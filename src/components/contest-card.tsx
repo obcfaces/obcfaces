@@ -99,9 +99,9 @@ export function ContestantCard({
         <div className="flex-1 p-2 sm:p-3 md:p-4 flex flex-col relative">
           {/* Voting overlay - shown by default when not voted and not editing */}
           {!isVoted && !isEditing && !showThanks && (
-            <div className="absolute inset-0 bg-gray-300 rounded-r flex items-center px-4">
+            <div className="absolute inset-0 bg-gray-200 rounded-r flex items-center px-4">
               <span className="text-base font-medium text-gray-800 mr-6">Vote</span>
-              <div className="scale-150">
+              <div className="scale-[1.72]">
                 <StarRating 
                   rating={0} 
                   isVoted={false}
@@ -123,19 +123,19 @@ export function ContestantCard({
           
           {/* Thank you message - shown for 1 second after voting */}
           {showThanks && (
-            <div className="absolute inset-0 bg-gray-300 rounded-r flex items-center justify-center px-4">
+            <div className="absolute inset-0 bg-gray-200 rounded-r flex items-center justify-center px-4">
               <div className="text-center">
                 <div className="text-base font-medium text-gray-800 mb-1">Thank you. Rated</div>
-                <div className="text-xl font-bold text-gray-800">{userRating.toFixed(1)}</div>
+                <div className="text-xl font-bold text-gray-800">{userRating.toFixed(0)}</div>
               </div>
             </div>
           )}
           
           {/* Re-voting overlay - shown when editing existing vote */}
           {isVoted && isEditing && !showThanks && (
-            <div className="absolute inset-0 bg-gray-300 rounded-r flex items-center px-4">
+            <div className="absolute inset-0 bg-gray-200 rounded-r flex items-center px-4">
               <span className="text-base font-medium text-gray-800 mr-6">Vote</span>
-              <div className="scale-150">
+              <div className="scale-[1.72]">
                 <StarRating 
                   rating={0} 
                   isVoted={false}
@@ -171,7 +171,7 @@ export function ContestantCard({
                     <MiniStars rating={rating} />
                   </div>
                   <div className="flex items-center justify-end gap-2 -mt-1 pr-1">
-                    <span className="text-xs text-muted-foreground/70">{userRating.toFixed(1)}</span>
+                    <span className="text-xs text-muted-foreground/70">{userRating.toFixed(0)}</span>
                     <Button 
                       variant="ghost" 
                       size="sm" 
