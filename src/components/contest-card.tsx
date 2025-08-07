@@ -45,6 +45,8 @@ export function ContestantCard({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalStartIndex, setModalStartIndex] = useState(0);
   const [isEditing, setIsEditing] = useState(false);
+  const [showThanks, setShowThanks] = useState(false);
+  const [userRating, setUserRating] = useState(0);
 
   const allPhotos = [faceImage, fullBodyImage, ...additionalPhotos];
 
@@ -95,27 +97,43 @@ export function ContestantCard({
         
         {/* Content area with potential voting overlay */}
         <div className="flex-1 p-2 sm:p-3 md:p-4 flex flex-col relative">
-          {/* Voting overlay - covers entire content area from photos to edges when not voted or editing */}
-          {(!isVoted || isEditing) && (
+          {/* Voting overlay - shown by default unless voted and not editing */}
+          {(!isVoted || isEditing) && !showThanks && (
             <div className="absolute inset-0 bg-gray-100 rounded-r flex items-center px-4">
               <span className="text-base font-medium text-gray-800 mr-6">Vote</span>
               <div className="scale-125">
                 <StarRating 
                   rating={0} 
                   isVoted={false}
-                  variant="default"
+                  variant="white"
                   hideText={true}
                   onRate={(rating) => {
-                    setIsEditing(false);
-                    onRate?.(rating);
+                    setUserRating(rating);
+                    setShowThanks(true);
+                    // Show thank you message for 1 second, then show full content
+                    setTimeout(() => {
+                      setShowThanks(false);
+                      setIsEditing(false);
+                      onRate?.(rating);
+                    }, 1000);
                   }}
                 />
               </div>
             </div>
           )}
           
-          {/* Normal content - only visible when voted and not editing */}
-          <div className={cn("flex flex-col h-full", (!isVoted || isEditing) && "invisible")}>
+          {/* Thank you message - shown for 1 second after voting */}
+          {showThanks && (
+            <div className="absolute inset-0 bg-gray-100 rounded-r flex items-center justify-center px-4">
+              <div className="text-center">
+                <div className="text-base font-medium text-gray-800 mb-1">Thank you. Rated</div>
+                <div className="text-xl font-bold text-gray-800">{userRating.toFixed(1)}</div>
+              </div>
+            </div>
+          )}
+          
+          {/* Normal content - only visible when voted, not editing, and not showing thanks */}
+          <div className={cn("flex flex-col h-full", (!isVoted || isEditing || showThanks) && "invisible")}>
             <div className="flex items-start justify-between mb-2">
               <div>
                 <h3 className="font-semibold text-contest-text text-sm sm:text-base">{name}</h3>
@@ -135,7 +153,7 @@ export function ContestantCard({
                 {/* Show user's vote right below main rating */}
                 {isVoted && (
                   <div className="flex items-center justify-end gap-2 -mt-1 pr-1">
-                    <span className="text-xs text-muted-foreground/70">4.5</span>
+                    <span className="text-xs text-muted-foreground/70">{userRating.toFixed(1)}</span>
                     <Button 
                       variant="ghost" 
                       size="sm" 
