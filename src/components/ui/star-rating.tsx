@@ -42,7 +42,7 @@ export function StarRating({ rating, isVoted, onRate, readonly, variant = "defau
                 variant === "white"
                   ? star <= hoveredRating
                     ? "fill-yellow-400 text-yellow-400"
-                    : "fill-transparent text-white stroke-2"
+                    : "fill-white text-white stroke-2"
                   : star <= hoveredRating
                     ? "fill-star-active text-star-active"
                     : "fill-star-inactive text-star-inactive"
