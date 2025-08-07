@@ -36,28 +36,29 @@ export function ContestantCard({
   onRate
 }: ContestantCardProps) {
   return (
-    <Card className="p-4 bg-card border-contest-border relative">
+    <Card className="bg-card border-contest-border relative overflow-hidden flex h-40">
       {isWinner && (
-        <div className="absolute -top-2 -right-2 bg-contest-blue text-white px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1">
+        <div className="absolute top-2 right-2 bg-contest-blue text-white px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 z-10">
           🏆 WINNER
         </div>
       )}
       
-      <div className="flex items-start gap-4">
-        <div className="flex-shrink-0 text-2xl font-bold text-contest-text w-8">
-          {rank}.
-        </div>
-        
-        <div className="flex-shrink-0">
-          <img 
-            src={image} 
-            alt={name}
-            className="w-24 h-32 rounded-lg object-cover"
-          />
-        </div>
-        
-        <div className="flex-1 min-w-0">
-          <div className="flex items-start justify-between mb-2">
+      {/* Photo taking full height */}
+      <div className="flex-shrink-0">
+        <img 
+          src={image} 
+          alt={name}
+          className="w-32 h-full object-cover"
+        />
+      </div>
+      
+      {/* Content area */}
+      <div className="flex-1 p-4 flex flex-col">
+        <div className="flex items-start justify-between mb-2">
+          <div className="flex items-center gap-2">
+            <div className="text-2xl font-bold text-contest-text">
+              {rank}.
+            </div>
             <div>
               <h3 className="font-semibold text-contest-text">{name}</h3>
               <div className="text-sm text-contest-blue">
@@ -67,35 +68,35 @@ export function ContestantCard({
                 {age} y.o · {weight} kg · {height} cm
               </div>
             </div>
-            
-            <div className="text-right">
-              <div className="text-xl font-bold text-contest-text mb-1">
-                {rating.toFixed(1)}
-              </div>
-              {isWinner && prize && (
-                <div className="text-contest-blue font-bold text-sm">
-                  {prize}
-                </div>
-              )}
+          </div>
+          
+          <div className="text-right">
+            <div className="text-xl font-bold text-contest-text mb-1">
+              {rating.toFixed(1)}
             </div>
+            {isWinner && prize && (
+              <div className="text-contest-blue font-bold text-sm">
+                {prize}
+              </div>
+            )}
           </div>
-          
-          <StarRating 
-            rating={Math.round(rating)} 
-            isVoted={isVoted}
-            onRate={onRate}
-          />
-          
-          <div className="flex items-center gap-4 mt-3">
-            <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-contest-blue">
-              <Heart className="w-4 h-4 mr-1" />
-              Like
-            </Button>
-            <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-contest-blue">
-              <MessageCircle className="w-4 h-4 mr-1" />
-              no comment
-            </Button>
-          </div>
+        </div>
+        
+        <StarRating 
+          rating={Math.round(rating)} 
+          isVoted={isVoted}
+          onRate={onRate}
+        />
+        
+        <div className="flex items-center gap-4 mt-auto pt-3">
+          <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-contest-blue">
+            <Heart className="w-4 h-4 mr-1" />
+            Like
+          </Button>
+          <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-contest-blue">
+            <MessageCircle className="w-4 h-4 mr-1" />
+            no comment
+          </Button>
         </div>
       </div>
     </Card>

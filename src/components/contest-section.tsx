@@ -116,7 +116,7 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
         <p className="text-muted-foreground">{description}</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
         {contestants.map((contestant) => (
           <ContestantCard
             key={contestant.rank}
