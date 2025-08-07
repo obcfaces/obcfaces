@@ -93,77 +93,80 @@ export function ContestantCard({
           </div>
         </div>
         
-        {/* Content area */}
-        <div className="flex-1 p-2 sm:p-3 md:p-4 flex flex-col">
-          <div className="flex items-start justify-between mb-2">
-            <div>
-              <h3 className="font-semibold text-contest-text text-sm sm:text-base">{name}</h3>
-              <div className="text-xs sm:text-sm text-contest-blue">
-                {country} · {city}
+        {/* Content area with potential voting overlay */}
+        <div className="flex-1 p-2 sm:p-3 md:p-4 flex flex-col relative">
+          {/* Voting overlay - covers entire content area from photos to edges when not voted or editing */}
+          {(!isVoted || isEditing) && (
+            <div className="absolute inset-0 bg-gray-100 rounded-r flex items-center px-4">
+              <span className="text-base font-medium text-gray-800 mr-6">Vote</span>
+              <div className="scale-125">
+                <StarRating 
+                  rating={0} 
+                  isVoted={false}
+                  variant="default"
+                  hideText={true}
+                  onRate={(rating) => {
+                    setIsEditing(false);
+                    onRate?.(rating);
+                  }}
+                />
               </div>
-              <div className="text-xs sm:text-sm text-muted-foreground">
-                {age} y.o · {weight} kg · {height} cm
+            </div>
+          )}
+          
+          {/* Normal content - only visible when voted and not editing */}
+          <div className={cn("flex flex-col h-full", (!isVoted || isEditing) && "invisible")}>
+            <div className="flex items-start justify-between mb-2">
+              <div>
+                <h3 className="font-semibold text-contest-text text-sm sm:text-base">{name}</h3>
+                <div className="text-xs sm:text-sm text-contest-blue">
+                  {country} · {city}
+                </div>
+                <div className="text-xs sm:text-sm text-muted-foreground">
+                  {age} y.o · {weight} kg · {height} cm
+                </div>
+              </div>
+              
+              <div className="text-right">
+                <div className="text-lg sm:text-xl font-bold text-contest-text mb-1 flex items-center justify-end gap-1">
+                  {rating.toFixed(1)}
+                  <MiniStars rating={rating} />
+                </div>
+                {/* Show user's vote right below main rating */}
+                {isVoted && (
+                  <div className="flex items-center justify-end gap-2 -mt-1 pr-1">
+                    <span className="text-xs text-muted-foreground/70">4.5</span>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="p-1 h-auto text-muted-foreground hover:text-gray-600"
+                      onClick={() => setIsEditing(true)}
+                    >
+                      <Pencil className="w-3 h-3" />
+                    </Button>
+                  </div>
+                )}
+                {isWinner && prize && (
+                  <div className="text-contest-blue font-bold text-sm">
+                    {prize}
+                  </div>
+                )}
               </div>
             </div>
             
-            <div className="text-right">
-              <div className="text-lg sm:text-xl font-bold text-contest-text mb-1 flex items-center justify-end gap-1">
-                {rating.toFixed(1)}
-                <MiniStars rating={rating} />
+            <div className="mt-auto pb-4">
+              {/* Like and comment buttons with more bottom spacing */}
+              <div className="flex items-center gap-4 mb-2">
+                <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-gray-600 hover:bg-gray-100">
+                  <Heart className="w-4 h-4 mr-1" />
+                  Like
+                </Button>
+                <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-gray-600 hover:bg-gray-100">
+                  <MessageCircle className="w-4 h-4 mr-1" />
+                  no comment
+                </Button>
               </div>
-              {/* Show user's vote right below main rating */}
-              {isVoted && (
-                <div className="flex items-center justify-end gap-2 -mt-1 pr-1">
-                  <span className="text-xs text-muted-foreground/70">4.5</span>
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    className="p-1 h-auto text-muted-foreground hover:text-gray-600"
-                    onClick={() => setIsEditing(true)}
-                  >
-                    <Pencil className="w-3 h-3" />
-                  </Button>
-                </div>
-              )}
-              {isWinner && prize && (
-                <div className="text-contest-blue font-bold text-sm">
-                  {prize}
-                </div>
-              )}
             </div>
-          </div>
-          
-          <div className="relative mt-auto pb-4">
-            {/* Like and comment buttons with more bottom spacing */}
-            <div className="flex items-center gap-4 mb-2">
-              <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-gray-600 hover:bg-gray-100">
-                <Heart className="w-4 h-4 mr-1" />
-                Like
-              </Button>
-              <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-gray-600 hover:bg-gray-100">
-                <MessageCircle className="w-4 h-4 mr-1" />
-                no comment
-              </Button>
-            </div>
-
-            {/* Voting overlay - covers entire bottom area when not voted or editing */}
-            {(!isVoted || isEditing) && (
-              <div className="absolute inset-0 bg-primary rounded-b flex items-center px-4 py-2" style={{ height: '80%' }}>
-                <span className="text-base font-medium text-white mr-6">Vote</span>
-                <div className="scale-125">
-                  <StarRating 
-                    rating={0} 
-                    isVoted={false}
-                    variant="white"
-                    hideText={true}
-                    onRate={(rating) => {
-                      setIsEditing(false);
-                      onRate?.(rating);
-                    }}
-                  />
-                </div>
-              </div>
-            )}
           </div>
         </div>
       </Card>
