@@ -23,7 +23,7 @@ export function StarRating({ rating, isVoted, onRate, readonly, variant = "defau
   return (
     <div className="flex items-center gap-2">
       <div className="flex items-center">
-        {[1, 2, 3].map((star) => (
+        {[1, 2, 3, 4, 5].map((star) => (
           <button
             key={star}
             type="button"
