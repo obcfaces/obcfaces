@@ -47,6 +47,7 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
       rating: ratings[1],
       faceImage: contestant1Face,
       fullBodyImage: contestant1Full,
+      additionalPhotos: [contestant2Face, contestant3Face],
       isWinner: showWinner,
       prize: showWinner ? "+ 5000 PhP" : undefined
     },
@@ -61,6 +62,7 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
       rating: ratings[2],
       faceImage: contestant2Face,
       fullBodyImage: contestant2Full,
+      additionalPhotos: [contestant1Face],
       isVoted: !!votes[2]
     },
     {
@@ -73,7 +75,8 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
       height: 182,
       rating: ratings[3],
       faceImage: contestant3Face,
-      fullBodyImage: contestant3Full
+      fullBodyImage: contestant3Full,
+      additionalPhotos: [contestant1Face, contestant2Face, contestant1Full]
     },
     {
       rank: 4,
@@ -98,7 +101,8 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
       height: 182,
       rating: ratings[5],
       faceImage: contestant2Face,
-      fullBodyImage: contestant2Full
+      fullBodyImage: contestant2Full,
+      additionalPhotos: [contestant3Face, contestant3Full]
     },
     {
       rank: 6,
