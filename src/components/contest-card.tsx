@@ -52,7 +52,7 @@ export function ContestantCard({
           <img 
             src={image} 
             alt={name}
-            className="w-20 h-20 rounded-lg object-cover"
+            className="w-24 h-32 rounded-lg object-cover"
           />
         </div>
         
