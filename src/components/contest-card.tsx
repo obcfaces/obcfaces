@@ -53,7 +53,7 @@ export function ContestantCard({
             alt={`${name} face`}
             className="w-28 sm:w-32 md:w-36 h-full object-cover border-r border-contest-border"
           />
-          <div className="absolute top-1 left-1 bg-black/70 text-white text-lg sm:text-xl md:text-2xl font-bold px-2 py-1 rounded">
+          <div className="absolute top-0 left-0 bg-black/70 text-white text-xs sm:text-sm font-bold px-1 py-0.5 rounded-br">
             {rank}
           </div>
         </div>
