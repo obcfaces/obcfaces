@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Heart, MessageCircle, Star } from "lucide-react";
+import { Heart, MessageCircle, Star, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { StarRating } from "@/components/ui/star-rating";
@@ -118,23 +118,40 @@ export function ContestantCard({
             </div>
           </div>
           
-          <div className="flex items-center gap-4 mt-auto pt-3">
-            {/* Show voting stars only if user hasn't voted yet */}
-            <StarRating 
-              rating={0} 
-              isVoted={isVoted}
-              onRate={onRate}
-            />
-            
-            {/* Show like/comment buttons only after voting or always */}
-            <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-gray-600 hover:bg-gray-100">
-              <Heart className="w-4 h-4 mr-1" />
-              Like
-            </Button>
-            <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-gray-600 hover:bg-gray-100">
-              <MessageCircle className="w-4 h-4 mr-1" />
-              no comment
-            </Button>
+          {/* Show user's vote below main rating if voted */}
+          {isVoted && (
+            <div className="flex items-center justify-end gap-2 mb-2">
+              <span className="text-xs text-muted-foreground">Your vote: 4.5</span>
+              <Button variant="ghost" size="sm" className="p-1 h-auto text-muted-foreground hover:text-gray-600">
+                <Pencil className="w-3 h-3" />
+              </Button>
+            </div>
+          )}
+
+          <div className="relative mt-auto pt-3">
+            {/* Like and comment buttons */}
+            <div className="flex items-center gap-4">
+              <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-gray-600 hover:bg-gray-100">
+                <Heart className="w-4 h-4 mr-1" />
+                Like
+              </Button>
+              <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-gray-600 hover:bg-gray-100">
+                <MessageCircle className="w-4 h-4 mr-1" />
+                no comment
+              </Button>
+            </div>
+
+            {/* Voting overlay - covers entire bottom area when not voted */}
+            {!isVoted && (
+              <div className="absolute inset-0 bg-card/95 backdrop-blur-sm flex items-center px-3 rounded-b border-t border-contest-border">
+                <span className="text-sm font-medium text-contest-text mr-3">Vote</span>
+                <StarRating 
+                  rating={0} 
+                  isVoted={isVoted}
+                  onRate={onRate}
+                />
+              </div>
+            )}
           </div>
         </div>
       </Card>
