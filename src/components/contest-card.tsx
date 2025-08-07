@@ -38,47 +38,47 @@ export function ContestantCard({
   onRate
 }: ContestantCardProps) {
   return (
-    <Card className="bg-card border-contest-border relative overflow-hidden flex h-44">
+    <Card className="bg-card border-contest-border relative overflow-hidden flex h-36 sm:h-40 md:h-44">
       {isWinner && (
         <div className="absolute top-2 right-2 bg-contest-blue text-white px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 z-10">
           🏆 WINNER
         </div>
       )}
       
-      {/* Two square photos side by side taking full height */}
+      {/* Two photos side by side - mobile optimized */}
       <div className="flex-shrink-0 flex h-full">
         <img 
           src={faceImage} 
           alt={`${name} face`}
-          className="w-44 h-full object-cover border-r border-contest-border"
+          className="w-20 sm:w-32 md:w-44 h-full object-cover border-r border-contest-border"
         />
         <img 
           src={fullBodyImage} 
           alt={`${name} full body`}
-          className="w-44 h-full object-cover"
+          className="w-20 sm:w-32 md:w-44 h-full object-cover"
         />
       </div>
       
       {/* Content area */}
-      <div className="flex-1 p-4 flex flex-col">
+      <div className="flex-1 p-2 sm:p-3 md:p-4 flex flex-col">
         <div className="flex items-start justify-between mb-2">
           <div className="flex items-center gap-2">
-            <div className="text-2xl font-bold text-contest-text">
+            <div className="text-lg sm:text-xl md:text-2xl font-bold text-contest-text">
               {rank}.
             </div>
             <div>
-              <h3 className="font-semibold text-contest-text">{name}</h3>
-              <div className="text-sm text-contest-blue">
+              <h3 className="font-semibold text-contest-text text-sm sm:text-base">{name}</h3>
+              <div className="text-xs sm:text-sm text-contest-blue">
                 {country} · {city}
               </div>
-              <div className="text-sm text-muted-foreground">
+              <div className="text-xs sm:text-sm text-muted-foreground">
                 {age} y.o · {weight} kg · {height} cm
               </div>
             </div>
           </div>
           
           <div className="text-right">
-            <div className="text-xl font-bold text-contest-text mb-1">
+            <div className="text-lg sm:text-xl font-bold text-contest-text mb-1">
               {rating.toFixed(1)}
             </div>
             {isWinner && prize && (
