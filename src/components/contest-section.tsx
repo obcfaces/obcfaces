@@ -25,11 +25,7 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
     6: 3.1
   });
 
-  const [votes, setVotes] = useState<Record<number, number>>({
-    2: 3,
-    4: 3,
-    6: 3
-  });
+  const [votes, setVotes] = useState<Record<number, number>>({});
 
   const handleRate = (contestantId: number, rating: number) => {
     setVotes(prev => ({ ...prev, [contestantId]: rating }));
@@ -48,6 +44,7 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
       faceImage: contestant1Face,
       fullBodyImage: contestant1Full,
       additionalPhotos: [contestant2Face, contestant3Face],
+      isVoted: !!votes[1],
       isWinner: showWinner,
       prize: showWinner ? "+ 5000 PhP" : undefined
     },
@@ -76,7 +73,8 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
       rating: ratings[3],
       faceImage: contestant3Face,
       fullBodyImage: contestant3Full,
-      additionalPhotos: [contestant1Face, contestant2Face, contestant1Full]
+      additionalPhotos: [contestant1Face, contestant2Face, contestant1Full],
+      isVoted: !!votes[3]
     },
     {
       rank: 4,
@@ -102,7 +100,8 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
       rating: ratings[5],
       faceImage: contestant2Face,
       fullBodyImage: contestant2Full,
-      additionalPhotos: [contestant3Face, contestant3Full]
+      additionalPhotos: [contestant3Face, contestant3Full],
+      isVoted: !!votes[5]
     },
     {
       rank: 6,
