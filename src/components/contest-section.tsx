@@ -1,8 +1,11 @@
 import { useState } from "react";
 import { ContestantCard } from "@/components/contest-card";
-import contestant1 from "@/assets/contestant-1.jpg";
-import contestant2 from "@/assets/contestant-2.jpg";
-import contestant3 from "@/assets/contestant-3.jpg";
+import contestant1Face from "@/assets/contestant-1-face.jpg";
+import contestant1Full from "@/assets/contestant-1-full.jpg";
+import contestant2Face from "@/assets/contestant-2-face.jpg";
+import contestant2Full from "@/assets/contestant-2-full.jpg";
+import contestant3Face from "@/assets/contestant-3-face.jpg";
+import contestant3Full from "@/assets/contestant-3-full.jpg";
 
 interface ContestSectionProps {
   title: string;
@@ -42,7 +45,8 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
       weight: 53,
       height: 182,
       rating: ratings[1],
-      image: contestant1,
+      faceImage: contestant1Face,
+      fullBodyImage: contestant1Full,
       isWinner: showWinner,
       prize: showWinner ? "+ 5000 PhP" : undefined
     },
@@ -55,7 +59,8 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
       weight: 53,
       height: 182,
       rating: ratings[2],
-      image: contestant2,
+      faceImage: contestant2Face,
+      fullBodyImage: contestant2Full,
       isVoted: !!votes[2]
     },
     {
@@ -67,7 +72,8 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
       weight: 53,
       height: 182,
       rating: ratings[3],
-      image: contestant3
+      faceImage: contestant3Face,
+      fullBodyImage: contestant3Full
     },
     {
       rank: 4,
@@ -78,7 +84,8 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
       weight: 53,
       height: 182,
       rating: ratings[4],
-      image: contestant1,
+      faceImage: contestant1Face,
+      fullBodyImage: contestant1Full,
       isVoted: !!votes[4]
     },
     {
@@ -90,7 +97,8 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
       weight: 53,
       height: 182,
       rating: ratings[5],
-      image: contestant2
+      faceImage: contestant2Face,
+      fullBodyImage: contestant2Full
     },
     {
       rank: 6,
@@ -101,7 +109,8 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
       weight: 53,
       height: 182,
       rating: ratings[6],
-      image: contestant3,
+      faceImage: contestant3Face,
+      fullBodyImage: contestant3Full,
       isVoted: !!votes[6]
     }
   ];

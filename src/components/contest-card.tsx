@@ -13,7 +13,8 @@ interface ContestantCardProps {
   weight: number;
   height: number;
   rating: number;
-  image: string;
+  faceImage: string;
+  fullBodyImage: string;
   isVoted?: boolean;
   isWinner?: boolean;
   prize?: string;
@@ -29,26 +30,32 @@ export function ContestantCard({
   weight,
   height,
   rating,
-  image,
+  faceImage,
+  fullBodyImage,
   isVoted,
   isWinner,
   prize,
   onRate
 }: ContestantCardProps) {
   return (
-    <Card className="bg-card border-contest-border relative overflow-hidden flex h-40">
+    <Card className="bg-card border-contest-border relative overflow-hidden flex h-44">
       {isWinner && (
         <div className="absolute top-2 right-2 bg-contest-blue text-white px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 z-10">
           🏆 WINNER
         </div>
       )}
       
-      {/* Photo taking full height */}
-      <div className="flex-shrink-0">
+      {/* Two square photos side by side */}
+      <div className="flex-shrink-0 flex">
         <img 
-          src={image} 
-          alt={name}
-          className="w-32 h-full object-cover"
+          src={faceImage} 
+          alt={`${name} face`}
+          className="w-20 h-20 object-cover border-r border-contest-border"
+        />
+        <img 
+          src={fullBodyImage} 
+          alt={`${name} full body`}
+          className="w-20 h-20 object-cover"
         />
       </div>
       
