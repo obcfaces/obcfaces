@@ -97,8 +97,8 @@ export function ContestantCard({
         
         {/* Content area with potential voting overlay */}
         <div className="flex-1 p-2 sm:p-3 md:p-4 flex flex-col relative">
-          {/* Voting overlay - shown by default unless voted and not editing */}
-          {(!isVoted || isEditing) && !showThanks && (
+          {/* Voting overlay - shown by default when not voted and not editing */}
+          {!isVoted && !isEditing && !showThanks && (
             <div className="absolute inset-0 bg-gray-100 rounded-r flex items-center px-4">
               <span className="text-base font-medium text-gray-800 mr-6">Vote</span>
               <div className="scale-125">
@@ -110,10 +110,9 @@ export function ContestantCard({
                   onRate={(rating) => {
                     setUserRating(rating);
                     setShowThanks(true);
-                    // Show thank you message for 1 second, then show full content
+                    // Show thank you message for 1 second, then show contestant info
                     setTimeout(() => {
                       setShowThanks(false);
-                      setIsEditing(false);
                       onRate?.(rating);
                     }, 1000);
                   }}
@@ -128,6 +127,26 @@ export function ContestantCard({
               <div className="text-center">
                 <div className="text-base font-medium text-gray-800 mb-1">Thank you. Rated</div>
                 <div className="text-xl font-bold text-gray-800">{userRating.toFixed(1)}</div>
+              </div>
+            </div>
+          )}
+          
+          {/* Re-voting overlay - shown when editing existing vote */}
+          {isVoted && isEditing && !showThanks && (
+            <div className="absolute inset-0 bg-gray-100 rounded-r flex items-center px-4">
+              <span className="text-base font-medium text-gray-800 mr-6">Vote</span>
+              <div className="scale-125">
+                <StarRating 
+                  rating={0} 
+                  isVoted={false}
+                  variant="white"
+                  hideText={true}
+                  onRate={(rating) => {
+                    setUserRating(rating);
+                    setIsEditing(false);
+                    onRate?.(rating);
+                  }}
+                />
               </div>
             </div>
           )}
