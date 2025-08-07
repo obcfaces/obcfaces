@@ -1,9 +1,19 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Camera, Upload } from "lucide-react";
 
 export function ContestHeader() {
+  const [activeSection, setActiveSection] = useState("Current Votes");
+
+  const navItems = [
+    { name: "Mash", href: "#" },
+    { name: "Current Votes", href: "#" },
+    { name: "Winners", href: "#" },
+    { name: "How it works", href: "#" }
+  ];
+
   return (
-    <div className="bg-contest-light-bg border-b border-contest-border">
+    <div className="bg-contest-light-bg">
       <div className="max-w-6xl mx-auto px-6 py-4">
         {/* Title in one line */}
         <div className="flex items-center gap-2">
@@ -21,21 +31,37 @@ export function ContestHeader() {
           </Button>
         </div>
         
-        {/* Navigation sections below button */}
-        <nav className="flex items-center gap-6 text-sm mt-4">
-          <a href="#" className="text-contest-blue hover:underline">Mash</a>
-          <a href="#" className="text-contest-blue hover:underline font-medium">Current Votes</a>
-          <a href="#" className="text-muted-foreground hover:text-contest-blue">Winners</a>
-          <a href="#" className="text-muted-foreground hover:text-contest-blue">How it works</a>
-        </nav>
-        
-        <div className="mt-3 text-sm text-muted-foreground">
+        {/* Description */}
+        <div className="mt-4 text-sm text-muted-foreground">
           <span className="font-medium">Global Online Beauty & Model Contest</span>
           <br />
           Natural. Honest. Voted by People...
           <span className="ml-8">Upload your photos and try to win!</span>
         </div>
+        
+        {/* Navigation sections below description */}
+        <nav className="flex items-center gap-6 text-sm mt-4">
+          {navItems.map((item) => (
+            <button
+              key={item.name}
+              onClick={() => setActiveSection(item.name)}
+              className={`relative py-2 transition-colors ${
+                activeSection === item.name
+                  ? "text-contest-blue font-medium"
+                  : "text-muted-foreground hover:text-contest-blue"
+              }`}
+            >
+              {item.name}
+              {activeSection === item.name && (
+                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-contest-blue"></div>
+              )}
+            </button>
+          ))}
+        </nav>
       </div>
+      
+      {/* Border line */}
+      <div className="border-b border-contest-border"></div>
     </div>
   );
 }
