@@ -123,11 +123,11 @@ export function ContestantCard({
           />
           
           <div className="flex items-center gap-4 mt-auto pt-3">
-            <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-contest-blue">
+            <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-gray-600 hover:bg-gray-100">
               <Heart className="w-4 h-4 mr-1" />
               Like
             </Button>
-            <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-contest-blue">
+            <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-gray-600 hover:bg-gray-100">
               <MessageCircle className="w-4 h-4 mr-1" />
               no comment
             </Button>
