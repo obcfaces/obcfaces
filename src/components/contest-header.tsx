@@ -45,23 +45,36 @@ export function ContestHeader() {
             <button
               key={item.name}
               onClick={() => setActiveSection(item.name)}
-              className={`relative py-2 transition-colors ${
+              className={`py-2 transition-colors ${
                 activeSection === item.name
                   ? "text-contest-blue font-medium"
                   : "text-muted-foreground hover:text-contest-blue"
               }`}
             >
               {item.name}
-              {activeSection === item.name && (
-                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-contest-blue"></div>
-              )}
             </button>
           ))}
         </nav>
       </div>
       
-      {/* Border line */}
-      <div className="border-b border-contest-border"></div>
+      {/* Border line with active section underline */}
+      <div className="relative border-b border-contest-border">
+        <div className="max-w-6xl mx-auto px-6">
+          <div className="flex items-center gap-6 text-sm">
+            {navItems.map((item) => (
+              <div
+                key={item.name}
+                className="relative py-0.5"
+                style={{ width: `${item.name.length * 8 + 16}px` }}
+              >
+                {activeSection === item.name && (
+                  <div className="absolute bottom-0 left-2 right-2 h-0.5 bg-contest-blue"></div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
