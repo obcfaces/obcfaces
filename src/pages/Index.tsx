@@ -1,12 +1,24 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { ContestHeader } from "@/components/contest-header";
+import { ContestSection } from "@/components/contest-section";
 
 const Index = () => {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
-      </div>
+    <div className="min-h-screen bg-background">
+      <ContestHeader />
+      
+      <ContestSection
+        title="JULE 24 – 30 /// 2025"
+        subtitle="Current vote right now!"
+        description="Take a look at the three leaders who have already emerged in the current vote."
+        isActive={true}
+      />
+      
+      <ContestSection
+        title="JULE 17 – 23 /// 2025"
+        subtitle="Voting is over! We have a winner!"
+        description="Take a look at the three leaders who have already emerged in the current vote."
+        showWinner={true}
+      />
     </div>
   );
 };

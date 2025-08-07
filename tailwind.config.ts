@@ -52,6 +52,16 @@ export default {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
 				},
+				contest: {
+					blue: 'hsl(var(--contest-blue))',
+					text: 'hsl(var(--contest-text))',
+					'light-bg': 'hsl(var(--contest-light-bg))',
+					border: 'hsl(var(--contest-border))'
+				},
+				star: {
+					active: 'hsl(var(--star-active))',
+					inactive: 'hsl(var(--star-inactive))'
+				},
 				sidebar: {
 					DEFAULT: 'hsl(var(--sidebar-background))',
 					foreground: 'hsl(var(--sidebar-foreground))',
