@@ -122,7 +122,7 @@ export function ContestantCard({
           </div>
           
           <StarRating 
-            rating={Math.round(rating)} 
+            rating={0} 
             isVoted={isVoted}
             onRate={onRate}
           />
