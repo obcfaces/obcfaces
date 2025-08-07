@@ -44,6 +44,7 @@ export function ContestantCard({
 }: ContestantCardProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalStartIndex, setModalStartIndex] = useState(0);
+  const [isEditing, setIsEditing] = useState(false);
 
   const allPhotos = [faceImage, fullBodyImage, ...additionalPhotos];
 
@@ -110,6 +111,20 @@ export function ContestantCard({
                 {rating.toFixed(1)}
                 <MiniStars rating={rating} />
               </div>
+              {/* Show user's vote right below main rating */}
+              {isVoted && (
+                <div className="flex items-center justify-end gap-2 mb-1">
+                  <span className="text-sm font-medium text-contest-text">4.5</span>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="p-1 h-auto text-muted-foreground hover:text-gray-600"
+                    onClick={() => setIsEditing(true)}
+                  >
+                    <Pencil className="w-3 h-3" />
+                  </Button>
+                </div>
+              )}
               {isWinner && prize && (
                 <div className="text-contest-blue font-bold text-sm">
                   {prize}
@@ -118,19 +133,9 @@ export function ContestantCard({
             </div>
           </div>
           
-          {/* Show user's vote below main rating if voted */}
-          {isVoted && (
-            <div className="flex items-center justify-end gap-2 mb-2">
-              <span className="text-xs text-muted-foreground">Your vote: 4.5</span>
-              <Button variant="ghost" size="sm" className="p-1 h-auto text-muted-foreground hover:text-gray-600">
-                <Pencil className="w-3 h-3" />
-              </Button>
-            </div>
-          )}
-
-          <div className="relative mt-auto pt-3">
-            {/* Like and comment buttons */}
-            <div className="flex items-center gap-4">
+          <div className="relative mt-auto pb-4">
+            {/* Like and comment buttons with more bottom spacing */}
+            <div className="flex items-center gap-4 mb-2">
               <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-gray-600 hover:bg-gray-100">
                 <Heart className="w-4 h-4 mr-1" />
                 Like
@@ -141,15 +146,20 @@ export function ContestantCard({
               </Button>
             </div>
 
-            {/* Voting overlay - covers entire bottom area when not voted */}
-            {!isVoted && (
+            {/* Voting overlay - covers entire bottom area when not voted or editing */}
+            {(!isVoted || isEditing) && (
               <div className="absolute inset-0 bg-card/95 backdrop-blur-sm flex items-center px-3 rounded-b border-t border-contest-border">
-                <span className="text-sm font-medium text-contest-text mr-3">Vote</span>
-                <StarRating 
-                  rating={0} 
-                  isVoted={isVoted}
-                  onRate={onRate}
-                />
+                <span className="text-base font-medium text-contest-text mr-4">Vote</span>
+                <div className="scale-125">
+                  <StarRating 
+                    rating={0} 
+                    isVoted={false}
+                    onRate={(rating) => {
+                      setIsEditing(false);
+                      onRate?.(rating);
+                    }}
+                  />
+                </div>
               </div>
             )}
           </div>
