@@ -45,17 +45,17 @@ export function ContestantCard({
         </div>
       )}
       
-      {/* Two square photos side by side */}
-      <div className="flex-shrink-0 flex">
+      {/* Two square photos side by side taking full height */}
+      <div className="flex-shrink-0 flex h-full">
         <img 
           src={faceImage} 
           alt={`${name} face`}
-          className="w-20 h-20 object-cover border-r border-contest-border"
+          className="w-44 h-full object-cover border-r border-contest-border"
         />
         <img 
           src={fullBodyImage} 
           alt={`${name} full body`}
-          className="w-20 h-20 object-cover"
+          className="w-44 h-full object-cover"
         />
       </div>
       
