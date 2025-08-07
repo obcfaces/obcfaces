@@ -45,17 +45,19 @@ export function ContestantCard({
         </div>
       )}
       
-      {/* Two photos side by side - mobile optimized */}
+      {/* Two photos side by side - 4:5 aspect ratio */}
       <div className="flex-shrink-0 flex h-full">
         <img 
           src={faceImage} 
           alt={`${name} face`}
-          className="w-20 sm:w-32 md:w-44 h-full object-cover border-r border-contest-border"
+          className="w-16 sm:w-24 md:w-32 h-full object-cover border-r border-contest-border"
+          style={{ aspectRatio: '4/5' }}
         />
         <img 
           src={fullBodyImage} 
           alt={`${name} full body`}
-          className="w-20 sm:w-32 md:w-44 h-full object-cover"
+          className="w-16 sm:w-24 md:w-32 h-full object-cover"
+          style={{ aspectRatio: '4/5' }}
         />
       </div>
       
