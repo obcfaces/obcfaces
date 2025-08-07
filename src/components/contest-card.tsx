@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Heart, MessageCircle } from "lucide-react";
+import { Heart, MessageCircle, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { StarRating } from "@/components/ui/star-rating";
@@ -105,8 +105,13 @@ export function ContestantCard({
             </div>
             
             <div className="text-right">
-              <div className="text-lg sm:text-xl font-bold text-contest-text mb-1">
+              <div className="text-lg sm:text-xl font-bold text-contest-text mb-1 flex items-center justify-end gap-1">
                 {rating.toFixed(1)}
+                <div className="flex">
+                  <Star className="w-3 h-3 fill-star-active text-star-active" />
+                  <Star className="w-3 h-3 fill-star-active text-star-active" />
+                  <Star className="w-3 h-3 fill-star-active text-star-active" />
+                </div>
               </div>
               {isWinner && prize && (
                 <div className="text-contest-blue font-bold text-sm">
