@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card";
 import { StarRating } from "@/components/ui/star-rating";
 import { PhotoModal } from "@/components/photo-modal";
 import { MiniStars } from "@/components/mini-stars";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 
 interface ContestantCardProps {
@@ -169,17 +170,25 @@ export function ContestantCard({
                   <div className="text-lg sm:text-xl font-bold text-contest-text mb-1 flex items-center justify-end gap-1">
                     {rating.toFixed(1)}
                     <MiniStars rating={rating} />
-                  </div>
-                  <div className="flex items-center justify-end gap-2 -mt-1 pr-1">
-                    <span className="text-xs text-muted-foreground/70">{userRating.toFixed(0)}</span>
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      className="p-1 h-auto text-muted-foreground hover:text-gray-600"
-                      onClick={() => setIsEditing(true)}
-                    >
-                      <Pencil className="w-3 h-3" />
-                    </Button>
+                    {isVoted && (
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <span className="text-sm text-muted-foreground/70 ml-2 cursor-pointer hover:text-muted-foreground">
+                            ({userRating.toFixed(0)})
+                          </span>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-3">
+                          <div className="text-sm">
+                            You rated {userRating.toFixed(0)} — <button 
+                              className="text-contest-blue hover:underline" 
+                              onClick={() => setIsEditing(true)}
+                            >
+                              change
+                            </button>
+                          </div>
+                        </PopoverContent>
+                      </Popover>
+                    )}
                   </div>
                   {isWinner && prize && (
                     <div className="text-contest-blue font-bold text-sm">
