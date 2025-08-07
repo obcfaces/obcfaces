@@ -48,6 +48,14 @@ export function ContestantCard({
   const [isEditing, setIsEditing] = useState(false);
   const [showThanks, setShowThanks] = useState(false);
   const [userRating, setUserRating] = useState(0);
+  const [isLiked, setIsLiked] = useState(false);
+  const [likesCount, setLikesCount] = useState(Math.floor(Math.random() * 50) + 5); // Random initial likes
+  const [commentsCount] = useState(Math.floor(Math.random() * 20) + 1); // Random initial comments
+
+  const handleLike = () => {
+    setIsLiked(!isLiked);
+    setLikesCount(prev => isLiked ? prev - 1 : prev + 1);
+  };
 
   const allPhotos = [faceImage, fullBodyImage, ...additionalPhotos];
 
@@ -199,13 +207,28 @@ export function ContestantCard({
               </div>
               
               <div className="flex items-center gap-4">
-                <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-gray-600 hover:bg-gray-100">
-                  <Heart className="w-4 h-4 mr-1" />
-                  Like
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className={cn(
+                    "transition-colors",
+                    isLiked 
+                      ? "text-contest-blue hover:text-contest-blue/80" 
+                      : "text-muted-foreground hover:text-gray-600 hover:bg-gray-100"
+                  )}
+                  onClick={handleLike}
+                >
+                  <Heart 
+                    className={cn(
+                      "w-4 h-4 mr-1 transition-colors",
+                      isLiked && "fill-contest-blue"
+                    )} 
+                  />
+                  {likesCount}
                 </Button>
                 <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-gray-600 hover:bg-gray-100">
                   <MessageCircle className="w-4 h-4 mr-1" />
-                  no comment
+                  {commentsCount}
                 </Button>
               </div>
             </div>
