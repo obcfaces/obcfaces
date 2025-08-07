@@ -224,11 +224,11 @@ export function ContestantCard({
                       isLiked && "fill-contest-blue"
                     )} 
                   />
-                  {likesCount}
+                  {likesCount} Like{likesCount !== 1 ? 's' : ''}
                 </Button>
                 <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-gray-600 hover:bg-gray-100">
                   <MessageCircle className="w-4 h-4 mr-1" />
-                  {commentsCount}
+                  {commentsCount} Comment{commentsCount !== 1 ? 's' : ''}
                 </Button>
               </div>
             </div>
