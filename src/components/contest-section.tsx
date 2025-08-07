@@ -119,8 +119,8 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
   ];
 
   return (
-    <section className="max-w-6xl mx-auto px-6 py-8">
-      <div className="mb-8">
+    <section className="max-w-6xl mx-auto px-0 sm:px-6 py-8">
+      <div className="mb-8 px-6 sm:px-0">
         <h2 className="text-3xl font-bold text-contest-text mb-2">
           {title}
         </h2>
@@ -128,7 +128,7 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
         <p className="text-muted-foreground">{description}</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-1 sm:gap-3">
         {contestants.map((contestant) => (
           <ContestantCard
             key={contestant.rank}
