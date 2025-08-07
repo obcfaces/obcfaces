@@ -45,13 +45,18 @@ export function ContestantCard({
         </div>
       )}
       
-      {/* Two photos side by side - 4:5 aspect ratio based on card height */}
-      <div className="flex-shrink-0 flex h-full">
-        <img 
-          src={faceImage} 
-          alt={`${name} face`}
-          className="w-28 sm:w-32 md:w-36 h-full object-cover border-r border-contest-border"
-        />
+      {/* Two photos side by side - 4:5 aspect ratio with rank overlay */}
+      <div className="flex-shrink-0 flex h-full relative">
+        <div className="relative">
+          <img 
+            src={faceImage} 
+            alt={`${name} face`}
+            className="w-28 sm:w-32 md:w-36 h-full object-cover border-r border-contest-border"
+          />
+          <div className="absolute top-1 left-1 bg-black/70 text-white text-lg sm:text-xl md:text-2xl font-bold px-2 py-1 rounded">
+            {rank}
+          </div>
+        </div>
         <img 
           src={fullBodyImage} 
           alt={`${name} full body`}
@@ -62,18 +67,13 @@ export function ContestantCard({
       {/* Content area */}
       <div className="flex-1 p-2 sm:p-3 md:p-4 flex flex-col">
         <div className="flex items-start justify-between mb-2">
-          <div className="flex items-center gap-2">
-            <div className="text-lg sm:text-xl md:text-2xl font-bold text-contest-text">
-              {rank}.
+          <div>
+            <h3 className="font-semibold text-contest-text text-sm sm:text-base">{name}</h3>
+            <div className="text-xs sm:text-sm text-contest-blue">
+              {country} · {city}
             </div>
-            <div>
-              <h3 className="font-semibold text-contest-text text-sm sm:text-base">{name}</h3>
-              <div className="text-xs sm:text-sm text-contest-blue">
-                {country} · {city}
-              </div>
-              <div className="text-xs sm:text-sm text-muted-foreground">
-                {age} y.o · {weight} kg · {height} cm
-              </div>
+            <div className="text-xs sm:text-sm text-muted-foreground">
+              {age} y.o · {weight} kg · {height} cm
             </div>
           </div>
           
