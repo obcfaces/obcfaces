@@ -29,31 +29,33 @@ export function StarRating({ rating, isVoted, onRate, readonly }: StarRatingProp
 
   return (
     <div className="flex items-center gap-2">
-      <div className="flex items-center">
-        {[1, 2, 3, 4, 5].map((star) => (
-          <button
-            key={star}
-            type="button"
-            disabled={readonly}
-            onClick={() => handleClick(star)}
-            onMouseEnter={() => !readonly && setHoveredRating(star)}
-            onMouseLeave={() => !readonly && setHoveredRating(0)}
-            className={cn(
-              "p-0.5 transition-colors",
-              !readonly && "hover:scale-110 cursor-pointer"
-            )}
-          >
-            <Star
+      {!userVote && (
+        <div className="flex items-center">
+          {[1, 2, 3, 4, 5].map((star) => (
+            <button
+              key={star}
+              type="button"
+              disabled={readonly}
+              onClick={() => handleClick(star)}
+              onMouseEnter={() => !readonly && setHoveredRating(star)}
+              onMouseLeave={() => !readonly && setHoveredRating(0)}
               className={cn(
-                "w-4 h-4 transition-colors",
-                star <= (hoveredRating || userVote || 0)
-                  ? "fill-star-active text-star-active"
-                  : "fill-star-inactive text-star-inactive"
+                "p-0.5 transition-colors",
+                !readonly && "hover:scale-110 cursor-pointer"
               )}
-            />
-          </button>
-        ))}
-      </div>
+            >
+              <Star
+                className={cn(
+                  "w-4 h-4 transition-colors",
+                  star <= hoveredRating
+                    ? "fill-star-active text-star-active"
+                    : "fill-star-inactive text-star-inactive"
+                )}
+              />
+            </button>
+          ))}
+        </div>
+      )}
       
       <div className="text-sm text-muted-foreground">
         {showThanks ? (
