@@ -17,12 +17,12 @@ interface ContestSectionProps {
 
 export function ContestSection({ title, subtitle, description, isActive, showWinner }: ContestSectionProps) {
   const [ratings, setRatings] = useState<Record<number, number>>({
-    1: 4.2,
-    2: 4.2,
+    1: 4.8,
+    2: 4.5,
     3: 4.2,
-    4: 4.2,
-    5: 4.2,
-    6: 4.2
+    4: 3.9,
+    5: 3.5,
+    6: 3.1
   });
 
   const [votes, setVotes] = useState<Record<number, number>>({

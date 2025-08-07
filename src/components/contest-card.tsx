@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { StarRating } from "@/components/ui/star-rating";
 import { PhotoModal } from "@/components/photo-modal";
+import { MiniStars } from "@/components/mini-stars";
 import { cn } from "@/lib/utils";
 
 interface ContestantCardProps {
@@ -107,11 +108,7 @@ export function ContestantCard({
             <div className="text-right">
               <div className="text-lg sm:text-xl font-bold text-contest-text mb-1 flex items-center justify-end gap-1">
                 {rating.toFixed(1)}
-                <div className="flex">
-                  <Star className="w-3 h-3 fill-star-active text-star-active" />
-                  <Star className="w-3 h-3 fill-star-active text-star-active" />
-                  <Star className="w-3 h-3 fill-star-active text-star-active" />
-                </div>
+                <MiniStars rating={rating} />
               </div>
               {isWinner && prize && (
                 <div className="text-contest-blue font-bold text-sm">
