@@ -118,13 +118,15 @@ export function ContestantCard({
             </div>
           </div>
           
-          <StarRating 
-            rating={0} 
-            isVoted={isVoted}
-            onRate={onRate}
-          />
-          
           <div className="flex items-center gap-4 mt-auto pt-3">
+            {/* Show voting stars only if user hasn't voted yet */}
+            <StarRating 
+              rating={0} 
+              isVoted={isVoted}
+              onRate={onRate}
+            />
+            
+            {/* Show like/comment buttons only after voting or always */}
             <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-gray-600 hover:bg-gray-100">
               <Heart className="w-4 h-4 mr-1" />
               Like
