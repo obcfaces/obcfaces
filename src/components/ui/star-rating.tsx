@@ -7,9 +7,11 @@ interface StarRatingProps {
   isVoted?: boolean;
   onRate?: (rating: number) => void;
   readonly?: boolean;
+  variant?: "default" | "white";
+  hideText?: boolean;
 }
 
-export function StarRating({ rating, isVoted, onRate, readonly }: StarRatingProps) {
+export function StarRating({ rating, isVoted, onRate, readonly, variant = "default", hideText = false }: StarRatingProps) {
   const [hoveredRating, setHoveredRating] = useState(0);
   const [showThanks, setShowThanks] = useState(false);
   const [userVote, setUserVote] = useState<number | null>(isVoted ? rating : null);
@@ -47,9 +49,13 @@ export function StarRating({ rating, isVoted, onRate, readonly }: StarRatingProp
               <Star
                 className={cn(
                   "w-4 h-4 transition-colors",
-                  star <= hoveredRating
-                    ? "fill-star-active text-star-active"
-                    : "fill-star-inactive text-star-inactive"
+                  variant === "white"
+                    ? star <= hoveredRating
+                      ? "fill-white text-white"
+                      : "fill-white/30 text-white/30"
+                    : star <= hoveredRating
+                      ? "fill-star-active text-star-active"
+                      : "fill-star-inactive text-star-inactive"
                 )}
               />
             </button>
@@ -57,15 +63,17 @@ export function StarRating({ rating, isVoted, onRate, readonly }: StarRatingProp
         </div>
       )}
       
-      <div className="text-sm text-muted-foreground">
-        {showThanks ? (
-          <span className="text-green-600 font-medium">Thanks!</span>
-        ) : userVote ? (
-          <span>Your vote is <span className="font-medium">{userVote} stars</span> /// <button className="text-contest-blue hover:underline">edit</button></span>
-        ) : (
-          <span className="text-contest-blue font-medium">Vote</span>
-        )}
-      </div>
+      {!hideText && (
+        <div className="text-sm text-muted-foreground">
+          {showThanks ? (
+            <span className="text-green-600 font-medium">Thanks!</span>
+          ) : userVote ? (
+            <span>Your vote is <span className="font-medium">{userVote} stars</span> /// <button className="text-contest-blue hover:underline">edit</button></span>
+          ) : (
+            <span className="text-contest-blue font-medium">Vote</span>
+          )}
+        </div>
+      )}
     </div>
   );
 }

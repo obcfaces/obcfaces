@@ -113,8 +113,8 @@ export function ContestantCard({
               </div>
               {/* Show user's vote right below main rating */}
               {isVoted && (
-                <div className="flex items-center justify-end gap-2 mb-1">
-                  <span className="text-sm font-medium text-contest-text">4.5</span>
+                <div className="flex items-center justify-end gap-2 -mt-1 pr-1">
+                  <span className="text-xs text-muted-foreground/70">4.5</span>
                   <Button 
                     variant="ghost" 
                     size="sm" 
@@ -148,12 +148,14 @@ export function ContestantCard({
 
             {/* Voting overlay - covers entire bottom area when not voted or editing */}
             {(!isVoted || isEditing) && (
-              <div className="absolute inset-0 bg-card/95 backdrop-blur-sm flex items-center px-3 rounded-b border-t border-contest-border">
-                <span className="text-base font-medium text-contest-text mr-4">Vote</span>
+              <div className="absolute inset-0 bg-primary rounded-b flex items-center px-4 py-2" style={{ height: '80%' }}>
+                <span className="text-base font-medium text-white mr-6">Vote</span>
                 <div className="scale-125">
                   <StarRating 
                     rating={0} 
                     isVoted={false}
+                    variant="white"
+                    hideText={true}
                     onRate={(rating) => {
                       setIsEditing(false);
                       onRate?.(rating);
