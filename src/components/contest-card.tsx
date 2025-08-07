@@ -151,8 +151,59 @@ export function ContestantCard({
             </div>
           )}
           
-          {/* Normal content - only visible when voted, not editing, and not showing thanks */}
-          <div className={cn("flex flex-col h-full", (!isVoted || isEditing || showThanks) && "invisible")}>
+          {/* Contestant info - shown after voting instead of normal content */}
+          {isVoted && !isEditing && !showThanks && (
+            <div className="absolute inset-0 bg-white rounded-r flex flex-col justify-between p-4">
+              <div className="flex items-start justify-between">
+                <div>
+                  <h3 className="font-semibold text-contest-text text-sm sm:text-base">{name}</h3>
+                  <div className="text-xs sm:text-sm text-contest-blue">
+                    {country} · {city}
+                  </div>
+                  <div className="text-xs sm:text-sm text-muted-foreground">
+                    {age} y.o · {weight} kg · {height} cm
+                  </div>
+                </div>
+                
+                <div className="text-right">
+                  <div className="text-lg sm:text-xl font-bold text-contest-text mb-1 flex items-center justify-end gap-1">
+                    {rating.toFixed(1)}
+                    <MiniStars rating={rating} />
+                  </div>
+                  <div className="flex items-center justify-end gap-2 -mt-1 pr-1">
+                    <span className="text-xs text-muted-foreground/70">{userRating.toFixed(1)}</span>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="p-1 h-auto text-muted-foreground hover:text-gray-600"
+                      onClick={() => setIsEditing(true)}
+                    >
+                      <Pencil className="w-3 h-3" />
+                    </Button>
+                  </div>
+                  {isWinner && prize && (
+                    <div className="text-contest-blue font-bold text-sm">
+                      {prize}
+                    </div>
+                  )}
+                </div>
+              </div>
+              
+              <div className="flex items-center gap-4">
+                <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-gray-600 hover:bg-gray-100">
+                  <Heart className="w-4 h-4 mr-1" />
+                  Like
+                </Button>
+                <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-gray-600 hover:bg-gray-100">
+                  <MessageCircle className="w-4 h-4 mr-1" />
+                  no comment
+                </Button>
+              </div>
+            </div>
+          )}
+          
+          {/* Normal content - hidden when voted */}
+          <div className={cn("flex flex-col h-full", isVoted && "invisible")}>
             <div className="flex items-start justify-between mb-2">
               <div>
                 <h3 className="font-semibold text-contest-text text-sm sm:text-base">{name}</h3>
