@@ -79,10 +79,10 @@ export function ContestantCard({
             <img 
               src={faceImage} 
               alt={`${name} face`}
-              className="w-28 sm:w-32 md:w-36 h-full object-cover border-r border-contest-border cursor-pointer hover:opacity-90 transition-opacity"
+              className="w-24 sm:w-28 md:w-32 h-full object-cover border-r border-contest-border cursor-pointer hover:opacity-90 transition-opacity"
               onClick={() => openModal(0)}
             />
-            <div className="absolute top-0 left-0 bg-black/70 text-white text-xs sm:text-sm font-bold px-1 py-0.5 rounded-br">
+            <div className="absolute top-0 left-0 bg-black/70 text-white text-xs font-bold px-1 py-0.5 rounded-br">
               {rank}
             </div>
           </div>
@@ -90,7 +90,7 @@ export function ContestantCard({
             <img 
               src={fullBodyImage} 
               alt={`${name} full body`}
-              className="w-28 sm:w-32 md:w-36 h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
+              className="w-24 sm:w-28 md:w-32 h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
               onClick={() => openModal(1)}
             />
             {additionalPhotos.length > 0 && (
@@ -105,12 +105,12 @@ export function ContestantCard({
         </div>
         
         {/* Content area with potential voting overlay */}
-        <div className="flex-1 p-2 sm:p-3 md:p-4 flex flex-col relative">
+        <div className="flex-1 p-1.5 sm:p-2 md:p-3 flex flex-col relative">
           {/* Voting overlay - shown by default when not voted and not editing */}
           {!isVoted && !isEditing && !showThanks && (
-            <div className="absolute inset-0 bg-gray-200 rounded-r flex items-center px-4">
-              <span className="text-base font-medium text-gray-800 mr-16">Vote</span>
-              <div className="scale-[2.0]">
+            <div className="absolute inset-0 bg-gray-200 rounded-r flex items-center px-2 sm:px-3">
+              <span className="text-sm sm:text-base font-medium text-gray-800 mr-2 sm:mr-4">Vote</span>
+              <div className="scale-[1.5] sm:scale-[2.0]">
                 <StarRating 
                   rating={0} 
                   isVoted={false}
@@ -142,9 +142,9 @@ export function ContestantCard({
           
           {/* Re-voting overlay - shown when editing existing vote */}
           {isVoted && isEditing && !showThanks && (
-            <div className="absolute inset-0 bg-gray-200 rounded-r flex items-center px-4">
-              <span className="text-base font-medium text-gray-800 mr-16">Vote</span>
-              <div className="scale-[2.0]">
+            <div className="absolute inset-0 bg-gray-200 rounded-r flex items-center px-2 sm:px-3">
+              <span className="text-sm sm:text-base font-medium text-gray-800 mr-2 sm:mr-4">Vote</span>
+              <div className="scale-[1.5] sm:scale-[2.0]">
                 <StarRating 
                   rating={0} 
                   isVoted={false}
@@ -162,26 +162,26 @@ export function ContestantCard({
           
           {/* Contestant info - shown after voting instead of normal content */}
           {isVoted && !isEditing && !showThanks && (
-            <div className="absolute inset-0 bg-white rounded-r flex flex-col justify-between p-4">
+            <div className="absolute inset-0 bg-white rounded-r flex flex-col justify-between p-2 sm:p-3">
               <div className="flex items-start justify-between">
-                <div>
-                  <h3 className="font-semibold text-contest-text text-sm sm:text-base">{name}</h3>
-                  <div className="text-xs sm:text-sm text-contest-blue">
+                <div className="min-w-0 flex-1 mr-2">
+                  <h3 className="font-semibold text-contest-text text-xs sm:text-sm truncate">{name}</h3>
+                  <div className="text-xs text-contest-blue truncate">
                     {country} · {city}
                   </div>
-                  <div className="text-xs sm:text-sm text-muted-foreground">
+                  <div className="text-xs text-muted-foreground">
                     {age} y.o · {weight} kg · {height} cm
                   </div>
                 </div>
                 
-                <div className="text-right">
-                  <div className="text-lg sm:text-xl font-bold text-contest-text mb-1 flex items-center justify-end gap-1">
+                <div className="text-right flex-shrink-0">
+                  <div className="text-sm sm:text-lg font-bold text-contest-text mb-1 flex items-center justify-end gap-1">
                     {rating.toFixed(1)}
                     <MiniStars rating={rating} />
                     {isVoted && (
                       <Popover>
                         <PopoverTrigger asChild>
-                          <span className="text-sm text-muted-foreground/70 ml-2 cursor-pointer hover:text-muted-foreground">
+                          <span className="text-xs text-muted-foreground/70 ml-1 cursor-pointer hover:text-muted-foreground">
                             ({userRating.toFixed(0)})
                           </span>
                         </PopoverTrigger>
@@ -199,19 +199,19 @@ export function ContestantCard({
                     )}
                   </div>
                   {isWinner && prize && (
-                    <div className="text-contest-blue font-bold text-sm">
+                    <div className="text-contest-blue font-bold text-xs">
                       {prize}
                     </div>
                   )}
                 </div>
               </div>
               
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2 sm:gap-3">
                 <Button 
                   variant="ghost" 
                   size="sm" 
                   className={cn(
-                    "transition-colors",
+                    "transition-colors text-xs h-6 px-2",
                     isLiked 
                       ? "text-contest-blue hover:text-contest-blue/80" 
                       : "text-muted-foreground hover:text-gray-600 hover:bg-gray-100"
@@ -220,15 +220,15 @@ export function ContestantCard({
                 >
                   <Heart 
                     className={cn(
-                      "w-4 h-4 mr-1 transition-colors",
+                      "w-3 h-3 mr-1 transition-colors",
                       isLiked && "fill-contest-blue"
                     )} 
                   />
-                  {likesCount} Like{likesCount !== 1 ? 's' : ''}
+                  {likesCount}
                 </Button>
-                <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-gray-600 hover:bg-gray-100">
-                  <MessageCircle className="w-4 h-4 mr-1" />
-                  {commentsCount} Comment{commentsCount !== 1 ? 's' : ''}
+                <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-gray-600 hover:bg-gray-100 text-xs h-6 px-2">
+                  <MessageCircle className="w-3 h-3 mr-1" />
+                  {commentsCount}
                 </Button>
               </div>
             </div>
