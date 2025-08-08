@@ -175,8 +175,10 @@ export function ContestantCard({
                 </div>
                 
                 <div className="text-right flex-shrink-0">
-                  <div className="text-lg sm:text-xl font-bold text-contest-text mb-1 flex items-center justify-end gap-1">
-                    {rating.toFixed(1)}
+                  <div className="text-xl sm:text-2xl font-bold text-contest-text mb-1 flex items-center justify-end gap-1">
+                    <span className="bg-contest-blue text-white px-2 py-1 rounded-lg shadow-md">
+                      {rating.toFixed(1)}
+                    </span>
                     {isVoted && (
                       <Popover>
                         <PopoverTrigger asChild>
