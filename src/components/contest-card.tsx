@@ -79,7 +79,7 @@ export function ContestantCard({
             <Popover>
               <PopoverTrigger asChild>
                 <div className="bg-contest-blue text-white rounded-bl-lg shadow-md cursor-pointer hover:bg-contest-blue/90 transition-colors flex items-center">
-                  <div className="bg-black/30 px-2 py-1.5 rounded-bl-lg text-sm font-medium">
+                  <div className="bg-gray-500 px-2 py-1.5 rounded-bl-lg text-sm font-medium">
                     #{rank}
                   </div>
                   <div className="px-2 py-1.5 text-base sm:text-lg font-bold">
