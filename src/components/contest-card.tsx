@@ -179,9 +179,8 @@ export function ContestantCard({
                 </div>
                 
                 <div className="text-right flex-shrink-0">
-                  <div className="text-sm sm:text-lg font-bold text-contest-text mb-1 flex items-center justify-end gap-1">
+                  <div className="text-lg sm:text-xl font-bold text-contest-text mb-1 flex items-center justify-end gap-1">
                     {rating.toFixed(1)}
-                    <MiniStars rating={rating} />
                     {isVoted && (
                       <Popover>
                         <PopoverTrigger asChild>
