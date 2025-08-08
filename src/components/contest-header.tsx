@@ -65,10 +65,10 @@ export function ContestHeader() {
               <div
                 key={item.name}
                 className="relative py-0.5"
-                style={{ width: `${item.name.length * 8 + 16}px` }}
               >
+                <span className="invisible">{item.name}</span>
                 {activeSection === item.name && (
-                  <div className="absolute bottom-0 left-2 right-2 h-0.5 bg-contest-blue"></div>
+                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-contest-blue"></div>
                 )}
               </div>
             ))}
