@@ -76,13 +76,10 @@ export function ContestantCard({
         {/* Rating badge in top right corner */}
         {isVoted && !isEditing && !showThanks && (
           <div className="absolute top-0 right-0 z-10 flex flex-col items-end">
-            <div className="bg-contest-blue text-white px-2 py-1.5 rounded-bl-lg text-base sm:text-lg font-bold shadow-md">
-              {rating.toFixed(1)}
-            </div>
             <Popover>
               <PopoverTrigger asChild>
-                <div className="text-xs text-muted-foreground mt-1 mr-1 cursor-pointer hover:text-contest-blue">
-                  ({userRating.toFixed(0)})
+                <div className="bg-contest-blue text-white px-2 py-1.5 rounded-bl-lg text-base sm:text-lg font-bold shadow-md cursor-pointer hover:bg-contest-blue/90 transition-colors">
+                  {rating.toFixed(1)}
                 </div>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-3">
