@@ -75,11 +75,11 @@ export function ContestantCard({
         
         {/* Rating badge in top right corner */}
         {isVoted && !isEditing && !showThanks && (
-          <div className="absolute top-0 right-0 bg-contest-blue text-white px-2 py-1.5 rounded-bl-lg text-base sm:text-lg font-bold z-10 shadow-md flex flex-col items-center">
-            <div>{rating.toFixed(1)}</div>
-            {isVoted && (
-              <div className="text-xs opacity-80">({userRating.toFixed(0)})</div>
-            )}
+          <div className="absolute top-0 right-0 z-10 flex flex-col items-end">
+            <div className="bg-contest-blue text-white px-2 py-1.5 rounded-bl-lg text-base sm:text-lg font-bold shadow-md">
+              {rating.toFixed(1)}
+            </div>
+            <div className="text-xs text-muted-foreground mt-1 mr-1">({userRating.toFixed(0)})</div>
           </div>
         )}
         
@@ -185,27 +185,6 @@ export function ContestantCard({
                 </div>
                 
                 <div className="text-right flex-shrink-0">
-                  <div className="flex items-center justify-end gap-1">
-                    {isVoted && (
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <button className="text-xs text-contest-blue hover:underline">
-                            change vote
-                          </button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-3">
-                          <div className="text-sm">
-                            You rated {userRating.toFixed(0)} — <button 
-                              className="text-contest-blue hover:underline" 
-                              onClick={() => setIsEditing(true)}
-                            >
-                              change
-                            </button>
-                          </div>
-                        </PopoverContent>
-                      </Popover>
-                    )}
-                  </div>
                   {isWinner && prize && (
                     <div className="text-contest-blue font-bold text-xs">
                       {prize}
