@@ -212,10 +212,10 @@ export function ContestantCard({
                   variant="ghost" 
                   size="sm" 
                   className={cn(
-                    "transition-colors text-xs h-6 px-2",
+                    "transition-colors text-xs h-6 px-2 hover:bg-gray-100",
                     isLiked 
                       ? "text-contest-blue hover:text-contest-blue/80" 
-                      : "text-muted-foreground hover:text-gray-600 hover:bg-gray-100"
+                      : "text-muted-foreground hover:text-gray-600"
                   )}
                   onClick={handleLike}
                 >
@@ -228,7 +228,7 @@ export function ContestantCard({
                   <span className="hidden sm:inline">{likesCount} Like{likesCount !== 1 ? 's' : ''}</span>
                   <span className="sm:hidden">{likesCount}</span>
                 </Button>
-                <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-gray-600 hover:bg-gray-100 text-xs h-6 px-2">
+                <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-gray-600 hover:bg-gray-100 text-xs h-6 px-2 transition-colors">
                   <MessageCircle className="w-3 h-3 mr-1" />
                   <span className="hidden sm:inline">{commentsCount} Comment{commentsCount !== 1 ? 's' : ''}</span>
                   <span className="sm:hidden">{commentsCount}</span>
