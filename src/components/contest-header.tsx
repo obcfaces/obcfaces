@@ -45,7 +45,7 @@ export function ContestHeader() {
             <button
               key={item.name}
               onClick={() => setActiveSection(item.name)}
-              className={`py-2 transition-colors ${
+              className={`py-1 transition-colors ${
                 activeSection === item.name
                   ? "text-contest-blue font-medium"
                   : "text-muted-foreground hover:text-contest-blue"
