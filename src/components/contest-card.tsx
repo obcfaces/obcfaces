@@ -88,7 +88,7 @@ export function ContestantCard({
             </div>
             {/* Rating badge moved here, right of rank number */}
             {isVoted && !isEditing && !showThanks && (
-              <div className="absolute top-0 left-8 z-10">
+              <div className="absolute top-0 left-6 z-10">
                 <Popover>
                   <PopoverTrigger asChild>
                     <div className="bg-contest-blue text-white px-1.5 py-0.5 rounded-br text-xs font-bold shadow-md cursor-pointer hover:bg-contest-blue/90 transition-colors">
