@@ -79,7 +79,23 @@ export function ContestantCard({
             <div className="bg-contest-blue text-white px-2 py-1.5 rounded-bl-lg text-base sm:text-lg font-bold shadow-md">
               {rating.toFixed(1)}
             </div>
-            <div className="text-xs text-muted-foreground mt-1 mr-1">({userRating.toFixed(0)})</div>
+            <Popover>
+              <PopoverTrigger asChild>
+                <div className="text-xs text-muted-foreground mt-1 mr-1 cursor-pointer hover:text-contest-blue">
+                  ({userRating.toFixed(0)})
+                </div>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-3">
+                <div className="text-sm">
+                  You rated {userRating.toFixed(0)} — <button 
+                    className="text-contest-blue hover:underline" 
+                    onClick={() => setIsEditing(true)}
+                  >
+                    change
+                  </button>
+                </div>
+              </PopoverContent>
+            </Popover>
           </div>
         )}
         
