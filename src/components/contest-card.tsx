@@ -108,26 +108,24 @@ export function ContestantCard({
         <div className="flex-1 p-1.5 sm:p-2 md:p-3 flex flex-col relative">
           {/* Voting overlay - shown by default when not voted and not editing */}
           {!isVoted && !isEditing && !showThanks && (
-            <div className="absolute inset-0 bg-gray-200 rounded-r flex items-center justify-center">
-              <div className="flex items-center gap-2">
-                <div className="scale-[1.5] sm:scale-[2.0]">
-                  <StarRating 
-                    rating={0} 
-                    isVoted={false}
-                    variant="white"
-                    hideText={true}
-                    onRate={(rating) => {
-                      setUserRating(rating);
-                      setShowThanks(true);
-                      // Show thank you message for 1 second, then show contestant info
-                      setTimeout(() => {
-                        setShowThanks(false);
-                        onRate?.(rating);
-                      }, 1000);
-                    }}
-                  />
-                </div>
-                <span className="text-sm sm:text-base font-medium text-gray-800">Vote</span>
+            <div className="absolute inset-0 bg-gray-200 rounded-r flex flex-col items-center justify-center gap-1">
+              <span className="text-sm sm:text-base font-medium text-gray-800">Vote</span>
+              <div className="scale-[2.0] sm:scale-[2.5]">
+                <StarRating 
+                  rating={0} 
+                  isVoted={false}
+                  variant="white"
+                  hideText={true}
+                  onRate={(rating) => {
+                    setUserRating(rating);
+                    setShowThanks(true);
+                    // Show thank you message for 1 second, then show contestant info
+                    setTimeout(() => {
+                      setShowThanks(false);
+                      onRate?.(rating);
+                    }, 1000);
+                  }}
+                />
               </div>
             </div>
           )}
@@ -144,22 +142,20 @@ export function ContestantCard({
           
           {/* Re-voting overlay - shown when editing existing vote */}
           {isVoted && isEditing && !showThanks && (
-            <div className="absolute inset-0 bg-gray-200 rounded-r flex items-center justify-center">
-              <div className="flex items-center gap-2">
-                <div className="scale-[1.5] sm:scale-[2.0]">
-                  <StarRating 
-                    rating={0} 
-                    isVoted={false}
-                    variant="white"
-                    hideText={true}
-                    onRate={(rating) => {
-                      setUserRating(rating);
-                      setIsEditing(false);
-                      onRate?.(rating);
-                    }}
-                  />
-                </div>
-                <span className="text-sm sm:text-base font-medium text-gray-800">Vote</span>
+            <div className="absolute inset-0 bg-gray-200 rounded-r flex flex-col items-center justify-center gap-1">
+              <span className="text-sm sm:text-base font-medium text-gray-800">Vote</span>
+              <div className="scale-[2.0] sm:scale-[2.5]">
+                <StarRating 
+                  rating={0} 
+                  isVoted={false}
+                  variant="white"
+                  hideText={true}
+                  onRate={(rating) => {
+                    setUserRating(rating);
+                    setIsEditing(false);
+                    onRate?.(rating);
+                  }}
+                />
               </div>
             </div>
           )}
