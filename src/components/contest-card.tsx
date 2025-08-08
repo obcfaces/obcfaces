@@ -109,7 +109,7 @@ export function ContestantCard({
           {/* Voting overlay - shown by default when not voted and not editing */}
           {!isVoted && !isEditing && !showThanks && (
             <div className="absolute inset-0 bg-gray-200 rounded-r flex flex-col items-center justify-center gap-1">
-              <span className="text-sm sm:text-base font-medium text-gray-800">Vote</span>
+              <span className="text-lg sm:text-xl font-medium text-gray-800">Vote</span>
               <div className="scale-[2.0] sm:scale-[2.5]">
                 <StarRating 
                   rating={0} 
@@ -143,7 +143,7 @@ export function ContestantCard({
           {/* Re-voting overlay - shown when editing existing vote */}
           {isVoted && isEditing && !showThanks && (
             <div className="absolute inset-0 bg-gray-200 rounded-r flex flex-col items-center justify-center gap-1">
-              <span className="text-sm sm:text-base font-medium text-gray-800">Vote</span>
+              <span className="text-lg sm:text-xl font-medium text-gray-800">Vote</span>
               <div className="scale-[2.0] sm:scale-[2.5]">
                 <StarRating 
                   rating={0} 
