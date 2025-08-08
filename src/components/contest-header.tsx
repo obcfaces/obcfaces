@@ -40,7 +40,7 @@ export function ContestHeader() {
         </div>
         
         {/* Navigation sections below description */}
-        <nav className="flex items-center gap-6 text-sm mt-2">
+        <nav className="flex items-center gap-6 text-sm mt-1">
           {navItems.map((item) => (
             <button
               key={item.name}
