@@ -68,8 +68,15 @@ export function ContestantCard({
     <>
       <Card className="bg-card border-contest-border relative overflow-hidden flex h-32 sm:h-36 md:h-40">
         {isWinner && (
-          <div className="absolute top-2 right-2 bg-contest-blue text-white px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 z-10">
+          <div className="absolute top-2 left-2 bg-contest-blue text-white px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 z-10">
             🏆 WINNER
+          </div>
+        )}
+        
+        {/* Rating badge in top right corner */}
+        {isVoted && !isEditing && !showThanks && (
+          <div className="absolute top-0 right-0 bg-contest-blue text-white px-3 py-2 rounded-bl-lg text-lg sm:text-xl font-bold z-10 shadow-md">
+            {rating.toFixed(1)}
           </div>
         )}
         
@@ -175,15 +182,12 @@ export function ContestantCard({
                 </div>
                 
                 <div className="text-right flex-shrink-0">
-                  <div className="text-xl sm:text-2xl font-bold text-contest-text mb-1 flex items-center justify-end gap-1">
-                    <span className="bg-contest-blue text-white px-2 py-1 rounded-lg shadow-md">
-                      {rating.toFixed(1)}
-                    </span>
+                  <div className="flex items-center justify-end gap-1">
                     {isVoted && (
                       <Popover>
                         <PopoverTrigger asChild>
-                          <span className="text-xs text-muted-foreground/70 ml-1 cursor-pointer hover:text-muted-foreground">
-                            ({userRating.toFixed(0)})
+                          <span className="text-xs text-muted-foreground/70 cursor-pointer hover:text-muted-foreground">
+                            (You: {userRating.toFixed(0)})
                           </span>
                         </PopoverTrigger>
                         <PopoverContent className="w-auto p-3">
