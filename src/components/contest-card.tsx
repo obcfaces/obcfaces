@@ -165,11 +165,11 @@ export function ContestantCard({
             <div className="absolute inset-0 bg-white rounded-r flex flex-col justify-between p-2 sm:p-3">
               <div className="flex items-start justify-between">
                 <div className="min-w-0 flex-1 mr-2">
-                  <h3 className="font-semibold text-contest-text text-xs sm:text-sm truncate">{name}</h3>
-                  <div className="text-xs text-contest-blue truncate">
+                  <h3 className="font-semibold text-contest-text text-sm sm:text-base truncate">{name}</h3>
+                  <div className="text-xs sm:text-sm text-contest-blue truncate">
                     {country} · {city}
                   </div>
-                  <div className="text-xs text-muted-foreground">
+                  <div className="text-xs sm:text-sm text-muted-foreground">
                     {age} y.o · {weight} kg · {height} cm
                   </div>
                 </div>
@@ -223,11 +223,13 @@ export function ContestantCard({
                       isLiked && "fill-contest-blue"
                     )} 
                   />
-                  {likesCount}
+                  <span className="hidden sm:inline">{likesCount} Like{likesCount !== 1 ? 's' : ''}</span>
+                  <span className="sm:hidden">{likesCount}</span>
                 </Button>
                 <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-gray-600 hover:bg-gray-100 text-xs h-6 px-2">
                   <MessageCircle className="w-3 h-3 mr-1" />
-                  {commentsCount}
+                  <span className="hidden sm:inline">{commentsCount} Comment{commentsCount !== 1 ? 's' : ''}</span>
+                  <span className="sm:hidden">{commentsCount}</span>
                 </Button>
               </div>
             </div>
