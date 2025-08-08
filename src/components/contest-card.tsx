@@ -75,8 +75,11 @@ export function ContestantCard({
         
         {/* Rating badge in top right corner */}
         {isVoted && !isEditing && !showThanks && (
-          <div className="absolute top-0 right-0 bg-contest-blue text-white px-3 py-2 rounded-bl-lg text-lg sm:text-xl font-bold z-10 shadow-md">
-            {rating.toFixed(1)}
+          <div className="absolute top-0 right-0 bg-contest-blue text-white px-2 py-1.5 rounded-bl-lg text-base sm:text-lg font-bold z-10 shadow-md flex flex-col items-center">
+            <div>{rating.toFixed(1)}</div>
+            {isVoted && (
+              <div className="text-xs opacity-80">({userRating.toFixed(0)})</div>
+            )}
           </div>
         )}
         
@@ -186,9 +189,9 @@ export function ContestantCard({
                     {isVoted && (
                       <Popover>
                         <PopoverTrigger asChild>
-                          <span className="text-xs text-muted-foreground/70 cursor-pointer hover:text-muted-foreground">
-                            (You: {userRating.toFixed(0)})
-                          </span>
+                          <button className="text-xs text-contest-blue hover:underline">
+                            change vote
+                          </button>
                         </PopoverTrigger>
                         <PopoverContent className="w-auto p-3">
                           <div className="text-sm">
