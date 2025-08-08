@@ -64,7 +64,7 @@ export function ContestHeader() {
             {navItems.map((item) => (
               <div
                 key={item.name}
-                className="relative py-0.5"
+                className="relative py-0"
               >
                 <span className="invisible">{item.name}</span>
                 {activeSection === item.name && (
