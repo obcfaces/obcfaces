@@ -73,28 +73,6 @@ export function ContestantCard({
           </div>
         )}
         
-        {/* Rating badge in top right corner */}
-        {isVoted && !isEditing && !showThanks && (
-          <div className="absolute top-0 right-0 z-10 flex flex-col items-end">
-            <Popover>
-              <PopoverTrigger asChild>
-                <div className="bg-contest-blue text-white px-2 py-1.5 rounded-bl-lg text-base sm:text-lg font-bold shadow-md cursor-pointer hover:bg-contest-blue/90 transition-colors">
-                  {rating.toFixed(1)}
-                </div>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-3">
-                <div className="text-sm">
-                  You rated {userRating.toFixed(0)} — <button 
-                    className="text-contest-blue hover:underline" 
-                    onClick={() => setIsEditing(true)}
-                  >
-                    change
-                  </button>
-                </div>
-              </PopoverContent>
-            </Popover>
-          </div>
-        )}
         
         {/* Main two photos with additional photos indicator */}
         <div className="flex-shrink-0 flex h-full relative">
@@ -105,9 +83,31 @@ export function ContestantCard({
               className="w-24 sm:w-28 md:w-32 h-full object-cover border-r border-contest-border cursor-pointer hover:opacity-90 transition-opacity"
               onClick={() => openModal(0)}
             />
-            <div className="absolute top-0 left-0 bg-black/70 text-white text-xs font-bold px-1 py-0.5 rounded-br">
+            <div className="absolute top-0 left-0 bg-black/50 text-white/70 text-xs px-1 py-0.5 rounded-br">
               {rank}
             </div>
+            {/* Rating badge moved here, right of rank number */}
+            {isVoted && !isEditing && !showThanks && (
+              <div className="absolute top-0 left-8 z-10">
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <div className="bg-contest-blue text-white px-1.5 py-0.5 rounded-br text-xs font-bold shadow-md cursor-pointer hover:bg-contest-blue/90 transition-colors">
+                      {rating.toFixed(1)}
+                    </div>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-3">
+                    <div className="text-sm">
+                      You rated {userRating.toFixed(0)} — <button 
+                        className="text-contest-blue hover:underline" 
+                        onClick={() => setIsEditing(true)}
+                      >
+                        change
+                      </button>
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              </div>
+            )}
           </div>
           <div className="relative">
             <img 
