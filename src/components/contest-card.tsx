@@ -53,47 +53,7 @@ export function ContestantCard({
   const [userRating, setUserRating] = useState(0);
   const [isLiked, setIsLiked] = useState(false);
   const [likesCount, setLikesCount] = useState(Math.floor(Math.random() * 50) + 5); // Random initial likes
-  const [commentsCount, setCommentsCount] = useState(Math.floor(Math.random() * 20) + 1); // Random initial comments
-  const [isCommentDialogOpen, setIsCommentDialogOpen] = useState(false);
-  const [commentText, setCommentText] = useState("");
-  const [comments, setComments] = useState(() => {
-    // Show example comments only for the first contestant (rank 1)
-    if (rank === 1) {
-      return [
-        {
-          id: 1,
-          author: "Алексей К.",
-          text: "Невероятная красота! Заслуженно лидирует в конкурсе",
-          timestamp: "2 часа назад"
-        },
-        {
-          id: 2,
-          author: "Marina_87",
-          text: "Очень красивая девушка, голосую за неё!",
-          timestamp: "4 часа назад"
-        },
-        {
-          id: 3,
-          author: "DenisM",
-          text: "Потрясающие фото, особенно второе. Удачи в конкурсе!",
-          timestamp: "1 день назад"
-        },
-        {
-          id: 4,
-          author: "Светлана П.",
-          text: "Такая милая улыбка, сразу видно хорошего человека",
-          timestamp: "1 день назад"
-        },
-        {
-          id: 5,
-          author: "Viktor_2000",
-          text: "Отличные данные, явно будет в топе",
-          timestamp: "2 дня назад"
-        }
-      ];
-    }
-    return [];
-  });
+  const [commentsCount] = useState(Math.floor(Math.random() * 20) + 1); // Random initial comments
   const { toast } = useToast();
 
   const handleLike = () => {
@@ -101,24 +61,6 @@ export function ContestantCard({
     setLikesCount(prev => isLiked ? prev - 1 : prev + 1);
   };
 
-  const handleCommentSubmit = () => {
-    if (commentText.trim()) {
-      const newComment = {
-        id: Date.now(),
-        author: "Вы",
-        text: commentText.trim(),
-        timestamp: "только что"
-      };
-      setComments(prev => [newComment, ...prev]);
-      setCommentsCount(prev => prev + 1);
-      setCommentText("");
-      setIsCommentDialogOpen(false);
-      toast({
-        title: "Комментарий отправлен",
-        description: "Ваш комментарий был успешно добавлен",
-      });
-    }
-  };
 
   const allPhotos = [faceImage, fullBodyImage, ...additionalPhotos];
 
@@ -290,72 +232,16 @@ export function ContestantCard({
                   <span className="hidden sm:inline">{likesCount} Like{likesCount !== 1 ? 's' : ''}</span>
                   <span className="sm:hidden">{likesCount}</span>
                 </Button>
-                <Dialog open={isCommentDialogOpen} onOpenChange={setIsCommentDialogOpen}>
-                  <DialogTrigger asChild>
-                    <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-gray-600 hover:bg-gray-100 text-xs h-6 px-2 transition-colors">
-                      <MessageCircle className="w-3 h-3 mr-1" />
-                      <span className="hidden sm:inline">{commentsCount} Comment{commentsCount !== 1 ? 's' : ''}</span>
-                      <span className="sm:hidden">{commentsCount}</span>
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="sm:max-w-lg max-h-[80vh] flex flex-col">
-                    <DialogHeader>
-                      <DialogTitle>Комментарии</DialogTitle>
-                    </DialogHeader>
-                    <div className="flex flex-col gap-4 flex-1 min-h-0">
-                      <div className="flex items-center gap-3 p-3 bg-muted rounded-lg">
-                        <img 
-                          src={faceImage} 
-                          alt={name}
-                          className="w-12 h-12 rounded-full object-cover"
-                        />
-                        <div>
-                          <h4 className="font-medium">{name}</h4>
-                          <p className="text-sm text-muted-foreground">{country} · {city}</p>
-                        </div>
-                      </div>
-                      
-                      {comments.length > 0 && (
-                        <div className="flex-1 min-h-0 overflow-y-auto space-y-3 max-h-64">
-                          <h5 className="font-medium text-sm">Все комментарии ({comments.length})</h5>
-                          {comments.map((comment) => (
-                            <div key={comment.id} className="border-b border-border pb-3 last:border-b-0">
-                              <div className="flex justify-between items-start mb-1">
-                                <span className="font-medium text-sm">{comment.author}</span>
-                                <span className="text-xs text-muted-foreground">{comment.timestamp}</span>
-                              </div>
-                              <p className="text-sm text-muted-foreground">{comment.text}</p>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                      
-                      <div className="space-y-3 pt-3 border-t border-border">
-                        <Textarea
-                          placeholder="Напишите ваш комментарий..."
-                          value={commentText}
-                          onChange={(e) => setCommentText(e.target.value)}
-                          className="min-h-[80px] resize-none"
-                        />
-                        <div className="flex justify-end gap-2">
-                          <Button 
-                            variant="outline" 
-                            onClick={() => setIsCommentDialogOpen(false)}
-                          >
-                            Закрыть
-                          </Button>
-                          <Button 
-                            onClick={handleCommentSubmit}
-                            disabled={!commentText.trim()}
-                          >
-                            <Send className="w-4 h-4 mr-2" />
-                            Отправить
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  </DialogContent>
-                </Dialog>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="text-muted-foreground hover:text-gray-600 hover:bg-gray-100 text-xs h-6 px-2 transition-colors"
+                  onClick={() => openModal(0)}
+                >
+                  <MessageCircle className="w-3 h-3 mr-1" />
+                  <span className="hidden sm:inline">{commentsCount} Comment{commentsCount !== 1 ? 's' : ''}</span>
+                  <span className="sm:hidden">{commentsCount}</span>
+                </Button>
               </div>
             </div>
           )}
