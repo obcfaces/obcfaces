@@ -25,7 +25,7 @@ export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantNa
   const [activeIndex, setActiveIndex] = useState(currentIndex);
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
-  const [showComments, setShowComments] = useState(false);
+  const [showComments, setShowComments] = useState(true);
   const [commentText, setCommentText] = useState("");
   const [photoComments, setPhotoComments] = useState<Record<number, Comment[]>>({
     // Примеры комментариев для первой фотографии первого участника
@@ -62,7 +62,7 @@ export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantNa
   // Reset activeIndex when currentIndex changes
   useEffect(() => {
     setActiveIndex(currentIndex);
-    setShowComments(false);
+    setShowComments(true);
   }, [currentIndex]);
 
   const nextPhoto = () => {
