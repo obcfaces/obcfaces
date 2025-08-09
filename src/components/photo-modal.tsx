@@ -133,18 +133,21 @@ export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantNa
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl h-[80vh] p-0 bg-black/90 flex">
-        {/* Photo section */}
-        <div className={cn(
-          "relative flex items-center justify-center transition-all duration-300",
-          showComments ? "w-2/3" : "w-full"
-        )}>
-          <button
-            onClick={onClose}
-            className="absolute top-4 right-4 z-10 text-white hover:text-gray-300 transition-colors"
-          >
-            <X className="w-6 h-6" />
-          </button>
+      <DialogContent className="max-w-4xl h-[80vh] p-0 bg-black/90">
+        {/* Desktop: flex layout, Mobile: block layout */}
+        <div className="h-full flex flex-col md:flex-row">
+          {/* Photo section */}
+          <div className={cn(
+            "relative flex items-center justify-center transition-all duration-300",
+            "h-2/3 md:h-full", // Mobile: 2/3 height, Desktop: full height
+            showComments ? "md:w-2/3" : "md:w-full" // Desktop: conditional width
+          )}>
+            <button
+              onClick={onClose}
+              className="absolute top-4 right-4 z-10 text-white hover:text-gray-300 transition-colors"
+            >
+              <X className="w-6 h-6" />
+            </button>
 
           {photos.length > 1 && (
             <>
@@ -154,15 +157,15 @@ export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantNa
               >
                 <ChevronLeft className="w-8 h-8" />
               </button>
-              <button
-                onClick={nextPhoto}
-                className={cn(
-                  "absolute z-10 text-white hover:text-gray-300 transition-colors",
-                  showComments ? "right-4" : "right-4"
-                )}
-              >
-                <ChevronRight className="w-8 h-8" />
-              </button>
+            <button
+              onClick={nextPhoto}
+              className={cn(
+                "absolute z-10 text-white hover:text-gray-300 transition-colors",
+                showComments ? "md:right-4 right-4" : "right-4"
+              )}
+            >
+              <ChevronRight className="w-8 h-8" />
+            </button>
             </>
           )}
 
@@ -176,7 +179,7 @@ export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantNa
           />
 
           {/* Photo action buttons */}
-          <div className="absolute bottom-16 left-4 flex gap-2">
+          <div className="absolute bottom-16 md:bottom-16 left-4 flex gap-2">
             <Button
               variant="secondary"
               size="sm"
@@ -219,9 +222,12 @@ export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantNa
           )}
         </div>
 
-        {/* Comments section */}
+        {/* Comments section - Desktop: sidebar, Mobile: bottom panel */}
         {showComments && (
-          <div className="w-1/3 bg-white flex flex-col">
+          <div className={cn(
+            "bg-white flex flex-col",
+            "h-1/3 md:h-full md:w-1/3" // Mobile: 1/3 height, Desktop: 1/3 width full height
+          )}>
             <div className="p-4 border-b">
               <div className="flex items-center justify-between">
                 <h3 className="font-semibold">Комментарии</h3>
@@ -238,7 +244,7 @@ export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantNa
               </p>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-4 space-y-3">
+            <div className="flex-1 overflow-y-auto p-4 space-y-3 min-h-0">
               {currentPhotoComments.length === 0 ? (
                 <p className="text-center text-muted-foreground text-sm">
                   Пока нет комментариев к этой фотографии
@@ -256,12 +262,12 @@ export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantNa
               )}
             </div>
 
-            <div className="p-4 border-t space-y-3">
+            <div className="p-3 md:p-4 border-t space-y-2 md:space-y-3">
               <Textarea
                 placeholder="Напишите комментарий к этой фотографии..."
                 value={commentText}
                 onChange={(e) => setCommentText(e.target.value)}
-                className="min-h-[60px] resize-none"
+                className="min-h-[50px] md:min-h-[60px] resize-none text-sm"
               />
               <Button
                 onClick={handleCommentSubmit}
@@ -275,6 +281,7 @@ export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantNa
             </div>
           </div>
         )}
+      </div>
       </DialogContent>
     </Dialog>
   );
