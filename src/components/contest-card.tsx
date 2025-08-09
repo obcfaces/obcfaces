@@ -1,11 +1,14 @@
 import { useState } from "react";
-import { Heart, MessageCircle, Star, Pencil } from "lucide-react";
+import { Heart, MessageCircle, Star, Pencil, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { StarRating } from "@/components/ui/star-rating";
 import { PhotoModal } from "@/components/photo-modal";
 import { MiniStars } from "@/components/mini-stars";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 
 interface ContestantCardProps {
@@ -50,11 +53,26 @@ export function ContestantCard({
   const [userRating, setUserRating] = useState(0);
   const [isLiked, setIsLiked] = useState(false);
   const [likesCount, setLikesCount] = useState(Math.floor(Math.random() * 50) + 5); // Random initial likes
-  const [commentsCount] = useState(Math.floor(Math.random() * 20) + 1); // Random initial comments
+  const [commentsCount, setCommentsCount] = useState(Math.floor(Math.random() * 20) + 1); // Random initial comments
+  const [isCommentDialogOpen, setIsCommentDialogOpen] = useState(false);
+  const [commentText, setCommentText] = useState("");
+  const { toast } = useToast();
 
   const handleLike = () => {
     setIsLiked(!isLiked);
     setLikesCount(prev => isLiked ? prev - 1 : prev + 1);
+  };
+
+  const handleCommentSubmit = () => {
+    if (commentText.trim()) {
+      setCommentsCount(prev => prev + 1);
+      setCommentText("");
+      setIsCommentDialogOpen(false);
+      toast({
+        title: "Комментарий отправлен",
+        description: "Ваш комментарий был успешно добавлен",
+      });
+    }
   };
 
   const allPhotos = [faceImage, fullBodyImage, ...additionalPhotos];
@@ -227,11 +245,54 @@ export function ContestantCard({
                   <span className="hidden sm:inline">{likesCount} Like{likesCount !== 1 ? 's' : ''}</span>
                   <span className="sm:hidden">{likesCount}</span>
                 </Button>
-                <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-gray-600 hover:bg-gray-100 text-xs h-6 px-2 transition-colors">
-                  <MessageCircle className="w-3 h-3 mr-1" />
-                  <span className="hidden sm:inline">{commentsCount} Comment{commentsCount !== 1 ? 's' : ''}</span>
-                  <span className="sm:hidden">{commentsCount}</span>
-                </Button>
+                <Dialog open={isCommentDialogOpen} onOpenChange={setIsCommentDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-gray-600 hover:bg-gray-100 text-xs h-6 px-2 transition-colors">
+                      <MessageCircle className="w-3 h-3 mr-1" />
+                      <span className="hidden sm:inline">{commentsCount} Comment{commentsCount !== 1 ? 's' : ''}</span>
+                      <span className="sm:hidden">{commentsCount}</span>
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                      <DialogTitle>Написать комментарий</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-3 p-3 bg-muted rounded-lg">
+                        <img 
+                          src={faceImage} 
+                          alt={name}
+                          className="w-12 h-12 rounded-full object-cover"
+                        />
+                        <div>
+                          <h4 className="font-medium">{name}</h4>
+                          <p className="text-sm text-muted-foreground">{country} · {city}</p>
+                        </div>
+                      </div>
+                      <Textarea
+                        placeholder="Напишите ваш комментарий..."
+                        value={commentText}
+                        onChange={(e) => setCommentText(e.target.value)}
+                        className="min-h-[100px] resize-none"
+                      />
+                      <div className="flex justify-end gap-2">
+                        <Button 
+                          variant="outline" 
+                          onClick={() => setIsCommentDialogOpen(false)}
+                        >
+                          Отмена
+                        </Button>
+                        <Button 
+                          onClick={handleCommentSubmit}
+                          disabled={!commentText.trim()}
+                        >
+                          <Send className="w-4 h-4 mr-2" />
+                          Отправить
+                        </Button>
+                      </div>
+                    </div>
+                  </DialogContent>
+                </Dialog>
               </div>
             </div>
           )}
