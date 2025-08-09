@@ -139,8 +139,7 @@ export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantNa
           {/* Photo section */}
           <div className={cn(
             "relative flex items-center justify-center transition-all duration-300",
-            "h-2/3 md:h-full", // Mobile: 2/3 height, Desktop: full height
-            showComments ? "md:w-2/3" : "md:w-full" // Desktop: conditional width
+            showComments ? "h-1/2 md:h-full md:w-2/3" : "h-full md:w-full" // Mobile: 1/2 height when comments open, Desktop: conditional width
           )}>
             <button
               onClick={onClose}
@@ -226,7 +225,7 @@ export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantNa
         {showComments && (
           <div className={cn(
             "bg-white flex flex-col",
-            "h-1/3 md:h-full md:w-1/3" // Mobile: 1/3 height, Desktop: 1/3 width full height
+            "h-1/2 md:h-full md:w-1/3" // Mobile: 1/2 height like FB, Desktop: 1/3 width full height
           )}>
             <div className="p-4 border-b">
               <div className="flex items-center justify-between">
