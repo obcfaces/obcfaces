@@ -281,7 +281,7 @@ export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantNa
           {/* Photo section */}
           <div className={cn(
             "relative flex items-center justify-center transition-all duration-300",
-            showComments ? "h-1/2 md:h-full md:w-2/3" : "h-full md:w-full" // Mobile: 1/2 height when comments open, Desktop: conditional width
+            "h-1/2 md:h-full md:w-2/3" // Always show comments on mobile and desktop
           )}>
             <button
               onClick={onClose}
