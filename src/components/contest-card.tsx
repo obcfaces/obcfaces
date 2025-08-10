@@ -103,7 +103,7 @@ export function ContestantCard({
           
           {/* Photos section */}
           <div className="p-4">
-            <div className="grid grid-cols-2 gap-1 mb-4">
+            <div className="grid grid-cols-2 mb-4">
               <div className="relative">
                 <img 
                   src={faceImage} 
