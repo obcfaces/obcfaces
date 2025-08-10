@@ -169,8 +169,8 @@ export function ContestantCard({
           </div>
           
           {/* Photos section */}
-          <div className="">
-            <div className="grid grid-cols-2 gap-px mb-4">
+          <div className="relative">
+            <div className="grid grid-cols-2 gap-px">
               <div className="relative">
                 <img 
                   src={faceImage} 
@@ -197,38 +197,34 @@ export function ContestantCard({
               </div>
             </div>
             
-            {/* Actions only */}
-            <div className="flex items-center justify-end p-4">
-              <div className="flex items-center gap-3">
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
+            {/* Actions in bottom left corner */}
+            <div className="absolute bottom-2 left-2 flex items-center gap-2">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className={cn(
+                  "transition-colors bg-black/20 hover:bg-black/30 text-white border-0",
+                  isLiked && "text-contest-blue"
+                )}
+                onClick={handleLike}
+              >
+                <Heart 
                   className={cn(
-                    "transition-colors",
-                    isLiked 
-                      ? "text-contest-blue hover:text-contest-blue/80" 
-                      : "text-muted-foreground hover:text-gray-600"
-                  )}
-                  onClick={handleLike}
-                >
-                  <Heart 
-                    className={cn(
-                      "w-4 h-4 mr-1 transition-colors",
-                      isLiked && "fill-contest-blue"
-                    )} 
-                  />
-                  {likesCount} Like{likesCount !== 1 ? 's' : ''}
-                </Button>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="text-muted-foreground hover:text-gray-600 transition-colors"
-                  onClick={() => openModal(0)}
-                >
-                  <MessageCircle className="w-4 h-4 mr-1" />
-                  {commentsCount} Comment{commentsCount !== 1 ? 's' : ''}
-                </Button>
-              </div>
+                    "w-4 h-4 mr-1 transition-colors",
+                    isLiked && "fill-contest-blue"
+                  )} 
+                />
+                {likesCount}
+              </Button>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="transition-colors bg-black/20 hover:bg-black/30 text-white border-0"
+                onClick={() => openModal(0)}
+              >
+                <MessageCircle className="w-4 h-4 mr-1" />
+                {commentsCount}
+              </Button>
             </div>
           </div>
         </Card>
