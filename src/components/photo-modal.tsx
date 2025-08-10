@@ -364,11 +364,10 @@ export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantNa
         </div>
 
         {/* Comments section - Desktop: sidebar, Mobile: bottom panel */}
-        {showComments && (
-          <div className={cn(
-            "bg-white flex flex-col",
-            "h-1/2 md:h-full md:w-1/3" // Mobile: 1/2 height like FB, Desktop: 1/3 width full height
-          )}>
+        <div className={cn(
+          "bg-white flex flex-col",
+          "h-1/2 md:h-full md:w-1/3" // Mobile: 1/2 height like FB, Desktop: 1/3 width full height
+        )}>
             <div className="p-4 border-b">
               <div className="flex items-center justify-between">
                 <h3 className="font-semibold">Комментарии</h3>
@@ -421,8 +420,7 @@ export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantNa
               </Button>
             </div>
           </div>
-        )}
-      </div>
+        </div>
       </DialogContent>
     </Dialog>
   );
