@@ -151,7 +151,7 @@ export function ContestantCard({
             
             {/* Contestant info - shown after voting */}
             {isVoted && !isEditing && !showThanks && (
-              <div className="flex items-start justify-between h-full pl-4 pr-4 pt-2 pb-2">
+              <div className="flex items-start justify-between h-full pl-4 pr-4 pt-4 pb-2">
                 <div>
                   <h3 className="text-xl font-semibold text-contest-text">{name}, {age}</h3>
                   <p className="text-contest-blue">{country} · {city}</p>
@@ -418,32 +418,30 @@ export function ContestantCard({
           
           {/* Contestant info - shown after voting instead of normal content */}
           {isVoted && !isEditing && !showThanks && (
-            <div className="absolute inset-0 bg-white rounded-r flex flex-col p-1 sm:p-2">
-              {/* Top row with rank, name, age - all on same level as rating */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 flex-1">
-                  <div className="bg-black/70 text-white text-xs font-bold px-1 py-0.5 rounded">
-                    #{rank}
+            <div className="absolute inset-0 bg-white rounded-r flex flex-col justify-between p-2 sm:p-3">
+              <div className="flex items-start justify-between">
+                <div className="min-w-0 flex-1 mr-2">
+                  <h3 className="font-semibold text-contest-text text-base sm:text-lg truncate">{name}</h3>
+                  <div className="text-sm sm:text-base text-contest-blue truncate">
+                    {country} · {city}
                   </div>
-                  <h3 className="font-semibold text-contest-text text-base sm:text-lg">{name}, {age}</h3>
+                  <div className="text-sm sm:text-base text-muted-foreground">
+                    {age} y.o · {weight} kg · {height} cm
+                  </div>
+                </div>
+                
+                <div className="text-right flex-shrink-0">
+                  {isWinner && prize && (
+                    <div className="text-contest-blue font-bold text-xs">
+                      {prize}
+                    </div>
+                  )}
                 </div>
               </div>
               
-              {/* Location and measurements below */}
-              <div className="flex flex-col gap-1 mt-1">
-                <div className="text-sm sm:text-base text-contest-blue truncate">
-                  {country} · {city}
-                </div>
-                <div className="text-sm sm:text-base text-muted-foreground">
-                  {weight} kg · {height} cm
-                </div>
+              <div className="flex items-center gap-2 sm:gap-3">
+                {/* Removed like and comment buttons */}
               </div>
-                
-              {isWinner && prize && (
-                <div className="text-contest-blue font-bold text-xs mt-auto">
-                  {prize}
-                </div>
-              )}
             </div>
           )}
           
