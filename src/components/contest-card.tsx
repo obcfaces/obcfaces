@@ -188,10 +188,10 @@ export function ContestantCard({
                 />
                 {additionalPhotos.length > 0 && (
                   <div 
-                    className="absolute bottom-0 right-0 bg-black/70 text-white text-xs px-2 py-1 cursor-pointer hover:bg-black/85 transition-colors"
+                    className="absolute bottom-0.5 right-0.5 bg-black/40 text-white/80 text-xs px-1 py-0.5 rounded cursor-pointer hover:bg-black/60 transition-colors"
                     onClick={() => openModal(2)}
                   >
-                    +{additionalPhotos.length} more
+                    +{additionalPhotos.length}
                   </div>
                 )}
               </div>
