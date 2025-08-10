@@ -326,20 +326,10 @@ export function ContestantCard({
                 >
                   <Heart 
                     className={cn(
-                      "w-2.5 h-2.5 mr-0 transition-colors",
+                      "w-2.5 h-2.5 transition-colors",
                       isLiked && "fill-contest-blue"
                     )} 
                   />
-                  {likesCount}
-                </Button>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="text-white hover:text-white/80 hover:bg-gray-100/20 text-xs h-4 px-1 transition-colors"
-                  onClick={() => openModal(0)}
-                >
-                  <MessageCircle className="w-2.5 h-2.5 mr-0" />
-                  {commentsCount}
                 </Button>
               </div>
             )}
