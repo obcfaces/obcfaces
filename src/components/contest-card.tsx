@@ -419,9 +419,9 @@ export function ContestantCard({
           {/* Contestant info - shown after voting instead of normal content */}
           {isVoted && !isEditing && !showThanks && (
             <div className="absolute inset-0 bg-white rounded-r flex flex-col p-2 sm:p-3">
-              {/* Top row with name, age, rank aligned with rating */}
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-2">
+              {/* Top row with rank, name, age - all on same level as rating */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 flex-1">
                   <div className="bg-black/70 text-white text-xs font-bold px-1 py-0.5 rounded">
                     #{rank}
                   </div>
@@ -429,8 +429,8 @@ export function ContestantCard({
                 </div>
               </div>
               
-              {/* Location and measurements */}
-              <div className="flex flex-col gap-1">
+              {/* Location and measurements below */}
+              <div className="flex flex-col gap-1 mt-2">
                 <div className="text-sm sm:text-base text-contest-blue truncate">
                   {country} · {city}
                 </div>
@@ -439,17 +439,11 @@ export function ContestantCard({
                 </div>
               </div>
                 
-              <div className="text-right flex-shrink-0">
-                {isWinner && prize && (
-                  <div className="text-contest-blue font-bold text-xs">
-                    {prize}
-                  </div>
-                )}
-              </div>
-              
-              <div className="flex items-center gap-2 sm:gap-3 mt-auto">
-                {/* Removed like and comment buttons */}
-              </div>
+              {isWinner && prize && (
+                <div className="text-contest-blue font-bold text-xs mt-auto">
+                  {prize}
+                </div>
+              )}
             </div>
           )}
           
