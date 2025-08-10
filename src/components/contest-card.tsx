@@ -421,11 +421,11 @@ export function ContestantCard({
             <div className="absolute inset-0 bg-white rounded-r flex flex-col justify-between p-2 sm:p-3">
               <div className="flex items-start justify-between">
                 <div className="min-w-0 flex-1 mr-2">
-                  <h3 className="font-semibold text-contest-text text-sm sm:text-base truncate">{name}</h3>
-                  <div className="text-xs sm:text-sm text-contest-blue truncate">
+                  <h3 className="font-semibold text-contest-text text-base sm:text-lg truncate">{name}</h3>
+                  <div className="text-sm sm:text-base text-contest-blue truncate">
                     {country} · {city}
                   </div>
-                  <div className="text-xs sm:text-sm text-muted-foreground">
+                  <div className="text-sm sm:text-base text-muted-foreground">
                     {age} y.o · {weight} kg · {height} cm
                   </div>
                 </div>
@@ -440,36 +440,7 @@ export function ContestantCard({
               </div>
               
               <div className="flex items-center gap-2 sm:gap-3">
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className={cn(
-                    "transition-colors text-xs h-6 px-2 hover:bg-gray-100",
-                    isLiked 
-                      ? "text-contest-blue hover:text-contest-blue/80" 
-                      : "text-muted-foreground hover:text-gray-600"
-                  )}
-                  onClick={handleLike}
-                >
-                  <Heart 
-                    className={cn(
-                      "w-3 h-3 mr-0 transition-colors",
-                      isLiked && "fill-contest-blue"
-                    )} 
-                  />
-                  <span className="hidden sm:inline">{likesCount} Like{likesCount !== 1 ? 's' : ''}</span>
-                  <span className="sm:hidden">{likesCount}</span>
-                </Button>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="text-muted-foreground hover:text-gray-600 hover:bg-gray-100 text-xs h-6 px-2 transition-colors"
-                  onClick={() => openModal(0)}
-                >
-                  <MessageCircle className="w-3 h-3 mr-0" />
-                  <span className="hidden sm:inline">{commentsCount} Comment{commentsCount !== 1 ? 's' : ''}</span>
-                  <span className="sm:hidden">{commentsCount}</span>
-                </Button>
+                {/* Removed like and comment buttons */}
               </div>
             </div>
           )}
