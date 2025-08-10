@@ -98,7 +98,7 @@ export function ContestantCard({
           
           
           {/* Header with voting overlay logic */}
-          <div className="relative p-4 border-b border-contest-border h-[120px]">
+          <div className="relative p-4 border-b border-contest-border h-[108px]">
             {/* Voting overlay - shown by default when not voted and not editing */}
             {!isVoted && !isEditing && !showThanks && (
               <div className="absolute inset-0 bg-gray-200 flex items-center justify-center gap-6 h-full">
@@ -151,7 +151,7 @@ export function ContestantCard({
             
             {/* Contestant info - shown after voting */}
             {isVoted && !isEditing && !showThanks && (
-              <div className="flex items-start justify-between h-full p-4">
+              <div className="flex items-start justify-between h-full p-2">
                 <div>
                   <h3 className="text-xl font-semibold text-contest-text">{name}</h3>
                   <p className="text-contest-blue">{country} · {city}</p>
