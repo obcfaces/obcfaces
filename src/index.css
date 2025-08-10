@@ -30,7 +30,7 @@ All colors MUST be HSL.
     --accent-foreground: 0 0% 100%;
 
     /* Contest specific colors */
-    --contest-blue: 210 100% 56%;
+    --contest-blue: 0 84% 60%;
     --contest-text: 220 15% 25%;
     --contest-light-bg: 215 20% 95%;
     --contest-border: 215 20% 85%;
