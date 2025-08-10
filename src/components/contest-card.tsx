@@ -81,6 +81,13 @@ export function ContestantCard({
             </div>
           )}
           
+          {/* Rating badge in top right corner - only after voting */}
+          {(isVoted || isEditing || showThanks) && (
+            <div className="absolute top-0 right-0 bg-contest-blue text-white px-2 py-1.5 rounded-bl-lg text-lg font-bold shadow-md z-20">
+              {rating.toFixed(1)}
+            </div>
+          )}
+          
           
           {/* Header with voting overlay logic */}
           <div className="relative p-4 border-b border-contest-border min-h-[100px]">
@@ -145,9 +152,6 @@ export function ContestantCard({
                 <div className="text-right flex items-start gap-2">
                   <div className="text-center">
                     <div className="text-2xl font-bold text-contest-blue">#{rank}</div>
-                  </div>
-                  <div className="bg-contest-blue text-white px-2 py-1.5 rounded-bl-lg text-lg font-bold shadow-md">
-                    {rating.toFixed(1)}
                   </div>
                   {isWinner && prize && (
                     <div className="text-contest-blue font-bold text-sm mt-1">
