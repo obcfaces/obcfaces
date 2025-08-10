@@ -25,7 +25,7 @@ export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantNa
   const [activeIndex, setActiveIndex] = useState(currentIndex);
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
-  const [showComments, setShowComments] = useState(true);
+  // Comments are always shown now
   const [commentText, setCommentText] = useState("");
   const [photoComments, setPhotoComments] = useState<Record<number, Comment[]>>({
     // Примеры комментариев для первой фотографии первого участника
@@ -196,7 +196,6 @@ export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantNa
   // Reset activeIndex when currentIndex changes
   useEffect(() => {
     setActiveIndex(currentIndex);
-    setShowComments(true);
   }, [currentIndex]);
 
   const nextPhoto = () => {
@@ -300,10 +299,7 @@ export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantNa
               </button>
             <button
               onClick={nextPhoto}
-              className={cn(
-                "absolute z-10 text-white hover:text-gray-300 transition-colors",
-                showComments ? "md:right-4 right-4" : "right-4"
-              )}
+              className="absolute right-4 z-10 text-white hover:text-gray-300 transition-colors"
             >
               <ChevronRight className="w-8 h-8" />
             </button>
@@ -337,7 +333,7 @@ export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantNa
               variant="secondary"
               size="sm"
               className="bg-black/50 hover:bg-black/70 text-white border-none"
-              onClick={() => setShowComments(!showComments)}
+              disabled
             >
               <MessageCircle className="w-4 h-4 mr-1" />
               {currentPhotoComments.length}
@@ -371,13 +367,6 @@ export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantNa
             <div className="p-4 border-b">
               <div className="flex items-center justify-between">
                 <h3 className="font-semibold">Комментарии</h3>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setShowComments(false)}
-                >
-                  <X className="w-4 h-4" />
-                </Button>
               </div>
               <p className="text-sm text-muted-foreground">
                 {contestantName} - Фото {activeIndex + 1}
