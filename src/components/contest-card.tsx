@@ -211,7 +211,7 @@ export function ContestantCard({
                 onClick={handleLike}
               >
                 <Heart 
-                  className="w-2.5 h-2.5 mr-0 transition-colors" 
+                  className="w-2.5 h-2.5 mr-0.5 transition-colors" 
                 />
                 {likesCount}
               </Button>
@@ -221,7 +221,7 @@ export function ContestantCard({
                 className="transition-colors text-white hover:text-white/80 border-0 bg-transparent hover:bg-contest-blue/20 h-4 px-0.5 text-xs"
                 onClick={() => openModal(0)}
               >
-                <MessageCircle className="w-2.5 h-2.5 mr-0" />
+                <MessageCircle className="w-2.5 h-2.5 mr-0.5" />
                 {commentsCount}
               </Button>
             </div>
@@ -395,7 +395,7 @@ export function ContestantCard({
                 >
                   <Heart 
                     className={cn(
-                      "w-3 h-3 mr-1 transition-colors",
+                      "w-3 h-3 mr-0.5 transition-colors",
                       isLiked && "fill-contest-blue"
                     )} 
                   />
@@ -408,7 +408,7 @@ export function ContestantCard({
                   className="text-muted-foreground hover:text-gray-600 hover:bg-gray-100 text-xs h-6 px-2 transition-colors"
                   onClick={() => openModal(0)}
                 >
-                  <MessageCircle className="w-3 h-3 mr-1" />
+                  <MessageCircle className="w-3 h-3 mr-0.5" />
                   <span className="hidden sm:inline">{commentsCount} Comment{commentsCount !== 1 ? 's' : ''}</span>
                   <span className="sm:hidden">{commentsCount}</span>
                 </Button>
