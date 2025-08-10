@@ -198,28 +198,25 @@ export function ContestantCard({
             </div>
             
             {/* Actions in bottom left corner */}
-            <div className="absolute bottom-2 left-2 flex items-center gap-2">
+            <div className="absolute bottom-1 left-1 flex items-center gap-2">
               <Button 
                 variant="ghost" 
                 size="sm" 
                 className={cn(
-                  "transition-colors bg-black/20 hover:bg-black/30 text-white border-0",
-                  isLiked && "text-contest-blue"
+                  "transition-colors text-white hover:text-white/80 border-0 bg-transparent hover:bg-transparent",
+                  isLiked && "text-contest-blue hover:text-contest-blue/80"
                 )}
                 onClick={handleLike}
               >
                 <Heart 
-                  className={cn(
-                    "w-4 h-4 mr-1 transition-colors",
-                    isLiked && "fill-contest-blue"
-                  )} 
+                  className="w-4 h-4 mr-1 transition-colors" 
                 />
                 {likesCount}
               </Button>
               <Button 
                 variant="ghost" 
                 size="sm" 
-                className="transition-colors bg-black/20 hover:bg-black/30 text-white border-0"
+                className="transition-colors text-white hover:text-white/80 border-0 bg-transparent hover:bg-transparent"
                 onClick={() => openModal(0)}
               >
                 <MessageCircle className="w-4 h-4 mr-1" />
