@@ -85,7 +85,7 @@ export function ContestantCard({
           <div className="relative p-4 border-b border-contest-border min-h-[100px]">
             {/* Voting overlay - shown by default when not voted and not editing */}
             {!isVoted && !isEditing && !showThanks && (
-              <div className="absolute inset-0 bg-gray-200 flex items-center justify-center gap-4">
+              <div className="absolute inset-0 bg-gray-200 flex items-center justify-center gap-6">
                 <span className="text-xl font-medium text-gray-800">Vote</span>
                 <div className="scale-[2]">
                   <StarRating 
@@ -108,17 +108,14 @@ export function ContestantCard({
             
             {/* Thank you message - shown for 1 second after voting */}
             {showThanks && (
-              <div className="absolute inset-0 bg-gray-200 flex items-center justify-center">
-                <div className="text-center">
-                  <div className="text-lg font-medium text-gray-800 mb-1">Thank you!</div>
-                  <div className="text-xl font-bold text-gray-800">Rated {userRating.toFixed(0)}</div>
-                </div>
+              <div className="absolute inset-0 bg-gray-200 flex items-center justify-center gap-3">
+                <span className="text-lg font-medium text-gray-800">Thank you! Rated {userRating.toFixed(0)}</span>
               </div>
             )}
             
             {/* Re-voting overlay - shown when editing existing vote */}
             {isVoted && isEditing && !showThanks && (
-              <div className="absolute inset-0 bg-gray-200 flex items-center justify-center gap-4">
+              <div className="absolute inset-0 bg-gray-200 flex items-center justify-center gap-6">
                 <span className="text-xl font-medium text-gray-800">Vote</span>
                 <div className="scale-[2]">
                   <StarRating 
