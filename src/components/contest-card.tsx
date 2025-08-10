@@ -82,7 +82,7 @@ export function ContestantCard({
           )}
           
           {/* Rank and Rating in top right corner - only after voting */}
-          {(isVoted && !showThanks) || isEditing && (
+          {((isVoted && !showThanks) || isEditing) && (
             <div className="absolute top-0 right-0 flex items-center gap-1 z-20">
               <div className="text-center">
                 <div className="text-2xl font-bold text-contest-blue">#{rank}</div>
