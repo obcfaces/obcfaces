@@ -178,6 +178,34 @@ export function ContestantCard({
                   className="w-full h-48 object-cover cursor-pointer hover:opacity-90 transition-opacity"
                   onClick={() => openModal(0)}
                 />
+                {/* Actions for face photo */}
+                <div className="absolute bottom-1 left-1 flex items-center gap-0.5">
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className={cn(
+                      "transition-colors border-0 h-4 px-0.5 text-xs",
+                      isLiked 
+                        ? "bg-contest-blue text-white hover:bg-contest-blue/90" 
+                        : "bg-transparent text-white hover:text-white/80 hover:bg-transparent"
+                    )}
+                    onClick={handleLike}
+                  >
+                    <Heart 
+                      className="w-2.5 h-2.5 mr-0 transition-colors" 
+                    />
+                    {likesCount}
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="transition-colors text-white hover:text-white/80 border-0 bg-transparent hover:bg-contest-blue/20 h-4 px-0.5 text-xs"
+                    onClick={() => openModal(0)}
+                  >
+                    <MessageCircle className="w-2.5 h-2.5 mr-0" />
+                    {commentsCount}
+                  </Button>
+                </div>
               </div>
               <div className="relative">
                 <img 
@@ -194,36 +222,35 @@ export function ContestantCard({
                     +{additionalPhotos.length}
                   </div>
                 )}
+                {/* Actions for full body photo */}
+                <div className="absolute bottom-1 left-1 flex items-center gap-0.5">
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className={cn(
+                      "transition-colors border-0 h-4 px-0.5 text-xs",
+                      isLiked 
+                        ? "bg-contest-blue text-white hover:bg-contest-blue/90" 
+                        : "bg-transparent text-white hover:text-white/80 hover:bg-transparent"
+                    )}
+                    onClick={handleLike}
+                  >
+                    <Heart 
+                      className="w-2.5 h-2.5 mr-0 transition-colors" 
+                    />
+                    {likesCount}
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="transition-colors text-white hover:text-white/80 border-0 bg-transparent hover:bg-contest-blue/20 h-4 px-0.5 text-xs"
+                    onClick={() => openModal(0)}
+                  >
+                    <MessageCircle className="w-2.5 h-2.5 mr-0" />
+                    {commentsCount}
+                  </Button>
+                </div>
               </div>
-            </div>
-            
-            {/* Actions in bottom left corner */}
-            <div className="absolute bottom-1 left-1 flex items-center gap-0.5">
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className={cn(
-                  "transition-colors border-0 h-4 px-0.5 text-xs",
-                  isLiked 
-                    ? "bg-contest-blue text-white hover:bg-contest-blue/90" 
-                    : "bg-transparent text-white hover:text-white/80 hover:bg-transparent"
-                )}
-                onClick={handleLike}
-              >
-                <Heart 
-                  className="w-2.5 h-2.5 mr-0 transition-colors" 
-                />
-                {likesCount}
-              </Button>
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className="transition-colors text-white hover:text-white/80 border-0 bg-transparent hover:bg-contest-blue/20 h-4 px-0.5 text-xs"
-                onClick={() => openModal(0)}
-              >
-                <MessageCircle className="w-2.5 h-2.5 mr-0" />
-                {commentsCount}
-              </Button>
             </div>
           </div>
         </Card>
@@ -283,6 +310,39 @@ export function ContestantCard({
             <div className="absolute top-0 left-0 bg-black/70 text-white text-xs font-bold px-1 py-0.5 rounded-br">
               {rank}
             </div>
+            {/* Actions for face photo in compact mode - only show when voted */}
+            {isVoted && !isEditing && !showThanks && (
+              <div className="absolute bottom-0.5 left-0.5 flex items-center gap-0.5">
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className={cn(
+                    "transition-colors text-xs h-4 px-1 hover:bg-gray-100/20",
+                    isLiked 
+                      ? "text-contest-blue hover:text-contest-blue/80" 
+                      : "text-white hover:text-white/80"
+                  )}
+                  onClick={handleLike}
+                >
+                  <Heart 
+                    className={cn(
+                      "w-2.5 h-2.5 mr-0 transition-colors",
+                      isLiked && "fill-contest-blue"
+                    )} 
+                  />
+                  {likesCount}
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="text-white hover:text-white/80 hover:bg-gray-100/20 text-xs h-4 px-1 transition-colors"
+                  onClick={() => openModal(0)}
+                >
+                  <MessageCircle className="w-2.5 h-2.5 mr-0" />
+                  {commentsCount}
+                </Button>
+              </div>
+            )}
           </div>
           <div className="relative">
             <img 
@@ -297,6 +357,39 @@ export function ContestantCard({
                 onClick={() => openModal(2)}
               >
                 +{additionalPhotos.length}
+              </div>
+            )}
+            {/* Actions for full body photo in compact mode - only show when voted */}
+            {isVoted && !isEditing && !showThanks && (
+              <div className="absolute bottom-0.5 left-0.5 flex items-center gap-0.5">
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className={cn(
+                    "transition-colors text-xs h-4 px-1 hover:bg-gray-100/20",
+                    isLiked 
+                      ? "text-contest-blue hover:text-contest-blue/80" 
+                      : "text-white hover:text-white/80"
+                  )}
+                  onClick={handleLike}
+                >
+                  <Heart 
+                    className={cn(
+                      "w-2.5 h-2.5 mr-0 transition-colors",
+                      isLiked && "fill-contest-blue"
+                    )} 
+                  />
+                  {likesCount}
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="text-white hover:text-white/80 hover:bg-gray-100/20 text-xs h-4 px-1 transition-colors"
+                  onClick={() => openModal(0)}
+                >
+                  <MessageCircle className="w-2.5 h-2.5 mr-0" />
+                  {commentsCount}
+                </Button>
               </div>
             )}
           </div>
