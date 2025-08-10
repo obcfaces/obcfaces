@@ -418,7 +418,7 @@ export function ContestantCard({
           
           {/* Contestant info - shown after voting instead of normal content */}
           {isVoted && !isEditing && !showThanks && (
-            <div className="absolute inset-0 bg-white rounded-r flex flex-col p-2 sm:p-3">
+            <div className="absolute inset-0 bg-white rounded-r flex flex-col p-1 sm:p-2">
               {/* Top row with rank, name, age - all on same level as rating */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 flex-1">
@@ -430,7 +430,7 @@ export function ContestantCard({
               </div>
               
               {/* Location and measurements below */}
-              <div className="flex flex-col gap-1 mt-2">
+              <div className="flex flex-col gap-1 mt-1">
                 <div className="text-sm sm:text-base text-contest-blue truncate">
                   {country} · {city}
                 </div>
