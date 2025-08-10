@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { X, ChevronLeft, ChevronRight, Heart, MessageCircle, Send } from "lucide-react";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
@@ -275,6 +275,9 @@ export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantNa
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl h-[80vh] p-0 bg-black/90">
+        <DialogTitle className="sr-only">
+          Фотографии {contestantName}
+        </DialogTitle>
         {/* Desktop: flex layout, Mobile: block layout */}
         <div className="h-full flex flex-col md:flex-row">
           {/* Photo section */}
