@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { ContestantCard } from "@/components/contest-card";
+import { Button } from "@/components/ui/button";
+import { Grid3X3, List } from "lucide-react";
 import contestant1Face from "@/assets/contestant-1-face.jpg";
 import contestant1Full from "@/assets/contestant-1-full.jpg";
 import contestant2Face from "@/assets/contestant-2-face.jpg";
@@ -16,6 +18,7 @@ interface ContestSectionProps {
 }
 
 export function ContestSection({ title, subtitle, description, isActive, showWinner }: ContestSectionProps) {
+  const [viewMode, setViewMode] = useState<'compact' | 'full'>('compact');
   const [ratings, setRatings] = useState<Record<number, number>>({
     1: 4.8,
     2: 4.5,
@@ -121,18 +124,44 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
   return (
     <section className="max-w-6xl mx-auto px-0 sm:px-6 py-8">
       <div className="mb-8 px-6 sm:px-0">
-        <h2 className="text-3xl font-bold text-contest-text mb-2">
-          {title}
-        </h2>
-        <p className="text-contest-blue font-medium mb-2">{subtitle}</p>
-        <p className="text-muted-foreground">{description}</p>
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h2 className="text-3xl font-bold text-contest-text mb-2">
+              {title}
+            </h2>
+            <p className="text-contest-blue font-medium mb-2">{subtitle}</p>
+            <p className="text-muted-foreground">{description}</p>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button
+              variant={viewMode === 'compact' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setViewMode('compact')}
+            >
+              <Grid3X3 className="w-4 h-4 mr-1" />
+              Компактный
+            </Button>
+            <Button
+              variant={viewMode === 'full' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setViewMode('full')}
+            >
+              <List className="w-4 h-4 mr-1" />
+              Полный
+            </Button>
+          </div>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-1 sm:gap-3">
+      <div className={viewMode === 'compact' 
+        ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-1 sm:gap-3"
+        : "space-y-6"
+      }>
         {contestants.map((contestant) => (
           <ContestantCard
             key={contestant.rank}
             {...contestant}
+            viewMode={viewMode}
             onRate={(rating) => handleRate(contestant.rank, rating)}
           />
         ))}

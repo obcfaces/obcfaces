@@ -26,6 +26,7 @@ interface ContestantCardProps {
   isVoted?: boolean;
   isWinner?: boolean;
   prize?: string;
+  viewMode?: 'compact' | 'full';
   onRate?: (rating: number) => void;
 }
 
@@ -44,6 +45,7 @@ export function ContestantCard({
   isVoted,
   isWinner,
   prize,
+  viewMode = 'compact',
   onRate
 }: ContestantCardProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -68,6 +70,183 @@ export function ContestantCard({
     setModalStartIndex(photoIndex);
     setIsModalOpen(true);
   };
+
+  if (viewMode === 'full') {
+    return (
+      <>
+        <Card className="bg-card border-contest-border relative overflow-hidden">
+          {isWinner && (
+            <div className="absolute top-4 left-4 bg-contest-blue text-white px-3 py-1 rounded-full text-sm font-bold flex items-center gap-1 z-10">
+              🏆 WINNER
+            </div>
+          )}
+          
+          {/* Header with name and location */}
+          <div className="p-4 border-b border-contest-border">
+            <div className="flex items-start justify-between">
+              <div>
+                <h3 className="text-xl font-semibold text-contest-text">{name}</h3>
+                <p className="text-contest-blue">{country} · {city}</p>
+                <p className="text-muted-foreground text-sm">{age} y.o · {weight} kg · {height} cm</p>
+              </div>
+              <div className="text-right">
+                <div className="text-sm text-muted-foreground">Rank</div>
+                <div className="text-2xl font-bold text-contest-blue">#{rank}</div>
+                {isWinner && prize && (
+                  <div className="text-contest-blue font-bold text-sm mt-1">
+                    {prize}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+          
+          {/* Photos section */}
+          <div className="p-4">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4">
+              <div className="relative">
+                <img 
+                  src={faceImage} 
+                  alt={`${name} face`}
+                  className="w-full h-32 object-cover rounded cursor-pointer hover:opacity-90 transition-opacity"
+                  onClick={() => openModal(0)}
+                />
+                <div className="absolute top-1 left-1 bg-black/70 text-white text-xs font-bold px-1 py-0.5 rounded">
+                  Face
+                </div>
+              </div>
+              <div className="relative">
+                <img 
+                  src={fullBodyImage} 
+                  alt={`${name} full body`}
+                  className="w-full h-32 object-cover rounded cursor-pointer hover:opacity-90 transition-opacity"
+                  onClick={() => openModal(1)}
+                />
+                <div className="absolute top-1 left-1 bg-black/70 text-white text-xs font-bold px-1 py-0.5 rounded">
+                  Body
+                </div>
+              </div>
+              {additionalPhotos.slice(0, 2).map((photo, index) => (
+                <div key={index} className="relative">
+                  <img 
+                    src={photo} 
+                    alt={`${name} additional ${index + 1}`}
+                    className="w-full h-32 object-cover rounded cursor-pointer hover:opacity-90 transition-opacity"
+                    onClick={() => openModal(index + 2)}
+                  />
+                  {index === 1 && additionalPhotos.length > 2 && (
+                    <div 
+                      className="absolute inset-0 bg-black/40 rounded flex items-center justify-center text-white font-bold cursor-pointer hover:bg-black/60 transition-colors"
+                      onClick={() => openModal(index + 2)}
+                    >
+                      +{additionalPhotos.length - 2}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+            
+            {/* Rating and actions */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                {!isVoted && !isEditing && !showThanks ? (
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium">Rate:</span>
+                    <StarRating 
+                      rating={0} 
+                      isVoted={false}
+                      variant="default"
+                      onRate={(rating) => {
+                        setUserRating(rating);
+                        setShowThanks(true);
+                        setTimeout(() => {
+                          setShowThanks(false);
+                          onRate?.(rating);
+                        }, 1000);
+                      }}
+                    />
+                  </div>
+                ) : showThanks ? (
+                  <div className="text-center">
+                    <span className="text-green-600 font-medium">Thank you! Rated {userRating.toFixed(0)}</span>
+                  </div>
+                ) : isEditing ? (
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium">New rating:</span>
+                    <StarRating 
+                      rating={0} 
+                      isVoted={false}
+                      variant="default"
+                      onRate={(rating) => {
+                        setUserRating(rating);
+                        setIsEditing(false);
+                        onRate?.(rating);
+                      }}
+                    />
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium">Your rating: {userRating.toFixed(0)}</span>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => setIsEditing(true)}
+                    >
+                      <Pencil className="w-3 h-3 mr-1" />
+                      Change
+                    </Button>
+                  </div>
+                )}
+                
+                <div className="text-sm text-muted-foreground">
+                  Average: {rating.toFixed(1)}
+                </div>
+              </div>
+              
+              <div className="flex items-center gap-3">
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className={cn(
+                    "transition-colors",
+                    isLiked 
+                      ? "text-contest-blue hover:text-contest-blue/80" 
+                      : "text-muted-foreground hover:text-gray-600"
+                  )}
+                  onClick={handleLike}
+                >
+                  <Heart 
+                    className={cn(
+                      "w-4 h-4 mr-1 transition-colors",
+                      isLiked && "fill-contest-blue"
+                    )} 
+                  />
+                  {likesCount} Like{likesCount !== 1 ? 's' : ''}
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="text-muted-foreground hover:text-gray-600 transition-colors"
+                  onClick={() => openModal(0)}
+                >
+                  <MessageCircle className="w-4 h-4 mr-1" />
+                  {commentsCount} Comment{commentsCount !== 1 ? 's' : ''}
+                </Button>
+              </div>
+            </div>
+          </div>
+        </Card>
+
+        <PhotoModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          photos={allPhotos}
+          currentIndex={modalStartIndex}
+          contestantName={name}
+        />
+      </>
+    );
+  }
 
   return (
     <>
