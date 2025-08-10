@@ -98,10 +98,10 @@ export function ContestantCard({
           
           
           {/* Header with voting overlay logic */}
-          <div className="relative p-4 border-b border-contest-border min-h-[100px]">
+          <div className="relative p-4 border-b border-contest-border h-[120px]">
             {/* Voting overlay - shown by default when not voted and not editing */}
             {!isVoted && !isEditing && !showThanks && (
-              <div className="absolute inset-0 bg-gray-200 flex items-center justify-center gap-6">
+              <div className="absolute inset-0 bg-gray-200 flex items-center justify-center gap-6 h-full">
                 <span className="text-2xl font-medium text-gray-800 mr-8">Vote</span>
                 <div className="scale-[2]">
                   <StarRating 
@@ -124,14 +124,14 @@ export function ContestantCard({
             
             {/* Thank you message - shown for 1 second after voting */}
             {showThanks && (
-              <div className="absolute inset-0 bg-gray-200 flex items-center justify-center gap-3">
+              <div className="absolute inset-0 bg-gray-200 flex items-center justify-center gap-3 h-full">
                 <span className="text-lg font-medium text-gray-800">Thank you! Rated {userRating.toFixed(0)}</span>
               </div>
             )}
             
             {/* Re-voting overlay - shown when editing existing vote */}
             {isVoted && isEditing && !showThanks && (
-              <div className="absolute inset-0 bg-gray-200 flex items-center justify-center gap-6">
+              <div className="absolute inset-0 bg-gray-200 flex items-center justify-center gap-6 h-full">
                 <span className="text-2xl font-medium text-gray-800 mr-8">Vote</span>
                 <div className="scale-[2]">
                   <StarRating 
@@ -151,7 +151,7 @@ export function ContestantCard({
             
             {/* Contestant info - shown after voting */}
             {isVoted && !isEditing && !showThanks && (
-              <div className="flex items-start justify-between">
+              <div className="flex items-start justify-between h-full p-4">
                 <div>
                   <h3 className="text-xl font-semibold text-contest-text">{name}</h3>
                   <p className="text-contest-blue">{country} · {city}</p>
