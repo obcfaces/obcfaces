@@ -99,7 +99,7 @@ export function ContestantCard({
                 <span className="text-2xl font-medium text-gray-800 mr-8">Vote</span>
                 <div className="scale-[2]">
                   <StarRating 
-                    rating={0} 
+                    rating={rating}
                     isVoted={false}
                     variant="white"
                     hideText={true}
@@ -129,7 +129,7 @@ export function ContestantCard({
                 <span className="text-2xl font-medium text-gray-800 mr-8">Vote</span>
                 <div className="scale-[2]">
                   <StarRating 
-                    rating={0} 
+                    rating={rating}
                     isVoted={false}
                     variant="white"
                     hideText={true}
