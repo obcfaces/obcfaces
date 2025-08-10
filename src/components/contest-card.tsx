@@ -111,9 +111,6 @@ export function ContestantCard({
                   className="w-full h-48 object-cover cursor-pointer hover:opacity-90 transition-opacity"
                   onClick={() => openModal(0)}
                 />
-                <div className="absolute top-2 left-2 bg-black/70 text-white text-xs font-bold px-2 py-1 rounded">
-                  Face
-                </div>
               </div>
               <div className="relative">
                 <img 
@@ -122,9 +119,6 @@ export function ContestantCard({
                   className="w-full h-48 object-cover cursor-pointer hover:opacity-90 transition-opacity"
                   onClick={() => openModal(1)}
                 />
-                <div className="absolute top-2 left-2 bg-black/70 text-white text-xs font-bold px-2 py-1 rounded">
-                  Body
-                </div>
                 {additionalPhotos.length > 0 && (
                   <div 
                     className="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded cursor-pointer hover:bg-black/85 transition-colors"
