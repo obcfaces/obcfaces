@@ -203,15 +203,18 @@ export function ContestantCard({
                 variant="ghost" 
                 size="sm" 
                 className={cn(
-                  "transition-colors border-0 h-4 px-0.5 text-xs",
+                  "transition-colors border-0 h-4 px-0.5 text-xs bg-transparent hover:bg-transparent",
                   isLiked 
-                    ? "bg-contest-blue text-white hover:bg-contest-blue/90" 
-                    : "bg-transparent text-white hover:text-white/80 hover:bg-transparent"
+                    ? "text-contest-blue hover:text-contest-blue/80" 
+                    : "text-white hover:text-white/80"
                 )}
                 onClick={handleLike}
               >
                 <Heart 
-                  className="w-2.5 h-2.5 mr-0 transition-colors" 
+                  className={cn(
+                    "w-2.5 h-2.5 mr-0 transition-colors",
+                    isLiked && "fill-contest-blue"
+                  )} 
                 />
                 {likesCount}
               </Button>
