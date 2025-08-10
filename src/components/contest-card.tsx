@@ -98,10 +98,10 @@ export function ContestantCard({
               </div>
             </div>
             
-            {/* Rank and Rating badges in top right corner */}
-            <div className="absolute top-0 right-0 flex items-start">
-              <div className="bg-gray-800 text-white px-2 py-1.5 text-lg font-bold">
-                #{rank}
+            {/* Rank and Rating in top right corner */}
+            <div className="absolute top-0 right-0 flex items-start gap-2">
+              <div className="text-center mt-2 mr-2">
+                <div className="text-2xl font-bold text-contest-blue">#{rank}</div>
               </div>
               <div className="bg-contest-blue text-white px-2 py-1.5 rounded-bl-lg text-lg font-bold shadow-md">
                 {rating.toFixed(1)}
