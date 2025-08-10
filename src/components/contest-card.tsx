@@ -89,11 +89,7 @@ export function ContestantCard({
                 <p className="text-contest-blue">{country} · {city}</p>
                 <p className="text-muted-foreground text-sm">{age} y.o · {weight} kg · {height} cm</p>
               </div>
-              <div className="text-right flex items-start gap-2">
-                <div className="text-center">
-                  <div className="text-sm text-muted-foreground">Rank</div>
-                  <div className="text-2xl font-bold text-contest-blue">#{rank}</div>
-                </div>
+              <div className="text-right">
                 <div className="bg-contest-blue text-white px-2 py-1.5 rounded-bl-lg text-lg font-bold shadow-md">
                   {rating.toFixed(1)}
                 </div>
