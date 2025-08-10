@@ -81,86 +81,98 @@ export function ContestantCard({
             </div>
           )}
           
-          {/* Header with name and location */}
-          <div className="p-4 border-b border-contest-border">
-            <div className="flex items-start justify-between">
-              <div>
-                <h3 className="text-xl font-semibold text-contest-text">{name}</h3>
-                <p className="text-contest-blue">{country} · {city}</p>
-                <p className="text-muted-foreground text-sm">{age} y.o · {weight} kg · {height} cm</p>
-              </div>
-              <div className="text-right flex items-start gap-2">
-                {isWinner && prize && (
-                  <div className="text-contest-blue font-bold text-sm mt-1">
-                    {prize}
-                  </div>
-                )}
-              </div>
-            </div>
-            
-            {/* Rank and Rating in top right corner */}
-            <div className="absolute top-0 right-0 flex flex-col items-end">
-              <div className="flex items-center gap-1">
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-contest-blue">#{rank}</div>
-                </div>
-                <div className="bg-contest-blue text-white px-2 py-1.5 rounded-bl-lg text-lg font-bold shadow-md">
-                  {rating.toFixed(1)}
-                </div>
-              </div>
-              
-              {/* Voting section under rating */}
-              <div className="mt-2 mr-2">
-                {!isVoted && !isEditing && !showThanks ? (
-                  <div className="flex items-center gap-2">
-                    <span className="font-medium text-sm">Rate:</span>
-                    <StarRating 
-                      rating={0} 
-                      isVoted={false}
-                      variant="default"
-                      onRate={(rating) => {
-                        setUserRating(rating);
-                        setShowThanks(true);
-                        setTimeout(() => {
-                          setShowThanks(false);
-                          onRate?.(rating);
-                        }, 1000);
-                      }}
-                    />
-                  </div>
-                ) : showThanks ? (
-                  <div className="flex items-center gap-2">
-                    <span className="text-green-600 font-medium text-sm">Thank you! Rated {userRating.toFixed(0)}</span>
-                  </div>
-                ) : isEditing ? (
-                  <div className="flex items-center gap-2">
-                    <span className="font-medium text-sm">New rating:</span>
-                    <StarRating 
-                      rating={0} 
-                      isVoted={false}
-                      variant="default"
-                      onRate={(rating) => {
-                        setUserRating(rating);
-                        setIsEditing(false);
+          {/* Header with voting overlay logic */}
+          <div className="relative p-4 border-b border-contest-border min-h-[100px]">
+            {/* Voting overlay - shown by default when not voted and not editing */}
+            {!isVoted && !isEditing && !showThanks && (
+              <div className="absolute inset-0 bg-gray-200 flex flex-col items-center justify-center gap-3">
+                <span className="text-xl font-medium text-gray-800">Vote</span>
+                <div className="scale-[1.5]">
+                  <StarRating 
+                    rating={0} 
+                    isVoted={false}
+                    variant="white"
+                    hideText={true}
+                    onRate={(rating) => {
+                      setUserRating(rating);
+                      setShowThanks(true);
+                      setTimeout(() => {
+                        setShowThanks(false);
                         onRate?.(rating);
-                      }}
-                    />
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-2">
-                    <span className="font-medium text-sm">Your rating: {userRating.toFixed(0)}</span>
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => setIsEditing(true)}
-                    >
-                      <Pencil className="w-3 h-3 mr-1" />
-                      Change
-                    </Button>
-                  </div>
-                )}
+                      }, 1000);
+                    }}
+                  />
+                </div>
               </div>
-            </div>
+            )}
+            
+            {/* Thank you message - shown for 1 second after voting */}
+            {showThanks && (
+              <div className="absolute inset-0 bg-gray-200 flex items-center justify-center">
+                <div className="text-center">
+                  <div className="text-lg font-medium text-gray-800 mb-1">Thank you!</div>
+                  <div className="text-xl font-bold text-gray-800">Rated {userRating.toFixed(0)}</div>
+                </div>
+              </div>
+            )}
+            
+            {/* Re-voting overlay - shown when editing existing vote */}
+            {isVoted && isEditing && !showThanks && (
+              <div className="absolute inset-0 bg-gray-200 flex flex-col items-center justify-center gap-3">
+                <span className="text-xl font-medium text-gray-800">Vote</span>
+                <div className="scale-[1.5]">
+                  <StarRating 
+                    rating={0} 
+                    isVoted={false}
+                    variant="white"
+                    hideText={true}
+                    onRate={(rating) => {
+                      setUserRating(rating);
+                      setIsEditing(false);
+                      onRate?.(rating);
+                    }}
+                  />
+                </div>
+              </div>
+            )}
+            
+            {/* Contestant info - shown after voting */}
+            {isVoted && !isEditing && !showThanks && (
+              <div className="flex items-start justify-between">
+                <div>
+                  <h3 className="text-xl font-semibold text-contest-text">{name}</h3>
+                  <p className="text-contest-blue">{country} · {city}</p>
+                  <p className="text-muted-foreground text-sm">{age} y.o · {weight} kg · {height} cm</p>
+                </div>
+                <div className="text-right flex items-start gap-2">
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-contest-blue">#{rank}</div>
+                  </div>
+                  <div className="bg-contest-blue text-white px-2 py-1.5 rounded-bl-lg text-lg font-bold shadow-md">
+                    {rating.toFixed(1)}
+                  </div>
+                  {isWinner && prize && (
+                    <div className="text-contest-blue font-bold text-sm mt-1">
+                      {prize}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+            
+            {/* Edit rating button for voted users */}
+            {isVoted && !isEditing && !showThanks && (
+              <div className="absolute bottom-2 right-2">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => setIsEditing(true)}
+                >
+                  <Pencil className="w-3 h-3 mr-1" />
+                  Change rating
+                </Button>
+              </div>
+            )}
           </div>
           
           {/* Photos section */}
