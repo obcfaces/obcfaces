@@ -103,12 +103,12 @@ export function ContestantCard({
           
           {/* Photos section */}
           <div className="p-4">
-            <div className="grid grid-cols-2 mb-4">
+            <div className="grid grid-cols-2 gap-px mb-4">
               <div className="relative">
                 <img 
                   src={faceImage} 
                   alt={`${name} face`}
-                  className="w-full h-48 object-cover rounded cursor-pointer hover:opacity-90 transition-opacity"
+                  className="w-full h-48 object-cover cursor-pointer hover:opacity-90 transition-opacity"
                   onClick={() => openModal(0)}
                 />
                 <div className="absolute top-2 left-2 bg-black/70 text-white text-xs font-bold px-2 py-1 rounded">
@@ -119,7 +119,7 @@ export function ContestantCard({
                 <img 
                   src={fullBodyImage} 
                   alt={`${name} full body`}
-                  className="w-full h-48 object-cover rounded cursor-pointer hover:opacity-90 transition-opacity"
+                  className="w-full h-48 object-cover cursor-pointer hover:opacity-90 transition-opacity"
                   onClick={() => openModal(1)}
                 />
                 <div className="absolute top-2 left-2 bg-black/70 text-white text-xs font-bold px-2 py-1 rounded">
