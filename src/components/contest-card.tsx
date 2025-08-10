@@ -151,14 +151,15 @@ export function ContestantCard({
             
             {/* Contestant info - shown after voting */}
             {isVoted && !isEditing && !showThanks && (
-              <div className="flex flex-col h-full pl-4 pr-4 pt-0 pb-2">
-                <div className="flex items-center justify-between pt-1.5">
+              <div className="flex items-start justify-between h-full pl-4 pr-4 pt-2 pb-2">
+                <div>
                   <h3 className="text-xl font-semibold text-contest-text">{name}, {age}</h3>
+                  <p className="text-contest-blue">{country} · {city}</p>
+                  <p className="text-muted-foreground text-sm">{weight} kg · {height} cm</p>
                 </div>
-                <p className="text-contest-blue text-lg mt-2">{country} · {city}</p>
-                <div className="text-right flex items-start gap-2 mt-auto">
+                <div className="text-right flex items-start gap-2">
                   {isWinner && prize && (
-                    <div className="text-contest-blue font-bold text-sm">
+                    <div className="text-contest-blue font-bold text-sm mt-1">
                       {prize}
                     </div>
                   )}
