@@ -180,8 +180,8 @@ export function ContestantCard({
           </div>
           
           {/* Photos section */}
-          <div className="p-4">
-            <div className="grid grid-cols-2 gap-px mb-4">
+          <div className="">
+            <div className="grid grid-cols-2 gap-0 mb-4">
               <div className="relative">
                 <img 
                   src={faceImage} 
@@ -209,7 +209,7 @@ export function ContestantCard({
             </div>
             
             {/* Actions only */}
-            <div className="flex items-center justify-end">
+            <div className="flex items-center justify-end p-4">
               <div className="flex items-center gap-3">
                 <Button 
                   variant="ghost" 
@@ -293,7 +293,7 @@ export function ContestantCard({
             <img 
               src={faceImage} 
               alt={`${name} face`}
-              className="w-24 sm:w-28 md:w-32 h-full object-cover border-r border-contest-border cursor-pointer hover:opacity-90 transition-opacity"
+              className="w-24 sm:w-28 md:w-32 h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
               onClick={() => openModal(0)}
             />
             <div className="absolute top-0 left-0 bg-black/70 text-white text-xs font-bold px-1 py-0.5 rounded-br">
