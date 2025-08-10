@@ -85,7 +85,7 @@ export function ContestantCard({
           {((isVoted && !showThanks) || isEditing) && (
             <div className="absolute top-0 right-0 flex items-center gap-1 z-20">
               <div className="text-center">
-                <div className="text-2xl font-bold text-contest-blue">#{rank}</div>
+                <div className="text-xl font-bold text-contest-blue">#{rank}</div>
               </div>
               <div className="bg-contest-blue text-white px-2 py-1.5 rounded-bl-lg text-lg font-bold shadow-md">
                 {rating.toFixed(1)}
