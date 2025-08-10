@@ -203,8 +203,10 @@ export function ContestantCard({
                 variant="ghost" 
                 size="sm" 
                 className={cn(
-                  "transition-colors text-white hover:text-white/80 border-0 bg-transparent hover:bg-transparent h-4 px-0.5 text-xs",
-                  isLiked && "text-contest-blue hover:text-contest-blue/80"
+                  "transition-colors border-0 h-4 px-0.5 text-xs",
+                  isLiked 
+                    ? "bg-contest-blue text-white hover:bg-contest-blue/90" 
+                    : "bg-transparent text-white hover:text-white/80 hover:bg-transparent"
                 )}
                 onClick={handleLike}
               >
@@ -216,7 +218,7 @@ export function ContestantCard({
               <Button 
                 variant="ghost" 
                 size="sm" 
-                className="transition-colors text-white hover:text-white/80 border-0 bg-transparent hover:bg-transparent h-4 px-0.5 text-xs"
+                className="transition-colors text-white hover:text-white/80 border-0 bg-transparent hover:bg-contest-blue/20 h-4 px-0.5 text-xs"
                 onClick={() => openModal(0)}
               >
                 <MessageCircle className="w-2.5 h-2.5 mr-0.5" />
