@@ -299,7 +299,7 @@ export function ContestantCard({
         )}
         
         {/* Main two photos with additional photos indicator */}
-        <div className="flex-shrink-0 flex h-full relative">
+        <div className="flex-shrink-0 flex h-full relative gap-px">
           <div className="relative">
             <img 
               src={faceImage} 
