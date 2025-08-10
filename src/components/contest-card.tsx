@@ -360,36 +360,11 @@ export function ContestantCard({
               </div>
             )}
             {/* Actions for full body photo in compact mode - only show when voted */}
-            {isVoted && !isEditing && !showThanks && (
-              <div className="absolute bottom-0.5 left-0.5 flex items-center gap-0.5">
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className={cn(
-                    "transition-colors text-xs h-4 px-1 hover:bg-gray-100/20",
-                    isLiked 
-                      ? "text-contest-blue hover:text-contest-blue/80" 
-                      : "text-white hover:text-white/80"
-                  )}
-                  onClick={handleLike}
-                >
-                  <Heart 
-                    className={cn(
-                      "w-2.5 h-2.5 mr-0 transition-colors",
-                      isLiked && "fill-contest-blue"
-                    )} 
-                  />
-                  {likesCount}
-                </Button>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="text-white hover:text-white/80 hover:bg-gray-100/20 text-xs h-4 px-1 transition-colors"
-                  onClick={() => openModal(0)}
-                >
-                  <MessageCircle className="w-2.5 h-2.5 mr-0" />
-                  {commentsCount}
-                </Button>
+            {isVoted && !isEditing && !showThanks && additionalPhotos.length > 0 && (
+              <div className="absolute bottom-0.5 right-0.5 bg-black/40 text-white/80 text-xs px-1 py-0.5 rounded cursor-pointer hover:bg-black/60 transition-colors"
+                onClick={() => openModal(2)}
+              >
+                +{additionalPhotos.length}
               </div>
             )}
           </div>
