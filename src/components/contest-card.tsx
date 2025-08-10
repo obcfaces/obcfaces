@@ -81,10 +81,15 @@ export function ContestantCard({
             </div>
           )}
           
-          {/* Rating badge in top right corner - only after voting */}
+          {/* Rank and Rating in top right corner - only after voting */}
           {(isVoted || isEditing || showThanks) && (
-            <div className="absolute top-0 right-0 bg-contest-blue text-white px-2 py-1.5 rounded-bl-lg text-lg font-bold shadow-md z-20">
-              {rating.toFixed(1)}
+            <div className="absolute top-0 right-0 flex items-center gap-1 z-20">
+              <div className="text-center">
+                <div className="text-2xl font-bold text-contest-blue">#{rank}</div>
+              </div>
+              <div className="bg-contest-blue text-white px-2 py-1.5 rounded-bl-lg text-lg font-bold shadow-md">
+                {rating.toFixed(1)}
+              </div>
             </div>
           )}
           
@@ -150,9 +155,6 @@ export function ContestantCard({
                   <p className="text-muted-foreground text-sm">{age} y.o · {weight} kg · {height} cm</p>
                 </div>
                 <div className="text-right flex items-start gap-2">
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-contest-blue">#{rank}</div>
-                  </div>
                   {isWinner && prize && (
                     <div className="text-contest-blue font-bold text-sm mt-1">
                       {prize}
