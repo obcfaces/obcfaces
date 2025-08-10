@@ -91,7 +91,6 @@ export function ContestantCard({
               </div>
               <div className="text-right flex items-start gap-2">
                 <div className="text-center">
-                  <div className="text-sm text-muted-foreground">Rank</div>
                   <div className="text-2xl font-bold text-contest-blue">#{rank}</div>
                 </div>
                 <div className="bg-contest-blue text-white px-2 py-1.5 rounded-bl-lg text-lg font-bold shadow-md">
