@@ -87,7 +87,10 @@ export function ContestantCard({
               <div className="text-center">
                 <div className="text-xl font-bold text-contest-blue">#{rank}</div>
               </div>
-              <div className="bg-contest-blue text-white px-2 py-1.5 rounded-bl-lg text-lg font-bold shadow-md">
+              <div 
+                className="bg-contest-blue text-white px-2 py-1.5 rounded-bl-lg text-lg font-bold shadow-md cursor-pointer hover:bg-contest-blue/90 transition-colors"
+                onClick={() => setIsEditing(true)}
+              >
                 {rating.toFixed(1)}
               </div>
             </div>
@@ -161,20 +164,6 @@ export function ContestantCard({
                     </div>
                   )}
                 </div>
-              </div>
-            )}
-            
-            {/* Edit rating button for voted users */}
-            {isVoted && !isEditing && !showThanks && (
-              <div className="absolute bottom-2 right-2">
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => setIsEditing(true)}
-                >
-                  <Pencil className="w-3 h-3 mr-1" />
-                  Change rating
-                </Button>
               </div>
             )}
           </div>
