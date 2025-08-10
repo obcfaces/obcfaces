@@ -92,6 +92,7 @@ export function ContestantCard({
               <div className="text-right">
                 <div className="text-sm text-muted-foreground">Rank</div>
                 <div className="text-2xl font-bold text-contest-blue">#{rank}</div>
+                <div className="text-lg font-semibold text-contest-text">{rating.toFixed(1)}</div>
                 {isWinner && prize && (
                   <div className="text-contest-blue font-bold text-sm mt-1">
                     {prize}
@@ -149,16 +150,10 @@ export function ContestantCard({
                         }, 1000);
                       }}
                     />
-                    <span className="text-sm text-muted-foreground ml-2">
-                      Average: {rating.toFixed(1)}
-                    </span>
                   </div>
                 ) : showThanks ? (
                   <div className="flex items-center gap-2">
                     <span className="text-green-600 font-medium">Thank you! Rated {userRating.toFixed(0)}</span>
-                    <span className="text-sm text-muted-foreground ml-2">
-                      Average: {rating.toFixed(1)}
-                    </span>
                   </div>
                 ) : isEditing ? (
                   <div className="flex items-center gap-2">
@@ -173,9 +168,6 @@ export function ContestantCard({
                         onRate?.(rating);
                       }}
                     />
-                    <span className="text-sm text-muted-foreground ml-2">
-                      Average: {rating.toFixed(1)}
-                    </span>
                   </div>
                 ) : (
                   <div className="flex items-center gap-2">
@@ -188,9 +180,6 @@ export function ContestantCard({
                       <Pencil className="w-3 h-3 mr-1" />
                       Change
                     </Button>
-                    <span className="text-sm text-muted-foreground ml-2">
-                      Average: {rating.toFixed(1)}
-                    </span>
                   </div>
                 )}
               </div>
