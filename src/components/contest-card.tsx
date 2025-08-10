@@ -175,7 +175,7 @@ export function ContestantCard({
                 <img 
                   src={faceImage} 
                   alt={`${name} face`}
-                  className="w-full h-48 object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                  className="w-full aspect-[4/5] object-cover cursor-pointer hover:opacity-90 transition-opacity"
                   onClick={() => openModal(0)}
                 />
                 {/* Actions for face photo */}
@@ -211,7 +211,7 @@ export function ContestantCard({
                 <img 
                   src={fullBodyImage} 
                   alt={`${name} full body`}
-                  className="w-full h-48 object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                  className="w-full aspect-[4/5] object-cover cursor-pointer hover:opacity-90 transition-opacity"
                   onClick={() => openModal(1)}
                 />
                 {additionalPhotos.length > 0 && (
