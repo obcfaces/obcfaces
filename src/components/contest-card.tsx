@@ -99,12 +99,66 @@ export function ContestantCard({
             </div>
             
             {/* Rank and Rating in top right corner */}
-            <div className="absolute top-0 right-0 flex items-center gap-1">
-              <div className="text-center">
-                <div className="text-2xl font-bold text-contest-blue">#{rank}</div>
+            <div className="absolute top-0 right-0 flex flex-col items-end">
+              <div className="flex items-center gap-1">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-contest-blue">#{rank}</div>
+                </div>
+                <div className="bg-contest-blue text-white px-2 py-1.5 rounded-bl-lg text-lg font-bold shadow-md">
+                  {rating.toFixed(1)}
+                </div>
               </div>
-              <div className="bg-contest-blue text-white px-2 py-1.5 rounded-bl-lg text-lg font-bold shadow-md">
-                {rating.toFixed(1)}
+              
+              {/* Voting section under rating */}
+              <div className="mt-2 mr-2">
+                {!isVoted && !isEditing && !showThanks ? (
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium text-sm">Rate:</span>
+                    <StarRating 
+                      rating={0} 
+                      isVoted={false}
+                      variant="default"
+                      onRate={(rating) => {
+                        setUserRating(rating);
+                        setShowThanks(true);
+                        setTimeout(() => {
+                          setShowThanks(false);
+                          onRate?.(rating);
+                        }, 1000);
+                      }}
+                    />
+                  </div>
+                ) : showThanks ? (
+                  <div className="flex items-center gap-2">
+                    <span className="text-green-600 font-medium text-sm">Thank you! Rated {userRating.toFixed(0)}</span>
+                  </div>
+                ) : isEditing ? (
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium text-sm">New rating:</span>
+                    <StarRating 
+                      rating={0} 
+                      isVoted={false}
+                      variant="default"
+                      onRate={(rating) => {
+                        setUserRating(rating);
+                        setIsEditing(false);
+                        onRate?.(rating);
+                      }}
+                    />
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium text-sm">Your rating: {userRating.toFixed(0)}</span>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => setIsEditing(true)}
+                    >
+                      <Pencil className="w-3 h-3 mr-1" />
+                      Change
+                    </Button>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -138,59 +192,8 @@ export function ContestantCard({
               </div>
             </div>
             
-            {/* Rating and actions */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                {!isVoted && !isEditing && !showThanks ? (
-                  <div className="flex items-center gap-2">
-                    <span className="font-medium">Rate:</span>
-                    <StarRating 
-                      rating={0} 
-                      isVoted={false}
-                      variant="default"
-                      onRate={(rating) => {
-                        setUserRating(rating);
-                        setShowThanks(true);
-                        setTimeout(() => {
-                          setShowThanks(false);
-                          onRate?.(rating);
-                        }, 1000);
-                      }}
-                    />
-                  </div>
-                ) : showThanks ? (
-                  <div className="flex items-center gap-2">
-                    <span className="text-green-600 font-medium">Thank you! Rated {userRating.toFixed(0)}</span>
-                  </div>
-                ) : isEditing ? (
-                  <div className="flex items-center gap-2">
-                    <span className="font-medium">New rating:</span>
-                    <StarRating 
-                      rating={0} 
-                      isVoted={false}
-                      variant="default"
-                      onRate={(rating) => {
-                        setUserRating(rating);
-                        setIsEditing(false);
-                        onRate?.(rating);
-                      }}
-                    />
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-2">
-                    <span className="font-medium">Your rating: {userRating.toFixed(0)}</span>
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => setIsEditing(true)}
-                    >
-                      <Pencil className="w-3 h-3 mr-1" />
-                      Change
-                    </Button>
-                  </div>
-                )}
-              </div>
-              
+            {/* Actions only */}
+            <div className="flex items-center justify-end">
               <div className="flex items-center gap-3">
                 <Button 
                   variant="ghost" 
