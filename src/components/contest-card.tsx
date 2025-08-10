@@ -103,15 +103,15 @@ export function ContestantCard({
           
           {/* Photos section */}
           <div className="p-4">
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4">
+            <div className="grid grid-cols-2 gap-4 mb-4">
               <div className="relative">
                 <img 
                   src={faceImage} 
                   alt={`${name} face`}
-                  className="w-full h-32 object-cover rounded cursor-pointer hover:opacity-90 transition-opacity"
+                  className="w-full h-48 object-cover rounded cursor-pointer hover:opacity-90 transition-opacity"
                   onClick={() => openModal(0)}
                 />
-                <div className="absolute top-1 left-1 bg-black/70 text-white text-xs font-bold px-1 py-0.5 rounded">
+                <div className="absolute top-2 left-2 bg-black/70 text-white text-xs font-bold px-2 py-1 rounded">
                   Face
                 </div>
               </div>
@@ -119,31 +119,21 @@ export function ContestantCard({
                 <img 
                   src={fullBodyImage} 
                   alt={`${name} full body`}
-                  className="w-full h-32 object-cover rounded cursor-pointer hover:opacity-90 transition-opacity"
+                  className="w-full h-48 object-cover rounded cursor-pointer hover:opacity-90 transition-opacity"
                   onClick={() => openModal(1)}
                 />
-                <div className="absolute top-1 left-1 bg-black/70 text-white text-xs font-bold px-1 py-0.5 rounded">
+                <div className="absolute top-2 left-2 bg-black/70 text-white text-xs font-bold px-2 py-1 rounded">
                   Body
                 </div>
+                {additionalPhotos.length > 0 && (
+                  <div 
+                    className="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded cursor-pointer hover:bg-black/85 transition-colors"
+                    onClick={() => openModal(2)}
+                  >
+                    +{additionalPhotos.length} more
+                  </div>
+                )}
               </div>
-              {additionalPhotos.slice(0, 2).map((photo, index) => (
-                <div key={index} className="relative">
-                  <img 
-                    src={photo} 
-                    alt={`${name} additional ${index + 1}`}
-                    className="w-full h-32 object-cover rounded cursor-pointer hover:opacity-90 transition-opacity"
-                    onClick={() => openModal(index + 2)}
-                  />
-                  {index === 1 && additionalPhotos.length > 2 && (
-                    <div 
-                      className="absolute inset-0 bg-black/40 rounded flex items-center justify-center text-white font-bold cursor-pointer hover:bg-black/60 transition-colors"
-                      onClick={() => openModal(index + 2)}
-                    >
-                      +{additionalPhotos.length - 2}
-                    </div>
-                  )}
-                </div>
-              ))}
             </div>
             
             {/* Rating and actions */}
