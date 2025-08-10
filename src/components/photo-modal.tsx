@@ -265,6 +265,14 @@ export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantNa
   const currentPhotoComments = photoComments[activeIndex] || [];
   const currentPhotoLikes = photoLikes[activeIndex] || { count: Math.floor(Math.random() * 30) + 5, isLiked: false };
 
+  // Ensure all photos have like data
+  if (!photoLikes[activeIndex]) {
+    setPhotoLikes(prev => ({
+      ...prev,
+      [activeIndex]: { count: Math.floor(Math.random() * 30) + 5, isLiked: false }
+    }));
+  }
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl h-[80vh] p-0 bg-black/90">
