@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+
 import { Button } from "@/components/ui/button";
 import SearchableSelect from "@/components/ui/searchable-select";
 import { toast } from "@/components/ui/use-toast";
@@ -162,28 +162,28 @@ const Account = () => {
           <div className="space-y-6">
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="display_name">Имя на сайте</Label>
+              
               <Input id="display_name" placeholder="Имя на сайте" className="placeholder:italic placeholder:text-muted-foreground"
                 value={form.display_name}
                 onChange={(e) => setForm((f) => ({ ...f, display_name: e.target.value }))} />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="birthdate">Дата рождения</Label>
+              
               <Input id="birthdate" type="date" value={form.birthdate ?? ""}
                 onChange={(e) => setForm((f) => ({ ...f, birthdate: e.target.value || null }))} />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="first_name">Имя</Label>
+              
               <Input id="first_name" placeholder="Имя" className="placeholder:italic placeholder:text-muted-foreground" value={form.first_name}
                 onChange={(e) => setForm((f) => ({ ...f, first_name: e.target.value }))} />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="last_name">Фамилия</Label>
+              
               <Input id="last_name" placeholder="Фамилия" className="placeholder:italic placeholder:text-muted-foreground" value={form.last_name}
                 onChange={(e) => setForm((f) => ({ ...f, last_name: e.target.value }))} />
             </div>
             <div className="space-y-2">
-              <Label>Страна</Label>
+              
               <SearchableSelect
                 value={countryCode ?? ""}
                 onValueChange={(code) => {
@@ -198,7 +198,7 @@ const Account = () => {
               />
             </div>
             <div className="space-y-2">
-              <Label>Штат/Регион</Label>
+              
               <SearchableSelect
                 disabled={!countryCode}
                 value={stateCode ?? ""}
@@ -216,7 +216,7 @@ const Account = () => {
               )}
             </div>
             <div className="space-y-2">
-              <Label>Город</Label>
+              
               <SearchableSelect
                 disabled={!countryCode || !stateCode}
                 value={form.city}
@@ -232,19 +232,19 @@ const Account = () => {
               ) : null}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="height_cm">Рост (см)</Label>
+              
               <Input id="height_cm" type="number" inputMode="numeric" placeholder="Рост"
                 className="placeholder:italic placeholder:text-muted-foreground" value={form.height_cm ?? ""}
                 onChange={(e) => setForm((f) => ({ ...f, height_cm: e.target.value ? Number(e.target.value) : undefined }))} />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="weight_kg">Вес (кг)</Label>
+              
               <Input id="weight_kg" type="number" inputMode="decimal" step="0.1" placeholder="Вес"
                 className="placeholder:italic placeholder:text-muted-foreground" value={form.weight_kg ?? ""}
                 onChange={(e) => setForm((f) => ({ ...f, weight_kg: e.target.value ? Number(e.target.value) : undefined }))} />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="age">Возраст</Label>
+              
               <Input id="age" type="number" inputMode="numeric" placeholder="Возраст" className="placeholder:italic placeholder:text-muted-foreground"
                 value={form.age ?? ""}
                 onChange={(e) => setForm((f) => ({ ...f, age: e.target.value ? Number(e.target.value) : undefined }))} />

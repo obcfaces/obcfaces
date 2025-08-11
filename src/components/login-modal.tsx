@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
 import { Eye, EyeOff } from "lucide-react";
-import { Label } from "@/components/ui/label";
+
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import SearchableSelect from "@/components/ui/searchable-select";
@@ -130,11 +130,11 @@ const LoginModalTrigger = () => {
         </DialogHeader>
         <form onSubmit={onSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="auth-email">Email</Label>
+            
             <Input id="auth-email" type="email" placeholder="email" className="placeholder:italic placeholder:text-muted-foreground" value={email} onChange={(e) => setEmail(e.target.value)} required />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="auth-password">Пароль</Label>
+            
             <div className="relative">
               <Input id="auth-password" type={showPassword ? "text" : "password"} placeholder="password" className="pr-10 placeholder:italic placeholder:text-muted-foreground" value={password} onChange={(e) => setPassword(e.target.value)} required />
               <button type="button" aria-label={showPassword ? "Скрыть пароль" : "Показать пароль"} onClick={() => setShowPassword((v) => !v)} className="absolute inset-y-0 right-2 inline-flex items-center text-muted-foreground hover:text-foreground">
@@ -145,15 +145,15 @@ const LoginModalTrigger = () => {
           {mode === "signup" && (
             <div className="grid gap-3 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="auth-firstname">Имя</Label>
+                
                 <Input id="auth-firstname" placeholder="Имя" className="placeholder:italic placeholder:text-muted-foreground" value={firstName} onChange={(e) => setFirstName(e.target.value)} />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="auth-lastname">Фамилия</Label>
+                
                 <Input id="auth-lastname" placeholder="Фамилия" className="placeholder:italic placeholder:text-muted-foreground" value={lastName} onChange={(e) => setLastName(e.target.value)} />
               </div>
               <div className="space-y-2">
-                <Label>Страна</Label>
+                
                 <SearchableSelect
                   value={countryCode ?? ""}
                   onValueChange={(code) => {
@@ -170,7 +170,7 @@ const LoginModalTrigger = () => {
                 />
               </div>
               <div className="space-y-2">
-                <Label>Штат/Регион</Label>
+                
                 <SearchableSelect
                   disabled={!countryCode}
                   value={stateCode ?? ""}
@@ -189,7 +189,7 @@ const LoginModalTrigger = () => {
                 )}
               </div>
               <div className="space-y-2">
-                <Label>Город</Label>
+                
                 <SearchableSelect
                   disabled={!countryCode || !stateCode}
                   value={city}
@@ -205,11 +205,11 @@ const LoginModalTrigger = () => {
                 ) : null}
               </div>
               <div className="space-y-2">
-                <Label htmlFor="auth-age">Возраст</Label>
+                
                 <Input id="auth-age" type="number" inputMode="numeric" placeholder="Возраст" className="placeholder:italic placeholder:text-muted-foreground" value={age} onChange={(e) => setAge(e.target.value)} />
               </div>
               <div className="space-y-2 sm:col-span-2">
-                <Label htmlFor="auth-photo">Фото</Label>
+                
                 <Input id="auth-photo" type="file" accept="image/*" onChange={(e) => setPhoto(e.currentTarget.files?.[0] ?? null)} />
               </div>
             </div>
