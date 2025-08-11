@@ -420,7 +420,7 @@ export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantNa
                 placeholder="Напишите комментарий к этой фотографии..."
                 value={commentText}
                 onChange={(e) => setCommentText(e.target.value)}
-                className="min-h-[50px] md:min-h-[60px] resize-none text-sm"
+                className="min-h-[50px] md:min-h-[60px] resize-none text-base md:text-sm"
                 aria-label="Комментарий к текущей фотографии"
               />
               <Button
