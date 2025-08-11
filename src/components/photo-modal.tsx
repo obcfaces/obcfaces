@@ -19,9 +19,14 @@ interface PhotoModalProps {
   photos: string[];
   currentIndex: number;
   contestantName: string;
+  age?: number;
+  weight?: number;
+  height?: number;
+  country?: string;
+  city?: string;
 }
 
-export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantName }: PhotoModalProps) {
+export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantName, age, weight, height, country, city }: PhotoModalProps) {
   const [activeIndex, setActiveIndex] = useState(currentIndex);
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
@@ -289,7 +294,7 @@ export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantNa
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="w-screen max-w-[100vw] h-[100vh] p-0 bg-black/90 top-0 translate-y-0">
+      <DialogContent className="w-screen max-w-[100vw] h-[100svh] p-0 bg-black/90 top-0 translate-y-0">
         {/* Desktop: flex layout, Mobile: block layout */}
         <div className="h-full flex flex-col md:flex-row">
           {/* Photo section */}
@@ -332,31 +337,7 @@ export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantNa
             onTouchEnd={onTouchEnd}
           />
 
-          {/* Photo action buttons */}
-          <div className="absolute bottom-4 left-4 z-10 flex gap-2">
-            <Button
-              variant="secondary"
-              size="sm"
-              className={cn(
-                "bg-black/50 hover:bg-black/70 text-white border-none",
-                currentPhotoLikes.isLiked && "text-red-400"
-              )}
-              onClick={handleLike}
-            >
-              <Heart className={cn("w-4 h-4 mr-1", currentPhotoLikes.isLiked && "fill-current")} />
-              {currentPhotoLikes.count}
-            </Button>
-            <Button
-              variant="secondary"
-              size="sm"
-              className="bg-black/50 hover:bg-black/70 text-white border-none"
-              onClick={focusCommentInput}
-              aria-label="Открыть комментарии и написать отзыв к текущей фотографии"
-            >
-              <MessageCircle className="w-4 h-4 mr-1" />
-              {currentPhotoComments.length}
-            </Button>
-          </div>
+          {/* actions moved to header */}
 
           <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 text-white text-sm bg-black/50 px-3 py-1 rounded">
             {activeIndex + 1} / {photos.length}
@@ -383,12 +364,42 @@ export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantNa
           "h-[40vh] md:h-full md:w-1/3" // Mobile: bottom sheet ~40vh; Desktop: 1/3 width full height
         )}>
             <div className="p-4 border-b">
-              <div className="flex items-center justify-between">
-                <h3 className="font-semibold">Комментарии</h3>
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <div className="font-semibold truncate">
+                    {contestantName}
+                    {age ? ` · ${age}` : ""}
+                    {weight ? ` · ${weight} кг` : ""}
+                    {height ? ` · ${height} см` : ""}
+                  </div>
+                  <div className="text-sm text-muted-foreground truncate">
+                    {(country || "")}
+                    {(country && city) ? ", " : ""}
+                    {(city || "")} {photos.length > 1 ? `• Фото ${activeIndex + 1}` : ""}
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className={cn(currentPhotoLikes.isLiked && "text-red-400")}
+                    onClick={handleLike}
+                    aria-label="Нравится"
+                  >
+                    <Heart className={cn("w-4 h-4 mr-1", currentPhotoLikes.isLiked && "fill-current")} />
+                    {currentPhotoLikes.count}
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={focusCommentInput}
+                    aria-label="Открыть поле комментария"
+                  >
+                    <MessageCircle className="w-4 h-4 mr-1" />
+                    {currentPhotoComments.length}
+                  </Button>
+                </div>
               </div>
-              <p className="text-sm text-muted-foreground">
-                {contestantName} - Фото {activeIndex + 1}
-              </p>
             </div>
 
             <div ref={commentsListRef} className="flex-1 overflow-y-auto p-4 pb-24 md:pb-28 space-y-3 min-h-0">
