@@ -1,34 +1,12 @@
 import { ContestHeader } from "@/components/contest-header";
 import { ContestSection } from "@/components/contest-section";
-import { Link } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { LogIn, UserPlus } from "lucide-react";
+import LoginModalTrigger from "@/components/login-modal";
 
 const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       <nav className="container mx-auto flex justify-end items-center gap-2 px-4 py-2">
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Link to="/auth?mode=login">
-              <Button variant="ghost" size="icon" aria-label="Войти">
-                <LogIn className="size-5" />
-              </Button>
-            </Link>
-          </TooltipTrigger>
-          <TooltipContent>Войти</TooltipContent>
-        </Tooltip>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Link to="/auth?mode=signup">
-              <Button variant="ghost" size="icon" aria-label="Регистрация">
-                <UserPlus className="size-5" />
-              </Button>
-            </Link>
-          </TooltipTrigger>
-          <TooltipContent>Регистрация</TooltipContent>
-        </Tooltip>
+        <LoginModalTrigger />
       </nav>
       <ContestHeader />
       
