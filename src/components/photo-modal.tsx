@@ -364,12 +364,10 @@ export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantNa
             <div className="p-4 border-b">
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
-                  <div className="font-semibold truncate">
+                  <h3 className="font-semibold text-contest-text truncate">
                     {contestantName}
-                    {age ? ` · ${age}` : ""}
-                    {weight ? ` · ${weight} кг` : ""}
-                    {height ? ` · ${height} см` : ""}
-                  </div>
+                    {age ? `, ${age}` : ""}
+                  </h3>
                   <div className="text-sm text-contest-blue truncate">
                     {(country || "")}
                     {(country && city) ? " · " : ""}
