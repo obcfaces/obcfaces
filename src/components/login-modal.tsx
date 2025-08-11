@@ -9,49 +9,78 @@ import { useNavigate } from "react-router-dom";
 
 const LoginModalTrigger = () => {
   const [open, setOpen] = useState(false);
+  const [mode, setMode] = useState<"login" | "signup">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const onLogin = async (e: React.FormEvent) => {
+  const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     try {
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) throw error;
-      toast({ description: "Вход выполнен" });
-      setOpen(false);
-      navigate("/account", { replace: true });
+      if (mode === "login") {
+        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) throw error;
+        toast({ description: "Вход выполнен" });
+        setOpen(false);
+        navigate("/account", { replace: true });
+      } else {
+        const redirectUrl = `${window.location.origin}/account`;
+        const { error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: { emailRedirectTo: redirectUrl },
+        });
+        if (error) throw error;
+        toast({ description: "Проверьте почту для подтверждения аккаунта." });
+        setOpen(false);
+      }
     } catch (err: any) {
-      toast({ description: err.message ?? "Ошибка входа" });
+      toast({ description: err.message ?? (mode === "login" ? "Ошибка входа" : "Ошибка регистрации") });
     } finally {
       setLoading(false);
     }
   };
 
+  const title = mode === "login" ? "Вход" : "Регистрация";
+  const description = mode === "login" ? "Введите email и пароль, чтобы продолжить." : "Создайте аккаунт для личной страницы.";
+
+  const switchText = mode === "login" ? (
+    <span className="text-sm text-muted-foreground">Нет аккаунта?{" "}
+      <button type="button" className="text-primary underline" onClick={() => setMode("signup")}>Зарегистрироваться</button>
+    </span>
+  ) : (
+    <span className="text-sm text-muted-foreground">Уже есть аккаунт?{" "}
+      <button type="button" className="text-primary underline" onClick={() => setMode("login")}>Войти</button>
+    </span>
+  );
+
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) setMode("login"); }}>
       <DialogTrigger asChild>
         <button className="text-sm underline text-primary">Log in</button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Вход</DialogTitle>
-          <DialogDescription>Введите email и пароль, чтобы продолжить.</DialogDescription>
+          <DialogTitle>{title}</DialogTitle>
+          <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
-        <form onSubmit={onLogin} className="space-y-4">
+        <form onSubmit={onSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="login-email">Email</Label>
-            <Input id="login-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+            <Label htmlFor="auth-email">Email</Label>
+            <Input id="auth-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="login-password">Пароль</Label>
-            <Input id="login-password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+            <Label htmlFor="auth-password">Пароль</Label>
+            <Input id="auth-password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
           </div>
-          <div className="flex justify-end gap-2">
-            <Button type="button" variant="secondary" onClick={() => setOpen(false)}>Отмена</Button>
-            <Button type="submit" disabled={loading}>{loading ? "Подождите…" : "Войти"}</Button>
+          <div className="flex items-center justify-between">
+            {switchText}
+            <div className="flex gap-2">
+              <Button type="button" variant="secondary" onClick={() => setOpen(false)}>Отмена</Button>
+              <Button type="submit" disabled={loading}>{loading ? "Подождите…" : mode === "login" ? "Войти" : "Зарегистрироваться"}</Button>
+            </div>
           </div>
         </form>
       </DialogContent>
