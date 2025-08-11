@@ -293,13 +293,13 @@ export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantNa
             <>
               <button
                 onClick={prevPhoto}
-                className="absolute left-4 z-10 text-white hover:text-gray-300 transition-colors"
+                className="absolute left-4 top-1/2 -translate-y-1/2 z-10 text-white hover:text-gray-300 transition-colors"
               >
                 <ChevronLeft className="w-8 h-8" />
               </button>
             <button
               onClick={nextPhoto}
-              className="absolute right-4 z-10 text-white hover:text-gray-300 transition-colors"
+              className="absolute right-4 top-1/2 -translate-y-1/2 z-10 text-white hover:text-gray-300 transition-colors"
             >
               <ChevronRight className="w-8 h-8" />
             </button>
