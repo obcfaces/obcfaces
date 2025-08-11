@@ -290,22 +290,22 @@ export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantNa
             </button>
 
           {photos.length > 1 && (
-            <>
+            <div className="absolute inset-y-0 left-0 right-0 z-10 flex items-center justify-between px-4 pointer-events-none">
               <button
                 onClick={prevPhoto}
-                className="absolute left-4 top-1/2 -translate-y-1/2 z-10 text-white hover:text-white/90 transition-colors w-12 h-12 rounded-full bg-black/50 hover:bg-black/70 backdrop-blur flex items-center justify-center"
+                className="pointer-events-auto text-white hover:text-white/90 transition-colors w-12 h-12 rounded-full bg-black/50 hover:bg-black/70 backdrop-blur flex items-center justify-center"
                 aria-label="Предыдущее фото"
               >
                 <ChevronLeft className="w-7 h-7" />
               </button>
-            <button
-              onClick={nextPhoto}
-              className="absolute right-4 top-1/2 -translate-y-1/2 z-10 text-white hover:text-white/90 transition-colors w-12 h-12 rounded-full bg-black/50 hover:bg-black/70 backdrop-blur flex items-center justify-center"
-              aria-label="Следующее фото"
-            >
-              <ChevronRight className="w-7 h-7" />
-            </button>
-            </>
+              <button
+                onClick={nextPhoto}
+                className="pointer-events-auto text-white hover:text-white/90 transition-colors w-12 h-12 rounded-full bg-black/50 hover:bg-black/70 backdrop-blur flex items-center justify-center"
+                aria-label="Следующее фото"
+              >
+                <ChevronRight className="w-7 h-7" />
+              </button>
+            </div>
           )}
 
           <img
