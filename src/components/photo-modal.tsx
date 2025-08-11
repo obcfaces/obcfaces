@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { X, ChevronLeft, ChevronRight, Heart, MessageCircle, Send } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -193,6 +193,10 @@ export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantNa
   });
   const { toast } = useToast();
 
+  // Refs for focusing comment input and scrolling
+  const commentsListRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
   // Reset activeIndex when currentIndex changes
   useEffect(() => {
     setActiveIndex(currentIndex);
@@ -232,6 +236,17 @@ export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantNa
       toast({
         title: "Комментарий добавлен",
         description: "Ваш комментарий к фотографии добавлен",
+      });
+    }
+  };
+
+  const focusCommentInput = () => {
+    textareaRef.current?.focus();
+    // Ensure comments panel is scrolled to the latest position
+    if (commentsListRef.current) {
+      commentsListRef.current.scrollTo({
+        top: commentsListRef.current.scrollHeight,
+        behavior: "smooth",
       });
     }
   };
@@ -335,7 +350,8 @@ export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantNa
               variant="secondary"
               size="sm"
               className="bg-black/50 hover:bg-black/70 text-white border-none"
-              disabled
+              onClick={focusCommentInput}
+              aria-label="Открыть комментарии и написать отзыв к текущей фотографии"
             >
               <MessageCircle className="w-4 h-4 mr-1" />
               {currentPhotoComments.length}
@@ -375,7 +391,7 @@ export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantNa
               </p>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-4 pb-24 md:pb-28 space-y-3 min-h-0">
+            <div ref={commentsListRef} className="flex-1 overflow-y-auto p-4 pb-24 md:pb-28 space-y-3 min-h-0">
               {currentPhotoComments.length === 0 ? (
                 <p className="text-center text-muted-foreground text-sm">
                   Пока нет комментариев к этой фотографии
@@ -395,10 +411,12 @@ export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantNa
 
             <div className="sticky bottom-0 left-0 right-0 p-3 md:p-4 border-t space-y-2 md:space-y-3 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/80">
               <Textarea
+                ref={textareaRef}
                 placeholder="Напишите комментарий к этой фотографии..."
                 value={commentText}
                 onChange={(e) => setCommentText(e.target.value)}
                 className="min-h-[50px] md:min-h-[60px] resize-none text-sm"
+                aria-label="Комментарий к текущей фотографии"
               />
               <Button
                 onClick={handleCommentSubmit}
