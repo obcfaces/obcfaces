@@ -274,12 +274,12 @@ export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantNa
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl h-[80vh] p-0 bg-black/90">
+      <DialogContent className="max-w-5xl h-[90vh] p-0 bg-black/90 top-2 md:top-4 translate-y-0">
         {/* Desktop: flex layout, Mobile: block layout */}
         <div className="h-full flex flex-col md:flex-row">
           {/* Photo section */}
           <div className={cn(
-            "relative flex items-center justify-center transition-all duration-300",
+            "relative flex items-start justify-center transition-all duration-300 pt-2 md:pt-4",
             "h-1/2 md:h-full md:w-2/3" // Always show comments on mobile and desktop
           )}>
             <button
@@ -309,14 +309,14 @@ export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantNa
           <img
             src={photos[activeIndex]}
             alt={`${contestantName} photo ${activeIndex + 1}`}
-            className="max-w-full max-h-full object-contain"
+            className="max-w-full max-h-full object-contain self-start"
             onTouchStart={onTouchStart}
             onTouchMove={onTouchMove}
             onTouchEnd={onTouchEnd}
           />
 
           {/* Photo action buttons */}
-          <div className="absolute bottom-16 md:bottom-16 left-4 flex gap-2">
+          <div className="absolute bottom-4 left-4 z-10 flex gap-2">
             <Button
               variant="secondary"
               size="sm"
