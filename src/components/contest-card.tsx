@@ -53,14 +53,29 @@ export function ContestantCard({
   const [isEditing, setIsEditing] = useState(false);
   const [showThanks, setShowThanks] = useState(false);
   const [userRating, setUserRating] = useState(0);
-  const [isLiked, setIsLiked] = useState(false);
-  const [likesCount, setLikesCount] = useState(Math.floor(Math.random() * 50) + 5); // Random initial likes
-  const [commentsCount] = useState(Math.floor(Math.random() * 20) + 1); // Random initial comments
+  const [isLiked, setIsLiked] = useState<boolean[]>([false, false]);
+  const [likesCount, setLikesCount] = useState<number[]>([
+    Math.floor(Math.random() * 50) + 5,
+    Math.floor(Math.random() * 50) + 5,
+  ]);
+  const [commentsCount] = useState<number[]>([
+    Math.floor(Math.random() * 20) + 1,
+    Math.floor(Math.random() * 20) + 1,
+  ]);
   const { toast } = useToast();
 
-  const handleLike = () => {
-    setIsLiked(!isLiked);
-    setLikesCount(prev => isLiked ? prev - 1 : prev + 1);
+  const handleLike = (index: number) => {
+    const wasLiked = isLiked[index]
+    setIsLiked((prev) => {
+      const next = [...prev]
+      next[index] = !wasLiked
+      return next
+    })
+    setLikesCount((prev) => {
+      const next = [...prev]
+      next[index] = wasLiked ? next[index] - 1 : next[index] + 1
+      return next
+    })
   };
 
 
@@ -189,16 +204,16 @@ export function ContestantCard({
                     size="sm" 
                     className={cn(
                       "transition-colors border-0 h-4 px-0.5 text-xs",
-                      isLiked 
+                      isLiked[0] 
                         ? "bg-contest-blue text-white hover:bg-contest-blue/90" 
                         : "bg-transparent text-white hover:text-white/80 hover:bg-transparent"
                     )}
-                    onClick={handleLike}
+                    onClick={() => handleLike(0)}
                   >
                     <Heart 
                       className="w-2.5 h-2.5 mr-0 transition-colors" 
                     />
-                    {likesCount}
+                    {likesCount[0]}
                   </Button>
                   <Button 
                     variant="ghost" 
@@ -207,7 +222,7 @@ export function ContestantCard({
                     onClick={() => openModal(0)}
                   >
                     <MessageCircle className="w-2.5 h-2.5 mr-0" />
-                    {commentsCount}
+                    {commentsCount[0]}
                   </Button>
                 </div>
               </div>
@@ -233,16 +248,16 @@ export function ContestantCard({
                     size="sm" 
                     className={cn(
                       "transition-colors border-0 h-4 px-0.5 text-xs",
-                      isLiked 
+                      isLiked[1] 
                         ? "bg-contest-blue text-white hover:bg-contest-blue/90" 
                         : "bg-transparent text-white hover:text-white/80 hover:bg-transparent"
                     )}
-                    onClick={handleLike}
+                    onClick={() => handleLike(1)}
                   >
                     <Heart 
                       className="w-2.5 h-2.5 mr-0 transition-colors" 
                     />
-                    {likesCount}
+                    {likesCount[1]}
                   </Button>
                   <Button 
                     variant="ghost" 
@@ -251,7 +266,7 @@ export function ContestantCard({
                     onClick={() => openModal(0)}
                   >
                     <MessageCircle className="w-2.5 h-2.5 mr-0" />
-                    {commentsCount}
+                    {commentsCount[1]}
                   </Button>
                 </div>
               </div>
@@ -322,16 +337,16 @@ export function ContestantCard({
                   size="sm" 
                   className={cn(
                     "transition-colors text-xs h-4 px-1 hover:bg-gray-100/20",
-                    isLiked 
+                    isLiked[0] 
                       ? "text-contest-blue hover:text-contest-blue/80" 
                       : "text-white hover:text-white/80"
                   )}
-                  onClick={handleLike}
+                  onClick={() => handleLike(0)}
                 >
                   <Heart 
                     className={cn(
                       "w-2.5 h-2.5 transition-colors",
-                      isLiked && "fill-contest-blue"
+                      isLiked[0] && "fill-contest-blue"
                     )} 
                   />
                 </Button>
