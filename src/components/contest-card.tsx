@@ -81,24 +81,24 @@ export function ContestantCard({
             </div>
           )}
           
-          {/* Name and Rank in top left - only after voting */}
+          {/* Name in top left - only after voting */}
           {((isVoted && !showThanks) || isEditing) && (
             <div className="absolute top-2 left-4 z-20">
-              <div className="flex items-center gap-3">
-                <div className="text-xl font-bold text-contest-blue">#{rank}</div>
-                <h3 className="text-xl font-semibold text-contest-text">{name}, {age} <span className="text-sm text-muted-foreground">({weight} kg · {height} cm)</span></h3>
-              </div>
+              <h3 className="text-xl font-semibold text-contest-text">{name}, {age} <span className="text-sm text-muted-foreground">({weight} kg · {height} cm)</span></h3>
             </div>
           )}
           
-          {/* Rating and location in top right corner - only after voting */}
+          {/* Rank, rating and location in top right corner - only after voting */}
           {((isVoted && !showThanks) || isEditing) && (
             <div className="absolute top-0 right-0 z-20 flex flex-col items-end">
-              <div 
-                className="bg-contest-blue text-white px-2 py-1.5 rounded-bl-lg text-lg font-bold shadow-md cursor-pointer hover:bg-contest-blue/90 transition-colors"
-                onClick={() => setIsEditing(true)}
-              >
-                {rating.toFixed(1)}
+              <div className="flex items-center gap-1">
+                <div className="text-xl font-bold text-contest-blue">#{rank}</div>
+                <div 
+                  className="bg-contest-blue text-white px-2 py-1.5 rounded-bl-lg text-lg font-bold shadow-md cursor-pointer hover:bg-contest-blue/90 transition-colors"
+                  onClick={() => setIsEditing(true)}
+                >
+                  {rating.toFixed(1)}
+                </div>
               </div>
               <div className="text-right pr-2 pt-1">
                 <p className="text-contest-blue text-sm">{country} · {city}</p>
