@@ -81,14 +81,15 @@ export function ContestantCard({
             </div>
           )}
           
-          {/* Rank and Rating in top right corner - only after voting */}
+          {/* Rank, Name and Rating in top section - only after voting */}
           {((isVoted && !showThanks) || isEditing) && (
-            <div className="absolute top-0 right-0 flex items-center gap-1 z-20">
-              <div className="text-center">
+            <div className="absolute top-0 left-0 right-0 flex items-center justify-between p-4 z-20">
+              <div className="flex items-center gap-3">
                 <div className="text-xl font-bold text-contest-blue">#{rank}</div>
+                <h3 className="text-xl font-semibold text-contest-text">{name}, {age} <span className="text-sm text-muted-foreground">({weight} kg · {height} cm)</span></h3>
               </div>
               <div 
-                className="bg-contest-blue text-white px-2 py-1.5 rounded-bl-lg text-lg font-bold shadow-md cursor-pointer hover:bg-contest-blue/90 transition-colors"
+                className="bg-contest-blue text-white px-2 py-1.5 rounded-lg text-lg font-bold shadow-md cursor-pointer hover:bg-contest-blue/90 transition-colors"
                 onClick={() => setIsEditing(true)}
               >
                 {rating.toFixed(1)}
@@ -151,9 +152,8 @@ export function ContestantCard({
             
             {/* Contestant info - shown after voting */}
             {isVoted && !isEditing && !showThanks && (
-              <div className="flex items-start justify-between h-full pl-4 pr-4 pt-2 pb-2">
+              <div className="flex items-start justify-between h-full pl-4 pr-4 pt-12 pb-2">
                 <div>
-                   <h3 className="text-xl font-semibold text-contest-text">{name}, {age} <span className="text-sm text-muted-foreground">({weight} kg · {height} cm)</span></h3>
                    <p className="text-contest-blue">{country} · {city}</p>
                 </div>
                 <div className="text-right flex items-start gap-2">
