@@ -375,7 +375,7 @@ export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantNa
                   <div className="text-sm text-muted-foreground truncate">
                     {(country || "")}
                     {(country && city) ? ", " : ""}
-                    {(city || "")} {photos.length > 1 ? `• Фото ${activeIndex + 1}` : ""}
+                    {(city || "")}
                   </div>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
