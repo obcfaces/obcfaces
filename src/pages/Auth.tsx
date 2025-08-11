@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Helmet } from "react-helmet-async";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -9,11 +9,16 @@ import { supabase } from "@/integrations/supabase/client";
 
 const Auth = () => {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [mode, setMode] = useState<"login" | "signup">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+    const m = searchParams.get("mode");
+    if (m === "signup" || m === "login") setMode(m);
+  }, [searchParams]);
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (session?.user) {
@@ -85,12 +90,12 @@ const Auth = () => {
           {mode === "login" ? (
             <span>
               Нет аккаунта?{" "}
-              <button className="text-primary underline" onClick={() => setMode("signup")}>Зарегистрироваться</button>
+              <button className="text-primary underline" onClick={() => { setMode("signup"); setSearchParams({ mode: "signup" }); }}>Зарегистрироваться</button>
             </span>
           ) : (
             <span>
               Уже есть аккаунт?{" "}
-              <button className="text-primary underline" onClick={() => setMode("login")}>Войти</button>
+              <button className="text-primary underline" onClick={() => { setMode("login"); setSearchParams({ mode: "login" }); }}>Войти</button>
             </span>
           )}
         </aside>
