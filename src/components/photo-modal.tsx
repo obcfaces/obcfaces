@@ -302,12 +302,6 @@ export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantNa
             "relative flex items-start justify-center transition-all duration-300 pt-2 md:pt-4",
             "w-full h-[60svh] md:h-full md:w-2/3" // Mobile: keep photo visible, bottom comments sheet
           )}>
-            <button
-              onClick={onClose}
-              className="absolute top-4 right-4 z-10 text-white hover:text-gray-300 transition-colors"
-            >
-              <X className="w-6 h-6" />
-            </button>
 
           {photos.length > 1 && (
             <>
