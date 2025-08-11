@@ -1,7 +1,7 @@
 import * as React from "react";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { ChevronsUpDown, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -47,31 +47,33 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
           <ChevronsUpDown className="ml-2 size-4 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[--radix-popover-trigger-width] p-0 z-50 bg-popover">
+      <PopoverContent className="w-[--radix-popover-trigger-width] p-0 z-50 bg-popover" onWheelCapture={(e) => e.stopPropagation()}>
         <Command>
           <CommandInput placeholder="Поиск..." />
           <CommandEmpty>{emptyMessage}</CommandEmpty>
-          <CommandGroup className="max-h-64 overflow-auto">
-            {options.map((opt) => (
-              <CommandItem
-                key={opt.value}
-                value={opt.label}
-                onSelect={() => {
-                  onValueChange(opt.value);
-                  setOpen(false);
-                }}
-                className="cursor-pointer"
-              >
-                <Check
-                  className={cn(
-                    "mr-2 size-4",
-                    value === opt.value ? "opacity-100" : "opacity-0"
-                  )}
-                />
-                {opt.label}
-              </CommandItem>
-            ))}
-          </CommandGroup>
+          <CommandList className="max-h-64 overflow-y-auto">
+            <CommandGroup>
+              {options.map((opt) => (
+                <CommandItem
+                  key={opt.value}
+                  value={opt.label}
+                  onSelect={() => {
+                    onValueChange(opt.value);
+                    setOpen(false);
+                  }}
+                  className="cursor-pointer"
+                >
+                  <Check
+                    className={cn(
+                      "mr-2 size-4",
+                      value === opt.value ? "opacity-100" : "opacity-0"
+                    )}
+                  />
+                  {opt.label}
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </CommandList>
         </Command>
       </PopoverContent>
     </Popover>
