@@ -368,6 +368,11 @@ export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantNa
                     {contestantName}
                     {age ? `, ${age}` : ""}
                   </h3>
+                  <div className="text-xs sm:text-sm text-muted-foreground font-normal">
+                    {weight ? `${weight} кг` : ""}
+                    {(weight && height) ? " · " : ""}
+                    {height ? `${height} см` : ""}
+                  </div>
                   <div className="text-sm text-contest-blue truncate">
                     {(country || "")}
                     {(country && city) ? " · " : ""}
