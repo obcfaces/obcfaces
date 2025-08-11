@@ -337,20 +337,26 @@ export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantNa
 
           {/* actions moved to header */}
 
-          <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 text-white text-sm bg-black/50 px-3 py-1 rounded">
-            {activeIndex + 1} / {photos.length}
-          </div>
 
           {photos.length > 1 && (
-            <div className="absolute bottom-4 right-4 flex gap-1">
-              {photos.map((_, index) => (
+            <div className="absolute bottom-4 right-4 flex items-center gap-2">
+              {photos.map((src, index) => (
                 <button
                   key={index}
                   onClick={() => setActiveIndex(index)}
-                  className={`w-2 h-2 rounded-full transition-colors ${
-                    index === activeIndex ? "bg-white" : "bg-white/50"
-                  }`}
-                />
+                  aria-label={`Перейти к фото ${index + 1}`}
+                  className={cn(
+                    "relative w-8 h-8 sm:w-10 sm:h-10 rounded-full overflow-hidden ring-1 ring-white/40 border border-white/20 transition-all",
+                    index === activeIndex ? "ring-2 ring-white opacity-100" : "opacity-70 hover:opacity-100"
+                  )}
+                >
+                  <img
+                    src={src}
+                    alt={`Миниатюра ${index + 1}`}
+                    className="w-full h-full object-cover"
+                    loading="lazy"
+                  />
+                </button>
               ))}
             </div>
           )}
