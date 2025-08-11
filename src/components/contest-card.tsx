@@ -129,7 +129,7 @@ export function ContestantCard({
           
           
           {/* Header with voting overlay logic */}
-          <div className="relative p-4 border-b border-contest-border h-[81px]">
+          <div className="relative p-4 border-b border-contest-border h-[72px]">
             {/* Voting overlay - shown by default when not voted and not editing */}
             {!isVoted && !isEditing && !showThanks && (
               <div className="absolute inset-0 bg-gray-200 flex items-center justify-center gap-6 h-full">
