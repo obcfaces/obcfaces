@@ -284,6 +284,11 @@ export function ContestantCard({
           photos={allPhotos}
           currentIndex={modalStartIndex}
           contestantName={name}
+          age={age}
+          weight={weight}
+          height={height}
+          country={country}
+          city={city}
         />
       </>
     );
@@ -477,6 +482,11 @@ export function ContestantCard({
         photos={allPhotos}
         currentIndex={modalStartIndex}
         contestantName={name}
+        age={age}
+        weight={weight}
+        height={height}
+        country={country}
+        city={city}
       />
     </>
   );
