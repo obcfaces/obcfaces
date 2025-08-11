@@ -4,10 +4,10 @@ import { useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import SearchableSelect from "@/components/ui/searchable-select";
 import { toast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Country, City } from "country-state-city";
+import { Country, State, City } from "country-state-city";
 
 interface ProfileForm {
   display_name: string;
@@ -17,6 +17,7 @@ interface ProfileForm {
   first_name: string;
   last_name: string;
   country: string;
+  state: string;
   city: string;
   age: number | undefined;
 }
@@ -34,6 +35,7 @@ const Account = () => {
     first_name: "",
     last_name: "",
     country: "",
+    state: "",
     city: "",
     age: undefined,
   });
@@ -48,7 +50,12 @@ const Account = () => {
 
   const countries = useMemo(() => Country.getAllCountries(), []);
   const [countryCode, setCountryCode] = useState<string | null>(null);
-  const cities = useMemo(() => countryCode ? City.getCitiesOfCountry(countryCode) : [], [countryCode]);
+  const [stateCode, setStateCode] = useState<string | null>(null);
+  const states = useMemo(() => (countryCode ? State.getStatesOfCountry(countryCode) : []), [countryCode]);
+  const cities = useMemo(
+    () => (countryCode && stateCode ? City.getCitiesOfState(countryCode, stateCode) : []),
+    [countryCode, stateCode]
+  );
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
@@ -69,7 +76,7 @@ const Account = () => {
       // Load profile
       const { data: profile } = await supabase
         .from("profiles")
-        .select("display_name, birthdate, height_cm, weight_kg, first_name, last_name, country, city, age")
+        .select("display_name, birthdate, height_cm, weight_kg, first_name, last_name, country, state, city, age")
         .eq("id", session.user.id)
         .maybeSingle();
       if (profile) {
@@ -81,12 +88,20 @@ const Account = () => {
           first_name: profile.first_name ?? "",
           last_name: profile.last_name ?? "",
           country: profile.country ?? "",
+          state: profile.state ?? "",
           city: profile.city ?? "",
           age: profile.age ?? undefined,
         });
-        // try set country code by name
+        // try set country and state codes by name
         const found = countries.find((c) => c.name === (profile.country ?? ""));
-        if (found) setCountryCode(found.isoCode);
+        if (found) {
+          setCountryCode(found.isoCode);
+          if (profile.state) {
+            const sts = State.getStatesOfCountry(found.isoCode);
+            const st = sts.find((s) => s.name === profile.state);
+            if (st) setStateCode(st.isoCode);
+          }
+        }
       }
       setLoading(false);
     });
@@ -108,6 +123,7 @@ const Account = () => {
           first_name: form.first_name || null,
           last_name: form.last_name || null,
           country: form.country || null,
+          state: form.state || null,
           city: form.city || null,
           age: form.age ?? null,
         },
@@ -168,36 +184,52 @@ const Account = () => {
             </div>
             <div className="space-y-2">
               <Label>Страна</Label>
-              <Select value={countryCode ?? ""} onValueChange={(code) => {
-                setCountryCode(code);
-                const c = countries.find((c) => c.isoCode === code);
-                setForm((f) => ({ ...f, country: c?.name || "", city: "" }));
-              }}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Страна" />
-                </SelectTrigger>
-                <SelectContent>
-                  {countries.map((c) => (
-                    <SelectItem key={c.isoCode} value={c.isoCode}>{c.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <SearchableSelect
+                value={countryCode ?? ""}
+                onValueChange={(code) => {
+                  setCountryCode(code);
+                  const c = countries.find((c) => c.isoCode === code);
+                  setForm((f) => ({ ...f, country: c?.name || "", state: "", city: "" }));
+                  setStateCode(null);
+                }}
+                placeholder="Страна"
+                ariaLabel="Выбор страны"
+                options={countries.map((c) => ({ value: c.isoCode, label: c.name }))}
+              />
             </div>
             <div className="space-y-2">
-              <Label>Город</Label>
-              <Select disabled={!countryCode} value={form.city} onValueChange={(val) => setForm((f) => ({ ...f, city: val }))}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Город" />
-                </SelectTrigger>
-                <SelectContent>
-                  {cities.map((ct) => (
-                    <SelectItem key={`${ct.name}-${ct.latitude}-${ct.longitude}`} value={ct.name}>{ct.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Label>Штат/Регион</Label>
+              <SearchableSelect
+                disabled={!countryCode}
+                value={stateCode ?? ""}
+                onValueChange={(code) => {
+                  setStateCode(code);
+                  const s = states.find((s) => s.isoCode === code);
+                  setForm((f) => ({ ...f, state: s?.name || "", city: "" }));
+                }}
+                placeholder="Штат/Регион"
+                ariaLabel="Выбор региона"
+                options={states.map((s) => ({ value: s.isoCode, label: s.name }))}
+              />
               {!countryCode && (
                 <p className="text-xs text-muted-foreground">Сначала выберите страну</p>
               )}
+            </div>
+            <div className="space-y-2">
+              <Label>Город</Label>
+              <SearchableSelect
+                disabled={!countryCode || !stateCode}
+                value={form.city}
+                onValueChange={(val) => setForm((f) => ({ ...f, city: val }))}
+                placeholder="Город"
+                ariaLabel="Выбор города"
+                options={cities.map((ct) => ({ value: ct.name, label: ct.name }))}
+              />
+              {!countryCode ? (
+                <p className="text-xs text-muted-foreground">Сначала выберите страну</p>
+              ) : !stateCode ? (
+                <p className="text-xs text-muted-foreground">Сначала выберите штат/регион</p>
+              ) : null}
             </div>
             <div className="space-y-2">
               <Label htmlFor="height_cm">Рост (см)</Label>

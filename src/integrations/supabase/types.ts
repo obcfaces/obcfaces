@@ -27,6 +27,7 @@ export type Database = {
           height_cm: number | null
           id: string
           last_name: string | null
+          state: string | null
           updated_at: string
           weight_kg: number | null
         }
@@ -42,6 +43,7 @@ export type Database = {
           height_cm?: number | null
           id: string
           last_name?: string | null
+          state?: string | null
           updated_at?: string
           weight_kg?: number | null
         }
@@ -57,6 +59,7 @@ export type Database = {
           height_cm?: number | null
           id?: string
           last_name?: string | null
+          state?: string | null
           updated_at?: string
           weight_kg?: number | null
         }
