@@ -293,15 +293,17 @@ export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantNa
             <>
               <button
                 onClick={prevPhoto}
-                className="absolute left-4 top-1/2 -translate-y-1/2 z-10 text-white hover:text-gray-300 transition-colors"
+                className="absolute left-4 top-1/2 -translate-y-1/2 z-10 text-white hover:text-white/90 transition-colors w-12 h-12 rounded-full bg-black/50 hover:bg-black/70 backdrop-blur flex items-center justify-center"
+                aria-label="Предыдущее фото"
               >
-                <ChevronLeft className="w-8 h-8" />
+                <ChevronLeft className="w-7 h-7" />
               </button>
             <button
               onClick={nextPhoto}
-              className="absolute right-4 top-1/2 -translate-y-1/2 z-10 text-white hover:text-gray-300 transition-colors"
+              className="absolute right-4 top-1/2 -translate-y-1/2 z-10 text-white hover:text-white/90 transition-colors w-12 h-12 rounded-full bg-black/50 hover:bg-black/70 backdrop-blur flex items-center justify-center"
+              aria-label="Следующее фото"
             >
-              <ChevronRight className="w-8 h-8" />
+              <ChevronRight className="w-7 h-7" />
             </button>
             </>
           )}
