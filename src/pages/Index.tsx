@@ -1,10 +1,14 @@
 import { ContestHeader } from "@/components/contest-header";
 import { ContestSection } from "@/components/contest-section";
+import { Link } from "react-router-dom";
 
 const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       <ContestHeader />
+      <nav className="container mx-auto flex justify-end px-4">
+        <Link to="/auth" className="text-primary underline text-sm">Войти / Регистрация</Link>
+      </nav>
       
       <ContestSection
         title="JULE 24 – 30 /// 2025"
