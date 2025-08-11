@@ -295,7 +295,7 @@ export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantNa
           {/* Photo section */}
           <div className={cn(
             "relative flex items-start justify-center transition-all duration-300 pt-2 md:pt-4",
-            "w-full h-2/3 md:h-full md:w-2/3" // Always show comments on mobile and desktop
+            "w-full h-[60vh] md:h-full md:w-2/3" // Mobile: keep photo visible, bottom comments sheet
           )}>
             <button
               onClick={onClose}
@@ -379,8 +379,8 @@ export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantNa
 
         {/* Comments section - Desktop: sidebar, Mobile: bottom panel */}
         <div className={cn(
-          "bg-white relative flex flex-col",
-          "h-1/3 md:h-full md:w-1/3" // Mobile: 2/3 photo, 1/3 comments; Desktop: 1/3 width full height
+          "bg-background relative flex flex-col",
+          "h-[40vh] md:h-full md:w-1/3" // Mobile: bottom sheet ~40vh; Desktop: 1/3 width full height
         )}>
             <div className="p-4 border-b">
               <div className="flex items-center justify-between">
@@ -409,7 +409,7 @@ export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantNa
               )}
             </div>
 
-            <div className="sticky bottom-0 left-0 right-0 p-3 md:p-4 border-t space-y-2 md:space-y-3 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/80">
+            <div className="sticky bottom-0 left-0 right-0 p-3 md:p-4 border-t space-y-2 md:space-y-3 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 pb-[env(safe-area-inset-bottom)]">
               <Textarea
                 ref={textareaRef}
                 placeholder="Напишите комментарий к этой фотографии..."
