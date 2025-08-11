@@ -16,32 +16,47 @@ export type Database = {
     Tables: {
       profiles: {
         Row: {
+          age: number | null
           avatar_url: string | null
           birthdate: string | null
+          city: string | null
+          country: string | null
           created_at: string
           display_name: string | null
+          first_name: string | null
           height_cm: number | null
           id: string
+          last_name: string | null
           updated_at: string
           weight_kg: number | null
         }
         Insert: {
+          age?: number | null
           avatar_url?: string | null
           birthdate?: string | null
+          city?: string | null
+          country?: string | null
           created_at?: string
           display_name?: string | null
+          first_name?: string | null
           height_cm?: number | null
           id: string
+          last_name?: string | null
           updated_at?: string
           weight_kg?: number | null
         }
         Update: {
+          age?: number | null
           avatar_url?: string | null
           birthdate?: string | null
+          city?: string | null
+          country?: string | null
           created_at?: string
           display_name?: string | null
+          first_name?: string | null
           height_cm?: number | null
           id?: string
+          last_name?: string | null
           updated_at?: string
           weight_kg?: number | null
         }

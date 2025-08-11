@@ -14,6 +14,12 @@ const LoginModalTrigger = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [country, setCountry] = useState("");
+  const [city, setCity] = useState("");
+  const [age, setAge] = useState<string>("");
+  const [photo, setPhoto] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -29,14 +35,54 @@ const LoginModalTrigger = () => {
         navigate("/account", { replace: true });
       } else {
         const redirectUrl = `${window.location.origin}/account`;
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email,
           password,
-          options: { emailRedirectTo: redirectUrl },
+          options: {
+            emailRedirectTo: redirectUrl,
+            data: {
+              first_name: firstName || null,
+              last_name: lastName || null,
+              country: country || null,
+              city: city || null,
+              age: age ? Number(age) : null,
+            },
+          },
         });
         if (error) throw error;
-        toast({ description: "Проверьте почту для подтверждения аккаунта." });
-        setOpen(false);
+
+        if (data.session?.user) {
+          const userId = data.session.user.id;
+          let uploadedUrl: string | null = null;
+          if (photo) {
+            const path = `${userId}/${Date.now()}-${photo.name}`;
+            const { error: uploadError } = await supabase.storage.from("avatars").upload(path, photo, { upsert: true });
+            if (uploadError) throw uploadError;
+            const { data: pub } = supabase.storage.from("avatars").getPublicUrl(path);
+            uploadedUrl = pub.publicUrl;
+          }
+          const { error: upsertErr } = await supabase
+            .from("profiles")
+            .upsert(
+              {
+                id: userId,
+                first_name: firstName || null,
+                last_name: lastName || null,
+                country: country || null,
+                city: city || null,
+                age: age ? Number(age) : null,
+                avatar_url: uploadedUrl,
+              },
+              { onConflict: "id" }
+            );
+          if (upsertErr) throw upsertErr;
+          toast({ description: "Регистрация завершена" });
+          setOpen(false);
+          navigate("/account", { replace: true });
+        } else {
+          toast({ description: "Проверьте почту для подтверждения. Фото можно загрузить после входа." });
+          setOpen(false);
+        }
       }
     } catch (err: any) {
       toast({ description: err.message ?? (mode === "login" ? "Ошибка входа" : "Ошибка регистрации") });
@@ -63,7 +109,7 @@ const LoginModalTrigger = () => {
       <DialogTrigger asChild>
         <button className="text-sm underline text-primary">Log in</button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className={mode === "signup" ? "sm:max-w-lg" : "sm:max-w-md"}>
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>{description}</DialogDescription>
@@ -82,6 +128,34 @@ const LoginModalTrigger = () => {
               </button>
             </div>
           </div>
+          {mode === "signup" && (
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="auth-firstname">Имя</Label>
+                <Input id="auth-firstname" value={firstName} onChange={(e) => setFirstName(e.target.value)} />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="auth-lastname">Фамилия</Label>
+                <Input id="auth-lastname" value={lastName} onChange={(e) => setLastName(e.target.value)} />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="auth-country">Страна</Label>
+                <Input id="auth-country" value={country} onChange={(e) => setCountry(e.target.value)} />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="auth-city">Город</Label>
+                <Input id="auth-city" value={city} onChange={(e) => setCity(e.target.value)} />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="auth-age">Возраст</Label>
+                <Input id="auth-age" type="number" inputMode="numeric" value={age} onChange={(e) => setAge(e.target.value)} />
+              </div>
+              <div className="space-y-2 sm:col-span-2">
+                <Label htmlFor="auth-photo">Фото</Label>
+                <Input id="auth-photo" type="file" accept="image/*" onChange={(e) => setPhoto(e.currentTarget.files?.[0] ?? null)} />
+              </div>
+            </div>
+          )}
           <div className="flex items-center justify-between">
             {switchText}
             <div className="flex gap-2">
