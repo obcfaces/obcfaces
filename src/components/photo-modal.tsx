@@ -296,11 +296,11 @@ export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantNa
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="fixed inset-0 left-0 top-0 translate-x-0 translate-y-0 w-screen max-w-none h-[100svh] overflow-hidden p-0 bg-black/90">
         {/* Desktop: flex layout, Mobile: block layout */}
-        <div className="h-full flex flex-col md:flex-row">
+        <div className="h-full flex flex-col">
           {/* Photo section */}
           <div className={cn(
             "relative flex items-start justify-center transition-all duration-300 pt-2 md:pt-4",
-            "w-full h-[60svh] md:h-full md:w-2/3" // Mobile: keep photo visible, bottom comments sheet
+            "w-full h-[60svh]"
           )}>
 
           {photos.length > 1 && (
@@ -355,7 +355,7 @@ export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantNa
         {/* Comments section - Desktop: sidebar, Mobile: bottom panel */}
         <div className={cn(
           "bg-background relative flex flex-col",
-          "h-[40svh] md:h-full md:w-1/3" // Mobile: bottom sheet ~40vh; Desktop: 1/3 width full height
+          "h-[40svh]"
         )}>
             <div className="p-4 border-b">
               <div className="flex items-start justify-between gap-3">
