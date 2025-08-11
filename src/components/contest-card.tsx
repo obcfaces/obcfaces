@@ -91,14 +91,22 @@ export function ContestantCard({
             </div>
           )}
           
-          {/* Rating in top right corner - only after voting */}
+          {/* Rating and location in top right corner - only after voting */}
           {((isVoted && !showThanks) || isEditing) && (
-            <div className="absolute top-0 right-0 z-20">
+            <div className="absolute top-0 right-0 z-20 flex flex-col items-end">
               <div 
                 className="bg-contest-blue text-white px-2 py-1.5 rounded-bl-lg text-lg font-bold shadow-md cursor-pointer hover:bg-contest-blue/90 transition-colors"
                 onClick={() => setIsEditing(true)}
               >
                 {rating.toFixed(1)}
+              </div>
+              <div className="text-right pr-2 pt-1">
+                <p className="text-contest-blue text-sm">{country} · {city}</p>
+                {isWinner && prize && (
+                  <div className="text-contest-blue font-bold text-sm mt-1">
+                    {prize}
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -156,19 +164,9 @@ export function ContestantCard({
               </div>
             )}
             
-            {/* Location info - shown after voting */}
+            {/* Empty space after voting */}
             {isVoted && !isEditing && !showThanks && (
-              <div className="flex items-start justify-between h-full pl-4 pr-4 pt-12 pb-2">
-                <div>
-                   <p className="text-contest-blue">{country} · {city}</p>
-                </div>
-                <div className="text-right flex items-start gap-2">
-                  {isWinner && prize && (
-                    <div className="text-contest-blue font-bold text-sm mt-1">
-                      {prize}
-                    </div>
-                  )}
-                </div>
+              <div className="h-full">
               </div>
             )}
           </div>
