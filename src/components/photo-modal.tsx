@@ -414,23 +414,36 @@ export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantNa
               )}
             </div>
 
-            <div className="sticky bottom-0 left-0 right-0 p-3 md:p-4 border-t space-y-2 md:space-y-3 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 pb-[env(safe-area-inset-bottom)]">
+            <div className="sticky bottom-0 left-0 right-0 p-3 md:p-4 border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 pb-[env(safe-area-inset-bottom)] flex items-end gap-2 md:gap-3">
               <Textarea
                 ref={textareaRef}
                 placeholder="Напишите комментарий к этой фотографии..."
                 value={commentText}
-                onChange={(e) => setCommentText(e.target.value)}
-                className="min-h-[50px] md:min-h-[60px] resize-none text-base md:text-sm"
+                rows={1}
+                onChange={(e) => {
+                  setCommentText(e.target.value);
+                  const el = e.currentTarget;
+                  el.style.height = 'auto';
+                  const maxH = Math.floor(window.innerHeight * 0.3);
+                  el.style.height = Math.min(el.scrollHeight, maxH) + 'px';
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    handleCommentSubmit();
+                  }
+                }}
+                className="flex-1 resize-none overflow-y-auto text-base md:text-sm min-h-[44px] max-h-[30dvh]"
                 aria-label="Комментарий к текущей фотографии"
               />
               <Button
                 onClick={handleCommentSubmit}
                 disabled={!commentText.trim()}
-                className="w-full"
-                size="sm"
+                size="icon"
+                className="shrink-0 rounded-full h-10 w-10 bg-contest-blue text-white hover:bg-contest-blue/90"
+                aria-label="Отправить комментарий"
               >
-                <Send className="w-4 h-4 mr-2" />
-                Отправить
+                <Send className="w-4 h-4" />
               </Button>
             </div>
           </div>
