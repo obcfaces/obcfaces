@@ -367,12 +367,16 @@ export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantNa
                   <h3 className="font-semibold text-contest-text truncate">
                     {contestantName}
                     {age ? `, ${age}` : ""}
+                    {(weight || height) ? (
+                      <span className="ml-1 text-xs sm:text-sm text-muted-foreground font-normal">
+                        (
+                        {weight ? `${weight} кг` : ""}
+                        {(weight && height) ? " · " : ""}
+                        {height ? `${height} см` : ""}
+                        )
+                      </span>
+                    ) : null}
                   </h3>
-                  <div className="text-xs sm:text-sm text-muted-foreground font-normal">
-                    {weight ? `${weight} кг` : ""}
-                    {(weight && height) ? " · " : ""}
-                    {height ? `${height} см` : ""}
-                  </div>
                   <div className="text-sm text-contest-blue truncate">
                     {(country || "")}
                     {(country && city) ? " · " : ""}
