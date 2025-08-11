@@ -8,7 +8,7 @@ import SearchableSelect from "@/components/ui/searchable-select";
 import { toast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
-import { Country, City } from "country-state-city";
+import { Country, State, City } from "country-state-city";
 
 const LoginModalTrigger = () => {
   const [open, setOpen] = useState(false);
@@ -20,6 +20,8 @@ const LoginModalTrigger = () => {
   const [lastName, setLastName] = useState("");
   const [country, setCountry] = useState("");
   const [countryCode, setCountryCode] = useState<string | null>(null);
+  const [stateName, setStateName] = useState("");
+  const [stateCode, setStateCode] = useState<string | null>(null);
   const [city, setCity] = useState("");
   const [age, setAge] = useState<string>("");
   const [photo, setPhoto] = useState<File | null>(null);
@@ -27,7 +29,11 @@ const LoginModalTrigger = () => {
   const navigate = useNavigate();
 
   const countries = useMemo(() => Country.getAllCountries(), []);
-  const cities = useMemo(() => countryCode ? City.getCitiesOfCountry(countryCode) : [], [countryCode]);
+  const states = useMemo(() => (countryCode ? State.getStatesOfCountry(countryCode) : []), [countryCode]);
+  const cities = useMemo(
+    () => (countryCode && stateCode ? City.getCitiesOfState(countryCode, stateCode) : []),
+    [countryCode, stateCode]
+  );
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,6 +56,7 @@ const LoginModalTrigger = () => {
               first_name: firstName || null,
               last_name: lastName || null,
               country: country || null,
+              state: stateName || null,
               city: city || null,
               age: age ? Number(age) : null,
             },
@@ -75,6 +82,7 @@ const LoginModalTrigger = () => {
                 first_name: firstName || null,
                 last_name: lastName || null,
                 country: country || null,
+                state: stateName || null,
                 city: city || null,
                 age: age ? Number(age) : null,
                 avatar_url: uploadedUrl,
@@ -146,37 +154,55 @@ const LoginModalTrigger = () => {
               </div>
               <div className="space-y-2">
                 <Label>Страна</Label>
-                <Select value={countryCode ?? ""} onValueChange={(code) => {
-                  setCountryCode(code);
-                  const c = countries.find((c) => c.isoCode === code);
-                  setCountry(c?.name || "");
-                  setCity("");
-                }}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Страна" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {countries.map((c) => (
-                      <SelectItem key={c.isoCode} value={c.isoCode}>{c.name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <SearchableSelect
+                  value={countryCode ?? ""}
+                  onValueChange={(code) => {
+                    setCountryCode(code);
+                    const c = countries.find((c) => c.isoCode === code);
+                    setCountry(c?.name || "");
+                    setStateName("");
+                    setStateCode(null);
+                    setCity("");
+                  }}
+                  placeholder="Страна"
+                  ariaLabel="Выбор страны"
+                  options={countries.map((c) => ({ value: c.isoCode, label: c.name }))}
+                />
               </div>
               <div className="space-y-2">
-                <Label>Город</Label>
-                <Select disabled={!countryCode} value={city} onValueChange={setCity}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Город" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {cities.map((ct) => (
-                      <SelectItem key={`${ct.name}-${ct.latitude}-${ct.longitude}`} value={ct.name}>{ct.name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Label>Штат/Регион</Label>
+                <SearchableSelect
+                  disabled={!countryCode}
+                  value={stateCode ?? ""}
+                  onValueChange={(code) => {
+                    setStateCode(code);
+                    const s = states.find((s) => s.isoCode === code);
+                    setStateName(s?.name || "");
+                    setCity("");
+                  }}
+                  placeholder="Штат/Регион"
+                  ariaLabel="Выбор региона"
+                  options={states.map((s) => ({ value: s.isoCode, label: s.name }))}
+                />
                 {!countryCode && (
                   <p className="text-xs text-muted-foreground">Сначала выберите страну</p>
                 )}
+              </div>
+              <div className="space-y-2">
+                <Label>Город</Label>
+                <SearchableSelect
+                  disabled={!countryCode || !stateCode}
+                  value={city}
+                  onValueChange={setCity}
+                  placeholder="Город"
+                  ariaLabel="Выбор города"
+                  options={cities.map((ct) => ({ value: ct.name, label: ct.name }))}
+                />
+                {!countryCode ? (
+                  <p className="text-xs text-muted-foreground">Сначала выберите страну</p>
+                ) : !stateCode ? (
+                  <p className="text-xs text-muted-foreground">Сначала выберите штат/регион</p>
+                ) : null}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="auth-age">Возраст</Label>
