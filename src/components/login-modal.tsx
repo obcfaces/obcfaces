@@ -1,12 +1,14 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
 import { Eye, EyeOff } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
+import { Country, City } from "country-state-city";
 
 const LoginModalTrigger = () => {
   const [open, setOpen] = useState(false);
@@ -17,11 +19,15 @@ const LoginModalTrigger = () => {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [country, setCountry] = useState("");
+  const [countryCode, setCountryCode] = useState<string | null>(null);
   const [city, setCity] = useState("");
   const [age, setAge] = useState<string>("");
   const [photo, setPhoto] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+
+  const countries = useMemo(() => Country.getAllCountries(), []);
+  const cities = useMemo(() => countryCode ? City.getCitiesOfCountry(countryCode) : [], [countryCode]);
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -117,12 +123,12 @@ const LoginModalTrigger = () => {
         <form onSubmit={onSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="auth-email">Email</Label>
-            <Input id="auth-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+            <Input id="auth-email" type="email" placeholder="email" className="placeholder:italic placeholder:text-muted-foreground" value={email} onChange={(e) => setEmail(e.target.value)} required />
           </div>
           <div className="space-y-2">
             <Label htmlFor="auth-password">Пароль</Label>
             <div className="relative">
-              <Input id="auth-password" type={showPassword ? "text" : "password"} className="pr-10" value={password} onChange={(e) => setPassword(e.target.value)} required />
+              <Input id="auth-password" type={showPassword ? "text" : "password"} placeholder="password" className="pr-10 placeholder:italic placeholder:text-muted-foreground" value={password} onChange={(e) => setPassword(e.target.value)} required />
               <button type="button" aria-label={showPassword ? "Скрыть пароль" : "Показать пароль"} onClick={() => setShowPassword((v) => !v)} className="absolute inset-y-0 right-2 inline-flex items-center text-muted-foreground hover:text-foreground">
                 {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
               </button>
@@ -132,23 +138,46 @@ const LoginModalTrigger = () => {
             <div className="grid gap-3 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="auth-firstname">Имя</Label>
-                <Input id="auth-firstname" value={firstName} onChange={(e) => setFirstName(e.target.value)} />
+                <Input id="auth-firstname" placeholder="Имя" className="placeholder:italic placeholder:text-muted-foreground" value={firstName} onChange={(e) => setFirstName(e.target.value)} />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="auth-lastname">Фамилия</Label>
-                <Input id="auth-lastname" value={lastName} onChange={(e) => setLastName(e.target.value)} />
+                <Input id="auth-lastname" placeholder="Фамилия" className="placeholder:italic placeholder:text-muted-foreground" value={lastName} onChange={(e) => setLastName(e.target.value)} />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="auth-country">Страна</Label>
-                <Input id="auth-country" value={country} onChange={(e) => setCountry(e.target.value)} />
+                <Label>Страна</Label>
+                <Select value={countryCode ?? ""} onValueChange={(code) => {
+                  setCountryCode(code);
+                  const c = countries.find((c) => c.isoCode === code);
+                  setCountry(c?.name || "");
+                  setCity("");
+                }}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Страна" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {countries.map((c) => (
+                      <SelectItem key={c.isoCode} value={c.isoCode}>{c.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="auth-city">Город</Label>
-                <Input id="auth-city" value={city} onChange={(e) => setCity(e.target.value)} />
+                <Label>Город</Label>
+                <Select disabled={!countryCode} value={city} onValueChange={setCity}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Город" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {cities.map((ct) => (
+                      <SelectItem key={`${ct.name}-${ct.latitude}-${ct.longitude}`} value={ct.name}>{ct.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="auth-age">Возраст</Label>
-                <Input id="auth-age" type="number" inputMode="numeric" value={age} onChange={(e) => setAge(e.target.value)} />
+                <Input id="auth-age" type="number" inputMode="numeric" placeholder="Возраст" className="placeholder:italic placeholder:text-muted-foreground" value={age} onChange={(e) => setAge(e.target.value)} />
               </div>
               <div className="space-y-2 sm:col-span-2">
                 <Label htmlFor="auth-photo">Фото</Label>
