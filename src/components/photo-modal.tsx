@@ -238,6 +238,10 @@ export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantNa
         [activeIndex]: [newComment, ...(prev[activeIndex] || [])]
       }));
       setCommentText("");
+      // Reset textarea height back to one line after submit
+      if (textareaRef.current) {
+        textareaRef.current.style.height = '44px';
+      }
       toast({
         title: "Комментарий добавлен",
         description: "Ваш комментарий к фотографии добавлен",
