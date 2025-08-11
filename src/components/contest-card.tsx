@@ -85,6 +85,7 @@ export function ContestantCard({
           {((isVoted && !showThanks) || isEditing) && (
             <div className="absolute top-2 left-4 z-20">
               <h3 className="text-xl font-semibold text-contest-text">{name}, {age} <span className="text-sm text-muted-foreground">({weight} kg · {height} cm)</span></h3>
+              <div className="text-contest-blue text-sm">{country} · {city}</div>
             </div>
           )}
           
@@ -101,7 +102,7 @@ export function ContestantCard({
                 </div>
               </div>
               <div className="text-right pr-2 pt-1">
-                <p className="text-contest-blue text-sm">{country} · {city}</p>
+                
                 {isWinner && prize && (
                   <div className="text-contest-blue font-bold text-sm mt-1">
                     {prize}
