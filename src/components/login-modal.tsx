@@ -34,9 +34,16 @@ const LoginModalTrigger = () => {
     if (!countryCode || !stateCode) return [];
     const byState = City.getCitiesOfState(countryCode, stateCode);
     if (byState.length) return byState;
-    // Fallback for countries/states missing state-level cities in the dataset
-    return City.getCitiesOfCountry(countryCode).filter((c) => c.stateCode === stateCode);
-  }, [countryCode, stateCode]);
+    // Fallback for datasets where city.stateCode may store the state NAME instead of ISO code (e.g., some PH provinces)
+    const all = City.getCitiesOfCountry(countryCode);
+    const normalize = (s: string | null | undefined) => (s ?? "").toLowerCase().replace(/\s+/g, "");
+    const code = normalize(stateCode);
+    const name = normalize(stateName);
+    return all.filter((c) => {
+      const sc = normalize(c.stateCode);
+      return sc === code || (!!name && sc === name);
+    });
+  }, [countryCode, stateCode, stateName]);
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
