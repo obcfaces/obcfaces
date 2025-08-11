@@ -47,7 +47,7 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
           <ChevronsUpDown className="ml-2 size-4 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[--radix-popover-trigger-width] p-0 z-50 bg-popover" onWheelCapture={(e) => e.stopPropagation()}>
+      <PopoverContent className="w-[--radix-popover-trigger-width] p-0 z-50 bg-popover" onWheelCapture={(e) => e.stopPropagation()} onOpenAutoFocus={(e) => e.preventDefault()}>
         <Command>
           <CommandInput placeholder="Поиск..." />
           <CommandEmpty>{emptyMessage}</CommandEmpty>

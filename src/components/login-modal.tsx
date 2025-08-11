@@ -30,10 +30,13 @@ const LoginModalTrigger = () => {
 
   const countries = useMemo(() => Country.getAllCountries(), []);
   const states = useMemo(() => (countryCode ? State.getStatesOfCountry(countryCode) : []), [countryCode]);
-  const cities = useMemo(
-    () => (countryCode && stateCode ? City.getCitiesOfState(countryCode, stateCode) : []),
-    [countryCode, stateCode]
-  );
+  const cities = useMemo(() => {
+    if (!countryCode || !stateCode) return [];
+    const byState = City.getCitiesOfState(countryCode, stateCode);
+    if (byState.length) return byState;
+    // Fallback for countries/states missing state-level cities in the dataset
+    return City.getCitiesOfCountry(countryCode).filter((c) => c.stateCode === stateCode);
+  }, [countryCode, stateCode]);
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

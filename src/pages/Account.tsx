@@ -52,10 +52,13 @@ const Account = () => {
   const [countryCode, setCountryCode] = useState<string | null>(null);
   const [stateCode, setStateCode] = useState<string | null>(null);
   const states = useMemo(() => (countryCode ? State.getStatesOfCountry(countryCode) : []), [countryCode]);
-  const cities = useMemo(
-    () => (countryCode && stateCode ? City.getCitiesOfState(countryCode, stateCode) : []),
-    [countryCode, stateCode]
-  );
+  const cities = useMemo(() => {
+    if (!countryCode || !stateCode) return [];
+    const byState = City.getCitiesOfState(countryCode, stateCode);
+    if (byState.length) return byState;
+    // Fallback when dataset lacks state-level city mapping
+    return City.getCitiesOfCountry(countryCode).filter((c) => c.stateCode === stateCode);
+  }, [countryCode, stateCode]);
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
