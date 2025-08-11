@@ -195,6 +195,9 @@ const Account = () => {
                   ))}
                 </SelectContent>
               </Select>
+              {!countryCode && (
+                <p className="text-xs text-muted-foreground">Сначала выберите страну</p>
+              )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="height_cm">Рост (см)</Label>
