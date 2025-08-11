@@ -363,7 +363,7 @@ export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantNa
 
         {/* Comments section - Desktop: sidebar, Mobile: bottom panel */}
         <div className={cn(
-          "bg-white flex flex-col",
+          "bg-white relative flex flex-col",
           "h-1/3 md:h-full md:w-1/3" // Mobile: 2/3 photo, 1/3 comments; Desktop: 1/3 width full height
         )}>
             <div className="p-4 border-b">
@@ -375,7 +375,7 @@ export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantNa
               </p>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-4 space-y-3 min-h-0">
+            <div className="flex-1 overflow-y-auto p-4 pb-24 md:pb-28 space-y-3 min-h-0">
               {currentPhotoComments.length === 0 ? (
                 <p className="text-center text-muted-foreground text-sm">
                   Пока нет комментариев к этой фотографии
@@ -393,7 +393,7 @@ export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantNa
               )}
             </div>
 
-            <div className="p-3 md:p-4 border-t space-y-2 md:space-y-3">
+            <div className="sticky bottom-0 left-0 right-0 p-3 md:p-4 border-t space-y-2 md:space-y-3 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/80">
               <Textarea
                 placeholder="Напишите комментарий к этой фотографии..."
                 value={commentText}
