@@ -153,8 +153,9 @@ export function ContestantCard({
             {isVoted && !isEditing && !showThanks && (
               <div className="flex items-start justify-between h-full pl-4 pr-4 pt-2 pb-2">
                 <div>
-                   <h3 className="text-xl font-semibold text-contest-text">{name}, {age} ({weight} kg · {height} cm)</h3>
+                   <h3 className="text-xl font-semibold text-contest-text">{name}, {age}</h3>
                    <p className="text-contest-blue">{country} · {city}</p>
+                   <p className="text-muted-foreground text-sm">{weight} kg · {height} cm</p>
                 </div>
                 <div className="text-right flex items-start gap-2">
                   {isWinner && prize && (
@@ -420,9 +421,12 @@ export function ContestantCard({
             <div className="absolute inset-0 bg-white rounded-r flex flex-col justify-between p-2 sm:p-3">
               <div className="flex items-start justify-between">
                 <div className="min-w-0 flex-1 mr-2">
-                   <h3 className="font-semibold text-contest-text text-base sm:text-lg truncate">{name}, {age} ({weight} kg · {height} cm)</h3>
+                   <h3 className="font-semibold text-contest-text text-base sm:text-lg truncate">{name}, {age}</h3>
                    <div className="text-sm sm:text-base text-contest-blue truncate">
                      {country} · {city}
+                   </div>
+                   <div className="text-sm sm:text-base text-muted-foreground">
+                     {weight} kg · {height} cm
                    </div>
                 </div>
                 
