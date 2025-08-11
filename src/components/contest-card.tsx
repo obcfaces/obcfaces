@@ -132,7 +132,7 @@ export function ContestantCard({
           <div className="relative p-4 border-b border-contest-border h-[72px]">
             {/* Voting overlay - shown by default when not voted and not editing */}
             {!isVoted && !isEditing && !showThanks && (
-              <div className="absolute inset-0 bg-gray-200 flex items-center justify-center gap-6 h-full">
+              <div className="absolute inset-0 bg-gray-300 flex items-center justify-center gap-6 h-full">
                 <span className="text-2xl font-medium text-gray-800 mr-8">Vote</span>
                 <div className="scale-[2]">
                   <StarRating 
@@ -162,7 +162,7 @@ export function ContestantCard({
             
             {/* Re-voting overlay - shown when editing existing vote */}
             {isVoted && isEditing && !showThanks && (
-              <div className="absolute inset-0 bg-gray-200 flex items-center justify-center gap-6 h-full">
+              <div className="absolute inset-0 bg-gray-300 flex items-center justify-center gap-6 h-full">
                 <span className="text-2xl font-medium text-gray-800 mr-8">Vote</span>
                 <div className="scale-[2]">
                   <StarRating 
@@ -383,7 +383,7 @@ export function ContestantCard({
         <div className="flex-1 p-1.5 sm:p-2 md:p-3 flex flex-col relative">
           {/* Voting overlay - shown by default when not voted and not editing */}
           {!isVoted && !isEditing && !showThanks && (
-            <div className="absolute inset-0 bg-gray-200 rounded-r flex flex-col items-center justify-center gap-3">
+            <div className="absolute inset-0 bg-gray-300 rounded-r flex flex-col items-center justify-center gap-3">
               <span className="text-lg sm:text-xl font-medium text-gray-800">Vote</span>
               <div className="scale-[1.7] sm:scale-[2.2]">
                 <StarRating 
@@ -417,7 +417,7 @@ export function ContestantCard({
           
           {/* Re-voting overlay - shown when editing existing vote */}
           {isVoted && isEditing && !showThanks && (
-            <div className="absolute inset-0 bg-gray-200 rounded-r flex flex-col items-center justify-center gap-3">
+            <div className="absolute inset-0 bg-gray-300 rounded-r flex flex-col items-center justify-center gap-3">
               <span className="text-lg sm:text-xl font-medium text-gray-800">Vote</span>
               <div className="scale-[1.7] sm:scale-[2.2]">
                 <StarRating 
