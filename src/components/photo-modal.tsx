@@ -274,13 +274,13 @@ export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantNa
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-5xl h-[90vh] p-0 bg-black/90 top-2 md:top-4 translate-y-0">
+      <DialogContent className="w-screen max-w-[100vw] h-[100vh] p-0 bg-black/90 top-0 translate-y-0">
         {/* Desktop: flex layout, Mobile: block layout */}
         <div className="h-full flex flex-col md:flex-row">
           {/* Photo section */}
           <div className={cn(
             "relative flex items-start justify-center transition-all duration-300 pt-2 md:pt-4",
-            "h-1/2 md:h-full md:w-2/3" // Always show comments on mobile and desktop
+            "w-full h-2/3 md:h-full md:w-2/3" // Always show comments on mobile and desktop
           )}>
             <button
               onClick={onClose}
@@ -309,7 +309,7 @@ export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantNa
           <img
             src={photos[activeIndex]}
             alt={`${contestantName} photo ${activeIndex + 1}`}
-            className="max-w-full max-h-full object-contain self-start"
+            className="w-full max-w-full max-h-full object-contain self-start"
             onTouchStart={onTouchStart}
             onTouchMove={onTouchMove}
             onTouchEnd={onTouchEnd}
@@ -362,7 +362,7 @@ export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantNa
         {/* Comments section - Desktop: sidebar, Mobile: bottom panel */}
         <div className={cn(
           "bg-white flex flex-col",
-          "h-1/2 md:h-full md:w-1/3" // Mobile: 1/2 height like FB, Desktop: 1/3 width full height
+          "h-1/3 md:h-full md:w-1/3" // Mobile: 2/3 photo, 1/3 comments; Desktop: 1/3 width full height
         )}>
             <div className="p-4 border-b">
               <div className="flex items-center justify-between">
