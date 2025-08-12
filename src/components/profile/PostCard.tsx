@@ -1,11 +1,9 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { HoverCard, HoverCardTrigger, HoverCardContent } from "@/components/ui/hover-card";
-import { Link } from "react-router-dom";
 
 interface PostCardProps {
   authorName: string;
-  authorId?: string; // for linking to profile /u/:id
   authorAvatarUrl?: string | null;
   time: string;
   content: string;
@@ -22,7 +20,6 @@ const getInitials = (name: string) => {
 
 const PostCard = ({
   authorName,
-  authorId,
   authorAvatarUrl,
   time,
   content,
@@ -40,16 +37,9 @@ const PostCard = ({
         <div className="flex flex-col">
           <HoverCard>
             <HoverCardTrigger asChild>
-              {authorId ? (
-                <Link
-                  to={`/u/${authorId}`}
-                  className="font-medium leading-none text-left hover:underline focus:outline-none"
-                >
-                  {authorName}
-                </Link>
-              ) : (
-                <span className="font-medium leading-none">{authorName}</span>
-              )}
+              <button className="font-medium leading-none text-left hover:underline focus:outline-none">
+                {authorName}
+              </button>
             </HoverCardTrigger>
             <HoverCardContent>
               <div className="flex items-center gap-3">
