@@ -48,7 +48,7 @@ const Profile = () => {
           <p className="text-muted-foreground">Загрузка…</p>
         ) : !data ? (
           <div>
-            <p className="text-muted-foreground mb-3">Профиль не найден.</p>
+            <p className="text-muted-foreground mb-3">Профиль не найден или приватен.</p>
             <Link to="/" className="text-primary underline">На главную</Link>
           </div>
         ) : (
