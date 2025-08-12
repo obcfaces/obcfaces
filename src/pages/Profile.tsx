@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Helmet } from "react-helmet-async";
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -246,7 +246,11 @@ const samplePosts = useMemo(
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  {!isOwner && (
+                  {isOwner ? (
+                    <Button asChild>
+                      <Link to="/account">Редактировать профиль</Link>
+                    </Button>
+                  ) : (
                     <>
                       <Button variant={isFollowing ? "secondary" : "default"} onClick={handleFollowToggle} disabled={loadingFollow}>
                         {isFollowing ? "Отписаться" : "Подписаться"}
