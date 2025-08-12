@@ -1,9 +1,8 @@
 import { ContestHeader } from "@/components/contest-header";
 import { ContestSection } from "@/components/contest-section";
 import AuthNav from "@/components/auth-nav";
-import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { Search } from "lucide-react";
+import GlobalSearch from "@/components/global-search";
 
 const Index = () => {
   return (
@@ -14,9 +13,7 @@ const Index = () => {
             <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-semibold">obc</span>
             <span>Bryre</span>
           </Link>
-          <Button variant="ghost" size="icon" aria-label="Поиск">
-            <Search className="h-5 w-5" />
-          </Button>
+          <GlobalSearch />
         </div>
         <AuthNav />
       </nav>
