@@ -61,11 +61,13 @@ const Account = () => {
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (!session?.user) {
+      if (event === "SIGNED_OUT") {
         navigate("/auth", { replace: true });
         return;
       }
-      setUserId(session.user.id);
+      if (session?.user) {
+        setUserId(session.user.id);
+      }
     });
 
     supabase.auth.getSession().then(async ({ data }) => {
