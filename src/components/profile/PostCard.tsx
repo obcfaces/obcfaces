@@ -1,5 +1,6 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
+import { HoverCard, HoverCardTrigger, HoverCardContent } from "@/components/ui/hover-card";
 
 interface PostCardProps {
   authorName: string;
@@ -34,7 +35,25 @@ const PostCard = ({
           <AvatarFallback>{getInitials(authorName)}</AvatarFallback>
         </Avatar>
         <div className="flex flex-col">
-          <span className="font-medium leading-none">{authorName}</span>
+          <HoverCard>
+            <HoverCardTrigger asChild>
+              <button className="font-medium leading-none text-left hover:underline focus:outline-none">
+                {authorName}
+              </button>
+            </HoverCardTrigger>
+            <HoverCardContent>
+              <div className="flex items-center gap-3">
+                <Avatar className="h-12 w-12">
+                  <AvatarImage src={authorAvatarUrl ?? undefined} alt={`Аватар ${authorName}`} />
+                  <AvatarFallback>{getInitials(authorName)}</AvatarFallback>
+                </Avatar>
+                <div className="flex flex-col">
+                  <span className="font-medium">{authorName}</span>
+                  <span className="text-xs text-muted-foreground">Последняя активность: {time}</span>
+                </div>
+              </div>
+            </HoverCardContent>
+          </HoverCard>
           <span className="text-xs text-muted-foreground">{time}</span>
         </div>
       </CardHeader>
