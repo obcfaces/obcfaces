@@ -1,12 +1,12 @@
 import { ContestHeader } from "@/components/contest-header";
 import { ContestSection } from "@/components/contest-section";
-import LoginModalTrigger from "@/components/login-modal";
+import AuthNav from "@/components/auth-nav";
 
 const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       <nav className="container mx-auto flex justify-end items-center gap-2 px-4 py-2">
-        <LoginModalTrigger />
+        <AuthNav />
       </nav>
       <ContestHeader />
       
