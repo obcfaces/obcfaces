@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { ContestantCard } from "@/components/contest-card";
-
-
+import { Badge } from "@/components/ui/badge";
 import contestant1Face from "@/assets/contestant-1-face.jpg";
 import contestant1Full from "@/assets/contestant-1-full.jpg";
 import contestant2Face from "@/assets/contestant-2-face.jpg";
@@ -136,9 +135,9 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
               <p className="text-muted-foreground italic -mt-1 self-center">{subtitle}</p>
             </div>
             {isActive && description && (
-              <span className="text-xs font-medium bg-accent text-accent-foreground px-2 py-1 rounded-full animate-fade-in hover-scale">
+              <Badge variant="outline" className="text-xs px-2 py-1 rounded-full animate-fade-in hover-scale">
                 {description}
-              </span>
+              </Badge>
             )}
           </div>
           {!isActive && description && (
