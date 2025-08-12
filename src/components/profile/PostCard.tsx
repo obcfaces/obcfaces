@@ -57,7 +57,7 @@ const PostCard = ({
           <span className="text-xs text-muted-foreground">{time}</span>
         </div>
       </CardHeader>
-      <CardContent className="px-0 sm:px-6 pt-0 pb-6">
+      <CardContent className="px-4 sm:px-6 pt-0 pb-6">
         <p className="text-sm whitespace-pre-line mb-4">{content}</p>
         {imageSrc && (
           <img
