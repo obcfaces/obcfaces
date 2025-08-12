@@ -137,7 +137,7 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
       </div>
 
       <div className="mb-4 px-6 sm:px-0">
-        <div className="flex items-center gap-3" role="tablist" aria-label="View mode">
+        <div className="flex items-end gap-8 pb-1 border-b border-border w-fit" role="tablist" aria-label="View mode">
           <button
             type="button"
             onClick={() => setViewMode('full')}
