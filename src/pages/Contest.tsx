@@ -77,7 +77,7 @@ const Contest = () => {
           {/* View controls moved below, above cards */}
 
           <header className="mb-6">
-            <h1 className="text-3xl font-bold text-contest-text">CURRENT WEEK.</h1>
+            <h1 className="text-3xl font-bold text-contest-text">THIS WEEK</h1>
             <p className="text-sm text-muted-foreground">{week.label}</p>
             <p className="text-muted-foreground">Help us choose the winner of the week.</p>
           </header>
