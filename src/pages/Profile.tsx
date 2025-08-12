@@ -210,15 +210,15 @@ const samplePosts = useMemo(
         <link rel="canonical" href={`${window.location.origin}/u/${id ?? ""}`} />
       </Helmet>
 
-      <section className="container mx-auto max-w-3xl py-8 px-4">
+      <section className="container mx-auto max-w-3xl py-8 px-0 sm:px-4">
 {loading ? (
           <p className="text-muted-foreground">Загрузка…</p>
         ) : (
           <>
 
             <header className="mb-4">
-              <div className="h-40 sm:h-56 w-full rounded-lg bg-muted" role="img" aria-label="Обложка профиля" />
-              <div className="-mt-8 sm:-mt-10 flex items-end gap-4 px-2 sm:px-4">
+              <div className="h-40 sm:h-56 w-full rounded-none sm:rounded-lg bg-muted" role="img" aria-label="Обложка профиля" />
+              <div className="-mt-8 sm:-mt-10 flex items-end gap-4 px-0 sm:px-4">
                 <Avatar className="h-20 w-20 ring-2 ring-background">
 <AvatarImage src={profile.avatar_url ?? undefined} alt={`Аватар ${profile.display_name ?? "пользователя"}`} />
                   <AvatarFallback>{initials}</AvatarFallback>
@@ -233,7 +233,7 @@ const samplePosts = useMemo(
               </div>
             </header>
 
-            <div className="px-2 sm:px-4">
+            <div className="px-0 sm:px-4">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <div className="flex items-center gap-6">
                   <div className="text-center">
@@ -301,14 +301,14 @@ const samplePosts = useMemo(
               </TabsContent>
 
               <TabsContent value="photos" className="mt-4">
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-0 sm:gap-3">
 {[c1, c2, c3, c1, c2, c3].map((src, idx) => (
                     <img
                       key={idx}
                       src={src}
                       loading="lazy"
                       alt={`Фото ${idx + 1} — ${profile.display_name ?? "пользователь"}`}
-                      className="w-full h-32 sm:h-36 object-cover rounded-md"
+                      className="w-full h-32 sm:h-36 object-cover rounded-none sm:rounded-md"
                     />
                   ))}
                 </div>

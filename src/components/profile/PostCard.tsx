@@ -28,7 +28,7 @@ const PostCard = ({
   comments = 0,
 }: PostCardProps) => {
   return (
-    <Card className="border bg-card">
+    <Card className="rounded-none sm:rounded-lg border bg-card">
       <CardHeader className="flex flex-row items-center gap-3 py-4">
         <Avatar className="h-10 w-10">
           <AvatarImage src={authorAvatarUrl ?? undefined} alt={`Аватар ${authorName}`} />
@@ -57,14 +57,14 @@ const PostCard = ({
           <span className="text-xs text-muted-foreground">{time}</span>
         </div>
       </CardHeader>
-      <CardContent className="space-y-3">
+      <CardContent className="space-y-3 px-0 sm:px-6 pt-0 pb-6">
         <p className="text-sm whitespace-pre-line">{content}</p>
         {imageSrc && (
           <img
             src={imageSrc}
             alt={`Изображение из поста — ${authorName}`}
             loading="lazy"
-            className="w-full rounded-lg object-cover"
+            className="block w-full object-cover rounded-none sm:rounded-lg"
           />
         )}
       </CardContent>
