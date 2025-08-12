@@ -113,8 +113,6 @@ const ageOptions = useMemo(() => Array.from({ length: 65 }, (_, i) => 16 + i), [
   const invalidFirstName = showErrors && !firstName.trim();
   const invalidLastName = showErrors && !lastName.trim();
   const invalidCountry = showErrors && !countryCode;
-  const invalidState = showErrors && !stateCode;
-  const invalidCity = showErrors && !city.trim();
   const invalidAge = showErrors && !age;
 
   return (
@@ -168,54 +166,6 @@ const ageOptions = useMemo(() => Array.from({ length: 65 }, (_, i) => 16 + i), [
                   invalid={invalidCountry}
                   options={countries.map((c) => ({ value: c.isoCode, label: c.name }))}
                 />
-              </div>
-              <div className="space-y-2">
-                
-                <SearchableSelect
-                  disabled={!countryCode}
-                  value={stateCode ?? ""}
-                  onValueChange={(code) => {
-                    setStateCode(code);
-                    const s = states.find((s) => s.isoCode === code);
-                    setStateName(s?.name || "");
-                    setCity("");
-                  }}
-                  placeholder="State/Region"
-                  ariaLabel="Select region"
-                  invalid={invalidState}
-                  options={states.map((s) => ({ value: s.isoCode, label: s.name }))}
-                />
-              </div>
-              <div className="space-y-2">
-                
-                {(!countryCode || !stateCode) ? (
-                  <SearchableSelect
-                    disabled
-                    value={""}
-                    onValueChange={() => {}}
-                    placeholder="City"
-                    ariaLabel="Select city"
-                    options={[]}
-                  />
-                ) : cities.length > 0 ? (
-                  <SearchableSelect
-                    value={city}
-                    onValueChange={setCity}
-                    placeholder="City"
-                    ariaLabel="Select city"
-                    invalid={invalidCity}
-                    options={cities.map((ct) => ({ value: ct.name, label: ct.name }))}
-                  />
-                ) : (
-                  <Input
-                    id="auth-city"
-                    placeholder="City (enter manually)"
-                    className={`placeholder:italic placeholder:text-muted-foreground ${invalidCity ? 'border-destructive focus:ring-destructive' : ''}`}
-                    aria-invalid={invalidCity}
-                    value={city}
-                    onChange={(e) => setCity(e.target.value)}
-                  />
-                )}
               </div>
               <div className="space-y-2">
                 
