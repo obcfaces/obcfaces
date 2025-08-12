@@ -96,37 +96,40 @@ const Contest = () => {
           </div>
 
           <div className="mb-4">
-            <div className="flex items-center gap-3" role="tablist" aria-label="View mode">
-              <button
-                type="button"
-                onClick={() => setViewMode('full')}
-                aria-pressed={viewMode === 'full'}
-                aria-label="List view"
-                className="p-1 rounded-md hover:bg-accent transition-colors"
-              >
-                <img
-                  src={viewMode === 'full' ? listActiveIcon : listIcon}
-                  alt="List view"
-                  width={28}
-                  height={28}
-                  loading="lazy"
-                />
-              </button>
-              <button
-                type="button"
-                onClick={() => setViewMode('compact')}
-                aria-pressed={viewMode === 'compact'}
-                aria-label="Grid view"
-                className="p-1 rounded-md hover:bg-accent transition-colors"
-              >
-                <img
-                  src={viewMode === 'compact' ? tableActiveIcon : tableIcon}
-                  alt="Grid view"
-                  width={28}
-                  height={28}
-                  loading="lazy"
-                />
-              </button>
+            <div className="relative">
+              <div aria-hidden className="absolute inset-x-0 bottom-0 border-b border-border" />
+              <div className="relative z-10 flex items-end justify-evenly w-full pb-0" role="tablist" aria-label="View mode">
+                <button
+                  type="button"
+                  onClick={() => setViewMode('full')}
+                  aria-pressed={viewMode === 'full'}
+                  aria-label="List view"
+                  className="p-1 rounded-md hover:bg-accent transition-colors"
+                >
+                  <img
+                    src={viewMode === 'full' ? listActiveIcon : listIcon}
+                    alt="List view"
+                    width={28}
+                    height={28}
+                    loading="lazy"
+                  />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setViewMode('compact')}
+                  aria-pressed={viewMode === 'compact'}
+                  aria-label="Grid view"
+                  className="p-1 rounded-md hover:bg-accent transition-colors"
+                >
+                  <img
+                    src={viewMode === 'compact' ? tableActiveIcon : tableIcon}
+                    alt="Grid view"
+                    width={28}
+                    height={28}
+                    loading="lazy"
+                  />
+                </button>
+              </div>
             </div>
           </div>
 
