@@ -130,17 +130,15 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
     <section className="max-w-6xl mx-auto px-0 sm:px-6 py-8">
       <div className="mb-8 px-6 sm:px-0">
         <div className="mb-4">
-          <div className="flex items-center justify-center gap-2 sm:gap-3 mb-1">
+          <div className="flex items-center gap-3 mb-1">
             <h2 className="text-3xl font-bold text-contest-text">{title}</h2>
-            {subtitle && (
-              <span className="text-muted-foreground italic text-xs">{subtitle}</span>
-            )}
             {isActive && description && (
               <span className="text-xs font-medium bg-accent text-accent-foreground px-2 py-1 rounded-full animate-fade-in hover-scale">
                 {description}
               </span>
             )}
           </div>
+          <p className="text-muted-foreground italic -mt-1">{subtitle}</p>
           {!isActive && description && (
             <p className="text-muted-foreground">{description}</p>
           )}
