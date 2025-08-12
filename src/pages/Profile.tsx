@@ -63,23 +63,25 @@ const Profile = () => {
     setBioDraft(data?.bio ?? "");
   }, [data?.bio]);
 
-  // Load followers/following counts
-  useEffect(() => {
-    if (!id) return;
-    const loadCounts = async () => {
-      const { count: followers } = await supabase
-        .from("follows")
-        .select("*", { head: true, count: "exact" })
-        .eq("followee_id", id);
-      const { count: following } = await supabase
-        .from("follows")
-        .select("*", { head: true, count: "exact" })
-        .eq("follower_id", id);
-      setFollowersCount(followers ?? 0);
-      setFollowingCount(following ?? 0);
-    };
-    loadCounts();
-  }, [id]);
+// Load followers/following counts
+useEffect(() => {
+  if (!id) return;
+  const loadCounts = async () => {
+  const { data, error } = await supabase.rpc('get_follow_stats', { target_user_id: id });
+  if (!error && data && Array.isArray(data) && data[0]) {
+    setFollowersCount((data[0] as any).followers_count ?? 0);
+    setFollowingCount((data[0] as any).following_count ?? 0);
+  } else if (!error && data && (data as any).followers_count !== undefined) {
+    // Fallback if supabase returns a single object in future versions
+    setFollowersCount((data as any).followers_count ?? 0);
+    setFollowingCount((data as any).following_count ?? 0);
+  } else {
+    setFollowersCount(0);
+    setFollowingCount(0);
+  }
+  };
+  loadCounts();
+}, [id]);
 
   // Check following state for current user
   useEffect(() => {
@@ -87,12 +89,14 @@ const Profile = () => {
       setIsFollowing(false);
       return;
     }
-    supabase
-      .from("follows")
-      .select("*", { head: true, count: "exact" })
-      .eq("follower_id", currentUserId)
-      .eq("followee_id", id)
-      .then(({ count }) => setIsFollowing((count ?? 0) > 0));
+  (async () => {
+    try {
+      const { data } = await supabase.rpc('is_following', { target_user_id: id });
+      setIsFollowing(Boolean(data));
+    } catch {
+      setIsFollowing(false);
+    }
+  })();
   }, [id, currentUserId]);
 
   const isOwner = currentUserId === (id ?? null);

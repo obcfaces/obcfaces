@@ -109,7 +109,17 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_follow_stats: {
+        Args: { target_user_id: string }
+        Returns: {
+          followers_count: number
+          following_count: number
+        }[]
+      }
+      is_following: {
+        Args: { target_user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never
