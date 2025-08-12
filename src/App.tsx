@@ -10,6 +10,7 @@ import Auth from "./pages/Auth";
 import Account from "./pages/Account";
 import Profile from "./pages/Profile";
 import AuthCallbackHandler from "@/components/auth-callback-handler";
+import TopBar from "@/components/top-bar";
 
 
 const queryClient = new QueryClient();
@@ -22,6 +23,7 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <AuthCallbackHandler />
+          <TopBar />
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
