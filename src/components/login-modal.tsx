@@ -25,6 +25,7 @@ const LoginModalTrigger = () => {
   const [stateCode, setStateCode] = useState<string | null>(null);
   const [city, setCity] = useState("");
   const [age, setAge] = useState<string>("");
+  const [gender, setGender] = useState<string>("");
   
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -43,10 +44,9 @@ const ageOptions = useMemo(() => Array.from({ length: 65 }, (_, i) => 16 + i), [
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
         toast({ description: "Signed in" });
-        setOpen(false);
-        navigate("/account", { replace: true });
+        setOpen(false); // Stay on current page
       } else {
-        const redirectUrl = `${window.location.origin}/account`;
+        const redirectUrl = window.location.href; // Confirm email back to current page
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
@@ -59,6 +59,7 @@ const ageOptions = useMemo(() => Array.from({ length: 65 }, (_, i) => 16 + i), [
               state: stateName || null,
               city: city || null,
               age: age ? Number(age) : null,
+              gender: gender || null,
             },
           },
         });
@@ -77,13 +78,13 @@ const ageOptions = useMemo(() => Array.from({ length: 65 }, (_, i) => 16 + i), [
                 state: stateName || null,
                 city: city || null,
                 age: age ? Number(age) : null,
+                gender: gender || null,
               },
               { onConflict: "id" }
             );
           if (upsertErr) throw upsertErr;
           toast({ description: "Registration complete" });
-          setOpen(false);
-          navigate("/account", { replace: true });
+          setOpen(false); // Stay on current page
         } else {
           toast({ description: "Check your email to confirm." });
           setOpen(false);
@@ -179,6 +180,20 @@ const ageOptions = useMemo(() => Array.from({ length: 65 }, (_, i) => 16 + i), [
                         {a}
                       </SelectItem>
                     ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                
+                <Select value={gender} onValueChange={setGender}>
+                  <SelectTrigger aria-label="Пол">
+                    <SelectValue placeholder="Пол" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="male">Мужской</SelectItem>
+                    <SelectItem value="female">Женский</SelectItem>
+                    <SelectItem value="other">Другое</SelectItem>
+                    <SelectItem value="na">Предпочитаю не указывать</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
