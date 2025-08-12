@@ -9,6 +9,7 @@ import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
 import Account from "./pages/Account";
 import Profile from "./pages/Profile";
+import Contest from "./pages/Contest";
 import AuthCallbackHandler from "@/components/auth-callback-handler";
 import TopBar from "@/components/top-bar";
 
@@ -26,6 +27,7 @@ const App = () => (
           <TopBar />
           <Routes>
             <Route path="/" element={<Index />} />
+            <Route path="/contest" element={<Contest />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/account" element={<Account />} />
             <Route path="/u/:id" element={<Profile />} />

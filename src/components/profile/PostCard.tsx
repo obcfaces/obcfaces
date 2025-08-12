@@ -31,7 +31,7 @@ const PostCard = ({
     <Card className="rounded-none sm:rounded-lg border bg-card">
       <CardHeader className="flex flex-row items-center gap-3 py-4">
         <Avatar className="h-10 w-10">
-          <AvatarImage src={authorAvatarUrl ?? undefined} alt={`Аватар ${authorName}`} />
+          <AvatarImage src={authorAvatarUrl ?? undefined} alt={`Avatar ${authorName}`} />
           <AvatarFallback>{getInitials(authorName)}</AvatarFallback>
         </Avatar>
         <div className="flex flex-col">
@@ -44,12 +44,12 @@ const PostCard = ({
             <HoverCardContent>
               <div className="flex items-center gap-3">
                 <Avatar className="h-12 w-12">
-                  <AvatarImage src={authorAvatarUrl ?? undefined} alt={`Аватар ${authorName}`} />
+                  <AvatarImage src={authorAvatarUrl ?? undefined} alt={`Avatar ${authorName}`} />
                   <AvatarFallback>{getInitials(authorName)}</AvatarFallback>
                 </Avatar>
                 <div className="flex flex-col">
                   <span className="font-medium">{authorName}</span>
-                  <span className="text-xs text-muted-foreground">Последняя активность: {time}</span>
+                  <span className="text-xs text-muted-foreground">Last activity: {time}</span>
                 </div>
               </div>
             </HoverCardContent>
@@ -62,7 +62,7 @@ const PostCard = ({
         {imageSrc && (
           <img
             src={imageSrc}
-            alt={`Изображение из поста — ${authorName}`}
+            alt={`Post image — ${authorName}`}
             loading="lazy"
             className="block w-full object-cover rounded-none sm:rounded-lg"
           />

@@ -33,163 +33,18 @@ export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantNa
   // Comments are always shown now
   const [commentText, setCommentText] = useState("");
   const [photoComments, setPhotoComments] = useState<Record<number, Comment[]>>({
-    // Примеры комментариев для первой фотографии первого участника
     0: [
-      {
-        id: 1,
-        author: "Мария_К",
-        text: "Потрясающий портрет! Очень красивые глаза",
-        timestamp: "1 час назад"
-      },
-      {
-        id: 2,
-        author: "Alex92",
-        text: "Профессиональное фото, отличный ракурс",
-        timestamp: "3 часа назад"
-      },
-      {
-        id: 3,
-        author: "Елена_Мир",
-        text: "Вау! Такая естественная красота! 😍",
-        timestamp: "4 часа назад"
-      },
-      {
-        id: 4,
-        author: "ДмитрийФото",
-        text: "Отличная работа фотографа, свет идеально подобран",
-        timestamp: "5 часов назад"
-      },
-      {
-        id: 5,
-        author: "Анна2024",
-        text: "Просто восхитительно! Очень стильный образ",
-        timestamp: "6 часов назад"
-      },
-      {
-        id: 6,
-        author: "Максим_В",
-        text: "Профессиональный уровень съемки 👏",
-        timestamp: "7 часов назад"
-      },
-      {
-        id: 7,
-        author: "Катя_style",
-        text: "Невероятно красивые глаза! Завораживает",
-        timestamp: "8 часов назад"
-      },
-      {
-        id: 8,
-        author: "ИгорьФотограф",
-        text: "Отличная композиция и постобработка",
-        timestamp: "9 часов назад"
-      },
-      {
-        id: 9,
-        author: "Лиза_модель",
-        text: "Какая же ты красивая! Вдохновляешь ✨",
-        timestamp: "10 часов назад"
-      },
-      {
-        id: 10,
-        author: "ВладимирАрт",
-        text: "Фото достойно журнальной обложки!",
-        timestamp: "11 часов назад"
-      },
-      {
-        id: 11,
-        author: "София_beauty",
-        text: "Обожаю такие естественные фото без фильтров",
-        timestamp: "12 часов назад"
-      },
-      {
-        id: 12,
-        author: "АртемСтиль",
-        text: "Прекрасное сочетание света и тени",
-        timestamp: "13 часов назад"
-      }
+      { id: 1, author: "Maria_K", text: "Stunning portrait! Beautiful eyes.", timestamp: "1 hour ago" },
+      { id: 2, author: "Alex92", text: "Professional shot, great angle.", timestamp: "3 hours ago" },
     ],
     1: [
-      {
-        id: 13,
-        author: "Светлана",
-        text: "Идеальная фигура! 👍",
-        timestamp: "2 часа назад"
-      },
-      {
-        id: 14,
-        author: "Михаил_спорт",
-        text: "Видно что много работаешь над собой! Респект",
-        timestamp: "3 часа назад"
-      },
-      {
-        id: 15,
-        author: "Кристина_фитнес",
-        text: "Какая же ты стройная! Поделись секретом 💪",
-        timestamp: "4 часа назад"
-      },
-      {
-        id: 16,
-        author: "ОлегТренер",
-        text: "Отличная физическая форма! Мотивируешь",
-        timestamp: "5 часов назад"
-      },
-      {
-        id: 17,
-        author: "Наташа_здоровье",
-        text: "Прекрасная фигура! Явно занимаешься спортом",
-        timestamp: "6 часов назад"
-      },
-      {
-        id: 18,
-        author: "ДенисСпорт",
-        text: "Вдохновляющий пример! Так держать 🔥",
-        timestamp: "7 часов назад"
-      },
-      {
-        id: 19,
-        author: "Алина_йога",
-        text: "Гармония и красота в одном фото ✨",
-        timestamp: "8 часов назад"
-      },
-      {
-        id: 20,
-        author: "РоманФит",
-        text: "Результат тяжелой работы над собой!",
-        timestamp: "9 часов назад"
-      }
+      { id: 3, author: "Svetlana", text: "Perfect shape! 👍", timestamp: "2 hours ago" },
+      { id: 4, author: "Michael_Fit", text: "You work hard on yourself, respect!", timestamp: "3 hours ago" },
     ],
     2: [
-      {
-        id: 21,
-        author: "ВикторияСтиль",
-        text: "Обожаю такие фото! Очень красиво",
-        timestamp: "1 час назад"
-      },
-      {
-        id: 22,
-        author: "АндрейАрт",
-        text: "Отличное фото! Профессиональная работа",
-        timestamp: "2 часа назад"
-      },
-      {
-        id: 23,
-        author: "Юлия_модница",
-        text: "Какой стильный образ! Где такой наряд?",
-        timestamp: "3 часа назад"
-      },
-      {
-        id: 24,
-        author: "СергейДизайн",
-        text: "Фото как произведение искусства 🎨",
-        timestamp: "4 часа назад"
-      },
-      {
-        id: 25,
-        author: "Маша_creative",
-        text: "Невероятная атмосфера на фото!",
-        timestamp: "5 часов назад"
-      }
-    ]
+      { id: 5, author: "VictoriaStyle", text: "Love this photo! Very pretty.", timestamp: "1 hour ago" },
+      { id: 6, author: "AndrewArt", text: "Excellent photo! Professional work.", timestamp: "2 hours ago" },
+    ],
   });
   const [photoLikes, setPhotoLikes] = useState<Record<number, { count: number; isLiked: boolean }>>({
     0: { count: 23, isLiked: false },
@@ -229,9 +84,9 @@ export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantNa
     if (commentText.trim()) {
       const newComment: Comment = {
         id: Date.now(),
-        author: "Вы",
+        author: "You",
         text: commentText.trim(),
-        timestamp: "только что"
+        timestamp: "just now"
       };
       setPhotoComments(prev => ({
         ...prev,
@@ -243,8 +98,8 @@ export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantNa
         textareaRef.current.style.height = '44px';
       }
       toast({
-        title: "Комментарий добавлен",
-        description: "Ваш комментарий к фотографии добавлен",
+        title: "Comment added",
+        description: "Your comment was added",
       });
     }
   };
@@ -312,14 +167,14 @@ export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantNa
               <button
                 onClick={prevPhoto}
                 className="absolute left-4 top-1/2 -translate-y-1/2 z-50 text-white hover:text-white/90 transition-colors w-12 h-12 rounded-full bg-black/50 hover:bg-black/70 backdrop-blur flex items-center justify-center"
-                aria-label="Предыдущее фото"
+                aria-label="Previous photo"
               >
                 <ChevronLeft className="w-7 h-7" />
               </button>
               <button
                 onClick={nextPhoto}
                 className="absolute right-4 top-1/2 -translate-y-1/2 z-50 text-white hover:text-white/90 transition-colors w-12 h-12 rounded-full bg-black/50 hover:bg-black/70 backdrop-blur flex items-center justify-center"
-                aria-label="Следующее фото"
+                aria-label="Next photo"
               >
                 <ChevronRight className="w-7 h-7" />
               </button>
@@ -344,7 +199,7 @@ export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantNa
                 <button
                   key={index}
                   onClick={() => setActiveIndex(index)}
-                  aria-label={`Перейти к фото ${index + 1}`}
+                  aria-label={`Go to photo ${index + 1}`}
                   className={cn(
                     "relative w-8 h-8 sm:w-10 sm:h-10 rounded-full overflow-hidden ring-1 ring-white/40 border border-white/20 transition-all",
                     index === activeIndex ? "ring-2 ring-white opacity-100" : "opacity-70 hover:opacity-100"
@@ -352,7 +207,7 @@ export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantNa
                 >
                   <img
                     src={src}
-                    alt={`Миниатюра ${index + 1}`}
+                    alt={`Thumbnail ${index + 1}`}
                     className="w-full h-full object-cover"
                     loading="lazy"
                   />
@@ -376,9 +231,9 @@ export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantNa
                     {(weight || height) ? (
                       <span className="ml-1 text-xs sm:text-sm text-muted-foreground font-normal">
                         (
-                        {weight ? `${weight} кг` : ""}
+                        {weight ? `${weight} kg` : ""}
                         {(weight && height) ? " · " : ""}
-                        {height ? `${height} см` : ""}
+                        {height ? `${height} cm` : ""}
                         )
                       </span>
                     ) : null}
@@ -395,7 +250,7 @@ export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantNa
                     size="sm"
                     className={cn(currentPhotoLikes.isLiked && "text-red-400")}
                     onClick={handleLike}
-                    aria-label="Нравится"
+                    aria-label="Like"
                   >
                     <Heart className={cn("w-4 h-4 mr-1", currentPhotoLikes.isLiked && "fill-current")} />
                     {currentPhotoLikes.count}
@@ -404,7 +259,7 @@ export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantNa
                     variant="ghost"
                     size="sm"
                     onClick={focusCommentInput}
-                    aria-label="Открыть поле комментария"
+                    aria-label="Open comment field"
                   >
                     <MessageCircle className="w-4 h-4 mr-1" />
                     {currentPhotoComments.length}
@@ -416,7 +271,7 @@ export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantNa
             <div ref={commentsListRef} className="flex-1 overflow-y-auto p-4 pb-24 md:pb-28 space-y-3 min-h-0">
               {currentPhotoComments.length === 0 ? (
                 <p className="text-center text-muted-foreground text-sm">
-                  Пока нет комментариев к этой фотографии
+                  No comments yet for this photo
                 </p>
               ) : (
                 currentPhotoComments.map((comment) => (
@@ -434,7 +289,7 @@ export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantNa
             <div className="sticky bottom-0 left-0 right-0 p-3 md:p-4 border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 pb-[env(safe-area-inset-bottom)] flex items-end gap-2 md:gap-3">
               <Textarea
                 ref={textareaRef}
-                placeholder="Напишите комментарий к этой фотографии..."
+                placeholder="Write a comment for this photo..."
                 value={commentText}
                 rows={1}
                 onChange={(e) => {
@@ -451,14 +306,14 @@ export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantNa
                   }
                 }}
                 className="flex-1 resize-none overflow-y-auto text-base md:text-sm min-h-[44px] max-h-[30dvh]"
-                aria-label="Комментарий к текущей фотографии"
+                aria-label="Comment for current photo"
               />
               <Button
                 onClick={handleCommentSubmit}
                 disabled={!commentText.trim()}
                 size="icon"
                 className="shrink-0 rounded-full h-10 w-10 bg-contest-blue text-white hover:bg-contest-blue/90"
-                aria-label="Отправить комментарий"
+                aria-label="Send comment"
               >
                 <Send className="w-4 h-4" />
               </Button>

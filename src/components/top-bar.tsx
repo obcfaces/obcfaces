@@ -10,13 +10,19 @@ const TopBar = () => {
           <Link
             to="/"
             className="inline-flex items-center gap-2 font-semibold text-foreground hover:text-primary transition-colors"
-            aria-label="На главную"
+            aria-label="Home"
           >
             <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-semibold">
               obc
             </span>
           </Link>
           <GlobalSearch />
+          <Link
+            to="/contest"
+            className="inline-flex items-center font-medium text-foreground hover:text-primary transition-colors"
+          >
+            Contest
+          </Link>
         </div>
         <AuthNav />
       </nav>

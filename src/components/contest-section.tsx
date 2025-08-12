@@ -140,7 +140,7 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
               onClick={() => setViewMode('compact')}
             >
               <Grid3X3 className="w-4 h-4 mr-1" />
-              Компактный
+              Compact
             </Button>
             <Button
               variant={viewMode === 'full' ? 'default' : 'outline'}
@@ -148,7 +148,7 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
               onClick={() => setViewMode('full')}
             >
               <List className="w-4 h-4 mr-1" />
-              Полный
+              Full
             </Button>
           </div>
         </div>
