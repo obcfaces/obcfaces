@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { ContestantCard } from "@/components/contest-card";
-import { Button } from "@/components/ui/button";
-import { Grid3X3, List } from "lucide-react";
+
+
 import contestant1Face from "@/assets/contestant-1-face.jpg";
 import contestant1Full from "@/assets/contestant-1-full.jpg";
 import contestant2Face from "@/assets/contestant-2-face.jpg";
@@ -125,36 +125,49 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
   return (
     <section className="max-w-6xl mx-auto px-0 sm:px-6 py-8">
       <div className="mb-8 px-6 sm:px-0">
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <h2 className="text-3xl font-bold text-contest-text mb-2">
-              {title}
-            </h2>
-            <p className="text-contest-blue font-medium mb-2">{subtitle}</p>
-            <p className="text-muted-foreground">{description}</p>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button
-              variant={viewMode === 'compact' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setViewMode('compact')}
-            >
-              <Grid3X3 className="w-4 h-4 mr-1" />
-              Compact
-            </Button>
-            <Button
-              variant={viewMode === 'full' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setViewMode('full')}
-            >
-              <List className="w-4 h-4 mr-1" />
-              Full
-            </Button>
-          </div>
+        <div className="mb-4">
+          <h2 className="text-3xl font-bold text-contest-text mb-2">{title}</h2>
+          <p className="text-contest-blue font-medium mb-2">{subtitle}</p>
+          <p className="text-muted-foreground">{description}</p>
         </div>
       </div>
 
-      <div className={viewMode === 'compact' 
+      <div className="mb-4 px-6 sm:px-0">
+        <div className="flex items-center gap-3" role="tablist" aria-label="View mode">
+          <button
+            type="button"
+            onClick={() => setViewMode('full')}
+            aria-pressed={viewMode === 'full'}
+            aria-label="List view"
+            className="p-1 rounded-md hover:bg-accent transition-colors"
+          >
+            <img
+              src={viewMode === 'full' ? '/icons/sdisplay-list-active.png' : '/icons/sdisplay-list.png'}
+              alt="List view icon"
+              width={28}
+              height={28}
+              loading="lazy"
+            />
+          </button>
+          <button
+            type="button"
+            onClick={() => setViewMode('compact')}
+            aria-pressed={viewMode === 'compact'}
+            aria-label="Grid view"
+            className="p-1 rounded-md hover:bg-accent transition-colors"
+          >
+            <img
+              src={viewMode === 'compact' ? '/icons/sdisplay-table-active.png' : '/icons/sdisplay-table.png'}
+              alt="Grid view icon"
+              width={28}
+              height={28}
+              loading="lazy"
+            />
+          </button>
+        </div>
+      </div>
+
+      <div className={viewMode === 'compact'
         ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-1 sm:gap-3"
         : "space-y-6"
       }>
