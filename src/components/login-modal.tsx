@@ -27,8 +27,8 @@ const LoginModalTrigger = () => {
   const [age, setAge] = useState<string>("");
   const [photo, setPhoto] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
   const navigate = useNavigate();
-
 const countries = useMemo(() => Country.getAllCountries(), []);
 const states = useMemo(() => (countryCode ? State.getStatesOfCountry(countryCode) : []), [countryCode]);
 const cities = useMemo(() => getCitiesForLocation(countryCode, stateCode, stateName), [countryCode, stateCode, stateName]);
@@ -37,11 +37,12 @@ const ageOptions = useMemo(() => Array.from({ length: 65 }, (_, i) => 16 + i), [
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    if (mode === "signup") setSubmitted(true);
     try {
       if (mode === "login") {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
-        toast({ description: "Вход выполнен" });
+        toast({ description: "Signed in" });
         setOpen(false);
         navigate("/account", { replace: true });
       } else {
@@ -89,67 +90,75 @@ const ageOptions = useMemo(() => Array.from({ length: 65 }, (_, i) => 16 + i), [
               { onConflict: "id" }
             );
           if (upsertErr) throw upsertErr;
-          toast({ description: "Регистрация завершена" });
+          toast({ description: "Registration complete" });
           setOpen(false);
           navigate("/account", { replace: true });
         } else {
-          toast({ description: "Проверьте почту для подтверждения. Фото можно загрузить после входа." });
+          toast({ description: "Check your email to confirm. You can upload a photo after signing in." });
           setOpen(false);
         }
       }
     } catch (err: any) {
-      toast({ description: err.message ?? (mode === "login" ? "Ошибка входа" : "Ошибка регистрации") });
+      toast({ description: err.message ?? (mode === "login" ? "Sign-in error" : "Sign-up error") });
     } finally {
       setLoading(false);
     }
   };
 
-  const title = mode === "login" ? "Вход" : "Регистрация";
-  const description = mode === "login" ? "Введите email и пароль, чтобы продолжить." : "Создайте аккаунт для личной страницы.";
+  const title = mode === "login" ? "Sign in" : "Sign up";
+  const description = mode === "login" ? "Enter your email and password to continue." : "Create an account for your profile.";
 
   const switchText = mode === "login" ? (
-    <span className="text-sm text-muted-foreground">Нет аккаунта?{" "}
-      <button type="button" className="text-primary underline" onClick={() => setMode("signup")}>Зарегистрироваться</button>
+    <span className="text-sm text-muted-foreground">No account?{" "}
+      <button type="button" className="text-primary underline" onClick={() => setMode("signup")}>Sign up</button>
     </span>
   ) : (
-    <span className="text-sm text-muted-foreground">Уже есть аккаунт?{" "}
-      <button type="button" className="text-primary underline" onClick={() => setMode("login")}>Войти</button>
+    <span className="text-sm text-muted-foreground">Already have an account?{" "}
+      <button type="button" className="text-primary underline" onClick={() => setMode("login")}>Sign in</button>
     </span>
   );
 
+  const showErrors = submitted && mode === "signup";
+  const invalidFirstName = showErrors && !firstName.trim();
+  const invalidLastName = showErrors && !lastName.trim();
+  const invalidCountry = showErrors && !countryCode;
+  const invalidState = showErrors && !stateCode;
+  const invalidCity = showErrors && !city.trim();
+  const invalidAge = showErrors && !age;
+
   return (
-    <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) setMode("login"); }}>
+    <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) { setMode("login"); setSubmitted(false); } }}>
       <DialogTrigger asChild>
-        <button className="text-sm underline text-primary">Log in</button>
+        <button className="text-sm underline text-primary">Sign in</button>
       </DialogTrigger>
       <DialogContent className={mode === "signup" ? "sm:max-w-lg" : "sm:max-w-md"}>
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
-        <form onSubmit={onSubmit} className="space-y-4">
+        <form onSubmit={onSubmit} className="space-y-3">
           <div className="space-y-2">
             
-            <Input id="auth-email" type="email" placeholder="email" className="placeholder:italic placeholder:text-muted-foreground" value={email} onChange={(e) => setEmail(e.target.value)} required />
+            <Input id="auth-email" type="email" placeholder="Email" className="placeholder:italic placeholder:text-muted-foreground" value={email} onChange={(e) => setEmail(e.target.value)} required />
           </div>
           <div className="space-y-2">
             
             <div className="relative">
-              <Input id="auth-password" type={showPassword ? "text" : "password"} placeholder="password" className="pr-10 placeholder:italic placeholder:text-muted-foreground" value={password} onChange={(e) => setPassword(e.target.value)} required />
-              <button type="button" aria-label={showPassword ? "Скрыть пароль" : "Показать пароль"} onClick={() => setShowPassword((v) => !v)} className="absolute inset-y-0 right-2 inline-flex items-center text-muted-foreground hover:text-foreground">
+              <Input id="auth-password" type={showPassword ? "text" : "password"} placeholder="Password" className="pr-10 placeholder:italic placeholder:text-muted-foreground" value={password} onChange={(e) => setPassword(e.target.value)} required />
+              <button type="button" aria-label={showPassword ? "Hide password" : "Show password"} onClick={() => setShowPassword((v) => !v)} className="absolute inset-y-0 right-2 inline-flex items-center text-muted-foreground hover:text-foreground">
                 {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
               </button>
             </div>
           </div>
           {mode === "signup" && (
-            <div className="grid gap-3 sm:grid-cols-2">
+            <div className="grid gap-2 sm:grid-cols-2">
               <div className="space-y-2">
                 
-                <Input id="auth-firstname" placeholder="Имя" className="placeholder:italic placeholder:text-muted-foreground" value={firstName} onChange={(e) => setFirstName(e.target.value)} />
+                <Input id="auth-firstname" placeholder="First name" aria-invalid={invalidFirstName} className={`placeholder:italic placeholder:text-muted-foreground ${invalidFirstName ? 'border-destructive focus:ring-destructive' : ''}`} value={firstName} onChange={(e) => setFirstName(e.target.value)} />
               </div>
               <div className="space-y-2">
                 
-                <Input id="auth-lastname" placeholder="Фамилия" className="placeholder:italic placeholder:text-muted-foreground" value={lastName} onChange={(e) => setLastName(e.target.value)} />
+                <Input id="auth-lastname" placeholder="Last name" aria-invalid={invalidLastName} className={`placeholder:italic placeholder:text-muted-foreground ${invalidLastName ? 'border-destructive focus:ring-destructive' : ''}`} value={lastName} onChange={(e) => setLastName(e.target.value)} />
               </div>
               <div className="space-y-2">
                 
@@ -163,8 +172,9 @@ const ageOptions = useMemo(() => Array.from({ length: 65 }, (_, i) => 16 + i), [
                     setStateCode(null);
                     setCity("");
                   }}
-                  placeholder="Страна"
-                  ariaLabel="Выбор страны"
+                  placeholder="Country"
+                  ariaLabel="Select country"
+                  invalid={invalidCountry}
                   options={countries.map((c) => ({ value: c.isoCode, label: c.name }))}
                 />
               </div>
@@ -179,50 +189,48 @@ const ageOptions = useMemo(() => Array.from({ length: 65 }, (_, i) => 16 + i), [
                     setStateName(s?.name || "");
                     setCity("");
                   }}
-                  placeholder="Штат/Регион"
-                  ariaLabel="Выбор региона"
+                  placeholder="State/Region"
+                  ariaLabel="Select region"
+                  invalid={invalidState}
                   options={states.map((s) => ({ value: s.isoCode, label: s.name }))}
                 />
-                {!countryCode && (
-                  <p className="text-xs text-muted-foreground">Сначала выберите страну</p>
-                )}
               </div>
               <div className="space-y-2">
                 
-                {!countryCode ? (
-                  <>
-                    <p className="text-xs text-muted-foreground">Сначала выберите страну</p>
-                  </>
-                ) : !stateCode ? (
-                  <>
-                    <p className="text-xs text-muted-foreground">Сначала выберите штат/регион</p>
-                  </>
+                {(!countryCode || !stateCode) ? (
+                  <SearchableSelect
+                    disabled
+                    value={""}
+                    onValueChange={() => {}}
+                    placeholder="City"
+                    ariaLabel="Select city"
+                    options={[]}
+                  />
                 ) : cities.length > 0 ? (
                   <SearchableSelect
                     value={city}
                     onValueChange={setCity}
-                    placeholder="Город"
-                    ariaLabel="Выбор города"
+                    placeholder="City"
+                    ariaLabel="Select city"
+                    invalid={invalidCity}
                     options={cities.map((ct) => ({ value: ct.name, label: ct.name }))}
                   />
                 ) : (
-                  <>
-                    <Input
-                      id="auth-city"
-                      placeholder="Город (введите вручную)"
-                      className="placeholder:italic placeholder:text-muted-foreground"
-                      value={city}
-                      onChange={(e) => setCity(e.target.value)}
-                    />
-                    <p className="text-xs text-muted-foreground">Для выбранного региона нет списка городов — введите название вручную.</p>
-                  </>
+                  <Input
+                    id="auth-city"
+                    placeholder="City (enter manually)"
+                    className={`placeholder:italic placeholder:text-muted-foreground ${invalidCity ? 'border-destructive focus:ring-destructive' : ''}`}
+                    aria-invalid={invalidCity}
+                    value={city}
+                    onChange={(e) => setCity(e.target.value)}
+                  />
                 )}
               </div>
               <div className="space-y-2">
                 
                 <Select value={age} onValueChange={setAge}>
-                  <SelectTrigger aria-label="Возраст">
-                    <SelectValue placeholder="Возраст" />
+                  <SelectTrigger aria-label="Age" className={invalidAge ? "border-destructive focus:ring-destructive" : undefined}>
+                    <SelectValue placeholder="Age" />
                   </SelectTrigger>
                   <SelectContent>
                     {ageOptions.map((a) => (
@@ -241,9 +249,8 @@ const ageOptions = useMemo(() => Array.from({ length: 65 }, (_, i) => 16 + i), [
           )}
           <div className="flex items-center justify-between">
             {switchText}
-            <div className="flex gap-2">
-              <Button type="button" variant="secondary" onClick={() => setOpen(false)}>Отмена</Button>
-              <Button type="submit" disabled={loading}>{loading ? "Подождите…" : mode === "login" ? "Войти" : "Зарегистрироваться"}</Button>
+            <div className="flex">
+              <Button type="submit" disabled={loading}>{loading ? "Please wait…" : mode === "login" ? "Sign in" : "Sign up"}</Button>
             </div>
           </div>
         </form>
