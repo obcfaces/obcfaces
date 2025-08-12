@@ -235,16 +235,18 @@ const samplePosts = useMemo(
 
             <div className="px-0 sm:px-4">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                <div className="flex items-center gap-6">
-                  <div className="text-center">
-                    <div className="text-xl font-semibold">{followersCount}</div>
-                    <div className="text-sm text-muted-foreground">Подписчики</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-xl font-semibold">{followingCount}</div>
-                    <div className="text-sm text-muted-foreground">Подписки</div>
-                  </div>
-                </div>
+                  {isOwner && (
+                    <div className="flex items-center gap-6">
+                      <div className="text-center">
+                        <div className="text-xl font-semibold">{followersCount}</div>
+                        <div className="text-sm text-muted-foreground">Подписчики</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-xl font-semibold">{followingCount}</div>
+                        <div className="text-sm text-muted-foreground">Подписки</div>
+                      </div>
+                    </div>
+                  )}
                 <div className="flex items-center gap-2">
                   {isOwner ? (
                     <Button asChild>
@@ -299,14 +301,22 @@ const samplePosts = useMemo(
               </TabsList>
 
               <TabsContent value="posts" className="space-y-4 mt-4">
+                <div className="mb-4 px-6 sm:px-0">
+                  <h2 className="text-2xl font-bold text-contest-text">Посты</h2>
+                  <p className="text-contest-blue font-medium">Последние обновления</p>
+                </div>
                 {samplePosts.map((p) => (
                   <PostCard key={p.id} {...p} />
                 ))}
               </TabsContent>
 
               <TabsContent value="photos" className="mt-4">
+                <div className="mb-4 px-6 sm:px-0">
+                  <h2 className="text-2xl font-bold text-contest-text">Фото</h2>
+                  <p className="text-contest-blue font-medium">Галерея</p>
+                </div>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-0 sm:gap-3">
-{[c1, c2, c3, c1, c2, c3].map((src, idx) => (
+                  {[c1, c2, c3, c1, c2, c3].map((src, idx) => (
                     <img
                       key={idx}
                       src={src}
@@ -319,9 +329,13 @@ const samplePosts = useMemo(
               </TabsContent>
 
               <TabsContent value="about" className="mt-4">
+                <div className="mb-4 px-6 sm:px-0">
+                  <h2 className="text-2xl font-bold text-contest-text">Инфо</h2>
+                  <p className="text-contest-blue font-medium">Параметры и данные</p>
+                </div>
                 <article className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-2">
-<p><span className="text-muted-foreground">Имя:</span> {profile.display_name ?? "—"}</p>
+                    <p><span className="text-muted-foreground">Имя:</span> {profile.display_name ?? "—"}</p>
                     <p><span className="text-muted-foreground">Дата рождения:</span> {profile.birthdate ?? "—"}</p>
                   </div>
                   <div className="space-y-2">
