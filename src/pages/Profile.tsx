@@ -301,20 +301,20 @@ const samplePosts = useMemo(
               </TabsList>
 
               <TabsContent value="posts" className="space-y-4 mt-4">
-                <div className="mb-4 px-6 sm:px-0">
-                  <h2 className="text-2xl font-bold text-contest-text">Посты</h2>
-                  <p className="text-contest-blue font-medium">Последние обновления</p>
-                </div>
+                 <div className="mb-8 px-6 sm:px-0">
+                   <h2 className="text-3xl font-bold text-contest-text mb-2">Посты</h2>
+                   <p className="text-contest-blue font-medium mb-2">Последние обновления</p>
+                 </div>
                 {samplePosts.map((p) => (
                   <PostCard key={p.id} {...p} />
                 ))}
               </TabsContent>
 
               <TabsContent value="photos" className="mt-4">
-                <div className="mb-4 px-6 sm:px-0">
-                  <h2 className="text-2xl font-bold text-contest-text">Фото</h2>
-                  <p className="text-contest-blue font-medium">Галерея</p>
-                </div>
+                 <div className="mb-8 px-6 sm:px-0">
+                   <h2 className="text-3xl font-bold text-contest-text mb-2">Фото</h2>
+                   <p className="text-contest-blue font-medium mb-2">Галерея</p>
+                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-0 sm:gap-3">
                   {[c1, c2, c3, c1, c2, c3].map((src, idx) => (
                     <img
@@ -329,10 +329,10 @@ const samplePosts = useMemo(
               </TabsContent>
 
               <TabsContent value="about" className="mt-4">
-                <div className="mb-4 px-6 sm:px-0">
-                  <h2 className="text-2xl font-bold text-contest-text">Инфо</h2>
-                  <p className="text-contest-blue font-medium">Параметры и данные</p>
-                </div>
+                 <div className="mb-8 px-6 sm:px-0">
+                   <h2 className="text-3xl font-bold text-contest-text mb-2">Инфо</h2>
+                   <p className="text-contest-blue font-medium mb-2">Параметры и данные</p>
+                 </div>
                 <article className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-2">
                     <p><span className="text-muted-foreground">Имя:</span> {profile.display_name ?? "—"}</p>
