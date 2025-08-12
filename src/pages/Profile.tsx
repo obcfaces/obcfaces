@@ -210,7 +210,7 @@ const samplePosts = useMemo(
         <link rel="canonical" href={`${window.location.origin}/u/${id ?? ""}`} />
       </Helmet>
 
-      <section className="container mx-auto max-w-3xl py-8 px-4">
+      <section className="container mx-auto max-w-3xl py-8 px-0 sm:px-4">
 {loading ? (
           <p className="text-muted-foreground">Загрузка…</p>
         ) : (
