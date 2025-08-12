@@ -5,6 +5,7 @@ import { Eye, EyeOff } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import SearchableSelect from "@/components/ui/searchable-select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
@@ -28,9 +29,10 @@ const LoginModalTrigger = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const countries = useMemo(() => Country.getAllCountries(), []);
-  const states = useMemo(() => (countryCode ? State.getStatesOfCountry(countryCode) : []), [countryCode]);
-  const cities = useMemo(() => getCitiesForLocation(countryCode, stateCode, stateName), [countryCode, stateCode, stateName]);
+const countries = useMemo(() => Country.getAllCountries(), []);
+const states = useMemo(() => (countryCode ? State.getStatesOfCountry(countryCode) : []), [countryCode]);
+const cities = useMemo(() => getCitiesForLocation(countryCode, stateCode, stateName), [countryCode, stateCode, stateName]);
+const ageOptions = useMemo(() => Array.from({ length: 65 }, (_, i) => 16 + i), []);
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -218,7 +220,18 @@ const LoginModalTrigger = () => {
               </div>
               <div className="space-y-2">
                 
-                <Input id="auth-age" type="number" inputMode="numeric" placeholder="Возраст" className="placeholder:italic placeholder:text-muted-foreground" value={age} onChange={(e) => setAge(e.target.value)} />
+                <Select value={age} onValueChange={setAge}>
+                  <SelectTrigger aria-label="Возраст">
+                    <SelectValue placeholder="Возраст" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {ageOptions.map((a) => (
+                      <SelectItem key={a} value={String(a)}>
+                        {a}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               <div className="space-y-2 sm:col-span-2">
                 
