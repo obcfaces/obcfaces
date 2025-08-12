@@ -38,6 +38,7 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
     {
       rank: 1,
       name: "Name Chall",
+      profileId: "11111111-1111-1111-1111-111111111111",
       country: "Philippines",
       city: "Negros",
       age: 25,

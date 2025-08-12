@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { Link } from "react-router-dom";
 
 interface ContestantCardProps {
   rank: number;
@@ -28,6 +29,7 @@ interface ContestantCardProps {
   prize?: string;
   viewMode?: 'compact' | 'full';
   onRate?: (rating: number) => void;
+  profileId?: string;
 }
 
 export function ContestantCard({
@@ -46,7 +48,8 @@ export function ContestantCard({
   isWinner,
   prize,
   viewMode = 'compact',
-  onRate
+  onRate,
+  profileId
 }: ContestantCardProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalStartIndex, setModalStartIndex] = useState(0);
@@ -99,7 +102,7 @@ export function ContestantCard({
           {/* Name in top left - only after voting */}
            {(isVoted && !showThanks && !isEditing) && (
              <div className="absolute top-2 left-4 z-20">
-              <h3 className="text-xl font-semibold text-contest-text">{name}, {age} <span className="text-sm text-muted-foreground font-normal">({weight} kg · {height} cm)</span></h3>
+              <h3 className="text-xl font-semibold text-contest-text">{profileId ? (<Link to={`/u/${profileId}`} className="hover:text-primary underline-offset-2 hover:underline">{name}</Link>) : name}, {age} <span className="text-sm text-muted-foreground font-normal">({weight} kg · {height} cm)</span></h3>
               <div className="text-contest-blue text-sm">{country} · {city}</div>
             </div>
           )}
@@ -449,7 +452,7 @@ export function ContestantCard({
             <div className="absolute inset-0 bg-white rounded-r flex flex-col justify-between p-2 sm:p-3">
               <div className="flex items-start justify-between">
                 <div className="min-w-0 flex-1 mr-2">
-                   <h3 className="font-semibold text-contest-text text-base sm:text-lg truncate">{name}, {age}</h3>
+                   <h3 className="font-semibold text-contest-text text-base sm:text-lg truncate">{profileId ? (<Link to={`/u/${profileId}`} className="hover:text-primary underline-offset-2 hover:underline">{name}</Link>) : name}, {age}</h3>
                    <div className="text-xs sm:text-sm text-muted-foreground font-normal">{weight} kg · {height} cm</div>
                    <div className="text-sm sm:text-base text-contest-blue truncate">
                      {country} · {city}
