@@ -57,14 +57,14 @@ const PostCard = ({
           <span className="text-xs text-muted-foreground">{time}</span>
         </div>
       </CardHeader>
-      <CardContent className="space-y-3 px-0 sm:px-6 pt-0 pb-6">
-        <p className="text-sm whitespace-pre-line">{content}</p>
+      <CardContent className="px-0 sm:px-6 pt-0 pb-6">
+        <p className="text-sm whitespace-pre-line mb-4">{content}</p>
         {imageSrc && (
           <img
             src={imageSrc}
             alt={`Изображение из поста — ${authorName}`}
             loading="lazy"
-            className="block w-full object-cover rounded-none sm:rounded-lg"
+            className="block w-full object-cover rounded-none sm:rounded-lg mt-4"
           />
         )}
       </CardContent>

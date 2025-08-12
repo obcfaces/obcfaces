@@ -246,7 +246,7 @@ const samplePosts = useMemo(
                       </div>
                     </div>
                   )}
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 mt-4 sm:mt-0">
                   {isOwner ? (
                     <Button asChild>
                       <Link to="/account">Редактировать профиль</Link>
