@@ -7,7 +7,7 @@ const Index = () => {
       <ContestHeader />
       
       <ContestSection
-        title="JULE 24 – 30 /// 2025"
+        title="THIS WEEK"
         subtitle="Current vote right now!"
         description="Take a look at the three leaders who have already emerged in the current vote."
         isActive={true}
