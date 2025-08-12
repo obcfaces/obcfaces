@@ -139,7 +139,7 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
       <div className="mb-4 px-6 sm:px-0">
         <div className="relative">
           <div aria-hidden className="absolute inset-x-0 bottom-0 border-b border-border" />
-          <div className="flex items-end gap-12 pb-px" role="tablist" aria-label="View mode">
+          <div className="flex items-end justify-evenly pb-0" role="tablist" aria-label="View mode">
             <button
               type="button"
               onClick={() => setViewMode('full')}
@@ -153,6 +153,7 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
                 width={28}
                 height={28}
                 loading="lazy"
+                className="block"
               />
             </button>
             <button
@@ -168,6 +169,7 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
                 width={28}
                 height={28}
                 loading="lazy"
+                className="block"
               />
             </button>
           </div>
