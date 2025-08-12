@@ -187,19 +187,34 @@ const LoginModalTrigger = () => {
               </div>
               <div className="space-y-2">
                 
-                <SearchableSelect
-                  disabled={!countryCode || !stateCode}
-                  value={city}
-                  onValueChange={setCity}
-                  placeholder="Город"
-                  ariaLabel="Выбор города"
-                  options={cities.map((ct) => ({ value: ct.name, label: ct.name }))}
-                />
                 {!countryCode ? (
-                  <p className="text-xs text-muted-foreground">Сначала выберите страну</p>
+                  <>
+                    <p className="text-xs text-muted-foreground">Сначала выберите страну</p>
+                  </>
                 ) : !stateCode ? (
-                  <p className="text-xs text-muted-foreground">Сначала выберите штат/регион</p>
-                ) : null}
+                  <>
+                    <p className="text-xs text-muted-foreground">Сначала выберите штат/регион</p>
+                  </>
+                ) : cities.length > 0 ? (
+                  <SearchableSelect
+                    value={city}
+                    onValueChange={setCity}
+                    placeholder="Город"
+                    ariaLabel="Выбор города"
+                    options={cities.map((ct) => ({ value: ct.name, label: ct.name }))}
+                  />
+                ) : (
+                  <>
+                    <Input
+                      id="auth-city"
+                      placeholder="Город (введите вручную)"
+                      className="placeholder:italic placeholder:text-muted-foreground"
+                      value={city}
+                      onChange={(e) => setCity(e.target.value)}
+                    />
+                    <p className="text-xs text-muted-foreground">Для выбранного региона нет списка городов — введите название вручную.</p>
+                  </>
+                )}
               </div>
               <div className="space-y-2">
                 

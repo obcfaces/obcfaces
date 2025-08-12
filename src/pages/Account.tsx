@@ -219,19 +219,30 @@ const Account = () => {
             </div>
             <div className="space-y-2">
               
-              <SearchableSelect
-                disabled={!countryCode || !stateCode}
-                value={form.city}
-                onValueChange={(val) => setForm((f) => ({ ...f, city: val }))}
-                placeholder="Город"
-                ariaLabel="Выбор города"
-                options={cities.map((ct) => ({ value: ct.name, label: ct.name }))}
-              />
               {!countryCode ? (
                 <p className="text-xs text-muted-foreground">Сначала выберите страну</p>
               ) : !stateCode ? (
                 <p className="text-xs text-muted-foreground">Сначала выберите штат/регион</p>
-              ) : null}
+              ) : cities.length > 0 ? (
+                <SearchableSelect
+                  value={form.city}
+                  onValueChange={(val) => setForm((f) => ({ ...f, city: val }))}
+                  placeholder="Город"
+                  ariaLabel="Выбор города"
+                  options={cities.map((ct) => ({ value: ct.name, label: ct.name }))}
+                />
+              ) : (
+                <>
+                  <Input
+                    id="city"
+                    placeholder="Город (введите вручную)"
+                    className="placeholder:italic placeholder:text-muted-foreground"
+                    value={form.city}
+                    onChange={(e) => setForm((f) => ({ ...f, city: e.target.value }))}
+                  />
+                  <p className="text-xs text-muted-foreground">Для выбранного региона нет списка городов — введите название вручную.</p>
+                </>
+              )}
             </div>
             <div className="space-y-2">
               
