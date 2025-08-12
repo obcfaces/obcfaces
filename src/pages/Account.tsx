@@ -61,7 +61,7 @@ const Account = () => {
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === "SIGNED_OUT") {
+      if (event === "SIGNED_OUT" || (event === "INITIAL_SESSION" && !session)) {
         navigate("/auth", { replace: true });
         return;
       }
@@ -73,7 +73,7 @@ const Account = () => {
     supabase.auth.getSession().then(async ({ data }) => {
       const session = data.session;
       if (!session?.user) {
-        navigate("/auth", { replace: true });
+        setLoading(false);
         return;
       }
       setUserId(session.user.id);
