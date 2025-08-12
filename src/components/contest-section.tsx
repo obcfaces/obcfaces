@@ -135,9 +135,9 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
               <p className="text-muted-foreground italic -mt-1 self-center">{subtitle}</p>
             </div>
             {isActive && description && (
-              <Badge variant="outline" className="text-xs px-2 py-1 rounded-full animate-fade-in hover-scale">
+              <span className="text-muted-foreground text-lg sm:text-xl font-medium">
                 {description}
-              </Badge>
+              </span>
             )}
           </div>
           {!isActive && description && (
