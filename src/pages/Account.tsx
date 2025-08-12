@@ -8,6 +8,7 @@ import SearchableSelect from "@/components/ui/searchable-select";
 import { toast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Country, State, City } from "country-state-city";
+import { getCitiesForLocation } from "@/lib/location-utils";
 
 interface ProfileForm {
   display_name: string;
@@ -52,33 +53,11 @@ const Account = () => {
   const [countryCode, setCountryCode] = useState<string | null>(null);
   const [stateCode, setStateCode] = useState<string | null>(null);
   const states = useMemo(() => (countryCode ? State.getStatesOfCountry(countryCode) : []), [countryCode]);
-  const cities = useMemo(() => {
-    if (!countryCode || !stateCode) return [];
-    const byState = City.getCitiesOfState(countryCode, stateCode);
-    if (byState.length) return byState;
-
-    // Fallbacks for datasets with inconsistent state codes/names (e.g., Philippines)
-    const all = City.getCitiesOfCountry(countryCode);
-    const normalize = (s: string | null | undefined) => (s ?? "").toLowerCase().replace(/\s+/g, "");
-
-    const st = states.find((s) => s.isoCode === stateCode);
-    const code = normalize(stateCode);
-    const name = normalize(st?.name);
-
-    const phRegionByProvince: Record<string, string> = {
-      cebu: "centralvisayas",
-      bohol: "centralvisayas",
-      negrosoriental: "centralvisayas",
-      siquijor: "centralvisayas",
-    };
-
-    const targets = new Set<string>([code, name]);
-    if (countryCode === "PH" && name && phRegionByProvince[name]) {
-      targets.add(phRegionByProvince[name]);
-    }
-
-    return all.filter((c) => targets.has(normalize(c.stateCode)));
-  }, [countryCode, stateCode, states]);
+  const cities = useMemo(() => getCitiesForLocation(
+    countryCode,
+    stateCode,
+    states.find((s) => s.isoCode === stateCode)?.name
+  ), [countryCode, stateCode, states]);
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {

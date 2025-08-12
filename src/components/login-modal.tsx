@@ -8,8 +8,8 @@ import SearchableSelect from "@/components/ui/searchable-select";
 import { toast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
-import { Country, State, City } from "country-state-city";
-
+import { Country, State } from "country-state-city";
+import { getCitiesForLocation } from "@/lib/location-utils";
 const LoginModalTrigger = () => {
   const [open, setOpen] = useState(false);
   const [mode, setMode] = useState<"login" | "signup">("login");
@@ -30,31 +30,7 @@ const LoginModalTrigger = () => {
 
   const countries = useMemo(() => Country.getAllCountries(), []);
   const states = useMemo(() => (countryCode ? State.getStatesOfCountry(countryCode) : []), [countryCode]);
-  const cities = useMemo(() => {
-    if (!countryCode || !stateCode) return [];
-    const byState = City.getCitiesOfState(countryCode, stateCode);
-    if (byState.length) return byState;
-    // Fallbacks for datasets with inconsistent state codes/names (e.g., Philippines)
-    const all = City.getCitiesOfCountry(countryCode);
-    const normalize = (s: string | null | undefined) => (s ?? "").toLowerCase().replace(/\s+/g, "");
-    const code = normalize(stateCode);
-    const name = normalize(stateName);
-
-    // Region synonym mapping (handles PH provinces whose cities are tagged by region name)
-    const phRegionByProvince: Record<string, string> = {
-      cebu: "centralvisayas",
-      bohol: "centralvisayas",
-      negrosoriental: "centralvisayas",
-      siquijor: "centralvisayas",
-    };
-
-    const targets = new Set<string>([code, name]);
-    if (countryCode === "PH" && name && phRegionByProvince[name]) {
-      targets.add(phRegionByProvince[name]);
-    }
-
-    return all.filter((c) => targets.has(normalize(c.stateCode)));
-  }, [countryCode, stateCode, stateName]);
+  const cities = useMemo(() => getCitiesForLocation(countryCode, stateCode, stateName), [countryCode, stateCode, stateName]);
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
