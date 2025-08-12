@@ -129,13 +129,13 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
     <section className="max-w-6xl mx-auto px-0 sm:px-6 py-8">
       <div className="mb-8 px-6 sm:px-0">
         <div className="mb-4">
-          <div className="flex items-center gap-3 mb-1">
+          <div className="flex items-baseline gap-3 mb-1">
             <div className="inline-flex flex-col items-start w-fit">
               <h2 className="text-3xl font-bold text-contest-text">{title}</h2>
               <p className="text-muted-foreground italic -mt-1 self-center">{subtitle}</p>
             </div>
             {isActive && description && (
-              <span className="text-muted-foreground text-lg sm:text-xl font-medium">
+              <span className="text-3xl font-bold text-contest-text">
                 {description}
               </span>
             )}
