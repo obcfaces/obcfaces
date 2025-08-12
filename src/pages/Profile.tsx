@@ -4,6 +4,8 @@ import { useParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import { toast } from "@/components/ui/use-toast";
 import PostCard from "@/components/profile/PostCard";
 import c1 from "@/assets/contestant-1.jpg";
 import c2 from "@/assets/contestant-2.jpg";
@@ -17,6 +19,7 @@ interface ProfileRow {
   avatar_url?: string | null;
   city?: string | null;
   country?: string | null;
+  bio?: string | null;
 }
 
 const Profile = () => {
@@ -24,12 +27,22 @@ const Profile = () => {
   const [data, setData] = useState<ProfileRow | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+
+  const [followersCount, setFollowersCount] = useState(0);
+  const [followingCount, setFollowingCount] = useState(0);
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [loadingFollow, setLoadingFollow] = useState(false);
+
+  const [isEditingBio, setIsEditingBio] = useState(false);
+  const [bioDraft, setBioDraft] = useState("");
+  const [savingBio, setSavingBio] = useState(false);
   useEffect(() => {
     const load = async () => {
       if (!id) return;
       const { data } = await supabase
         .from("profiles")
-        .select("display_name, birthdate, height_cm, weight_kg, avatar_url, city, country")
+        .select("display_name, birthdate, height_cm, weight_kg, avatar_url, city, country, bio")
         .eq("id", id)
         .maybeSingle();
       setData(data ?? null);
@@ -37,6 +50,106 @@ const Profile = () => {
     };
     load();
   }, [id]);
+
+  // Get current user id
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      setCurrentUserId(data.user?.id ?? null);
+    });
+  }, []);
+
+  // Keep bio draft in sync
+  useEffect(() => {
+    setBioDraft(data?.bio ?? "");
+  }, [data?.bio]);
+
+  // Load followers/following counts
+  useEffect(() => {
+    if (!id) return;
+    const loadCounts = async () => {
+      const { count: followers } = await supabase
+        .from("follows")
+        .select("*", { head: true, count: "exact" })
+        .eq("followee_id", id);
+      const { count: following } = await supabase
+        .from("follows")
+        .select("*", { head: true, count: "exact" })
+        .eq("follower_id", id);
+      setFollowersCount(followers ?? 0);
+      setFollowingCount(following ?? 0);
+    };
+    loadCounts();
+  }, [id]);
+
+  // Check following state for current user
+  useEffect(() => {
+    if (!id || !currentUserId || currentUserId === id) {
+      setIsFollowing(false);
+      return;
+    }
+    supabase
+      .from("follows")
+      .select("*", { head: true, count: "exact" })
+      .eq("follower_id", currentUserId)
+      .eq("followee_id", id)
+      .then(({ count }) => setIsFollowing((count ?? 0) > 0));
+  }, [id, currentUserId]);
+
+  const isOwner = currentUserId === (id ?? null);
+
+  const handleFollowToggle = async () => {
+    if (!currentUserId) {
+      toast({ description: "Войдите, чтобы подписываться." });
+      return;
+    }
+    if (!id) return;
+    setLoadingFollow(true);
+    try {
+      if (isFollowing) {
+        const { error } = await supabase
+          .from("follows")
+          .delete()
+          .match({ follower_id: currentUserId, followee_id: id });
+        if (error) throw error;
+        setIsFollowing(false);
+        setFollowersCount((c) => Math.max(0, c - 1));
+      } else {
+        const { error } = await supabase
+          .from("follows")
+          .insert({ follower_id: currentUserId, followee_id: id });
+        if (error) throw error;
+        setIsFollowing(true);
+        setFollowersCount((c) => c + 1);
+      }
+    } catch (e) {
+      toast({ description: "Не удалось выполнить действие. Попробуйте позже." });
+    } finally {
+      setLoadingFollow(false);
+    }
+  };
+
+  const handleMessage = () => {
+    toast({ description: "Сообщения скоро будут доступны." });
+  };
+
+  const handleBioSave = async () => {
+    if (!currentUserId || !isOwner) return;
+    setSavingBio(true);
+    try {
+      const { error } = await supabase
+        .from("profiles")
+        .update({ bio: bioDraft })
+        .eq("id", currentUserId);
+      if (error) throw error;
+      setData((prev) => (prev ? { ...prev, bio: bioDraft } : prev));
+      setIsEditingBio(false);
+      toast({ description: "Описание обновлено." });
+    } catch (e) {
+      toast({ description: "Не удалось сохранить описание." });
+    } finally {
+      setSavingBio(false);
+    }
+  };
 
   const title = data?.display_name ? `${data.display_name} — Профиль` : "Профиль пользователя";
   const description = data?.display_name ? `Личная страница ${data.display_name}` : "Личная страница пользователя";
@@ -109,6 +222,60 @@ const Profile = () => {
                 </div>
               </div>
             </header>
+
+            <div className="px-2 sm:px-4">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <div className="text-xl font-semibold">{followersCount}</div>
+                    <div className="text-sm text-muted-foreground">Подписчики</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-xl font-semibold">{followingCount}</div>
+                    <div className="text-sm text-muted-foreground">Подписки</div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  {!isOwner && (
+                    <>
+                      <Button variant={isFollowing ? "secondary" : "default"} onClick={handleFollowToggle} disabled={loadingFollow}>
+                        {isFollowing ? "Отписаться" : "Подписаться"}
+                      </Button>
+                      <Button variant="outline" onClick={handleMessage}>Сообщение</Button>
+                    </>
+                  )}
+                </div>
+              </div>
+
+              <div className="mt-3">
+                {isOwner ? (
+                  isEditingBio ? (
+                    <div className="space-y-2">
+                      <textarea
+                        className="w-full min-h-24 rounded-md border bg-background p-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                        value={bioDraft}
+                        onChange={(e) => setBioDraft(e.target.value)}
+                        placeholder="Расскажите о себе…"
+                      />
+                      <div className="flex gap-2">
+                        <Button size="sm" onClick={handleBioSave} disabled={savingBio}>Сохранить</Button>
+                        <Button size="sm" variant="ghost" onClick={() => { setIsEditingBio(false); setBioDraft(data.bio ?? ""); }}>Отмена</Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-sm text-muted-foreground">
+                      {data.bio ? (
+                        <p>{data.bio}</p>
+                      ) : (
+                        <button className="underline" onClick={() => setIsEditingBio(true)}>Добавить текст “О себе”</button>
+                      )}
+                    </div>
+                  )
+                ) : (
+                  data.bio ? <p className="text-sm text-muted-foreground">{data.bio}</p> : null
+                )}
+              </div>
+            </div>
 
             <Tabs defaultValue="posts" className="mt-4">
               <TabsList className="w-full sm:w-auto">
