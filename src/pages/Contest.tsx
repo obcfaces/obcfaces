@@ -5,6 +5,8 @@ import contestant1 from "@/assets/contestant-1.jpg";
 import contestant2 from "@/assets/contestant-2.jpg";
 import contestant3 from "@/assets/contestant-3.jpg";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { AspectRatio } from "@/components/ui/aspect-ratio";
+import { Grid3X3, List } from "lucide-react";
 
 interface Week {
   key: string;
@@ -54,6 +56,7 @@ function formatTimeForCard(iso: string, weekLabel: string) {
 }
 
 const Contest = () => {
+  const [viewMode, setViewMode] = useState<'compact' | 'full'>('compact');
   const [selectedWeek, setSelectedWeek] = useState<string>(weeks[0].key);
   const week = useMemo(() => weeks.find(w => w.key === selectedWeek)!, [selectedWeek]);
   const entries = useMemo(() => allEntries.filter(e => e.weekKey === selectedWeek), [selectedWeek]);
@@ -68,6 +71,44 @@ const Contest = () => {
 
       <main className="min-h-screen bg-background">
         <section className="container mx-auto px-0 sm:px-6 py-8">
+          <div className="mb-6" role="tablist" aria-label="View mode">
+            <div className="inline-flex items-stretch gap-3">
+              <button
+                type="button"
+                onClick={() => setViewMode('compact')}
+                aria-pressed={viewMode === 'compact'}
+                className={`group rounded-lg border px-3 py-2 transition-colors ${viewMode === 'compact' ? 'bg-accent text-accent-foreground border-border' : 'bg-card hover:bg-accent/50'}`}
+              >
+                <div className="flex items-center gap-2">
+                  <Grid3X3 className="w-4 h-4" />
+                  <div className="grid grid-cols-3 gap-0.5 w-14 h-8">
+                    {Array.from({ length: 9 }).map((_, i) => (
+                      <span key={i} className={`rounded-sm ${viewMode === 'compact' ? 'bg-primary/70' : 'bg-muted'} block`} />
+                    ))}
+                  </div>
+                </div>
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewMode('full')}
+                aria-pressed={viewMode === 'full'}
+                className={`group rounded-lg border px-3 py-2 transition-colors ${viewMode === 'full' ? 'bg-accent text-accent-foreground border-border' : 'bg-card hover:bg-accent/50'}`}
+              >
+                <div className="flex items-center gap-2">
+                  <List className="w-4 h-4" />
+                  <div className="w-14 h-8 flex flex-col justify-between">
+                    {Array.from({ length: 3 }).map((_, r) => (
+                      <div key={r} className="flex items-center gap-1">
+                        <span className={`${viewMode === 'full' ? 'bg-primary/70' : 'bg-muted'} w-4 h-4 rounded-sm block`} />
+                        <span className="bg-muted-foreground/30 h-1 flex-1 rounded" />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </button>
+            </div>
+          </div>
+
           <header className="mb-6">
             <h1 className="text-3xl font-bold text-contest-text">Contest – Weekly Entries</h1>
             <p className="text-muted-foreground">Select a week to see the girls’ participation posts.</p>
@@ -86,23 +127,43 @@ const Contest = () => {
             </Select>
           </div>
 
-          <div className="grid grid-cols-1 gap-4 sm:gap-6">
-            {entries.map(e => (
-              <article key={e.id}>
-                <PostCard
-                  authorName={e.authorName}
-                  time={formatTimeForCard(e.createdAt, week.label)}
-                  content={`Contest entry for ${week.label}`}
-                  imageSrc={e.imageSrc}
-                  likes={0}
-                  comments={0}
-                />
-              </article>
-            ))}
-            {entries.length === 0 && (
-              <p className="text-sm text-muted-foreground">No entries for this week yet.</p>
-            )}
-          </div>
+          {viewMode === 'compact' ? (
+            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-1 sm:gap-2">
+              {entries.map(e => (
+                <article key={e.id} className="relative">
+                  <AspectRatio ratio={1}>
+                    <img
+                      src={e.imageSrc}
+                      alt={`Contest entry by ${e.authorName}`}
+                      loading="lazy"
+                      className="absolute inset-0 w-full h-full object-cover"
+                    />
+                  </AspectRatio>
+                </article>
+              ))}
+              {entries.length === 0 && (
+                <p className="col-span-full text-sm text-muted-foreground">No entries for this week yet.</p>
+              )}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 gap-4 sm:gap-6">
+              {entries.map(e => (
+                <article key={e.id}>
+                  <PostCard
+                    authorName={e.authorName}
+                    time={formatTimeForCard(e.createdAt, week.label)}
+                    content={`Contest entry for ${week.label}`}
+                    imageSrc={e.imageSrc}
+                    likes={0}
+                    comments={0}
+                  />
+                </article>
+              ))}
+              {entries.length === 0 && (
+                <p className="text-sm text-muted-foreground">No entries for this week yet.</p>
+              )}
+            </div>
+          )}
         </section>
       </main>
     </>
