@@ -34,15 +34,26 @@ const LoginModalTrigger = () => {
     if (!countryCode || !stateCode) return [];
     const byState = City.getCitiesOfState(countryCode, stateCode);
     if (byState.length) return byState;
-    // Fallback for datasets where city.stateCode may store the state NAME instead of ISO code (e.g., some PH provinces)
+    // Fallbacks for datasets with inconsistent state codes/names (e.g., Philippines)
     const all = City.getCitiesOfCountry(countryCode);
     const normalize = (s: string | null | undefined) => (s ?? "").toLowerCase().replace(/\s+/g, "");
     const code = normalize(stateCode);
     const name = normalize(stateName);
-    return all.filter((c) => {
-      const sc = normalize(c.stateCode);
-      return sc === code || (!!name && sc === name);
-    });
+
+    // Region synonym mapping (handles PH provinces whose cities are tagged by region name)
+    const phRegionByProvince: Record<string, string> = {
+      cebu: "centralvisayas",
+      bohol: "centralvisayas",
+      negrosoriental: "centralvisayas",
+      siquijor: "centralvisayas",
+    };
+
+    const targets = new Set<string>([code, name]);
+    if (countryCode === "PH" && name && phRegionByProvince[name]) {
+      targets.add(phRegionByProvince[name]);
+    }
+
+    return all.filter((c) => targets.has(normalize(c.stateCode)));
   }, [countryCode, stateCode, stateName]);
 
   const onSubmit = async (e: React.FormEvent) => {

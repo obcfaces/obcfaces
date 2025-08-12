@@ -56,9 +56,29 @@ const Account = () => {
     if (!countryCode || !stateCode) return [];
     const byState = City.getCitiesOfState(countryCode, stateCode);
     if (byState.length) return byState;
-    // Fallback when dataset lacks state-level city mapping
-    return City.getCitiesOfCountry(countryCode).filter((c) => c.stateCode === stateCode);
-  }, [countryCode, stateCode]);
+
+    // Fallbacks for datasets with inconsistent state codes/names (e.g., Philippines)
+    const all = City.getCitiesOfCountry(countryCode);
+    const normalize = (s: string | null | undefined) => (s ?? "").toLowerCase().replace(/\s+/g, "");
+
+    const st = states.find((s) => s.isoCode === stateCode);
+    const code = normalize(stateCode);
+    const name = normalize(st?.name);
+
+    const phRegionByProvince: Record<string, string> = {
+      cebu: "centralvisayas",
+      bohol: "centralvisayas",
+      negrosoriental: "centralvisayas",
+      siquijor: "centralvisayas",
+    };
+
+    const targets = new Set<string>([code, name]);
+    if (countryCode === "PH" && name && phRegionByProvince[name]) {
+      targets.add(phRegionByProvince[name]);
+    }
+
+    return all.filter((c) => targets.has(normalize(c.stateCode)));
+  }, [countryCode, stateCode, states]);
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
