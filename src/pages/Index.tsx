@@ -14,8 +14,8 @@ const Index = () => {
       />
       
       <ContestSection
-        title="JULE 17 – 23 /// 2025"
-        subtitle="Voting is over! We have a winner!"
+        title="1 WEEK AGO (Closed)"
+        subtitle="18-24 August 2025"
         description="Take a look at the three leaders who have already emerged in the current vote."
         showWinner={true}
       />
