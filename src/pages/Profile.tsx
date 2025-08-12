@@ -293,10 +293,10 @@ const samplePosts = useMemo(
             </div>
 
             <Tabs defaultValue="posts" className="mt-4">
-              <TabsList className="w-full sm:w-auto">
-                <TabsTrigger value="posts">Посты</TabsTrigger>
-                <TabsTrigger value="photos">Фото</TabsTrigger>
-                <TabsTrigger value="about">Инфо</TabsTrigger>
+              <TabsList className="w-full sm:w-auto bg-transparent p-0 rounded-none justify-start gap-8 border-b border-border">
+                <TabsTrigger value="posts" className="px-0 mr-6 h-auto pb-2 bg-transparent rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary text-muted-foreground hover:text-foreground">Посты</TabsTrigger>
+                <TabsTrigger value="photos" className="px-0 mr-6 h-auto pb-2 bg-transparent rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary text-muted-foreground hover:text-foreground">Фото</TabsTrigger>
+                <TabsTrigger value="about" className="px-0 h-auto pb-2 bg-transparent rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary text-muted-foreground hover:text-foreground">Инфо</TabsTrigger>
               </TabsList>
 
                <TabsContent value="posts" className="space-y-4 mt-4">
