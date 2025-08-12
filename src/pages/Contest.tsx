@@ -110,8 +110,9 @@ const Contest = () => {
           </div>
 
           <header className="mb-6">
-            <h1 className="text-3xl font-bold text-contest-text">Contest – Weekly Entries</h1>
-            <p className="text-muted-foreground">Select a week to see the girls’ participation posts.</p>
+            <h1 className="text-3xl font-bold text-contest-text">CURRENT WEEK.</h1>
+            <p className="text-sm text-muted-foreground">{week.label}</p>
+            <p className="text-muted-foreground">Help us choose the winner of the week.</p>
           </header>
 
           <div className="mb-6 max-w-xs">
