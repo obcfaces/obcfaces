@@ -6,7 +6,7 @@ import contestant2 from "@/assets/contestant-2.jpg";
 import contestant3 from "@/assets/contestant-3.jpg";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
-import { Grid3X3, List } from "lucide-react";
+import { List, Square } from "lucide-react";
 
 interface Week {
   key: string;
@@ -71,43 +71,7 @@ const Contest = () => {
 
       <main className="min-h-screen bg-background">
         <section className="container mx-auto px-0 sm:px-6 py-8">
-          <div className="mb-6" role="tablist" aria-label="View mode">
-            <div className="inline-flex items-stretch gap-3">
-              <button
-                type="button"
-                onClick={() => setViewMode('compact')}
-                aria-pressed={viewMode === 'compact'}
-                className={`group rounded-lg border px-3 py-2 transition-colors ${viewMode === 'compact' ? 'bg-accent text-accent-foreground border-border' : 'bg-card hover:bg-accent/50'}`}
-              >
-                <div className="flex items-center gap-2">
-                  <Grid3X3 className="w-4 h-4" />
-                  <div className="grid grid-cols-3 gap-0.5 w-14 h-8">
-                    {Array.from({ length: 9 }).map((_, i) => (
-                      <span key={i} className={`rounded-sm ${viewMode === 'compact' ? 'bg-primary/70' : 'bg-muted'} block`} />
-                    ))}
-                  </div>
-                </div>
-              </button>
-              <button
-                type="button"
-                onClick={() => setViewMode('full')}
-                aria-pressed={viewMode === 'full'}
-                className={`group rounded-lg border px-3 py-2 transition-colors ${viewMode === 'full' ? 'bg-accent text-accent-foreground border-border' : 'bg-card hover:bg-accent/50'}`}
-              >
-                <div className="flex items-center gap-2">
-                  <List className="w-4 h-4" />
-                  <div className="w-14 h-8 flex flex-col justify-between">
-                    {Array.from({ length: 3 }).map((_, r) => (
-                      <div key={r} className="flex items-center gap-1">
-                        <span className={`${viewMode === 'full' ? 'bg-primary/70' : 'bg-muted'} w-4 h-4 rounded-sm block`} />
-                        <span className="bg-muted-foreground/30 h-1 flex-1 rounded" />
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </button>
-            </div>
-          </div>
+          {/* View controls moved below, above cards */}
 
           <header className="mb-6">
             <h1 className="text-3xl font-bold text-contest-text">CURRENT WEEK.</h1>
@@ -126,6 +90,34 @@ const Contest = () => {
                 ))}
               </SelectContent>
             </Select>
+          </div>
+
+<div className="mb-4">
+            <div className="relative">
+              <div aria-hidden className="absolute inset-x-0 bottom-0 border-b border-border/60" />
+              <div className="grid grid-cols-2 place-items-center">
+                <button
+                  type="button"
+                  onClick={() => setViewMode('full')}
+                  aria-pressed={viewMode === 'full'}
+                  className="relative py-2"
+                  aria-label="List view"
+                >
+                  <List className={(viewMode === 'full' ? 'text-foreground' : 'text-muted-foreground') + ' w-6 h-6'} />
+                  <span className={"pointer-events-none absolute -bottom-[1px] h-0.5 w-16 rounded-full " + (viewMode === 'full' ? 'bg-foreground' : 'bg-transparent')} />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setViewMode('compact')}
+                  aria-pressed={viewMode === 'compact'}
+                  className="relative py-2"
+                  aria-label="Grid view"
+                >
+                  <Square className={(viewMode === 'compact' ? 'text-foreground' : 'text-muted-foreground') + ' w-6 h-6'} />
+                  <span className={"pointer-events-none absolute -bottom-[1px] h-0.5 w-16 rounded-full " + (viewMode === 'compact' ? 'bg-foreground' : 'bg-transparent')} />
+                </button>
+              </div>
+            </div>
           </div>
 
           {viewMode === 'compact' ? (
