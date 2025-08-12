@@ -217,11 +217,18 @@ const samplePosts = useMemo(
           <>
 
             <header className="mb-4 px-0 sm:px-4">
-              <div className="flex items-center">
+              <div className="flex items-center gap-4">
                 <Avatar className="h-20 w-20 ring-2 ring-background">
                   <AvatarImage src={profile.avatar_url ?? undefined} alt={`Аватар ${profile.display_name ?? "пользователя"}`} />
                   <AvatarFallback>{initials}</AvatarFallback>
                 </Avatar>
+                <div>
+                  <h1 className="text-2xl font-semibold leading-tight">{profile.display_name ?? "Профиль пользователя"}</h1>
+                  <p className="text-sm text-muted-foreground">
+                    {profile.city ? `${profile.city}` : "Город не указан"}
+                    {profile.country ? `, ${profile.country}` : ""}
+                  </p>
+                </div>
               </div>
             </header>
 
@@ -292,14 +299,22 @@ const samplePosts = useMemo(
                 <TabsTrigger value="about">Инфо</TabsTrigger>
               </TabsList>
 
-              <TabsContent value="posts" className="space-y-4 mt-4">
-                {samplePosts.map((p) => (
+               <TabsContent value="posts" className="space-y-4 mt-4">
+                 <div className="mb-8 px-6 sm:px-0">
+                   <h2 className="text-3xl font-bold text-contest-text mb-2">Посты</h2>
+                   <p className="text-contest-blue font-medium mb-2">Последние обновления</p>
+                 </div>
+                 {samplePosts.map((p) => (
                   <PostCard key={p.id} {...p} />
                 ))}
               </TabsContent>
 
-              <TabsContent value="photos" className="mt-4">
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-0 sm:gap-3">
+               <TabsContent value="photos" className="mt-4">
+                 <div className="mb-8 px-6 sm:px-0">
+                   <h2 className="text-3xl font-bold text-contest-text mb-2">Фото</h2>
+                   <p className="text-contest-blue font-medium mb-2">Галерея</p>
+                 </div>
+                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-0 sm:gap-3">
                   {[c1, c2, c3, c1, c2, c3].map((src, idx) => (
                     <img
                       key={idx}
@@ -312,8 +327,12 @@ const samplePosts = useMemo(
                 </div>
               </TabsContent>
 
-              <TabsContent value="about" className="mt-4">
-                <article className="grid gap-4 sm:grid-cols-2">
+               <TabsContent value="about" className="mt-4">
+                 <div className="mb-8 px-6 sm:px-0">
+                   <h2 className="text-3xl font-bold text-contest-text mb-2">Инфо</h2>
+                   <p className="text-contest-blue font-medium mb-2">Параметры и данные</p>
+                 </div>
+                 <article className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-2">
                     <p><span className="text-muted-foreground">Имя:</span> {profile.display_name ?? "—"}</p>
                     <p><span className="text-muted-foreground">Дата рождения:</span> {profile.birthdate ?? "—"}</p>
