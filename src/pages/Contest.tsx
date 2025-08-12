@@ -6,7 +6,10 @@ import contestant2 from "@/assets/contestant-2.jpg";
 import contestant3 from "@/assets/contestant-3.jpg";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
-import { List, Square } from "lucide-react";
+import listIcon from "@/assets/icons/sdisplay-list.png";
+import listActiveIcon from "@/assets/icons/sdisplay-list-active.png";
+import tableIcon from "@/assets/icons/sdisplay-table.png";
+import tableActiveIcon from "@/assets/icons/sdisplay-table-active.png";
 
 interface Week {
   key: string;
@@ -102,7 +105,7 @@ const Contest = () => {
                 className="p-1 rounded-md hover:bg-accent transition-colors"
               >
                 <img
-                  src={viewMode === 'full' ? '/icons/sdisplay-list-active.png' : '/icons/sdisplay-list.png'}
+                  src={viewMode === 'full' ? listActiveIcon : listIcon}
                   alt="List view"
                   width={28}
                   height={28}
@@ -117,7 +120,7 @@ const Contest = () => {
                 className="p-1 rounded-md hover:bg-accent transition-colors"
               >
                 <img
-                  src={viewMode === 'compact' ? '/icons/sdisplay-table-active.png' : '/icons/sdisplay-table.png'}
+                  src={viewMode === 'compact' ? tableActiveIcon : tableIcon}
                   alt="Grid view"
                   width={28}
                   height={28}

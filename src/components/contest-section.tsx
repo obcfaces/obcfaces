@@ -8,6 +8,10 @@ import contestant2Face from "@/assets/contestant-2-face.jpg";
 import contestant2Full from "@/assets/contestant-2-full.jpg";
 import contestant3Face from "@/assets/contestant-3-face.jpg";
 import contestant3Full from "@/assets/contestant-3-full.jpg";
+import listIcon from "@/assets/icons/sdisplay-list.png";
+import listActiveIcon from "@/assets/icons/sdisplay-list-active.png";
+import tableIcon from "@/assets/icons/sdisplay-table.png";
+import tableActiveIcon from "@/assets/icons/sdisplay-table-active.png";
 
 interface ContestSectionProps {
   title: string;
@@ -142,7 +146,7 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
             className="p-1 rounded-md hover:bg-accent transition-colors"
           >
             <img
-              src={viewMode === 'full' ? '/icons/sdisplay-list-active.png' : '/icons/sdisplay-list.png'}
+              src={viewMode === 'full' ? listActiveIcon : listIcon}
               alt="List view icon"
               width={28}
               height={28}
@@ -157,7 +161,7 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
             className="p-1 rounded-md hover:bg-accent transition-colors"
           >
             <img
-              src={viewMode === 'compact' ? '/icons/sdisplay-table-active.png' : '/icons/sdisplay-table.png'}
+              src={viewMode === 'compact' ? tableActiveIcon : tableIcon}
               alt="Grid view icon"
               width={28}
               height={28}
