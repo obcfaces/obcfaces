@@ -25,7 +25,7 @@ const LoginModalTrigger = () => {
   const [stateCode, setStateCode] = useState<string | null>(null);
   const [city, setCity] = useState("");
   const [age, setAge] = useState<string>("");
-  const [photo, setPhoto] = useState<File | null>(null);
+  
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const navigate = useNavigate();
@@ -66,14 +66,6 @@ const ageOptions = useMemo(() => Array.from({ length: 65 }, (_, i) => 16 + i), [
 
         if (data.session?.user) {
           const userId = data.session.user.id;
-          let uploadedUrl: string | null = null;
-          if (photo) {
-            const path = `${userId}/${Date.now()}-${photo.name}`;
-            const { error: uploadError } = await supabase.storage.from("avatars").upload(path, photo, { upsert: true });
-            if (uploadError) throw uploadError;
-            const { data: pub } = supabase.storage.from("avatars").getPublicUrl(path);
-            uploadedUrl = pub.publicUrl;
-          }
           const { error: upsertErr } = await supabase
             .from("profiles")
             .upsert(
@@ -85,7 +77,6 @@ const ageOptions = useMemo(() => Array.from({ length: 65 }, (_, i) => 16 + i), [
                 state: stateName || null,
                 city: city || null,
                 age: age ? Number(age) : null,
-                avatar_url: uploadedUrl,
               },
               { onConflict: "id" }
             );
@@ -94,7 +85,7 @@ const ageOptions = useMemo(() => Array.from({ length: 65 }, (_, i) => 16 + i), [
           setOpen(false);
           navigate("/account", { replace: true });
         } else {
-          toast({ description: "Check your email to confirm. You can upload a photo after signing in." });
+          toast({ description: "Check your email to confirm." });
           setOpen(false);
         }
       }
@@ -240,10 +231,6 @@ const ageOptions = useMemo(() => Array.from({ length: 65 }, (_, i) => 16 + i), [
                     ))}
                   </SelectContent>
                 </Select>
-              </div>
-              <div className="space-y-2 sm:col-span-2">
-                
-                <Input id="auth-photo" type="file" accept="image/*" onChange={(e) => setPhoto(e.currentTarget.files?.[0] ?? null)} />
               </div>
             </div>
           )}
