@@ -48,7 +48,7 @@ export function ContestantCard({
   faceImage,
   fullBodyImage,
   additionalPhotos = [],
-  isVoted,
+  isVoted: propIsVoted,
   isWinner,
   prize,
   viewMode = 'compact',
@@ -75,6 +75,7 @@ export function ContestantCard({
     Math.floor(Math.random() * 20) + 1,
   ]);
   const [user, setUser] = useState<any>(null);
+  const [isVoted, setIsVoted] = useState(propIsVoted || false);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const { toast } = useToast();
 
@@ -90,23 +91,82 @@ export function ContestantCard({
     return () => subscription.unsubscribe();
   }, []);
 
-  const handleLike = (index: number) => {
+  // Load user's likes and ratings on component mount
+  useEffect(() => {
+    if (!user) return;
+    
+    const loadUserData = async () => {
+      // Load likes for both photos
+      const { data: likes } = await supabase
+        .from("likes")
+        .select("content_id")
+        .eq("user_id", user.id)
+        .eq("content_type", "contest")
+        .in("content_id", [`contestant-${name}-0`, `contestant-${name}-1`]);
+      
+      if (likes) {
+        const likedState = [
+          likes.some(like => like.content_id === `contestant-${name}-0`),
+          likes.some(like => like.content_id === `contestant-${name}-1`)
+        ];
+        setIsLiked(likedState);
+      }
+      
+      // Load user's rating (if any)
+      const savedRating = localStorage.getItem(`rating-${name}-${user.id}`);
+      if (savedRating) {
+        setUserRating(parseFloat(savedRating));
+        setIsVoted(true); // Mark as voted if rating exists
+      }
+    };
+    
+    loadUserData();
+  }, [user, name]);
+
+  const handleLike = async (index: number) => {
     if (!user) {
       setShowLoginModal(true);
       return;
     }
     
-    const wasLiked = isLiked[index]
-    setIsLiked((prev) => {
-      const next = [...prev]
-      next[index] = !wasLiked
-      return next
-    })
-    setLikesCount((prev) => {
-      const next = [...prev]
-      next[index] = wasLiked ? next[index] - 1 : next[index] + 1
-      return next
-    })
+    const contentId = `contestant-${name}-${index}`;
+    const wasLiked = isLiked[index];
+    
+    try {
+      if (wasLiked) {
+        // Unlike
+        await supabase
+          .from("likes")
+          .delete()
+          .eq("user_id", user.id)
+          .eq("content_type", "contest")
+          .eq("content_id", contentId);
+      } else {
+        // Like
+        await supabase
+          .from("likes")
+          .insert({
+            user_id: user.id,
+            content_type: "contest",
+            content_id: contentId,
+          });
+      }
+      
+      setIsLiked((prev) => {
+        const next = [...prev];
+        next[index] = !wasLiked;
+        return next;
+      });
+      
+      setLikesCount((prev) => {
+        const next = [...prev];
+        next[index] = wasLiked ? next[index] - 1 : next[index] + 1;
+        return next;
+      });
+      
+    } catch (error) {
+      toast({ description: "Не удалось выполнить действие" });
+    }
   };
 
   const handleDislike = () => {
@@ -126,6 +186,10 @@ export function ContestantCard({
     }
     
     setUserRating(rating);
+    setIsVoted(true); // Mark as voted
+    // Save rating to localStorage
+    localStorage.setItem(`rating-${name}-${user.id}`, rating.toString());
+    
     setShowThanks(true);
     setTimeout(() => {
       setShowThanks(false);
@@ -237,6 +301,7 @@ export function ContestantCard({
                         return;
                       }
                       setUserRating(rating);
+                      localStorage.setItem(`rating-${name}-${user.id}`, rating.toString());
                       setIsEditing(false);
                       onRate?.(rating);
                     }}
@@ -473,6 +538,7 @@ export function ContestantCard({
                       return;
                     }
                     setUserRating(rating);
+                    localStorage.setItem(`rating-${name}-${user.id}`, rating.toString());
                     setIsEditing(false);
                     onRate?.(rating);
                   }}
