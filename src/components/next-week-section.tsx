@@ -176,18 +176,9 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
           </div>
           
           <div className="mt-4 text-center">
-            {currentCandidate.isVoted && currentCandidate.rank > 0 ? (
-              <div className="flex items-center justify-center gap-3">
-                <span className="text-xl font-bold text-contest-blue">#{currentCandidate.rank}</span>
-                <span className="text-lg text-contest-text">{currentCandidate.rating}</span>
-                <span className="text-lg text-contest-text">•</span>
-                <span className="text-lg text-contest-text">{remainingCandidates} remaining</span>
-              </div>
-            ) : (
-              <span className="text-lg text-contest-text">
-                {remainingCandidates} remaining
-              </span>
-            )}
+            <span className="text-lg text-contest-text">
+              {remainingCandidates} remaining
+            </span>
           </div>
         </div>
       ) : (
