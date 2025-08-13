@@ -60,7 +60,16 @@ export function ContestantCard({
   const [modalStartIndex, setModalStartIndex] = useState(0);
   const [isEditing, setIsEditing] = useState(false);
   const [showThanks, setShowThanks] = useState(false);
-  const [userRating, setUserRating] = useState(0);
+  const [userRating, setUserRating] = useState(() => {
+    try {
+      const currentUserId = localStorage.getItem('currentUserId');
+      if (!currentUserId) return 0;
+      const savedRating = localStorage.getItem(`rating-${name}-${currentUserId}`);
+      return savedRating ? parseFloat(savedRating) : 0;
+    } catch {
+      return 0;
+    }
+  });
   const [isLiked, setIsLiked] = useState<boolean[]>([false, false]);
   const [isDisliked, setIsDisliked] = useState(false);
   const [likesCount, setLikesCount] = useState<number[]>([
@@ -75,17 +84,40 @@ export function ContestantCard({
     Math.floor(Math.random() * 20) + 1,
   ]);
   const [user, setUser] = useState<any>(null);
-  const [isVoted, setIsVoted] = useState(propIsVoted || false);
+  // Initialize isVoted state synchronously by checking localStorage
+  const [isVoted, setIsVoted] = useState(() => {
+    if (propIsVoted) return true;
+    try {
+      const savedRating = localStorage.getItem(`rating-${name}-${localStorage.getItem('currentUserId') || 'anonymous'}`);
+      return !!savedRating;
+    } catch {
+      return false;
+    }
+  });
   const [showLoginModal, setShowLoginModal] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
-      setUser(session?.user ?? null);
+      const newUser = session?.user ?? null;
+      setUser(newUser);
+      // Store current user ID for synchronous access
+      if (newUser?.id) {
+        localStorage.setItem('currentUserId', newUser.id);
+      } else {
+        localStorage.removeItem('currentUserId');
+      }
     });
 
     supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
+      const newUser = session?.user ?? null;
+      setUser(newUser);
+      // Store current user ID for synchronous access
+      if (newUser?.id) {
+        localStorage.setItem('currentUserId', newUser.id);
+      } else {
+        localStorage.removeItem('currentUserId');
+      }
     });
 
     return () => subscription.unsubscribe();
