@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Heart, MessageCircle, Star, Pencil, Send, Share } from "lucide-react";
+import { Heart, MessageCircle, Star, Pencil, Send, Reply } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { StarRating } from "@/components/ui/star-rating";
@@ -309,8 +309,8 @@ export function ContestantCard({
                onClick={async () => { try { if ((navigator as any).share) { await (navigator as any).share({ title: name, url: window.location.href }); } else if (navigator.clipboard) { await navigator.clipboard.writeText(window.location.href); toast({ title: "Link copied" }); } } catch {} }}
                aria-label="Share"
              >
-               <Share className="w-4 h-4" />
-               <span className="hidden sm:inline">Share</span>
+                <Reply className="w-4 h-4" />
+                <span className="hidden sm:inline">Share</span>
              </button>
            </div>
          </Card>
@@ -541,7 +541,7 @@ export function ContestantCard({
                   }}
                   aria-label="Share"
                 >
-                  <Share className="w-3.5 h-3.5" />
+                  <Reply className="w-3.5 h-3.5" />
                   <span className="hidden md:inline">Share</span>
                 </button>
               </div>
