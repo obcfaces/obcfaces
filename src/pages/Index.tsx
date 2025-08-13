@@ -11,15 +11,12 @@ const Index = () => {
   const [country, setCountry] = useState<string>("PH");
   const [gender, setGender] = useState<'male' | 'female'>("female");
   const [viewMode, setViewMode] = useState<'compact' | 'full'>("compact");
-  const [category, setCategory] = useState<"" | Category>("");
-
-  // Восстановление category из localStorage при загрузке
-  useEffect(() => {
-    const savedCategory = localStorage.getItem('contest-category-filter');
-    if (savedCategory !== null) {
-      setCategory(savedCategory as "" | Category);
-    }
-  }, []);
+  
+  // Инициализация category из localStorage или "" по умолчанию
+  const [category, setCategory] = useState<"" | Category>(() => {
+    const saved = localStorage.getItem('contest-category-filter');
+    return saved !== null ? (saved as "" | Category) : "";
+  });
 
   // Сохранение category в localStorage при изменении
   const handleCategoryChange = (newCategory: "" | Category) => {
