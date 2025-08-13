@@ -16,7 +16,7 @@ const Index = () => {
       <ContestSection
         title="1 WEEK AGO (Closed)"
         subtitle="18-24 August 2025"
-        
+        centerSubtitle
         showWinner={true}
       />
     </div>

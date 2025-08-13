@@ -18,9 +18,10 @@ interface ContestSectionProps {
   description?: string;
   isActive?: boolean;
   showWinner?: boolean;
+  centerSubtitle?: boolean;
 }
 
-export function ContestSection({ title, subtitle, description, isActive, showWinner }: ContestSectionProps) {
+export function ContestSection({ title, subtitle, description, isActive, showWinner, centerSubtitle }: ContestSectionProps) {
   const [viewMode, setViewMode] = useState<'compact' | 'full'>('compact');
   const [ratings, setRatings] = useState<Record<number, number>>({
     1: 4.8,
@@ -130,9 +131,9 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
       <div className="mb-8 px-6 sm:px-0">
         <div className="mb-4">
           <div className="flex items-baseline gap-3 mb-1">
-            <div className="inline-flex flex-col items-start w-fit">
+            <div className={`inline-flex flex-col w-fit ${centerSubtitle ? "items-center" : "items-start"}`}>
               <h2 className="text-3xl font-bold text-contest-text">{title}</h2>
-              <p className="text-muted-foreground italic -mt-1 self-center">{subtitle}</p>
+              <p className="text-muted-foreground italic -mt-1">{subtitle}</p>
             </div>
             {isActive && description && (
               <span className="text-2xl font-normal text-contest-text">
