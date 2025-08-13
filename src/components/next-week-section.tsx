@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Heart, X, RotateCcw } from "lucide-react";
+import { Heart, ThumbsDown, RotateCcw } from "lucide-react";
 import { ContestantCard } from "@/components/contest-card";
 import { Button } from "@/components/ui/button";
 
@@ -157,7 +157,7 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
               size="lg"
               className="rounded-full w-16 h-16 p-0 border-2 border-red-300 hover:border-red-500 hover:bg-red-50"
             >
-              <X className="w-8 h-8 text-red-500" />
+              <ThumbsDown className="w-8 h-8 text-red-500" />
             </Button>
             
             <Button
