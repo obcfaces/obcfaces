@@ -2,9 +2,10 @@ import { useState } from "react";
 import { Heart, MessageCircle, Star, Pencil, Send } from "lucide-react";
 
 const ShareIcon = ({ className }: { className?: string }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-    <path d="M8 3c0 0 5 0 9 4s4 9 4 9" />
-    <path d="m17 7 4 4-4 4" />
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+    <path d="M3 12c0 0 4-6 10-6s10 6 10 6" />
+    <path d="M16 3l7 3-7 3" />
+    <path d="M8 15c0 0 5 6 8 6" />
   </svg>
 );
 import { Button } from "@/components/ui/button";
