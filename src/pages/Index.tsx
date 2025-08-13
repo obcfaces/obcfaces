@@ -13,7 +13,11 @@ const Index = () => {
         isActive={true}
         noWrapTitle
       />
-      
+
+      <div className="px-6 sm:px-0" aria-hidden>
+        <hr className="my-8 sm:my-10 border-border" />
+      </div>
+
       <ContestSection
         title="1 WEEK AGO"
         titleSuffix="(Closed)"
