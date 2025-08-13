@@ -1,12 +1,6 @@
 import { useState } from "react";
 import { Heart, MessageCircle, Star, Pencil, Send, Share, Share2, ExternalLink, Upload, ArrowUpRight } from "lucide-react";
 
-const ShareIcon = ({ className }: { className?: string }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-    <path d="M7 17C7 17 12 12 17 7"/>
-    <path d="M10 7L17 7L17 14"/>
-  </svg>
-);
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { StarRating } from "@/components/ui/star-rating";
@@ -106,7 +100,7 @@ export function ContestantCard({
             <div className="grid grid-cols-6 gap-4">
               <div className="text-center">
                 <div className="mb-2 p-2 bg-white rounded border">
-                  <ShareIcon className="w-6 h-6 mx-auto" />
+                  <Share2 className="w-6 h-6 mx-auto" />
                 </div>
                 <p className="text-xs">Текущая</p>
               </div>
@@ -361,7 +355,7 @@ export function ContestantCard({
                onClick={async () => { try { if ((navigator as any).share) { await (navigator as any).share({ title: name, url: window.location.href }); } else if (navigator.clipboard) { await navigator.clipboard.writeText(window.location.href); toast({ title: "Link copied" }); } } catch {} }}
                aria-label="Share"
              >
-                <ShareIcon className="w-4 h-4" />
+                <Share2 className="w-4 h-4" />
                 <span className="hidden sm:inline">Share</span>
              </button>
            </div>
@@ -593,7 +587,7 @@ export function ContestantCard({
                   }}
                   aria-label="Share"
                 >
-                  <ShareIcon className="w-3.5 h-3.5" />
+                  <Share2 className="w-3.5 h-3.5" />
                   <span className="hidden md:inline">Share</span>
                 </button>
               </div>
