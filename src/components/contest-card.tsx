@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Heart, MessageCircle, Star, Pencil, Send } from "lucide-react";
+import { Heart, MessageCircle, Star, Pencil, Send, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { StarRating } from "@/components/ui/star-rating";
@@ -278,8 +278,40 @@ export function ContestantCard({
                 </div>
               </div>
             </div>
-          </div>
-        </Card>
+           </div>
+           <div className="border-t border-contest-border px-4 py-2 flex items-center justify-end gap-4">
+             <button
+               type="button"
+               className={cn(
+                 "inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors",
+                 (isLiked[0] || isLiked[1]) && "text-contest-blue"
+               )}
+               onClick={() => handleLike(0)}
+               aria-label="Like"
+             >
+               <Heart className="w-4 h-4" />
+               <span>{likesCount[0] + likesCount[1]}</span>
+             </button>
+             <button
+               type="button"
+               className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
+               onClick={() => openModal(0)}
+               aria-label="Comments"
+             >
+               <MessageCircle className="w-4 h-4" />
+               <span>{commentsCount[0] + commentsCount[1]}</span>
+             </button>
+             <button
+               type="button"
+               className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
+               onClick={async () => { try { if ((navigator as any).share) { await (navigator as any).share({ title: name, url: window.location.href }); } else if (navigator.clipboard) { await navigator.clipboard.writeText(window.location.href); toast({ title: "Link copied" }); } } catch {} }}
+               aria-label="Share"
+             >
+               <Share2 className="w-4 h-4" />
+               <span>Share</span>
+             </button>
+           </div>
+         </Card>
 
         <PhotoModal
           isOpen={isModalOpen}
@@ -468,8 +500,46 @@ export function ContestantCard({
                 </div>
               </div>
               
-              <div className="flex items-center gap-2 sm:gap-3">
-                {/* Removed like and comment buttons */}
+              <div className="flex items-center justify-end gap-4">
+                <button
+                  type="button"
+                  className={cn(
+                    "inline-flex items-center gap-1 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors",
+                    (isLiked[0] || isLiked[1]) && "text-contest-blue"
+                  )}
+                  onClick={() => handleLike(0)}
+                  aria-label="Like"
+                >
+                  <Heart className="w-3.5 h-3.5" />
+                  <span>{likesCount[0] + likesCount[1]}</span>
+                </button>
+                <button
+                  type="button"
+                  className="inline-flex items-center gap-1 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors"
+                  onClick={() => openModal(0)}
+                  aria-label="Comments"
+                >
+                  <MessageCircle className="w-3.5 h-3.5" />
+                  <span>{commentsCount[0] + commentsCount[1]}</span>
+                </button>
+                <button
+                  type="button"
+                  className="inline-flex items-center gap-1 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors"
+                  onClick={async () => {
+                    try {
+                      if ((navigator as any).share) {
+                        await (navigator as any).share({ title: name, url: window.location.href });
+                      } else if (navigator.clipboard) {
+                        await navigator.clipboard.writeText(window.location.href);
+                        toast({ title: "Link copied" });
+                      }
+                    } catch {}
+                  }}
+                  aria-label="Share"
+                >
+                  <Share2 className="w-3.5 h-3.5" />
+                  <span>Share</span>
+                </button>
               </div>
             </div>
           )}
