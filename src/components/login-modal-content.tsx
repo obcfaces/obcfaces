@@ -32,6 +32,7 @@ const LoginModalContent = ({ onClose }: LoginModalContentProps) => {
   const [age, setAge] = useState<string>("");
   const [gender, setGender] = useState<string>("");
   const [acceptTerms, setAcceptTerms] = useState(false);
+  const [authError, setAuthError] = useState<string>("");
   
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -44,6 +45,7 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setAuthError(""); // Очищаем предыдущие ошибки
     setLoading(true);
     if (mode === "signup") {
       setSubmitted(true);
@@ -171,10 +173,7 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
         }
       }
     } catch (err: any) {
-      toast({ 
-        variant: "destructive",
-        description: err.message ?? (mode === "login" ? "Ошибка входа" : "Ошибка регистрации") 
-      });
+      setAuthError(err.message ?? (mode === "login" ? "Ошибка входа" : "Ошибка регистрации"));
     } finally {
       setLoading(false);
     }
@@ -185,11 +184,17 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
 
   const switchText = mode === "login" ? (
     <span className="text-sm text-muted-foreground">No account?{" "}
-      <button type="button" className="text-primary underline" onClick={() => setMode("signup")}>Sign up</button>
+      <button type="button" className="text-primary underline" onClick={() => {
+        setMode("signup");
+        setAuthError("");
+      }}>Sign up</button>
     </span>
   ) : (
     <span className="text-sm text-muted-foreground">Already have an account?{" "}
-      <button type="button" className="text-primary underline" onClick={() => setMode("login")}>Sign in</button>
+      <button type="button" className="text-primary underline" onClick={() => {
+        setMode("login");
+        setAuthError("");
+      }}>Sign in</button>
     </span>
   );
 
@@ -207,8 +212,12 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
         <DialogDescription>{description}</DialogDescription>
       </DialogHeader>
       <form onSubmit={onSubmit} className="space-y-3">
+        {authError && (
+          <div className="bg-destructive text-destructive-foreground p-3 rounded-lg text-sm font-medium">
+            {authError}
+          </div>
+        )}
         <div className="space-y-2">
-          
           <Input id="auth-email" type="email" placeholder="Email" className="placeholder:italic placeholder:text-muted-foreground" value={email} onChange={(e) => setEmail(e.target.value)} required />
         </div>
         <div className="space-y-2">
