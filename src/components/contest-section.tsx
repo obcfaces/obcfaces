@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { ContestantCard } from "@/components/contest-card";
-import { Button } from "@/components/ui/button";
 
 import contestant1Face from "@/assets/contestant-1-face.jpg";
 import contestant1Full from "@/assets/contestant-1-full.jpg";
@@ -8,10 +7,6 @@ import contestant2Face from "@/assets/contestant-2-face.jpg";
 import contestant2Full from "@/assets/contestant-2-full.jpg";
 import contestant3Face from "@/assets/contestant-3-face.jpg";
 import contestant3Full from "@/assets/contestant-3-full.jpg";
-import listIcon from "@/assets/icons/sdisplay-list.png";
-import listActiveIcon from "@/assets/icons/sdisplay-list-active.png";
-import tableIcon from "@/assets/icons/sdisplay-table.png";
-import tableActiveIcon from "@/assets/icons/sdisplay-table-active.png";
 
 interface ContestSectionProps {
   title: string;
@@ -22,10 +17,12 @@ interface ContestSectionProps {
   centerSubtitle?: boolean;
   titleSuffix?: string;
   noWrapTitle?: boolean;
+  viewMode?: 'compact' | 'full';
 }
 
-export function ContestSection({ title, subtitle, description, isActive, showWinner, centerSubtitle, titleSuffix, noWrapTitle }: ContestSectionProps) {
-  const [viewMode, setViewMode] = useState<'compact' | 'full'>('compact');
+export function ContestSection({ title, subtitle, description, isActive, showWinner, centerSubtitle, titleSuffix, noWrapTitle, viewMode: controlledViewMode }: ContestSectionProps) {
+  const [localViewMode] = useState<'compact' | 'full'>('compact');
+  const viewMode = controlledViewMode ?? localViewMode;
   const [ratings, setRatings] = useState<Record<number, number>>({
     1: 4.8,
     2: 4.5,
@@ -146,53 +143,12 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
                 {description}
               </span>
             )}
-            <div className="ml-auto flex items-center gap-2">
-              <Button variant="outline" size="sm" className="text-contest-blue border-contest-blue">
-                Philippines ▼
-              </Button>
-              <div className="flex items-center gap-1">
-                <button
-                  type="button"
-                  onClick={() => setViewMode('full')}
-                  aria-pressed={viewMode === 'full'}
-                  aria-label="List view"
-                  className="p-1 rounded-md hover:bg-accent transition-colors"
-                >
-                  <img
-                    src={viewMode === 'full' ? listActiveIcon : listIcon}
-                    alt="List view icon"
-                    width={28}
-                    height={28}
-                    loading="lazy"
-                    className="block"
-                  />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setViewMode('compact')}
-                  aria-pressed={viewMode === 'compact'}
-                  aria-label="Grid view"
-                  className="p-1 rounded-md hover:bg-accent transition-colors"
-                >
-                  <img
-                    src={viewMode === 'compact' ? tableActiveIcon : tableIcon}
-                    alt="Grid view icon"
-                    width={28}
-                    height={28}
-                    loading="lazy"
-                    className="block"
-                  />
-                </button>
-              </div>
-            </div>
           </div>
           {!isActive && description && (
             <p className="text-muted-foreground">{description}</p>
           )}
         </div>
       </div>
-
-      {/* View mode controls moved to header */}
 
       <div className={viewMode === 'compact'
         ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-1 sm:gap-3"

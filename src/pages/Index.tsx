@@ -1,10 +1,26 @@
+import { useState } from "react";
 import { ContestHeader } from "@/components/contest-header";
 import { ContestSection } from "@/components/contest-section";
+import ContestFilters from "@/components/contest-filters";
 
 const Index = () => {
+  const [country, setCountry] = useState<string>("PH");
+  const [gender, setGender] = useState<'all' | 'women' | 'men'>("all");
+  const [viewMode, setViewMode] = useState<'compact' | 'full'>("compact");
   return (
     <div className="min-h-screen bg-background">
       <ContestHeader />
+      
+      <section className="max-w-6xl mx-auto px-6 sm:px-0 mt-4">
+        <ContestFilters
+          country={country}
+          onCountryChange={setCountry}
+          gender={gender}
+          onGenderChange={setGender}
+          viewMode={viewMode}
+          onViewModeChange={setViewMode}
+        />
+      </section>
       
       <ContestSection
         title="THIS WEEK"
@@ -12,6 +28,7 @@ const Index = () => {
         description="Choose the winner of the week."
         isActive={true}
         noWrapTitle
+        viewMode={viewMode}
       />
 
       <div className="px-6 sm:px-0" aria-hidden>
