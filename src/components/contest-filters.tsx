@@ -116,13 +116,13 @@ const categoryOptions: Option[] = useMemo(() => [
       <div className="ml-auto flex items-center gap-1 shrink-0">
         <button
           type="button"
-          onClick={() => onViewModeChange("full")}
-          aria-pressed={viewMode === "full"}
+          onClick={() => onViewModeChange("compact")}
+          aria-pressed={viewMode === "compact"}
           aria-label="List view"
           className="p-1 rounded-md hover:bg-accent transition-colors"
         >
           <img
-            src={viewMode === "full" ? listActiveIcon : listIcon}
+            src={viewMode === "compact" ? listActiveIcon : listIcon}
             alt="List view icon"
             width={28}
             height={28}
@@ -131,13 +131,13 @@ const categoryOptions: Option[] = useMemo(() => [
         </button>
         <button
           type="button"
-          onClick={() => onViewModeChange("compact")}
-          aria-pressed={viewMode === "compact"}
+          onClick={() => onViewModeChange("full")}
+          aria-pressed={viewMode === "full"}
           aria-label="Grid view"
           className="p-1 rounded-md hover:bg-accent transition-colors"
         >
           <img
-            src={viewMode === "compact" ? tableActiveIcon : tableIcon}
+            src={viewMode === "full" ? tableActiveIcon : tableIcon}
             alt="Grid view icon"
             width={28}
             height={28}
