@@ -56,8 +56,45 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
     try {
       if (mode === "login") {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) throw error;
-        toast({ description: "Signed in" });
+        if (error) {
+          // Более конкретные сообщения об ошибках
+          let errorMessage = "Ошибка входа";
+          
+          switch (error.message) {
+            case "Invalid login credentials":
+              errorMessage = "Неправильный email или пароль";
+              break;
+            case "Email not confirmed":
+              errorMessage = "Email не подтвержден. Проверьте почту";
+              break;
+            case "Too many requests":
+              errorMessage = "Слишком много попыток. Попробуйте позже";
+              break;
+            case "User not found":
+              errorMessage = "Пользователь не найден";
+              break;
+            case "Invalid email":
+              errorMessage = "Неправильный формат email";
+              break;
+            case "Weak password":
+              errorMessage = "Слишком слабый пароль";
+              break;
+            default:
+              // Проверяем, содержит ли сообщение ключевые слова
+              if (error.message.toLowerCase().includes("password")) {
+                errorMessage = "Неправильный пароль";
+              } else if (error.message.toLowerCase().includes("email") || error.message.toLowerCase().includes("user")) {
+                errorMessage = "Пользователь с таким email не существует";
+              } else if (error.message.toLowerCase().includes("confirmed")) {
+                errorMessage = "Email не подтвержден";
+              } else {
+                errorMessage = error.message;
+              }
+          }
+          
+          throw new Error(errorMessage);
+        }
+        toast({ description: "Вход выполнен успешно" });
         onClose?.(); // Stay on current page
       } else {
         const redirectUrl = window.location.href; // Confirm email back to current page
@@ -77,7 +114,36 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
             },
           },
         });
-        if (error) throw error;
+        
+        if (error) {
+          // Более конкретные сообщения об ошибках регистрации
+          let errorMessage = "Ошибка регистрации";
+          
+          switch (error.message) {
+            case "User already registered":
+              errorMessage = "Пользователь с таким email уже существует";
+              break;
+            case "Password should be at least 6 characters":
+              errorMessage = "Пароль должен содержать минимум 6 символов";
+              break;
+            case "Invalid email":
+              errorMessage = "Неправильный формат email";
+              break;
+            case "Weak password":
+              errorMessage = "Пароль слишком простой. Используйте буквы, цифры и символы";
+              break;
+            default:
+              if (error.message.toLowerCase().includes("already registered") || error.message.toLowerCase().includes("already exists")) {
+                errorMessage = "Пользователь с таким email уже зарегистрирован";
+              } else if (error.message.toLowerCase().includes("password")) {
+                errorMessage = "Проблема с паролем: " + error.message;
+              } else {
+                errorMessage = error.message;
+              }
+          }
+          
+          throw new Error(errorMessage);
+        }
 
         if (data.session?.user) {
           const userId = data.session.user.id;
@@ -96,16 +162,19 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
               },
               { onConflict: "id" }
             );
-          if (upsertErr) throw upsertErr;
-          toast({ description: "Registration complete" });
+          if (upsertErr) throw new Error("Ошибка сохранения профиля: " + upsertErr.message);
+          toast({ description: "Регистрация завершена успешно" });
           onClose?.(); // Stay on current page
         } else {
-          toast({ description: "Check your email to confirm." });
+          toast({ description: "Проверьте почту для подтверждения регистрации" });
           onClose?.();
         }
       }
     } catch (err: any) {
-      toast({ description: err.message ?? (mode === "login" ? "Sign-in error" : "Sign-up error") });
+      toast({ 
+        variant: "destructive",
+        description: err.message ?? (mode === "login" ? "Ошибка входа" : "Ошибка регистрации") 
+      });
     } finally {
       setLoading(false);
     }
