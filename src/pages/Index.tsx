@@ -3,6 +3,7 @@ import { ShareIconSelector } from "@/components/share-icon-selector";
 import { ContestHeader } from "@/components/contest-header";
 import { ContestSection } from "@/components/contest-section";
 import ContestFilters from "@/components/contest-filters";
+import AiChat from "@/components/ai-chat";
 import type { Category } from "@/components/contest-filters";
 
 const Index = () => {
@@ -49,6 +50,14 @@ const Index = () => {
         centerSubtitle
         showWinner={true}
       />
+
+      <div className="px-6 sm:px-0" aria-hidden>
+        <hr className="my-8 sm:my-10 border-border" />
+      </div>
+
+      <section className="max-w-6xl mx-auto px-6 sm:px-0 mb-8">
+        <AiChat />
+      </section>
     </div>
   );
 };
