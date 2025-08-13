@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Eye, EyeOff } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -19,6 +19,12 @@ interface LoginModalContentProps {
 
 const LoginModalContent = ({ onClose }: LoginModalContentProps) => {
   const [mode, setMode] = useState<"login" | "signup">("login");
+  
+  // Reset to login mode when modal opens
+  useEffect(() => {
+    setMode("login");
+    setAuthError("");
+  }, []);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -147,8 +153,9 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
           throw new Error(errorMessage);
         }
 
-        if (data.session?.user) {
-          const userId = data.session.user.id;
+        // Always try to create profile for registered user, even if session isn't immediately available
+        const userId = data.user?.id;
+        if (userId) {
           const { error: upsertErr } = await supabase
             .from("profiles")
             .upsert(
@@ -164,11 +171,16 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
               },
               { onConflict: "id" }
             );
-          if (upsertErr) throw new Error("Ошибка сохранения профиля: " + upsertErr.message);
+          if (upsertErr) console.warn("Profile creation warning:", upsertErr.message);
+        }
+        
+        if (data.session?.user) {
+          // User is immediately logged in
           toast({ description: "Регистрация завершена успешно" });
-          onClose?.(); // Stay on current page
+          onClose?.();
         } else {
-          toast({ description: "Проверьте почту для подтверждения регистрации" });
+          // User needs to confirm email but registration was successful
+          toast({ description: "Регистрация завершена. Проверьте почту для подтверждения" });
           onClose?.();
         }
       }
