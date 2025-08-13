@@ -7,8 +7,8 @@ import tableActiveIcon from "@/assets/icons/sdisplay-table-active.png";
 import { Country } from "country-state-city";
 
 type Gender = "male" | "female";
+export type Category = "teen" | "miss" | "ms" | "mrs";
 export type ViewMode = "compact" | "full";
-
 interface ContestFiltersProps {
   country: string;
   onCountryChange: (value: string) => void;
@@ -16,6 +16,8 @@ interface ContestFiltersProps {
   onGenderChange: (value: Gender) => void;
   viewMode: ViewMode;
   onViewModeChange: (value: ViewMode) => void;
+  category: Category | "";
+  onCategoryChange: (value: Category | "") => void;
   genderAvailability?: { male: boolean; female: boolean };
 }
 
@@ -26,6 +28,8 @@ const ContestFilters: React.FC<ContestFiltersProps> = ({
   onGenderChange,
   viewMode,
   onViewModeChange,
+  category,
+  onCategoryChange,
   genderAvailability,
 }) => {
   const countryOptions: Option[] = useMemo(() => {
@@ -55,13 +59,20 @@ const ContestFilters: React.FC<ContestFiltersProps> = ({
     }
   }, []);
 
-  const genderOptions: Option[] = useMemo(() => {
-    const av = genderAvailability ?? { male: false, female: true };
-    return [
-      { value: "female", label: "Female", disabled: !av.female },
-      { value: "male", label: "Male", disabled: !av.male },
-    ];
-  }, [genderAvailability]);
+const genderOptions: Option[] = useMemo(() => {
+  const av = genderAvailability ?? { male: false, female: true };
+  return [
+    { value: "female", label: "Female", disabled: !av.female },
+    { value: "male", label: "Male", disabled: !av.male },
+  ];
+}, [genderAvailability]);
+
+const categoryOptions: Option[] = useMemo(() => [
+  { value: "teen", label: "Teen (13-17 y.o.)" },
+  { value: "miss", label: "Miss (18-27 y.o.)" },
+  { value: "ms", label: "Ms (28-39 y.o.)" },
+  { value: "mrs", label: "Mrs (18-60 y.o.)" },
+], []);
 
   return (
     <div className="flex flex-row flex-nowrap items-center gap-2 w-full">
@@ -73,6 +84,7 @@ const ContestFilters: React.FC<ContestFiltersProps> = ({
           options={countryOptions}
           placeholder="Select country"
           ariaLabel="Country filter"
+          highlightSelected
         />
       </div>
 
@@ -84,6 +96,19 @@ const ContestFilters: React.FC<ContestFiltersProps> = ({
           options={genderOptions}
           placeholder="Select gender"
           ariaLabel="Gender filter"
+          highlightSelected
+        />
+      </div>
+
+      {/* Category filter */}
+      <div className="w-56 shrink-0">
+        <SearchableSelect
+          value={category}
+          onValueChange={(v) => onCategoryChange(v as Category)}
+          options={categoryOptions}
+          placeholder="Category"
+          ariaLabel="Category filter"
+          highlightSelected
         />
       </div>
 

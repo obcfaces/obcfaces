@@ -16,6 +16,7 @@ interface SearchableSelectProps {
   emptyMessage?: string;
   ariaLabel?: string;
   invalid?: boolean;
+  highlightSelected?: boolean;
 }
 
 const SearchableSelect: React.FC<SearchableSelectProps> = ({
@@ -27,6 +28,7 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
   emptyMessage = "Nothing found",
   ariaLabel,
   invalid = false,
+  highlightSelected = false,
 }) => {
   const [open, setOpen] = React.useState(false);
   const selected = options.find((o) => o.value === value);
@@ -44,7 +46,8 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
           className={cn(
             "w-full justify-between",
             !selected && "italic text-muted-foreground",
-            invalid && "border-destructive focus:ring-destructive"
+            invalid && "border-destructive focus:ring-destructive",
+            highlightSelected && selected && "border-primary focus:ring-primary"
           )}
         >
           {selected ? selected.label : (placeholder || "Select...")}

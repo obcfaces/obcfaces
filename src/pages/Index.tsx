@@ -2,11 +2,13 @@ import { useState } from "react";
 import { ContestHeader } from "@/components/contest-header";
 import { ContestSection } from "@/components/contest-section";
 import ContestFilters from "@/components/contest-filters";
+import type { Category } from "@/components/contest-filters";
 
 const Index = () => {
   const [country, setCountry] = useState<string>("PH");
   const [gender, setGender] = useState<'male' | 'female'>("female");
   const [viewMode, setViewMode] = useState<'compact' | 'full'>("compact");
+  const [category, setCategory] = useState<"" | Category>("");
   return (
     <div className="min-h-screen bg-background">
       <ContestHeader />
@@ -19,6 +21,8 @@ const Index = () => {
           onGenderChange={setGender}
           viewMode={viewMode}
           onViewModeChange={setViewMode}
+          category={category}
+          onCategoryChange={setCategory}
           genderAvailability={{ male: false, female: true }}
         />
       </section>
