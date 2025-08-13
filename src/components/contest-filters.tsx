@@ -101,7 +101,7 @@ const categoryOptions: Option[] = useMemo(() => [
       </div>
 
       {/* Category filter */}
-      <div className="w-56 shrink-0">
+      <div className="w-40 shrink-0">
         <SearchableSelect
           value={category}
           onValueChange={(v) => onCategoryChange(v as Category)}
