@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Heart, MessageCircle, Star, Pencil, Send, Share, Share2, ExternalLink, Upload, ArrowUpRight, ThumbsDown } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { Link } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import LoginModalTrigger from "@/components/login-modal";
 
 interface ContestantCardProps {
   rank: number;
@@ -72,9 +74,28 @@ export function ContestantCard({
     Math.floor(Math.random() * 20) + 1,
     Math.floor(Math.random() * 20) + 1,
   ]);
+  const [user, setUser] = useState<any>(null);
+  const [showLoginModal, setShowLoginModal] = useState(false);
   const { toast } = useToast();
 
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
   const handleLike = (index: number) => {
+    if (!user) {
+      setShowLoginModal(true);
+      return;
+    }
+    
     const wasLiked = isLiked[index]
     setIsLiked((prev) => {
       const next = [...prev]
@@ -89,8 +110,36 @@ export function ContestantCard({
   };
 
   const handleDislike = () => {
+    if (!user) {
+      setShowLoginModal(true);
+      return;
+    }
+    
     setIsDisliked(prev => !prev);
     setDislikesCount(prev => isDisliked ? prev - 1 : prev + 1);
+  };
+
+  const handleRate = (rating: number) => {
+    if (!user) {
+      setShowLoginModal(true);
+      return;
+    }
+    
+    setUserRating(rating);
+    setShowThanks(true);
+    setTimeout(() => {
+      setShowThanks(false);
+      onRate?.(rating);
+    }, 1000);
+  };
+
+  const handleComment = () => {
+    if (!user) {
+      setShowLoginModal(true);
+      return;
+    }
+    
+    openModal(0);
   };
 
 
@@ -157,14 +206,7 @@ export function ContestantCard({
                     isVoted={false}
                     variant="white"
                     hideText={true}
-                    onRate={(rating) => {
-                      setUserRating(rating);
-                      setShowThanks(true);
-                      setTimeout(() => {
-                        setShowThanks(false);
-                        onRate?.(rating);
-                      }, 1000);
-                    }}
+                    onRate={handleRate}
                   />
                 </div>
               </div>
@@ -190,6 +232,10 @@ export function ContestantCard({
                     variant="white"
                     hideText={true}
                     onRate={(rating) => {
+                      if (!user) {
+                        setShowLoginModal(true);
+                        return;
+                      }
                       setUserRating(rating);
                       setIsEditing(false);
                       onRate?.(rating);
@@ -268,7 +314,7 @@ export function ContestantCard({
               <button
                 type="button"
                 className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
-                onClick={() => openModal(0)}
+                onClick={handleComment}
                 aria-label="Comments"
               >
                 <MessageCircle className="w-4 h-4" />
@@ -299,6 +345,26 @@ export function ContestantCard({
           country={country}
           city={city}
         />
+
+        {/* Login Modal */}
+        <Dialog open={showLoginModal} onOpenChange={setShowLoginModal}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Sign in Required</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <p className="text-sm text-muted-foreground">
+                You need to be signed in to perform this action.
+              </p>
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={() => setShowLoginModal(false)}>
+                  Cancel
+                </Button>
+                <LoginModalTrigger />
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       </>
     );
   }
@@ -388,15 +454,7 @@ export function ContestantCard({
                   isVoted={false}
                   variant="white"
                   hideText={true}
-                  onRate={(rating) => {
-                    setUserRating(rating);
-                    setShowThanks(true);
-                    // Show thank you message for 1 second, then show contestant info
-                    setTimeout(() => {
-                      setShowThanks(false);
-                      onRate?.(rating);
-                    }, 1000);
-                  }}
+                  onRate={handleRate}
                 />
               </div>
             </div>
@@ -423,6 +481,10 @@ export function ContestantCard({
                   variant="white"
                   hideText={true}
                   onRate={(rating) => {
+                    if (!user) {
+                      setShowLoginModal(true);
+                      return;
+                    }
                     setUserRating(rating);
                     setIsEditing(false);
                     onRate?.(rating);
@@ -485,7 +547,7 @@ export function ContestantCard({
                 <button
                   type="button"
                   className="inline-flex items-center gap-1 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors"
-                  onClick={() => openModal(0)}
+                  onClick={handleComment}
                   aria-label="Comments"
                 >
                   <MessageCircle className="w-3.5 h-3.5" />
@@ -531,6 +593,26 @@ export function ContestantCard({
         country={country}
         city={city}
       />
+
+      {/* Login Modal */}
+      <Dialog open={showLoginModal} onOpenChange={setShowLoginModal}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Sign in Required</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              You need to be signed in to perform this action.
+            </p>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowLoginModal(false)}>
+                Cancel
+              </Button>
+              <LoginModalTrigger />
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

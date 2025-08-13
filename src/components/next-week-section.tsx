@@ -1,7 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Heart, ThumbsDown, RotateCcw } from "lucide-react";
 import { ContestantCard } from "@/components/contest-card";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { supabase } from "@/integrations/supabase/client";
+import LoginModalTrigger from "@/components/login-modal";
 
 import contestant1Face from "@/assets/contestant-1-face.jpg";
 import contestant1Full from "@/assets/contestant-1-full.jpg";
@@ -90,8 +93,27 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [history, setHistory] = useState<number[]>([]);
   const [remainingCandidates, setRemainingCandidates] = useState(candidates.length);
+  const [user, setUser] = useState<any>(null);
+  const [showLoginModal, setShowLoginModal] = useState(false);
+
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   const handleLike = () => {
+    if (!user) {
+      setShowLoginModal(true);
+      return;
+    }
+    
     if (currentIndex < candidates.length - 1) {
       setHistory(prev => [...prev, currentIndex]);
       setCurrentIndex(prev => prev + 1);
@@ -100,6 +122,11 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
   };
 
   const handleDislike = () => {
+    if (!user) {
+      setShowLoginModal(true);
+      return;
+    }
+    
     if (currentIndex < candidates.length - 1) {
       setHistory(prev => [...prev, currentIndex]);
       setCurrentIndex(prev => prev + 1);
@@ -108,6 +135,11 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
   };
 
   const handleUndo = () => {
+    if (!user) {
+      setShowLoginModal(true);
+      return;
+    }
+    
     if (history.length > 0) {
       const previousIndex = history[history.length - 1];
       setHistory(prev => prev.slice(0, -1));
@@ -187,6 +219,26 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
           <p className="text-muted-foreground">You've made your choices for next week's finalists.</p>
         </div>
       )}
+
+      {/* Login Modal */}
+      <Dialog open={showLoginModal} onOpenChange={setShowLoginModal}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Sign in Required</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              You need to be signed in to perform this action.
+            </p>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowLoginModal(false)}>
+                Cancel
+              </Button>
+              <LoginModalTrigger />
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </section>
   );
 }
