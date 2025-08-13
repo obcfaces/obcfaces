@@ -151,33 +151,42 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
           
           <div className="flex items-center justify-center gap-6 mt-6">
             {history.length > 0 && (
-              <Button
-                onClick={handleUndo}
-                variant="outline"
-                size="lg"
-                className="rounded-full w-14 h-14 p-0 border-2 border-muted hover:border-blue-400 hover:bg-blue-50"
-              >
-                <RotateCcw className="w-6 h-6 text-blue-500" />
-              </Button>
+              <div className="flex flex-col items-center gap-2">
+                <Button
+                  onClick={handleUndo}
+                  variant="outline"
+                  size="lg"
+                  className="rounded-full w-14 h-14 p-0 border-2 border-muted hover:border-blue-400 hover:bg-blue-50"
+                >
+                  <RotateCcw className="w-6 h-6 text-blue-500" />
+                </Button>
+                <span className="text-sm text-muted-foreground">Undo</span>
+              </div>
             )}
             
-            <Button
-              onClick={handleDislike}
-              variant="outline"
-              size="lg"
-              className="rounded-full w-16 h-16 p-0 border-2 border-red-300 hover:border-red-500 hover:bg-red-50"
-            >
-              <ThumbsDown className="w-8 h-8 text-red-500" />
-            </Button>
+            <div className="flex flex-col items-center gap-2">
+              <Button
+                onClick={handleDislike}
+                variant="outline"
+                size="lg"
+                className="rounded-full w-16 h-16 p-0 border-2 border-red-300 hover:border-red-500 hover:bg-red-50"
+              >
+                <ThumbsDown className="w-8 h-8 text-red-500" />
+              </Button>
+              <span className="text-sm text-muted-foreground">Pass</span>
+            </div>
             
-            <Button
-              onClick={handleLike}
-              variant="outline"
-              size="lg"
-              className="rounded-full w-16 h-16 p-0 border-2 border-green-300 hover:border-green-500 hover:bg-green-50"
-            >
-              <Heart className="w-8 h-8 text-green-500" />
-            </Button>
+            <div className="flex flex-col items-center gap-2">
+              <Button
+                onClick={handleLike}
+                variant="outline"
+                size="lg"
+                className="rounded-full w-16 h-16 p-0 border-2 border-green-300 hover:border-green-500 hover:bg-green-50"
+              >
+                <Heart className="w-8 h-8 text-green-500" />
+              </Button>
+              <span className="text-sm text-muted-foreground">Like</span>
+            </div>
           </div>
         </div>
       ) : (
