@@ -89,11 +89,13 @@ interface NextWeekSectionProps {
 export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [history, setHistory] = useState<number[]>([]);
+  const [remainingCandidates, setRemainingCandidates] = useState(candidates.length);
 
   const handleLike = () => {
     if (currentIndex < candidates.length - 1) {
       setHistory(prev => [...prev, currentIndex]);
       setCurrentIndex(prev => prev + 1);
+      setRemainingCandidates(prev => prev - 1);
     }
   };
 
@@ -101,6 +103,7 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
     if (currentIndex < candidates.length - 1) {
       setHistory(prev => [...prev, currentIndex]);
       setCurrentIndex(prev => prev + 1);
+      setRemainingCandidates(prev => prev - 1);
     }
   };
 
@@ -109,6 +112,7 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
       const previousIndex = history[history.length - 1];
       setHistory(prev => prev.slice(0, -1));
       setCurrentIndex(previousIndex);
+      setRemainingCandidates(prev => prev + 1);
     }
   };
 
@@ -132,6 +136,11 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
 
       {currentIndex < candidates.length ? (
         <div className="flex flex-col items-center">
+          <div className="mb-4 text-center">
+            <span className="text-lg font-medium text-contest-text">
+              {remainingCandidates} candidates remaining
+            </span>
+          </div>
           <div className="w-full">
             <ContestantCard
               {...currentCandidate}
