@@ -5,7 +5,7 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { ChevronsUpDown, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-export type Option = { value: string; label: string; disabled?: boolean };
+export type Option = { value: string; label: string; disabled?: boolean; divider?: boolean };
 
 interface SearchableSelectProps {
   value: string;
@@ -57,34 +57,43 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
           <CommandEmpty>{emptyMessage}</CommandEmpty>
           <CommandList className="max-h-64 overflow-y-auto">
             <CommandGroup>
-              {options.map((opt) => (
-                <CommandItem
-                  key={opt.value}
-                  value={opt.label}
-                  onSelect={() => {
-                    if (opt.disabled) return;
-                    onValueChange(opt.value);
-                    setOpen(false);
-                  }}
-                  aria-disabled={opt.disabled || undefined}
-                  className={cn(
-                    "cursor-pointer",
-                    opt.disabled && "opacity-60 pointer-events-none"
-                  )}
-                >
-                  <Check
-                    className={cn(
-                      "mr-2 size-4",
-                      value === opt.value ? "opacity-100" : "opacity-0"
-                    )}
+              {options.map((opt, idx) => (
+                opt.divider ? (
+                  <div
+                    key={`divider-${idx}`}
+                    className="my-1 border-t border-border"
+                    role="separator"
+                    aria-hidden="true"
                   />
-                  <span className="flex items-center gap-2">
-                    <span>{opt.label}</span>
-                    {opt.disabled && (
-                      <span className="text-xs italic text-muted-foreground">soon</span>
+                ) : (
+                  <CommandItem
+                    key={opt.value}
+                    value={opt.label}
+                    onSelect={() => {
+                      if (opt.disabled) return;
+                      onValueChange(opt.value);
+                      setOpen(false);
+                    }}
+                    aria-disabled={opt.disabled || undefined}
+                    className={cn(
+                      "cursor-pointer",
+                      opt.disabled && "opacity-60 pointer-events-none"
                     )}
-                  </span>
-                </CommandItem>
+                  >
+                    <Check
+                      className={cn(
+                        "mr-2 size-4",
+                        value === opt.value ? "opacity-100" : "opacity-0"
+                      )}
+                    />
+                    <span className="flex items-center gap-2">
+                      <span>{opt.label}</span>
+                      {opt.disabled && (
+                        <span className="text-xs italic text-muted-foreground">soon</span>
+                      )}
+                    </span>
+                  </CommandItem>
+                )
               ))}
             </CommandGroup>
           </CommandList>

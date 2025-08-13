@@ -31,12 +31,26 @@ const ContestFilters: React.FC<ContestFiltersProps> = ({
   const countryOptions: Option[] = useMemo(() => {
     try {
       const list = Country.getAllCountries?.() || [];
-      return list.map((c) => ({ value: c.isoCode, label: c.name }));
+      const ph = list.find((c) => c.isoCode === "PH");
+      const others = list
+        .filter((c) => c.isoCode !== "PH")
+        .sort((a, b) => a.name.localeCompare(b.name));
+
+      const header = ph
+        ? { value: ph.isoCode, label: ph.name }
+        : { value: "PH", label: "Philippines" };
+
+      return [
+        header,
+        { value: "__divider__", label: "divider", disabled: true, divider: true },
+        ...others.map((c) => ({ value: c.isoCode, label: c.name, disabled: true })),
+      ];
     } catch {
       return [
         { value: "PH", label: "Philippines" },
-        { value: "US", label: "United States" },
-        { value: "GB", label: "United Kingdom" },
+        { value: "__divider__", label: "divider", disabled: true, divider: true },
+        { value: "US", label: "United States", disabled: true },
+        { value: "GB", label: "United Kingdom", disabled: true },
       ];
     }
   }, []);
@@ -52,7 +66,7 @@ const ContestFilters: React.FC<ContestFiltersProps> = ({
   return (
     <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
       {/* Country filter */}
-      <div className="w-full sm:w-64">
+      <div className="w-full sm:w-44">
         <SearchableSelect
           value={country}
           onValueChange={onCountryChange}
@@ -63,7 +77,7 @@ const ContestFilters: React.FC<ContestFiltersProps> = ({
       </div>
 
       {/* Gender filter */}
-      <div className="w-full sm:w-48">
+      <div className="w-full sm:w-24">
         <SearchableSelect
           value={gender}
           onValueChange={(v) => onGenderChange(v as Gender)}
