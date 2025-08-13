@@ -9,7 +9,7 @@ import SearchableSelect from "@/components/ui/searchable-select";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { Country, State } from "country-state-city";
 import { getCitiesForLocation } from "@/lib/location-utils";
 const LoginModalTrigger = () => {
@@ -223,7 +223,14 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
                       htmlFor="terms"
                       className={`text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 ${invalidTerms ? 'text-destructive' : ''}`}
                     >
-                      I agree to the Terms of Service and Privacy Policy
+                      I agree to the{" "}
+                      <Link to="/terms" className="text-primary underline hover:no-underline" target="_blank">
+                        Terms of Service
+                      </Link>
+                      {" "}and{" "}
+                      <Link to="/privacy" className="text-primary underline hover:no-underline" target="_blank">
+                        Privacy Policy
+                      </Link>
                     </label>
                     <p className="text-xs text-muted-foreground">
                       By registering, you confirm that you are at least 18 years old and agree to our community guidelines. 
