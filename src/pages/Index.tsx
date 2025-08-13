@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 
 import { ContestHeader } from "@/components/contest-header";
 import { ContestSection } from "@/components/contest-section";
+import { NextWeekSection } from "@/components/next-week-section";
 import ContestFilters from "@/components/contest-filters";
 import AiChat from "@/components/ai-chat";
 import type { Category } from "@/components/contest-filters";
@@ -51,6 +52,12 @@ const Index = () => {
         noWrapTitle
         viewMode={viewMode}
       />
+
+      <div className="px-6 sm:px-0" aria-hidden>
+        <hr className="my-8 sm:my-10 border-border" />
+      </div>
+
+      <NextWeekSection viewMode={viewMode} />
 
       <div className="px-6 sm:px-0" aria-hidden>
         <hr className="my-8 sm:my-10 border-border" />
