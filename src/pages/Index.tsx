@@ -15,7 +15,7 @@ const Index = () => {
   // Восстановление category из localStorage при загрузке
   useEffect(() => {
     const savedCategory = localStorage.getItem('contest-category-filter');
-    if (savedCategory && (savedCategory === "" || savedCategory === "teen" || savedCategory === "miss" || savedCategory === "ms" || savedCategory === "mrs")) {
+    if (savedCategory !== null) {
       setCategory(savedCategory as "" | Category);
     }
   }, []);
