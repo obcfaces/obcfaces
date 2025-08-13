@@ -12,69 +12,69 @@ import contestant3Full from "@/assets/contestant-3-full.jpg";
 
 const candidates = [
   {
-    rank: 1,
+    rank: 0, // Убираем отображение места
     name: "Name Chall",
     country: "Philippines",
     city: "Negros",
     age: 25,
     weight: 53,
     height: 182,
-    rating: 4.8,
+    rating: 0, // Убираем отображение оценки
     faceImage: contestant1Face,
     fullBodyImage: contestant1Full,
     additionalPhotos: [contestant2Face, contestant3Face],
     isVoted: true
   },
   {
-    rank: 2,
+    rank: 0,
     name: "Name Chall",
     country: "Philippines", 
     city: "Negros",
     age: 25,
     weight: 53,
     height: 182,
-    rating: 4.5,
+    rating: 0,
     faceImage: contestant2Face,
     fullBodyImage: contestant2Full,
     additionalPhotos: [contestant1Face],
     isVoted: true
   },
   {
-    rank: 3,
+    rank: 0,
     name: "Name Chall",
     country: "Philippines",
     city: "Negros",
     age: 25,
     weight: 53,
     height: 182,
-    rating: 4.2,
+    rating: 0,
     faceImage: contestant3Face,
     fullBodyImage: contestant3Full,
     additionalPhotos: [contestant1Face, contestant2Face, contestant1Full],
     isVoted: true
   },
   {
-    rank: 4,
+    rank: 0,
     name: "Name Chall",
     country: "Philippines",
     city: "Negros",
     age: 25,
     weight: 53,
     height: 182,
-    rating: 3.9,
+    rating: 0,
     faceImage: contestant1Face,
     fullBodyImage: contestant1Full,
     isVoted: true
   },
   {
-    rank: 5,
+    rank: 0,
     name: "Name Chall",
     country: "Philippines",
     city: "Negros",
     age: 25,
     weight: 53,
     height: 182,
-    rating: 3.5,
+    rating: 0,
     faceImage: contestant2Face,
     fullBodyImage: contestant2Full,
     additionalPhotos: [contestant3Face, contestant3Full],
@@ -132,7 +132,7 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
 
       {currentIndex < candidates.length ? (
         <div className="flex flex-col items-center">
-          <div className="w-full max-w-md">
+          <div className="w-full">
             <ContestantCard
               {...currentCandidate}
               viewMode={viewMode}
