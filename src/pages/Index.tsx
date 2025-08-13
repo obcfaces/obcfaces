@@ -16,7 +16,7 @@ const Index = () => {
       <ContestSection
         title="1 WEEK AGO (Closed)"
         subtitle="18-24 August 2025"
-        description="Take a look at the three leaders who have already emerged in the current vote."
+        
         showWinner={true}
       />
     </div>

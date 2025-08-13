@@ -15,7 +15,7 @@ import tableActiveIcon from "@/assets/icons/sdisplay-table-active.png";
 interface ContestSectionProps {
   title: string;
   subtitle: string;
-  description: string;
+  description?: string;
   isActive?: boolean;
   showWinner?: boolean;
 }
@@ -146,45 +146,7 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
         </div>
       </div>
 
-      <div className="mb-4 px-6 sm:px-0">
-        <div className="relative">
-          <div aria-hidden className="absolute inset-x-0 bottom-0 border-b border-border" />
-          <div className="relative z-10 flex items-end justify-evenly w-full pb-0" role="tablist" aria-label="View mode">
-            <button
-              type="button"
-              onClick={() => setViewMode('full')}
-              aria-pressed={viewMode === 'full'}
-              aria-label="List view"
-              className="p-1 rounded-md hover:bg-accent transition-colors"
-            >
-              <img
-                src={viewMode === 'full' ? listActiveIcon : listIcon}
-                alt="List view icon"
-                width={28}
-                height={28}
-                loading="lazy"
-                className="block"
-              />
-            </button>
-            <button
-              type="button"
-              onClick={() => setViewMode('compact')}
-              aria-pressed={viewMode === 'compact'}
-              aria-label="Grid view"
-              className="p-1 rounded-md hover:bg-accent transition-colors"
-            >
-              <img
-                src={viewMode === 'compact' ? tableActiveIcon : tableIcon}
-                alt="Grid view icon"
-                width={28}
-                height={28}
-                loading="lazy"
-                className="block"
-              />
-            </button>
-          </div>
-        </div>
-      </div>
+      {/* View mode controls moved to header */}
 
       <div className={viewMode === 'compact'
         ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-1 sm:gap-3"
