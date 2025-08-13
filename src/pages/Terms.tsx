@@ -23,89 +23,104 @@ const Terms = () => {
           </div>
           
           <div className="prose prose-gray max-w-none">
-            <h1 className="text-3xl font-bold mb-8">Terms of Service</h1>
+            <h1 className="text-3xl font-bold mb-8 text-center">Terms of Service</h1>
             
-            <p className="text-muted-foreground mb-6">
-              Last updated: {new Date().toLocaleDateString()}
-            </p>
+            <div className="mb-6">
+              <p className="text-muted-foreground mb-2">
+                <strong>Last updated:</strong> {new Date().toLocaleDateString()}
+              </p>
+              <p className="text-muted-foreground">
+                <strong>Effective date:</strong> {new Date().toLocaleDateString()}
+              </p>
+            </div>
             
             <section className="mb-8">
-              <h2 className="text-2xl font-semibold mb-4">1. Acceptance of Terms</h2>
+              <h2 className="text-2xl font-semibold mb-4">1. Introduction</h2>
               <p className="mb-4">
-                By accessing and using our platform, you accept and agree to be bound by the terms and provision of this agreement.
-                If you do not agree to abide by the above, please do not use this service.
+                Welcome to [Site Name] ("Platform"), an online beauty contest platform where users can participate in weekly competitions, vote for contestants, and interact with AI-powered features ("Services"). By accessing or using our Services, you agree to these Terms and our Privacy Policy.
               </p>
             </section>
 
             <section className="mb-8">
-              <h2 className="text-2xl font-semibold mb-4">2. Age Requirements</h2>
-              <p className="mb-4">
-                You must be at least 18 years old to use our service. By using our platform, you represent and warrant that you are at least 18 years of age.
-              </p>
-            </section>
-
-            <section className="mb-8">
-              <h2 className="text-2xl font-semibold mb-4">3. User Conduct</h2>
-              <p className="mb-4">You agree not to use the service to:</p>
+              <h2 className="text-2xl font-semibold mb-4">2. Eligibility</h2>
               <ul className="list-disc pl-6 mb-4 space-y-2">
-                <li>Upload, post, or transmit any content that is harmful, threatening, abusive, harassing, defamatory, vulgar, obscene, or otherwise objectionable</li>
-                <li>Impersonate any person or entity or falsely state or otherwise misrepresent your affiliation with a person or entity</li>
-                <li>Upload, post, or transmit any content that you do not have a right to transmit under any law or under contractual or fiduciary relationships</li>
-                <li>Upload, post, or transmit any content that infringes any patent, trademark, trade secret, copyright, or other proprietary rights of any party</li>
-                <li>Engage in any form of harassment, bullying, or stalking of other users</li>
-                <li>Share explicit or inappropriate content</li>
-                <li>Attempt to gain unauthorized access to other user accounts or the platform's systems</li>
+                <li>Minimum Age: 13 years old.</li>
+                <li>Minors (13–17): Participation only with verified parental/guardian consent.</li>
+                <li>Adults: 18+ without extra consent.</li>
+                <li>Jurisdiction: You must comply with your local laws regarding age and content.</li>
               </ul>
             </section>
 
             <section className="mb-8">
-              <h2 className="text-2xl font-semibold mb-4">4. Content and Intellectual Property</h2>
+              <h2 className="text-2xl font-semibold mb-4">3. Account Registration</h2>
               <p className="mb-4">
-                You retain ownership of content you submit, post, or display on or through the service. However, by submitting content, 
-                you grant us a worldwide, non-exclusive, royalty-free license to use, copy, reproduce, process, adapt, modify, publish, 
-                transmit, display, and distribute such content in any and all media or distribution methods.
+                You must provide truthful and accurate information. You are responsible for securing your account and password. We may suspend or terminate accounts that violate the Terms.
               </p>
             </section>
 
             <section className="mb-8">
-              <h2 className="text-2xl font-semibold mb-4">5. Privacy and Data Protection</h2>
+              <h2 className="text-2xl font-semibold mb-4">4. Content Rules</h2>
+              <ul className="list-disc pl-6 mb-4 space-y-2">
+                <li>You confirm you own or have permission to share uploaded content.</li>
+                <li>Prohibited: nudity, sexual content, exploitation of minors, hate speech, threats, AI deepfakes without consent, fraudulent content.</li>
+              </ul>
+            </section>
+
+            <section className="mb-8">
+              <h2 className="text-2xl font-semibold mb-4">5. Deepfake & AI Content Policy</h2>
               <p className="mb-4">
-                Your privacy is important to us. Please review our Privacy Policy, which also governs your use of the service, 
-                to understand our practices regarding the collection, use, and disclosure of your personal information.
+                All AI-generated or altered images must be clearly labeled. Uploading deepfake or AI-altered images of real persons without consent is prohibited and may result in account termination and legal action.
               </p>
             </section>
 
             <section className="mb-8">
-              <h2 className="text-2xl font-semibold mb-4">6. Account Termination</h2>
+              <h2 className="text-2xl font-semibold mb-4">6. Voting & Competition Rules</h2>
               <p className="mb-4">
-                We reserve the right to terminate or suspend your account and access to the service at our sole discretion, 
-                without notice, for conduct that we believe violates these Terms of Service or is harmful to other users, 
-                us, or third parties, or for any other reason.
+                Votes are for registered users only. Bots, scripts, fake accounts are forbidden. False reporting or harassment leads to penalties or bans. We may adjust or nullify votes if manipulation is detected.
               </p>
             </section>
 
             <section className="mb-8">
-              <h2 className="text-2xl font-semibold mb-4">7. Limitation of Liability</h2>
+              <h2 className="text-2xl font-semibold mb-4">7. AI Features Transparency</h2>
               <p className="mb-4">
-                In no event shall we be liable for any indirect, incidental, special, consequential, or punitive damages, 
-                including without limitation, loss of profits, data, use, goodwill, or other intangible losses, 
-                resulting from your use of the service.
+                Our AI may generate photo descriptions, suggestions, and analyze entries. AI outputs may not always be accurate and should be considered informational only.
               </p>
             </section>
 
             <section className="mb-8">
-              <h2 className="text-2xl font-semibold mb-4">8. Changes to Terms</h2>
+              <h2 className="text-2xl font-semibold mb-4">8. Special Rules for Minors' Content</h2>
+              <ul className="list-disc pl-6 mb-4 space-y-2">
+                <li>All minors' photos reviewed by human moderators.</li>
+                <li>No public display of minors' contact details.</li>
+                <li>Parents/guardians can request removal at any time.</li>
+              </ul>
+            </section>
+
+            <section className="mb-8">
+              <h2 className="text-2xl font-semibold mb-4">9. Intellectual Property</h2>
               <p className="mb-4">
-                We reserve the right to modify these terms at any time. We will notify users of any material changes 
-                to these terms by posting the new terms on this page. Your continued use of the service after 
-                such modifications will constitute your acknowledgment of the modified terms.
+                You retain ownership of your content but grant us a license to use it in connection with the Platform. Unauthorized external use is prohibited.
               </p>
             </section>
 
             <section className="mb-8">
-              <h2 className="text-2xl font-semibold mb-4">9. Contact Information</h2>
+              <h2 className="text-2xl font-semibold mb-4">10. Liability & Disclaimer</h2>
               <p className="mb-4">
-                If you have any questions about these Terms of Service, please contact us through our support channels.
+                Platform is provided "as is" without warranties. We are not responsible for user content or damages from use.
+              </p>
+            </section>
+
+            <section className="mb-8">
+              <h2 className="text-2xl font-semibold mb-4">11. Changes to Terms</h2>
+              <p className="mb-4">
+                We may update Terms anytime. Continued use means acceptance.
+              </p>
+            </section>
+
+            <section className="mb-8">
+              <h2 className="text-2xl font-semibold mb-4">12. Contact</h2>
+              <p className="mb-4">
+                Email: [Support Email]
               </p>
             </section>
           </div>
