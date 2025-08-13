@@ -212,11 +212,36 @@ useEffect(() => {
     }
   };
 
-  // Load likes when owner visits their own profile
+  // Load likes when owner visits their own profile and refresh when needed
   useEffect(() => {
     if (isOwner && currentUserId) {
       loadLikedItems();
     }
+  }, [isOwner, currentUserId]);
+
+  // Listen for likes updates to refresh the list
+  useEffect(() => {
+    if (!isOwner || !currentUserId) return;
+
+    const channel = supabase
+      .channel('likes-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'likes',
+          filter: `user_id=eq.${currentUserId}`
+        },
+        () => {
+          loadLikedItems();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [isOwner, currentUserId]);
 
   const handleUnlike = (likeId: string) => {
