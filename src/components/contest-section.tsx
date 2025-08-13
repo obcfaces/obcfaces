@@ -19,9 +19,10 @@ interface ContestSectionProps {
   isActive?: boolean;
   showWinner?: boolean;
   centerSubtitle?: boolean;
+  titleSuffix?: string;
 }
 
-export function ContestSection({ title, subtitle, description, isActive, showWinner, centerSubtitle }: ContestSectionProps) {
+export function ContestSection({ title, subtitle, description, isActive, showWinner, centerSubtitle, titleSuffix }: ContestSectionProps) {
   const [viewMode, setViewMode] = useState<'compact' | 'full'>('compact');
   const [ratings, setRatings] = useState<Record<number, number>>({
     1: 4.8,
@@ -135,6 +136,9 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
               <h2 className="text-3xl font-bold text-contest-text">{title}</h2>
               <p className="text-muted-foreground italic -mt-1">{subtitle}</p>
             </div>
+            {titleSuffix && (
+              <span className="text-2xl font-normal text-muted-foreground">{titleSuffix}</span>
+            )}
             {isActive && description && (
               <span className="text-2xl font-normal text-contest-text">
                 {description}

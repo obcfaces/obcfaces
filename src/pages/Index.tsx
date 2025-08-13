@@ -14,7 +14,8 @@ const Index = () => {
       />
       
       <ContestSection
-        title="1 WEEK AGO (Closed)"
+        title="1 WEEK AGO"
+        titleSuffix="(Closed)"
         subtitle="18-24 August 2025"
         centerSubtitle
         showWinner={true}
