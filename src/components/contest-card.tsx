@@ -1,5 +1,13 @@
 import { useState } from "react";
-import { Heart, MessageCircle, Star, Pencil, Send, Reply } from "lucide-react";
+import { Heart, MessageCircle, Star, Pencil, Send } from "lucide-react";
+
+const ShareIcon = ({ className }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+    <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
+    <polyline points="16,6 12,2 8,6" />
+    <line x1="12" y1="2" x2="12" y2="15" />
+  </svg>
+);
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { StarRating } from "@/components/ui/star-rating";
@@ -309,7 +317,7 @@ export function ContestantCard({
                onClick={async () => { try { if ((navigator as any).share) { await (navigator as any).share({ title: name, url: window.location.href }); } else if (navigator.clipboard) { await navigator.clipboard.writeText(window.location.href); toast({ title: "Link copied" }); } } catch {} }}
                aria-label="Share"
              >
-                <Reply className="w-4 h-4" />
+                <ShareIcon className="w-4 h-4" />
                 <span className="hidden sm:inline">Share</span>
              </button>
            </div>
@@ -541,7 +549,7 @@ export function ContestantCard({
                   }}
                   aria-label="Share"
                 >
-                  <Reply className="w-3.5 h-3.5" />
+                  <ShareIcon className="w-3.5 h-3.5" />
                   <span className="hidden md:inline">Share</span>
                 </button>
               </div>
