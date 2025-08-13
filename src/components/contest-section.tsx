@@ -164,13 +164,6 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
         ))}
       </div>
 
-      {!showWinner && (
-        <div className="mt-8 text-center">
-          <button className="text-contest-blue hover:underline">
-            Other 6 challengers ↓
-          </button>
-        </div>
-      )}
     </section>
   );
 }
