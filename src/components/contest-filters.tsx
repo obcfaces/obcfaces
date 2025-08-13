@@ -77,7 +77,7 @@ const categoryOptions: Option[] = useMemo(() => [
   return (
     <div className="flex flex-row flex-nowrap items-center gap-2 w-full">
       {/* Country filter */}
-      <div className="w-44 shrink-0">
+      <div className="w-36 shrink-0">
         <SearchableSelect
           value={country}
           onValueChange={onCountryChange}
