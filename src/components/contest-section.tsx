@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { ContestantCard } from "@/components/contest-card";
+import { Button } from "@/components/ui/button";
 
 import contestant1Face from "@/assets/contestant-1-face.jpg";
 import contestant1Full from "@/assets/contestant-1-full.jpg";
@@ -145,6 +146,45 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
                 {description}
               </span>
             )}
+            <div className="ml-auto flex items-center gap-2">
+              <Button variant="outline" size="sm" className="text-contest-blue border-contest-blue">
+                Philippines ▼
+              </Button>
+              <div className="flex items-center gap-1">
+                <button
+                  type="button"
+                  onClick={() => setViewMode('full')}
+                  aria-pressed={viewMode === 'full'}
+                  aria-label="List view"
+                  className="p-1 rounded-md hover:bg-accent transition-colors"
+                >
+                  <img
+                    src={viewMode === 'full' ? listActiveIcon : listIcon}
+                    alt="List view icon"
+                    width={28}
+                    height={28}
+                    loading="lazy"
+                    className="block"
+                  />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setViewMode('compact')}
+                  aria-pressed={viewMode === 'compact'}
+                  aria-label="Grid view"
+                  className="p-1 rounded-md hover:bg-accent transition-colors"
+                >
+                  <img
+                    src={viewMode === 'compact' ? tableActiveIcon : tableIcon}
+                    alt="Grid view icon"
+                    width={28}
+                    height={28}
+                    loading="lazy"
+                    className="block"
+                  />
+                </button>
+              </div>
+            </div>
           </div>
           {!isActive && description && (
             <p className="text-muted-foreground">{description}</p>
