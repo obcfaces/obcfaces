@@ -64,7 +64,7 @@ const ContestFilters: React.FC<ContestFiltersProps> = ({
   }, [genderAvailability]);
 
   return (
-    <div className="flex flex-row flex-nowrap items-center gap-2">
+    <div className="flex flex-row flex-nowrap items-center gap-2 w-full">
       {/* Country filter */}
       <div className="w-44 shrink-0">
         <SearchableSelect
@@ -88,22 +88,7 @@ const ContestFilters: React.FC<ContestFiltersProps> = ({
       </div>
 
       {/* View toggles */}
-      <div className="flex items-center gap-1 shrink-0">
-        <button
-          type="button"
-          onClick={() => onViewModeChange("full")}
-          aria-pressed={viewMode === "full"}
-          aria-label="List view"
-          className="p-1 rounded-md hover:bg-accent transition-colors"
-        >
-          <img
-            src={viewMode === "full" ? listActiveIcon : listIcon}
-            alt="List view icon"
-            width={28}
-            height={28}
-            loading="lazy"
-          />
-        </button>
+      <div className="ml-auto flex items-center gap-1 shrink-0">
         <button
           type="button"
           onClick={() => onViewModeChange("compact")}
@@ -114,6 +99,21 @@ const ContestFilters: React.FC<ContestFiltersProps> = ({
           <img
             src={viewMode === "compact" ? tableActiveIcon : tableIcon}
             alt="Grid view icon"
+            width={28}
+            height={28}
+            loading="lazy"
+          />
+        </button>
+        <button
+          type="button"
+          onClick={() => onViewModeChange("full")}
+          aria-pressed={viewMode === "full"}
+          aria-label="List view"
+          className="p-1 rounded-md hover:bg-accent transition-colors"
+        >
+          <img
+            src={viewMode === "full" ? listActiveIcon : listIcon}
+            alt="List view icon"
             width={28}
             height={28}
             loading="lazy"
