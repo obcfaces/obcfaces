@@ -222,23 +222,8 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
 
       {/* Login Modal */}
       <Dialog open={showLoginModal} onOpenChange={setShowLoginModal}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Sign in Required</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <p className="text-sm text-muted-foreground">
-              You need to be signed in to perform this action.
-            </p>
-            <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setShowLoginModal(false)}>
-                Cancel
-              </Button>
-              <Button onClick={() => setShowLoginModal(false)}>
-                Sign in
-              </Button>
-            </div>
-          </div>
+        <DialogContent className="sm:max-w-lg">
+          <LoginModalTrigger />
         </DialogContent>
       </Dialog>
     </section>
