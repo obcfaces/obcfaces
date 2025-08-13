@@ -52,6 +52,48 @@ const ShareIcon6 = ({ className }: { className?: string }) => (
   </svg>
 );
 
+const ShareIcon7 = ({ className }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+    <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>
+  </svg>
+);
+
+const ShareIcon8 = ({ className }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="22,12 18,8 18,11 2,11 2,13 18,13 18,16"/>
+  </svg>
+);
+
+const ShareIcon9 = ({ className }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+    <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+    <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+  </svg>
+);
+
+const ShareIcon10 = ({ className }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+    <polyline points="7,10 12,15 17,10"/>
+    <line x1="12" y1="15" x2="12" y2="3"/>
+  </svg>
+);
+
+const ShareIcon11 = ({ className }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+    <path d="M8 17l4 4 4-4"/>
+    <path d="M12 12v9"/>
+    <path d="M20.88 18.09A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.29"/>
+  </svg>
+);
+
+const ShareIcon12 = ({ className }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+    <path d="M3 7v10a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2z"/>
+    <polyline points="22,6 12,13 2,6"/>
+  </svg>
+);
+
 export const ShareIconSelector = () => {
   const icons = [
     { id: 1, name: "Curved Arrow", component: ShareIcon1 },
@@ -60,6 +102,12 @@ export const ShareIconSelector = () => {
     { id: 4, name: "Box Arrow", component: ShareIcon4 },
     { id: 5, name: "Upload", component: ShareIcon5 },
     { id: 6, name: "Document Share", component: ShareIcon6 },
+    { id: 7, name: "Fire Share", component: ShareIcon7 },
+    { id: 8, name: "Arrow Right", component: ShareIcon8 },
+    { id: 9, name: "Link Chain", component: ShareIcon9 },
+    { id: 10, name: "Download", component: ShareIcon10 },
+    { id: 11, name: "Cloud Share", component: ShareIcon11 },
+    { id: 12, name: "Email Share", component: ShareIcon12 },
   ];
 
   return (
