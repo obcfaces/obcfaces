@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/use-toast";
 import PostCard from "@/components/profile/PostCard";
+import LikedItem from "@/components/profile/LikedItem";
 import c1 from "@/assets/contestant-1.jpg";
 import c2 from "@/assets/contestant-2.jpg";
 import c3 from "@/assets/contestant-3.jpg";
@@ -38,6 +39,10 @@ const Profile = () => {
   const [isEditingBio, setIsEditingBio] = useState(false);
   const [bioDraft, setBioDraft] = useState("");
   const [savingBio, setSavingBio] = useState(false);
+  
+  // State for likes
+  const [likedItems, setLikedItems] = useState<any[]>([]);
+  const [loadingLikes, setLoadingLikes] = useState(false);
   useEffect(() => {
     const load = async () => {
       if (!id) return;
@@ -169,6 +174,55 @@ useEffect(() => {
     }
   };
 
+  // Load user's liked items
+  const loadLikedItems = async () => {
+    if (!isOwner || !currentUserId) return;
+    
+    setLoadingLikes(true);
+    try {
+      const { data, error } = await supabase
+        .from("likes")
+        .select("id, content_type, content_id, created_at")
+        .eq("user_id", currentUserId)
+        .order("created_at", { ascending: false });
+      
+      if (error) throw error;
+      
+      // Create mock data for liked items since we don't have actual content tables
+      const mockLikedItems = (data || []).map((like, index) => ({
+        likeId: like.id,
+        contentType: like.content_type,
+        contentId: like.content_id,
+        authorName: profile.display_name ?? "Пользователь",
+        authorAvatarUrl: profile.avatar_url,
+        time: new Date(like.created_at).toLocaleDateString('ru-RU'),
+        content: like.content_type === 'post' 
+          ? `Это ${like.content_type === 'post' ? 'пост' : 'контент'}, который вам понравился`
+          : undefined,
+        imageSrc: like.content_type === 'photo' ? [c1, c2, c3][index % 3] : undefined,
+        likes: Math.floor(Math.random() * 50) + 5,
+        comments: Math.floor(Math.random() * 20) + 1,
+      }));
+      
+      setLikedItems(mockLikedItems);
+    } catch (error) {
+      console.error("Error loading liked items:", error);
+    } finally {
+      setLoadingLikes(false);
+    }
+  };
+
+  // Load likes when owner visits their own profile
+  useEffect(() => {
+    if (isOwner && currentUserId) {
+      loadLikedItems();
+    }
+  }, [isOwner, currentUserId]);
+
+  const handleUnlike = (likeId: string) => {
+    setLikedItems(prev => prev.filter(item => item.likeId !== likeId));
+  };
+
 const title = profile.display_name ? `${profile.display_name} — Профиль` : "Профиль пользователя";
 const description = profile.display_name ? `Личная страница ${profile.display_name}` : "Личная страница пользователя";
 
@@ -296,6 +350,9 @@ const samplePosts = useMemo(
               <TabsList className="w-full sm:w-auto bg-transparent p-0 rounded-none justify-start gap-8 border-b border-border">
                 <TabsTrigger value="posts" className="px-0 mr-6 h-auto pb-2 bg-transparent rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary text-muted-foreground hover:text-foreground">Посты</TabsTrigger>
                 <TabsTrigger value="photos" className="px-0 mr-6 h-auto pb-2 bg-transparent rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary text-muted-foreground hover:text-foreground">Фото</TabsTrigger>
+                {isOwner && (
+                  <TabsTrigger value="likes" className="px-0 mr-6 h-auto pb-2 bg-transparent rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary text-muted-foreground hover:text-foreground">Лайки</TabsTrigger>
+                )}
                 <TabsTrigger value="about" className="px-0 h-auto pb-2 bg-transparent rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary text-muted-foreground hover:text-foreground">Инфо</TabsTrigger>
               </TabsList>
 
@@ -317,7 +374,37 @@ const samplePosts = useMemo(
                     />
                   ))}
                 </div>
-              </TabsContent>
+               </TabsContent>
+
+               {isOwner && (
+                 <TabsContent value="likes" className="space-y-4 mt-4">
+                   {loadingLikes ? (
+                     <p className="text-muted-foreground text-center py-8">Загрузка лайков...</p>
+                   ) : likedItems.length > 0 ? (
+                     likedItems.map((item) => (
+                       <LikedItem
+                         key={item.likeId}
+                         likeId={item.likeId}
+                         contentType={item.contentType}
+                         contentId={item.contentId}
+                         authorName={item.authorName}
+                         authorAvatarUrl={item.authorAvatarUrl}
+                         time={item.time}
+                         content={item.content}
+                         imageSrc={item.imageSrc}
+                         likes={item.likes}
+                         comments={item.comments}
+                         onUnlike={handleUnlike}
+                       />
+                     ))
+                   ) : (
+                     <div className="text-center py-8">
+                       <p className="text-muted-foreground">Вы еще ничего не лайкали</p>
+                       <p className="text-sm text-muted-foreground mt-2">Лайкните посты и фото, чтобы они отображались здесь</p>
+                     </div>
+                   )}
+                 </TabsContent>
+               )}
 
                <TabsContent value="about" className="mt-4">
                  <article className="grid gap-4 sm:grid-cols-2">
