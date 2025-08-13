@@ -12,14 +12,14 @@ import contestant3Full from "@/assets/contestant-3-full.jpg";
 
 const candidates = [
   {
-    rank: 0, // Убираем отображение места
+    rank: 0, // Специальное значение для скрытия места и плашки
     name: "Name Chall",
     country: "Philippines",
     city: "Negros",
     age: 25,
     weight: 53,
     height: 182,
-    rating: 0, // Убираем отображение оценки
+    rating: 0,
     faceImage: contestant1Face,
     fullBodyImage: contestant1Full,
     additionalPhotos: [contestant2Face, contestant3Face],

@@ -108,8 +108,8 @@ export function ContestantCard({
             </div>
           )}
           
-          {/* Rank, rating and location in top right corner - only after voting */}
-          {(isVoted && !showThanks && !isEditing) && (
+          {/* Rank, rating and location in top right corner - only after voting and if rank > 0 */}
+          {(isVoted && !showThanks && !isEditing && rank > 0) && (
             <div className="absolute top-0 right-0 z-20 flex flex-col items-end">
               <div className="flex items-center gap-1">
                 <div className="text-xl font-bold text-contest-blue">#{rank}</div>
@@ -285,8 +285,8 @@ export function ContestantCard({
           </div>
         )}
         
-        {/* Rating badge in top right corner */}
-        {isVoted && !isEditing && !showThanks && (
+        {/* Rating badge in top right corner - only if rank > 0 */}
+        {isVoted && !isEditing && !showThanks && rank > 0 && (
           <div className="absolute top-0 right-0 z-10 flex flex-col items-end">
             <Popover>
               <PopoverTrigger asChild>
@@ -317,9 +317,11 @@ export function ContestantCard({
               className="w-24 sm:w-28 md:w-32 h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
               onClick={() => openModal(0)}
             />
-            <div className="absolute top-0 left-0 bg-black/70 text-white text-xs font-bold px-1 py-0.5 rounded-br">
-              {rank}
-            </div>
+            {rank > 0 && (
+              <div className="absolute top-0 left-0 bg-black/70 text-white text-xs font-bold px-1 py-0.5 rounded-br">
+                {rank}
+              </div>
+            )}
           </div>
           <div className="relative">
             <img 
