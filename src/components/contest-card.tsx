@@ -467,6 +467,21 @@ export function ContestantCard({
                   <span className="hidden md:inline">Like</span>
                   <span>{likesCount[0] + likesCount[1]}</span>
                 </button>
+                {showDislike && (
+                  <button
+                    type="button"
+                    className={cn(
+                      "inline-flex items-center gap-1 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors",
+                      isDisliked && "text-red-500"
+                    )}
+                    onClick={handleDislike}
+                    aria-label="Dislike"
+                  >
+                    <ThumbsDown className="w-3.5 h-3.5" />
+                    <span className="hidden md:inline">Dislike</span>
+                    <span>{dislikesCount}</span>
+                  </button>
+                )}
                 <button
                   type="button"
                   className="inline-flex items-center gap-1 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors"
