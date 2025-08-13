@@ -360,7 +360,9 @@ export function ContestantCard({
                 <Button variant="outline" onClick={() => setShowLoginModal(false)}>
                   Cancel
                 </Button>
-                <LoginModalTrigger />
+                <Button onClick={() => setShowLoginModal(false)}>
+                  Sign in
+                </Button>
               </div>
             </div>
           </DialogContent>
@@ -608,7 +610,9 @@ export function ContestantCard({
               <Button variant="outline" onClick={() => setShowLoginModal(false)}>
                 Cancel
               </Button>
-              <LoginModalTrigger />
+              <Button onClick={() => setShowLoginModal(false)}>
+                Sign in
+              </Button>
             </div>
           </div>
         </DialogContent>

@@ -367,7 +367,9 @@ export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantNa
                 <Button variant="outline" onClick={() => setShowLoginModal(false)}>
                   Cancel
                 </Button>
-                <LoginModalTrigger />
+                <Button onClick={() => setShowLoginModal(false)}>
+                  Sign in
+                </Button>
               </div>
             </div>
           </DialogContent>

@@ -234,7 +234,9 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
               <Button variant="outline" onClick={() => setShowLoginModal(false)}>
                 Cancel
               </Button>
-              <LoginModalTrigger />
+              <Button onClick={() => setShowLoginModal(false)}>
+                Sign in
+              </Button>
             </div>
           </div>
         </DialogContent>
