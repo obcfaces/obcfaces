@@ -247,6 +247,7 @@ export function ContestantCard({
                 aria-label="Like"
               >
                 <Heart className="w-4 h-4" />
+                <span className="hidden sm:inline">Like</span>
                 <span>{likesCount[0] + likesCount[1]}</span>
               </button>
               {showDislike && (
@@ -260,6 +261,7 @@ export function ContestantCard({
                   aria-label="Dislike"
                 >
                   <ThumbsDown className="w-4 h-4" />
+                  <span className="hidden sm:inline">Dislike</span>
                   <span>{dislikesCount}</span>
                 </button>
               )}
@@ -270,6 +272,7 @@ export function ContestantCard({
                 aria-label="Comments"
               >
                 <MessageCircle className="w-4 h-4" />
+                <span className="hidden sm:inline">Comment</span>
                 <span>{commentsCount[0] + commentsCount[1]}</span>
               </button>
               <button
@@ -279,6 +282,7 @@ export function ContestantCard({
                 aria-label="Share"
               >
                  <Share2 className="w-4 h-4" />
+                 <span className="hidden sm:inline">Share</span>
               </button>
            </div>
          </Card>
@@ -460,6 +464,7 @@ export function ContestantCard({
                   aria-label="Like"
                 >
                   <Heart className="w-3.5 h-3.5" />
+                  <span className="hidden xl:inline">Like</span>
                   <span>{likesCount[0] + likesCount[1]}</span>
                 </button>
                 {showDislike && (
@@ -473,6 +478,7 @@ export function ContestantCard({
                     aria-label="Dislike"
                   >
                     <ThumbsDown className="w-3.5 h-3.5" />
+                    <span className="hidden xl:inline">Dislike</span>
                     <span>{dislikesCount}</span>
                   </button>
                 )}
@@ -483,6 +489,7 @@ export function ContestantCard({
                   aria-label="Comments"
                 >
                   <MessageCircle className="w-3.5 h-3.5" />
+                  <span className="hidden xl:inline">Comment</span>
                   <span>{commentsCount[0] + commentsCount[1]}</span>
                 </button>
                 <button
@@ -501,6 +508,7 @@ export function ContestantCard({
                   aria-label="Share"
                 >
                   <Share2 className="w-3.5 h-3.5" />
+                  <span className="hidden xl:inline">Share</span>
                 </button>
               </div>
             </div>
