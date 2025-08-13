@@ -68,10 +68,10 @@ const genderOptions: Option[] = useMemo(() => {
 }, [genderAvailability]);
 
 const categoryOptions: Option[] = useMemo(() => [
-  { value: "teen", label: "Teen (13-17 y.o.)" },
+  { value: "teen", label: "Teen (13-17 y.o.)", disabled: true },
   { value: "miss", label: "Miss (18-27 y.o.)" },
-  { value: "ms", label: "Ms (28-39 y.o.)" },
-  { value: "mrs", label: "Mrs (18-60 y.o.)" },
+  { value: "ms", label: "Ms (28-39 y.o.)", disabled: true },
+  { value: "mrs", label: "Mrs (18-60 y.o.)", disabled: true },
 ], []);
 
   return (
