@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Heart, MessageCircle, Star, Pencil, Send, Share, Share2, ExternalLink, Upload, ArrowUpRight, ThumbsDown } from "lucide-react";
+import { Heart, MessageCircle, Star, Pencil, Send, Share, Share2, ExternalLink, Upload, ArrowUpRight } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -58,14 +58,10 @@ export function ContestantCard({
   const [showThanks, setShowThanks] = useState(false);
   const [userRating, setUserRating] = useState(0);
   const [isLiked, setIsLiked] = useState<boolean[]>([false, false]);
-  const [isDisliked, setIsDisliked] = useState(false);
   const [likesCount, setLikesCount] = useState<number[]>([
     Math.floor(Math.random() * 50) + 5,
     Math.floor(Math.random() * 50) + 5,
   ]);
-  const [dislikesCount, setDislikesCount] = useState<number>(
-    Math.floor(Math.random() * 20) + 2
-  );
   const [commentsCount] = useState<number[]>([
     Math.floor(Math.random() * 20) + 1,
     Math.floor(Math.random() * 20) + 1,
@@ -86,10 +82,6 @@ export function ContestantCard({
     })
   };
 
-  const handleDislike = () => {
-    setIsDisliked(prev => !prev);
-    setDislikesCount(prev => isDisliked ? prev - 1 : prev + 1);
-  };
 
 
   const allPhotos = [faceImage, fullBodyImage, ...additionalPhotos];
@@ -246,19 +238,6 @@ export function ContestantCard({
                 <Heart className="w-4 h-4" />
                 <span className="hidden min-[280px]:inline">Like</span>
                 <span>{likesCount[0] + likesCount[1]}</span>
-              </button>
-              <button
-                type="button"
-                className={cn(
-                  "inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors",
-                  isDisliked && "text-red-500"
-                )}
-                onClick={handleDislike}
-                aria-label="Dislike"
-              >
-                <ThumbsDown className="w-4 h-4" />
-                <span className="hidden min-[280px]:inline">Dislike</span>
-                <span>{dislikesCount}</span>
               </button>
               <button
                 type="button"
