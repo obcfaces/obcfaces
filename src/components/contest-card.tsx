@@ -224,7 +224,7 @@ export function ContestantCard({
               </div>
             </div>
            </div>
-           <div className="border-t border-contest-border px-4 py-2 flex items-center justify-between gap-4">
+           <div className="border-t border-contest-border px-4 py-2 flex items-center justify-evenly gap-4">
              <button
                type="button"
                className={cn(
