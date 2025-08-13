@@ -16,7 +16,7 @@ export const ShareIconSelector = () => {
       <CardContent>
         <div className="flex justify-center">
           <div className="flex flex-col items-center gap-2 p-4 border rounded-lg">
-            <ShareIcon className="w-8 h-8 text-foreground" />
+            <ShareIcon key="curved-share-icon" className="w-8 h-8 text-foreground" />
             <span className="text-xs text-center">Share</span>
           </div>
         </div>
