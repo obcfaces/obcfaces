@@ -64,9 +64,9 @@ const ContestFilters: React.FC<ContestFiltersProps> = ({
   }, [genderAvailability]);
 
   return (
-    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+    <div className="flex flex-row flex-nowrap items-center gap-2">
       {/* Country filter */}
-      <div className="w-full sm:w-44">
+      <div className="w-44 shrink-0">
         <SearchableSelect
           value={country}
           onValueChange={onCountryChange}
@@ -77,7 +77,7 @@ const ContestFilters: React.FC<ContestFiltersProps> = ({
       </div>
 
       {/* Gender filter */}
-      <div className="w-full sm:w-24">
+      <div className="w-24 shrink-0">
         <SearchableSelect
           value={gender}
           onValueChange={(v) => onGenderChange(v as Gender)}
@@ -88,7 +88,7 @@ const ContestFilters: React.FC<ContestFiltersProps> = ({
       </div>
 
       {/* View toggles */}
-      <div className="flex items-center gap-1 self-end sm:self-auto">
+      <div className="flex items-center gap-1 shrink-0">
         <button
           type="button"
           onClick={() => onViewModeChange("full")}
