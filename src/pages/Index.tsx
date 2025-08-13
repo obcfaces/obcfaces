@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ShareIconSelector } from "@/components/share-icon-selector";
 import { ContestHeader } from "@/components/contest-header";
 import { ContestSection } from "@/components/contest-section";
@@ -11,6 +11,20 @@ const Index = () => {
   const [gender, setGender] = useState<'male' | 'female'>("female");
   const [viewMode, setViewMode] = useState<'compact' | 'full'>("compact");
   const [category, setCategory] = useState<"" | Category>("");
+
+  // Восстановление category из localStorage при загрузке
+  useEffect(() => {
+    const savedCategory = localStorage.getItem('contest-category-filter');
+    if (savedCategory && (savedCategory === "" || savedCategory === "teen" || savedCategory === "miss" || savedCategory === "ms" || savedCategory === "mrs")) {
+      setCategory(savedCategory as "" | Category);
+    }
+  }, []);
+
+  // Сохранение category в localStorage при изменении
+  const handleCategoryChange = (newCategory: "" | Category) => {
+    setCategory(newCategory);
+    localStorage.setItem('contest-category-filter', newCategory);
+  };
   return (
     <div className="min-h-screen bg-background">
       <ContestHeader />
@@ -25,7 +39,7 @@ const Index = () => {
           viewMode={viewMode}
           onViewModeChange={setViewMode}
           category={category}
-          onCategoryChange={setCategory}
+          onCategoryChange={handleCategoryChange}
           genderAvailability={{ male: false, female: true }}
         />
       </section>
