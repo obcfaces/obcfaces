@@ -5,8 +5,7 @@ const ShareIcon = ({ className }: { className?: string }) => (
   <img 
     src="/lovable-uploads/c4e9d90c-eeda-44db-94e3-08c6a959f1a5.png" 
     alt="Share" 
-    className={`w-4 h-4 opacity-60 ${className}`}
-    style={{ filter: 'grayscale(100%) brightness(0.5)' }}
+    className={`w-6 h-6 ${className}`}
   />
 );
 import { Button } from "@/components/ui/button";
