@@ -120,8 +120,8 @@ export function ContestantCard({
             </div>
           )}
           
-          {/* Rank, rating and location in top right corner - show rank always if rank > 0 */}
-          {rank > 0 && (
+          {/* Rank, rating and location in top right corner - show rank always if rank > 0 and user has voted */}
+          {rank > 0 && isVoted && (
             <div className="absolute top-0 right-0 z-20 flex flex-col items-end">
               <div className="flex items-center gap-1">
                 <div className="text-xl font-bold text-contest-blue">#{rank}</div>
@@ -344,7 +344,7 @@ export function ContestantCard({
               className="w-24 sm:w-28 md:w-32 h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
               onClick={() => openModal(0)}
             />
-            {rank > 0 && (
+            {rank > 0 && isVoted && (
               <div className="absolute top-0 left-0 bg-black/70 text-white text-xs font-bold px-1 py-0.5 rounded-br">
                 {rank}
               </div>
