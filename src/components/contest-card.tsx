@@ -225,38 +225,38 @@ export function ContestantCard({
             </div>
            </div>
            <div className="border-t border-contest-border px-4 py-2 flex items-center justify-evenly gap-4">
-             <button
-               type="button"
-               className={cn(
-                 "inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors",
-                 (isLiked[0] || isLiked[1]) && "text-contest-blue"
-               )}
-               onClick={() => handleLike(0)}
-               aria-label="Like"
-             >
-               <Heart className="w-4 h-4" />
-               <span className="hidden sm:inline">Like</span>
-               <span>{likesCount[0] + likesCount[1]}</span>
-             </button>
-             <button
-               type="button"
-               className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
-               onClick={() => openModal(0)}
-               aria-label="Comments"
-             >
-               <MessageCircle className="w-4 h-4" />
-               <span className="hidden sm:inline">Comment</span>
-               <span>{commentsCount[0] + commentsCount[1]}</span>
-             </button>
-             <button
-               type="button"
-               className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
-               onClick={async () => { try { if ((navigator as any).share) { await (navigator as any).share({ title: name, url: window.location.href }); } else if (navigator.clipboard) { await navigator.clipboard.writeText(window.location.href); toast({ title: "Link copied" }); } } catch {} }}
-               aria-label="Share"
-             >
-                <Share2 className="w-4 h-4" />
-                <span className="hidden sm:inline">Share</span>
-             </button>
+              <button
+                type="button"
+                className={cn(
+                  "inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors",
+                  (isLiked[0] || isLiked[1]) && "text-contest-blue"
+                )}
+                onClick={() => handleLike(0)}
+                aria-label="Like"
+              >
+                <Heart className="w-4 h-4" />
+                <span className="hidden min-[280px]:inline">Like</span>
+                <span>{likesCount[0] + likesCount[1]}</span>
+              </button>
+              <button
+                type="button"
+                className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                onClick={() => openModal(0)}
+                aria-label="Comments"
+              >
+                <MessageCircle className="w-4 h-4" />
+                <span className="hidden min-[280px]:inline">Comment</span>
+                <span>{commentsCount[0] + commentsCount[1]}</span>
+              </button>
+              <button
+                type="button"
+                className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                onClick={async () => { try { if ((navigator as any).share) { await (navigator as any).share({ title: name, url: window.location.href }); } else if (navigator.clipboard) { await navigator.clipboard.writeText(window.location.href); toast({ title: "Link copied" }); } } catch {} }}
+                aria-label="Share"
+              >
+                 <Share2 className="w-4 h-4" />
+                 <span className="hidden min-[280px]:inline">Share</span>
+              </button>
            </div>
          </Card>
 
