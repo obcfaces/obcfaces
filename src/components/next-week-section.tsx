@@ -4,7 +4,7 @@ import { ContestantCard } from "@/components/contest-card";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
-import LoginModalTrigger from "@/components/login-modal";
+import LoginModalContent from "@/components/login-modal-content";
 
 import contestant1Face from "@/assets/contestant-1-face.jpg";
 import contestant1Full from "@/assets/contestant-1-full.jpg";
@@ -223,7 +223,7 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
       {/* Login Modal */}
       <Dialog open={showLoginModal} onOpenChange={setShowLoginModal}>
         <DialogContent className="sm:max-w-lg">
-          <LoginModalTrigger />
+          <LoginModalContent onClose={() => setShowLoginModal(false)} />
         </DialogContent>
       </Dialog>
     </section>

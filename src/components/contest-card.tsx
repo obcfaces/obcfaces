@@ -13,7 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import LoginModalTrigger from "@/components/login-modal";
+import LoginModalContent from "@/components/login-modal-content";
 
 interface ContestantCardProps {
   rank: number;
@@ -349,7 +349,7 @@ export function ContestantCard({
         {/* Login Modal */}
         <Dialog open={showLoginModal} onOpenChange={setShowLoginModal}>
           <DialogContent className="sm:max-w-lg">
-            <LoginModalTrigger />
+            <LoginModalContent onClose={() => setShowLoginModal(false)} />
           </DialogContent>
         </Dialog>
       </>
@@ -584,7 +584,7 @@ export function ContestantCard({
       {/* Login Modal */}
       <Dialog open={showLoginModal} onOpenChange={setShowLoginModal}>
         <DialogContent className="sm:max-w-lg">
-          <LoginModalTrigger />
+          <LoginModalContent onClose={() => setShowLoginModal(false)} />
         </DialogContent>
       </Dialog>
     </>

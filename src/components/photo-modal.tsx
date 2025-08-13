@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
-import LoginModalTrigger from "@/components/login-modal";
+import LoginModalContent from "@/components/login-modal-content";
 
 interface Comment {
   id: number;
@@ -356,7 +356,7 @@ export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantNa
         {/* Login Modal */}
         <Dialog open={showLoginModal} onOpenChange={setShowLoginModal}>
           <DialogContent className="sm:max-w-lg">
-            <LoginModalTrigger />
+            <LoginModalContent onClose={() => setShowLoginModal(false)} />
           </DialogContent>
         </Dialog>
       </DialogContent>
