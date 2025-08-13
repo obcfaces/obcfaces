@@ -41,13 +41,13 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
   const contestants = [
     {
       rank: 1,
-      name: "Name Chall",
-      profileId: "11111111-1111-1111-1111-111111111111",
-      country: "Philippines",
-      city: "Negros",
-      age: 25,
-      weight: 53,
-      height: 182,
+      name: "Maria Santos",
+      profileId: "1b5c2751-a820-4767-87e6-d06080219942", // ID реального пользователя
+      country: "Philippines", 
+      city: "Cebu",
+      age: 23,
+      weight: 52,
+      height: 168,
       rating: ratings[1],
       faceImage: contestant1Face,
       fullBodyImage: contestant1Full,
