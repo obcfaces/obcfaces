@@ -136,11 +136,6 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
 
       {currentIndex < candidates.length ? (
         <div className="flex flex-col items-center">
-          <div className="mb-4 text-center">
-            <span className="text-lg font-medium text-contest-text">
-              {remainingCandidates} candidates remaining
-            </span>
-          </div>
           <div className="w-full">
             <ContestantCard
               {...currentCandidate}
@@ -187,6 +182,12 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
               </Button>
               <span className="text-sm text-muted-foreground">Like</span>
             </div>
+          </div>
+          
+          <div className="mt-4 text-center">
+            <span className="text-lg text-contest-text">
+              {remainingCandidates} remaining
+            </span>
           </div>
         </div>
       ) : (
