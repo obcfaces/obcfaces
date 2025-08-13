@@ -5,7 +5,7 @@ import ContestFilters from "@/components/contest-filters";
 
 const Index = () => {
   const [country, setCountry] = useState<string>("PH");
-  const [gender, setGender] = useState<'all' | 'women' | 'men'>("all");
+  const [gender, setGender] = useState<'male' | 'female'>("female");
   const [viewMode, setViewMode] = useState<'compact' | 'full'>("compact");
   return (
     <div className="min-h-screen bg-background">
@@ -19,6 +19,7 @@ const Index = () => {
           onGenderChange={setGender}
           viewMode={viewMode}
           onViewModeChange={setViewMode}
+          genderAvailability={{ male: false, female: true }}
         />
       </section>
       

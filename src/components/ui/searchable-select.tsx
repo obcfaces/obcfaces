@@ -5,7 +5,7 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { ChevronsUpDown, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-export type Option = { value: string; label: string };
+export type Option = { value: string; label: string; disabled?: boolean };
 
 interface SearchableSelectProps {
   value: string;
@@ -62,10 +62,15 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
                   key={opt.value}
                   value={opt.label}
                   onSelect={() => {
+                    if (opt.disabled) return;
                     onValueChange(opt.value);
                     setOpen(false);
                   }}
-                  className="cursor-pointer"
+                  aria-disabled={opt.disabled || undefined}
+                  className={cn(
+                    "cursor-pointer",
+                    opt.disabled && "opacity-60 pointer-events-none"
+                  )}
                 >
                   <Check
                     className={cn(
@@ -73,7 +78,12 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
                       value === opt.value ? "opacity-100" : "opacity-0"
                     )}
                   />
-                  {opt.label}
+                  <span className="flex items-center gap-2">
+                    <span>{opt.label}</span>
+                    {opt.disabled && (
+                      <span className="text-xs italic text-muted-foreground">soon</span>
+                    )}
+                  </span>
                 </CommandItem>
               ))}
             </CommandGroup>

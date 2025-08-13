@@ -1,14 +1,12 @@
 import React, { useMemo } from "react";
 import SearchableSelect, { type Option } from "@/components/ui/searchable-select";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Label } from "@/components/ui/label";
 import listIcon from "@/assets/icons/sdisplay-list.png";
 import listActiveIcon from "@/assets/icons/sdisplay-list-active.png";
 import tableIcon from "@/assets/icons/sdisplay-table.png";
 import tableActiveIcon from "@/assets/icons/sdisplay-table-active.png";
 import { Country } from "country-state-city";
 
-type Gender = "all" | "women" | "men";
+type Gender = "male" | "female";
 export type ViewMode = "compact" | "full";
 
 interface ContestFiltersProps {
@@ -18,6 +16,7 @@ interface ContestFiltersProps {
   onGenderChange: (value: Gender) => void;
   viewMode: ViewMode;
   onViewModeChange: (value: ViewMode) => void;
+  genderAvailability?: { male: boolean; female: boolean };
 }
 
 const ContestFilters: React.FC<ContestFiltersProps> = ({
@@ -27,6 +26,7 @@ const ContestFilters: React.FC<ContestFiltersProps> = ({
   onGenderChange,
   viewMode,
   onViewModeChange,
+  genderAvailability,
 }) => {
   const countryOptions: Option[] = useMemo(() => {
     try {
@@ -40,6 +40,14 @@ const ContestFilters: React.FC<ContestFiltersProps> = ({
       ];
     }
   }, []);
+
+  const genderOptions: Option[] = useMemo(() => {
+    const av = genderAvailability ?? { male: false, female: true };
+    return [
+      { value: "female", label: "Female", disabled: !av.female },
+      { value: "male", label: "Male", disabled: !av.male },
+    ];
+  }, [genderAvailability]);
 
   return (
     <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -55,27 +63,14 @@ const ContestFilters: React.FC<ContestFiltersProps> = ({
       </div>
 
       {/* Gender filter */}
-      <div className="flex items-center gap-3">
-        <span className="text-sm text-muted-foreground">Gender:</span>
-        <RadioGroup
+      <div className="w-full sm:w-48">
+        <SearchableSelect
           value={gender}
           onValueChange={(v) => onGenderChange(v as Gender)}
-          className="flex flex-row items-center gap-4"
-          aria-label="Gender filter"
-        >
-          <div className="flex items-center gap-2">
-            <RadioGroupItem id="gender-all" value="all" />
-            <Label htmlFor="gender-all" className="text-sm">All</Label>
-          </div>
-          <div className="flex items-center gap-2">
-            <RadioGroupItem id="gender-women" value="women" />
-            <Label htmlFor="gender-women" className="text-sm">Women</Label>
-          </div>
-          <div className="flex items-center gap-2">
-            <RadioGroupItem id="gender-men" value="men" />
-            <Label htmlFor="gender-men" className="text-sm">Men</Label>
-          </div>
-        </RadioGroup>
+          options={genderOptions}
+          placeholder="Select gender"
+          ariaLabel="Gender filter"
+        />
       </div>
 
       {/* View toggles */}
