@@ -23,112 +23,109 @@ const Privacy = () => {
           </div>
           
           <div className="prose prose-gray max-w-none">
-            <h1 className="text-3xl font-bold mb-8">Privacy Policy</h1>
+            <h1 className="text-3xl font-bold mb-8 text-center">Privacy Policy</h1>
             
-            <p className="text-muted-foreground mb-6">
-              Last updated: {new Date().toLocaleDateString()}
-            </p>
+            <div className="mb-6">
+              <p className="text-muted-foreground mb-2">
+                <strong>Last updated:</strong> {new Date().toLocaleDateString()}
+              </p>
+              <p className="text-muted-foreground">
+                <strong>Effective date:</strong> {new Date().toLocaleDateString()}
+              </p>
+            </div>
             
             <section className="mb-8">
-              <h2 className="text-2xl font-semibold mb-4">1. Information We Collect</h2>
-              <p className="mb-4">We collect information you provide directly to us, such as:</p>
+              <h2 className="text-2xl font-semibold mb-4">1. Introduction</h2>
+              <p className="mb-4">
+                This Privacy Policy explains how [Site Name] ("we," "us") collects, uses, and protects your personal data.
+              </p>
+            </section>
+
+            <section className="mb-8">
+              <h2 className="text-2xl font-semibold mb-4">2. Data We Collect</h2>
               <ul className="list-disc pl-6 mb-4 space-y-2">
-                <li>Account information (name, email address, age, gender, location)</li>
-                <li>Profile information and photos you choose to share</li>
-                <li>Messages, comments, and other content you create</li>
-                <li>Information about your interactions with other users</li>
+                <li>Account Information: name, email, date of birth, profile photo.</li>
+                <li>Contest Information: uploaded photos, votes, comments.</li>
+                <li>Technical Data: IP address, device info, browser type, cookies.</li>
+                <li>Parental Consent Data for minors.</li>
               </ul>
             </section>
 
             <section className="mb-8">
-              <h2 className="text-2xl font-semibold mb-4">2. How We Use Your Information</h2>
-              <p className="mb-4">We use the information we collect to:</p>
+              <h2 className="text-2xl font-semibold mb-4">3. How We Use Your Data</h2>
               <ul className="list-disc pl-6 mb-4 space-y-2">
-                <li>Provide, maintain, and improve our services</li>
-                <li>Process transactions and send related information</li>
-                <li>Send you technical notices, updates, security alerts, and support messages</li>
-                <li>Respond to your comments, questions, and provide customer service</li>
-                <li>Communicate with you about products, services, offers, and events</li>
-                <li>Monitor and analyze trends, usage, and activities in connection with our services</li>
-                <li>Personalize and improve your experience</li>
-                <li>Facilitate contests, sweepstakes, and promotions</li>
+                <li>To operate and improve the Platform.</li>
+                <li>To run competitions and manage votes.</li>
+                <li>To moderate content and prevent abuse.</li>
+                <li>To inform users about contests and updates.</li>
+                <li>For AI-based recommendations and descriptions.</li>
               </ul>
             </section>
 
             <section className="mb-8">
-              <h2 className="text-2xl font-semibold mb-4">3. Information Sharing and Disclosure</h2>
+              <h2 className="text-2xl font-semibold mb-4">4. Deepfake & AI Content Protection</h2>
               <p className="mb-4">
-                We do not sell, trade, or otherwise transfer your personal information to third parties without your consent, 
-                except as described in this policy:
+                We use automated and manual checks to detect manipulated or AI-generated content. Misuse may lead to removal and legal reporting.
               </p>
+            </section>
+
+            <section className="mb-8">
+              <h2 className="text-2xl font-semibold mb-4">5. Protection of Minors</h2>
               <ul className="list-disc pl-6 mb-4 space-y-2">
-                <li>With your consent or at your direction</li>
-                <li>With service providers who assist us in operating our platform</li>
-                <li>To comply with laws, regulations, or legal requests</li>
-                <li>To protect the rights, property, or safety of our users or others</li>
-                <li>In connection with a merger, acquisition, or sale of assets</li>
+                <li>Strict moderation of minors' photos.</li>
+                <li>No public contact details.</li>
+                <li>Parents/guardians can withdraw consent anytime.</li>
               </ul>
             </section>
 
             <section className="mb-8">
-              <h2 className="text-2xl font-semibold mb-4">4. Data Security</h2>
+              <h2 className="text-2xl font-semibold mb-4">6. Data Sharing</h2>
               <p className="mb-4">
-                We implement appropriate technical and organizational security measures to protect your personal information 
-                against unauthorized access, alteration, disclosure, or destruction. However, no method of transmission over 
-                the internet or electronic storage is 100% secure.
+                We do not sell your data. We share only with service providers, legal authorities when required, and parents/guardians for minors.
               </p>
             </section>
 
             <section className="mb-8">
-              <h2 className="text-2xl font-semibold mb-4">5. Data Retention</h2>
+              <h2 className="text-2xl font-semibold mb-4">7. Cookies & Tracking</h2>
               <p className="mb-4">
-                We retain your personal information for as long as necessary to provide our services, comply with legal obligations, 
-                resolve disputes, and enforce our agreements. You may delete your account at any time, and we will delete 
-                your personal information within a reasonable time frame.
+                We use cookies for authentication, analytics, and experience improvement.
               </p>
             </section>
 
             <section className="mb-8">
-              <h2 className="text-2xl font-semibold mb-4">6. Your Rights and Choices</h2>
-              <p className="mb-4">You have the right to:</p>
+              <h2 className="text-2xl font-semibold mb-4">8. Data Retention</h2>
+              <p className="mb-4">
+                Data is kept as long as necessary or required by law.
+              </p>
+            </section>
+
+            <section className="mb-8">
+              <h2 className="text-2xl font-semibold mb-4">9. User Rights</h2>
               <ul className="list-disc pl-6 mb-4 space-y-2">
-                <li>Access, update, or delete your personal information</li>
-                <li>Object to processing of your personal information</li>
-                <li>Request restriction of processing of your personal information</li>
-                <li>Request portability of your personal information</li>
-                <li>Withdraw consent at any time (where processing is based on consent)</li>
+                <li>Access, correct, or delete your data.</li>
+                <li>Withdraw consent.</li>
+                <li>Request removal of specific content.</li>
               </ul>
             </section>
 
             <section className="mb-8">
-              <h2 className="text-2xl font-semibold mb-4">7. Children's Privacy</h2>
+              <h2 className="text-2xl font-semibold mb-4">10. International Transfers</h2>
               <p className="mb-4">
-                Our service is not intended for individuals under the age of 18. We do not knowingly collect 
-                personal information from children under 18. If you become aware that a child has provided us 
-                with personal information, please contact us.
+                Your data may be processed in other countries with safeguards.
               </p>
             </section>
 
             <section className="mb-8">
-              <h2 className="text-2xl font-semibold mb-4">8. International Data Transfers</h2>
+              <h2 className="text-2xl font-semibold mb-4">11. Changes to Policy</h2>
               <p className="mb-4">
-                Your personal information may be transferred to and processed in countries other than your own. 
-                We will ensure that any such transfers comply with applicable data protection laws.
+                We may update this Policy anytime. Continued use means acceptance.
               </p>
             </section>
 
             <section className="mb-8">
-              <h2 className="text-2xl font-semibold mb-4">9. Changes to This Privacy Policy</h2>
+              <h2 className="text-2xl font-semibold mb-4">12. Contact</h2>
               <p className="mb-4">
-                We may update this Privacy Policy from time to time. We will notify you of any changes by posting 
-                the new Privacy Policy on this page and updating the "Last updated" date.
-              </p>
-            </section>
-
-            <section className="mb-8">
-              <h2 className="text-2xl font-semibold mb-4">10. Contact Us</h2>
-              <p className="mb-4">
-                If you have any questions about this Privacy Policy, please contact us through our support channels.
+                Email: [Privacy Email]
               </p>
             </section>
           </div>
