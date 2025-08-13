@@ -93,51 +93,6 @@ export function ContestantCard({
   if (viewMode === 'full') {
     return (
       <>
-        {/* DEMO SECTION - Share Icons */}
-        {rank === 1 && (
-          <Card className="bg-yellow-50 border-yellow-200 p-4 mb-4">
-            <h3 className="text-lg font-bold mb-3">Варианты иконок Share:</h3>
-            <div className="grid grid-cols-6 gap-4">
-              <div className="text-center">
-                <div className="mb-2 p-2 bg-white rounded border">
-                  <Share2 className="w-6 h-6 mx-auto" />
-                </div>
-                <p className="text-xs">Текущая</p>
-              </div>
-              <div className="text-center">
-                <div className="mb-2 p-2 bg-white rounded border">
-                  <Share className="w-6 h-6 mx-auto" />
-                </div>
-                <p className="text-xs">Share</p>
-              </div>
-              <div className="text-center">
-                <div className="mb-2 p-2 bg-white rounded border">
-                  <Share2 className="w-6 h-6 mx-auto" />
-                </div>
-                <p className="text-xs">Share2</p>
-              </div>
-              <div className="text-center">
-                <div className="mb-2 p-2 bg-white rounded border">
-                  <ExternalLink className="w-6 h-6 mx-auto" />
-                </div>
-                <p className="text-xs">External</p>
-              </div>
-              <div className="text-center">
-                <div className="mb-2 p-2 bg-white rounded border">
-                  <Upload className="w-6 h-6 mx-auto" />
-                </div>
-                <p className="text-xs">Upload</p>
-              </div>
-              <div className="text-center">
-                <div className="mb-2 p-2 bg-white rounded border">
-                  <ArrowUpRight className="w-6 h-6 mx-auto" />
-                </div>
-                <p className="text-xs">Arrow</p>
-              </div>
-            </div>
-          </Card>
-        )}
-        
         <Card className="bg-card border-contest-border relative overflow-hidden">
           {isWinner && (
             <div className="absolute top-4 left-4 bg-contest-blue text-white px-3 py-1 rounded-full text-sm font-bold flex items-center gap-1 z-10">
