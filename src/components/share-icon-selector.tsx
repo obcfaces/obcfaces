@@ -2,8 +2,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const ShareIcon = ({ className }: { className?: string }) => (
   <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-    <path d="M3 20L21 4"/>
-    <path d="M21 4L14 4L3 20L9 13L21 4Z"/>
+    <path d="M7 17L17 7"/>
+    <path d="M17 7H10"/>
+    <path d="M17 7V14"/>
   </svg>
 );
 
