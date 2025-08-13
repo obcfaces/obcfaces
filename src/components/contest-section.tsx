@@ -52,7 +52,7 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
       faceImage: contestant1Face,
       fullBodyImage: contestant1Full,
       additionalPhotos: [contestant2Face, contestant3Face],
-      isVoted: !!votes[1],
+      isVoted: showWinner ? true : !!votes[1], // Для завершенных конкурсов голосование уже прошло
       isWinner: showWinner,
       prize: showWinner ? "+ 5000 PhP" : undefined
     },
