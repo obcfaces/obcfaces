@@ -11,6 +11,7 @@ const Index = () => {
         subtitle="25-31 august 2025"
         description="Choose the winner of the week."
         isActive={true}
+        noWrapTitle
       />
       
       <ContestSection
