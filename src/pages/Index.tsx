@@ -69,6 +69,33 @@ const Index = () => {
         subtitle="18-24 August 2025"
         centerSubtitle
         showWinner={true}
+        viewMode={viewMode}
+      />
+
+      <div className="px-6 sm:px-0" aria-hidden>
+        <hr className="my-8 sm:my-10 border-border" />
+      </div>
+
+      <ContestSection
+        title="2 WEEKS AGO"
+        titleSuffix="(Closed)"
+        subtitle="11-17 August 2025"
+        centerSubtitle
+        showWinner={true}
+        viewMode={viewMode}
+      />
+
+      <div className="px-6 sm:px-0" aria-hidden>
+        <hr className="my-8 sm:my-10 border-border" />
+      </div>
+
+      <ContestSection
+        title="3 WEEKS AGO"
+        titleSuffix="(Closed)"
+        subtitle="4-10 August 2025"
+        centerSubtitle
+        showWinner={true}
+        viewMode={viewMode}
       />
 
       <div className="px-6 sm:px-0" aria-hidden>

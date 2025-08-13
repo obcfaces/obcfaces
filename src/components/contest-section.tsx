@@ -68,7 +68,7 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
       faceImage: contestant2Face,
       fullBodyImage: contestant2Full,
       additionalPhotos: [contestant1Face],
-      isVoted: !!votes[2]
+      isVoted: showWinner ? true : !!votes[2] // Для завершенных конкурсов голосование уже прошло
     },
     {
       rank: 3,
@@ -82,7 +82,7 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
       faceImage: contestant3Face,
       fullBodyImage: contestant3Full,
       additionalPhotos: [contestant1Face, contestant2Face, contestant1Full],
-      isVoted: !!votes[3]
+      isVoted: showWinner ? true : !!votes[3] // Для завершенных конкурсов голосование уже прошло
     },
     {
       rank: 4,
@@ -95,7 +95,7 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
       rating: ratings[4],
       faceImage: contestant1Face,
       fullBodyImage: contestant1Full,
-      isVoted: !!votes[4]
+      isVoted: showWinner ? true : !!votes[4] // Для завершенных конкурсов голосование уже прошло
     },
     {
       rank: 5,
@@ -109,7 +109,7 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
       faceImage: contestant2Face,
       fullBodyImage: contestant2Full,
       additionalPhotos: [contestant3Face, contestant3Full],
-      isVoted: !!votes[5]
+      isVoted: showWinner ? true : !!votes[5] // Для завершенных конкурсов голосование уже прошло
     },
     {
       rank: 6,
@@ -122,7 +122,7 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
       rating: ratings[6],
       faceImage: contestant3Face,
       fullBodyImage: contestant3Full,
-      isVoted: !!votes[6]
+      isVoted: showWinner ? true : !!votes[6] // Для завершенных конкурсов голосование уже прошло
     }
   ];
 
