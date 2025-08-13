@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { ShareIconSelector } from "@/components/share-icon-selector";
 import { ContestHeader } from "@/components/contest-header";
 import { ContestSection } from "@/components/contest-section";
 import ContestFilters from "@/components/contest-filters";
@@ -14,6 +15,7 @@ const Index = () => {
       <ContestHeader />
       
       <section className="max-w-6xl mx-auto px-6 sm:px-0 mt-4">
+        <ShareIconSelector />
         <ContestFilters
           country={country}
           onCountryChange={setCountry}
