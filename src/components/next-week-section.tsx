@@ -136,6 +136,7 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
             <ContestantCard
               {...currentCandidate}
               viewMode={viewMode}
+              showDislike={true}
             />
           </div>
           
