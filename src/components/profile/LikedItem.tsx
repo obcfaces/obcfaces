@@ -100,9 +100,6 @@ const LikedItem = ({
                 className="w-24 sm:w-28 md:w-32 h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
                 onClick={() => openModal(0)}
               />
-              <div className="absolute top-0 left-0 bg-black/70 text-white text-xs font-bold px-1 py-0.5 rounded-br">
-                ❤️
-              </div>
             </div>
             <div className="relative">
               <img 
@@ -205,9 +202,6 @@ const LikedItem = ({
               className="w-24 sm:w-28 md:w-32 h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
               onClick={() => openModal(0)}
             />
-            <div className="absolute top-0 left-0 bg-black/70 text-white text-xs font-bold px-1 py-0.5 rounded-br">
-              ❤️
-            </div>
           </div>
           <div className="relative">
             <img 
