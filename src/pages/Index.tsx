@@ -8,106 +8,46 @@ import AiChat from "@/components/ai-chat";
 import type { Category } from "@/components/contest-filters";
 
 const Index = () => {
-  const [country, setCountry] = useState<string>("PH");
-  const [gender, setGender] = useState<'male' | 'female'>("female");
-  const [viewMode, setViewMode] = useState<'compact' | 'full'>("compact");
+  console.log('[INDEX] Index page rendering...');
   
-  // Инициализация category из localStorage или "" по умолчанию
-  const [category, setCategory] = useState<"" | Category>(() => {
-    try {
-      const saved = localStorage.getItem('contest-category-filter');
-      return saved !== null ? (saved as "" | Category) : "";
-    } catch {
-      return "";
-    }
-  });
-
-  // Сохранение category в localStorage при изменении
-  const handleCategoryChange = (newCategory: "" | Category) => {
-    setCategory(newCategory);
-    localStorage.setItem('contest-category-filter', newCategory);
-  };
-  return (
-    <div className="min-h-screen bg-background">
-      <ContestHeader />
-      
-      <section className="max-w-6xl mx-auto px-6 sm:px-0 mt-4">
-        <ContestFilters
-          country={country}
-          onCountryChange={setCountry}
-          gender={gender}
-          onGenderChange={setGender}
-          viewMode={viewMode}
-          onViewModeChange={setViewMode}
-          category={category}
-          onCategoryChange={handleCategoryChange}
-          genderAvailability={{ male: false, female: true }}
-        />
-      </section>
-      
-      <ContestSection
-        title="THIS WEEK"
-        subtitle="25-31 august 2025"
-        description="Choose the winner of the week."
-        isActive={true}
-        noWrapTitle
-        viewMode={viewMode}
-      />
-
-      <div className="px-6 sm:px-0" aria-hidden>
-        <hr className="my-8 sm:my-10 border-border" />
+  try {
+    return (
+      <div className="min-h-screen bg-background">
+        <div style={{ padding: '20px', fontFamily: 'system-ui' }}>
+          <h1 style={{ marginBottom: '20px' }}>OBC Faces of Philippines</h1>
+          <p>Loading contest sections...</p>
+          
+          {/* Простая версия заголовка без сложных компонентов */}
+          <div style={{ 
+            backgroundColor: '#f8f9fa',
+            padding: '20px',
+            marginTop: '20px',
+            borderRadius: '8px'
+          }}>
+            <h2>Contest Header Test</h2>
+            <button style={{
+              padding: '10px 20px',
+              backgroundColor: '#007bff',
+              color: 'white',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: 'pointer'
+            }}>
+              Load your photo and win 5000 Php
+            </button>
+          </div>
+        </div>
       </div>
-
-      <NextWeekSection viewMode={viewMode} />
-
-      <div className="px-6 sm:px-0" aria-hidden>
-        <hr className="my-8 sm:my-10 border-border" />
+    );
+  } catch (error) {
+    console.error('[INDEX] Error in Index component:', error);
+    return (
+      <div style={{ padding: '20px', color: 'red' }}>
+        <h2>Index Error:</h2>
+        <p>{String(error)}</p>
       </div>
-
-      <ContestSection
-        title="1 WEEK AGO"
-        titleSuffix="(Closed)"
-        subtitle="18-24 August 2025"
-        centerSubtitle
-        showWinner={true}
-        viewMode={viewMode}
-      />
-
-      <div className="px-6 sm:px-0" aria-hidden>
-        <hr className="my-8 sm:my-10 border-border" />
-      </div>
-
-      <ContestSection
-        title="2 WEEKS AGO"
-        titleSuffix="(Closed)"
-        subtitle="11-17 August 2025"
-        centerSubtitle
-        showWinner={true}
-        viewMode={viewMode}
-      />
-
-      <div className="px-6 sm:px-0" aria-hidden>
-        <hr className="my-8 sm:my-10 border-border" />
-      </div>
-
-      <ContestSection
-        title="3 WEEKS AGO"
-        titleSuffix="(Closed)"
-        subtitle="4-10 August 2025"
-        centerSubtitle
-        showWinner={true}
-        viewMode={viewMode}
-      />
-
-      <div className="px-6 sm:px-0" aria-hidden>
-        <hr className="my-8 sm:my-10 border-border" />
-      </div>
-
-      <section className="max-w-6xl mx-auto px-6 sm:px-0 mb-8">
-        <AiChat />
-      </section>
-    </div>
-  );
+    );
+  }
 };
 
 export default Index;
