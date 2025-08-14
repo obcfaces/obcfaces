@@ -1,111 +1,11 @@
-import { useState, useEffect } from "react";
-
-import { ContestHeader } from "@/components/contest-header";
-import { ContestSection } from "@/components/contest-section";
-import { NextWeekSection } from "@/components/next-week-section";
-import ContestFilters from "@/components/contest-filters";
-import AiChat from "@/components/ai-chat";
-import type { Category } from "@/components/contest-filters";
-
 const Index = () => {
-  const [country, setCountry] = useState<string>("PH");
-  const [gender, setGender] = useState<'male' | 'female'>("female");
-  const [viewMode, setViewMode] = useState<'compact' | 'full'>("compact");
-  
-  // Инициализация category из localStorage или "" по умолчанию
-  const [category, setCategory] = useState<"" | Category>(() => {
-    try {
-      const saved = localStorage.getItem('contest-category-filter');
-      return saved !== null ? (saved as "" | Category) : "";
-    } catch {
-      return "";
-    }
-  });
-
-  // Сохранение category в localStorage при изменении
-  const handleCategoryChange = (newCategory: "" | Category) => {
-    setCategory(newCategory);
-    localStorage.setItem('contest-category-filter', newCategory);
-  };
   return (
-    <div className="min-h-screen bg-background">
-      <ContestHeader />
-      
-      <section className="max-w-6xl mx-auto px-6 sm:px-0 mt-4">
-        <ContestFilters
-          country={country}
-          onCountryChange={setCountry}
-          gender={gender}
-          onGenderChange={setGender}
-          viewMode={viewMode}
-          onViewModeChange={setViewMode}
-          category={category}
-          onCategoryChange={handleCategoryChange}
-          genderAvailability={{ male: false, female: true }}
-        />
-      </section>
-      
-      <ContestSection
-        title="THIS WEEK"
-        subtitle="25-31 august 2025"
-        description="Choose the winner of the week."
-        isActive={true}
-        noWrapTitle
-        viewMode={viewMode}
-      />
-
-      <div className="px-6 sm:px-0" aria-hidden>
-        <hr className="my-8 sm:my-10 border-border" />
-      </div>
-
-      <NextWeekSection viewMode={viewMode} />
-
-      <div className="px-6 sm:px-0" aria-hidden>
-        <hr className="my-8 sm:my-10 border-border" />
-      </div>
-
-      <ContestSection
-        title="1 WEEK AGO"
-        titleSuffix="(Closed)"
-        subtitle="18-24 August 2025"
-        centerSubtitle
-        showWinner={true}
-        viewMode={viewMode}
-      />
-
-      <div className="px-6 sm:px-0" aria-hidden>
-        <hr className="my-8 sm:my-10 border-border" />
-      </div>
-
-      <ContestSection
-        title="2 WEEKS AGO"
-        titleSuffix="(Closed)"
-        subtitle="11-17 August 2025"
-        centerSubtitle
-        showWinner={true}
-        viewMode={viewMode}
-      />
-
-      <div className="px-6 sm:px-0" aria-hidden>
-        <hr className="my-8 sm:my-10 border-border" />
-      </div>
-
-      <ContestSection
-        title="3 WEEKS AGO"
-        titleSuffix="(Closed)"
-        subtitle="4-10 August 2025"
-        centerSubtitle
-        showWinner={true}
-        viewMode={viewMode}
-      />
-
-      <div className="px-6 sm:px-0" aria-hidden>
-        <hr className="my-8 sm:my-10 border-border" />
-      </div>
-
-      <section className="max-w-6xl mx-auto px-6 sm:px-0 mb-8">
-        <AiChat />
-      </section>
+    <div className="min-h-screen bg-white p-4">
+      <h1 className="text-2xl font-bold text-black mb-4">OBC Contest</h1>
+      <p className="text-gray-700">Mobile test version</p>
+      <button className="mt-4 px-4 py-2 bg-blue-500 text-white rounded">
+        Test Button
+      </button>
     </div>
   );
 };
