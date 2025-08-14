@@ -1,71 +1,38 @@
 import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { HelmetProvider } from 'react-helmet-async';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import Index from '@/pages/Index';
+import Contest from '@/pages/Contest';
+import Profile from '@/pages/Profile';
+import Account from '@/pages/Account';
+import Auth from '@/pages/Auth';
+import Privacy from '@/pages/Privacy';
+import Terms from '@/pages/Terms';
+import NotFound from '@/pages/NotFound';
+
+const queryClient = new QueryClient();
 
 const App = () => {
-  console.log('[APP] Ultra simple mobile test');
+  console.log('[APP] Full app with simple TopBar');
   
   return (
-    <div style={{
-      minHeight: '100vh',
-      backgroundColor: '#f8f9fa',
-      padding: '16px',
-      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
-    }}>
-      <div style={{
-        maxWidth: '400px',
-        margin: '0 auto',
-        backgroundColor: 'white',
-        borderRadius: '12px',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-        padding: '24px'
-      }}>
-        <h1 style={{
-          fontSize: '24px',
-          fontWeight: 'bold',
-          color: '#333',
-          marginBottom: '16px',
-          textAlign: 'center'
-        }}>
-          OBC Faces of Philippines
-        </h1>
-        
-        <p style={{
-          color: '#666',
-          marginBottom: '16px',
-          textAlign: 'center'
-        }}>
-          Mobile diagnostic version
-        </p>
-        
-        <button 
-          style={{
-            width: '100%',
-            backgroundColor: '#007bff',
-            color: 'white',
-            padding: '12px 16px',
-            border: 'none',
-            borderRadius: '8px',
-            fontSize: '16px',
-            fontWeight: '500',
-            cursor: 'pointer'
-          }}
-          onClick={() => {
-            alert('Mobile works!');
-            console.log('[MOBILE] Click successful');
-          }}
-        >
-          Test Mobile Button
-        </button>
-        
-        <div style={{
-          marginTop: '16px',
-          fontSize: '12px',
-          color: '#999',
-          textAlign: 'center'
-        }}>
-          Diagnostic: No imports, pure React
-        </div>
-      </div>
-    </div>
+    <HelmetProvider>
+      <QueryClientProvider client={queryClient}>
+        <Router>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/contest" element={<Contest />} />
+            <Route path="/profile/:id" element={<Profile />} />
+            <Route path="/account" element={<Account />} />
+            <Route path="/auth" element={<Auth />} />
+            <Route path="/privacy" element={<Privacy />} />
+            <Route path="/terms" element={<Terms />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </Router>
+      </QueryClientProvider>
+    </HelmetProvider>
   );
 };
 
