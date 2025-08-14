@@ -136,7 +136,7 @@ const LikedItem = ({
               </div>
             </div>
             
-            <div className="flex items-center justify-end gap-4">
+            <div className="flex items-center justify-end gap-4 pr-2">
               <button
                 type="button"
                 className="inline-flex items-center gap-1 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors"
