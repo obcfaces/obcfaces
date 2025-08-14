@@ -1,46 +1,63 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { HelmetProvider } from "react-helmet-async";
-import AuthCallbackHandler from "@/components/auth-callback-handler";
-import TopBar from "@/components/top-bar";
-import Index from "./pages/Index";
-import Contest from "./pages/Contest";
-import Auth from "./pages/Auth";
-import Account from "./pages/Account";
-import Profile from "./pages/Profile";
-import Terms from "./pages/Terms";
-import Privacy from "./pages/Privacy";
-import NotFound from "./pages/NotFound";
 
-const queryClient = new QueryClient();
-
-const App = () => (
-  <HelmetProvider>
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <AuthCallbackHandler />
-          <TopBar />
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/contest" element={<Contest />} />
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/account" element={<Account />} />
-            <Route path="/u/:id" element={<Profile />} />
-            <Route path="/terms" element={<Terms />} />
-            <Route path="/privacy" element={<Privacy />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
-    </QueryClientProvider>
-  </HelmetProvider>
-);
+const App = () => {
+  console.log('[APP] Simple app loaded');
+  
+  return (
+    <div style={{
+      minHeight: '100vh',
+      backgroundColor: '#f8f9fa',
+      padding: '16px',
+      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+    }}>
+      <div style={{
+        maxWidth: '400px',
+        margin: '0 auto',
+        backgroundColor: 'white',
+        borderRadius: '12px',
+        boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+        padding: '24px'
+      }}>
+        <h1 style={{
+          fontSize: '24px',
+          fontWeight: 'bold',
+          color: '#333',
+          marginBottom: '16px',
+          textAlign: 'center'
+        }}>
+          OBC Faces of Philippines
+        </h1>
+        
+        <p style={{
+          color: '#666',
+          marginBottom: '16px',
+          textAlign: 'center'
+        }}>
+          App loaded successfully on mobile!
+        </p>
+        
+        <button 
+          style={{
+            width: '100%',
+            backgroundColor: '#007bff',
+            color: 'white',
+            padding: '12px 16px',
+            border: 'none',
+            borderRadius: '8px',
+            fontSize: '16px',
+            fontWeight: '500',
+            cursor: 'pointer'
+          }}
+          onClick={() => {
+            alert('Button works!');
+            console.log('[MOBILE] Button clicked');
+          }}
+        >
+          Test Button
+        </button>
+      </div>
+    </div>
+  );
+};
 
 export default App;
