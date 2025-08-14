@@ -33,149 +33,244 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
     setVotes(prev => ({ ...prev, [contestantId]: rating }));
   };
 
-  const contestants = [
-    {
-      rank: 1,
-      name: "Maria Santos",
-      profileId: "1b5c2751-a820-4767-87e6-d06080219942",
-      country: "Philippines", 
-      city: "Cebu",
-      age: 23,
-      weight: 52,
-      height: 168,
-      rating: ratings[1],
-      faceImage: contestant1Face,
-      fullBodyImage: contestant1Full,
-      additionalPhotos: [contestant2Face, contestant3Face],
-      isVoted: showWinner ? true : !!votes[1],
-      isWinner: showWinner,
-      prize: showWinner ? "+ 5000 PhP" : undefined
-    },
-    {
-      rank: 2,
-      name: "Anna Cruz",
-      country: "Philippines",
-      city: "Manila",
-      age: 24,
-      weight: 55,
-      height: 165,
-      rating: ratings[2],
-      faceImage: contestant2Face,
-      fullBodyImage: contestant2Full,
-      additionalPhotos: [contestant1Face],
-      isVoted: showWinner ? true : !!votes[2]
-    },
-    {
-      rank: 3,
-      name: "Sofia Reyes",
-      country: "Philippines",
-      city: "Davao", 
-      age: 22,
-      weight: 51,
-      height: 170,
-      rating: ratings[3],
-      faceImage: contestant3Face,
-      fullBodyImage: contestant3Full,
-      additionalPhotos: [contestant1Face, contestant2Face, contestant1Full],
-      isVoted: showWinner ? true : !!votes[3]
-    },
-    {
-      rank: 4,
-      name: "Isabella Garcia",
-      country: "Philippines",
-      city: "Quezon City",
-      age: 25,
-      weight: 53,
-      height: 167,
-      rating: ratings[4],
-      faceImage: contestant1Face,
-      fullBodyImage: contestant1Full,
-      isVoted: showWinner ? true : !!votes[4]
-    },
-    {
-      rank: 5,
-      name: "Camila Torres",
-      country: "Philippines",
-      city: "Makati",
-      age: 21,
-      weight: 49,
-      height: 163,
-      rating: ratings[5],
-      faceImage: contestant2Face,
-      fullBodyImage: contestant2Full,
-      additionalPhotos: [contestant3Face, contestant3Full],
-      isVoted: showWinner ? true : !!votes[5]
-    },
-    {
-      rank: 6,
-      name: "Valentina Lopez",
-      country: "Philippines",
-      city: "Pasig",
-      age: 26,
-      weight: 56,
-      height: 172,
-      rating: ratings[6],
-      faceImage: contestant3Face,
-      fullBodyImage: contestant3Full,
-      isVoted: showWinner ? true : !!votes[6]
-    },
-    {
-      rank: 7,
-      name: "Emma Rodriguez",
-      country: "Philippines",
-      city: "Taguig",
-      age: 23,
-      weight: 52,
-      height: 166,
-      rating: ratings[7] || 3.7,
-      faceImage: contestant1Face,
-      fullBodyImage: contestant1Full,
-      additionalPhotos: [contestant2Face],
-      isVoted: showWinner ? true : !!votes[7]
-    },
-    {
-      rank: 8,
-      name: "Mia Hernandez",
-      country: "Philippines",
-      city: "Antipolo",
-      age: 24,
-      weight: 54,
-      height: 169,
-      rating: ratings[8] || 3.4,
-      faceImage: contestant2Face,
-      fullBodyImage: contestant2Full,
-      additionalPhotos: [contestant3Face],
-      isVoted: showWinner ? true : !!votes[8]
-    },
-    {
-      rank: 9,
-      name: "Gabriela Martinez",
-      country: "Philippines",
-      city: "Zamboanga",
-      age: 22,
-      weight: 50,
-      height: 164,
-      rating: ratings[9] || 3.2,
-      faceImage: contestant3Face,
-      fullBodyImage: contestant3Full,
-      additionalPhotos: [contestant1Face, contestant2Face],
-      isVoted: showWinner ? true : !!votes[9]
-    },
-    {
-      rank: 10,
-      name: "Lucia Gonzalez",
-      country: "Philippines",
-      city: "Cagayan de Oro",
-      age: 25,
-      weight: 57,
-      height: 171,
-      rating: ratings[10] || 3.0,
-      faceImage: contestant1Face,
-      fullBodyImage: contestant1Full,
-      additionalPhotos: [contestant3Face],
-      isVoted: showWinner ? true : !!votes[10]
+  // Определяем участников в зависимости от типа недели
+  const getContestants = () => {
+    if (title === "THIS WEEK") {
+      // Текущая неделя - 3 финалистки из наших тестовых пользователей
+      return [
+        {
+          rank: 1,
+          name: "Анна Петрова",
+          profileId: "11111111-1111-1111-1111-111111111111",
+          country: "Россия", 
+          city: "Москва",
+          age: 25,
+          weight: 55.5,
+          height: 165,
+          rating: ratings[1],
+          faceImage: contestant1Face,
+          fullBodyImage: contestant1Full,
+          additionalPhotos: [contestant2Face, contestant3Face],
+          isVoted: showWinner ? true : !!votes[1],
+          isWinner: showWinner,
+          prize: showWinner ? "+ 5000 руб" : undefined
+        },
+        {
+          rank: 2,
+          name: "Елена Козлова",
+          profileId: "33333333-3333-3333-3333-333333333333",
+          country: "Россия",
+          city: "Екатеринбург",
+          age: 28,
+          weight: 60,
+          height: 170,
+          rating: ratings[2],
+          faceImage: contestant2Face,
+          fullBodyImage: contestant2Full,
+          additionalPhotos: [contestant1Face],
+          isVoted: showWinner ? true : !!votes[2]
+        },
+        {
+          rank: 3,
+          name: "Ольга Волкова",
+          profileId: "55555555-5555-5555-5555-555555555555",
+          country: "Россия",
+          city: "Казань", 
+          age: 31,
+          weight: 58,
+          height: 162,
+          rating: ratings[3],
+          faceImage: contestant3Face,
+          fullBodyImage: contestant3Full,
+          additionalPhotos: [contestant1Face, contestant2Face, contestant1Full],
+          isVoted: showWinner ? true : !!votes[3]
+        }
+      ];
+    } else if (title === "1 WEEK AGO") {
+      // Прошлая неделя - 2 финалистки
+      return [
+        {
+          rank: 1,
+          name: "Михаил Иванов",
+          profileId: "22222222-2222-2222-2222-222222222222",
+          country: "Россия",
+          city: "Санкт-Петербург",
+          age: 32,
+          weight: 75,
+          height: 180,
+          rating: ratings[1],
+          faceImage: contestant1Face,
+          fullBodyImage: contestant1Full,
+          additionalPhotos: [contestant2Face],
+          isVoted: showWinner ? true : !!votes[1],
+          isWinner: showWinner,
+          prize: showWinner ? "+ 3000 руб" : undefined
+        },
+        {
+          rank: 2,
+          name: "Дмитрий Смирнов",
+          profileId: "44444444-4444-4444-4444-444444444444",
+          country: "Россия",
+          city: "Новосибирск",
+          age: 29,
+          weight: 70.5,
+          height: 178,
+          rating: ratings[2],
+          faceImage: contestant2Face,
+          fullBodyImage: contestant2Full,
+          additionalPhotos: [contestant3Face],
+          isVoted: showWinner ? true : !!votes[2]
+        }
+      ];
+    } else {
+      // Остальные недели - оригинальные участники
+      return [
+        {
+          rank: 1,
+          name: "Maria Santos",
+          profileId: "1b5c2751-a820-4767-87e6-d06080219942",
+          country: "Philippines", 
+          city: "Cebu",
+          age: 23,
+          weight: 52,
+          height: 168,
+          rating: ratings[1],
+          faceImage: contestant1Face,
+          fullBodyImage: contestant1Full,
+          additionalPhotos: [contestant2Face, contestant3Face],
+          isVoted: showWinner ? true : !!votes[1],
+          isWinner: showWinner,
+          prize: showWinner ? "+ 5000 PhP" : undefined
+        },
+        {
+          rank: 2,
+          name: "Anna Cruz",
+          country: "Philippines",
+          city: "Manila",
+          age: 24,
+          weight: 55,
+          height: 165,
+          rating: ratings[2],
+          faceImage: contestant2Face,
+          fullBodyImage: contestant2Full,
+          additionalPhotos: [contestant1Face],
+          isVoted: showWinner ? true : !!votes[2]
+        },
+        {
+          rank: 3,
+          name: "Sofia Reyes",
+          country: "Philippines",
+          city: "Davao", 
+          age: 22,
+          weight: 51,
+          height: 170,
+          rating: ratings[3],
+          faceImage: contestant3Face,
+          fullBodyImage: contestant3Full,
+          additionalPhotos: [contestant1Face, contestant2Face, contestant1Full],
+          isVoted: showWinner ? true : !!votes[3]
+        },
+        {
+          rank: 4,
+          name: "Isabella Garcia",
+          country: "Philippines",
+          city: "Quezon City",
+          age: 25,
+          weight: 53,
+          height: 167,
+          rating: ratings[4],
+          faceImage: contestant1Face,
+          fullBodyImage: contestant1Full,
+          isVoted: showWinner ? true : !!votes[4]
+        },
+        {
+          rank: 5,
+          name: "Camila Torres",
+          country: "Philippines",
+          city: "Makati",
+          age: 21,
+          weight: 49,
+          height: 163,
+          rating: ratings[5],
+          faceImage: contestant2Face,
+          fullBodyImage: contestant2Full,
+          additionalPhotos: [contestant3Face, contestant3Full],
+          isVoted: showWinner ? true : !!votes[5]
+        },
+        {
+          rank: 6,
+          name: "Valentina Lopez",
+          country: "Philippines",
+          city: "Pasig",
+          age: 26,
+          weight: 56,
+          height: 172,
+          rating: ratings[6],
+          faceImage: contestant3Face,
+          fullBodyImage: contestant3Full,
+          isVoted: showWinner ? true : !!votes[6]
+        },
+        {
+          rank: 7,
+          name: "Emma Rodriguez",
+          country: "Philippines",
+          city: "Taguig",
+          age: 23,
+          weight: 52,
+          height: 166,
+          rating: ratings[7] || 3.7,
+          faceImage: contestant1Face,
+          fullBodyImage: contestant1Full,
+          additionalPhotos: [contestant2Face],
+          isVoted: showWinner ? true : !!votes[7]
+        },
+        {
+          rank: 8,
+          name: "Mia Hernandez",
+          country: "Philippines",
+          city: "Antipolo",
+          age: 24,
+          weight: 54,
+          height: 169,
+          rating: ratings[8] || 3.4,
+          faceImage: contestant2Face,
+          fullBodyImage: contestant2Full,
+          additionalPhotos: [contestant3Face],
+          isVoted: showWinner ? true : !!votes[8]
+        },
+        {
+          rank: 9,
+          name: "Gabriela Martinez",
+          country: "Philippines",
+          city: "Zamboanga",
+          age: 22,
+          weight: 50,
+          height: 164,
+          rating: ratings[9] || 3.2,
+          faceImage: contestant3Face,
+          fullBodyImage: contestant3Full,
+          additionalPhotos: [contestant1Face, contestant2Face],
+          isVoted: showWinner ? true : !!votes[9]
+        },
+        {
+          rank: 10,
+          name: "Lucia Gonzalez",
+          country: "Philippines",
+          city: "Cagayan de Oro",
+          age: 25,
+          weight: 57,
+          height: 171,
+          rating: ratings[10] || 3.0,
+          faceImage: contestant1Face,
+          fullBodyImage: contestant1Full,
+          additionalPhotos: [contestant3Face],
+          isVoted: showWinner ? true : !!votes[10]
+        }
+      ];
     }
-  ];
+  };
+
+  const contestants = getContestants();
 
   return (
     <section className="max-w-6xl mx-auto px-0 sm:px-6 py-8">
