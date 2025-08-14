@@ -160,10 +160,9 @@ const PostCard = ({
           </div>
         )}
 
-        {/* Footer with actions - expanded across full width */}
-        <div className="px-3 py-3">
-          <div className="flex items-center justify-between w-full">
-            <div className="flex items-center gap-6">
+        {/* Footer with actions - exact copy from contest cards */}
+        <div className="px-3 pb-3">
+          <div className="flex items-center justify-end gap-4">
             <button
               type="button"
               className={cn(
@@ -178,8 +177,6 @@ const PostCard = ({
               <span className="hidden xl:inline">Like</span>
               <span>{currentLikes}</span>
             </button>
-            </div>
-            <div className="flex items-center gap-6">
             <button
               type="button"
               className="inline-flex items-center gap-1 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors"
@@ -189,8 +186,6 @@ const PostCard = ({
               <span className="hidden xl:inline">Comment</span>
               <span>{comments}</span>
             </button>
-            </div>
-            <div className="flex items-center gap-6">
             <button
               type="button"
               className="inline-flex items-center gap-1 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors"
@@ -209,7 +204,6 @@ const PostCard = ({
               <Share2 className="w-3.5 h-3.5" />
               <span className="hidden xl:inline">Share</span>
             </button>
-            </div>
           </div>
         </div>
       </Card>
