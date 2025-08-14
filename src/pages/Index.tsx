@@ -48,7 +48,7 @@ const Index = () => {
       <NextWeekSection viewMode={viewMode} />
 
       <div className="w-full" aria-hidden>
-        <div className="h-[5px] bg-foreground/20 my-0.5" />
+        <div className="h-[5px] bg-foreground/40 rounded-full my-0.5" />
       </div>
 
       <ContestSection
@@ -61,7 +61,7 @@ const Index = () => {
       />
 
       <div className="w-full" aria-hidden>
-        <div className="h-[5px] bg-foreground/20 my-8 sm:my-10" />
+        <div className="h-[5px] bg-foreground/40 rounded-full my-8 sm:my-10" />
       </div>
 
       <ContestSection
@@ -74,7 +74,7 @@ const Index = () => {
       />
 
       <div className="w-full" aria-hidden>
-        <div className="h-[5px] bg-foreground/20 my-8 sm:my-10" />
+        <div className="h-[5px] bg-foreground/40 rounded-full my-8 sm:my-10" />
       </div>
 
       <ContestSection
@@ -87,7 +87,7 @@ const Index = () => {
       />
 
       <div className="w-full" aria-hidden>
-        <div className="h-[5px] bg-foreground/20 my-8 sm:my-10" />
+        <div className="h-[5px] bg-foreground/40 rounded-full my-8 sm:my-10" />
       </div>
 
       <ContestSection
@@ -100,7 +100,7 @@ const Index = () => {
       />
 
       <div className="w-full" aria-hidden>
-        <div className="h-[5px] bg-foreground/20 my-8 sm:my-10" />
+        <div className="h-[5px] bg-foreground/40 rounded-full my-8 sm:my-10" />
       </div>
 
       <section className="max-w-6xl mx-auto px-6 mb-8">
