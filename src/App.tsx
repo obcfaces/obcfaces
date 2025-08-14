@@ -18,7 +18,9 @@ import TopBar from "@/components/top-bar";
 
 const queryClient = new QueryClient();
 
-const App = () => (
+const App = () => {
+  console.log('App component rendering');
+  return (
   <HelmetProvider>
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
@@ -42,6 +44,7 @@ const App = () => (
       </TooltipProvider>
     </QueryClientProvider>
   </HelmetProvider>
-);
+  );
+};
 
 export default App;
