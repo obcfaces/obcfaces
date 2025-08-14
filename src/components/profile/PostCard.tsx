@@ -28,10 +28,10 @@ const PostCard = ({
   comments = 0,
 }: PostCardProps) => {
   return (
-    <Card className="rounded-none sm:rounded-lg border bg-card">
+    <Card className="border bg-card">
       <CardHeader className="flex flex-row items-center gap-3 py-4">
         <Avatar className="h-10 w-10">
-          <AvatarImage src={authorAvatarUrl ?? undefined} alt={`Avatar ${authorName}`} />
+          <AvatarImage src={authorAvatarUrl ?? undefined} alt={`Аватар ${authorName}`} />
           <AvatarFallback>{getInitials(authorName)}</AvatarFallback>
         </Avatar>
         <div className="flex flex-col">
@@ -44,12 +44,12 @@ const PostCard = ({
             <HoverCardContent>
               <div className="flex items-center gap-3">
                 <Avatar className="h-12 w-12">
-                  <AvatarImage src={authorAvatarUrl ?? undefined} alt={`Avatar ${authorName}`} />
+                  <AvatarImage src={authorAvatarUrl ?? undefined} alt={`Аватар ${authorName}`} />
                   <AvatarFallback>{getInitials(authorName)}</AvatarFallback>
                 </Avatar>
                 <div className="flex flex-col">
                   <span className="font-medium">{authorName}</span>
-                  <span className="text-xs text-muted-foreground">Last activity: {time}</span>
+                  <span className="text-xs text-muted-foreground">Последняя активность: {time}</span>
                 </div>
               </div>
             </HoverCardContent>
@@ -57,14 +57,14 @@ const PostCard = ({
           <span className="text-xs text-muted-foreground">{time}</span>
         </div>
       </CardHeader>
-      <CardContent className="px-0 pt-0 pb-6">
+      <CardContent className="space-y-3">
         <p className="text-sm whitespace-pre-line">{content}</p>
         {imageSrc && (
           <img
             src={imageSrc}
-            alt={`Post image — ${authorName}`}
+            alt={`Изображение из поста — ${authorName}`}
             loading="lazy"
-            className="block w-full object-cover rounded-none sm:rounded-lg"
+            className="w-full rounded-lg object-cover"
           />
         )}
       </CardContent>

@@ -15,7 +15,7 @@ interface ProfileHit {
 }
 
 const nameOf = (p: ProfileHit) =>
-  p.display_name || [p.first_name, p.last_name].filter(Boolean).join(" ") || "User";
+  p.display_name || [p.first_name, p.last_name].filter(Boolean).join(" ") || "Пользователь";
 
 const initialHits: ProfileHit[] = [];
 
@@ -91,7 +91,7 @@ const GlobalSearch = () => {
   return (
     <div ref={wrapRef} className="relative">
       {!open ? (
-        <Button variant="ghost" size="icon" aria-label="Search" onClick={() => setOpen(true)}>
+        <Button variant="ghost" size="icon" aria-label="Поиск" onClick={() => setOpen(true)}>
           <Search className="h-5 w-5" />
         </Button>
       ) : (
@@ -102,12 +102,12 @@ const GlobalSearch = () => {
               ref={inputRef}
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Find a user..."
+              placeholder="Найти пользователя..."
               className="h-9 w-56 sm:w-64 md:w-80 pl-8"
-              aria-label="Search"
+              aria-label="Поиск"
             />
           </div>
-          <Button variant="ghost" size="icon" aria-label="Close search" onClick={() => { setOpen(false); setQuery(""); }}>
+          <Button variant="ghost" size="icon" aria-label="Закрыть поиск" onClick={() => { setOpen(false); setQuery(""); }}>
             <X className="h-5 w-5" />
           </Button>
         </div>
@@ -117,9 +117,9 @@ const GlobalSearch = () => {
         <div className="absolute left-0 top-11 z-50 w-[min(20rem,85vw)] sm:w-80 rounded-md border bg-popover text-popover-foreground shadow-md">
           <div className="max-h-80 overflow-auto p-1">
             {loading ? (
-              <div className="px-3 py-2 text-sm text-muted-foreground">Searching…</div>
+              <div className="px-3 py-2 text-sm text-muted-foreground">Идёт поиск…</div>
             ) : debounced && results.length === 0 ? (
-              <div className="px-3 py-2 text-sm text-muted-foreground">No results</div>
+              <div className="px-3 py-2 text-sm text-muted-foreground">Ничего не найдено</div>
             ) : results.length > 0 ? (
               <ul className="divide-y divide-border">
                 {results.map((p) => {
@@ -144,7 +144,7 @@ const GlobalSearch = () => {
                 })}
               </ul>
             ) : (
-              <div className="px-3 py-2 text-sm text-muted-foreground">Enter a query</div>
+              <div className="px-3 py-2 text-sm text-muted-foreground">Введите запрос</div>
             )}
           </div>
         </div>

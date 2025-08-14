@@ -186,14 +186,14 @@ const ageOptions = useMemo(() => Array.from({ length: 65 }, (_, i) => 16 + i), [
               <div className="space-y-2">
                 
                 <Select value={gender} onValueChange={setGender}>
-                  <SelectTrigger aria-label="Gender">
-                    <SelectValue placeholder="Gender" />
+                  <SelectTrigger aria-label="Пол">
+                    <SelectValue placeholder="Пол" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="male">Male</SelectItem>
-                    <SelectItem value="female">Female</SelectItem>
-                    <SelectItem value="other">Other</SelectItem>
-                    <SelectItem value="na">Prefer not to say</SelectItem>
+                    <SelectItem value="male">Мужской</SelectItem>
+                    <SelectItem value="female">Женский</SelectItem>
+                    <SelectItem value="other">Другое</SelectItem>
+                    <SelectItem value="na">Предпочитаю не указывать</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
