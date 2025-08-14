@@ -89,7 +89,7 @@ const LikedItem = ({
   
   return (
     <>
-      <Card className="bg-card border-contest-border relative overflow-hidden flex h-32 sm:h-36 md:h-40">
+      <Card className="bg-card border-contest-border relative flex h-32 sm:h-36 md:h-40 rounded-lg overflow-hidden">
         {/* Main two photos with additional photos indicator */}
         <div className="flex-shrink-0 flex h-full relative gap-px">
           <div className="relative">
@@ -113,7 +113,7 @@ const LikedItem = ({
         {/* Content area - using exact same structure as contest cards */}
         <div className="flex-1 p-1.5 sm:p-2 md:p-3 flex flex-col relative">
           {/* Contestant info - shown always (like voted state) */}
-          <div className="absolute inset-0 bg-white flex flex-col justify-between p-2 sm:p-3">
+          <div className="absolute inset-0 bg-white rounded-r flex flex-col justify-between p-2 sm:p-3">
             <div className="flex items-start justify-between">
               <div className="min-w-0 flex-1 mr-2">
                 <h3 className="font-semibold text-contest-text text-base sm:text-lg truncate">
