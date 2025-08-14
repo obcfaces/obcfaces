@@ -116,46 +116,62 @@ const LikedItem = ({
           
           {/* Content area */}
           <div className="flex-1 p-1.5 sm:p-2 md:p-3 flex flex-col justify-between">
-            <div>
-              <div className="flex items-center justify-between mb-1">
+            <div className="flex items-start justify-between">
+              <div className="min-w-0 flex-1 mr-2">
                 {authorProfileId ? (
                   <Link 
                     to={`/u/${authorProfileId}`}
-                    className="font-semibold text-sm sm:text-base text-contest-text hover:text-primary hover:underline"
+                    className="font-semibold text-contest-text text-base sm:text-lg truncate hover:text-primary underline-offset-2 hover:underline"
                   >
-                    {authorName}
+                    {authorName}, 25
                   </Link>
                 ) : (
-                  <h3 className="font-semibold text-sm sm:text-base text-contest-text">{authorName}</h3>
+                  <h3 className="font-semibold text-contest-text text-base sm:text-lg truncate">{authorName}, 25</h3>
                 )}
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleUnlike}
-                  disabled={isUnliking}
-                  className="h-6 w-6 p-0 text-red-500 hover:text-red-600 hover:bg-red-50"
-                >
-                  <Heart className="h-3 w-3 fill-current" />
-                </Button>
+                <div className="text-xs sm:text-sm text-muted-foreground font-normal">52 kg · 168 cm</div>
+                <div className="text-sm sm:text-base text-contest-blue truncate">
+                  Philippines
+                </div>
               </div>
-              <div className="text-xs text-muted-foreground mb-1">Philippines</div>
-              <div className="text-xs text-muted-foreground">{time}</div>
+              
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleUnlike}
+                disabled={isUnliking}
+                className="h-6 w-6 p-0 text-red-500 hover:text-red-600 hover:bg-red-50 flex-shrink-0"
+              >
+                <Heart className="h-3 w-3 fill-current" />
+              </Button>
             </div>
             
-            <div className="flex items-center justify-between text-xs text-muted-foreground mt-2">
-              <div className="flex items-center gap-3">
-                <span className="flex items-center gap-1">
-                  <Heart className="w-3 h-3" />
-                  {likes}
-                </span>
-                <span className="flex items-center gap-1">
-                  <MessageCircle className="w-3 h-3" />
-                  {comments}
-                </span>
-              </div>
-              <span className="bg-contest-blue/10 text-contest-blue px-2 py-0.5 rounded text-xs">
-                Конкурс
-              </span>
+            <div className="flex items-center justify-end gap-4">
+              <button
+                type="button"
+                className="inline-flex items-center gap-1 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors"
+                aria-label="Like"
+              >
+                <Heart className="w-3.5 h-3.5" />
+                <span className="hidden xl:inline">Like</span>
+                <span>{likes}</span>
+              </button>
+              <button
+                type="button"
+                className="inline-flex items-center gap-1 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors"
+                aria-label="Comments"
+              >
+                <MessageCircle className="w-3.5 h-3.5" />
+                <span className="hidden xl:inline">Comment</span>
+                <span>{comments}</span>
+              </button>
+              <button
+                type="button"
+                className="inline-flex items-center gap-1 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors"
+                aria-label="Share"
+              >
+                <Share2 className="w-3.5 h-3.5" />
+                <span className="hidden xl:inline">Share</span>
+              </button>
             </div>
           </div>
         </Card>
