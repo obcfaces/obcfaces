@@ -5,6 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { HelmetProvider } from "react-helmet-async";
+import AuthCallbackHandler from "@/components/auth-callback-handler";
 import Index from "./pages/Index";
 import Contest from "./pages/Contest";
 import Auth from "./pages/Auth";
@@ -21,6 +22,7 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
+          <AuthCallbackHandler />
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/contest" element={<Contest />} />
