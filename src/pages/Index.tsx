@@ -45,15 +45,9 @@ const Index = () => {
         />
       </div>
       
-      <div className="w-full pt-6 pb-2" aria-hidden>
-        <div className="h-[5px] bg-foreground/40" />
-      </div>
       
       <NextWeekSection viewMode={viewMode} />
 
-      <div className="w-full" aria-hidden>
-        <div className="h-[5px] bg-foreground/40 my-0.5" />
-      </div>
 
       <ContestSection
         title="THIS WEEK"
@@ -64,9 +58,6 @@ const Index = () => {
         viewMode={viewMode}
       />
 
-      <div className="w-full" aria-hidden>
-        <div className="h-[5px] bg-foreground/40 my-8 sm:my-10" />
-      </div>
 
       <ContestSection
         title="1 WEEK AGO"
@@ -77,9 +68,6 @@ const Index = () => {
         viewMode={viewMode}
       />
 
-      <div className="w-full" aria-hidden>
-        <div className="h-[5px] bg-foreground/40 my-8 sm:my-10" />
-      </div>
 
       <ContestSection
         title="2 WEEKS AGO"
@@ -90,9 +78,6 @@ const Index = () => {
         viewMode={viewMode}
       />
 
-      <div className="w-full" aria-hidden>
-        <div className="h-[5px] bg-foreground/40 my-8 sm:my-10" />
-      </div>
 
       <ContestSection
         title="3 WEEKS AGO"
@@ -103,9 +88,6 @@ const Index = () => {
         viewMode={viewMode}
       />
 
-      <div className="w-full" aria-hidden>
-        <div className="h-[5px] bg-foreground/40 my-8 sm:my-10" />
-      </div>
 
       <section className="max-w-6xl mx-auto px-6 mb-8">
         <AiChat />
