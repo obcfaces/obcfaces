@@ -318,7 +318,7 @@ export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantNa
               )}
             </div>
 
-            <div className="sticky bottom-0 left-0 right-0 p-3 md:p-4 border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 pb-[env(safe-area-inset-bottom)] flex items-end gap-2 md:gap-3">
+            <div className="sticky bottom-0 left-0 right-0 p-3 md:p-4 border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 pb-2 md:pb-3 flex items-end gap-2 md:gap-3">
               <Textarea
                 ref={textareaRef}
                 placeholder="Write a comment for this photo..."
