@@ -4,7 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
-import IndexSimple from "./pages/IndexSimple";
+import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
 import Account from "./pages/Account";
@@ -28,7 +28,7 @@ const App = () => (
           <AuthCallbackHandler />
           <TopBar />
           <Routes>
-            <Route path="/" element={<IndexSimple />} />
+            <Route path="/" element={<Index />} />
             <Route path="/contest" element={<Contest />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/account" element={<Account />} />
