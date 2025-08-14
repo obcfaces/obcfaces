@@ -245,7 +245,7 @@ const Profile = () => {
       <main className="container mx-auto px-6 py-8">
         <section className="max-w-4xl mx-auto">
           {/* Profile Header */}
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 mb-8">
+          <div className="flex flex-col gap-6 mb-8">
             <div className="flex items-center gap-4">
               <Avatar className="w-20 h-20 sm:w-24 sm:h-24">
                 <AvatarImage src={profile.avatar_url || ""} alt={`Avatar of ${profile.display_name || "User"}`} />
@@ -253,75 +253,34 @@ const Profile = () => {
                   {(profile.display_name || "U").charAt(0).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
-              <h1 className="text-2xl font-bold">{profile.display_name || "Пользователь"}</h1>
-            </div>
-            
-            <div className="flex-1 w-full">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                <div>
-                  {(profile.city || profile.country) && (
-                    <p className="text-muted-foreground">
-                      {[profile.city, profile.country].filter(Boolean).join(", ")}
-                    </p>
-                  )}
-                  {!isOwner && (
-                    <div className="flex items-center gap-6 mt-2">
-                      <div className="text-center">
-                        <div className="text-xl font-semibold">{followersCount}</div>
-                        <div className="text-sm text-muted-foreground">Подписчики</div>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-xl font-semibold">{followingCount}</div>
-                        <div className="text-sm text-muted-foreground">Подписки</div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-                <div className="flex items-center gap-2">
-                  {isOwner ? (
-                    <Button asChild>
-                      <Link to="/account">Редактировать профиль</Link>
-                    </Button>
-                  ) : (
-                    <>
-                      <Button variant={isFollowing ? "secondary" : "default"} onClick={handleFollowToggle} disabled={loadingFollow}>
-                        {isFollowing ? "Отписаться" : "Подписаться"}
-                      </Button>
-                      <Button variant="outline" onClick={handleMessage}>Сообщение</Button>
-                    </>
-                  )}
-                </div>
-              </div>
-
-              <div className="mt-3">
-                {isOwner ? (
-                  isEditingBio ? (
-                    <div className="space-y-2">
-                      <textarea
-                        className="w-full min-h-24 rounded-md border bg-background p-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                        value={bioDraft}
-                        onChange={(e) => setBioDraft(e.target.value)}
-                        placeholder="Расскажите о себе…"
-                      />
-                      <div className="flex gap-2">
-                        <Button size="sm" onClick={handleBioSave} disabled={savingBio}>Сохранить</Button>
-                        <Button size="sm" variant="ghost" onClick={() => { setIsEditingBio(false); setBioDraft(data?.bio ?? ""); }}>Отмена</Button>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="text-sm text-muted-foreground">
-                      {data?.bio ? (
-                        <p>{data.bio}</p>
-                      ) : (
-                        <button className="underline" onClick={() => setIsEditingBio(true)}>Добавить текст "О себе"</button>
-                      )}
-                    </div>
-                  )
-                ) : (
-                  profile.bio ? <p className="text-sm text-muted-foreground">{profile.bio}</p> : null
+              <div>
+                <h1 className="text-2xl font-bold">{profile.display_name || "Пользователь"}</h1>
+                {(profile.city || profile.country) && (
+                  <p className="text-muted-foreground">
+                    {[profile.city, profile.country].filter(Boolean).join(", ")}
+                  </p>
                 )}
               </div>
             </div>
+            
+            <div className="flex items-center gap-2">
+              <Button className="bg-blue-600 hover:bg-blue-700">Create</Button>
+              <Button variant="outline">Edit Profile</Button>
+            </div>
+
+            {!isOwner && (
+              <div className="flex items-center gap-6">
+                <div className="text-center">
+                  <div className="text-xl font-semibold">{followersCount}</div>
+                  <div className="text-sm text-muted-foreground">Подписчики</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-xl font-semibold">{followingCount}</div>
+                  <div className="text-sm text-muted-foreground">Подписки</div>
+                </div>
+              </div>
+            )}
+
           </div>
 
           {/* Tabs */}
