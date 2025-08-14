@@ -156,8 +156,8 @@ const PostCard = ({
         </div>
 
         {/* Content */}
-        <div className="px-3 pt-0 pb-3">
-          {content && <p className="text-sm whitespace-pre-line mb-3">{content}</p>}
+        <div className="px-3 pt-0 pb-1">
+          {content && <p className="text-sm whitespace-pre-line mb-1">{content}</p>}
         </div>
         
         {imageSrc && (
