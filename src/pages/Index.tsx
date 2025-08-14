@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import TopBar from "@/components/top-bar";
 import { ContestSection } from "@/components/contest-section";
 import { NextWeekSection } from "@/components/next-week-section";
 import ContestFilters from "@/components/contest-filters";
@@ -11,8 +10,36 @@ import listActiveIcon from "@/assets/icons/sdisplay-list-active.png";
 import tableIcon from "@/assets/icons/sdisplay-table.png";
 import tableActiveIcon from "@/assets/icons/sdisplay-table-active.png";
 
+// Simple TopBar without Supabase
+const SimpleTopBar = () => {
+  return (
+    <header className="w-full bg-white border-b border-border px-4 py-2">
+      <nav className="flex justify-between items-center max-w-6xl mx-auto gap-2">
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 font-semibold text-foreground">
+            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-bold">
+              obc
+            </span>
+          </div>
+          
+          <button
+            className="p-2 hover:bg-accent rounded-md transition-colors hidden sm:flex"
+            aria-label="Search"
+          >
+            🔍
+          </button>
+        </div>
+        
+        <button className="bg-primary text-primary-foreground px-4 py-2 rounded text-sm hover:bg-primary/90 transition-colors">
+          Войти
+        </button>
+      </nav>
+    </header>
+  );
+};
+
 const Index = () => {
-  console.log('[INDEX] Full site with mobile optimization');
+  console.log('[INDEX] Static version without any Supabase');
   
   const [viewMode, setViewMode] = useState<'compact' | 'full'>('compact');
   const [country, setCountry] = useState<string>('PH');
@@ -32,7 +59,7 @@ const Index = () => {
       </Helmet>
 
       <div className="min-h-screen bg-background">
-        <TopBar />
+        <SimpleTopBar />
         
         <main>
           <div className="container mx-auto px-0">
@@ -44,7 +71,6 @@ const Index = () => {
                     <TabsTrigger value="winners" className="text-sm">WINNERS</TabsTrigger>
                   </TabsList>
                   
-                  {/* View Mode Controls */}
                   <div className="flex items-center gap-2">
                     <button
                       type="button"
@@ -98,7 +124,7 @@ const Index = () => {
                   isActive
                   viewMode={viewMode}
                 />
-                <NextWeekSection />
+                <NextWeekSection viewMode={viewMode} />
               </TabsContent>
 
               <TabsContent value="winners" className="mt-0">
