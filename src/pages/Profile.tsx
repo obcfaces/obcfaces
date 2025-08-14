@@ -328,10 +328,12 @@ const Profile = () => {
               <TabsTrigger value="about" className="px-0 h-auto pb-2 bg-transparent rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary text-muted-foreground hover:text-foreground">Инфо</TabsTrigger>
             </TabsList>
 
-            <TabsContent value="posts" className="space-y-4 mt-4">
-              {samplePosts.map((p) => (
-                <PostCard key={p.id} {...p} />
-              ))}
+            <TabsContent value="posts" className="space-y-4 mt-4 -mx-6">
+              <div className="px-0 sm:px-6 space-y-4">
+                {samplePosts.map((p) => (
+                  <PostCard key={p.id} {...p} />
+                ))}
+              </div>
             </TabsContent>
 
             <TabsContent value="photos" className="mt-4">
