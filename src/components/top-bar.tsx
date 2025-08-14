@@ -5,7 +5,7 @@ import GlobalSearch from "@/components/global-search";
 const TopBar = () => {
   return (
     <header role="banner" className="w-full bg-background border-b">
-      <nav className="max-w-6xl mx-auto flex justify-between items-center gap-2 px-6 sm:px-0 py-2" aria-label="Main navigation">
+      <nav className="max-w-6xl mx-auto flex justify-between items-center gap-2 px-6 py-2" aria-label="Main navigation">
         <div className="flex items-center gap-2">
           <Link
             to="/"
