@@ -192,67 +192,91 @@ const LikedItem = ({
     );
   }
 
-  // For posts and photos, render in post style but more compact
+  // For posts and photos, render in contest card style too
   return (
     <>
-      <Card className="bg-card border-contest-border relative overflow-hidden">
-        <div className="flex items-center justify-between p-3 border-b border-contest-border">
-          <div className="flex items-center gap-3">
-            <Avatar className="h-8 w-8">
-              <AvatarImage src={authorAvatarUrl ?? undefined} alt={`Avatar ${authorName}`} />
-              <AvatarFallback className="text-xs">{getInitials(authorName)}</AvatarFallback>
-            </Avatar>
-            <div className="flex flex-col">
+      <Card className="bg-card border-contest-border relative overflow-hidden flex h-32 sm:h-36 md:h-40">
+        {/* Main two photos */}
+        <div className="flex-shrink-0 flex h-full relative gap-px">
+          <div className="relative">
+            <img 
+              src={imageSrc || contestant1Face} 
+              alt={`${authorName} face`}
+              className="w-24 sm:w-28 md:w-32 h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
+              onClick={() => openModal(0)}
+            />
+            <div className="absolute top-0 left-0 bg-black/70 text-white text-xs font-bold px-1 py-0.5 rounded-br">
+              ❤️
+            </div>
+          </div>
+          <div className="relative">
+            <img 
+              src={imageSrc || contestant1Full} 
+              alt={`${authorName} full body`}
+              className="w-24 sm:w-28 md:w-32 h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
+              onClick={() => openModal(1)}
+            />
+          </div>
+        </div>
+        
+        {/* Content area */}
+        <div className="flex-1 p-1.5 sm:p-2 md:p-3 flex flex-col justify-between">
+          <div className="flex items-start justify-between">
+            <div className="min-w-0 flex-1 mr-2">
               {authorProfileId ? (
                 <Link 
                   to={`/u/${authorProfileId}`}
-                  className="font-medium text-sm leading-none hover:text-primary hover:underline"
+                  className="font-semibold text-contest-text text-base sm:text-lg truncate hover:text-primary underline-offset-2 hover:underline"
                 >
-                  {authorName}
+                  {authorName}, 25
                 </Link>
               ) : (
-                <span className="font-medium text-sm leading-none">{authorName}</span>
+                <h3 className="font-semibold text-contest-text text-base sm:text-lg truncate">{authorName}, 25</h3>
               )}
-              <span className="text-xs text-muted-foreground">{time}</span>
+              <div className="text-xs sm:text-sm text-muted-foreground font-normal">52 kg · 168 cm</div>
+              <div className="text-sm sm:text-base text-contest-blue truncate">
+                Philippines
+              </div>
             </div>
+            
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleUnlike}
+              disabled={isUnliking}
+              className="h-6 w-6 p-0 text-red-500 hover:text-red-600 hover:bg-red-50 flex-shrink-0"
+            >
+              <Heart className="h-3 w-3 fill-current" />
+            </Button>
           </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleUnlike}
-            disabled={isUnliking}
-            className="h-8 w-8 p-0 text-red-500 hover:text-red-600 hover:bg-red-50"
-          >
-            <Heart className="h-4 w-4 fill-current" />
-          </Button>
-        </div>
-        
-        <div className="p-3">
-          {content && <p className="text-sm whitespace-pre-line mb-3">{content}</p>}
-          {imageSrc && (
-            <img
-              src={imageSrc}
-              alt={`${contentType} image — ${authorName}`}
-              loading="lazy"
-              className="block w-full object-cover rounded-lg max-h-64 cursor-pointer hover:opacity-90 transition-opacity"
-              onClick={() => openModal(0)}
-            />
-          )}
           
-          <div className="flex items-center justify-between text-sm text-muted-foreground mt-3">
-            <div className="flex items-center gap-4">
-              <span className="flex items-center gap-1">
-                <Heart className="w-4 h-4" />
-                {likes}
-              </span>
-              <span className="flex items-center gap-1">
-                <MessageCircle className="w-4 h-4" />
-                {comments}
-              </span>
-            </div>
-            <span className="text-xs bg-muted px-2 py-1 rounded">
-              {contentType === 'post' ? 'Пост' : 'Фото'}
-            </span>
+          <div className="flex items-center justify-end gap-4">
+            <button
+              type="button"
+              className="inline-flex items-center gap-1 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors"
+              aria-label="Like"
+            >
+              <Heart className="w-3.5 h-3.5" />
+              <span className="hidden xl:inline">Like</span>
+              <span>{likes}</span>
+            </button>
+            <button
+              type="button"
+              className="inline-flex items-center gap-1 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors"
+              aria-label="Comments"
+            >
+              <MessageCircle className="w-3.5 h-3.5" />
+              <span className="hidden xl:inline">Comment</span>
+              <span>{comments}</span>
+            </button>
+            <button
+              type="button"
+              className="inline-flex items-center gap-1 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors"
+              aria-label="Share"
+            >
+              <Share2 className="w-3.5 h-3.5" />
+              <span className="hidden xl:inline">Share</span>
+            </button>
           </div>
         </div>
       </Card>
@@ -265,9 +289,9 @@ const LikedItem = ({
           currentIndex={modalStartIndex}
           contestantName={authorName}
           age={25}
-          weight={0}
-          height={0}
-          country=""
+          weight={52}
+          height={168}
+          country="Philippines"
           city=""
         />
       )}
