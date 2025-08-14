@@ -226,7 +226,7 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
         <div className="mb-4">
           <div className="flex items-baseline gap-3 mb-1">
             <div className="inline-flex flex-col w-fit items-start">
-              <h2 className="text-3xl font-bold text-contest-text">NEXT WEEK</h2>
+              <h2 className="text-3xl font-bold text-contest-text whitespace-nowrap">NEXT WEEK</h2>
               <p className="text-muted-foreground italic -mt-1">1-8 September 2025</p>
             </div>
             <span className="text-lg font-normal text-contest-text">
