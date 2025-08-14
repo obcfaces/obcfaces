@@ -123,7 +123,7 @@ const PostCard = ({
     <>
       <Card className="bg-card border-contest-border relative overflow-hidden">
         {/* Header with author info */}
-        <div className="flex items-center gap-3 p-3 border-b border-contest-border">
+        <div className="flex items-center gap-3 p-3">
           <Avatar className="h-10 w-10">
             <AvatarImage src={authorAvatarUrl ?? undefined} alt={`Avatar ${authorName}`} />
             <AvatarFallback>{getInitials(authorName)}</AvatarFallback>
