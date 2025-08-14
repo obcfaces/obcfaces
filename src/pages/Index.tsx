@@ -1,21 +1,14 @@
-import { useState } from "react";
+import React from "react";
 import { Helmet } from "react-helmet-async";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import TopBar from "@/components/top-bar";
-import { ContestSection } from "@/components/contest-section";
-import { NextWeekSection } from "@/components/next-week-section";
-import ContestFilters from "@/components/contest-filters";
 
-import listIcon from "@/assets/icons/sdisplay-list.png";
-import listActiveIcon from "@/assets/icons/sdisplay-list-active.png";
-import tableIcon from "@/assets/icons/sdisplay-table.png";
-import tableActiveIcon from "@/assets/icons/sdisplay-table-active.png";
+// Import images statically
+import contestant1 from "@/assets/contestant-1.jpg";
+import contestant2 from "@/assets/contestant-2.jpg";
+import contestant3 from "@/assets/contestant-3.jpg";
 
 const Index = () => {
-  const [viewMode, setViewMode] = useState<'compact' | 'full'>('compact');
-  const [country, setCountry] = useState<string>('PH');
-  const [gender, setGender] = useState<'male' | 'female'>('female');
-  const [category, setCategory] = useState<'teen' | 'miss' | 'ms' | 'mrs' | ''>('miss');
+  console.log('[INDEX] Static mobile-friendly version');
 
   return (
     <>
@@ -23,105 +16,66 @@ const Index = () => {
         <title>OBC Faces of Philippines - Global Online Beauty Contest</title>
         <meta name="description" content="Global Online Beauty & Model Contest. Natural. Honest. Voted by People. Upload your photos and try to win!" />
         <link rel="canonical" href="/" />
-        <meta property="og:title" content="OBC Faces of Philippines - Global Online Beauty Contest" />
-        <meta property="og:description" content="Global Online Beauty & Model Contest. Natural. Honest. Voted by People. Upload your photos and try to win!" />
-        <meta property="og:type" content="website" />
-        <meta property="og:url" content="/" />
       </Helmet>
 
       <div className="min-h-screen bg-background">
         <TopBar />
         
-        <main>
-          <div className="container mx-auto px-0">
-            <Tabs defaultValue="this-week" className="w-full">
-              <div className="sticky top-0 z-10 bg-background/95 backdrop-blur-sm border-b">
-                <div className="flex items-center justify-between px-4 sm:px-6 py-3">
-                  <TabsList className="grid w-fit grid-cols-2 bg-muted/30">
-                    <TabsTrigger value="this-week" className="text-sm">THIS WEEK</TabsTrigger>
-                    <TabsTrigger value="winners" className="text-sm">WINNERS</TabsTrigger>
-                  </TabsList>
-                  
-                  {/* View Mode Controls */}
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setViewMode('full')}
-                      aria-pressed={viewMode === 'full'}
-                      aria-label="List view"
-                      className="p-2 rounded-md hover:bg-accent transition-colors"
-                    >
-                      <img
-                        src={viewMode === 'full' ? listActiveIcon : listIcon}
-                        alt="List view"
-                        width={24}
-                        height={24}
-                        loading="lazy"
-                      />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setViewMode('compact')}
-                      aria-pressed={viewMode === 'compact'}
-                      aria-label="Grid view"
-                      className="p-2 rounded-md hover:bg-accent transition-colors"
-                    >
-                      <img
-                        src={viewMode === 'compact' ? tableActiveIcon : tableIcon}
-                        alt="Grid view"
-                        width={24}
-                        height={24}
-                        loading="lazy"
-                      />
-                    </button>
+        <main className="container mx-auto px-4 py-8">
+          <div className="max-w-4xl mx-auto">
+            {/* Header */}
+            <div className="text-center mb-8">
+              <h1 className="text-3xl font-bold mb-2">THIS WEEK</h1>
+              <p className="text-muted-foreground mb-1">25 - 31 August 2025</p>
+              <p className="text-muted-foreground">Help us choose the winner of the week.</p>
+            </div>
+
+            {/* Simple grid of contestants */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[
+                { name: "Maria Santos", image: contestant1, rating: 4.8 },
+                { name: "Anna Cruz", image: contestant2, rating: 4.5 },
+                { name: "Sofia Reyes", image: contestant3, rating: 4.2 },
+                { name: "Isabella Garcia", image: contestant1, rating: 3.9 },
+                { name: "Camila Torres", image: contestant2, rating: 3.5 },
+                { name: "Valentina Lopez", image: contestant3, rating: 3.1 }
+              ].map((contestant, index) => (
+                <div key={index} className="bg-card rounded-lg overflow-hidden shadow-sm border">
+                  <div className="aspect-[3/4] relative">
+                    <img 
+                      src={contestant.image} 
+                      alt={contestant.name}
+                      className="w-full h-full object-cover"
+                      loading="lazy"
+                    />
+                  </div>
+                  <div className="p-4">
+                    <h3 className="font-semibold text-lg mb-1">{contestant.name}</h3>
+                    <p className="text-sm text-muted-foreground mb-2">Philippines</p>
+                    <div className="flex items-center gap-2">
+                      <div className="flex text-yellow-400">
+                        {"★".repeat(Math.floor(contestant.rating))}
+                        {"☆".repeat(5 - Math.floor(contestant.rating))}
+                      </div>
+                      <span className="text-sm">{contestant.rating}</span>
+                    </div>
                   </div>
                 </div>
+              ))}
+            </div>
+
+            {/* Upload section */}
+            <div className="mt-12 text-center">
+              <div className="bg-primary/5 rounded-lg p-8">
+                <h2 className="text-2xl font-bold mb-4">Join the Contest!</h2>
+                <p className="text-muted-foreground mb-6">
+                  Upload your photo and try to win 5000 PhP
+                </p>
+                <button className="bg-primary text-primary-foreground px-6 py-3 rounded-lg font-semibold hover:bg-primary/90 transition-colors">
+                  📸 Upload Your Photo
+                </button>
               </div>
-
-              <TabsContent value="this-week" className="mt-0">
-                <ContestFilters
-                  country={country}
-                  onCountryChange={setCountry}
-                  gender={gender}
-                  onGenderChange={setGender}
-                  viewMode={viewMode}
-                  onViewModeChange={setViewMode}
-                  category={category}
-                  onCategoryChange={setCategory}
-                />
-                <ContestSection
-                  title="THIS WEEK"
-                  subtitle="25 - 31 August 2025"
-                  description="Help us choose the winner of the week."
-                  isActive
-                  viewMode={viewMode}
-                />
-                <NextWeekSection />
-              </TabsContent>
-
-              <TabsContent value="winners" className="mt-0">
-                <ContestFilters
-                  country={country}
-                  onCountryChange={setCountry}
-                  gender={gender}
-                  onGenderChange={setGender}
-                  viewMode={viewMode}
-                  onViewModeChange={setViewMode}
-                  category={category}
-                  onCategoryChange={setCategory}
-                />
-                <ContestSection
-                  title="WINNER"
-                  subtitle="18 - 24 August 2025"
-                  description=""
-                  showWinner
-                  centerSubtitle
-                  titleSuffix="18 - 24 August 2025"
-                  noWrapTitle
-                  viewMode={viewMode}
-                />
-              </TabsContent>
-            </Tabs>
+            </div>
           </div>
         </main>
       </div>
