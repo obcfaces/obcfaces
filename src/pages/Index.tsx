@@ -31,6 +31,12 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       <ContestHeader />
       
+      <NextWeekSection viewMode={viewMode} />
+
+      <div className="max-w-6xl mx-auto px-6" aria-hidden>
+        <hr className="my-8 sm:my-10 border-border" />
+      </div>
+
       <ContestSection
         title="THIS WEEK"
         subtitle="25-31 august 2025"
@@ -52,12 +58,6 @@ const Index = () => {
           />
         }
       />
-
-      <div className="max-w-6xl mx-auto px-6" aria-hidden>
-        <hr className="my-8 sm:my-10 border-border" />
-      </div>
-
-      <NextWeekSection viewMode={viewMode} />
 
       <div className="max-w-6xl mx-auto px-6" aria-hidden>
         <hr className="my-8 sm:my-10 border-border" />
