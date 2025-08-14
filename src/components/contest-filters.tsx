@@ -4,7 +4,6 @@ import listIcon from "@/assets/icons/sdisplay-list.png";
 import listActiveIcon from "@/assets/icons/sdisplay-list-active.png";
 import tableIcon from "@/assets/icons/sdisplay-table.png";
 import tableActiveIcon from "@/assets/icons/sdisplay-table-active.png";
-import { Country } from "country-state-city";
 
 type Gender = "male" | "female";
 export type Category = "teen" | "miss" | "ms" | "mrs";
@@ -32,32 +31,14 @@ const ContestFilters: React.FC<ContestFiltersProps> = ({
   onCategoryChange,
   genderAvailability,
 }) => {
-  const countryOptions: Option[] = useMemo(() => {
-    try {
-      const list = Country.getAllCountries?.() || [];
-      const ph = list.find((c) => c.isoCode === "PH");
-      const others = list
-        .filter((c) => c.isoCode !== "PH")
-        .sort((a, b) => a.name.localeCompare(b.name));
-
-      const header = ph
-        ? { value: ph.isoCode, label: ph.name }
-        : { value: "PH", label: "Philippines" };
-
-      return [
-        header,
-        { value: "__divider__", label: "divider", disabled: true, divider: true },
-        ...others.map((c) => ({ value: c.isoCode, label: c.name, disabled: true })),
-      ];
-    } catch {
-      return [
-        { value: "PH", label: "Philippines" },
-        { value: "__divider__", label: "divider", disabled: true, divider: true },
-        { value: "US", label: "United States", disabled: true },
-        { value: "GB", label: "United Kingdom", disabled: true },
-      ];
-    }
-  }, []);
+  const countryOptions: Option[] = useMemo(() => [
+    { value: "PH", label: "Philippines" },
+    { value: "__divider__", label: "divider", disabled: true, divider: true },
+    { value: "US", label: "United States", disabled: true },
+    { value: "GB", label: "United Kingdom", disabled: true },
+    { value: "CA", label: "Canada", disabled: true },
+    { value: "AU", label: "Australia", disabled: true },
+  ], []);
 
 const genderOptions: Option[] = useMemo(() => {
   const av = genderAvailability ?? { male: false, female: true };
