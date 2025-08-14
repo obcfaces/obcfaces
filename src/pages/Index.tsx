@@ -1,68 +1,111 @@
+import { useState, useEffect } from "react";
+
+import { ContestHeader } from "@/components/contest-header";
+import { ContestSection } from "@/components/contest-section";
+import { NextWeekSection } from "@/components/next-week-section";
+import ContestFilters from "@/components/contest-filters";
+import AiChat from "@/components/ai-chat";
+import type { Category } from "@/components/contest-filters";
+
 const Index = () => {
-  console.log('[INDEX] Ultra simple Index rendering');
+  const [country, setCountry] = useState<string>("PH");
+  const [gender, setGender] = useState<'male' | 'female'>("female");
+  const [viewMode, setViewMode] = useState<'compact' | 'full'>("compact");
   
+  // Инициализация category из localStorage или "" по умолчанию
+  const [category, setCategory] = useState<"" | Category>(() => {
+    try {
+      const saved = localStorage.getItem('contest-category-filter');
+      return saved !== null ? (saved as "" | Category) : "";
+    } catch {
+      return "";
+    }
+  });
+
+  // Сохранение category в localStorage при изменении
+  const handleCategoryChange = (newCategory: "" | Category) => {
+    setCategory(newCategory);
+    localStorage.setItem('contest-category-filter', newCategory);
+  };
   return (
-    <div style={{
-      minHeight: '100vh',
-      backgroundColor: '#f8f9fa',
-      padding: '16px',
-      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
-    }}>
-      <div style={{
-        maxWidth: '400px',
-        margin: '0 auto',
-        backgroundColor: 'white',
-        borderRadius: '12px',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-        padding: '24px'
-      }}>
-        <h1 style={{
-          fontSize: '24px',
-          fontWeight: 'bold',
-          color: '#333',
-          marginBottom: '16px',
-          textAlign: 'center'
-        }}>
-          OBC Faces of Philippines
-        </h1>
-        
-        <p style={{
-          color: '#666',
-          marginBottom: '16px',
-          textAlign: 'center'
-        }}>
-          Mobile testing - no frameworks
-        </p>
-        
-        <button 
-          style={{
-            width: '100%',
-            backgroundColor: '#007bff',
-            color: 'white',
-            padding: '12px 16px',
-            border: 'none',
-            borderRadius: '8px',
-            fontSize: '16px',
-            fontWeight: '500',
-            cursor: 'pointer'
-          }}
-          onClick={() => {
-            alert('Success! React works on mobile');
-            console.log('[MOBILE] Button clicked successfully');
-          }}
-        >
-          Test Mobile Button
-        </button>
-        
-        <div style={{
-          marginTop: '16px',
-          fontSize: '12px',
-          color: '#999',
-          textAlign: 'center'
-        }}>
-          Version: Pure inline styles
-        </div>
+    <div className="min-h-screen bg-background">
+      <ContestHeader />
+      
+      <section className="max-w-6xl mx-auto px-6 sm:px-0 mt-4">
+        <ContestFilters
+          country={country}
+          onCountryChange={setCountry}
+          gender={gender}
+          onGenderChange={setGender}
+          viewMode={viewMode}
+          onViewModeChange={setViewMode}
+          category={category}
+          onCategoryChange={handleCategoryChange}
+          genderAvailability={{ male: false, female: true }}
+        />
+      </section>
+      
+      <ContestSection
+        title="THIS WEEK"
+        subtitle="25-31 august 2025"
+        description="Choose the winner of the week."
+        isActive={true}
+        noWrapTitle
+        viewMode={viewMode}
+      />
+
+      <div className="px-6 sm:px-0" aria-hidden>
+        <hr className="my-8 sm:my-10 border-border" />
       </div>
+
+      <NextWeekSection viewMode={viewMode} />
+
+      <div className="px-6 sm:px-0" aria-hidden>
+        <hr className="my-8 sm:my-10 border-border" />
+      </div>
+
+      <ContestSection
+        title="1 WEEK AGO"
+        titleSuffix="(Closed)"
+        subtitle="18-24 August 2025"
+        centerSubtitle
+        showWinner={true}
+        viewMode={viewMode}
+      />
+
+      <div className="px-6 sm:px-0" aria-hidden>
+        <hr className="my-8 sm:my-10 border-border" />
+      </div>
+
+      <ContestSection
+        title="2 WEEKS AGO"
+        titleSuffix="(Closed)"
+        subtitle="11-17 August 2025"
+        centerSubtitle
+        showWinner={true}
+        viewMode={viewMode}
+      />
+
+      <div className="px-6 sm:px-0" aria-hidden>
+        <hr className="my-8 sm:my-10 border-border" />
+      </div>
+
+      <ContestSection
+        title="3 WEEKS AGO"
+        titleSuffix="(Closed)"
+        subtitle="4-10 August 2025"
+        centerSubtitle
+        showWinner={true}
+        viewMode={viewMode}
+      />
+
+      <div className="px-6 sm:px-0" aria-hidden>
+        <hr className="my-8 sm:my-10 border-border" />
+      </div>
+
+      <section className="max-w-6xl mx-auto px-6 sm:px-0 mb-8">
+        <AiChat />
+      </section>
     </div>
   );
 };

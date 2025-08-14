@@ -125,39 +125,35 @@ export function ContestantCard({
 
   // Load user's likes and ratings on component mount
   useEffect(() => {
-    if (!user || !name) return;
+    if (!user) return;
     
     const loadUserData = async () => {
-      try {
-        // Load likes for both photos
-        const { data: likes } = await supabase
-          .from("likes")
-          .select("content_id")
-          .eq("user_id", user.id)
-          .eq("content_type", "contest")
-          .in("content_id", [`contestant-${name}-0`, `contestant-${name}-1`]);
-        
-        if (likes) {
-          const likedState = [
-            likes.some(like => like.content_id === `contestant-${name}-0`),
-            likes.some(like => like.content_id === `contestant-${name}-1`)
-          ];
-          setIsLiked(likedState);
-        }
-        
-        // Load user's rating (if any)
-        const savedRating = localStorage.getItem(`rating-${name}-${user.id}`);
-        if (savedRating) {
-          setUserRating(parseFloat(savedRating));
-          setIsVoted(true); // Mark as voted if rating exists
-        }
-      } catch (error) {
-        console.error('Error loading user data:', error);
+      // Load likes for both photos
+      const { data: likes } = await supabase
+        .from("likes")
+        .select("content_id")
+        .eq("user_id", user.id)
+        .eq("content_type", "contest")
+        .in("content_id", [`contestant-${name}-0`, `contestant-${name}-1`]);
+      
+      if (likes) {
+        const likedState = [
+          likes.some(like => like.content_id === `contestant-${name}-0`),
+          likes.some(like => like.content_id === `contestant-${name}-1`)
+        ];
+        setIsLiked(likedState);
+      }
+      
+      // Load user's rating (if any)
+      const savedRating = localStorage.getItem(`rating-${name}-${user.id}`);
+      if (savedRating) {
+        setUserRating(parseFloat(savedRating));
+        setIsVoted(true); // Mark as voted if rating exists
       }
     };
     
     loadUserData();
-  }, [user?.id, name]); // Исправлено: только user.id вместо всего объекта user
+  }, [user, name]);
 
   const handleLike = async (index: number) => {
     if (!user) {
