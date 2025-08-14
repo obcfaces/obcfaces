@@ -18,6 +18,9 @@ export function ContestHeader() {
         {/* Title in one line */}
         <div className="flex items-center gap-2">
           <h1 className="text-2xl font-bold text-contest-text">OBC faces of</h1>
+          <Button variant="outline" size="sm" className="text-contest-blue border-contest-blue">
+            Philippines ▼
+          </Button>
         </div>
         
         {/* Load photo button below title */}
