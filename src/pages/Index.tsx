@@ -48,7 +48,7 @@ const Index = () => {
       <NextWeekSection viewMode={viewMode} />
 
       <div className="max-w-6xl mx-auto px-6" aria-hidden>
-        <hr className="my-1 border-border" />
+        <hr className="my-0.5 border-border" />
       </div>
 
       <ContestSection
