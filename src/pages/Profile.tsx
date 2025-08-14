@@ -246,17 +246,19 @@ const Profile = () => {
         <section className="max-w-4xl mx-auto">
           {/* Profile Header */}
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 mb-8">
-            <Avatar className="w-20 h-20 sm:w-24 sm:h-24">
-              <AvatarImage src={profile.avatar_url || ""} alt={`Avatar of ${profile.display_name || "User"}`} />
-              <AvatarFallback className="text-lg">
-                {(profile.display_name || "U").charAt(0).toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
+            <div className="flex items-center gap-4">
+              <Avatar className="w-20 h-20 sm:w-24 sm:h-24">
+                <AvatarImage src={profile.avatar_url || ""} alt={`Avatar of ${profile.display_name || "User"}`} />
+                <AvatarFallback className="text-lg">
+                  {(profile.display_name || "U").charAt(0).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+              <h1 className="text-2xl font-bold">{profile.display_name || "Пользователь"}</h1>
+            </div>
             
             <div className="flex-1 w-full">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
-                  <h1 className="text-2xl font-bold">{profile.display_name || "Пользователь"}</h1>
                   {(profile.city || profile.country) && (
                     <p className="text-muted-foreground">
                       {[profile.city, profile.country].filter(Boolean).join(", ")}
