@@ -1,0 +1,414 @@
+import { useEffect, useState } from "react";
+import { Helmet } from "react-helmet-async";
+import { supabase } from "@/integrations/supabase/client";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Textarea } from "@/components/ui/textarea";
+import { toast } from "@/components/ui/use-toast";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Check, X, Eye, UserCog, FileText } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+
+interface ProfileData {
+  id: string;
+  display_name: string | null;
+  first_name: string | null;
+  last_name: string | null;
+  avatar_url: string | null;
+  age: number | null;
+  country: string | null;
+  city: string | null;
+  gender: string | null;
+  bio: string | null;
+  is_approved: boolean | null;
+  moderation_notes: string | null;
+  created_at: string;
+}
+
+interface UserRole {
+  user_id: string;
+  role: string;
+}
+
+const Admin = () => {
+  const [user, setUser] = useState<any>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [profiles, setProfiles] = useState<ProfileData[]>([]);
+  const [userRoles, setUserRoles] = useState<UserRole[]>([]);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    checkAdminAccess();
+  }, []);
+
+  const checkAdminAccess = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session?.user) {
+        navigate('/auth');
+        return;
+      }
+
+      setUser(session.user);
+
+      // Check if user has admin role
+      const { data: roles } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', session.user.id);
+
+      const hasAdminRole = roles?.some(r => r.role === 'admin');
+      
+      if (!hasAdminRole) {
+        toast({
+          title: "Access Denied",
+          description: "You don't have admin permissions",
+          variant: "destructive"
+        });
+        navigate('/');
+        return;
+      }
+
+      setIsAdmin(true);
+      fetchProfiles();
+      fetchUserRoles();
+    } catch (error) {
+      console.error('Error checking admin access:', error);
+      navigate('/');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchProfiles = async () => {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to fetch profiles",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setProfiles(data || []);
+  };
+
+  const fetchUserRoles = async () => {
+    const { data, error } = await supabase
+      .from('user_roles')
+      .select('user_id, role');
+
+    if (error) {
+      console.error('Error fetching user roles:', error);
+      return;
+    }
+
+    setUserRoles(data || []);
+  };
+
+  const moderateProfile = async (profileId: string, isApproved: boolean, notes?: string) => {
+    const { error } = await supabase
+      .from('profiles')
+      .update({
+        is_approved: isApproved,
+        moderation_notes: notes || null,
+        moderated_by: user?.id,
+        moderated_at: new Date().toISOString()
+      })
+      .eq('id', profileId);
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to moderate profile",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    toast({
+      title: "Success",
+      description: `Profile ${isApproved ? 'approved' : 'rejected'}`,
+    });
+
+    fetchProfiles();
+  };
+
+  const assignRole = async (userId: string, role: 'admin' | 'moderator' | 'user') => {
+    const { error } = await supabase
+      .from('user_roles')
+      .upsert({
+        user_id: userId,
+        role: role
+      });
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to assign role",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    toast({
+      title: "Success",
+      description: `Role ${role} assigned successfully`,
+    });
+
+    fetchUserRoles();
+  };
+
+  const removeRole = async (userId: string, role: 'admin' | 'moderator' | 'user') => {
+    const { error } = await supabase
+      .from('user_roles')
+      .delete()
+      .eq('user_id', userId)
+      .eq('role', role);
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to remove role",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    toast({
+      title: "Success",
+      description: "Role removed successfully",
+    });
+
+    fetchUserRoles();
+  };
+
+  const getUserRoles = (userId: string) => {
+    return userRoles.filter(r => r.user_id === userId).map(r => r.role);
+  };
+
+  const getStatusBadge = (isApproved: boolean | null) => {
+    if (isApproved === null) {
+      return <Badge variant="secondary">Pending</Badge>;
+    }
+    return isApproved ? (
+      <Badge variant="default" className="bg-green-500">Approved</Badge>
+    ) : (
+      <Badge variant="destructive">Rejected</Badge>
+    );
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p>Checking access...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAdmin) {
+    return null;
+  }
+
+  return (
+    <>
+      <Helmet>
+        <title>Admin Panel - Moderation</title>
+        <meta name="description" content="Admin panel for moderating user profiles and managing roles" />
+      </Helmet>
+
+      <div className="min-h-screen bg-gradient-to-br from-background to-muted/20 py-8 px-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold mb-2">Admin Panel</h1>
+            <p className="text-muted-foreground">Manage user profiles and roles</p>
+          </div>
+
+          <Tabs defaultValue="moderation" className="space-y-6">
+            <TabsList>
+              <TabsTrigger value="moderation" className="flex items-center gap-2">
+                <Eye className="w-4 h-4" />
+                Profile Moderation
+              </TabsTrigger>
+              <TabsTrigger value="roles" className="flex items-center gap-2">
+                <UserCog className="w-4 h-4" />
+                User Roles
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="moderation" className="space-y-4">
+              <div className="grid gap-4">
+                {profiles.map((profile) => (
+                  <Card key={profile.id}>
+                    <CardHeader>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                          <Avatar className="h-16 w-16">
+                            <AvatarImage src={profile.avatar_url || ''} />
+                            <AvatarFallback>
+                              {profile.display_name?.charAt(0) || profile.first_name?.charAt(0) || 'U'}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <h3 className="text-lg font-semibold">
+                              {profile.display_name || `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 'No Name'}
+                            </h3>
+                            <p className="text-sm text-muted-foreground">
+                              {profile.age && `${profile.age} years old`} {profile.gender && `• ${profile.gender}`}
+                            </p>
+                            <p className="text-sm text-muted-foreground">
+                              {profile.city && profile.country && `${profile.city}, ${profile.country}`}
+                            </p>
+                          </div>
+                        </div>
+                        {getStatusBadge(profile.is_approved)}
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      {profile.bio && (
+                        <div className="mb-4">
+                          <h4 className="text-sm font-medium mb-2">Bio:</h4>
+                          <p className="text-sm text-muted-foreground">{profile.bio}</p>
+                        </div>
+                      )}
+                      
+                      {profile.moderation_notes && (
+                        <div className="mb-4">
+                          <h4 className="text-sm font-medium mb-2">Moderation Notes:</h4>
+                          <p className="text-sm text-muted-foreground">{profile.moderation_notes}</p>
+                        </div>
+                      )}
+
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          onClick={() => moderateProfile(profile.id, true)}
+                          disabled={profile.is_approved === true}
+                          className="bg-green-600 hover:bg-green-700"
+                        >
+                          <Check className="w-4 h-4 mr-1" />
+                          Approve
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          onClick={() => {
+                            const notes = prompt("Reason for rejection (optional):");
+                            moderateProfile(profile.id, false, notes || undefined);
+                          }}
+                          disabled={profile.is_approved === false}
+                        >
+                          <X className="w-4 h-4 mr-1" />
+                          Reject
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => navigate(`/u/${profile.id}`)}
+                        >
+                          <Eye className="w-4 h-4 mr-1" />
+                          View Profile
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </TabsContent>
+
+            <TabsContent value="roles" className="space-y-4">
+              <div className="grid gap-4">
+                {profiles.map((profile) => {
+                  const roles = getUserRoles(profile.id);
+                  return (
+                    <Card key={profile.id}>
+                      <CardHeader>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-4">
+                            <Avatar>
+                              <AvatarImage src={profile.avatar_url || ''} />
+                              <AvatarFallback>
+                                {profile.display_name?.charAt(0) || profile.first_name?.charAt(0) || 'U'}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div>
+                              <h3 className="font-semibold">
+                                {profile.display_name || `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 'No Name'}
+                              </h3>
+                              <div className="flex gap-2 mt-1">
+                                {roles.map((role) => (
+                                  <Badge key={role} variant="outline">
+                                    {role}
+                                  </Badge>
+                                ))}
+                                {roles.length === 0 && (
+                                  <Badge variant="secondary">user</Badge>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="flex gap-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => assignRole(profile.id, 'admin')}
+                            disabled={roles.includes('admin')}
+                          >
+                            Make Admin
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => assignRole(profile.id, 'moderator')}
+                            disabled={roles.includes('moderator')}
+                          >
+                            Make Moderator
+                          </Button>
+                          {roles.includes('admin') && (
+                            <Button
+                              size="sm"
+                              variant="destructive"
+                              onClick={() => removeRole(profile.id, 'admin')}
+                            >
+                              Remove Admin
+                            </Button>
+                          )}
+                          {roles.includes('moderator') && (
+                            <Button
+                              size="sm"
+                              variant="destructive"
+                              onClick={() => removeRole(profile.id, 'moderator')}
+                            >
+                              Remove Moderator
+                            </Button>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+            </TabsContent>
+          </Tabs>
+        </div>
+      </div>
+    </>
+  );
+};
+
+export default Admin;

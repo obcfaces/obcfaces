@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { Settings } from "lucide-react";
 import LoginModalTrigger from "@/components/login-modal";
 
 // Shows Login button when logged out and a round avatar linking to the user's profile when logged in
@@ -9,6 +11,7 @@ const AuthNav = () => {
   const [session, setSession] = useState<import("@supabase/supabase-js").Session | null>(null);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [displayName, setDisplayName] = useState<string | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     // Subscribe first
@@ -45,6 +48,14 @@ const AuthNav = () => {
     const dn = data?.display_name || [data?.first_name, data?.last_name].filter(Boolean).join(" ") || null;
     setDisplayName(dn);
     setAvatarUrl(data?.avatar_url || null);
+
+    // Check admin role
+    const { data: roles } = await supabase
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', id);
+
+    setIsAdmin(roles?.some(r => r.role === 'admin') || false);
   };
 
   const fallbackInitial = useMemo(() => {
@@ -57,21 +68,31 @@ const AuthNav = () => {
   }
 
   return (
-    <Link
-      to={`/u/${session.user.id}`}
-      className="inline-flex items-center"
-      aria-label="Open your profile"
-    >
-      <Avatar className="h-9 w-9 ring-1 ring-border hover:ring-primary transition-colors">
-        {avatarUrl ? (
-          <AvatarImage src={avatarUrl} alt={(displayName || "User") + " avatar"} />
-        ) : (
-          <AvatarFallback className="text-sm font-medium">
-            {fallbackInitial}
-          </AvatarFallback>
-        )}
-      </Avatar>
-    </Link>
+    <div className="flex items-center gap-2">
+      {isAdmin && (
+        <Link to="/admin">
+          <Button variant="outline" size="sm" className="h-9">
+            <Settings className="w-4 h-4 mr-1" />
+            Admin
+          </Button>
+        </Link>
+      )}
+      <Link
+        to={`/u/${session.user.id}`}
+        className="inline-flex items-center"
+        aria-label="Open your profile"
+      >
+        <Avatar className="h-9 w-9 ring-1 ring-border hover:ring-primary transition-colors">
+          {avatarUrl ? (
+            <AvatarImage src={avatarUrl} alt={(displayName || "User") + " avatar"} />
+          ) : (
+            <AvatarFallback className="text-sm font-medium">
+              {fallbackInitial}
+            </AvatarFallback>
+          )}
+        </Avatar>
+      </Link>
+    </div>
   );
 };
 
