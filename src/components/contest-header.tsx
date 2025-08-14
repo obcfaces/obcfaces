@@ -3,12 +3,10 @@ import { Button } from "@/components/ui/button";
 import { Camera, Upload } from "lucide-react";
 
 export function ContestHeader() {
-  const [activeSection, setActiveSection] = useState("Current Votes");
+  const [activeSection, setActiveSection] = useState("Contest");
 
   const navItems = [
-    { name: "Mash", href: "#" },
-    { name: "Current Votes", href: "#" },
-    { name: "Winners", href: "#" },
+    { name: "Contest", href: "#" },
     { name: "How it works", href: "#" }
   ];
 
