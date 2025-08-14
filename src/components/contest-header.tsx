@@ -24,6 +24,26 @@ export function ContestHeader() {
             <Camera className="w-4 h-4 mr-2" />
             Load your photo and win 5000 Php
           </Button>
+          
+          {/* Contest info points */}
+          <div className="mt-3 space-y-1 text-sm text-contest-text">
+            <div className="flex items-center gap-2">
+              <span>🌍</span>
+              <span>Anyone can join — open to all!</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span>📸</span>
+              <span>Free entry with just 2 photos</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span>🏆</span>
+              <span>Weekly winner gets 5,000 PHP</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span>💰</span>
+              <span>Annual winner takes 200,000 PHP</span>
+            </div>
+          </div>
         </div>
         
         {/* Description */}
