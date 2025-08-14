@@ -1,12 +1,10 @@
 import { useState, useEffect, useRef } from "react";
 import { X, ChevronLeft, ChevronRight, Heart, MessageCircle, Send } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
-import { supabase } from "@/integrations/supabase/client";
-import LoginModalContent from "@/components/login-modal-content";
 
 interface Comment {
   id: number;
@@ -53,25 +51,11 @@ export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantNa
     1: { count: 18, isLiked: false },
     2: { count: 15, isLiked: false }
   });
-  const [user, setUser] = useState<any>(null);
-  const [showLoginModal, setShowLoginModal] = useState(false);
   const { toast } = useToast();
 
   // Refs for focusing comment input and scrolling
   const commentsListRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-
-  useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
-      setUser(session?.user ?? null);
-    });
-
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
 
   // Reset activeIndex when currentIndex changes
   useEffect(() => {
@@ -87,11 +71,6 @@ export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantNa
   };
 
   const handleLike = () => {
-    if (!user) {
-      setShowLoginModal(true);
-      return;
-    }
-    
     setPhotoLikes(prev => ({
       ...prev,
       [activeIndex]: {
@@ -102,11 +81,6 @@ export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantNa
   };
 
   const handleCommentSubmit = () => {
-    if (!user) {
-      setShowLoginModal(true);
-      return;
-    }
-    
     if (commentText.trim()) {
       const newComment: Comment = {
         id: Date.now(),
@@ -131,11 +105,6 @@ export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantNa
   };
 
   const focusCommentInput = () => {
-    if (!user) {
-      setShowLoginModal(true);
-      return;
-    }
-    
     textareaRef.current?.focus();
     // Ensure comments panel is scrolled to the latest position
     if (commentsListRef.current) {
@@ -145,7 +114,6 @@ export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantNa
       });
     }
   };
-
 
   // Touch handlers for swipe functionality
   const onTouchStart = (e: React.TouchEvent) => {
@@ -352,13 +320,6 @@ export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantNa
             </div>
           </div>
         </div>
-
-        {/* Login Modal */}
-        <Dialog open={showLoginModal} onOpenChange={setShowLoginModal}>
-          <DialogContent className="sm:max-w-lg">
-            <LoginModalContent onClose={() => setShowLoginModal(false)} />
-          </DialogContent>
-        </Dialog>
       </DialogContent>
     </Dialog>
   );

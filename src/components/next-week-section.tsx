@@ -1,10 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Heart, ThumbsDown, RotateCcw } from "lucide-react";
 import { ContestantCard } from "@/components/contest-card";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { supabase } from "@/integrations/supabase/client";
-import LoginModalContent from "@/components/login-modal-content";
 
 import contestant1Face from "@/assets/contestant-1-face.jpg";
 import contestant1Full from "@/assets/contestant-1-full.jpg";
@@ -15,13 +12,13 @@ import contestant3Full from "@/assets/contestant-3-full.jpg";
 
 const candidates = [
   {
-    rank: 0,
-    name: "Victoria Morales",
+    rank: 0, // Специальное значение для скрытия места и плашки
+    name: "Name Chall",
     country: "Philippines",
-    city: "Manila",
-    age: 22,
-    weight: 50,
-    height: 165,
+    city: "Negros",
+    age: 25,
+    weight: 53,
+    height: 182,
     rating: 0,
     faceImage: contestant1Face,
     fullBodyImage: contestant1Full,
@@ -30,12 +27,12 @@ const candidates = [
   },
   {
     rank: 0,
-    name: "Alejandra Silva",
+    name: "Name Chall",
     country: "Philippines", 
-    city: "Cebu",
-    age: 24,
+    city: "Negros",
+    age: 25,
     weight: 53,
-    height: 168,
+    height: 182,
     rating: 0,
     faceImage: contestant2Face,
     fullBodyImage: contestant2Full,
@@ -44,12 +41,12 @@ const candidates = [
   },
   {
     rank: 0,
-    name: "Andrea Vargas",
+    name: "Name Chall",
     country: "Philippines",
-    city: "Davao",
-    age: 23,
-    weight: 52,
-    height: 167,
+    city: "Negros",
+    age: 25,
+    weight: 53,
+    height: 182,
     rating: 0,
     faceImage: contestant3Face,
     fullBodyImage: contestant3Full,
@@ -58,12 +55,12 @@ const candidates = [
   },
   {
     rank: 0,
-    name: "Natalia Castillo",
+    name: "Name Chall",
     country: "Philippines",
-    city: "Quezon City",
+    city: "Negros",
     age: 25,
-    weight: 55,
-    height: 170,
+    weight: 53,
+    height: 182,
     rating: 0,
     faceImage: contestant1Face,
     fullBodyImage: contestant1Full,
@@ -71,86 +68,16 @@ const candidates = [
   },
   {
     rank: 0,
-    name: "Daniela Ruiz",
+    name: "Name Chall",
     country: "Philippines",
-    city: "Makati",
-    age: 21,
-    weight: 49,
-    height: 163,
+    city: "Negros",
+    age: 25,
+    weight: 53,
+    height: 182,
     rating: 0,
     faceImage: contestant2Face,
     fullBodyImage: contestant2Full,
     additionalPhotos: [contestant3Face, contestant3Full],
-    isVoted: true
-  },
-  {
-    rank: 0,
-    name: "Paula Jimenez",
-    country: "Philippines",
-    city: "Pasig",
-    age: 26,
-    weight: 56,
-    height: 172,
-    rating: 0,
-    faceImage: contestant3Face,
-    fullBodyImage: contestant3Full,
-    additionalPhotos: [contestant1Face],
-    isVoted: true
-  },
-  {
-    rank: 0,
-    name: "Carolina Perez",
-    country: "Philippines",
-    city: "Taguig",
-    age: 23,
-    weight: 51,
-    height: 166,
-    rating: 0,
-    faceImage: contestant1Face,
-    fullBodyImage: contestant1Full,
-    additionalPhotos: [contestant2Face],
-    isVoted: true
-  },
-  {
-    rank: 0,
-    name: "Mariana Santos",
-    country: "Philippines",
-    city: "Antipolo",
-    age: 24,
-    weight: 54,
-    height: 169,
-    rating: 0,
-    faceImage: contestant2Face,
-    fullBodyImage: contestant2Full,
-    additionalPhotos: [contestant3Face],
-    isVoted: true
-  },
-  {
-    rank: 0,
-    name: "Fernanda Diaz",
-    country: "Philippines",
-    city: "Zamboanga",
-    age: 22,
-    weight: 48,
-    height: 164,
-    rating: 0,
-    faceImage: contestant3Face,
-    fullBodyImage: contestant3Full,
-    additionalPhotos: [contestant1Face, contestant2Face],
-    isVoted: true
-  },
-  {
-    rank: 0,
-    name: "Adriana Castro",
-    country: "Philippines",
-    city: "Cagayan de Oro",
-    age: 25,
-    weight: 57,
-    height: 171,
-    rating: 0,
-    faceImage: contestant1Face,
-    fullBodyImage: contestant1Full,
-    additionalPhotos: [contestant3Face],
     isVoted: true
   }
 ];
@@ -163,27 +90,8 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [history, setHistory] = useState<number[]>([]);
   const [remainingCandidates, setRemainingCandidates] = useState(candidates.length);
-  const [user, setUser] = useState<any>(null);
-  const [showLoginModal, setShowLoginModal] = useState(false);
-
-  useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
-      setUser(session?.user ?? null);
-    });
-
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
 
   const handleLike = () => {
-    if (!user) {
-      setShowLoginModal(true);
-      return;
-    }
-    
     if (currentIndex < candidates.length - 1) {
       setHistory(prev => [...prev, currentIndex]);
       setCurrentIndex(prev => prev + 1);
@@ -192,11 +100,6 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
   };
 
   const handleDislike = () => {
-    if (!user) {
-      setShowLoginModal(true);
-      return;
-    }
-    
     if (currentIndex < candidates.length - 1) {
       setHistory(prev => [...prev, currentIndex]);
       setCurrentIndex(prev => prev + 1);
@@ -205,11 +108,6 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
   };
 
   const handleUndo = () => {
-    if (!user) {
-      setShowLoginModal(true);
-      return;
-    }
-    
     if (history.length > 0) {
       const previousIndex = history[history.length - 1];
       setHistory(prev => prev.slice(0, -1));
@@ -289,13 +187,6 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
           <p className="text-muted-foreground">You've made your choices for next week's finalists.</p>
         </div>
       )}
-
-      {/* Login Modal */}
-      <Dialog open={showLoginModal} onOpenChange={setShowLoginModal}>
-        <DialogContent className="sm:max-w-lg">
-          <LoginModalContent onClose={() => setShowLoginModal(false)} />
-        </DialogContent>
-      </Dialog>
     </section>
   );
 }

@@ -24,7 +24,12 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
   const [localViewMode] = useState<'compact' | 'full'>('compact');
   const viewMode = controlledViewMode ?? localViewMode;
   const [ratings, setRatings] = useState<Record<number, number>>({
-    1: 4.8, 2: 4.5, 3: 4.2, 4: 3.9, 5: 3.5, 6: 3.1, 7: 3.7, 8: 3.4, 9: 3.2, 10: 3.0
+    1: 4.8,
+    2: 4.5,
+    3: 4.2,
+    4: 3.9,
+    5: 3.5,
+    6: 3.1
   });
 
   const [votes, setVotes] = useState<Record<number, number>>({});
@@ -36,144 +41,88 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
   const contestants = [
     {
       rank: 1,
-      name: "Maria Santos",
-      profileId: "1b5c2751-a820-4767-87e6-d06080219942",
-      country: "Philippines", 
-      city: "Cebu",
-      age: 23,
-      weight: 52,
-      height: 168,
+      name: "Name Chall",
+      profileId: "11111111-1111-1111-1111-111111111111",
+      country: "Philippines",
+      city: "Negros",
+      age: 25,
+      weight: 53,
+      height: 182,
       rating: ratings[1],
       faceImage: contestant1Face,
       fullBodyImage: contestant1Full,
       additionalPhotos: [contestant2Face, contestant3Face],
-      isVoted: showWinner ? true : !!votes[1],
+      isVoted: showWinner ? true : !!votes[1], // Для завершенных конкурсов голосование уже прошло
       isWinner: showWinner,
       prize: showWinner ? "+ 5000 PhP" : undefined
     },
     {
       rank: 2,
-      name: "Anna Cruz",
+      name: "Name Chall",
       country: "Philippines",
-      city: "Manila",
-      age: 24,
-      weight: 55,
-      height: 165,
+      city: "Negros",
+      age: 25,
+      weight: 53,
+      height: 182,
       rating: ratings[2],
       faceImage: contestant2Face,
       fullBodyImage: contestant2Full,
       additionalPhotos: [contestant1Face],
-      isVoted: showWinner ? true : !!votes[2]
+      isVoted: showWinner ? true : !!votes[2] // Для завершенных конкурсов голосование уже прошло
     },
     {
       rank: 3,
-      name: "Sofia Reyes",
+      name: "Name Chall",
       country: "Philippines",
-      city: "Davao", 
-      age: 22,
-      weight: 51,
-      height: 170,
+      city: "Negros", 
+      age: 25,
+      weight: 53,
+      height: 182,
       rating: ratings[3],
       faceImage: contestant3Face,
       fullBodyImage: contestant3Full,
       additionalPhotos: [contestant1Face, contestant2Face, contestant1Full],
-      isVoted: showWinner ? true : !!votes[3]
+      isVoted: showWinner ? true : !!votes[3] // Для завершенных конкурсов голосование уже прошло
     },
     {
       rank: 4,
-      name: "Isabella Garcia",
+      name: "Name Chall",
       country: "Philippines",
-      city: "Quezon City",
+      city: "Negros",
       age: 25,
       weight: 53,
-      height: 167,
+      height: 182,
       rating: ratings[4],
       faceImage: contestant1Face,
       fullBodyImage: contestant1Full,
-      isVoted: showWinner ? true : !!votes[4]
+      isVoted: showWinner ? true : !!votes[4] // Для завершенных конкурсов голосование уже прошло
     },
     {
       rank: 5,
-      name: "Camila Torres",
+      name: "Name Chall",
       country: "Philippines",
-      city: "Makati",
-      age: 21,
-      weight: 49,
-      height: 163,
+      city: "Negros",
+      age: 25,
+      weight: 53,
+      height: 182,
       rating: ratings[5],
       faceImage: contestant2Face,
       fullBodyImage: contestant2Full,
       additionalPhotos: [contestant3Face, contestant3Full],
-      isVoted: showWinner ? true : !!votes[5]
+      isVoted: showWinner ? true : !!votes[5] // Для завершенных конкурсов голосование уже прошло
     },
     {
       rank: 6,
-      name: "Valentina Lopez",
+      name: "Name Chall",
       country: "Philippines",
-      city: "Pasig",
-      age: 26,
-      weight: 56,
-      height: 172,
+      city: "Negros",
+      age: 25,
+      weight: 53,
+      height: 182,
       rating: ratings[6],
       faceImage: contestant3Face,
       fullBodyImage: contestant3Full,
-      isVoted: showWinner ? true : !!votes[6]
-    },
-    {
-      rank: 7,
-      name: "Emma Rodriguez",
-      country: "Philippines",
-      city: "Taguig",
-      age: 23,
-      weight: 52,
-      height: 166,
-      rating: ratings[7] || 3.7,
-      faceImage: contestant1Face,
-      fullBodyImage: contestant1Full,
-      additionalPhotos: [contestant2Face],
-      isVoted: showWinner ? true : !!votes[7]
-    },
-    {
-      rank: 8,
-      name: "Mia Hernandez",
-      country: "Philippines",
-      city: "Antipolo",
-      age: 24,
-      weight: 54,
-      height: 169,
-      rating: ratings[8] || 3.4,
-      faceImage: contestant2Face,
-      fullBodyImage: contestant2Full,
-      additionalPhotos: [contestant3Face],
-      isVoted: showWinner ? true : !!votes[8]
-    },
-    {
-      rank: 9,
-      name: "Gabriela Martinez",
-      country: "Philippines",
-      city: "Zamboanga",
-      age: 22,
-      weight: 50,
-      height: 164,
-      rating: ratings[9] || 3.2,
-      faceImage: contestant3Face,
-      fullBodyImage: contestant3Full,
-      additionalPhotos: [contestant1Face, contestant2Face],
-      isVoted: showWinner ? true : !!votes[9]
-    },
-    {
-      rank: 10,
-      name: "Lucia Gonzalez",
-      country: "Philippines",
-      city: "Cagayan de Oro",
-      age: 25,
-      weight: 57,
-      height: 171,
-      rating: ratings[10] || 3.0,
-      faceImage: contestant1Face,
-      fullBodyImage: contestant1Full,
-      additionalPhotos: [contestant3Face],
-      isVoted: showWinner ? true : !!votes[10]
+      isVoted: showWinner ? true : !!votes[6] // Для завершенных конкурсов голосование уже прошло
     }
   ];
 

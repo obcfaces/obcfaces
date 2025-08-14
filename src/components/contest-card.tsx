@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Heart, MessageCircle, Star, Pencil, Send, Share, Share2, ExternalLink, Upload, ArrowUpRight, ThumbsDown } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -12,8 +12,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { Link } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
-import LoginModalContent from "@/components/login-modal-content";
 
 interface ContestantCardProps {
   rank: number;
@@ -48,7 +46,7 @@ export function ContestantCard({
   faceImage,
   fullBodyImage,
   additionalPhotos = [],
-  isVoted: propIsVoted,
+  isVoted,
   isWinner,
   prize,
   viewMode = 'compact',
@@ -60,16 +58,7 @@ export function ContestantCard({
   const [modalStartIndex, setModalStartIndex] = useState(0);
   const [isEditing, setIsEditing] = useState(false);
   const [showThanks, setShowThanks] = useState(false);
-  const [userRating, setUserRating] = useState(() => {
-    try {
-      const currentUserId = localStorage.getItem('currentUserId');
-      if (!currentUserId) return 0;
-      const savedRating = localStorage.getItem(`rating-${name}-${currentUserId}`);
-      return savedRating ? parseFloat(savedRating) : 0;
-    } catch {
-      return 0;
-    }
-  });
+  const [userRating, setUserRating] = useState(0);
   const [isLiked, setIsLiked] = useState<boolean[]>([false, false]);
   const [isDisliked, setIsDisliked] = useState(false);
   const [likesCount, setLikesCount] = useState<number[]>([
@@ -83,159 +72,25 @@ export function ContestantCard({
     Math.floor(Math.random() * 20) + 1,
     Math.floor(Math.random() * 20) + 1,
   ]);
-  const [user, setUser] = useState<any>(null);
-  // Initialize isVoted state synchronously by checking localStorage
-  const [isVoted, setIsVoted] = useState(() => {
-    if (propIsVoted) return true;
-    try {
-      const savedRating = localStorage.getItem(`rating-${name}-${localStorage.getItem('currentUserId') || 'anonymous'}`);
-      return !!savedRating;
-    } catch {
-      return false;
-    }
-  });
-  const [showLoginModal, setShowLoginModal] = useState(false);
   const { toast } = useToast();
 
-  useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
-      const newUser = session?.user ?? null;
-      setUser(newUser);
-      // Store current user ID for synchronous access
-      if (newUser?.id) {
-        localStorage.setItem('currentUserId', newUser.id);
-      } else {
-        localStorage.removeItem('currentUserId');
-      }
-    });
-
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      const newUser = session?.user ?? null;
-      setUser(newUser);
-      // Store current user ID for synchronous access
-      if (newUser?.id) {
-        localStorage.setItem('currentUserId', newUser.id);
-      } else {
-        localStorage.removeItem('currentUserId');
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
-
-  // Load user's likes and ratings on component mount
-  useEffect(() => {
-    if (!user) return;
-    
-    const loadUserData = async () => {
-      // Load likes for both photos
-      const { data: likes } = await supabase
-        .from("likes")
-        .select("content_id")
-        .eq("user_id", user.id)
-        .eq("content_type", "contest")
-        .in("content_id", [`contestant-${name}-0`, `contestant-${name}-1`]);
-      
-      if (likes) {
-        const likedState = [
-          likes.some(like => like.content_id === `contestant-${name}-0`),
-          likes.some(like => like.content_id === `contestant-${name}-1`)
-        ];
-        setIsLiked(likedState);
-      }
-      
-      // Load user's rating (if any)
-      const savedRating = localStorage.getItem(`rating-${name}-${user.id}`);
-      if (savedRating) {
-        setUserRating(parseFloat(savedRating));
-        setIsVoted(true); // Mark as voted if rating exists
-      }
-    };
-    
-    loadUserData();
-  }, [user, name]);
-
-  const handleLike = async (index: number) => {
-    if (!user) {
-      setShowLoginModal(true);
-      return;
-    }
-    
-    const contentId = `contestant-${name}-${index}`;
-    const wasLiked = isLiked[index];
-    
-    try {
-      if (wasLiked) {
-        // Unlike
-        await supabase
-          .from("likes")
-          .delete()
-          .eq("user_id", user.id)
-          .eq("content_type", "contest")
-          .eq("content_id", contentId);
-      } else {
-        // Like
-        await supabase
-          .from("likes")
-          .insert({
-            user_id: user.id,
-            content_type: "contest",
-            content_id: contentId,
-          });
-      }
-      
-      setIsLiked((prev) => {
-        const next = [...prev];
-        next[index] = !wasLiked;
-        return next;
-      });
-      
-      setLikesCount((prev) => {
-        const next = [...prev];
-        next[index] = wasLiked ? next[index] - 1 : next[index] + 1;
-        return next;
-      });
-      
-    } catch (error) {
-      toast({ description: "Не удалось выполнить действие" });
-    }
+  const handleLike = (index: number) => {
+    const wasLiked = isLiked[index]
+    setIsLiked((prev) => {
+      const next = [...prev]
+      next[index] = !wasLiked
+      return next
+    })
+    setLikesCount((prev) => {
+      const next = [...prev]
+      next[index] = wasLiked ? next[index] - 1 : next[index] + 1
+      return next
+    })
   };
 
   const handleDislike = () => {
-    if (!user) {
-      setShowLoginModal(true);
-      return;
-    }
-    
     setIsDisliked(prev => !prev);
     setDislikesCount(prev => isDisliked ? prev - 1 : prev + 1);
-  };
-
-  const handleRate = (rating: number) => {
-    if (!user) {
-      setShowLoginModal(true);
-      return;
-    }
-    
-    setUserRating(rating);
-    setIsVoted(true); // Mark as voted
-    // Save rating to localStorage
-    localStorage.setItem(`rating-${name}-${user.id}`, rating.toString());
-    
-    setShowThanks(true);
-    setTimeout(() => {
-      setShowThanks(false);
-      onRate?.(rating);
-    }, 1000);
-  };
-
-  const handleComment = () => {
-    if (!user) {
-      setShowLoginModal(true);
-      return;
-    }
-    
-    openModal(0);
   };
 
 
@@ -302,7 +157,14 @@ export function ContestantCard({
                     isVoted={false}
                     variant="white"
                     hideText={true}
-                    onRate={handleRate}
+                    onRate={(rating) => {
+                      setUserRating(rating);
+                      setShowThanks(true);
+                      setTimeout(() => {
+                        setShowThanks(false);
+                        onRate?.(rating);
+                      }, 1000);
+                    }}
                   />
                 </div>
               </div>
@@ -328,12 +190,7 @@ export function ContestantCard({
                     variant="white"
                     hideText={true}
                     onRate={(rating) => {
-                      if (!user) {
-                        setShowLoginModal(true);
-                        return;
-                      }
                       setUserRating(rating);
-                      localStorage.setItem(`rating-${name}-${user.id}`, rating.toString());
                       setIsEditing(false);
                       onRate?.(rating);
                     }}
@@ -411,7 +268,7 @@ export function ContestantCard({
               <button
                 type="button"
                 className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
-                onClick={handleComment}
+                onClick={() => openModal(0)}
                 aria-label="Comments"
               >
                 <MessageCircle className="w-4 h-4" />
@@ -442,13 +299,6 @@ export function ContestantCard({
           country={country}
           city={city}
         />
-
-        {/* Login Modal */}
-        <Dialog open={showLoginModal} onOpenChange={setShowLoginModal}>
-          <DialogContent className="sm:max-w-lg">
-            <LoginModalContent onClose={() => setShowLoginModal(false)} />
-          </DialogContent>
-        </Dialog>
       </>
     );
   }
@@ -538,7 +388,15 @@ export function ContestantCard({
                   isVoted={false}
                   variant="white"
                   hideText={true}
-                  onRate={handleRate}
+                  onRate={(rating) => {
+                    setUserRating(rating);
+                    setShowThanks(true);
+                    // Show thank you message for 1 second, then show contestant info
+                    setTimeout(() => {
+                      setShowThanks(false);
+                      onRate?.(rating);
+                    }, 1000);
+                  }}
                 />
               </div>
             </div>
@@ -565,12 +423,7 @@ export function ContestantCard({
                   variant="white"
                   hideText={true}
                   onRate={(rating) => {
-                    if (!user) {
-                      setShowLoginModal(true);
-                      return;
-                    }
                     setUserRating(rating);
-                    localStorage.setItem(`rating-${name}-${user.id}`, rating.toString());
                     setIsEditing(false);
                     onRate?.(rating);
                   }}
@@ -632,7 +485,7 @@ export function ContestantCard({
                 <button
                   type="button"
                   className="inline-flex items-center gap-1 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors"
-                  onClick={handleComment}
+                  onClick={() => openModal(0)}
                   aria-label="Comments"
                 >
                   <MessageCircle className="w-3.5 h-3.5" />
@@ -678,13 +531,6 @@ export function ContestantCard({
         country={country}
         city={city}
       />
-
-      {/* Login Modal */}
-      <Dialog open={showLoginModal} onOpenChange={setShowLoginModal}>
-        <DialogContent className="sm:max-w-lg">
-          <LoginModalContent onClose={() => setShowLoginModal(false)} />
-        </DialogContent>
-      </Dialog>
     </>
   );
 }
