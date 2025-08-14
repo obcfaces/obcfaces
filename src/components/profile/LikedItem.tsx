@@ -2,12 +2,14 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Heart, MessageCircle, Share2, ThumbsDown } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
 import { cn } from "@/lib/utils";
 import { PhotoModal } from "@/components/photo-modal";
 import { Link } from "react-router-dom";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import LoginModalContent from "@/components/login-modal-content";
 
 // Import contest images for mock display
 import contestant1Face from "@/assets/contestant-1-face.jpg";
@@ -57,6 +59,21 @@ const LikedItem = ({
   const [isLiked, setIsLiked] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalStartIndex, setModalStartIndex] = useState(0);
+  const [user, setUser] = useState<any>(null);
+  const [showLoginModal, setShowLoginModal] = useState(false);
+
+  // Get current user
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   const handleUnlike = async () => {
     setIsUnliking(true);
@@ -81,6 +98,15 @@ const LikedItem = ({
   const openModal = (photoIndex: number) => {
     setModalStartIndex(photoIndex);
     setIsModalOpen(true);
+  };
+
+  const handleComment = () => {
+    if (!user) {
+      setShowLoginModal(true);
+      return;
+    }
+    
+    openModal(0);
   };
 
   // All cards use the exact same contest card structure
@@ -152,6 +178,7 @@ const LikedItem = ({
                 <button
                   type="button"
                   className="inline-flex items-center gap-1 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors"
+                  onClick={handleComment}
                   aria-label="Comments"
                 >
                   <MessageCircle className="w-3.5 h-3.5" />
@@ -193,6 +220,13 @@ const LikedItem = ({
           country="Philippines"
           city="Unknown"
         />
+
+        {/* Login Modal */}
+        <Dialog open={showLoginModal} onOpenChange={setShowLoginModal}>
+          <DialogContent className="sm:max-w-lg">
+            <LoginModalContent onClose={() => setShowLoginModal(false)} />
+          </DialogContent>
+        </Dialog>
       </>
     );
   }
@@ -256,6 +290,7 @@ const LikedItem = ({
           <button
             type="button"
             className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
+            onClick={handleComment}
             aria-label="Comments"
           >
             <MessageCircle className="w-4 h-4" />
@@ -295,6 +330,13 @@ const LikedItem = ({
         country="Philippines"
         city="Unknown"
       />
+
+      {/* Login Modal */}
+      <Dialog open={showLoginModal} onOpenChange={setShowLoginModal}>
+        <DialogContent className="sm:max-w-lg">
+          <LoginModalContent onClose={() => setShowLoginModal(false)} />
+        </DialogContent>
+      </Dialog>
     </>
   );
 };
