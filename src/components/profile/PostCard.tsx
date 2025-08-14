@@ -159,13 +159,13 @@ const PostCard = ({
           </div>
         )}
 
-        {/* Footer with actions - using contest card style */}
+        {/* Footer with actions - exact copy from contest cards */}
         <div className="px-3 pb-3">
           <div className="flex items-center justify-end gap-4">
             <button
               type="button"
-              className={`inline-flex items-center gap-1 text-xs sm:text-sm transition-colors ${
-                isLiked ? "text-contest-blue" : "text-muted-foreground hover:text-foreground"
+              className={`inline-flex items-center gap-1 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors ${
+                isLiked ? "text-contest-blue" : ""
               }`}
               onClick={handleLike}
               disabled={loading}
