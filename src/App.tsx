@@ -21,42 +21,41 @@ const queryClient = new QueryClient();
 const App = () => {
   console.log('[APP] App component rendering...');
   
-  try {
-    console.log('[APP] Creating providers...');
-    return (
-      <HelmetProvider>
-        <QueryClientProvider client={queryClient}>
-          <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
-              <AuthCallbackHandler />
-              <TopBar />
-              <Routes>
-                <Route path="/" element={<Index />} />
-                <Route path="/contest" element={<Contest />} />
-                <Route path="/auth" element={<Auth />} />
-                <Route path="/account" element={<Account />} />
-                <Route path="/u/:id" element={<Profile />} />
-                <Route path="/terms" element={<Terms />} />
-                <Route path="/privacy" element={<Privacy />} />
-                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </BrowserRouter>
-          </TooltipProvider>
-        </QueryClientProvider>
-      </HelmetProvider>
-    );
-  } catch (error) {
-    console.error('[APP] Error in App component:', error);
-    return (
-      <div style={{ padding: '20px', fontFamily: 'system-ui' }}>
-        <h2>App Error:</h2>
-        <p>{String(error)}</p>
+  // Simple test without complex providers
+  return (
+    <div style={{ 
+      minHeight: '100vh', 
+      padding: '20px', 
+      fontFamily: 'system-ui',
+      backgroundColor: '#f0f0f0'
+    }}>
+      <h1 style={{ color: '#333', marginBottom: '20px' }}>
+        OBC Faces of Philippines
+      </h1>
+      <p style={{ color: '#666', marginBottom: '20px' }}>
+        Mobile app test - React is working!
+      </p>
+      <button 
+        onClick={() => {
+          alert('Button works!');
+          console.log('Button clicked on mobile');
+        }}
+        style={{
+          padding: '12px 24px',
+          backgroundColor: '#007bff',
+          color: 'white',
+          border: 'none',
+          borderRadius: '6px',
+          cursor: 'pointer'
+        }}
+      >
+        Test Button
+      </button>
+      <div style={{ marginTop: '20px', fontSize: '14px', color: '#888' }}>
+        User Agent: {navigator.userAgent}
       </div>
-    );
-  }
+    </div>
+  );
 };
 
 export default App;
