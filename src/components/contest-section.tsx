@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ContestantCard } from "@/components/contest-card-no-supabase";
+import { ContestantCard } from "@/components/contest-card";
 
 import contestant1Face from "@/assets/contestant-1-face.jpg";
 import contestant1Full from "@/assets/contestant-1-full.jpg";
