@@ -15,18 +15,16 @@ interface SearchableSelectProps {
   disabled?: boolean;
   emptyMessage?: string;
   ariaLabel?: string;
-  invalid?: boolean;
 }
 
 const SearchableSelect: React.FC<SearchableSelectProps> = ({
   value,
   onValueChange,
   options,
-  placeholder = "Select...",
+  placeholder = "Выберите...",
   disabled,
-  emptyMessage = "Nothing found",
+  emptyMessage = "Ничего не найдено",
   ariaLabel,
-  invalid = false,
 }) => {
   const [open, setOpen] = React.useState(false);
   const selected = options.find((o) => o.value === value);
@@ -40,20 +38,18 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
           aria-expanded={open}
           aria-label={ariaLabel}
           disabled={disabled}
-          aria-invalid={invalid}
           className={cn(
             "w-full justify-between",
-            !selected && "italic text-muted-foreground",
-            invalid && "border-destructive focus:ring-destructive"
+            !selected && "italic text-muted-foreground"
           )}
         >
-          {selected ? selected.label : (placeholder || "Select...")}
+          {selected ? selected.label : (placeholder || "Выберите...")}
           <ChevronsUpDown className="ml-2 size-4 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[--radix-popover-trigger-width] p-0 z-50 bg-popover" onWheelCapture={(e) => e.stopPropagation()} onOpenAutoFocus={(e) => e.preventDefault()}>
         <Command>
-          <CommandInput placeholder="Search..." />
+          <CommandInput placeholder="Поиск..." />
           <CommandEmpty>{emptyMessage}</CommandEmpty>
           <CommandList className="max-h-64 overflow-y-auto">
             <CommandGroup>

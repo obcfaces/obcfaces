@@ -1,25 +1,13 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { useParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
-import { toast } from "@/components/ui/use-toast";
-import PostCard from "@/components/profile/PostCard";
-import c1 from "@/assets/contestant-1.jpg";
-import c2 from "@/assets/contestant-2.jpg";
-import c3 from "@/assets/contestant-3.jpg";
 
 interface ProfileRow {
   display_name: string | null;
   birthdate: string | null;
   height_cm: number | null;
   weight_kg: number | null;
-  avatar_url?: string | null;
-  city?: string | null;
-  country?: string | null;
-  bio?: string | null;
 }
 
 const Profile = () => {
@@ -27,22 +15,12 @@ const Profile = () => {
   const [data, setData] = useState<ProfileRow | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
-
-  const [followersCount, setFollowersCount] = useState(0);
-  const [followingCount, setFollowingCount] = useState(0);
-  const [isFollowing, setIsFollowing] = useState(false);
-  const [loadingFollow, setLoadingFollow] = useState(false);
-
-  const [isEditingBio, setIsEditingBio] = useState(false);
-  const [bioDraft, setBioDraft] = useState("");
-  const [savingBio, setSavingBio] = useState(false);
   useEffect(() => {
     const load = async () => {
       if (!id) return;
       const { data } = await supabase
         .from("profiles")
-        .select("display_name, birthdate, height_cm, weight_kg, avatar_url, city, country, bio")
+        .select("display_name, birthdate, height_cm, weight_kg")
         .eq("id", id)
         .maybeSingle();
       setData(data ?? null);
@@ -51,142 +29,8 @@ const Profile = () => {
     load();
   }, [id]);
 
-  // Get current user id
-  useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      setCurrentUserId(data.user?.id ?? null);
-    });
-  }, []);
-
-  // Keep bio draft in sync
-  useEffect(() => {
-    setBioDraft(data?.bio ?? "");
-  }, [data?.bio]);
-
-// Load followers/following counts
-useEffect(() => {
-  if (!id) return;
-  const loadCounts = async () => {
-  const { data, error } = await supabase.rpc('get_follow_stats', { target_user_id: id });
-  if (!error && data && Array.isArray(data) && data[0]) {
-    setFollowersCount((data[0] as any).followers_count ?? 0);
-    setFollowingCount((data[0] as any).following_count ?? 0);
-  } else if (!error && data && (data as any).followers_count !== undefined) {
-    // Fallback if supabase returns a single object in future versions
-    setFollowersCount((data as any).followers_count ?? 0);
-    setFollowingCount((data as any).following_count ?? 0);
-  } else {
-    setFollowersCount(0);
-    setFollowingCount(0);
-  }
-  };
-  loadCounts();
-}, [id]);
-
-  // Check following state for current user
-  useEffect(() => {
-    if (!id || !currentUserId || currentUserId === id) {
-      setIsFollowing(false);
-      return;
-    }
-  (async () => {
-    try {
-      const { data } = await supabase.rpc('is_following', { target_user_id: id });
-      setIsFollowing(Boolean(data));
-    } catch {
-      setIsFollowing(false);
-    }
-  })();
-  }, [id, currentUserId]);
-
-  const isOwner = currentUserId === (id ?? null);
-
-  const handleFollowToggle = async () => {
-    if (!currentUserId) {
-      toast({ description: "Войдите, чтобы подписываться." });
-      return;
-    }
-    if (!id) return;
-    setLoadingFollow(true);
-    try {
-      if (isFollowing) {
-        const { error } = await supabase
-          .from("follows")
-          .delete()
-          .match({ follower_id: currentUserId, followee_id: id });
-        if (error) throw error;
-        setIsFollowing(false);
-        setFollowersCount((c) => Math.max(0, c - 1));
-      } else {
-        const { error } = await supabase
-          .from("follows")
-          .insert({ follower_id: currentUserId, followee_id: id });
-        if (error) throw error;
-        setIsFollowing(true);
-        setFollowersCount((c) => c + 1);
-      }
-    } catch (e) {
-      toast({ description: "Не удалось выполнить действие. Попробуйте позже." });
-    } finally {
-      setLoadingFollow(false);
-    }
-  };
-
-  const handleMessage = () => {
-    toast({ description: "Сообщения скоро будут доступны." });
-  };
-
-  const handleBioSave = async () => {
-    if (!currentUserId || !isOwner) return;
-    setSavingBio(true);
-    try {
-      const { error } = await supabase
-        .from("profiles")
-        .update({ bio: bioDraft })
-        .eq("id", currentUserId);
-      if (error) throw error;
-      setData((prev) => (prev ? { ...prev, bio: bioDraft } : prev));
-      setIsEditingBio(false);
-      toast({ description: "Описание обновлено." });
-    } catch (e) {
-      toast({ description: "Не удалось сохранить описание." });
-    } finally {
-      setSavingBio(false);
-    }
-  };
-
   const title = data?.display_name ? `${data.display_name} — Профиль` : "Профиль пользователя";
   const description = data?.display_name ? `Личная страница ${data.display_name}` : "Личная страница пользователя";
-
-  const initials = useMemo(() => {
-    const name = data?.display_name ?? "User";
-    const parts = name.trim().split(/\s+/);
-    return (parts[0]?.[0] ?? "U").toUpperCase() + (parts[1]?.[0] ?? "").toUpperCase();
-  }, [data?.display_name]);
-
-  const samplePosts = useMemo(
-    () => [
-      {
-        id: "p1",
-        authorName: data?.display_name ?? "Пользователь",
-        authorAvatarUrl: data?.avatar_url ?? undefined,
-        time: "2 ч. назад",
-        content: "Сегодня тренировка прошла на ура! Готовлюсь к следующим соревнованиям.",
-        imageSrc: c2,
-        likes: 24,
-        comments: 5,
-      },
-      {
-        id: "p2",
-        authorName: data?.display_name ?? "Пользователь",
-        authorAvatarUrl: data?.avatar_url ?? undefined,
-        time: "Вчера",
-        content: "Спасибо всем за поддержку! Маленькие шаги приводят к большим победам.",
-        likes: 18,
-        comments: 3,
-      },
-    ], [data?.display_name, data?.avatar_url]
-  );
 
   return (
     <main className="min-h-screen bg-background">
@@ -195,133 +39,29 @@ useEffect(() => {
         <meta name="description" content={description} />
         <link rel="canonical" href={`${window.location.origin}/u/${id ?? ""}`} />
       </Helmet>
-
-      <section className="container mx-auto max-w-3xl py-8 px-4">
+      <section className="container mx-auto max-w-2xl py-10 px-4">
+        <header className="mb-6">
+          <h1 className="text-2xl font-semibold">{data?.display_name ?? "Профиль пользователя"}</h1>
+          <p className="text-sm text-muted-foreground">Личная страница участника</p>
+        </header>
         {loading ? (
           <p className="text-muted-foreground">Загрузка…</p>
         ) : !data ? (
           <div>
-            <header className="mb-4">
-              <h1 className="text-2xl font-semibold">Профиль пользователя</h1>
-              <p className="text-sm text-muted-foreground">Личная страница участника</p>
-            </header>
-            <p className="text-muted-foreground mb-3">Профиль не найден или приватен.</p>
+            <p className="text-muted-foreground mb-3">Профиль не найден.</p>
             <Link to="/" className="text-primary underline">На главную</Link>
           </div>
         ) : (
-          <>
-            <header className="mb-4">
-              <div className="h-40 sm:h-56 w-full rounded-lg bg-muted" role="img" aria-label="Обложка профиля" />
-              <div className="-mt-8 sm:-mt-10 flex items-end gap-4 px-2 sm:px-4">
-                <Avatar className="h-20 w-20 ring-2 ring-background">
-                  <AvatarImage src={data.avatar_url ?? undefined} alt={`Аватар ${data.display_name ?? "пользователя"}`} />
-                  <AvatarFallback>{initials}</AvatarFallback>
-                </Avatar>
-                <div className="pb-2">
-                  <h1 className="text-2xl font-semibold leading-tight">{data.display_name ?? "Профиль пользователя"}</h1>
-                  <p className="text-sm text-muted-foreground">
-                    {data.city ? `${data.city}` : "Город не указан"}
-                    {data.country ? `, ${data.country}` : ""}
-                  </p>
-                </div>
-              </div>
-            </header>
-
-            <div className="px-2 sm:px-4">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                <div className="flex items-center gap-6">
-                  <div className="text-center">
-                    <div className="text-xl font-semibold">{followersCount}</div>
-                    <div className="text-sm text-muted-foreground">Подписчики</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-xl font-semibold">{followingCount}</div>
-                    <div className="text-sm text-muted-foreground">Подписки</div>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  {!isOwner && (
-                    <>
-                      <Button variant={isFollowing ? "secondary" : "default"} onClick={handleFollowToggle} disabled={loadingFollow}>
-                        {isFollowing ? "Отписаться" : "Подписаться"}
-                      </Button>
-                      <Button variant="outline" onClick={handleMessage}>Сообщение</Button>
-                    </>
-                  )}
-                </div>
-              </div>
-
-              <div className="mt-3">
-                {isOwner ? (
-                  isEditingBio ? (
-                    <div className="space-y-2">
-                      <textarea
-                        className="w-full min-h-24 rounded-md border bg-background p-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                        value={bioDraft}
-                        onChange={(e) => setBioDraft(e.target.value)}
-                        placeholder="Расскажите о себе…"
-                      />
-                      <div className="flex gap-2">
-                        <Button size="sm" onClick={handleBioSave} disabled={savingBio}>Сохранить</Button>
-                        <Button size="sm" variant="ghost" onClick={() => { setIsEditingBio(false); setBioDraft(data.bio ?? ""); }}>Отмена</Button>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="text-sm text-muted-foreground">
-                      {data.bio ? (
-                        <p>{data.bio}</p>
-                      ) : (
-                        <button className="underline" onClick={() => setIsEditingBio(true)}>Добавить текст “О себе”</button>
-                      )}
-                    </div>
-                  )
-                ) : (
-                  data.bio ? <p className="text-sm text-muted-foreground">{data.bio}</p> : null
-                )}
-              </div>
+          <article className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <p><span className="text-muted-foreground">Имя:</span> {data.display_name ?? "—"}</p>
+              <p><span className="text-muted-foreground">Дата рождения:</span> {data.birthdate ?? "—"}</p>
             </div>
-
-            <Tabs defaultValue="posts" className="mt-4">
-              <TabsList className="w-full sm:w-auto">
-                <TabsTrigger value="posts">Посты</TabsTrigger>
-                <TabsTrigger value="photos">Фото</TabsTrigger>
-                <TabsTrigger value="about">Инфо</TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="posts" className="space-y-4 mt-4">
-                {samplePosts.map((p) => (
-                  <PostCard key={p.id} {...p} />
-                ))}
-              </TabsContent>
-
-              <TabsContent value="photos" className="mt-4">
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                  {[c1, c2, c3, c1, c2, c3].map((src, idx) => (
-                    <img
-                      key={idx}
-                      src={src}
-                      loading="lazy"
-                      alt={`Фото ${idx + 1} — ${data.display_name ?? "пользователь"}`}
-                      className="w-full h-32 sm:h-36 object-cover rounded-md"
-                    />
-                  ))}
-                </div>
-              </TabsContent>
-
-              <TabsContent value="about" className="mt-4">
-                <article className="grid gap-4 sm:grid-cols-2">
-                  <div className="space-y-2">
-                    <p><span className="text-muted-foreground">Имя:</span> {data.display_name ?? "—"}</p>
-                    <p><span className="text-muted-foreground">Дата рождения:</span> {data.birthdate ?? "—"}</p>
-                  </div>
-                  <div className="space-y-2">
-                    <p><span className="text-muted-foreground">Рост:</span> {data.height_cm ? `${data.height_cm} см` : "—"}</p>
-                    <p><span className="text-muted-foreground">Вес:</span> {data.weight_kg ? `${data.weight_kg} кг` : "—"}</p>
-                  </div>
-                </article>
-              </TabsContent>
-            </Tabs>
-          </>
+            <div className="space-y-2">
+              <p><span className="text-muted-foreground">Рост:</span> {data.height_cm ? `${data.height_cm} см` : "—"}</p>
+              <p><span className="text-muted-foreground">Вес:</span> {data.weight_kg ? `${data.weight_kg} кг` : "—"}</p>
+            </div>
+          </article>
         )}
       </section>
     </main>
@@ -329,4 +69,3 @@ useEffect(() => {
 };
 
 export default Profile;
-

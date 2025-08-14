@@ -14,51 +14,16 @@ export type Database = {
   }
   public: {
     Tables: {
-      follows: {
-        Row: {
-          created_at: string
-          followee_id: string
-          follower_id: string
-        }
-        Insert: {
-          created_at?: string
-          followee_id: string
-          follower_id: string
-        }
-        Update: {
-          created_at?: string
-          followee_id?: string
-          follower_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "follows_followee_id_fkey"
-            columns: ["followee_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "follows_follower_id_fkey"
-            columns: ["follower_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       profiles: {
         Row: {
           age: number | null
           avatar_url: string | null
-          bio: string | null
           birthdate: string | null
           city: string | null
           country: string | null
           created_at: string
           display_name: string | null
           first_name: string | null
-          gender: string | null
           height_cm: number | null
           id: string
           last_name: string | null
@@ -69,14 +34,12 @@ export type Database = {
         Insert: {
           age?: number | null
           avatar_url?: string | null
-          bio?: string | null
           birthdate?: string | null
           city?: string | null
           country?: string | null
           created_at?: string
           display_name?: string | null
           first_name?: string | null
-          gender?: string | null
           height_cm?: number | null
           id: string
           last_name?: string | null
@@ -87,14 +50,12 @@ export type Database = {
         Update: {
           age?: number | null
           avatar_url?: string | null
-          bio?: string | null
           birthdate?: string | null
           city?: string | null
           country?: string | null
           created_at?: string
           display_name?: string | null
           first_name?: string | null
-          gender?: string | null
           height_cm?: number | null
           id?: string
           last_name?: string | null
@@ -109,17 +70,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      get_follow_stats: {
-        Args: { target_user_id: string }
-        Returns: {
-          followers_count: number
-          following_count: number
-        }[]
-      }
-      is_following: {
-        Args: { target_user_id: string }
-        Returns: boolean
-      }
+      [_ in never]: never
     }
     Enums: {
       [_ in never]: never
