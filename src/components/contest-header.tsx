@@ -22,7 +22,7 @@ export function ContestHeader() {
         <div className="mt-4">
           <Button className="bg-contest-blue hover:bg-blue-600 text-white px-6">
             <Camera className="w-4 h-4 mr-2" />
-            Load your photo and win 5000 Php
+            Join & Win 5,000 PHP
           </Button>
           
           {/* Contest info points */}
