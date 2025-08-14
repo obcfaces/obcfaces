@@ -81,17 +81,6 @@ const categoryOptions: Option[] = useMemo(() => [
         />
       </div>
 
-      {/* Category filter */}
-      <div className="w-40 shrink-0">
-        <SearchableSelect
-          value={category}
-          onValueChange={(v) => onCategoryChange(v as Category)}
-          options={categoryOptions}
-          placeholder="Category"
-          ariaLabel="Category filter"
-          highlightSelected
-        />
-      </div>
 
       {/* View toggles */}
       <div className="ml-auto flex items-center gap-1 shrink-0">
