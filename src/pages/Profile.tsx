@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/use-toast";
 import PostCard from "@/components/profile/PostCard";
 import LikedItem from "@/components/profile/LikedItem";
+import { PhotoModal } from "@/components/photo-modal";
 import c1 from "@/assets/contestant-1.jpg";
 import c2 from "@/assets/contestant-2.jpg";
 import c3 from "@/assets/contestant-3.jpg";
@@ -43,6 +44,11 @@ const Profile = () => {
   const [likedItems, setLikedItems] = useState<any[]>([]);
   const [loadingLikes, setLoadingLikes] = useState(true);
   const [likesViewMode, setLikesViewMode] = useState<'compact' | 'full'>('compact');
+  const [photoModalOpen, setPhotoModalOpen] = useState(false);
+  const [selectedPhotoIndex, setSelectedPhotoIndex] = useState(0);
+
+  // Sample photos for gallery
+  const profilePhotos = [c1, c2, c3, c1, c2, c3];
 
   // Demo profile for fallback
   const demoProfile: ProfileRow = {
@@ -303,15 +309,23 @@ const Profile = () => {
             </TabsContent>
 
             <TabsContent value="photos" className="mt-4">
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-0 sm:gap-3">
-                {[c1, c2, c3, c1, c2, c3].map((src, idx) => (
-                  <img
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                {profilePhotos.map((src, idx) => (
+                  <button
                     key={idx}
-                    src={src}
-                    loading="lazy"
-                    alt={`Фото ${idx + 1} — ${profile.display_name ?? "пользователь"}`}
-                    className="w-full h-32 sm:h-36 object-cover rounded-none sm:rounded-md"
-                  />
+                    onClick={() => {
+                      setSelectedPhotoIndex(idx);
+                      setPhotoModalOpen(true);
+                    }}
+                    className="relative group cursor-pointer"
+                  >
+                    <img
+                      src={src}
+                      loading="lazy"
+                      alt={`Фото ${idx + 1} — ${profile.display_name ?? "пользователь"}`}
+                      className="w-full h-32 sm:h-36 object-cover rounded-md group-hover:opacity-90 transition-opacity"
+                    />
+                  </button>
                 ))}
               </div>
             </TabsContent>
@@ -406,6 +420,20 @@ const Profile = () => {
           </Tabs>
         </section>
       </main>
+
+      {/* Photo Modal */}
+      <PhotoModal
+        isOpen={photoModalOpen}
+        onClose={() => setPhotoModalOpen(false)}
+        photos={profilePhotos}
+        currentIndex={selectedPhotoIndex}
+        contestantName={profile.display_name || "Пользователь"}
+        age={profile.birthdate ? new Date().getFullYear() - new Date(profile.birthdate).getFullYear() : undefined}
+        weight={profile.weight_kg || undefined}
+        height={profile.height_cm || undefined}
+        country={profile.country || undefined}
+        city={profile.city || undefined}
+      />
     </div>
   );
 };
