@@ -405,29 +405,31 @@ const samplePosts = useMemo(
                </TabsContent>
 
                {isOwner && (
-                 <TabsContent value="likes" className="space-y-4 mt-4">
+                 <TabsContent value="likes" className="mt-4">
                    {loadingLikes ? (
-                     <p className="text-muted-foreground text-center py-8">Загрузка лайков...</p>
+                     <p className="text-muted-foreground text-center py-8 px-6">Загрузка лайков...</p>
                    ) : likedItems.length > 0 ? (
-                      likedItems.map((item) => (
-                        <LikedItem
-                          key={item.likeId}
-                          likeId={item.likeId}
-                          contentType={item.contentType}
-                          contentId={item.contentId}
-                          authorName={item.authorName}
-                          authorAvatarUrl={item.authorAvatarUrl}
-                          authorProfileId={item.authorProfileId}
-                          time={item.time}
-                          content={item.content}
-                          imageSrc={item.imageSrc}
-                          likes={item.likes}
-                          comments={item.comments}
-                          onUnlike={handleUnlike}
-                        />
-                      ))
+                      <div className="px-0 sm:px-6 space-y-4">
+                        {likedItems.map((item) => (
+                          <LikedItem
+                            key={item.likeId}
+                            likeId={item.likeId}
+                            contentType={item.contentType}
+                            contentId={item.contentId}
+                            authorName={item.authorName}
+                            authorAvatarUrl={item.authorAvatarUrl}
+                            authorProfileId={item.authorProfileId}
+                            time={item.time}
+                            content={item.content}
+                            imageSrc={item.imageSrc}
+                            likes={item.likes}
+                            comments={item.comments}
+                            onUnlike={handleUnlike}
+                          />
+                        ))}
+                      </div>
                    ) : (
-                     <div className="text-center py-8">
+                     <div className="text-center py-8 px-6">
                        <p className="text-muted-foreground">Вы еще ничего не лайкали</p>
                        <p className="text-sm text-muted-foreground mt-2">Лайкните посты и фото, чтобы они отображались здесь</p>
                      </div>
