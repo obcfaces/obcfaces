@@ -31,6 +31,20 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       <ContestHeader />
       
+      <div className="max-w-6xl mx-auto px-6 mb-6">
+        <ContestFilters
+          country={country}
+          onCountryChange={setCountry}
+          gender={gender}
+          onGenderChange={setGender}
+          viewMode={viewMode}
+          onViewModeChange={setViewMode}
+          category={category}
+          onCategoryChange={handleCategoryChange}
+          genderAvailability={{ male: false, female: true }}
+        />
+      </div>
+      
       <NextWeekSection viewMode={viewMode} />
 
       <div className="max-w-6xl mx-auto px-6" aria-hidden>
@@ -44,19 +58,6 @@ const Index = () => {
         isActive={true}
         noWrapTitle
         viewMode={viewMode}
-        filters={
-          <ContestFilters
-            country={country}
-            onCountryChange={setCountry}
-            gender={gender}
-            onGenderChange={setGender}
-            viewMode={viewMode}
-            onViewModeChange={setViewMode}
-            category={category}
-            onCategoryChange={handleCategoryChange}
-            genderAvailability={{ male: false, female: true }}
-          />
-        }
       />
 
       <div className="max-w-6xl mx-auto px-6" aria-hidden>
