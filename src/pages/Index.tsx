@@ -14,12 +14,8 @@ const Index = () => {
   
   // Инициализация category из localStorage или "" по умолчанию
   const [category, setCategory] = useState<"" | Category>(() => {
-    try {
-      const saved = localStorage.getItem('contest-category-filter');
-      return saved !== null ? (saved as "" | Category) : "";
-    } catch {
-      return "";
-    }
+    const saved = localStorage.getItem('contest-category-filter');
+    return saved !== null ? (saved as "" | Category) : "";
   });
 
   // Сохранение category в localStorage при изменении

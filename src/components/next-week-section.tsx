@@ -89,13 +89,11 @@ interface NextWeekSectionProps {
 export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [history, setHistory] = useState<number[]>([]);
-  const [remainingCandidates, setRemainingCandidates] = useState(candidates.length);
 
   const handleLike = () => {
     if (currentIndex < candidates.length - 1) {
       setHistory(prev => [...prev, currentIndex]);
       setCurrentIndex(prev => prev + 1);
-      setRemainingCandidates(prev => prev - 1);
     }
   };
 
@@ -103,7 +101,6 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
     if (currentIndex < candidates.length - 1) {
       setHistory(prev => [...prev, currentIndex]);
       setCurrentIndex(prev => prev + 1);
-      setRemainingCandidates(prev => prev - 1);
     }
   };
 
@@ -112,7 +109,6 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
       const previousIndex = history[history.length - 1];
       setHistory(prev => prev.slice(0, -1));
       setCurrentIndex(previousIndex);
-      setRemainingCandidates(prev => prev + 1);
     }
   };
 
@@ -173,12 +169,6 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
             >
               <Heart className="w-8 h-8 text-green-500" />
             </Button>
-          </div>
-          
-          <div className="mt-4 text-center">
-            <span className="text-lg text-contest-text">
-              {remainingCandidates} remaining
-            </span>
           </div>
         </div>
       ) : (

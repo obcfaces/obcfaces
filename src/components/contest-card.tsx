@@ -120,8 +120,8 @@ export function ContestantCard({
             </div>
           )}
           
-          {/* Rank, rating and location in top right corner - show rank always if rank > 0 and user has voted */}
-          {rank > 0 && isVoted && (
+          {/* Rank, rating and location in top right corner - show rank always if rank > 0 */}
+          {rank > 0 && (
             <div className="absolute top-0 right-0 z-20 flex flex-col items-end">
               <div className="flex items-center gap-1">
                 <div className="text-xl font-bold text-contest-blue">#{rank}</div>
@@ -247,7 +247,7 @@ export function ContestantCard({
                 aria-label="Like"
               >
                 <Heart className="w-4 h-4" />
-                <span className="hidden sm:inline">Like</span>
+                <span className="hidden min-[280px]:inline">Like</span>
                 <span>{likesCount[0] + likesCount[1]}</span>
               </button>
               {showDislike && (
@@ -261,7 +261,7 @@ export function ContestantCard({
                   aria-label="Dislike"
                 >
                   <ThumbsDown className="w-4 h-4" />
-                  <span className="hidden sm:inline">Dislike</span>
+                  <span className="hidden min-[280px]:inline">Dislike</span>
                   <span>{dislikesCount}</span>
                 </button>
               )}
@@ -272,7 +272,7 @@ export function ContestantCard({
                 aria-label="Comments"
               >
                 <MessageCircle className="w-4 h-4" />
-                <span className="hidden sm:inline">Comment</span>
+                <span className="hidden min-[280px]:inline">Comment</span>
                 <span>{commentsCount[0] + commentsCount[1]}</span>
               </button>
               <button
@@ -282,7 +282,7 @@ export function ContestantCard({
                 aria-label="Share"
               >
                  <Share2 className="w-4 h-4" />
-                 <span className="hidden sm:inline">Share</span>
+                 <span className="hidden min-[280px]:inline">Share</span>
               </button>
            </div>
          </Card>
@@ -344,7 +344,7 @@ export function ContestantCard({
               className="w-24 sm:w-28 md:w-32 h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
               onClick={() => openModal(0)}
             />
-            {rank > 0 && isVoted && (
+            {rank > 0 && (
               <div className="absolute top-0 left-0 bg-black/70 text-white text-xs font-bold px-1 py-0.5 rounded-br">
                 {rank}
               </div>
@@ -464,24 +464,9 @@ export function ContestantCard({
                   aria-label="Like"
                 >
                   <Heart className="w-3.5 h-3.5" />
-                  <span className="hidden xl:inline">Like</span>
+                  <span className="hidden md:inline">Like</span>
                   <span>{likesCount[0] + likesCount[1]}</span>
                 </button>
-                {showDislike && (
-                  <button
-                    type="button"
-                    className={cn(
-                      "inline-flex items-center gap-1 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors",
-                      isDisliked && "text-red-500"
-                    )}
-                    onClick={handleDislike}
-                    aria-label="Dislike"
-                  >
-                    <ThumbsDown className="w-3.5 h-3.5" />
-                    <span className="hidden xl:inline">Dislike</span>
-                    <span>{dislikesCount}</span>
-                  </button>
-                )}
                 <button
                   type="button"
                   className="inline-flex items-center gap-1 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors"
@@ -489,7 +474,7 @@ export function ContestantCard({
                   aria-label="Comments"
                 >
                   <MessageCircle className="w-3.5 h-3.5" />
-                  <span className="hidden xl:inline">Comment</span>
+                  <span className="hidden md:inline">Comment</span>
                   <span>{commentsCount[0] + commentsCount[1]}</span>
                 </button>
                 <button
@@ -508,7 +493,7 @@ export function ContestantCard({
                   aria-label="Share"
                 >
                   <Share2 className="w-3.5 h-3.5" />
-                  <span className="hidden xl:inline">Share</span>
+                  <span className="hidden md:inline">Share</span>
                 </button>
               </div>
             </div>
