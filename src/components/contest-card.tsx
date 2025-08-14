@@ -1,5 +1,6 @@
-import { useState } from "react";
-import { Heart, MessageCircle, Star, Pencil, Send } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Heart, MessageCircle, Star, Pencil, Send, Share, Share2, ExternalLink, Upload, ArrowUpRight, ThumbsDown } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { StarRating } from "@/components/ui/star-rating";
@@ -10,6 +11,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { Link } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import LoginModalContent from "@/components/login-modal-content";
 
 interface ContestantCardProps {
   rank: number;
@@ -28,6 +32,8 @@ interface ContestantCardProps {
   prize?: string;
   viewMode?: 'compact' | 'full';
   onRate?: (rating: number) => void;
+  profileId?: string;
+  showDislike?: boolean; // Новый пропс для показа дизлайка
 }
 
 export function ContestantCard({
@@ -42,41 +48,200 @@ export function ContestantCard({
   faceImage,
   fullBodyImage,
   additionalPhotos = [],
-  isVoted,
+  isVoted: propIsVoted,
   isWinner,
   prize,
   viewMode = 'compact',
-  onRate
+  onRate,
+  profileId,
+  showDislike = false
 }: ContestantCardProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalStartIndex, setModalStartIndex] = useState(0);
   const [isEditing, setIsEditing] = useState(false);
   const [showThanks, setShowThanks] = useState(false);
-  const [userRating, setUserRating] = useState(0);
+  const [userRating, setUserRating] = useState(() => {
+    try {
+      const currentUserId = localStorage.getItem('currentUserId');
+      if (!currentUserId) return 0;
+      const savedRating = localStorage.getItem(`rating-${name}-${currentUserId}`);
+      return savedRating ? parseFloat(savedRating) : 0;
+    } catch {
+      return 0;
+    }
+  });
   const [isLiked, setIsLiked] = useState<boolean[]>([false, false]);
+  const [isDisliked, setIsDisliked] = useState(false);
   const [likesCount, setLikesCount] = useState<number[]>([
     Math.floor(Math.random() * 50) + 5,
     Math.floor(Math.random() * 50) + 5,
   ]);
+  const [dislikesCount, setDislikesCount] = useState<number>(
+    Math.floor(Math.random() * 20) + 2
+  );
   const [commentsCount] = useState<number[]>([
     Math.floor(Math.random() * 20) + 1,
     Math.floor(Math.random() * 20) + 1,
   ]);
+  const [user, setUser] = useState<any>(null);
+  // Initialize isVoted state synchronously by checking localStorage
+  const [isVoted, setIsVoted] = useState(() => {
+    if (propIsVoted) return true;
+    try {
+      const savedRating = localStorage.getItem(`rating-${name}-${localStorage.getItem('currentUserId') || 'anonymous'}`);
+      return !!savedRating;
+    } catch {
+      return false;
+    }
+  });
+  const [showLoginModal, setShowLoginModal] = useState(false);
   const { toast } = useToast();
 
-  const handleLike = (index: number) => {
-    const wasLiked = isLiked[index]
-    setIsLiked((prev) => {
-      const next = [...prev]
-      next[index] = !wasLiked
-      return next
-    })
-    setLikesCount((prev) => {
-      const next = [...prev]
-      next[index] = wasLiked ? next[index] - 1 : next[index] + 1
-      return next
-    })
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
+      const newUser = session?.user ?? null;
+      setUser(newUser);
+      // Store current user ID for synchronous access
+      if (newUser?.id) {
+        localStorage.setItem('currentUserId', newUser.id);
+      } else {
+        localStorage.removeItem('currentUserId');
+      }
+    });
+
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      const newUser = session?.user ?? null;
+      setUser(newUser);
+      // Store current user ID for synchronous access
+      if (newUser?.id) {
+        localStorage.setItem('currentUserId', newUser.id);
+      } else {
+        localStorage.removeItem('currentUserId');
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  // Load user's likes and ratings on component mount
+  useEffect(() => {
+    if (!user || !name) return;
+    
+    const loadUserData = async () => {
+      try {
+        // Load likes for both photos
+        const { data: likes } = await supabase
+          .from("likes")
+          .select("content_id")
+          .eq("user_id", user.id)
+          .eq("content_type", "contest")
+          .in("content_id", [`contestant-${name}-0`, `contestant-${name}-1`]);
+        
+        if (likes) {
+          const likedState = [
+            likes.some(like => like.content_id === `contestant-${name}-0`),
+            likes.some(like => like.content_id === `contestant-${name}-1`)
+          ];
+          setIsLiked(likedState);
+        }
+        
+        // Load user's rating (if any)
+        const savedRating = localStorage.getItem(`rating-${name}-${user.id}`);
+        if (savedRating) {
+          setUserRating(parseFloat(savedRating));
+          setIsVoted(true); // Mark as voted if rating exists
+        }
+      } catch (error) {
+        console.error('Error loading user data:', error);
+      }
+    };
+    
+    loadUserData();
+  }, [user?.id, name]); // Исправлено: только user.id вместо всего объекта user
+
+  const handleLike = async (index: number) => {
+    if (!user) {
+      setShowLoginModal(true);
+      return;
+    }
+    
+    const contentId = `contestant-${name}-${index}`;
+    const wasLiked = isLiked[index];
+    
+    try {
+      if (wasLiked) {
+        // Unlike
+        await supabase
+          .from("likes")
+          .delete()
+          .eq("user_id", user.id)
+          .eq("content_type", "contest")
+          .eq("content_id", contentId);
+      } else {
+        // Like
+        await supabase
+          .from("likes")
+          .insert({
+            user_id: user.id,
+            content_type: "contest",
+            content_id: contentId,
+          });
+      }
+      
+      setIsLiked((prev) => {
+        const next = [...prev];
+        next[index] = !wasLiked;
+        return next;
+      });
+      
+      setLikesCount((prev) => {
+        const next = [...prev];
+        next[index] = wasLiked ? next[index] - 1 : next[index] + 1;
+        return next;
+      });
+      
+    } catch (error) {
+      toast({ description: "Не удалось выполнить действие" });
+    }
   };
+
+  const handleDislike = () => {
+    if (!user) {
+      setShowLoginModal(true);
+      return;
+    }
+    
+    setIsDisliked(prev => !prev);
+    setDislikesCount(prev => isDisliked ? prev - 1 : prev + 1);
+  };
+
+  const handleRate = (rating: number) => {
+    if (!user) {
+      setShowLoginModal(true);
+      return;
+    }
+    
+    setUserRating(rating);
+    setIsVoted(true); // Mark as voted
+    // Save rating to localStorage
+    localStorage.setItem(`rating-${name}-${user.id}`, rating.toString());
+    
+    setShowThanks(true);
+    setTimeout(() => {
+      setShowThanks(false);
+      onRate?.(rating);
+    }, 1000);
+  };
+
+  const handleComment = () => {
+    if (!user) {
+      setShowLoginModal(true);
+      return;
+    }
+    
+    openModal(0);
+  };
+
 
 
   const allPhotos = [faceImage, fullBodyImage, ...additionalPhotos];
@@ -91,7 +256,7 @@ export function ContestantCard({
       <>
         <Card className="bg-card border-contest-border relative overflow-hidden">
           {isWinner && (
-            <div className="absolute top-4 left-4 bg-contest-blue text-white px-3 py-1 rounded-full text-sm font-bold flex items-center gap-1 z-10">
+            <div className="absolute top-2 left-4 bg-contest-blue text-white px-3 py-1 rounded-full text-sm font-bold flex items-center gap-1 z-10">
               🏆 WINNER
             </div>
           )}
@@ -99,13 +264,13 @@ export function ContestantCard({
           {/* Name in top left - only after voting */}
            {(isVoted && !showThanks && !isEditing) && (
              <div className="absolute top-2 left-4 z-20">
-              <h3 className="text-xl font-semibold text-contest-text">{name}, {age} <span className="text-sm text-muted-foreground font-normal">({weight} kg · {height} cm)</span></h3>
+              <h3 className="text-xl font-semibold text-contest-text">{profileId ? (<Link to={`/u/${profileId}`} className="hover:text-primary underline-offset-2 hover:underline">{name}</Link>) : name}, {age} <span className="text-sm text-muted-foreground font-normal">({weight} kg · {height} cm)</span></h3>
               <div className="text-contest-blue text-sm">{country} · {city}</div>
             </div>
           )}
           
-          {/* Rank, rating and location in top right corner - only after voting */}
-          {(isVoted && !showThanks && !isEditing) && (
+          {/* Rank, rating and location in top right corner - show rank always if rank > 0 and user has voted */}
+          {rank > 0 && isVoted && (
             <div className="absolute top-0 right-0 z-20 flex flex-col items-end">
               <div className="flex items-center gap-1">
                 <div className="text-xl font-bold text-contest-blue">#{rank}</div>
@@ -141,14 +306,7 @@ export function ContestantCard({
                     isVoted={false}
                     variant="white"
                     hideText={true}
-                    onRate={(rating) => {
-                      setUserRating(rating);
-                      setShowThanks(true);
-                      setTimeout(() => {
-                        setShowThanks(false);
-                        onRate?.(rating);
-                      }, 1000);
-                    }}
+                    onRate={handleRate}
                   />
                 </div>
               </div>
@@ -174,7 +332,12 @@ export function ContestantCard({
                     variant="white"
                     hideText={true}
                     onRate={(rating) => {
+                      if (!user) {
+                        setShowLoginModal(true);
+                        return;
+                      }
                       setUserRating(rating);
+                      localStorage.setItem(`rating-${name}-${user.id}`, rating.toString());
                       setIsEditing(false);
                       onRate?.(rating);
                     }}
@@ -201,34 +364,6 @@ export function ContestantCard({
                   className="w-full aspect-[4/5] object-cover cursor-pointer hover:opacity-90 transition-opacity"
                   onClick={() => openModal(0)}
                 />
-                {/* Actions for face photo */}
-                <div className="absolute bottom-1 left-1 flex items-center gap-0.5">
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    className={cn(
-                      "transition-colors border-0 h-4 px-0.5 text-xs",
-                      isLiked[0] 
-                        ? "bg-contest-blue text-white hover:bg-contest-blue/90" 
-                        : "bg-transparent text-white hover:text-white/80 hover:bg-transparent"
-                    )}
-                    onClick={() => handleLike(0)}
-                  >
-                    <Heart 
-                      className="w-2.5 h-2.5 mr-0 transition-colors" 
-                    />
-                    {likesCount[0]}
-                  </Button>
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    className="transition-colors text-white hover:text-white/80 border-0 bg-transparent hover:bg-contest-blue/20 h-4 px-0.5 text-xs"
-                    onClick={() => openModal(0)}
-                  >
-                    <MessageCircle className="w-2.5 h-2.5 mr-0" />
-                    {commentsCount[0]}
-                  </Button>
-                </div>
               </div>
               <div className="relative">
                 <img 
@@ -245,38 +380,59 @@ export function ContestantCard({
                     +{additionalPhotos.length}
                   </div>
                 )}
-                {/* Actions for full body photo */}
-                <div className="absolute bottom-1 left-1 flex items-center gap-0.5">
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    className={cn(
-                      "transition-colors border-0 h-4 px-0.5 text-xs",
-                      isLiked[1] 
-                        ? "bg-contest-blue text-white hover:bg-contest-blue/90" 
-                        : "bg-transparent text-white hover:text-white/80 hover:bg-transparent"
-                    )}
-                    onClick={() => handleLike(1)}
-                  >
-                    <Heart 
-                      className="w-2.5 h-2.5 mr-0 transition-colors" 
-                    />
-                    {likesCount[1]}
-                  </Button>
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    className="transition-colors text-white hover:text-white/80 border-0 bg-transparent hover:bg-contest-blue/20 h-4 px-0.5 text-xs"
-                    onClick={() => openModal(0)}
-                  >
-                    <MessageCircle className="w-2.5 h-2.5 mr-0" />
-                    {commentsCount[1]}
-                  </Button>
-                </div>
               </div>
             </div>
-          </div>
-        </Card>
+           </div>
+           <div className="border-t border-contest-border px-4 py-2 flex items-center justify-evenly gap-4">
+              <button
+                type="button"
+                className={cn(
+                  "inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors",
+                  (isLiked[0] || isLiked[1]) && "text-contest-blue"
+                )}
+                onClick={() => handleLike(0)}
+                aria-label="Like"
+              >
+                <Heart className="w-4 h-4" />
+                <span className="hidden sm:inline">Like</span>
+                <span>{likesCount[0] + likesCount[1]}</span>
+              </button>
+              {showDislike && (
+                <button
+                  type="button"
+                  className={cn(
+                    "inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors",
+                    isDisliked && "text-red-500"
+                  )}
+                  onClick={handleDislike}
+                  aria-label="Dislike"
+                >
+                  <ThumbsDown className="w-4 h-4" />
+                  <span className="hidden sm:inline">Dislike</span>
+                  <span>{dislikesCount}</span>
+                </button>
+              )}
+              <button
+                type="button"
+                className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                onClick={handleComment}
+                aria-label="Comments"
+              >
+                <MessageCircle className="w-4 h-4" />
+                <span className="hidden sm:inline">Comment</span>
+                <span>{commentsCount[0] + commentsCount[1]}</span>
+              </button>
+              <button
+                type="button"
+                className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                onClick={async () => { try { if ((navigator as any).share) { await (navigator as any).share({ title: name, url: window.location.href }); } else if (navigator.clipboard) { await navigator.clipboard.writeText(window.location.href); toast({ title: "Link copied" }); } } catch {} }}
+                aria-label="Share"
+              >
+                 <Share2 className="w-4 h-4" />
+                 <span className="hidden sm:inline">Share</span>
+              </button>
+           </div>
+         </Card>
 
         <PhotoModal
           isOpen={isModalOpen}
@@ -290,6 +446,13 @@ export function ContestantCard({
           country={country}
           city={city}
         />
+
+        {/* Login Modal */}
+        <Dialog open={showLoginModal} onOpenChange={setShowLoginModal}>
+          <DialogContent className="sm:max-w-lg">
+            <LoginModalContent onClose={() => setShowLoginModal(false)} />
+          </DialogContent>
+        </Dialog>
       </>
     );
   }
@@ -298,13 +461,13 @@ export function ContestantCard({
     <>
       <Card className="bg-card border-contest-border relative overflow-hidden flex h-32 sm:h-36 md:h-40">
         {isWinner && (
-          <div className="absolute top-2 left-2 bg-contest-blue text-white px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 z-10">
+          <div className="absolute top-1 left-2 bg-contest-blue text-white px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 z-10">
             🏆 WINNER
           </div>
         )}
         
-        {/* Rating badge in top right corner */}
-        {isVoted && !isEditing && !showThanks && (
+        {/* Rating badge in top right corner - only if rank > 0 */}
+        {isVoted && !isEditing && !showThanks && rank > 0 && (
           <div className="absolute top-0 right-0 z-10 flex flex-col items-end">
             <Popover>
               <PopoverTrigger asChild>
@@ -335,30 +498,9 @@ export function ContestantCard({
               className="w-24 sm:w-28 md:w-32 h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
               onClick={() => openModal(0)}
             />
-            <div className="absolute top-0 left-0 bg-black/70 text-white text-xs font-bold px-1 py-0.5 rounded-br">
-              {rank}
-            </div>
-            {/* Actions for face photo in compact mode - only show when voted */}
-            {isVoted && !isEditing && !showThanks && (
-              <div className="absolute bottom-0.5 left-0.5 flex items-center gap-0.5">
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className={cn(
-                    "transition-colors text-xs h-4 px-1 hover:bg-gray-100/20",
-                    isLiked[0] 
-                      ? "text-contest-blue hover:text-contest-blue/80" 
-                      : "text-white hover:text-white/80"
-                  )}
-                  onClick={() => handleLike(0)}
-                >
-                  <Heart 
-                    className={cn(
-                      "w-2.5 h-2.5 transition-colors",
-                      isLiked[0] && "fill-contest-blue"
-                    )} 
-                  />
-                </Button>
+            {rank > 0 && isVoted && (
+              <div className="absolute top-0 left-0 bg-black/70 text-white text-xs font-bold px-1 py-0.5 rounded-br">
+                {rank}
               </div>
             )}
           </div>
@@ -400,15 +542,7 @@ export function ContestantCard({
                   isVoted={false}
                   variant="white"
                   hideText={true}
-                  onRate={(rating) => {
-                    setUserRating(rating);
-                    setShowThanks(true);
-                    // Show thank you message for 1 second, then show contestant info
-                    setTimeout(() => {
-                      setShowThanks(false);
-                      onRate?.(rating);
-                    }, 1000);
-                  }}
+                  onRate={handleRate}
                 />
               </div>
             </div>
@@ -435,7 +569,12 @@ export function ContestantCard({
                   variant="white"
                   hideText={true}
                   onRate={(rating) => {
+                    if (!user) {
+                      setShowLoginModal(true);
+                      return;
+                    }
                     setUserRating(rating);
+                    localStorage.setItem(`rating-${name}-${user.id}`, rating.toString());
                     setIsEditing(false);
                     onRate?.(rating);
                   }}
@@ -449,7 +588,7 @@ export function ContestantCard({
             <div className="absolute inset-0 bg-white rounded-r flex flex-col justify-between p-2 sm:p-3">
               <div className="flex items-start justify-between">
                 <div className="min-w-0 flex-1 mr-2">
-                   <h3 className="font-semibold text-contest-text text-base sm:text-lg truncate">{name}, {age}</h3>
+                   <h3 className="font-semibold text-contest-text text-base sm:text-lg truncate">{profileId ? (<Link to={`/u/${profileId}`} className="hover:text-primary underline-offset-2 hover:underline">{name}</Link>) : name}, {age}</h3>
                    <div className="text-xs sm:text-sm text-muted-foreground font-normal">{weight} kg · {height} cm</div>
                    <div className="text-sm sm:text-base text-contest-blue truncate">
                      {country} · {city}
@@ -465,8 +604,63 @@ export function ContestantCard({
                 </div>
               </div>
               
-              <div className="flex items-center gap-2 sm:gap-3">
-                {/* Removed like and comment buttons */}
+              <div className="flex items-center justify-end gap-4">
+                <button
+                  type="button"
+                  className={cn(
+                    "inline-flex items-center gap-1 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors",
+                    (isLiked[0] || isLiked[1]) && "text-contest-blue"
+                  )}
+                  onClick={() => handleLike(0)}
+                  aria-label="Like"
+                >
+                  <Heart className="w-3.5 h-3.5" />
+                  <span className="hidden xl:inline">Like</span>
+                  <span>{likesCount[0] + likesCount[1]}</span>
+                </button>
+                {showDislike && (
+                  <button
+                    type="button"
+                    className={cn(
+                      "inline-flex items-center gap-1 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors",
+                      isDisliked && "text-red-500"
+                    )}
+                    onClick={handleDislike}
+                    aria-label="Dislike"
+                  >
+                    <ThumbsDown className="w-3.5 h-3.5" />
+                    <span className="hidden xl:inline">Dislike</span>
+                    <span>{dislikesCount}</span>
+                  </button>
+                )}
+                <button
+                  type="button"
+                  className="inline-flex items-center gap-1 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors"
+                  onClick={handleComment}
+                  aria-label="Comments"
+                >
+                  <MessageCircle className="w-3.5 h-3.5" />
+                  <span className="hidden xl:inline">Comment</span>
+                  <span>{commentsCount[0] + commentsCount[1]}</span>
+                </button>
+                <button
+                  type="button"
+                  className="inline-flex items-center gap-1 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors"
+                  onClick={async () => {
+                    try {
+                      if ((navigator as any).share) {
+                        await (navigator as any).share({ title: name, url: window.location.href });
+                      } else if (navigator.clipboard) {
+                        await navigator.clipboard.writeText(window.location.href);
+                        toast({ title: "Link copied" });
+                      }
+                    } catch {}
+                  }}
+                  aria-label="Share"
+                >
+                  <Share2 className="w-3.5 h-3.5" />
+                  <span className="hidden xl:inline">Share</span>
+                </button>
               </div>
             </div>
           )}
@@ -488,6 +682,13 @@ export function ContestantCard({
         country={country}
         city={city}
       />
+
+      {/* Login Modal */}
+      <Dialog open={showLoginModal} onOpenChange={setShowLoginModal}>
+        <DialogContent className="sm:max-w-lg">
+          <LoginModalContent onClose={() => setShowLoginModal(false)} />
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

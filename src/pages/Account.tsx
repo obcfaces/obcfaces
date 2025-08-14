@@ -8,6 +8,7 @@ import SearchableSelect from "@/components/ui/searchable-select";
 import { toast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Country, State, City } from "country-state-city";
+import { getCitiesForLocation } from "@/lib/location-utils";
 
 interface ProfileForm {
   display_name: string;
@@ -52,27 +53,27 @@ const Account = () => {
   const [countryCode, setCountryCode] = useState<string | null>(null);
   const [stateCode, setStateCode] = useState<string | null>(null);
   const states = useMemo(() => (countryCode ? State.getStatesOfCountry(countryCode) : []), [countryCode]);
-  const cities = useMemo(() => {
-    if (!countryCode || !stateCode) return [];
-    const byState = City.getCitiesOfState(countryCode, stateCode);
-    if (byState.length) return byState;
-    // Fallback when dataset lacks state-level city mapping
-    return City.getCitiesOfCountry(countryCode).filter((c) => c.stateCode === stateCode);
-  }, [countryCode, stateCode]);
+  const cities = useMemo(() => getCitiesForLocation(
+    countryCode,
+    stateCode,
+    states.find((s) => s.isoCode === stateCode)?.name
+  ), [countryCode, stateCode, states]);
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (!session?.user) {
+      if (event === "SIGNED_OUT" || (event === "INITIAL_SESSION" && !session)) {
         navigate("/auth", { replace: true });
         return;
       }
-      setUserId(session.user.id);
+      if (session?.user) {
+        setUserId(session.user.id);
+      }
     });
 
     supabase.auth.getSession().then(async ({ data }) => {
       const session = data.session;
       if (!session?.user) {
-        navigate("/auth", { replace: true });
+        setLoading(false);
         return;
       }
       setUserId(session.user.id);
@@ -220,19 +221,30 @@ const Account = () => {
             </div>
             <div className="space-y-2">
               
-              <SearchableSelect
-                disabled={!countryCode || !stateCode}
-                value={form.city}
-                onValueChange={(val) => setForm((f) => ({ ...f, city: val }))}
-                placeholder="Город"
-                ariaLabel="Выбор города"
-                options={cities.map((ct) => ({ value: ct.name, label: ct.name }))}
-              />
               {!countryCode ? (
                 <p className="text-xs text-muted-foreground">Сначала выберите страну</p>
               ) : !stateCode ? (
                 <p className="text-xs text-muted-foreground">Сначала выберите штат/регион</p>
-              ) : null}
+              ) : cities.length > 0 ? (
+                <SearchableSelect
+                  value={form.city}
+                  onValueChange={(val) => setForm((f) => ({ ...f, city: val }))}
+                  placeholder="Город"
+                  ariaLabel="Выбор города"
+                  options={cities.map((ct) => ({ value: ct.name, label: ct.name }))}
+                />
+              ) : (
+                <>
+                  <Input
+                    id="city"
+                    placeholder="Город (введите вручную)"
+                    className="placeholder:italic placeholder:text-muted-foreground"
+                    value={form.city}
+                    onChange={(e) => setForm((f) => ({ ...f, city: e.target.value }))}
+                  />
+                  <p className="text-xs text-muted-foreground">Для выбранного региона нет списка городов — введите название вручную.</p>
+                </>
+              )}
             </div>
             <div className="space-y-2">
               
