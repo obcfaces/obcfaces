@@ -30,5 +30,17 @@
       </div>
     </div>
     <script type="module" src="/src/main.tsx"></script>
+    <script>
+      // Fallback error handling if module fails to load
+      setTimeout(function() {
+        var root = document.getElementById('root');
+        if (root && root.innerHTML.includes('Loading...')) {
+          root.innerHTML = '<div style="padding: 20px; font-family: Arial, sans-serif; background: #f8f9fa;"><h2 style="color: #dc3545;">⚠️ Module Loading Failed</h2><p><strong>Browser:</strong> ' + navigator.userAgent + '</p><p><strong>URL:</strong> ' + window.location.href + '</p><p><strong>Time:</strong> ' + new Date().toISOString() + '</p><button onclick="location.reload()" style="background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">🔄 Refresh</button></div>';
+        }
+      }, 10000);
+      
+      // Log script loading
+      console.log('HTML loaded, browser:', navigator.userAgent);
+    </script>
   </body>
 </html>
