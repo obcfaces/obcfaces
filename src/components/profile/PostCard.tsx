@@ -8,6 +8,8 @@ import { cn } from "@/lib/utils";
 import { toast } from "@/components/ui/use-toast";
 import { Link } from "react-router-dom";
 import { PhotoModal } from "@/components/photo-modal";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import LoginModalContent from "@/components/login-modal-content";
 
 interface PostCardProps {
   id?: string;
@@ -43,6 +45,7 @@ const PostCard = ({
   const [loading, setLoading] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
 
   // Get current user
   useEffect(() => {
@@ -119,6 +122,15 @@ const PostCard = ({
     if (imageSrc) setIsModalOpen(true);
   };
 
+  const handleComment = () => {
+    if (!currentUserId) {
+      setShowLoginModal(true);
+      return;
+    }
+    
+    openModal();
+  };
+
   return (
     <>
       <Card className="bg-card border-contest-border relative overflow-hidden">
@@ -179,6 +191,7 @@ const PostCard = ({
           <button
             type="button"
             className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
+            onClick={handleComment}
             aria-label="Comments"
           >
             <MessageCircle className="w-4 h-4" />
@@ -220,6 +233,13 @@ const PostCard = ({
           city=""
         />
       )}
+
+      {/* Login Modal */}
+      <Dialog open={showLoginModal} onOpenChange={setShowLoginModal}>
+        <DialogContent className="sm:max-w-lg">
+          <LoginModalContent onClose={() => setShowLoginModal(false)} />
+        </DialogContent>
+      </Dialog>
     </>
   );
 };
