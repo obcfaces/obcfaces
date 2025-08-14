@@ -10,8 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate, Link } from "react-router-dom";
-import { Country, State } from "country-state-city";
-import { getCitiesForLocation } from "@/lib/location-utils";
+// Simplified location data for mobile performance
 const LoginModalTrigger = () => {
   const [open, setOpen] = useState(false);
   const [mode, setMode] = useState<"login" | "signup">("login");
@@ -32,9 +31,39 @@ const LoginModalTrigger = () => {
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const navigate = useNavigate();
-const countries = useMemo(() => Country.getAllCountries(), []);
-const states = useMemo(() => (countryCode ? State.getStatesOfCountry(countryCode) : []), [countryCode]);
-const cities = useMemo(() => getCitiesForLocation(countryCode, stateCode, stateName), [countryCode, stateCode, stateName]);
+// Simplified location data for mobile performance
+const countries = useMemo(() => [
+  { name: "Philippines", isoCode: "PH" },
+  { name: "United States", isoCode: "US" },
+  { name: "Canada", isoCode: "CA" },
+  { name: "United Kingdom", isoCode: "GB" },
+], []);
+
+const states = useMemo(() => {
+  if (countryCode === "PH") {
+    return [
+      { name: "Metro Manila", isoCode: "MM" },
+      { name: "Cebu", isoCode: "CE" },
+      { name: "Davao", isoCode: "DA" },
+    ];
+  }
+  return [];
+}, [countryCode]);
+
+const cities = useMemo(() => {
+  if (!stateCode) return [];
+  const stateData = states.find(s => s.isoCode === stateCode);
+  if (stateData?.name === "Metro Manila") {
+    return [{ name: "Manila" }, { name: "Quezon City" }, { name: "Makati" }];
+  }
+  if (stateData?.name === "Cebu") {
+    return [{ name: "Cebu City" }, { name: "Lapu-Lapu" }];
+  }
+  if (stateData?.name === "Davao") {
+    return [{ name: "Davao City" }];
+  }
+  return [];
+}, [stateCode, states]);
 const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), []);
 
   const onSubmit = async (e: React.FormEvent) => {

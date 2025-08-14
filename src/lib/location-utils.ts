@@ -40,7 +40,7 @@ export function getCitiesForLocation(countryCode: string | null, stateCode: stri
       }
     }
     if (cities.length) {
-      // Cast to expected shape from country-state-city
+      // Cast to expected shape (simplified for mobile performance)
       return cities.map((c) => ({
         name: c.name,
         countryCode: "PH",
