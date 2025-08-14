@@ -7,9 +7,9 @@ const Index = () => {
       <ContestHeader />
       
       <ContestSection
-        title="THIS WEEK"
-        subtitle="25-31 august 2025"
-        description="Choose the winner of the week."
+        title="JULE 24 – 30 /// 2025"
+        subtitle="Current vote right now!"
+        description="Take a look at the three leaders who have already emerged in the current vote."
         isActive={true}
       />
       

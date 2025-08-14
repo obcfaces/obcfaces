@@ -6,10 +6,7 @@ import contestant2 from "@/assets/contestant-2.jpg";
 import contestant3 from "@/assets/contestant-3.jpg";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
-import listIcon from "@/assets/icons/sdisplay-list.png";
-import listActiveIcon from "@/assets/icons/sdisplay-list-active.png";
-import tableIcon from "@/assets/icons/sdisplay-table.png";
-import tableActiveIcon from "@/assets/icons/sdisplay-table-active.png";
+import { List, Square } from "lucide-react";
 
 interface Week {
   key: string;
@@ -77,7 +74,7 @@ const Contest = () => {
           {/* View controls moved below, above cards */}
 
           <header className="mb-6">
-            <h1 className="text-3xl font-bold text-contest-text">THIS WEEK</h1>
+            <h1 className="text-3xl font-bold text-contest-text">CURRENT WEEK.</h1>
             <p className="text-sm text-muted-foreground">{week.label}</p>
             <p className="text-muted-foreground">Help us choose the winner of the week.</p>
           </header>
@@ -96,40 +93,37 @@ const Contest = () => {
           </div>
 
           <div className="mb-4">
-            <div className="relative">
-              <div aria-hidden className="absolute inset-x-0 bottom-0 border-b border-border" />
-              <div className="relative z-10 flex items-end justify-evenly w-full pb-0" role="tablist" aria-label="View mode">
-                <button
-                  type="button"
-                  onClick={() => setViewMode('full')}
-                  aria-pressed={viewMode === 'full'}
-                  aria-label="List view"
-                  className="p-1 rounded-md hover:bg-accent transition-colors"
-                >
-                  <img
-                    src={viewMode === 'full' ? listActiveIcon : listIcon}
-                    alt="List view"
-                    width={28}
-                    height={28}
-                    loading="lazy"
-                  />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setViewMode('compact')}
-                  aria-pressed={viewMode === 'compact'}
-                  aria-label="Grid view"
-                  className="p-1 rounded-md hover:bg-accent transition-colors"
-                >
-                  <img
-                    src={viewMode === 'compact' ? tableActiveIcon : tableIcon}
-                    alt="Grid view"
-                    width={28}
-                    height={28}
-                    loading="lazy"
-                  />
-                </button>
-              </div>
+            <div className="flex items-center gap-3" role="tablist" aria-label="View mode">
+              <button
+                type="button"
+                onClick={() => setViewMode('full')}
+                aria-pressed={viewMode === 'full'}
+                aria-label="List view"
+                className="p-1 rounded-md hover:bg-accent transition-colors"
+              >
+                <img
+                  src={viewMode === 'full' ? '/icons/sdisplay-list-active.png' : '/icons/sdisplay-list.png'}
+                  alt="List view"
+                  width={28}
+                  height={28}
+                  loading="lazy"
+                />
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewMode('compact')}
+                aria-pressed={viewMode === 'compact'}
+                aria-label="Grid view"
+                className="p-1 rounded-md hover:bg-accent transition-colors"
+              >
+                <img
+                  src={viewMode === 'compact' ? '/icons/sdisplay-table-active.png' : '/icons/sdisplay-table.png'}
+                  alt="Grid view"
+                  width={28}
+                  height={28}
+                  loading="lazy"
+                />
+              </button>
             </div>
           </div>
 
