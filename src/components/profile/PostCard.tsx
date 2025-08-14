@@ -143,21 +143,21 @@ const PostCard = ({
         </div>
 
         {/* Content */}
-        <div className="p-3">
+        <div className="px-3 pt-0 pb-3">
           {content && <p className="text-sm whitespace-pre-line mb-3">{content}</p>}
-          
-          {imageSrc && (
-            <div className="relative">
-              <img
-                src={imageSrc}
-                alt={`Post image — ${authorName}`}
-                loading="lazy"
-                className="w-full object-cover rounded-lg max-h-96 cursor-pointer hover:opacity-90 transition-opacity"
-                onClick={openModal}
-              />
-            </div>
-          )}
         </div>
+        
+        {imageSrc && (
+          <div className="relative">
+            <img
+              src={imageSrc}
+              alt={`Post image — ${authorName}`}
+              loading="lazy"
+              className="w-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
+              onClick={openModal}
+            />
+          </div>
+        )}
 
         {/* Footer with actions - using contest card style */}
         <div className="px-3 pb-3">
