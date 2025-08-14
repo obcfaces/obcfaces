@@ -31,20 +31,6 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       <ContestHeader />
       
-      <section className="max-w-6xl mx-auto px-6 sm:px-0 mt-4">
-        <ContestFilters
-          country={country}
-          onCountryChange={setCountry}
-          gender={gender}
-          onGenderChange={setGender}
-          viewMode={viewMode}
-          onViewModeChange={setViewMode}
-          category={category}
-          onCategoryChange={handleCategoryChange}
-          genderAvailability={{ male: false, female: true }}
-        />
-      </section>
-      
       <ContestSection
         title="THIS WEEK"
         subtitle="25-31 august 2025"
@@ -52,6 +38,19 @@ const Index = () => {
         isActive={true}
         noWrapTitle
         viewMode={viewMode}
+        filters={
+          <ContestFilters
+            country={country}
+            onCountryChange={setCountry}
+            gender={gender}
+            onGenderChange={setGender}
+            viewMode={viewMode}
+            onViewModeChange={setViewMode}
+            category={category}
+            onCategoryChange={handleCategoryChange}
+            genderAvailability={{ male: false, female: true }}
+          />
+        }
       />
 
       <div className="px-6 sm:px-0" aria-hidden>

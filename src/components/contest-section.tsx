@@ -18,9 +18,10 @@ interface ContestSectionProps {
   titleSuffix?: string;
   noWrapTitle?: boolean;
   viewMode?: 'compact' | 'full';
+  filters?: React.ReactNode; // Add filters prop
 }
 
-export function ContestSection({ title, subtitle, description, isActive, showWinner, centerSubtitle, titleSuffix, noWrapTitle, viewMode: controlledViewMode }: ContestSectionProps) {
+export function ContestSection({ title, subtitle, description, isActive, showWinner, centerSubtitle, titleSuffix, noWrapTitle, viewMode: controlledViewMode, filters }: ContestSectionProps) {
   const [localViewMode] = useState<'compact' | 'full'>('compact');
   const viewMode = controlledViewMode ?? localViewMode;
   const [ratings, setRatings] = useState<Record<number, number>>({
@@ -296,10 +297,17 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
         </div>
       </div>
 
-      <div className={viewMode === 'compact'
+      {/* Filters section - only show for active contests */}
+      {filters && isActive && (
+        <div className="px-6 sm:px-0 mb-6">
+          {filters}
+        </div>
+      )}
+
+      <div className={`px-6 sm:px-0 ${viewMode === 'compact'
         ? "grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-1 sm:gap-3"
         : "grid grid-cols-1 lg:grid-cols-2 gap-6"
-      }>
+      }`}>
         {contestants.map((contestant) => (
           <ContestantCard
             key={contestant.rank}
