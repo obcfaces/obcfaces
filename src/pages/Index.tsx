@@ -1,156 +1,133 @@
-import React from "react";
+import { useState } from "react";
+import { Helmet } from "react-helmet-async";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import TopBar from "@/components/top-bar";
+import { ContestSection } from "@/components/contest-section";
+import { NextWeekSection } from "@/components/next-week-section";
+import ContestFilters from "@/components/contest-filters";
+
+import listIcon from "@/assets/icons/sdisplay-list.png";
+import listActiveIcon from "@/assets/icons/sdisplay-list-active.png";
+import tableIcon from "@/assets/icons/sdisplay-table.png";
+import tableActiveIcon from "@/assets/icons/sdisplay-table-active.png";
 
 const Index = () => {
-  console.log('[INDEX] Ultra minimal mobile version');
+  console.log('[INDEX] Full site with mobile optimization');
+  
+  const [viewMode, setViewMode] = useState<'compact' | 'full'>('compact');
+  const [country, setCountry] = useState<string>('PH');
+  const [gender, setGender] = useState<'male' | 'female'>('female');
+  const [category, setCategory] = useState<'teen' | 'miss' | 'ms' | 'mrs' | ''>('miss');
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      backgroundColor: '#f8f9fa',
-      padding: '20px',
-      fontFamily: 'system-ui, sans-serif'
-    }}>
-      {/* Top bar */}
-      <div style={{
-        backgroundColor: 'white',
-        padding: '10px 20px',
-        marginBottom: '20px',
-        borderRadius: '8px',
-        boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center'
-      }}>
-        <div style={{
-          width: '32px',
-          height: '32px',
-          backgroundColor: '#1976d2',
-          borderRadius: '50%',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          color: 'white',
-          fontSize: '12px',
-          fontWeight: 'bold'
-        }}>
-          obc
-        </div>
-        <button style={{
-          backgroundColor: '#1976d2',
-          color: 'white',
-          padding: '8px 16px',
-          border: 'none',
-          borderRadius: '4px',
-          fontSize: '14px'
-        }}>
-          Войти
-        </button>
-      </div>
+    <>
+      <Helmet>
+        <title>OBC Faces of Philippines - Global Online Beauty Contest</title>
+        <meta name="description" content="Global Online Beauty & Model Contest. Natural. Honest. Voted by People. Upload your photos and try to win!" />
+        <link rel="canonical" href="/" />
+        <meta property="og:title" content="OBC Faces of Philippines - Global Online Beauty Contest" />
+        <meta property="og:description" content="Global Online Beauty & Model Contest. Natural. Honest. Voted by People. Upload your photos and try to win!" />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="/" />
+      </Helmet>
 
-      {/* Main content */}
-      <div style={{
-        backgroundColor: 'white',
-        borderRadius: '8px',
-        padding: '20px',
-        boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-      }}>
-        <h1 style={{
-          fontSize: '28px',
-          fontWeight: 'bold',
-          textAlign: 'center',
-          marginBottom: '10px',
-          color: '#333'
-        }}>
-          THIS WEEK
-        </h1>
+      <div className="min-h-screen bg-background">
+        <TopBar />
         
-        <p style={{
-          textAlign: 'center',
-          color: '#666',
-          marginBottom: '20px'
-        }}>
-          25 - 31 August 2025
-        </p>
-
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
-          gap: '15px',
-          marginBottom: '30px'
-        }}>
-          {['Maria Santos', 'Anna Cruz', 'Sofia Reyes'].map((name, index) => (
-            <div key={index} style={{
-              backgroundColor: '#f5f5f5',
-              borderRadius: '8px',
-              padding: '15px',
-              textAlign: 'center'
-            }}>
-              <div style={{
-                width: '100%',
-                height: '120px',
-                backgroundColor: '#ddd',
-                borderRadius: '4px',
-                marginBottom: '10px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: '#666'
-              }}>
-                📸
+        <main>
+          <div className="container mx-auto px-0">
+            <Tabs defaultValue="this-week" className="w-full">
+              <div className="sticky top-0 z-10 bg-background/95 backdrop-blur-sm border-b">
+                <div className="flex items-center justify-between px-4 sm:px-6 py-3">
+                  <TabsList className="grid w-fit grid-cols-2 bg-muted/30">
+                    <TabsTrigger value="this-week" className="text-sm">THIS WEEK</TabsTrigger>
+                    <TabsTrigger value="winners" className="text-sm">WINNERS</TabsTrigger>
+                  </TabsList>
+                  
+                  {/* View Mode Controls */}
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setViewMode('full')}
+                      aria-pressed={viewMode === 'full'}
+                      aria-label="List view"
+                      className="p-2 rounded-md hover:bg-accent transition-colors"
+                    >
+                      <img
+                        src={viewMode === 'full' ? listActiveIcon : listIcon}
+                        alt="List view"
+                        width={24}
+                        height={24}
+                        loading="lazy"
+                      />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setViewMode('compact')}
+                      aria-pressed={viewMode === 'compact'}
+                      aria-label="Grid view"
+                      className="p-2 rounded-md hover:bg-accent transition-colors"
+                    >
+                      <img
+                        src={viewMode === 'compact' ? tableActiveIcon : tableIcon}
+                        alt="Grid view"
+                        width={24}
+                        height={24}
+                        loading="lazy"
+                      />
+                    </button>
+                  </div>
+                </div>
               </div>
-              <h3 style={{
-                fontSize: '16px',
-                fontWeight: 'bold',
-                margin: '0 0 5px 0'
-              }}>
-                {name}
-              </h3>
-              <p style={{
-                fontSize: '12px',
-                color: '#666',
-                margin: 0
-              }}>
-                Philippines
-              </p>
-            </div>
-          ))}
-        </div>
 
-        <div style={{
-          backgroundColor: '#e3f2fd',
-          padding: '20px',
-          borderRadius: '8px',
-          textAlign: 'center'
-        }}>
-          <h2 style={{
-            fontSize: '20px',
-            fontWeight: 'bold',
-            color: '#1976d2',
-            marginBottom: '10px'
-          }}>
-            Join the Contest!
-          </h2>
-          <p style={{
-            color: '#666',
-            marginBottom: '15px'
-          }}>
-            Upload your photo and win 5000 PhP
-          </p>
-          <button style={{
-            backgroundColor: '#1976d2',
-            color: 'white',
-            padding: '12px 24px',
-            border: 'none',
-            borderRadius: '6px',
-            fontSize: '16px',
-            fontWeight: 'bold',
-            cursor: 'pointer'
-          }} onClick={() => alert('Upload works!')}>
-            📸 Upload Your Photo
-          </button>
-        </div>
+              <TabsContent value="this-week" className="mt-0">
+                <ContestFilters
+                  country={country}
+                  onCountryChange={setCountry}
+                  gender={gender}
+                  onGenderChange={setGender}
+                  viewMode={viewMode}
+                  onViewModeChange={setViewMode}
+                  category={category}
+                  onCategoryChange={setCategory}
+                />
+                <ContestSection
+                  title="THIS WEEK"
+                  subtitle="25 - 31 August 2025"
+                  description="Help us choose the winner of the week."
+                  isActive
+                  viewMode={viewMode}
+                />
+                <NextWeekSection />
+              </TabsContent>
+
+              <TabsContent value="winners" className="mt-0">
+                <ContestFilters
+                  country={country}
+                  onCountryChange={setCountry}
+                  gender={gender}
+                  onGenderChange={setGender}
+                  viewMode={viewMode}
+                  onViewModeChange={setViewMode}
+                  category={category}
+                  onCategoryChange={setCategory}
+                />
+                <ContestSection
+                  title="WINNER"
+                  subtitle="18 - 24 August 2025"
+                  description=""
+                  showWinner
+                  centerSubtitle
+                  titleSuffix="18 - 24 August 2025"
+                  noWrapTitle
+                  viewMode={viewMode}
+                />
+              </TabsContent>
+            </Tabs>
+          </div>
+        </main>
       </div>
-    </div>
+    </>
   );
 };
 
