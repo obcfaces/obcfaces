@@ -29,67 +29,6 @@
         <p>Loading...</p>
       </div>
     </div>
-    <!-- Try legacy script first for Safari compatibility -->
-    <script>
-      // Check if we're on mobile Safari and try different loading approach
-      var isMobileSafari = /iPhone|iPad|iPod/.test(navigator.userAgent) && /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent);
-      
-      if (isMobileSafari) {
-        // For mobile Safari, redirect to a simpler version or show mobile-specific content
-        setTimeout(function() {
-          var root = document.getElementById('root');
-          if (root && root.innerHTML.includes('Loading...')) {
-            // Create a simple mobile version
-            root.innerHTML = `
-              <div style="padding: 20px; font-family: Arial, sans-serif; text-align: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; color: white;">
-                <div style="background: rgba(255,255,255,0.1); border-radius: 15px; padding: 30px; margin: 20px 0; backdrop-filter: blur(10px);">
-                  <h1 style="margin: 0 0 20px 0; font-size: 24px;">🏆 OBC Faces</h1>
-                  <p style="margin: 10px 0; font-size: 16px;">Global Online Beauty Contest</p>
-                  <p style="margin: 10px 0; font-size: 14px;">Честный конкурс красоты</p>
-                </div>
-                
-                <div style="background: rgba(255,255,255,0.1); border-radius: 15px; padding: 20px; margin: 20px 0; backdrop-filter: blur(10px);">
-                  <h2 style="margin: 0 0 15px 0; font-size: 20px;">📱 Мобильная версия</h2>
-                  <p style="margin: 10px 0; font-size: 14px; line-height: 1.4;">
-                    Для лучшего опыта на мобильном устройстве рекомендуем использовать:
-                  </p>
-                  <div style="margin: 20px 0;">
-                    <a href="https://apps.apple.com/app/google-chrome/id535886823" style="display: inline-block; background: #4285f4; color: white; padding: 12px 20px; text-decoration: none; border-radius: 8px; margin: 5px; font-size: 14px;">
-                      📲 Chrome для iOS
-                    </a>
-                    <br>
-                    <a href="https://apps.apple.com/app/firefox/id989804926" style="display: inline-block; background: #ff7139; color: white; padding: 12px 20px; text-decoration: none; border-radius: 8px; margin: 5px; font-size: 14px;">
-                      🦊 Firefox для iOS
-                    </a>
-                  </div>
-                </div>
-                
-                <div style="background: rgba(255,255,255,0.1); border-radius: 15px; padding: 20px; margin: 20px 0; backdrop-filter: blur(10px);">
-                  <h3 style="margin: 0 0 15px 0; font-size: 18px;">💻 Полная версия</h3>
-                  <p style="margin: 10px 0; font-size: 14px;">
-                    Откройте на компьютере для полного функционала
-                  </p>
-                  <button onclick="location.reload()" style="background: #28a745; color: white; border: none; padding: 12px 20px; border-radius: 8px; font-size: 14px; cursor: pointer; margin: 10px 5px;">
-                    🔄 Попробовать снова
-                  </button>
-                </div>
-                
-                <div style="margin-top: 30px; font-size: 12px; opacity: 0.8;">
-                  <p>Browser: ${navigator.userAgent.substring(0, 50)}...</p>
-                  <p>Time: ${new Date().toLocaleString('ru-RU')}</p>
-                </div>
-              </div>
-            `;
-          }
-        }, 5000);
-      }
-    </script>
-    
     <script type="module" src="/src/main.tsx"></script>
-    
-    <script nomodule>
-      // Fallback for browsers that don't support ES modules
-      document.getElementById('root').innerHTML = '<div style="padding: 20px; font-family: Arial, sans-serif; background: #f8f9fa; text-align: center;"><h2 style="color: #dc3545;">⚠️ Браузер не поддерживается</h2><p>Пожалуйста, обновите браузер или используйте Chrome/Firefox</p><a href="https://www.google.com/chrome/" style="color: #007bff;">Скачать Chrome</a></div>';
-    </script>
   </body>
 </html>
