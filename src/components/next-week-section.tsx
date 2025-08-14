@@ -238,7 +238,7 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
 
       {currentIndex < candidates.length ? (
         <div className="flex flex-col items-center">
-          <div className="w-full">
+          <div className="w-full px-0 sm:px-6">
             <ContestantCard
               {...currentCandidate}
               viewMode={viewMode}
