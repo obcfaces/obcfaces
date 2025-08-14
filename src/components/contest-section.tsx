@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ContestantCardOptimized } from "@/components/contest-card-optimized";
+import { ContestantCard } from "@/components/contest-card-no-supabase";
 
 import contestant1Face from "@/assets/contestant-1-face.jpg";
 import contestant1Full from "@/assets/contestant-1-full.jpg";
@@ -206,7 +206,7 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
         : "grid grid-cols-1 lg:grid-cols-2 gap-6"
       }>
         {contestants.map((contestant) => (
-          <ContestantCardOptimized
+          <ContestantCard
             key={contestant.rank}
             {...contestant}
             viewMode={viewMode}
