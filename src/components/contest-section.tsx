@@ -305,8 +305,8 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
       )}
 
       <div className={viewMode === 'compact'
-        ? "grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-0 sm:gap-1 lg:gap-3"
-        : "grid grid-cols-1 lg:grid-cols-2 gap-0 sm:gap-6"
+        ? "grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-1 sm:gap-3"
+        : "grid grid-cols-1 lg:grid-cols-2 gap-6"
       }>
         {contestants.map((contestant) => (
           <ContestantCard
