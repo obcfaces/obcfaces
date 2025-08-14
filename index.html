@@ -62,13 +62,30 @@
     
     <script>
       // Hide loading when React app loads
-      setTimeout(function() {
-        var loading = document.getElementById('loading');
-        var root = document.getElementById('root');
-        if (loading && root && root.children.length > 0) {
-          loading.style.display = 'none';
+      document.addEventListener('DOMContentLoaded', function() {
+        // Check immediately and then periodically
+        function checkAndHideLoading() {
+          var loading = document.getElementById('loading');
+          var root = document.getElementById('root');
+          if (loading && root && root.children.length > 0) {
+            loading.style.display = 'none';
+            return true;
+          }
+          return false;
         }
-      }, 2000);
+        
+        // Try immediately
+        if (!checkAndHideLoading()) {
+          // Try every 100ms for up to 5 seconds
+          var attempts = 0;
+          var interval = setInterval(function() {
+            attempts++;
+            if (checkAndHideLoading() || attempts > 50) {
+              clearInterval(interval);
+            }
+          }, 100);
+        }
+      });
     </script>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
