@@ -17,7 +17,7 @@ const TopBar = () => {
             </span>
           </Link>
           
-          <div className="hidden sm:flex items-center gap-6">
+          <div className="flex items-center gap-6">
             <Link
               to="/"
               className="text-sm font-medium text-foreground hover:text-primary transition-colors"
