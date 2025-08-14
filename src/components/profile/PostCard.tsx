@@ -1,18 +1,18 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
-import { HoverCard, HoverCardTrigger, HoverCardContent } from "@/components/ui/hover-card";
+import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Heart } from "lucide-react";
+import { Heart, MessageCircle, Share2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
 import { Link } from "react-router-dom";
+import { PhotoModal } from "@/components/photo-modal";
 
 interface PostCardProps {
   id?: string;
   authorName: string;
   authorAvatarUrl?: string | null;
-  authorProfileId?: string; // Add profile ID for linking
+  authorProfileId?: string;
   time: string;
   content: string;
   imageSrc?: string;
@@ -41,6 +41,7 @@ const PostCard = ({
   const [currentLikes, setCurrentLikes] = useState(likes);
   const [loading, setLoading] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Get current user
   useEffect(() => {
@@ -113,74 +114,113 @@ const PostCard = ({
     }
   };
 
+  const openModal = () => {
+    if (imageSrc) setIsModalOpen(true);
+  };
+
   return (
-    <Card className="rounded-none sm:rounded-lg border bg-card">
-      <CardHeader className="flex flex-row items-center gap-3 py-4">
-        <Avatar className="h-10 w-10">
-          <AvatarImage src={authorAvatarUrl ?? undefined} alt={`Avatar ${authorName}`} />
-          <AvatarFallback>{getInitials(authorName)}</AvatarFallback>
-        </Avatar>
-        <div className="flex flex-col">
-          <HoverCard>
-            <HoverCardTrigger asChild>
-              {authorProfileId ? (
-                <Link 
-                  to={`/u/${authorProfileId}`}
-                  className="font-medium leading-none text-left hover:underline focus:outline-none text-primary"
-                >
-                  {authorName}
-                </Link>
-              ) : (
-                <button className="font-medium leading-none text-left hover:underline focus:outline-none">
-                  {authorName}
-                </button>
-              )}
-            </HoverCardTrigger>
-            <HoverCardContent>
-              <div className="flex items-center gap-3">
-                <Avatar className="h-12 w-12">
-                  <AvatarImage src={authorAvatarUrl ?? undefined} alt={`Avatar ${authorName}`} />
-                  <AvatarFallback>{getInitials(authorName)}</AvatarFallback>
-                </Avatar>
-                <div className="flex flex-col">
-                  <span className="font-medium">{authorName}</span>
-                  <span className="text-xs text-muted-foreground">Last activity: {time}</span>
-                </div>
-              </div>
-            </HoverCardContent>
-          </HoverCard>
-          <span className="text-xs text-muted-foreground">{time}</span>
+    <>
+      <Card className="bg-card border-contest-border relative overflow-hidden">
+        {/* Header with author info */}
+        <div className="flex items-center gap-3 p-3 border-b border-contest-border">
+          <Avatar className="h-10 w-10">
+            <AvatarImage src={authorAvatarUrl ?? undefined} alt={`Avatar ${authorName}`} />
+            <AvatarFallback>{getInitials(authorName)}</AvatarFallback>
+          </Avatar>
+          <div className="flex flex-col flex-1">
+            {authorProfileId ? (
+              <Link 
+                to={`/u/${authorProfileId}`}
+                className="font-medium leading-none hover:underline text-primary"
+              >
+                {authorName}
+              </Link>
+            ) : (
+              <span className="font-medium leading-none">{authorName}</span>
+            )}
+            <span className="text-xs text-muted-foreground">{time}</span>
+          </div>
         </div>
-      </CardHeader>
-      <CardContent className="px-0 pt-0 pb-6">
-        <p className="text-sm whitespace-pre-line">{content}</p>
-        {imageSrc && (
-          <img
-            src={imageSrc}
-            alt={`Post image — ${authorName}`}
-            loading="lazy"
-            className="block w-full object-cover rounded-none sm:rounded-lg"
-          />
-        )}
-      </CardContent>
-      <CardFooter className="flex items-center justify-between text-sm text-muted-foreground">
-        <div className="flex items-center gap-6">
-          <span>👍 {currentLikes}</span>
-          <span>💬 {comments}</span>
+
+        {/* Content */}
+        <div className="p-3">
+          {content && <p className="text-sm whitespace-pre-line mb-3">{content}</p>}
+          
+          {imageSrc && (
+            <div className="relative">
+              <img
+                src={imageSrc}
+                alt={`Post image — ${authorName}`}
+                loading="lazy"
+                className="w-full object-cover rounded-lg max-h-96 cursor-pointer hover:opacity-90 transition-opacity"
+                onClick={openModal}
+              />
+            </div>
+          )}
         </div>
-        {currentUserId && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleLike}
-            disabled={loading}
-            className={isLiked ? "text-red-500 hover:text-red-600" : "text-muted-foreground hover:text-foreground"}
-          >
-            <Heart className={`h-4 w-4 ${isLiked ? "fill-current" : ""}`} />
-          </Button>
-        )}
-      </CardFooter>
-    </Card>
+
+        {/* Footer with actions - using contest card style */}
+        <div className="px-3 pb-3">
+          <div className="flex items-center justify-end gap-4">
+            <button
+              type="button"
+              className={`inline-flex items-center gap-1 text-xs sm:text-sm transition-colors ${
+                isLiked ? "text-contest-blue" : "text-muted-foreground hover:text-foreground"
+              }`}
+              onClick={handleLike}
+              disabled={loading}
+              aria-label="Like"
+            >
+              <Heart className="w-3.5 h-3.5" />
+              <span className="hidden xl:inline">Like</span>
+              <span>{currentLikes}</span>
+            </button>
+            <button
+              type="button"
+              className="inline-flex items-center gap-1 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors"
+              aria-label="Comments"
+            >
+              <MessageCircle className="w-3.5 h-3.5" />
+              <span className="hidden xl:inline">Comment</span>
+              <span>{comments}</span>
+            </button>
+            <button
+              type="button"
+              className="inline-flex items-center gap-1 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors"
+              onClick={async () => {
+                try {
+                  if ((navigator as any).share) {
+                    await (navigator as any).share({ title: `Post by ${authorName}`, url: window.location.href });
+                  } else if (navigator.clipboard) {
+                    await navigator.clipboard.writeText(window.location.href);
+                    toast({ title: "Link copied" });
+                  }
+                } catch {}
+              }}
+              aria-label="Share"
+            >
+              <Share2 className="w-3.5 h-3.5" />
+              <span className="hidden xl:inline">Share</span>
+            </button>
+          </div>
+        </div>
+      </Card>
+
+      {imageSrc && (
+        <PhotoModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          photos={[imageSrc]}
+          currentIndex={0}
+          contestantName={authorName}
+          age={0}
+          weight={0}
+          height={0}
+          country=""
+          city=""
+        />
+      )}
+    </>
   );
 };
 
