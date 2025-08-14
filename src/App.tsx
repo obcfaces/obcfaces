@@ -6,7 +6,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { HelmetProvider } from "react-helmet-async";
 import AuthCallbackHandler from "@/components/auth-callback-handler";
-import TopBar from "@/components/top-bar";
+import SimpleTopBar from "@/components/simple-top-bar";
 import Index from "./pages/Index";
 import Contest from "./pages/Contest";
 import Auth from "./pages/Auth";
@@ -24,7 +24,7 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <AuthCallbackHandler />
-          <TopBar />
+          <SimpleTopBar />
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/contest" element={<Contest />} />
