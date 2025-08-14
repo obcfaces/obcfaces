@@ -23,7 +23,7 @@ interface LikedItemProps {
   contentId: string;
   authorName: string;
   authorAvatarUrl?: string;
-  authorProfileId?: string; // Add profile ID for linking
+  authorProfileId?: string;
   time: string;
   content?: string;
   imageSrc?: string;
@@ -89,24 +89,37 @@ const LikedItem = ({
   const randomIndex = Math.floor(Math.random() * images.length);
   const allPhotos = contentType === 'contest' ? [images[randomIndex], fullImages[randomIndex]] : [imageSrc || images[randomIndex]];
   
-  // Compact view (like contest compact mode)
+  // Compact view (same as contest compact mode) 
   if (viewMode === 'compact') {
     return (
       <>
-        <Card className="bg-card border-contest-border relative overflow-hidden">
-          <div className="flex items-center gap-3 p-3">
-            <div className="flex-shrink-0">
+        <Card className="bg-card border-contest-border relative overflow-hidden flex h-32 sm:h-36 md:h-40">
+          {/* Main two photos */}
+          <div className="flex-shrink-0 flex h-full relative gap-px">
+            <div className="relative">
               <img 
                 src={imageSrc || images[randomIndex]} 
-                alt={`${authorName} thumbnail`}
-                className="w-12 h-12 object-cover rounded cursor-pointer hover:opacity-90 transition-opacity"
+                alt={`${authorName} face`}
+                className="w-24 sm:w-28 md:w-32 h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
                 onClick={() => openModal(0)}
               />
             </div>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center justify-between">
-                <div className="min-w-0 flex-1">
-                  <h3 className="font-semibold text-contest-text text-sm truncate">
+            <div className="relative">
+              <img 
+                src={imageSrc || fullImages[randomIndex]} 
+                alt={`${authorName} full body`}
+                className="w-24 sm:w-28 md:w-32 h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                onClick={() => openModal(1)}
+              />
+            </div>
+          </div>
+          
+          {/* Content area - показываем информацию как в проголосованных карточках конкурса */}
+          <div className="flex-1 p-1.5 sm:p-2 md:p-3 flex flex-col relative">
+            <div className="absolute inset-0 bg-white rounded-r flex flex-col justify-between p-2 sm:p-3">
+              <div className="flex items-start justify-between">
+                <div className="min-w-0 flex-1 mr-2">
+                  <h3 className="font-semibold text-contest-text text-base sm:text-lg truncate">
                     {authorProfileId ? (
                       <Link to={`/u/${authorProfileId}`} className="hover:text-primary underline-offset-2 hover:underline">
                         {authorName}
@@ -115,19 +128,54 @@ const LikedItem = ({
                       authorName
                     )}, 25
                   </h3>
-                  <div className="text-xs text-muted-foreground">52 kg · 168 cm · Philippines</div>
-                  <div className="text-xs text-muted-foreground">{time}</div>
+                  <div className="text-xs sm:text-sm text-muted-foreground font-normal">52 kg · 168 cm</div>
+                  <div className="text-sm sm:text-base text-contest-blue truncate">
+                    Philippines
+                  </div>
                 </div>
-                <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                  <span className="flex items-center gap-1">
-                    <Heart className="w-3 h-3" />
-                    {likes}
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <MessageCircle className="w-3 h-3" />
-                    {comments}
-                  </span>
+                
+                <div className="text-right flex-shrink-0">
+                  {/* Empty space like in contest cards */}
                 </div>
+              </div>
+              
+              <div className="flex items-center justify-end gap-4">
+                <button
+                  type="button"
+                  className="inline-flex items-center gap-1 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors"
+                  aria-label="Like"
+                >
+                  <Heart className="w-3.5 h-3.5" />
+                  <span className="hidden xl:inline">Like</span>
+                  <span>{likes}</span>
+                </button>
+                <button
+                  type="button"
+                  className="inline-flex items-center gap-1 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors"
+                  aria-label="Comments"
+                >
+                  <MessageCircle className="w-3.5 h-3.5" />
+                  <span className="hidden xl:inline">Comment</span>
+                  <span>{comments}</span>
+                </button>
+                <button
+                  type="button"
+                  className="inline-flex items-center gap-1 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors"
+                  onClick={async () => {
+                    try {
+                      if ((navigator as any).share) {
+                        await (navigator as any).share({ title: authorName, url: window.location.href });
+                      } else if (navigator.clipboard) {
+                        await navigator.clipboard.writeText(window.location.href);
+                        toast({ title: "Link copied" });
+                      }
+                    } catch {}
+                  }}
+                  aria-label="Share"
+                >
+                  <Share2 className="w-3.5 h-3.5" />
+                  <span className="hidden xl:inline">Share</span>
+                </button>
               </div>
             </div>
           </div>
@@ -149,95 +197,89 @@ const LikedItem = ({
     );
   }
   
-  // Full view (like contest full mode)
+  // Full view (same as contest full mode)
   return (
     <>
-      <Card className="bg-card border-contest-border relative overflow-hidden flex h-32 sm:h-36 md:h-40">
-        {/* Main two photos with additional photos indicator */}
-        <div className="flex-shrink-0 flex h-full relative gap-px">
-          <div className="relative">
-            <img 
-              src={imageSrc || images[randomIndex]} 
-              alt={`${authorName} face`}
-              className="w-24 sm:w-28 md:w-32 h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
-              onClick={() => openModal(0)}
-            />
-          </div>
-          <div className="relative">
-            <img 
-              src={imageSrc || fullImages[randomIndex]} 
-              alt={`${authorName} full body`}
-              className="w-24 sm:w-28 md:w-32 h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
-              onClick={() => openModal(1)}
-            />
+      <Card className="bg-card border-contest-border relative overflow-hidden">
+        {/* Name in top left - показываем всегда как в проголосованных */}
+        <div className="absolute top-2 left-4 z-20">
+          <h3 className="text-xl font-semibold text-contest-text">
+            {authorProfileId ? (
+              <Link to={`/u/${authorProfileId}`} className="hover:text-primary underline-offset-2 hover:underline">
+                {authorName}
+              </Link>
+            ) : (
+              authorName
+            )}, 25 <span className="text-sm text-muted-foreground font-normal">(52 kg · 168 cm)</span>
+          </h3>
+          <div className="text-contest-blue text-sm">Philippines</div>
+        </div>
+        
+        {/* Header - пустой как в проголосованных карточках конкурса */}
+        <div className="relative p-4 border-b border-contest-border h-[72px]">
+          <div className="h-full"></div>
+        </div>
+        
+        {/* Photos section */}
+        <div className="relative">
+          <div className="grid grid-cols-2 gap-px">
+            <div className="relative">
+              <img 
+                src={imageSrc || images[randomIndex]} 
+                alt={`${authorName} face`}
+                className="w-full aspect-[4/5] object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                onClick={() => openModal(0)}
+              />
+            </div>
+            <div className="relative">
+              <img 
+                src={imageSrc || fullImages[randomIndex]} 
+                alt={`${authorName} full body`}
+                className="w-full aspect-[4/5] object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                onClick={() => openModal(1)}
+              />
+            </div>
           </div>
         </div>
         
-        {/* Content area - using exact same structure as contest cards */}
-        <div className="flex-1 p-1.5 sm:p-2 md:p-3 flex flex-col relative">
-          {/* Contestant info - shown always (like voted state) */}
-          <div className="absolute inset-0 bg-white rounded-r flex flex-col justify-between p-2 sm:p-3">
-            <div className="flex items-start justify-between">
-              <div className="min-w-0 flex-1 mr-2">
-                <h3 className="font-semibold text-contest-text text-base sm:text-lg truncate">
-                  {authorProfileId ? (
-                    <Link to={`/u/${authorProfileId}`} className="hover:text-primary underline-offset-2 hover:underline">
-                      {authorName}
-                    </Link>
-                  ) : (
-                    authorName
-                  )}, 25
-                </h3>
-                <div className="text-xs sm:text-sm text-muted-foreground font-normal">52 kg · 168 cm</div>
-                <div className="text-sm sm:text-base text-contest-blue truncate">
-                  Philippines
-                </div>
-              </div>
-              
-              <div className="text-right flex-shrink-0">
-                {/* Empty space like in contest cards */}
-              </div>
-            </div>
-            
-            <div className="flex items-center justify-end gap-4 pr-2">
-              <button
-                type="button"
-                className="inline-flex items-center gap-1 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors"
-                aria-label="Like"
-              >
-                <Heart className="w-3.5 h-3.5" />
-                <span className="hidden xl:inline">Like</span>
-                <span>{likes}</span>
-              </button>
-              <button
-                type="button"
-                className="inline-flex items-center gap-1 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors"
-                aria-label="Comments"
-              >
-                <MessageCircle className="w-3.5 h-3.5" />
-                <span className="hidden xl:inline">Comment</span>
-                <span>{comments}</span>
-              </button>
-              <button
-                type="button"
-                className="inline-flex items-center gap-1 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors"
-                onClick={async () => {
-                  try {
-                    if ((navigator as any).share) {
-                      await (navigator as any).share({ title: authorName, url: window.location.href });
-                    } else if (navigator.clipboard) {
-                      await navigator.clipboard.writeText(window.location.href);
-                      toast({ title: "Link copied" });
-                    }
-                  } catch {}
-                }}
-                aria-label="Share"
-              >
-                <Share2 className="w-3.5 h-3.5" />
-                <span className="hidden xl:inline">Share</span>
-              </button>
-            </div>
-          </div>
+        {/* Footer with actions - точно как в конкурсе */}
+        <div className="border-t border-contest-border px-4 py-2 flex items-center justify-evenly gap-4">
+          <button
+            type="button"
+            className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
+            aria-label="Like"
+          >
+            <Heart className="w-4 h-4" />
+            <span className="hidden sm:inline">Like</span>
+            <span>{likes}</span>
+          </button>
+          <button
+            type="button"
+            className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
+            aria-label="Comments"
+          >
+            <MessageCircle className="w-4 h-4" />
+            <span className="hidden sm:inline">Comment</span>
+            <span>{comments}</span>
+          </button>
+          <button
+            type="button"
+            className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
+            onClick={async () => {
+              try {
+                if ((navigator as any).share) {
+                  await (navigator as any).share({ title: authorName, url: window.location.href });
+                } else if (navigator.clipboard) {
+                  await navigator.clipboard.writeText(window.location.href);
+                  toast({ title: "Link copied" });
+                }
+              } catch {}
+            }}
+            aria-label="Share"
+          >
+            <Share2 className="w-4 h-4" />
+            <span className="hidden sm:inline">Share</span>
+          </button>
         </div>
       </Card>
 
