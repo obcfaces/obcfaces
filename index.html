@@ -30,5 +30,16 @@
       </div>
     </div>
     <script type="module" src="/src/main.tsx"></script>
+    <script nomodule>
+      document.getElementById('root').innerHTML = '<div style="padding: 20px; text-align: center; font-family: Arial, sans-serif;"><h2>Browser Not Supported</h2><p>Please update your browser to use this application.</p></div>';
+    </script>
+    <script>
+      // Mobile compatibility check
+      setTimeout(function() {
+        if (document.getElementById('root').innerHTML.includes('Loading...')) {
+          document.getElementById('root').innerHTML = '<div style="padding: 20px; text-align: center; font-family: Arial, sans-serif;"><h2>Loading Error</h2><p>Please refresh the page or try a different browser.</p><button onclick="location.reload()" style="margin-top: 10px; padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 5px;">Refresh Page</button></div>';
+        }
+      }, 10000);
+    </script>
   </body>
 </html>
