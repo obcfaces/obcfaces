@@ -160,51 +160,49 @@ const PostCard = ({
           </div>
         )}
 
-        {/* Footer with actions - exact copy from contest cards */}
-        <div className="px-3 pb-3">
-          <div className="flex items-center justify-end gap-4">
-            <button
-              type="button"
-              className={cn(
-                "inline-flex items-center gap-1 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors",
-                isLiked && "text-contest-blue"
-              )}
-              onClick={handleLike}
-              disabled={loading}
-              aria-label="Like"
-            >
-              <Heart className="w-3.5 h-3.5" />
-              <span className="hidden xl:inline">Like</span>
-              <span>{currentLikes}</span>
-            </button>
-            <button
-              type="button"
-              className="inline-flex items-center gap-1 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors"
-              aria-label="Comments"
-            >
-              <MessageCircle className="w-3.5 h-3.5" />
-              <span className="hidden xl:inline">Comment</span>
-              <span>{comments}</span>
-            </button>
-            <button
-              type="button"
-              className="inline-flex items-center gap-1 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors"
-              onClick={async () => {
-                try {
-                  if ((navigator as any).share) {
-                    await (navigator as any).share({ title: `Post by ${authorName}`, url: window.location.href });
-                  } else if (navigator.clipboard) {
-                    await navigator.clipboard.writeText(window.location.href);
-                    toast({ title: "Link copied" });
-                  }
-                } catch {}
-              }}
-              aria-label="Share"
-            >
-              <Share2 className="w-3.5 h-3.5" />
-              <span className="hidden xl:inline">Share</span>
-            </button>
-          </div>
+        {/* Footer with actions - exact copy from full contest cards */}
+        <div className="border-t border-contest-border px-4 py-2 flex items-center justify-evenly gap-4">
+          <button
+            type="button"
+            className={cn(
+              "inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors",
+              isLiked && "text-contest-blue"
+            )}
+            onClick={handleLike}
+            disabled={loading}
+            aria-label="Like"
+          >
+            <Heart className="w-4 h-4" />
+            <span className="hidden sm:inline">Like</span>
+            <span>{currentLikes}</span>
+          </button>
+          <button
+            type="button"
+            className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
+            aria-label="Comments"
+          >
+            <MessageCircle className="w-4 h-4" />
+            <span className="hidden sm:inline">Comment</span>
+            <span>{comments}</span>
+          </button>
+          <button
+            type="button"
+            className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
+            onClick={async () => {
+              try {
+                if ((navigator as any).share) {
+                  await (navigator as any).share({ title: `Post by ${authorName}`, url: window.location.href });
+                } else if (navigator.clipboard) {
+                  await navigator.clipboard.writeText(window.location.href);
+                  toast({ title: "Link copied" });
+                }
+              } catch {}
+            }}
+            aria-label="Share"
+          >
+            <Share2 className="w-4 h-4" />
+            <span className="hidden sm:inline">Share</span>
+          </button>
         </div>
       </Card>
 
