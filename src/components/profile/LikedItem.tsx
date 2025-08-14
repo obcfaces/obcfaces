@@ -130,16 +130,6 @@ const LikedItem = ({
                   Philippines
                 </div>
               </div>
-              
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleUnlike}
-                disabled={isUnliking}
-                className="h-6 w-6 p-0 text-red-500 hover:text-red-600 hover:bg-red-50 flex-shrink-0"
-              >
-                <Heart className="h-3 w-3 fill-current" />
-              </Button>
             </div>
             
             <div className="flex items-center justify-end gap-4">
@@ -232,16 +222,6 @@ const LikedItem = ({
                 Philippines
               </div>
             </div>
-            
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleUnlike}
-              disabled={isUnliking}
-              className="h-6 w-6 p-0 text-red-500 hover:text-red-600 hover:bg-red-50 flex-shrink-0"
-            >
-              <Heart className="h-3 w-3 fill-current" />
-            </Button>
           </div>
           
           <div className="flex items-center justify-end gap-4">
