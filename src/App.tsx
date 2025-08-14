@@ -26,7 +26,7 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <AuthCallbackHandler />
-          <TopBar />
+          {/* <TopBar /> */}
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/contest" element={<Contest />} />
