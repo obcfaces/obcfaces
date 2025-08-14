@@ -4,7 +4,6 @@ const MOBILE_BREAKPOINT = 768
 
 export function useIsMobile() {
   const [isMobile, setIsMobile] = React.useState<boolean>(false)
-  console.log('useIsMobile hook initialized, current value:', isMobile)
 
   React.useEffect(() => {
     // Set initial value immediately

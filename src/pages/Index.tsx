@@ -8,7 +8,6 @@ import AiChat from "@/components/ai-chat";
 import type { Category } from "@/components/contest-filters";
 
 const Index = () => {
-  console.log('Index page rendering');
   const [country, setCountry] = useState<string>("PH");
   const [gender, setGender] = useState<'male' | 'female'>("female");
   const [viewMode, setViewMode] = useState<'compact' | 'full'>("compact");
