@@ -3,35 +3,28 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Mobile Test</title>
+    <title>OBC faces of Philippines - Global Online Beauty Contest</title>
+    <meta name="description" content="Global Online Beauty & Model Contest. Natural. Honest. Voted by People. Upload your photos and try to win!" />
+    <meta name="author" content="OBC Contest" />
+
+    <meta property="og:title" content="OBC faces of Philippines - Global Online Beauty Contest" />
+    <meta property="og:description" content="Global Online Beauty & Model Contest. Natural. Honest. Voted by People. Upload your photos and try to win!" />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@lovable_dev" />
+    <meta name="twitter:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
   </head>
+
   <body>
-    <div id="root">
+    <noscript>
       <div style="padding: 20px; text-align: center; font-family: Arial, sans-serif;">
-        <h1>Pure HTML Test</h1>
-        <p>If you see this, HTML works</p>
-        <button onclick="alert('JavaScript works!')" style="padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 4px;">
-          Test JS
-        </button>
+        <h2>JavaScript Required</h2>
+        <p>This application requires JavaScript to function properly. Please enable JavaScript in your browser settings and reload the page.</p>
       </div>
-    </div>
-    
-    <script>
-      console.log('Vanilla JS loaded');
-      
-      // Try to load React manually
-      setTimeout(() => {
-        const script = document.createElement('script');
-        script.type = 'module';
-        script.textContent = `
-          console.log('Module script running');
-          import('./src/main.tsx').catch(err => {
-            console.error('Failed to load main.tsx:', err);
-            document.getElementById('root').innerHTML = '<div style="padding: 20px; color: red;">Error loading React: ' + err.message + '</div>';
-          });
-        `;
-        document.head.appendChild(script);
-      }, 1000);
-    </script>
+    </noscript>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
