@@ -49,7 +49,7 @@ export function ContestHeader() {
         {/* Description */}
         
         {/* Navigation sections below description */}
-        <nav className="flex items-center gap-6 text-sm -mb-6">
+        <nav className="flex items-center gap-6 text-sm -mb-6 mt-8">
           {navItems.map((item) => (
             <button
               key={item.name}
