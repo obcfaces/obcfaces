@@ -47,12 +47,6 @@ export function ContestHeader() {
         </div>
         
         {/* Description */}
-        <div className="mt-4 text-sm text-muted-foreground">
-          <span className="font-medium">Global Online Beauty & Model Contest</span>
-          <br />
-          Natural. Honest. Voted by People...
-          <span className="ml-8">Upload your photos and try to win!</span>
-        </div>
         
         {/* Navigation sections below description */}
         <nav className="flex items-center gap-6 text-sm -mb-6">
