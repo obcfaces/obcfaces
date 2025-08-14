@@ -30,14 +30,5 @@
       </div>
     </div>
     <script type="module" src="/src/main.tsx"></script>
-    <script>
-      // Fallback for older browsers or loading issues
-      setTimeout(function() {
-        var root = document.getElementById('root');
-        if (root && root.innerHTML.includes('Loading...')) {
-          root.innerHTML = '<div style="padding: 20px; text-align: center; font-family: Arial, sans-serif;"><h2>Browser Compatibility Issue</h2><p>Please try refreshing the page or use a modern browser like Chrome, Firefox, or Safari.</p><button onclick="location.reload()" style="margin-top: 10px; padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;">Refresh Page</button></div>';
-        }
-      }, 15000);
-    </script>
   </body>
 </html>
