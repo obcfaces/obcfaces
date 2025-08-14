@@ -13,40 +13,34 @@ export function ContestHeader() {
   return (
     <div className="bg-contest-light-bg">
       <div className="max-w-6xl mx-auto px-6 py-4">
-        {/* Title in one line */}
-        <div className="flex items-center gap-2">
-          <h1 className="text-2xl font-bold text-contest-text">OBC faces of</h1>
-        </div>
-        
-        {/* Load photo button below title */}
-        <div className="mt-4">
+        {/* Title and button in one line */}
+        <div className="flex items-center justify-between">
+          <h1 className="text-2xl font-bold text-contest-text">OBC faces</h1>
           <Button className="bg-contest-blue hover:bg-blue-600 text-white px-6">
             <Camera className="w-4 h-4 mr-2" />
             Join & Win 5,000 PHP
           </Button>
-          
-          {/* Contest info points */}
-          <div className="mt-3 space-y-1 text-sm text-contest-text">
-            <div className="flex items-center gap-2">
-              <span>🌍</span>
-              <span>Anyone can join — open to all!</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span>📸</span>
-              <span>Free entry with just 2 photos</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span>🏆</span>
-              <span>Weekly winner gets 5,000 PHP</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span>💰</span>
-              <span>Annual winner takes 200,000 PHP</span>
-            </div>
-          </div>
         </div>
         
-        {/* Description */}
+        {/* Contest info points */}
+        <div className="mt-3 space-y-1 text-sm text-contest-text">
+          <div className="flex items-center gap-2">
+            <span>🌍</span>
+            <span>Anyone can join — open to all!</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span>📸</span>
+            <span>Free entry with just 2 photos</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span>🏆</span>
+            <span>Weekly winner gets 5,000 PHP</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span>💰</span>
+            <span>Annual winner takes 200,000 PHP</span>
+          </div>
+        </div>
         
         {/* Navigation sections below description */}
         <nav className="flex items-center gap-6 text-sm -mb-6 mt-8">
