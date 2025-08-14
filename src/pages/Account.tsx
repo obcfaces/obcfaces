@@ -7,8 +7,7 @@ import { Button } from "@/components/ui/button";
 import SearchableSelect from "@/components/ui/searchable-select";
 import { toast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Country, State, City } from "country-state-city";
-import { getCitiesForLocation } from "@/lib/location-utils";
+// Simplified location data for mobile performance
 
 interface ProfileForm {
   display_name: string;
@@ -49,15 +48,42 @@ const Account = () => {
     return Math.abs(ageDt.getUTCFullYear() - 1970);
   }, [form.birthdate]);
 
-  const countries = useMemo(() => Country.getAllCountries(), []);
+  // Simplified location data for mobile performance
+  const countries = useMemo(() => [
+    { name: "Philippines", isoCode: "PH" },
+    { name: "United States", isoCode: "US" },
+    { name: "Canada", isoCode: "CA" },
+    { name: "United Kingdom", isoCode: "GB" },
+  ], []);
+  
   const [countryCode, setCountryCode] = useState<string | null>(null);
   const [stateCode, setStateCode] = useState<string | null>(null);
-  const states = useMemo(() => (countryCode ? State.getStatesOfCountry(countryCode) : []), [countryCode]);
-  const cities = useMemo(() => getCitiesForLocation(
-    countryCode,
-    stateCode,
-    states.find((s) => s.isoCode === stateCode)?.name
-  ), [countryCode, stateCode, states]);
+  
+  const states = useMemo(() => {
+    if (countryCode === "PH") {
+      return [
+        { name: "Metro Manila", isoCode: "MM" },
+        { name: "Cebu", isoCode: "CE" },
+        { name: "Davao", isoCode: "DA" },
+      ];
+    }
+    return [];
+  }, [countryCode]);
+  
+  const cities = useMemo(() => {
+    if (!stateCode) return [];
+    const stateData = states.find(s => s.isoCode === stateCode);
+    if (stateData?.name === "Metro Manila") {
+      return [{ name: "Manila" }, { name: "Quezon City" }, { name: "Makati" }];
+    }
+    if (stateData?.name === "Cebu") {
+      return [{ name: "Cebu City" }, { name: "Lapu-Lapu" }];
+    }
+    if (stateData?.name === "Davao") {
+      return [{ name: "Davao City" }];
+    }
+    return [];
+  }, [stateCode, states]);
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
@@ -96,12 +122,16 @@ const Account = () => {
           city: profile.city ?? "",
           age: profile.age ?? undefined,
         });
-        // try set country and state codes by name
+        // Simplified location lookup
         const found = countries.find((c) => c.name === (profile.country ?? ""));
         if (found) {
           setCountryCode(found.isoCode);
           if (profile.state) {
-            const sts = State.getStatesOfCountry(found.isoCode);
+            const sts = found.isoCode === "PH" ? [
+              { name: "Metro Manila", isoCode: "MM" },
+              { name: "Cebu", isoCode: "CE" },
+              { name: "Davao", isoCode: "DA" },
+            ] : [];
             const st = sts.find((s) => s.name === profile.state);
             if (st) setStateCode(st.isoCode);
           }

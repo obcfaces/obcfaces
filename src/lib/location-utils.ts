@@ -1,4 +1,4 @@
-import { City } from "country-state-city";
+// Simplified location utilities for mobile performance
 import phRaw from "@/data/philippines-2019v2.json?raw";
 
 const normalize = (s: string | null | undefined) => (s ?? "").toLowerCase().replace(/\s+/g, "").replace(/[-_']/g, "");
@@ -17,7 +17,7 @@ function getPhData() {
 }
 
 export function getCitiesForLocation(countryCode: string | null, stateCode: string | null, stateName?: string) {
-  if (!countryCode || !stateCode) return [] as ReturnType<typeof City.getCitiesOfState>;
+  if (!countryCode || !stateCode) return [] as Array<{ name: string; countryCode: string; stateCode: string }>;
 
   // 0) Philippines: use authoritative dataset for province -> cities/municipalities
   if (countryCode === "PH") {
@@ -50,26 +50,6 @@ export function getCitiesForLocation(countryCode: string | null, stateCode: stri
     // If not found, fall through to generic logic
   }
 
-  // 1) Direct lookup
-  const byState = City.getCitiesOfState(countryCode, stateCode);
-  if (byState.length) return byState;
-
-  // 2) Broad fallbacks using country-state-city inconsistencies
-  const all = City.getCitiesOfCountry(countryCode);
-  const code = normalize(stateCode);
-  const name = normalize(stateName);
-
-  const targets = new Set<string>([code]);
-  if (name) targets.add(name);
-
-  // Try strict equals on normalized stateCode field
-  let res = all.filter((c) => targets.has(normalize(c.stateCode)));
-  if (res.length) return res;
-
-  // Last resort: includes match (helps with variants like "Region VII - Central Visayas")
-  res = all.filter((c) => {
-    const sc = normalize(c.stateCode);
-    return Array.from(targets).some((t) => sc.includes(t));
-  });
-  return res;
+  // For other countries, return empty array (simplified for mobile performance)
+  return [];
 }
