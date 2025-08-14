@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Heart, MessageCircle, Share2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { cn } from "@/lib/utils";
 import { toast } from "@/components/ui/use-toast";
 import { Link } from "react-router-dom";
 import { PhotoModal } from "@/components/photo-modal";
@@ -164,9 +165,10 @@ const PostCard = ({
           <div className="flex items-center justify-end gap-4">
             <button
               type="button"
-              className={`inline-flex items-center gap-1 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors ${
-                isLiked ? "text-contest-blue" : ""
-              }`}
+              className={cn(
+                "inline-flex items-center gap-1 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors",
+                isLiked && "text-contest-blue"
+              )}
               onClick={handleLike}
               disabled={loading}
               aria-label="Like"
