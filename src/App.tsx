@@ -18,30 +18,45 @@ import TopBar from "@/components/top-bar";
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <HelmetProvider>
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <AuthCallbackHandler />
-          <TopBar />
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/contest" element={<Contest />} />
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/account" element={<Account />} />
-            <Route path="/u/:id" element={<Profile />} />
-            <Route path="/terms" element={<Terms />} />
-            <Route path="/privacy" element={<Privacy />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
-    </QueryClientProvider>
-  </HelmetProvider>
-);
+const App = () => {
+  console.log('[APP] App component rendering...');
+  
+  try {
+    console.log('[APP] Creating providers...');
+    return (
+      <HelmetProvider>
+        <QueryClientProvider client={queryClient}>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <AuthCallbackHandler />
+              <TopBar />
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/contest" element={<Contest />} />
+                <Route path="/auth" element={<Auth />} />
+                <Route path="/account" element={<Account />} />
+                <Route path="/u/:id" element={<Profile />} />
+                <Route path="/terms" element={<Terms />} />
+                <Route path="/privacy" element={<Privacy />} />
+                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </BrowserRouter>
+          </TooltipProvider>
+        </QueryClientProvider>
+      </HelmetProvider>
+    );
+  } catch (error) {
+    console.error('[APP] Error in App component:', error);
+    return (
+      <div style={{ padding: '20px', fontFamily: 'system-ui' }}>
+        <h2>App Error:</h2>
+        <p>{String(error)}</p>
+      </div>
+    );
+  }
+};
 
 export default App;
