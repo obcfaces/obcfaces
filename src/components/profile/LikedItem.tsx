@@ -89,7 +89,7 @@ const LikedItem = ({
   
   return (
     <>
-      <Card className="bg-card border-contest-border relative flex h-32 sm:h-36 md:h-40 rounded-lg overflow-hidden">
+      <Card className="bg-card border-contest-border relative flex h-32 sm:h-36 md:h-40">
         {/* Main two photos with additional photos indicator */}
         <div className="flex-shrink-0 flex h-full relative gap-px">
           <div className="relative">
