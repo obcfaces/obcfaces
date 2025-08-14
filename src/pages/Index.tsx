@@ -1,112 +1,31 @@
-import { useState, useEffect } from "react";
-
-import { ContestHeader } from "@/components/contest-header";
-import { ContestSection } from "@/components/contest-section";
-import { NextWeekSection } from "@/components/next-week-section";
-import ContestFilters from "@/components/contest-filters";
-import AiChat from "@/components/ai-chat";
-import type { Category } from "@/components/contest-filters";
+import { useState } from "react";
 
 const Index = () => {
-  const [country, setCountry] = useState<string>("PH");
-  const [gender, setGender] = useState<'male' | 'female'>("female");
-  const [viewMode, setViewMode] = useState<'compact' | 'full'>("compact");
-  
-  // Инициализация category из localStorage или "" по умолчанию
-  const [category, setCategory] = useState<"" | Category>(() => {
-    try {
-      const saved = localStorage.getItem('contest-category-filter');
-      return saved !== null ? (saved as "" | Category) : "";
-    } catch {
-      return "";
-    }
-  });
-
-  // Сохранение category в localStorage при изменении
-  const handleCategoryChange = (newCategory: "" | Category) => {
-    setCategory(newCategory);
-    localStorage.setItem('contest-category-filter', newCategory);
-  };
+  console.log('[INDEX] Simple Index rendering');
   
   return (
-    <div className="min-h-screen bg-background">
-      <ContestHeader />
-      
-      <section className="max-w-6xl mx-auto px-6 sm:px-0 mt-4">
-        <ContestFilters
-          country={country}
-          onCountryChange={setCountry}
-          gender={gender}
-          onGenderChange={setGender}
-          viewMode={viewMode}
-          onViewModeChange={setViewMode}
-          category={category}
-          onCategoryChange={handleCategoryChange}
-          genderAvailability={{ male: false, female: true }}
-        />
-      </section>
-      
-      <ContestSection
-        title="THIS WEEK"
-        subtitle="25-31 august 2025"
-        description="Choose the winner of the week."
-        isActive={true}
-        noWrapTitle
-        viewMode={viewMode}
-      />
-
-      <div className="px-6 sm:px-0" aria-hidden>
-        <hr className="my-8 sm:my-10 border-border" />
+    <div className="min-h-screen bg-gray-50 p-4">
+      <div className="max-w-md mx-auto bg-white rounded-lg shadow-md p-6">
+        <h1 className="text-2xl font-bold text-gray-800 mb-4">
+          OBC Faces of Philippines
+        </h1>
+        <p className="text-gray-600 mb-4">
+          Mobile version loading test...
+        </p>
+        <div className="bg-blue-50 p-4 rounded-lg mb-4">
+          <h2 className="text-lg font-semibold text-blue-800">Contest Info</h2>
+          <p className="text-blue-600 text-sm">Global Online Beauty Contest</p>
+        </div>
+        <button 
+          className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-700"
+          onClick={() => alert('Button works on mobile!')}
+        >
+          Load your photo and win 5000 Php
+        </button>
+        <div className="mt-4 text-xs text-gray-500">
+          React App Version: Mobile Test
+        </div>
       </div>
-
-      <NextWeekSection viewMode={viewMode} />
-
-      <div className="px-6 sm:px-0" aria-hidden>
-        <hr className="my-8 sm:my-10 border-border" />
-      </div>
-
-      <ContestSection
-        title="1 WEEK AGO"
-        titleSuffix="(Closed)"
-        subtitle="18-24 August 2025"
-        centerSubtitle
-        showWinner={true}
-        viewMode={viewMode}
-      />
-
-      <div className="px-6 sm:px-0" aria-hidden>
-        <hr className="my-8 sm:my-10 border-border" />
-      </div>
-
-      <ContestSection
-        title="2 WEEKS AGO"
-        titleSuffix="(Closed)"
-        subtitle="11-17 August 2025"
-        centerSubtitle
-        showWinner={true}
-        viewMode={viewMode}
-      />
-
-      <div className="px-6 sm:px-0" aria-hidden>
-        <hr className="my-8 sm:my-10 border-border" />
-      </div>
-
-      <ContestSection
-        title="3 WEEKS AGO"
-        titleSuffix="(Closed)"
-        subtitle="4-10 August 2025"
-        centerSubtitle
-        showWinner={true}
-        viewMode={viewMode}
-      />
-
-      <div className="px-6 sm:px-0" aria-hidden>
-        <hr className="my-8 sm:my-10 border-border" />
-      </div>
-
-      <section className="max-w-6xl mx-auto px-6 sm:px-0 mb-8">
-        <AiChat />
-      </section>
     </div>
   );
 };
