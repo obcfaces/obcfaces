@@ -247,16 +247,21 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
           </div>
           
           <div className="flex items-center justify-center gap-6 mt-6">
-            {history.length > 0 && (
-              <Button
-                onClick={handleUndo}
-                variant="outline"
-                size="lg"
-                className="rounded-full w-14 h-14 p-0 border-2 border-muted hover:border-blue-400 hover:bg-blue-50"
-              >
-                <RotateCcw className="w-6 h-6 text-blue-500" />
-              </Button>
-            )}
+            <div className="flex items-center gap-4">
+              <span className="text-lg text-contest-text font-medium">
+                {remainingCandidates}
+              </span>
+              {history.length > 0 && (
+                <Button
+                  onClick={handleUndo}
+                  variant="outline"
+                  size="lg"
+                  className="rounded-full w-14 h-14 p-0 border-2 border-muted hover:border-blue-400 hover:bg-blue-50"
+                >
+                  <RotateCcw className="w-6 h-6 text-blue-500" />
+                </Button>
+              )}
+            </div>
             
             <Button
               onClick={handleDislike}
@@ -275,12 +280,6 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
             >
               <Heart className="w-8 h-8 text-green-500" />
             </Button>
-          </div>
-          
-          <div className="mt-4 text-center">
-            <span className="text-lg text-contest-text">
-              {remainingCandidates} remaining
-            </span>
           </div>
         </div>
       ) : (
