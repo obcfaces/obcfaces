@@ -45,7 +45,7 @@ const Index = () => {
         />
       </div>
       
-      <div className="w-full py-4" aria-hidden>
+      <div className="w-full pt-6 pb-2" aria-hidden>
         <div className="h-[5px] bg-foreground/40" />
       </div>
       
