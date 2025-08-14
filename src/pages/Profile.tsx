@@ -416,6 +416,7 @@ const Profile = () => {
                           likes={item.likes}
                           comments={item.comments}
                           onUnlike={handleUnlike}
+                          viewMode={likesViewMode}
                         />
                       ))}
                     </div>

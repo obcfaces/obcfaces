@@ -30,6 +30,7 @@ interface LikedItemProps {
   likes?: number;
   comments?: number;
   onUnlike?: (likeId: string) => void;
+  viewMode?: 'compact' | 'full';
 }
 
 const getInitials = (name: string) => {
@@ -49,7 +50,8 @@ const LikedItem = ({
   imageSrc,
   likes = 0,
   comments = 0,
-  onUnlike
+  onUnlike,
+  viewMode = 'full'
 }: LikedItemProps) => {
   const [isUnliking, setIsUnliking] = useState(false);
   const [isLiked, setIsLiked] = useState(true);
@@ -87,6 +89,67 @@ const LikedItem = ({
   const randomIndex = Math.floor(Math.random() * images.length);
   const allPhotos = contentType === 'contest' ? [images[randomIndex], fullImages[randomIndex]] : [imageSrc || images[randomIndex]];
   
+  // Compact view (like contest compact mode)
+  if (viewMode === 'compact') {
+    return (
+      <>
+        <Card className="bg-card border-contest-border relative overflow-hidden">
+          <div className="flex items-center gap-3 p-3">
+            <div className="flex-shrink-0">
+              <img 
+                src={imageSrc || images[randomIndex]} 
+                alt={`${authorName} thumbnail`}
+                className="w-12 h-12 object-cover rounded cursor-pointer hover:opacity-90 transition-opacity"
+                onClick={() => openModal(0)}
+              />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center justify-between">
+                <div className="min-w-0 flex-1">
+                  <h3 className="font-semibold text-contest-text text-sm truncate">
+                    {authorProfileId ? (
+                      <Link to={`/u/${authorProfileId}`} className="hover:text-primary underline-offset-2 hover:underline">
+                        {authorName}
+                      </Link>
+                    ) : (
+                      authorName
+                    )}, 25
+                  </h3>
+                  <div className="text-xs text-muted-foreground">52 kg · 168 cm · Philippines</div>
+                  <div className="text-xs text-muted-foreground">{time}</div>
+                </div>
+                <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                  <span className="flex items-center gap-1">
+                    <Heart className="w-3 h-3" />
+                    {likes}
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <MessageCircle className="w-3 h-3" />
+                    {comments}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </Card>
+
+        <PhotoModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          photos={allPhotos}
+          currentIndex={modalStartIndex}
+          contestantName={authorName}
+          age={25}
+          weight={52}
+          height={168}
+          country="Philippines"
+          city="Unknown"
+        />
+      </>
+    );
+  }
+  
+  // Full view (like contest full mode)
   return (
     <>
       <Card className="bg-card border-contest-border relative overflow-hidden flex h-32 sm:h-36 md:h-40">
