@@ -195,6 +195,7 @@ useEffect(() => {
         contentId: like.content_id,
         authorName: profile.display_name ?? "Пользователь",
         authorAvatarUrl: profile.avatar_url,
+        authorProfileId: id, // Add profile ID for linking
         time: new Date(like.created_at).toLocaleDateString('ru-RU'),
         content: like.content_type === 'post' 
           ? `Это ${like.content_type === 'post' ? 'пост' : 'контент'}, который вам понравился`
@@ -263,6 +264,7 @@ const samplePosts = useMemo(
       id: "p1",
       authorName: profile.display_name ?? "Пользователь",
       authorAvatarUrl: profile.avatar_url ?? undefined,
+      authorProfileId: id,
       time: "2 ч. назад",
       content: "Сегодня тренировка прошла на ура! Готовлюсь к следующим соревнованиям.",
       imageSrc: c2,
@@ -273,12 +275,13 @@ const samplePosts = useMemo(
       id: "p2",
       authorName: profile.display_name ?? "Пользователь",
       authorAvatarUrl: profile.avatar_url ?? undefined,
+      authorProfileId: id,
       time: "Вчера",
       content: "Спасибо всем за поддержку! Маленькие шаги приводят к большим победам.",
       likes: 18,
       comments: 3,
     },
-  ], [profile.display_name, profile.avatar_url]
+  ], [profile.display_name, profile.avatar_url, id]
 );
 
   return (
@@ -406,22 +409,23 @@ const samplePosts = useMemo(
                    {loadingLikes ? (
                      <p className="text-muted-foreground text-center py-8">Загрузка лайков...</p>
                    ) : likedItems.length > 0 ? (
-                     likedItems.map((item) => (
-                       <LikedItem
-                         key={item.likeId}
-                         likeId={item.likeId}
-                         contentType={item.contentType}
-                         contentId={item.contentId}
-                         authorName={item.authorName}
-                         authorAvatarUrl={item.authorAvatarUrl}
-                         time={item.time}
-                         content={item.content}
-                         imageSrc={item.imageSrc}
-                         likes={item.likes}
-                         comments={item.comments}
-                         onUnlike={handleUnlike}
-                       />
-                     ))
+                      likedItems.map((item) => (
+                        <LikedItem
+                          key={item.likeId}
+                          likeId={item.likeId}
+                          contentType={item.contentType}
+                          contentId={item.contentId}
+                          authorName={item.authorName}
+                          authorAvatarUrl={item.authorAvatarUrl}
+                          authorProfileId={item.authorProfileId}
+                          time={item.time}
+                          content={item.content}
+                          imageSrc={item.imageSrc}
+                          likes={item.likes}
+                          comments={item.comments}
+                          onUnlike={handleUnlike}
+                        />
+                      ))
                    ) : (
                      <div className="text-center py-8">
                        <p className="text-muted-foreground">Вы еще ничего не лайкали</p>

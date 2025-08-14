@@ -6,11 +6,13 @@ import { Heart } from "lucide-react";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
+import { Link } from "react-router-dom";
 
 interface PostCardProps {
   id?: string;
   authorName: string;
   authorAvatarUrl?: string | null;
+  authorProfileId?: string; // Add profile ID for linking
   time: string;
   content: string;
   imageSrc?: string;
@@ -28,6 +30,7 @@ const PostCard = ({
   id = `post-${Math.random()}`,
   authorName,
   authorAvatarUrl,
+  authorProfileId,
   time,
   content,
   imageSrc,
@@ -120,9 +123,18 @@ const PostCard = ({
         <div className="flex flex-col">
           <HoverCard>
             <HoverCardTrigger asChild>
-              <button className="font-medium leading-none text-left hover:underline focus:outline-none">
-                {authorName}
-              </button>
+              {authorProfileId ? (
+                <Link 
+                  to={`/u/${authorProfileId}`}
+                  className="font-medium leading-none text-left hover:underline focus:outline-none text-primary"
+                >
+                  {authorName}
+                </Link>
+              ) : (
+                <button className="font-medium leading-none text-left hover:underline focus:outline-none">
+                  {authorName}
+                </button>
+              )}
             </HoverCardTrigger>
             <HoverCardContent>
               <div className="flex items-center gap-3">

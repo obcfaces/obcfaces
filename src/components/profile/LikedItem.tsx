@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
 import { cn } from "@/lib/utils";
 import { PhotoModal } from "@/components/photo-modal";
+import { Link } from "react-router-dom";
 
 // Import contest images for mock display
 import contestant1Face from "@/assets/contestant-1-face.jpg";
@@ -22,6 +23,7 @@ interface LikedItemProps {
   contentId: string;
   authorName: string;
   authorAvatarUrl?: string;
+  authorProfileId?: string; // Add profile ID for linking
   time: string;
   content?: string;
   imageSrc?: string;
@@ -41,6 +43,7 @@ const LikedItem = ({
   contentType,
   authorName,
   authorAvatarUrl,
+  authorProfileId,
   time,
   content,
   imageSrc,
@@ -115,7 +118,16 @@ const LikedItem = ({
           <div className="flex-1 p-1.5 sm:p-2 md:p-3 flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between mb-1">
-                <h3 className="font-semibold text-sm sm:text-base text-contest-text">{authorName}</h3>
+                {authorProfileId ? (
+                  <Link 
+                    to={`/u/${authorProfileId}`}
+                    className="font-semibold text-sm sm:text-base text-contest-text hover:text-primary hover:underline"
+                  >
+                    {authorName}
+                  </Link>
+                ) : (
+                  <h3 className="font-semibold text-sm sm:text-base text-contest-text">{authorName}</h3>
+                )}
                 <Button
                   variant="ghost"
                   size="sm"
@@ -175,7 +187,16 @@ const LikedItem = ({
               <AvatarFallback className="text-xs">{getInitials(authorName)}</AvatarFallback>
             </Avatar>
             <div className="flex flex-col">
-              <span className="font-medium text-sm leading-none">{authorName}</span>
+              {authorProfileId ? (
+                <Link 
+                  to={`/u/${authorProfileId}`}
+                  className="font-medium text-sm leading-none hover:text-primary hover:underline"
+                >
+                  {authorName}
+                </Link>
+              ) : (
+                <span className="font-medium text-sm leading-none">{authorName}</span>
+              )}
               <span className="text-xs text-muted-foreground">{time}</span>
             </div>
           </div>
