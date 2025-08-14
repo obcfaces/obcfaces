@@ -45,8 +45,8 @@ const Index = () => {
         />
       </div>
       
-      <div className="w-full" aria-hidden>
-        <div className="h-[5px] bg-foreground/40 my-0.5" />
+      <div className="w-full py-4" aria-hidden>
+        <div className="h-[5px] bg-foreground/40" />
       </div>
       
       <NextWeekSection viewMode={viewMode} />
