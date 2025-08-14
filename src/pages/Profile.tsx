@@ -405,11 +405,11 @@ const samplePosts = useMemo(
                </TabsContent>
 
                {isOwner && (
-                 <TabsContent value="likes" className="mt-4">
-                   {loadingLikes ? (
-                     <p className="text-muted-foreground text-center py-8 px-6">Загрузка лайков...</p>
-                   ) : likedItems.length > 0 ? (
-                       <div className="px-0 sm:px-6 grid grid-cols-1 lg:grid-cols-2 gap-1 sm:gap-3">
+                  <TabsContent value="likes" className="mt-4 -mx-6">
+                    {loadingLikes ? (
+                      <p className="text-muted-foreground text-center py-8 px-6">Загрузка лайков...</p>
+                    ) : likedItems.length > 0 ? (
+                        <div className="px-0 sm:px-6 grid grid-cols-1 lg:grid-cols-2 gap-1 sm:gap-3">
                         {likedItems.map((item) => (
                           <LikedItem
                             key={item.likeId}
