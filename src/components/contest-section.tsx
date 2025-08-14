@@ -274,8 +274,8 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
   const contestants = getContestants();
 
   return (
-    <section className="max-w-6xl mx-auto px-0 sm:px-6 py-8">
-      <div className="mb-8 px-6 sm:px-0">
+    <section className="max-w-6xl mx-auto px-6 sm:px-0 py-8">
+      <div className="mb-8">
         <div className="mb-4">
           <div className="flex items-baseline gap-3 mb-1">
             <div className={`inline-flex flex-col w-fit ${centerSubtitle ? "items-center" : "items-start"}`}>
@@ -299,15 +299,15 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
 
       {/* Filters section - only show for active contests */}
       {filters && isActive && (
-        <div className="px-6 sm:px-0 mb-6">
+        <div className="mb-6">
           {filters}
         </div>
       )}
 
-      <div className={`px-6 sm:px-0 ${viewMode === 'compact'
+      <div className={viewMode === 'compact'
         ? "grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-1 sm:gap-3"
         : "grid grid-cols-1 lg:grid-cols-2 gap-6"
-      }`}>
+      }>
         {contestants.map((contestant) => (
           <ContestantCard
             key={contestant.rank}
