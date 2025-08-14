@@ -12,6 +12,10 @@ import c1 from "@/assets/contestant-1.jpg";
 import c2 from "@/assets/contestant-2.jpg";
 import c3 from "@/assets/contestant-3.jpg";
 import c1face from "@/assets/contestant-1-face.jpg";
+import listIcon from "@/assets/icons/sdisplay-list.png";
+import listActiveIcon from "@/assets/icons/sdisplay-list-active.png";
+import tableIcon from "@/assets/icons/sdisplay-table.png";
+import tableActiveIcon from "@/assets/icons/sdisplay-table-active.png";
 
 interface ProfileRow {
   display_name: string | null;
@@ -38,6 +42,7 @@ const Profile = () => {
   const [savingBio, setSavingBio] = useState(false);
   const [likedItems, setLikedItems] = useState<any[]>([]);
   const [loadingLikes, setLoadingLikes] = useState(true);
+  const [likesViewMode, setLikesViewMode] = useState<'compact' | 'full'>('compact');
 
   // Demo profile for fallback
   const demoProfile: ProfileRow = {
@@ -355,24 +360,65 @@ const Profile = () => {
                 {loadingLikes ? (
                   <p className="text-muted-foreground text-center py-8 px-6">Загрузка лайков...</p>
                 ) : likedItems.length > 0 ? (
-                  <div className="px-0 sm:px-6 grid grid-cols-1 lg:grid-cols-2 gap-1 sm:gap-3">
-                    {likedItems.map((item) => (
-                      <LikedItem
-                        key={item.likeId}
-                        likeId={item.likeId}
-                        contentType={item.contentType}
-                        contentId={item.contentId}
-                        authorName={item.authorName}
-                        authorAvatarUrl={item.authorAvatarUrl}
-                        authorProfileId={item.authorProfileId}
-                        time={item.time}
-                        content={item.content}
-                        imageSrc={item.imageSrc}
-                        likes={item.likes}
-                        comments={item.comments}
-                        onUnlike={handleUnlike}
-                      />
-                    ))}
+                  <div className="px-0 sm:px-6">
+                    {/* View mode toggle buttons */}
+                    <div className="flex justify-end items-center gap-1 mb-4 px-6 sm:px-0">
+                      <button
+                        type="button"
+                        onClick={() => setLikesViewMode("compact")}
+                        aria-pressed={likesViewMode === "compact"}
+                        aria-label="List view"
+                        className="p-1 rounded-md hover:bg-accent transition-colors"
+                      >
+                        <img
+                          src={likesViewMode === "compact" ? listActiveIcon : listIcon}
+                          alt="List view icon"
+                          width={28}
+                          height={28}
+                          loading="lazy"
+                        />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setLikesViewMode("full")}
+                        aria-pressed={likesViewMode === "full"}
+                        aria-label="Grid view"
+                        className="p-1 rounded-md hover:bg-accent transition-colors"
+                      >
+                        <img
+                          src={likesViewMode === "full" ? tableActiveIcon : tableIcon}
+                          alt="Grid view icon"
+                          width={28}
+                          height={28}
+                          loading="lazy"
+                        />
+                      </button>
+                    </div>
+                    
+                    {/* Liked items grid */}
+                    <div className={`grid gap-1 sm:gap-3 ${
+                      likesViewMode === 'compact' 
+                        ? 'grid-cols-1' 
+                        : 'grid-cols-1 lg:grid-cols-2'
+                    }`}>
+                      {likedItems.map((item) => (
+                        <LikedItem
+                          key={item.likeId}
+                          likeId={item.likeId}
+                          contentType={item.contentType}
+                          contentId={item.contentId}
+                          authorName={item.authorName}
+                          authorAvatarUrl={item.authorAvatarUrl}
+                          authorProfileId={item.authorProfileId}
+                          time={item.time}
+                          content={item.content}
+                          imageSrc={item.imageSrc}
+                          likes={item.likes}
+                          comments={item.comments}
+                          onUnlike={handleUnlike}
+                        />
+                      ))}
+                    </div>
                   </div>
                 ) : (
                   <div className="text-center py-8 px-6">
