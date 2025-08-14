@@ -3,108 +3,11 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>OBC faces of Philippines - Mobile Test</title>
-    <style>
-      body {
-        font-family: Arial, sans-serif;
-        margin: 0;
-        padding: 20px;
-        background: #f5f5f5;
-        color: #333;
-      }
-      .container {
-        max-width: 600px;
-        margin: 0 auto;
-        background: white;
-        padding: 20px;
-        border-radius: 8px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-      }
-      h1 {
-        color: #2563eb;
-        text-align: center;
-        margin-bottom: 10px;
-      }
-      .status {
-        background: #dcfce7;
-        border: 2px solid #22c55e;
-        padding: 15px;
-        border-radius: 6px;
-        margin: 20px 0;
-        text-align: center;
-      }
-      .test-section {
-        background: #f8fafc;
-        padding: 15px;
-        margin: 10px 0;
-        border-radius: 6px;
-        border-left: 4px solid #3b82f6;
-      }
-      button {
-        background: #3b82f6;
-        color: white;
-        border: none;
-        padding: 10px 20px;
-        border-radius: 4px;
-        cursor: pointer;
-        margin: 5px;
-      }
-      button:hover {
-        background: #1d4ed8;
-      }
-      .mobile-info {
-        font-size: 14px;
-        color: #6b7280;
-        margin-top: 20px;
-      }
-    </style>
+    <title>OBC Faces of Philippines</title>
+    <meta name="description" content="Global Online Beauty Contest - OBC Faces of Philippines">
   </head>
   <body>
-    <div class="container">
-      <h1>🌟 OBC Faces of Philippines</h1>
-      
-      <div class="status">
-        ✅ <strong>SUCCESS!</strong><br>
-        Mobile site is loading perfectly!
-      </div>
-      
-      <div class="test-section">
-        <h3>📱 Mobile Test Results</h3>
-        <p>This is a pure HTML version to test mobile compatibility.</p>
-        <button onclick="alert('Button works!')">Test Button</button>
-        <button onclick="showInfo()">Show Info</button>
-      </div>
-      
-      <div class="test-section">
-        <h3>🏆 Contest Features</h3>
-        <div>✓ Beauty Contest Voting</div>
-        <div>✓ Photo Galleries</div>
-        <div>✓ Rating System</div>
-        <div>✓ Mobile Optimized</div>
-      </div>
-      
-      <div class="mobile-info">
-        <strong>Device Info:</strong><br>
-        Screen: <span id="screen-info"></span><br>
-        User Agent: <span id="ua-info"></span><br>
-        Time: <span id="time-info"></span>
-      </div>
-    </div>
-
-    <script>
-      function showInfo() {
-        alert('Mobile test successful! Site is working.');
-      }
-      
-      // Display device info
-      document.getElementById('screen-info').textContent = 
-        screen.width + 'x' + screen.height;
-      document.getElementById('ua-info').textContent = 
-        navigator.userAgent.substring(0, 50) + '...';
-      document.getElementById('time-info').textContent = 
-        new Date().toLocaleString();
-        
-      console.log('HTML version loaded successfully');
-    </script>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
