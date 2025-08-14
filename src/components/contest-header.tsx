@@ -11,7 +11,7 @@ export function ContestHeader() {
   ];
 
   return (
-    <div className="bg-contest-light-bg rounded-b-lg shadow-lg shadow-foreground/15">
+    <div className="bg-contest-light-bg">
       <div className="max-w-6xl mx-auto px-6 py-4">
         {/* Title and button in one line */}
         <div className="flex items-center justify-between">
