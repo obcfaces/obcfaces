@@ -52,7 +52,7 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
       faceImage: contestant1Face,
       fullBodyImage: contestant1Full,
       additionalPhotos: [contestant2Face, contestant3Face],
-      isVoted: showWinner ? true : !!votes[1], // Для завершенных конкурсов голосование уже прошло
+      isVoted: !!votes[1],
       isWinner: showWinner,
       prize: showWinner ? "+ 5000 PhP" : undefined
     },
@@ -68,7 +68,7 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
       faceImage: contestant2Face,
       fullBodyImage: contestant2Full,
       additionalPhotos: [contestant1Face],
-      isVoted: showWinner ? true : !!votes[2] // Для завершенных конкурсов голосование уже прошло
+      isVoted: !!votes[2]
     },
     {
       rank: 3,
@@ -82,7 +82,7 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
       faceImage: contestant3Face,
       fullBodyImage: contestant3Full,
       additionalPhotos: [contestant1Face, contestant2Face, contestant1Full],
-      isVoted: showWinner ? true : !!votes[3] // Для завершенных конкурсов голосование уже прошло
+      isVoted: !!votes[3]
     },
     {
       rank: 4,
@@ -95,7 +95,7 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
       rating: ratings[4],
       faceImage: contestant1Face,
       fullBodyImage: contestant1Full,
-      isVoted: showWinner ? true : !!votes[4] // Для завершенных конкурсов голосование уже прошло
+      isVoted: !!votes[4]
     },
     {
       rank: 5,
@@ -109,7 +109,7 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
       faceImage: contestant2Face,
       fullBodyImage: contestant2Full,
       additionalPhotos: [contestant3Face, contestant3Full],
-      isVoted: showWinner ? true : !!votes[5] // Для завершенных конкурсов голосование уже прошло
+      isVoted: !!votes[5]
     },
     {
       rank: 6,
@@ -122,7 +122,7 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
       rating: ratings[6],
       faceImage: contestant3Face,
       fullBodyImage: contestant3Full,
-      isVoted: showWinner ? true : !!votes[6] // Для завершенных конкурсов голосование уже прошло
+      isVoted: !!votes[6]
     }
   ];
 
@@ -164,6 +164,13 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
         ))}
       </div>
 
+      {!showWinner && (
+        <div className="mt-8 text-center">
+          <button className="text-contest-blue hover:underline">
+            Other 6 challengers ↓
+          </button>
+        </div>
+      )}
     </section>
   );
 }

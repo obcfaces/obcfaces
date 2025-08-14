@@ -77,7 +77,7 @@ const categoryOptions: Option[] = useMemo(() => [
   return (
     <div className="flex flex-row flex-nowrap items-center gap-2 w-full">
       {/* Country filter */}
-      <div className="w-36 shrink-0">
+      <div className="w-44 shrink-0">
         <SearchableSelect
           value={country}
           onValueChange={onCountryChange}
@@ -118,12 +118,12 @@ const categoryOptions: Option[] = useMemo(() => [
           type="button"
           onClick={() => onViewModeChange("compact")}
           aria-pressed={viewMode === "compact"}
-          aria-label="List view"
+          aria-label="Grid view"
           className="p-1 rounded-md hover:bg-accent transition-colors"
         >
           <img
-            src={viewMode === "compact" ? listActiveIcon : listIcon}
-            alt="List view icon"
+            src={viewMode === "compact" ? tableActiveIcon : tableIcon}
+            alt="Grid view icon"
             width={28}
             height={28}
             loading="lazy"
@@ -133,12 +133,12 @@ const categoryOptions: Option[] = useMemo(() => [
           type="button"
           onClick={() => onViewModeChange("full")}
           aria-pressed={viewMode === "full"}
-          aria-label="Grid view"
+          aria-label="List view"
           className="p-1 rounded-md hover:bg-accent transition-colors"
         >
           <img
-            src={viewMode === "full" ? tableActiveIcon : tableIcon}
-            alt="Grid view icon"
+            src={viewMode === "full" ? listActiveIcon : listIcon}
+            alt="List view icon"
             width={28}
             height={28}
             loading="lazy"

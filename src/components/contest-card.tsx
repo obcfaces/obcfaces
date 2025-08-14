@@ -1,6 +1,5 @@
 import { useState } from "react";
-import { Heart, MessageCircle, Star, Pencil, Send, Share, Share2, ExternalLink, Upload, ArrowUpRight, ThumbsDown } from "lucide-react";
-
+import { Heart, MessageCircle, Star, Pencil, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { StarRating } from "@/components/ui/star-rating";
@@ -31,7 +30,6 @@ interface ContestantCardProps {
   viewMode?: 'compact' | 'full';
   onRate?: (rating: number) => void;
   profileId?: string;
-  showDislike?: boolean; // Новый пропс для показа дизлайка
 }
 
 export function ContestantCard({
@@ -51,8 +49,7 @@ export function ContestantCard({
   prize,
   viewMode = 'compact',
   onRate,
-  profileId,
-  showDislike = false
+  profileId
 }: ContestantCardProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalStartIndex, setModalStartIndex] = useState(0);
@@ -60,14 +57,10 @@ export function ContestantCard({
   const [showThanks, setShowThanks] = useState(false);
   const [userRating, setUserRating] = useState(0);
   const [isLiked, setIsLiked] = useState<boolean[]>([false, false]);
-  const [isDisliked, setIsDisliked] = useState(false);
   const [likesCount, setLikesCount] = useState<number[]>([
     Math.floor(Math.random() * 50) + 5,
     Math.floor(Math.random() * 50) + 5,
   ]);
-  const [dislikesCount, setDislikesCount] = useState<number>(
-    Math.floor(Math.random() * 20) + 2
-  );
   const [commentsCount] = useState<number[]>([
     Math.floor(Math.random() * 20) + 1,
     Math.floor(Math.random() * 20) + 1,
@@ -88,12 +81,6 @@ export function ContestantCard({
     })
   };
 
-  const handleDislike = () => {
-    setIsDisliked(prev => !prev);
-    setDislikesCount(prev => isDisliked ? prev - 1 : prev + 1);
-  };
-
-
 
   const allPhotos = [faceImage, fullBodyImage, ...additionalPhotos];
 
@@ -107,7 +94,7 @@ export function ContestantCard({
       <>
         <Card className="bg-card border-contest-border relative overflow-hidden">
           {isWinner && (
-            <div className="absolute top-2 left-4 bg-contest-blue text-white px-3 py-1 rounded-full text-sm font-bold flex items-center gap-1 z-10">
+            <div className="absolute top-4 left-4 bg-contest-blue text-white px-3 py-1 rounded-full text-sm font-bold flex items-center gap-1 z-10">
               🏆 WINNER
             </div>
           )}
@@ -120,8 +107,8 @@ export function ContestantCard({
             </div>
           )}
           
-          {/* Rank, rating and location in top right corner - show rank always if rank > 0 */}
-          {rank > 0 && (
+          {/* Rank, rating and location in top right corner - only after voting */}
+          {(isVoted && !showThanks && !isEditing) && (
             <div className="absolute top-0 right-0 z-20 flex flex-col items-end">
               <div className="flex items-center gap-1">
                 <div className="text-xl font-bold text-contest-blue">#{rank}</div>
@@ -217,6 +204,34 @@ export function ContestantCard({
                   className="w-full aspect-[4/5] object-cover cursor-pointer hover:opacity-90 transition-opacity"
                   onClick={() => openModal(0)}
                 />
+                {/* Actions for face photo */}
+                <div className="absolute bottom-1 left-1 flex items-center gap-0.5">
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className={cn(
+                      "transition-colors border-0 h-4 px-0.5 text-xs",
+                      isLiked[0] 
+                        ? "bg-contest-blue text-white hover:bg-contest-blue/90" 
+                        : "bg-transparent text-white hover:text-white/80 hover:bg-transparent"
+                    )}
+                    onClick={() => handleLike(0)}
+                  >
+                    <Heart 
+                      className="w-2.5 h-2.5 mr-0 transition-colors" 
+                    />
+                    {likesCount[0]}
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="transition-colors text-white hover:text-white/80 border-0 bg-transparent hover:bg-contest-blue/20 h-4 px-0.5 text-xs"
+                    onClick={() => openModal(0)}
+                  >
+                    <MessageCircle className="w-2.5 h-2.5 mr-0" />
+                    {commentsCount[0]}
+                  </Button>
+                </div>
               </div>
               <div className="relative">
                 <img 
@@ -233,59 +248,38 @@ export function ContestantCard({
                     +{additionalPhotos.length}
                   </div>
                 )}
+                {/* Actions for full body photo */}
+                <div className="absolute bottom-1 left-1 flex items-center gap-0.5">
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className={cn(
+                      "transition-colors border-0 h-4 px-0.5 text-xs",
+                      isLiked[1] 
+                        ? "bg-contest-blue text-white hover:bg-contest-blue/90" 
+                        : "bg-transparent text-white hover:text-white/80 hover:bg-transparent"
+                    )}
+                    onClick={() => handleLike(1)}
+                  >
+                    <Heart 
+                      className="w-2.5 h-2.5 mr-0 transition-colors" 
+                    />
+                    {likesCount[1]}
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="transition-colors text-white hover:text-white/80 border-0 bg-transparent hover:bg-contest-blue/20 h-4 px-0.5 text-xs"
+                    onClick={() => openModal(0)}
+                  >
+                    <MessageCircle className="w-2.5 h-2.5 mr-0" />
+                    {commentsCount[1]}
+                  </Button>
+                </div>
               </div>
             </div>
-           </div>
-           <div className="border-t border-contest-border px-4 py-2 flex items-center justify-evenly gap-4">
-              <button
-                type="button"
-                className={cn(
-                  "inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors",
-                  (isLiked[0] || isLiked[1]) && "text-contest-blue"
-                )}
-                onClick={() => handleLike(0)}
-                aria-label="Like"
-              >
-                <Heart className="w-4 h-4" />
-                <span className="hidden min-[280px]:inline">Like</span>
-                <span>{likesCount[0] + likesCount[1]}</span>
-              </button>
-              {showDislike && (
-                <button
-                  type="button"
-                  className={cn(
-                    "inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors",
-                    isDisliked && "text-red-500"
-                  )}
-                  onClick={handleDislike}
-                  aria-label="Dislike"
-                >
-                  <ThumbsDown className="w-4 h-4" />
-                  <span className="hidden min-[280px]:inline">Dislike</span>
-                  <span>{dislikesCount}</span>
-                </button>
-              )}
-              <button
-                type="button"
-                className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
-                onClick={() => openModal(0)}
-                aria-label="Comments"
-              >
-                <MessageCircle className="w-4 h-4" />
-                <span className="hidden min-[280px]:inline">Comment</span>
-                <span>{commentsCount[0] + commentsCount[1]}</span>
-              </button>
-              <button
-                type="button"
-                className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
-                onClick={async () => { try { if ((navigator as any).share) { await (navigator as any).share({ title: name, url: window.location.href }); } else if (navigator.clipboard) { await navigator.clipboard.writeText(window.location.href); toast({ title: "Link copied" }); } } catch {} }}
-                aria-label="Share"
-              >
-                 <Share2 className="w-4 h-4" />
-                 <span className="hidden min-[280px]:inline">Share</span>
-              </button>
-           </div>
-         </Card>
+          </div>
+        </Card>
 
         <PhotoModal
           isOpen={isModalOpen}
@@ -307,13 +301,13 @@ export function ContestantCard({
     <>
       <Card className="bg-card border-contest-border relative overflow-hidden flex h-32 sm:h-36 md:h-40">
         {isWinner && (
-          <div className="absolute top-1 left-2 bg-contest-blue text-white px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 z-10">
+          <div className="absolute top-2 left-2 bg-contest-blue text-white px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 z-10">
             🏆 WINNER
           </div>
         )}
         
-        {/* Rating badge in top right corner - only if rank > 0 */}
-        {isVoted && !isEditing && !showThanks && rank > 0 && (
+        {/* Rating badge in top right corner */}
+        {isVoted && !isEditing && !showThanks && (
           <div className="absolute top-0 right-0 z-10 flex flex-col items-end">
             <Popover>
               <PopoverTrigger asChild>
@@ -344,9 +338,30 @@ export function ContestantCard({
               className="w-24 sm:w-28 md:w-32 h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
               onClick={() => openModal(0)}
             />
-            {rank > 0 && (
-              <div className="absolute top-0 left-0 bg-black/70 text-white text-xs font-bold px-1 py-0.5 rounded-br">
-                {rank}
+            <div className="absolute top-0 left-0 bg-black/70 text-white text-xs font-bold px-1 py-0.5 rounded-br">
+              {rank}
+            </div>
+            {/* Actions for face photo in compact mode - only show when voted */}
+            {isVoted && !isEditing && !showThanks && (
+              <div className="absolute bottom-0.5 left-0.5 flex items-center gap-0.5">
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className={cn(
+                    "transition-colors text-xs h-4 px-1 hover:bg-gray-100/20",
+                    isLiked[0] 
+                      ? "text-contest-blue hover:text-contest-blue/80" 
+                      : "text-white hover:text-white/80"
+                  )}
+                  onClick={() => handleLike(0)}
+                >
+                  <Heart 
+                    className={cn(
+                      "w-2.5 h-2.5 transition-colors",
+                      isLiked[0] && "fill-contest-blue"
+                    )} 
+                  />
+                </Button>
               </div>
             )}
           </div>
@@ -453,48 +468,8 @@ export function ContestantCard({
                 </div>
               </div>
               
-              <div className="flex items-center justify-end gap-4">
-                <button
-                  type="button"
-                  className={cn(
-                    "inline-flex items-center gap-1 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors",
-                    (isLiked[0] || isLiked[1]) && "text-contest-blue"
-                  )}
-                  onClick={() => handleLike(0)}
-                  aria-label="Like"
-                >
-                  <Heart className="w-3.5 h-3.5" />
-                  <span className="hidden md:inline">Like</span>
-                  <span>{likesCount[0] + likesCount[1]}</span>
-                </button>
-                <button
-                  type="button"
-                  className="inline-flex items-center gap-1 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors"
-                  onClick={() => openModal(0)}
-                  aria-label="Comments"
-                >
-                  <MessageCircle className="w-3.5 h-3.5" />
-                  <span className="hidden md:inline">Comment</span>
-                  <span>{commentsCount[0] + commentsCount[1]}</span>
-                </button>
-                <button
-                  type="button"
-                  className="inline-flex items-center gap-1 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors"
-                  onClick={async () => {
-                    try {
-                      if ((navigator as any).share) {
-                        await (navigator as any).share({ title: name, url: window.location.href });
-                      } else if (navigator.clipboard) {
-                        await navigator.clipboard.writeText(window.location.href);
-                        toast({ title: "Link copied" });
-                      }
-                    } catch {}
-                  }}
-                  aria-label="Share"
-                >
-                  <Share2 className="w-3.5 h-3.5" />
-                  <span className="hidden md:inline">Share</span>
-                </button>
+              <div className="flex items-center gap-2 sm:gap-3">
+                {/* Removed like and comment buttons */}
               </div>
             </div>
           )}
