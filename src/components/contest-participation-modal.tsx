@@ -386,6 +386,31 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
   const invalidPhoto1 = showProfileErrors && !photo1File;
   const invalidPhoto2 = showProfileErrors && !photo2File;
 
+  // Helper function to get field classes based on validation and filled state
+  const getFieldClasses = (isInvalid: boolean, isFilled: boolean) => {
+    let classes = "text-sm placeholder:text-muted-foreground";
+    if (isInvalid) {
+      classes += " border-destructive focus:ring-destructive";
+    } else if (isFilled) {
+      classes += " border-blue-500 focus:ring-blue-500";
+    }
+    return classes;
+  };
+
+  // Check if fields are filled
+  const isFirstNameFilled = formData.first_name.trim() !== "";
+  const isLastNameFilled = formData.last_name.trim() !== "";
+  const isCountryFilled = !!formData.countryCode;
+  const isStateFilled = !!formData.stateCode;
+  const isCityFilled = formData.city.trim() !== "";
+  const isGenderFilled = !!formData.gender;
+  const isBirthDayFilled = !!formData.birth_day;
+  const isBirthMonthFilled = !!formData.birth_month;
+  const isBirthYearFilled = !!formData.birth_year;
+  const isMaritalStatusFilled = !!formData.marital_status;
+  const isHeightFilled = !!formData.height_cm;
+  const isWeightFilled = !!formData.weight_kg;
+
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
@@ -467,7 +492,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
               <Input
                 id="first_name"
                 placeholder="First name"
-                className={`text-sm placeholder:text-muted-foreground ${invalidFirstName ? 'border-destructive focus:ring-destructive' : ''}`}
+                className={getFieldClasses(invalidFirstName, isFirstNameFilled)}
                 value={formData.first_name}
                 onChange={(e) => setFormData({...formData, first_name: e.target.value})}
                 aria-invalid={invalidFirstName}
@@ -476,14 +501,14 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
               <Input
                 id="last_name"
                 placeholder="Last name"
-                className={`text-sm placeholder:text-muted-foreground ${invalidLastName ? 'border-destructive focus:ring-destructive' : ''}`}
+                className={getFieldClasses(invalidLastName, isLastNameFilled)}
                 value={formData.last_name}
                 onChange={(e) => setFormData({...formData, last_name: e.target.value})}
                 aria-invalid={invalidLastName}
                 required
               />
               <Select value={formData.gender} onValueChange={(value) => setFormData({...formData, gender: value})}>
-                <SelectTrigger className={`${invalidGender ? "border-destructive focus:ring-destructive" : ""}`}>
+                <SelectTrigger className={`${invalidGender ? "border-destructive focus:ring-destructive" : isGenderFilled ? "border-blue-500 focus:ring-blue-500" : ""}`}>
                   <SelectValue placeholder="Gender" />
                 </SelectTrigger>
                 <SelectContent>
@@ -567,7 +592,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
             <div className="grid gap-2 sm:grid-cols-2">
               <div className="grid grid-cols-3 gap-1">
                 <Select value={formData.birth_day} onValueChange={(value) => setFormData({...formData, birth_day: value})}>
-                  <SelectTrigger className={`${invalidBirthDay ? "border-destructive focus:ring-destructive" : ""}`}>
+                  <SelectTrigger className={`${invalidBirthDay ? "border-destructive focus:ring-destructive" : isBirthDayFilled ? "border-blue-500 focus:ring-blue-500" : ""}`}>
                     <SelectValue placeholder="Day of birth" />
                   </SelectTrigger>
                   <SelectContent>
@@ -578,7 +603,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                 </Select>
                 
                 <Select value={formData.birth_month} onValueChange={(value) => setFormData({...formData, birth_month: value})}>
-                  <SelectTrigger className={`${invalidBirthMonth ? "border-destructive focus:ring-destructive" : ""}`}>
+                  <SelectTrigger className={`${invalidBirthMonth ? "border-destructive focus:ring-destructive" : isBirthMonthFilled ? "border-blue-500 focus:ring-blue-500" : ""}`}>
                     <SelectValue placeholder="Month of birth" />
                   </SelectTrigger>
                   <SelectContent>
@@ -592,7 +617,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                 </Select>
                 
                 <Select value={formData.birth_year} onValueChange={(value) => setFormData({...formData, birth_year: value})}>
-                  <SelectTrigger className={`${invalidBirthYear ? "border-destructive focus:ring-destructive" : ""}`}>
+                  <SelectTrigger className={`${invalidBirthYear ? "border-destructive focus:ring-destructive" : isBirthYearFilled ? "border-blue-500 focus:ring-blue-500" : ""}`}>
                     <SelectValue placeholder="Year of birth" />
                   </SelectTrigger>
                   <SelectContent>
@@ -606,7 +631,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
 
             <div className="grid gap-2 grid-cols-2">
               <Select value={formData.marital_status} onValueChange={(value) => setFormData({...formData, marital_status: value})}>
-                <SelectTrigger>
+                <SelectTrigger className={`${isMaritalStatusFilled ? "border-blue-500 focus:ring-blue-500" : ""}`}>
                   <SelectValue placeholder="Marital status" />
                 </SelectTrigger>
                 <SelectContent>
@@ -621,7 +646,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                 value={formData.has_children ? formData.has_children.toString() : ""} 
                 onValueChange={(value) => setFormData({...formData, has_children: value === 'true'})}
               >
-                <SelectTrigger>
+                <SelectTrigger className={`${formData.has_children !== undefined ? "border-blue-500 focus:ring-blue-500" : ""}`}>
                   <SelectValue placeholder="Do you have children?" />
                 </SelectTrigger>
                 <SelectContent>
@@ -643,7 +668,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
               </Select>
               
               <Select value={formData.height_cm} onValueChange={(value) => setFormData({...formData, height_cm: value})}>
-                <SelectTrigger>
+                <SelectTrigger className={`${isHeightFilled ? "border-blue-500 focus:ring-blue-500" : ""}`}>
                   <SelectValue placeholder={formData.measurement_system === 'imperial' ? "Height (ft)" : "Height (cm)"} />
                 </SelectTrigger>
                 <SelectContent>
@@ -672,7 +697,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
               </Select>
               
               <Select value={formData.weight_kg} onValueChange={(value) => setFormData({...formData, weight_kg: value})}>
-                <SelectTrigger>
+                <SelectTrigger className={`${isWeightFilled ? "border-blue-500 focus:ring-blue-500" : ""}`}>
                   <SelectValue placeholder={formData.measurement_system === 'imperial' ? "Weight (lbs)" : "Weight (kg)"} />
                 </SelectTrigger>
                 <SelectContent>
