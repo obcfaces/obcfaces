@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -50,21 +50,30 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
   const [photo2File, setPhoto2File] = useState<File | null>(null);
 
   // Location data - simplified like in registration
-  const countries = [
+  const countries = useMemo(() => [
     { name: "Philippines", isoCode: "PH" },
     { name: "United States", isoCode: "US" },
     { name: "Canada", isoCode: "CA" },
     { name: "United Kingdom", isoCode: "GB" },
-  ];
-
-  const states = formData.countryCode === "PH" ? [
-    { name: "Metro Manila", isoCode: "MM" },
-    { name: "Cebu", isoCode: "CE" },
-    { name: "Davao", isoCode: "DA" },
-  ] : [];
-
-  const cities = !formData.stateCode ? [] : (() => {
-    const stateData = states.find(s => s.isoCode === formData.stateCode);
+  ], []);
+  
+  const [countryCode, setCountryCode] = useState<string | null>(null);
+  const [stateCode, setStateCode] = useState<string | null>(null);
+  
+  const states = useMemo(() => {
+    if (countryCode === "PH") {
+      return [
+        { name: "Metro Manila", isoCode: "MM" },
+        { name: "Cebu", isoCode: "CE" },
+        { name: "Davao", isoCode: "DA" },
+      ];
+    }
+    return [];
+  }, [countryCode]);
+  
+  const cities = useMemo(() => {
+    if (!stateCode) return [];
+    const stateData = states.find(s => s.isoCode === stateCode);
     if (stateData?.name === "Metro Manila") {
       return [{ name: "Manila" }, { name: "Quezon City" }, { name: "Makati" }];
     }
@@ -75,7 +84,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
       return [{ name: "Davao City" }];
     }
     return [];
-  })();
+  }, [stateCode, states]);
 
   useEffect(() => {
     const checkUser = async () => {
@@ -446,8 +455,9 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
               <SearchableSelect
                 placeholder="Country"
                 options={countries.map(c => ({ value: c.isoCode, label: c.name }))}
-                value={formData.countryCode}
+                value={countryCode || ""}
                 onValueChange={(code) => {
+                  setCountryCode(code);
                   const country = countries.find(c => c.isoCode === code);
                   setFormData({
                     ...formData, 
@@ -457,39 +467,35 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                     stateCode: "",
                     city: ""
                   });
+                  setStateCode(null);
                 }}
                 invalid={invalidCountry}
               />
               
-              <Select value={formData.stateCode} onValueChange={(code) => {
-                const state = states.find(s => s.isoCode === code);
-                setFormData({
-                  ...formData, 
-                  stateCode: code,
-                  state: state?.name || "",
-                  city: ""
-                });
-              }}>
-                <SelectTrigger>
-                  <SelectValue placeholder="State" />
-                </SelectTrigger>
-                <SelectContent>
-                  {states.map((state) => (
-                    <SelectItem key={state.isoCode} value={state.isoCode}>{state.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <SearchableSelect
+                disabled={!countryCode}
+                placeholder="State/Region"
+                options={states.map(s => ({ value: s.isoCode, label: s.name }))}
+                value={stateCode || ""}
+                onValueChange={(code) => {
+                  setStateCode(code);
+                  const state = states.find(s => s.isoCode === code);
+                  setFormData({
+                    ...formData, 
+                    stateCode: code,
+                    state: state?.name || "",
+                    city: ""
+                  });
+                }}
+              />
               
-              <Select value={formData.city} onValueChange={(value) => setFormData({...formData, city: value})}>
-                <SelectTrigger>
-                  <SelectValue placeholder="City" />
-                </SelectTrigger>
-                <SelectContent>
-                  {cities.map((city) => (
-                    <SelectItem key={city.name} value={city.name}>{city.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <SearchableSelect
+                disabled={!stateCode}
+                placeholder="City"
+                options={cities.map(ct => ({ value: ct.name, label: ct.name }))}
+                value={formData.city}
+                onValueChange={(value) => setFormData({...formData, city: value})}
+              />
             </div>
 
             <div className="grid gap-2 sm:grid-cols-2">
