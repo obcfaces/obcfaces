@@ -115,6 +115,7 @@ export type Database = {
           moderated_at: string | null
           moderated_by: string | null
           moderation_notes: string | null
+          participant_type: string | null
           privacy_level: string | null
           state: string | null
           updated_at: string
@@ -139,6 +140,7 @@ export type Database = {
           moderated_at?: string | null
           moderated_by?: string | null
           moderation_notes?: string | null
+          participant_type?: string | null
           privacy_level?: string | null
           state?: string | null
           updated_at?: string
@@ -163,6 +165,7 @@ export type Database = {
           moderated_at?: string | null
           moderated_by?: string | null
           moderation_notes?: string | null
+          participant_type?: string | null
           privacy_level?: string | null
           state?: string | null
           updated_at?: string

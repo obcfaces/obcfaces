@@ -94,6 +94,7 @@ const LikedItem = ({
   const [modalStartIndex, setModalStartIndex] = useState(0);
   const [user, setUser] = useState<any>(null);
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const [currentParticipantType, setCurrentParticipantType] = useState<'candidate' | 'finalist' | 'winner' | null>(participantType || null);
 
   // Get current user
   useEffect(() => {
@@ -107,6 +108,29 @@ const LikedItem = ({
 
     return () => subscription.unsubscribe();
   }, []);
+
+  // Fetch current participant type from database
+  useEffect(() => {
+    if (authorProfileId && contentType === 'next_week_candidate') {
+      const fetchParticipantType = async () => {
+        try {
+          const { data, error } = await supabase
+            .from('profiles')
+            .select('participant_type')
+            .eq('id', authorProfileId)
+            .single();
+          
+          if (!error && data?.participant_type) {
+            setCurrentParticipantType(data.participant_type as 'candidate' | 'finalist' | 'winner');
+          }
+        } catch (error) {
+          console.error('Error fetching participant type:', error);
+        }
+      };
+      
+      fetchParticipantType();
+    }
+  }, [authorProfileId, contentType]);
 
   const handleUnlike = async () => {
     setIsUnliking(true);
@@ -168,7 +192,7 @@ const LikedItem = ({
       <>
         <Card className="bg-card border-contest-border relative overflow-hidden flex h-32 sm:h-36 md:h-40">
           {/* Participant Type Badge */}
-          {getParticipantBadge(participantType)}
+          {getParticipantBadge(currentParticipantType)}
           {/* Main two photos */}
           <div className="flex-shrink-0 flex h-full relative gap-px">
             <div className="relative">
@@ -285,7 +309,7 @@ const LikedItem = ({
     <>
       <Card className="bg-card border-contest-border relative overflow-hidden">
         {/* Participant Type Badge */}
-        {getParticipantBadge(participantType)}
+        {getParticipantBadge(currentParticipantType)}
         {/* Name in top left - показываем всегда как в проголосованных */}
         <div className="absolute top-8 left-4 z-20">
           <h3 className="text-xl font-semibold text-contest-text">
