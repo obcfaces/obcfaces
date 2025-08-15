@@ -308,7 +308,7 @@ const Profile = () => {
           </div>
 
           {/* Tabs */}
-          <Tabs defaultValue={isOwner ? "likes" : "posts"} className="mt-2">
+          <Tabs defaultValue={isOwner ? "likes" : "posts"} className="mt-8">
             <TabsList className="w-full sm:w-auto bg-transparent p-0 rounded-none justify-start gap-8 border-b border-border">
               {isOwner && (
                 <TabsTrigger value="likes" className="px-0 mr-6 h-auto pb-2 bg-transparent rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary text-muted-foreground hover:text-foreground">Лайки</TabsTrigger>
