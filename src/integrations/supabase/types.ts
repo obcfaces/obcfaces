@@ -176,6 +176,16 @@ export type Database = {
           following_count: number
         }[]
       }
+      get_public_profile_summary: {
+        Args: { profile_user_id: string }
+        Returns: {
+          avatar_url: string
+          city: string
+          country: string
+          display_name: string
+          id: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
