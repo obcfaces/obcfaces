@@ -271,7 +271,7 @@ export function ContestantCard({
               <div className="flex items-center gap-1">
                 <div className="text-xl font-bold text-contest-blue">#{rank}</div>
                 <div 
-                  className="bg-contest-blue text-white px-2 py-1.5 rounded-bl-lg text-lg font-bold shadow-md cursor-pointer hover:bg-contest-blue/90 transition-colors"
+                  className="bg-contest-blue text-white px-2 py-1.5 rounded-bl-lg text-lg font-bold shadow-sm cursor-pointer hover:bg-contest-blue/90 transition-colors"
                   onClick={() => setIsEditing(true)}
                 >
                   {rating.toFixed(1)}
@@ -467,7 +467,7 @@ export function ContestantCard({
           <div className="absolute top-0 right-0 z-10 flex flex-col items-end">
             <Popover>
               <PopoverTrigger asChild>
-                <div className="bg-contest-blue text-white px-2 py-1.5 rounded-bl-lg text-base sm:text-lg font-bold shadow-md cursor-pointer hover:bg-contest-blue/90 transition-colors">
+                <div className="bg-contest-blue text-white px-2 py-1.5 rounded-bl-lg text-base sm:text-lg font-bold shadow-sm cursor-pointer hover:bg-contest-blue/90 transition-colors">
                   {rating.toFixed(1)}
                 </div>
               </PopoverTrigger>
