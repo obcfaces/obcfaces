@@ -248,12 +248,6 @@ const Profile = () => {
     setLikedItems(prev => prev.filter(item => item.likeId !== likeId));
   };
 
-  const handleHideAccount = () => {
-    toast({ 
-      description: "Аккаунт скрыт",
-      duration: 2000
-    });
-  };
 
   // Sample posts data
   const samplePosts = [
@@ -302,31 +296,21 @@ const Profile = () => {
         <section className="max-w-4xl mx-auto">
           {/* Profile Header */}
           <div className="flex flex-col gap-6 mb-8">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <Avatar className="w-20 h-20 sm:w-24 sm:h-24">
-                  <AvatarImage src={profile.avatar_url || ""} alt={`Avatar of ${profile.display_name || "User"}`} />
-                  <AvatarFallback className="text-lg">
-                    {(profile.display_name || "U").charAt(0).toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
-                <div>
-                  <h1 className="text-2xl font-bold">{profile.display_name || "Пользователь"}</h1>
-                  {(profile.city || profile.country) && (
-                    <p className="text-muted-foreground">
-                      {[profile.city, profile.country].filter(Boolean).join(", ")}
-                    </p>
-                  )}
-                </div>
+            <div className="flex items-center gap-4">
+              <Avatar className="w-20 h-20 sm:w-24 sm:h-24">
+                <AvatarImage src={profile.avatar_url || ""} alt={`Avatar of ${profile.display_name || "User"}`} />
+                <AvatarFallback className="text-lg">
+                  {(profile.display_name || "U").charAt(0).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+              <div>
+                <h1 className="text-2xl font-bold">{profile.display_name || "Пользователь"}</h1>
+                {(profile.city || profile.country) && (
+                  <p className="text-muted-foreground">
+                    {[profile.city, profile.country].filter(Boolean).join(", ")}
+                  </p>
+                )}
               </div>
-              
-              {/* Hide Account Button */}
-              <button
-                onClick={handleHideAccount}
-                className="bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded-lg font-medium shadow-lg transition-colors duration-200 text-sm"
-              >
-                Скрыть аккаунт
-              </button>
             </div>
             
             <div className="flex items-center gap-2">
