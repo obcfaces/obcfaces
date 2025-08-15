@@ -561,7 +561,6 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
 
             <div className="space-y-4">
               <h3 className="text-sm font-medium text-center">Upload Photos</h3>
-              <p className="text-xs text-blue-600 text-center font-medium">no nude</p>
               <div className="flex gap-8 items-center justify-center">
                 {/* Portrait Photo */}
                 <div className="relative">
