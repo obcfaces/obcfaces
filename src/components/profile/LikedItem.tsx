@@ -241,11 +241,13 @@ const LikedItem = ({
               <div className="flex items-center justify-end gap-4">
                 <button
                   type="button"
-                  className="inline-flex items-center gap-1 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors"
-                  aria-label="Like"
+                  className="inline-flex items-center gap-1 text-xs sm:text-sm text-red-500 hover:text-red-600 transition-colors"
+                  aria-label="Unlike"
+                  onClick={handleUnlike}
+                  disabled={isUnliking}
                 >
-                  <Heart className="w-3.5 h-3.5" />
-                  <span className="hidden xl:inline">Like</span>
+                  <Heart className="w-3.5 h-3.5 fill-current" />
+                  <span className="hidden xl:inline">Unlike</span>
                   <span>{likes}</span>
                 </button>
                 <button
@@ -355,11 +357,13 @@ const LikedItem = ({
         <div className="border-t border-contest-border px-4 py-2 flex items-center justify-evenly gap-4">
           <button
             type="button"
-            className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
-            aria-label="Like"
+            className="inline-flex items-center gap-1 text-sm text-red-500 hover:text-red-600 transition-colors"
+            aria-label="Unlike"
+            onClick={handleUnlike}
+            disabled={isUnliking}
           >
-            <Heart className="w-4 h-4" />
-            <span className="hidden sm:inline">Like</span>
+            <Heart className="w-4 h-4 fill-current" />
+            <span className="hidden sm:inline">Unlike</span>
             <span>{likes}</span>
           </button>
           <button
