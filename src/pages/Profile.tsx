@@ -360,7 +360,7 @@ const Profile = () => {
                     </div>
                     
                     {/* Liked items grid */}
-                    <div className={`grid gap-1 sm:gap-3 ${
+                    <div className={`grid gap-0.5 sm:gap-1.5 ${
                       likesViewMode === 'compact' 
                         ? 'grid-cols-1' 
                         : 'grid-cols-1 lg:grid-cols-2'
@@ -396,7 +396,7 @@ const Profile = () => {
             )}
 
             <TabsContent value="posts" className="space-y-4 mt-4 -mx-6">
-              <div className="px-0 sm:px-6 space-y-4">
+              <div className="px-0 sm:px-6 space-y-2">
                 {samplePosts.map((p) => (
                   <PostCard key={p.id} {...p} />
                 ))}
@@ -404,7 +404,7 @@ const Profile = () => {
             </TabsContent>
 
             <TabsContent value="photos" className="mt-4">
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
                 {profilePhotos.map((src, idx) => (
                   <button
                     key={idx}
