@@ -561,8 +561,8 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
 
             <div className="space-y-4">
               <h3 className="text-sm font-medium text-center">Upload Photos</h3>
-              <p className="text-xs text-blue-600 text-center font-medium">no makeup, no filters, no nude, no color correction</p>
-              <div className="grid gap-4 grid-cols-2">
+              <p className="text-xs text-blue-600 text-center font-medium">no nude</p>
+              <div className="flex gap-8 items-center justify-center">
                 {/* Portrait Photo */}
                 <div className="relative">
                   <input
@@ -615,6 +615,13 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                       </div>
                     )}
                   </label>
+                </div>
+
+                {/* Central text column */}
+                <div className="flex flex-col justify-center items-center space-y-1 text-xs text-muted-foreground">
+                  <span>no makeup</span>
+                  <span>no filters</span>
+                  <span>no color correction</span>
                 </div>
 
                 {/* Full Length Photo */}
