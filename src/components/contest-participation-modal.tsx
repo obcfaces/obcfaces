@@ -78,33 +78,49 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
   const cities = useMemo(() => {
     if (!countryCode || !stateCode) return [];
     
+    // Debug: log the current codes
+    console.log('Country Code:', countryCode, 'State Code:', stateCode);
+    
     // Extended static data for Philippines to ensure comprehensive coverage
     const philippinesCities: Record<string, string[]> = {
-      // Cebu Province
+      // Try different possible codes for Cebu
       'CE': [
         'Cebu City', 'Lapu-Lapu City', 'Mandaue City', 'Talisay City', 'Toledo City',
         'Danao City', 'Carcar City', 'Naga City', 'Bogo City', 'Minglanilla',
-        'Consolacion', 'Liloan', 'Compostela', 'Cordova', 'Balamban',
-        'Aloguinsan', 'Argao', 'Asturias', 'Bantayan', 'Barili',
-        'Boljoon', 'Borbon', 'Carmen', 'Catmon', 'Dalaguete',
-        'Dumanjug', 'Ginatilan', 'Madridejos', 'Malabuyoc', 'Medellin',
-        'Moalboal', 'Oslob', 'Pilar', 'Pinamungajan', 'Poro',
-        'Ronda', 'Samboan', 'San Fernando', 'San Francisco', 'San Remigio',
-        'Santa Fe', 'Santander', 'Sibonga', 'Sogod', 'Tabogon',
-        'Tabuelan', 'Tuburan', 'Tudela'
+        'Consolacion', 'Liloan', 'Compostela', 'Cordova', 'Balamban'
       ],
-      // Metro Manila
+      'CEB': [
+        'Cebu City', 'Lapu-Lapu City', 'Mandaue City', 'Talisay City', 'Toledo City',
+        'Danao City', 'Carcar City', 'Naga City', 'Bogo City', 'Minglanilla',
+        'Consolacion', 'Liloan', 'Compostela', 'Cordova', 'Balamban'
+      ],
+      'PH-CEB': [
+        'Cebu City', 'Lapu-Lapu City', 'Mandaue City', 'Talisay City', 'Toledo City',
+        'Danao City', 'Carcar City', 'Naga City', 'Bogo City', 'Minglanilla',
+        'Consolacion', 'Liloan', 'Compostela', 'Cordova', 'Balamban'
+      ],
+      '07': [
+        'Cebu City', 'Lapu-Lapu City', 'Mandaue City', 'Talisay City', 'Toledo City',
+        'Danao City', 'Carcar City', 'Naga City', 'Bogo City', 'Minglanilla',
+        'Consolacion', 'Liloan', 'Compostela', 'Cordova', 'Balamban'
+      ],
+      // Metro Manila variants
       'MM': [
         'Manila', 'Quezon City', 'Makati', 'Pasig', 'Taguig', 'Marikina',
         'Mandaluyong', 'San Juan', 'Pasay', 'Caloocan', 'Las Piñas',
-        'Muntinlupa', 'Parañaque', 'Valenzuela', 'Malabon', 'Navotas',
-        'Pateros'
+        'Muntinlupa', 'Parañaque', 'Valenzuela', 'Malabon', 'Navotas'
       ],
-      // Davao Region
+      'NCR': [
+        'Manila', 'Quezon City', 'Makati', 'Pasig', 'Taguig', 'Marikina',
+        'Mandaluyong', 'San Juan', 'Pasay', 'Caloocan', 'Las Piñas',
+        'Muntinlupa', 'Parañaque', 'Valenzuela', 'Malabon', 'Navotas'
+      ],
+      // Davao variants
       'DA': [
-        'Davao City', 'Tagum', 'Panabo', 'Samal', 'Digos', 'Mati',
-        'General Santos', 'Koronadal', 'Tacurong', 'Kidapawan',
-        'Cotabato City', 'Malungon', 'Polomolok', 'Tupi', 'Tantangan'
+        'Davao City', 'Tagum', 'Panabo', 'Samal', 'Digos', 'Mati'
+      ],
+      'DAV': [
+        'Davao City', 'Tagum', 'Panabo', 'Samal', 'Digos', 'Mati'
       ]
     };
     
@@ -115,6 +131,18 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
     
     // Get cities from country-state-city library for other countries
     const cscCities = City.getCitiesOfState(countryCode, stateCode);
+    console.log('CSC Cities found:', cscCities.length);
+    
+    // If no cities found and it's Philippines, provide fallback
+    if (countryCode === 'PH' && cscCities.length === 0) {
+      return [
+        { name: 'Cebu City' },
+        { name: 'Lapu-Lapu City' },
+        { name: 'Mandaue City' },
+        { name: 'Talisay City' },
+        { name: 'Toledo City' }
+      ];
+    }
     
     // Sort and return cities
     return cscCities
