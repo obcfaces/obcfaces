@@ -52,6 +52,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
   // Complete country list for contest participation - Philippines first like in contest filter
   const countries = useMemo(() => [
     { name: "Philippines", isoCode: "PH" },
+    { name: "divider", isoCode: "__divider__", disabled: true, divider: true },
     { name: "Afghanistan", isoCode: "AF" },
     { name: "Albania", isoCode: "AL" },
     { name: "Algeria", isoCode: "DZ" },
@@ -116,9 +117,10 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
     { name: "Nigeria", isoCode: "NG" },
     { name: "North Macedonia", isoCode: "MK" },
     { name: "Norway", isoCode: "NO" },
-    { name: "Pakistan", isoCode: "PK" },
-    { name: "Peru", isoCode: "PE" },
-    { name: "Poland", isoCode: "PL" },
+     { name: "Pakistan", isoCode: "PK" },
+     { name: "Peru", isoCode: "PE" },
+     { name: "Philippines", isoCode: "PH" },
+     { name: "Poland", isoCode: "PL" },
     { name: "Portugal", isoCode: "PT" },
     { name: "Qatar", isoCode: "QA" },
     { name: "Romania", isoCode: "RO" },
