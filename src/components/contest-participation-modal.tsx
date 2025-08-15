@@ -35,7 +35,9 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
     state: "",
     city: "",
     gender: "",
-    birthdate: "",
+    birth_day: "",
+    birth_month: "",
+    birth_year: "",
     marital_status: "",
     has_children: false,
     height_cm: "",
@@ -74,7 +76,9 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
             state: profile.state || "",
             city: profile.city || "",
             gender: profile.gender || "",
-            birthdate: profile.birthdate || "",
+            birth_day: profile.birthdate ? new Date(profile.birthdate).getDate().toString() : "",
+            birth_month: profile.birthdate ? (new Date(profile.birthdate).getMonth() + 1).toString() : "",
+            birth_year: profile.birthdate ? new Date(profile.birthdate).getFullYear().toString() : "",
             marital_status: profile.marital_status || "",
             has_children: profile.has_children || false,
             height_cm: profile.height_cm?.toString() || "",
@@ -193,6 +197,12 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
         photo2Url = await uploadPhoto(photo2File, 2);
       }
 
+      // Create birthdate from separate fields
+      let birthdate = null;
+      if (formData.birth_day && formData.birth_month && formData.birth_year) {
+        birthdate = `${formData.birth_year}-${formData.birth_month.padStart(2, '0')}-${formData.birth_day.padStart(2, '0')}`;
+      }
+
       // Update profile
       const { error } = await supabase
         .from('profiles')
@@ -204,7 +214,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
           state: formData.state,
           city: formData.city,
           gender: formData.gender,
-          birthdate: formData.birthdate,
+          birthdate: birthdate,
           marital_status: formData.marital_status,
           has_children: formData.has_children,
           height_cm: formData.height_cm ? parseInt(formData.height_cm) : null,
@@ -265,6 +275,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
               id="email"
               type="email"
               placeholder="Email"
+              className="italic"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -275,6 +286,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                 id="password"
                 type={showPassword ? "text" : "password"}
                 placeholder="Пароль"
+                className="italic"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
@@ -309,14 +321,16 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
             <div className="grid grid-cols-2 gap-4">
               <Input
                 id="first_name"
-                placeholder="Имя *"
+                placeholder="Имя"
+                className="italic"
                 value={formData.first_name}
                 onChange={(e) => setFormData({...formData, first_name: e.target.value})}
                 required
               />
               <Input
                 id="last_name"
-                placeholder="Фамилия *"
+                placeholder="Фамилия"
+                className="italic"
                 value={formData.last_name}
                 onChange={(e) => setFormData({...formData, last_name: e.target.value})}
                 required
@@ -324,7 +338,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
             </div>
 
             <SearchableSelect
-              placeholder="Выберите страну *"
+              placeholder="Выберите страну"
               options={countryOptions.map(c => ({ value: c.isoCode, label: c.name }))}
               value={formData.country}
               onValueChange={(value) => setFormData({...formData, country: value, state: "", city: ""})}
@@ -334,12 +348,14 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
               <Input
                 id="state"
                 placeholder="Штат/Область"
+                className="italic"
                 value={formData.state}
                 onChange={(e) => setFormData({...formData, state: e.target.value})}
               />
               <Input
                 id="city"
                 placeholder="Город"
+                className="italic"
                 value={formData.city}
                 onChange={(e) => setFormData({...formData, city: e.target.value})}
               />
@@ -347,26 +363,56 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
 
             <div className="grid grid-cols-2 gap-4">
               <Select value={formData.gender} onValueChange={(value) => setFormData({...formData, gender: value})}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Выберите пол *" />
+                <SelectTrigger className="italic">
+                  <SelectValue placeholder="Выберите пол" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="male">Мужской</SelectItem>
                   <SelectItem value="female">Женский</SelectItem>
                 </SelectContent>
               </Select>
-              <Input
-                id="birthdate"
-                type="date"
-                placeholder="Дата рождения *"
-                value={formData.birthdate}
-                onChange={(e) => setFormData({...formData, birthdate: e.target.value})}
-                required
-              />
+              
+              <div className="grid grid-cols-3 gap-2">
+                <Select value={formData.birth_day} onValueChange={(value) => setFormData({...formData, birth_day: value})}>
+                  <SelectTrigger className="italic">
+                    <SelectValue placeholder="День" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Array.from({length: 31}, (_, i) => i + 1).map(day => (
+                      <SelectItem key={day} value={day.toString()}>{day}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                
+                <Select value={formData.birth_month} onValueChange={(value) => setFormData({...formData, birth_month: value})}>
+                  <SelectTrigger className="italic">
+                    <SelectValue placeholder="Месяц" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {[
+                      'Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
+                      'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'
+                    ].map((month, index) => (
+                      <SelectItem key={index + 1} value={(index + 1).toString()}>{month}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                
+                <Select value={formData.birth_year} onValueChange={(value) => setFormData({...formData, birth_year: value})}>
+                  <SelectTrigger className="italic">
+                    <SelectValue placeholder="Год" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Array.from({length: 80}, (_, i) => new Date().getFullYear() - 18 - i).map(year => (
+                      <SelectItem key={year} value={year.toString()}>{year}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
             <Select value={formData.marital_status} onValueChange={(value) => setFormData({...formData, marital_status: value})}>
-              <SelectTrigger>
+              <SelectTrigger className="italic">
                 <SelectValue placeholder="Выберите семейное положение" />
               </SelectTrigger>
               <SelectContent>
@@ -378,7 +424,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
             </Select>
 
             <Select value={formData.has_children.toString()} onValueChange={(value) => setFormData({...formData, has_children: value === 'true'})}>
-              <SelectTrigger>
+              <SelectTrigger className="italic">
                 <SelectValue placeholder="Есть ли дети?" />
               </SelectTrigger>
               <SelectContent>
@@ -392,6 +438,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                 id="height"
                 type="number"
                 placeholder="Рост (см)"
+                className="italic"
                 value={formData.height_cm}
                 onChange={(e) => setFormData({...formData, height_cm: e.target.value})}
               />
@@ -400,6 +447,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                 type="number"
                 step="0.1"
                 placeholder="Вес (кг)"
+                className="italic"
                 value={formData.weight_kg}
                 onChange={(e) => setFormData({...formData, weight_kg: e.target.value})}
               />
