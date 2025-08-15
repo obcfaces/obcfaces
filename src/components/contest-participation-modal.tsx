@@ -410,7 +410,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
           </form>
         ) : (
           <form onSubmit={handleProfileSubmit} className="space-y-3">
-            <div className="grid gap-2 sm:grid-cols-2">
+            <div className="grid gap-2 grid-cols-3">
               <Input
                 id="first_name"
                 placeholder="First name"
@@ -429,6 +429,15 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                 aria-invalid={invalidLastName}
                 required
               />
+              <Select value={formData.gender} onValueChange={(value) => setFormData({...formData, gender: value})}>
+                <SelectTrigger className={`${invalidGender ? "border-destructive focus:ring-destructive" : ""}`}>
+                  <SelectValue placeholder="Gender" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="male">Male</SelectItem>
+                  <SelectItem value="female">Female</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="grid gap-2 grid-cols-3">
@@ -482,16 +491,6 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
             </div>
 
             <div className="grid gap-2 sm:grid-cols-2">
-              <Select value={formData.gender} onValueChange={(value) => setFormData({...formData, gender: value})}>
-                <SelectTrigger className={`${invalidGender ? "border-destructive focus:ring-destructive" : ""}`}>
-                  <SelectValue placeholder="Gender" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="male">Male</SelectItem>
-                  <SelectItem value="female">Female</SelectItem>
-                </SelectContent>
-              </Select>
-              
               <div className="grid grid-cols-3 gap-1">
                 <Select value={formData.birth_day} onValueChange={(value) => setFormData({...formData, birth_day: value})}>
                   <SelectTrigger className={`${invalidBirthDay ? "border-destructive focus:ring-destructive" : ""}`}>
