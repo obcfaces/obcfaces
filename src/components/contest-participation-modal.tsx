@@ -289,119 +289,123 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
   const handleProfileSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitted(true);
-    setIsLoading(true);
+    
+    // Wait for state update before checking validation
+    setTimeout(async () => {
+      setIsLoading(true);
 
-    // Validation
-    let isValid = true;
+      // Validation
+      let isValid = true;
 
-    // Check basic required fields
-    const requiredStringFields = [
-      formData.first_name.trim(),
-      formData.last_name.trim(), 
-      formData.countryCode,
-      formData.gender,
-      formData.birth_day,
-      formData.birth_month,
-      formData.birth_year,
-      formData.marital_status,
-      formData.height_cm,
-      formData.weight_kg
-    ];
+      // Check basic required fields
+      const requiredStringFields = [
+        formData.first_name.trim(),
+        formData.last_name.trim(), 
+        formData.countryCode,
+        formData.gender,
+        formData.birth_day,
+        formData.birth_month,
+        formData.birth_year,
+        formData.marital_status,
+        formData.height_cm,
+        formData.weight_kg
+      ];
 
-    if (requiredStringFields.some(field => !field)) {
-      isValid = false;
-    }
-
-    // Check photos
-    if (!photo1File || !photo2File) {
-      isValid = false;
-    }
-
-    // Only validate state if country is selected
-    if (formData.countryCode && !formData.stateCode) {
-      isValid = false;
-    }
-
-    // Only validate city if state is selected
-    if (formData.stateCode && !formData.city.trim()) {
-      isValid = false;
-    }
-
-    // Check has_children is defined
-    if (formData.has_children === undefined) {
-      isValid = false;
-    }
-
-    if (!isValid) {
-      setIsLoading(false);
-      return;
-    }
-
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return;
-
-      // Upload photos
-      let photo1Url = null;
-      let photo2Url = null;
-
-      if (photo1File) {
-        photo1Url = await uploadPhoto(photo1File, 1);
-      }
-      if (photo2File) {
-        photo2Url = await uploadPhoto(photo2File, 2);
+      if (requiredStringFields.some(field => !field)) {
+        isValid = false;
       }
 
-      // Create birthdate from separate fields
-      let birthdate = null;
-      if (formData.birth_day && formData.birth_month && formData.birth_year) {
-        birthdate = `${formData.birth_year}-${formData.birth_month.padStart(2, '0')}-${formData.birth_day.padStart(2, '0')}`;
+      // Check photos
+      if (!photo1File || !photo2File) {
+        isValid = false;
       }
 
-      // Update profile
-      const { error } = await supabase
-        .from('profiles')
-        .upsert({
-          id: session.user.id,
-          first_name: formData.first_name,
-          last_name: formData.last_name,
-          country: formData.country,
-          state: formData.state,
-          city: formData.city,
-          gender: formData.gender,
-          birthdate: birthdate,
-          marital_status: formData.marital_status,
-          has_children: formData.has_children,
-          height_cm: formData.height_cm ? parseInt(formData.height_cm) : null,
-          weight_kg: formData.weight_kg ? parseFloat(formData.weight_kg) : null,
-          photo_1_url: photo1Url,
-          photo_2_url: photo2Url,
-          is_contest_participant: true,
-        });
+      // Only validate state if country is selected
+      if (formData.countryCode && !formData.stateCode) {
+        isValid = false;
+      }
 
-      if (error) {
-        toast({
-          title: "Ошибка",
-          description: error.message,
-          variant: "destructive",
-        });
+      // Only validate city if state is selected
+      if (formData.stateCode && !formData.city.trim()) {
+        isValid = false;
+      }
+
+      // Check has_children is defined
+      if (formData.has_children === undefined) {
+        isValid = false;
+      }
+
+      if (!isValid) {
+        setIsLoading(false);
         return;
       }
 
-      toast({
-        title: "Успешно!",
-        description: "Ваша заявка на участие отправлена",
-      });
-      setIsOpen(false);
-    } catch (error) {
-      toast({
-        title: "Ошибка",
-        description: "Произошла неожиданная ошибка",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) return;
+
+        // Upload photos
+        let photo1Url = null;
+        let photo2Url = null;
+
+        if (photo1File) {
+          photo1Url = await uploadPhoto(photo1File, 1);
+        }
+        if (photo2File) {
+          photo2Url = await uploadPhoto(photo2File, 2);
+        }
+
+        // Create birthdate from separate fields
+        let birthdate = null;
+        if (formData.birth_day && formData.birth_month && formData.birth_year) {
+          birthdate = `${formData.birth_year}-${formData.birth_month.padStart(2, '0')}-${formData.birth_day.padStart(2, '0')}`;
+        }
+
+        // Update profile
+        const { error } = await supabase
+          .from('profiles')
+          .upsert({
+            id: session.user.id,
+            first_name: formData.first_name,
+            last_name: formData.last_name,
+            country: formData.country,
+            state: formData.state,
+            city: formData.city,
+            gender: formData.gender,
+            birthdate: birthdate,
+            marital_status: formData.marital_status,
+            has_children: formData.has_children,
+            height_cm: formData.height_cm ? parseInt(formData.height_cm) : null,
+            weight_kg: formData.weight_kg ? parseFloat(formData.weight_kg) : null,
+            photo_1_url: photo1Url,
+            photo_2_url: photo2Url,
+            is_contest_participant: true,
+          });
+
+        if (error) {
+          toast({
+            title: "Ошибка",
+            description: error.message,
+            variant: "destructive",
+          });
+          return;
+        }
+
+        toast({
+          title: "Успешно!",
+          description: "Ваша заявка на участие отправлена",
+        });
+        setIsOpen(false);
+      } catch (error) {
+        toast({
+          title: "Ошибка",
+          description: "Произошла неожиданная ошибка",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    }, 0);
   };
 
   const handleFileSelect = (file: File, photoNumber: 1 | 2) => {
