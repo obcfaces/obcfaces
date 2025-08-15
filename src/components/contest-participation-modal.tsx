@@ -566,15 +566,18 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                 value={formData.height_cm}
                 onChange={(e) => setFormData({...formData, height_cm: e.target.value})}
               />
-              <Input
-                id="weight"
-                type="number"
-                step="0.1"
-                placeholder="Weight (kg)"
-                className="text-sm placeholder:text-muted-foreground"
-                value={formData.weight_kg}
-                onChange={(e) => setFormData({...formData, weight_kg: e.target.value})}
-              />
+              <Select value={formData.weight_kg} onValueChange={(value) => setFormData({...formData, weight_kg: value})}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Weight (kg)" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="less_30">Less than 30</SelectItem>
+                  {Array.from({length: 41}, (_, i) => 30 + i).map(weight => (
+                    <SelectItem key={weight} value={weight.toString()}>{weight}</SelectItem>
+                  ))}
+                  <SelectItem value="more_70">More than 70</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="space-y-3">
