@@ -61,7 +61,7 @@ export function ContestHeader() {
       </div>
       
       {/* Border line with active section underline */}
-      <div className="relative border-b border-contest-border">
+      <div className="relative border-b border-contest-border/30">
         <div className="max-w-6xl mx-auto px-6">
           <div className="flex items-center gap-6 text-sm">
             {navItems.map((item) => (
