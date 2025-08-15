@@ -327,11 +327,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                      isWeightEmpty || isPhoto1Empty || isPhoto2Empty;
 
     if (hasErrors) {
-      console.log("FORM HAS ERRORS - stopping submission but KEEPING validation state");
-      // Force component re-render to show validation errors
-      setTimeout(() => {
-        console.log("Forced re-render after validation");
-      }, 100);
+      console.log("FORM HAS ERRORS - validation will show red borders");
       return;
     }
 
