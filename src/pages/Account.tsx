@@ -307,6 +307,16 @@ const Account = () => {
                 <div className="text-center py-8">
                   <p className="text-muted-foreground">Settings section is coming soon</p>
                 </div>
+                <div className="border-t border-border pt-6">
+                  <div className="flex flex-col space-y-4">
+                    <h3 className="text-lg font-medium">Account Actions</h3>
+                    <div className="flex justify-start">
+                      <Button variant="destructive" onClick={logout} className="w-auto">
+                        📚 Log Out
+                      </Button>
+                    </div>
+                  </div>
+                </div>
               </div>
             </TabsContent>
 
