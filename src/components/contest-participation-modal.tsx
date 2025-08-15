@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import SearchableSelect from "@/components/ui/searchable-select";
 import { Country, State, City } from 'country-state-city';
+import { getCitiesForLocation } from '@/lib/location-utils';
 
 interface ContestParticipationModalProps {
   children: React.ReactNode;
@@ -81,74 +82,28 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
     // Debug: log the current codes
     console.log('Country Code:', countryCode, 'State Code:', stateCode);
     
-    // Extended static data for Philippines to ensure comprehensive coverage
-    const philippinesCities: Record<string, string[]> = {
-      // Try different possible codes for Cebu
-      'CE': [
-        'Cebu City', 'Lapu-Lapu City', 'Mandaue City', 'Talisay City', 'Toledo City',
-        'Danao City', 'Carcar City', 'Naga City', 'Bogo City', 'Minglanilla',
-        'Consolacion', 'Liloan', 'Compostela', 'Cordova', 'Balamban'
-      ],
-      'CEB': [
-        'Cebu City', 'Lapu-Lapu City', 'Mandaue City', 'Talisay City', 'Toledo City',
-        'Danao City', 'Carcar City', 'Naga City', 'Bogo City', 'Minglanilla',
-        'Consolacion', 'Liloan', 'Compostela', 'Cordova', 'Balamban'
-      ],
-      'PH-CEB': [
-        'Cebu City', 'Lapu-Lapu City', 'Mandaue City', 'Talisay City', 'Toledo City',
-        'Danao City', 'Carcar City', 'Naga City', 'Bogo City', 'Minglanilla',
-        'Consolacion', 'Liloan', 'Compostela', 'Cordova', 'Balamban'
-      ],
-      '07': [
-        'Cebu City', 'Lapu-Lapu City', 'Mandaue City', 'Talisay City', 'Toledo City',
-        'Danao City', 'Carcar City', 'Naga City', 'Bogo City', 'Minglanilla',
-        'Consolacion', 'Liloan', 'Compostela', 'Cordova', 'Balamban'
-      ],
-      // Metro Manila variants
-      'MM': [
-        'Manila', 'Quezon City', 'Makati', 'Pasig', 'Taguig', 'Marikina',
-        'Mandaluyong', 'San Juan', 'Pasay', 'Caloocan', 'Las Piñas',
-        'Muntinlupa', 'Parañaque', 'Valenzuela', 'Malabon', 'Navotas'
-      ],
-      'NCR': [
-        'Manila', 'Quezon City', 'Makati', 'Pasig', 'Taguig', 'Marikina',
-        'Mandaluyong', 'San Juan', 'Pasay', 'Caloocan', 'Las Piñas',
-        'Muntinlupa', 'Parañaque', 'Valenzuela', 'Malabon', 'Navotas'
-      ],
-      // Davao variants
-      'DA': [
-        'Davao City', 'Tagum', 'Panabo', 'Samal', 'Digos', 'Mati'
-      ],
-      'DAV': [
-        'Davao City', 'Tagum', 'Panabo', 'Samal', 'Digos', 'Mati'
-      ]
-    };
-    
-    // Get cities from static data for Philippines
-    if (countryCode === 'PH' && philippinesCities[stateCode]) {
-      return philippinesCities[stateCode].map(name => ({ name }));
+    // Use comprehensive Philippines database for PH
+    if (countryCode === 'PH') {
+      const stateName = states.find(s => s.isoCode === stateCode)?.name;
+      console.log('State Name:', stateName);
+      
+      if (stateName) {
+        const philippinesCities = getCitiesForLocation(countryCode, stateCode, stateName);
+        if (philippinesCities.length > 0) {
+          return philippinesCities.map(city => ({ name: city.name }));
+        }
+      }
     }
     
-    // Get cities from country-state-city library for other countries
+    // Get cities from country-state-city library for other countries or fallback
     const cscCities = City.getCitiesOfState(countryCode, stateCode);
     console.log('CSC Cities found:', cscCities.length);
-    
-    // If no cities found and it's Philippines, provide fallback
-    if (countryCode === 'PH' && cscCities.length === 0) {
-      return [
-        { name: 'Cebu City' },
-        { name: 'Lapu-Lapu City' },
-        { name: 'Mandaue City' },
-        { name: 'Talisay City' },
-        { name: 'Toledo City' }
-      ];
-    }
     
     // Sort and return cities
     return cscCities
       .map(c => ({ name: c.name }))
       .sort((a, b) => a.name.localeCompare(b.name));
-  }, [countryCode, stateCode]);
+  }, [countryCode, stateCode, states]);
 
   useEffect(() => {
     const checkUser = async () => {
