@@ -521,21 +521,42 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                   <SelectItem value="imperial">Imperial (ft, lbs)</SelectItem>
                 </SelectContent>
               </Select>
-              <Input
-                placeholder="Height (cm)"
-                className={getFieldClasses('height_cm', "text-sm placeholder:text-muted-foreground")}
-                value={formData.height_cm}
-                onChange={(e) => handleFieldChange('height_cm', e.target.value)}
-                type="number"
-              />
-              <Input
-                placeholder="Weight (kg)"
-                className={getFieldClasses('weight_kg', "text-sm placeholder:text-muted-foreground")}
-                value={formData.weight_kg}
-                onChange={(e) => handleFieldChange('weight_kg', e.target.value)}
-                type="number"
-                step="0.1"
-              />
+              <Select 
+                value={formData.height_cm} 
+                onValueChange={(value) => handleFieldChange('height_cm', value)}
+              >
+                <SelectTrigger className={getFieldClasses('height_cm', "text-sm")}>
+                  <SelectValue placeholder="Height (cm)" />
+                </SelectTrigger>
+                <SelectContent>
+                  {Array.from({ length: 51 }, (_, i) => {
+                    const height = 140 + i;
+                    return (
+                      <SelectItem key={height} value={height.toString()}>
+                        {height} cm
+                      </SelectItem>
+                    );
+                  })}
+                </SelectContent>
+              </Select>
+              <Select 
+                value={formData.weight_kg} 
+                onValueChange={(value) => handleFieldChange('weight_kg', value)}
+              >
+                <SelectTrigger className={getFieldClasses('weight_kg', "text-sm")}>
+                  <SelectValue placeholder="Weight (kg)" />
+                </SelectTrigger>
+                <SelectContent>
+                  {Array.from({ length: 111 }, (_, i) => {
+                    const weight = 40 + i;
+                    return (
+                      <SelectItem key={weight} value={weight.toString()}>
+                        {weight} kg
+                      </SelectItem>
+                    );
+                  })}
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="space-y-3">
