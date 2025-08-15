@@ -166,6 +166,7 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [filteredCandidates, setFilteredCandidates] = useState(candidates);
   const [remainingCandidates, setRemainingCandidates] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
@@ -182,9 +183,12 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
   // Filter candidates based on user's previous votes
   useEffect(() => {
     const filterCandidates = async () => {
+      setIsLoading(true);
+      
       if (!user) {
         setFilteredCandidates(candidates);
         setRemainingCandidates(candidates.length);
+        setIsLoading(false);
         return;
       }
 
@@ -206,6 +210,8 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
         setFilteredCandidates(candidates);
         setRemainingCandidates(candidates.length);
       }
+      
+      setIsLoading(false);
     };
 
     filterCandidates();
@@ -318,7 +324,14 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
         </div>
       </div>
 
-      {currentIndex < filteredCandidates.length ? (
+      {isLoading ? (
+        <div className="text-center py-12">
+          <div className="animate-pulse">
+            <div className="h-8 bg-muted rounded w-32 mx-auto mb-2"></div>
+            <div className="h-4 bg-muted rounded w-48 mx-auto"></div>
+          </div>
+        </div>
+      ) : currentIndex < filteredCandidates.length ? (
         <div className="flex flex-col items-center">
           <div className="w-full px-0 sm:px-6">
             <ContestantCard
