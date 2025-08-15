@@ -427,6 +427,8 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
 
   // Validation states with debug logging
   const showProfileErrors = submitted;
+  console.log("Current step:", currentStep);
+  console.log("submitted state:", submitted);
   console.log("showProfileErrors:", showProfileErrors);
   
   // Required field validations
