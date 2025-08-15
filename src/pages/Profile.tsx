@@ -13,6 +13,8 @@ import c1 from "@/assets/contestant-1.jpg";
 import c2 from "@/assets/contestant-2.jpg";
 import c3 from "@/assets/contestant-3.jpg";
 import c1face from "@/assets/contestant-1-face.jpg";
+import c2face from "@/assets/contestant-2-face.jpg";
+import c3face from "@/assets/contestant-3-face.jpg";
 import listIcon from "@/assets/icons/sdisplay-list.png";
 import listActiveIcon from "@/assets/icons/sdisplay-list-active.png";
 import tableIcon from "@/assets/icons/sdisplay-table.png";
@@ -191,6 +193,10 @@ const Profile = () => {
           };
         } else {
           // Handle other content types (posts, contests, etc.)
+          // Use one of the contestant images for mock data
+          const mockImages = [c1face, c2face, c3face];
+          const randomImageIndex = Math.floor(Math.random() * mockImages.length);
+          
           return {
             likeId: like.id,
             contentType: like.content_type as 'contest' | 'post',
@@ -200,7 +206,17 @@ const Profile = () => {
             time: timeAgo,
             likes: Math.floor(Math.random() * 100), // Mock likes count
             comments: Math.floor(Math.random() * 20), // Mock comments count
-            imageSrc: '/lovable-uploads/c4e9d90c-eeda-44db-94e3-08c6a959f1a5.png' // Default image for contest posts
+            imageSrc: mockImages[randomImageIndex], // Use random contestant image
+            candidateData: {
+              name: `Contestant #${like.content_id.slice(-4)}`,
+              age: 20 + Math.floor(Math.random() * 10),
+              weight: 45 + Math.floor(Math.random() * 15),
+              height: 155 + Math.floor(Math.random() * 20),
+              country: 'Philippines',
+              city: 'Manila',
+              faceImage: mockImages[randomImageIndex],
+              fullBodyImage: mockImages[randomImageIndex]
+            }
           };
         }
       }) || [];
