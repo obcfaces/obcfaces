@@ -431,25 +431,25 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
               />
             </div>
 
-            <SearchableSelect
-              placeholder="Country"
-              options={countries.map(c => ({ value: c.isoCode, label: c.name }))}
-              value={formData.countryCode}
-              onValueChange={(code) => {
-                const country = countries.find(c => c.isoCode === code);
-                setFormData({
-                  ...formData, 
-                  countryCode: code,
-                  country: country?.name || "",
-                  state: "", 
-                  stateCode: "",
-                  city: ""
-                });
-              }}
-              invalid={invalidCountry}
-            />
-
-            <div className="grid gap-2 sm:grid-cols-2">
+            <div className="grid gap-2 grid-cols-3">
+              <SearchableSelect
+                placeholder="Country"
+                options={countries.map(c => ({ value: c.isoCode, label: c.name }))}
+                value={formData.countryCode}
+                onValueChange={(code) => {
+                  const country = countries.find(c => c.isoCode === code);
+                  setFormData({
+                    ...formData, 
+                    countryCode: code,
+                    country: country?.name || "",
+                    state: "", 
+                    stateCode: "",
+                    city: ""
+                  });
+                }}
+                invalid={invalidCountry}
+              />
+              
               <Select value={formData.stateCode} onValueChange={(code) => {
                 const state = states.find(s => s.isoCode === code);
                 setFormData({
@@ -543,7 +543,10 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
               </SelectContent>
             </Select>
 
-            <Select value={formData.has_children.toString()} onValueChange={(value) => setFormData({...formData, has_children: value === 'true'})}>
+            <Select 
+              value={formData.has_children ? formData.has_children.toString() : ""} 
+              onValueChange={(value) => setFormData({...formData, has_children: value === 'true'})}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Do you have children?" />
               </SelectTrigger>
