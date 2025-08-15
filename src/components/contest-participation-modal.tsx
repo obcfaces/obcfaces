@@ -402,6 +402,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                   setFormData(prev => ({ ...prev, stateCode: "", city: "" }));
                 }}
                 placeholder="Country"
+                invalid={hasRedBorder('country')}
               />
               <SearchableSelect
                 options={states}
@@ -412,12 +413,15 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                 }}
                 placeholder="State/Region"
                 disabled={!formData.countryCode}
+                invalid={hasRedBorder('state')}
               />
               <SearchableSelect
                 options={cities}
                 value={formData.city}
                 onValueChange={(value) => handleFieldChange('city', value)}
+                placeholder="Enter city name"
                 disabled={!formData.stateCode}
+                invalid={hasRedBorder('city')}
               />
             </div>
 
