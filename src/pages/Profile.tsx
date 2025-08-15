@@ -308,7 +308,7 @@ const Profile = () => {
           </div>
 
           {/* Tabs */}
-          <Tabs defaultValue={isOwner ? "likes" : "posts"} className="mt-8">
+          <Tabs defaultValue={isOwner ? "likes" : "posts"} className="mt-4">
             <TabsList className="w-full sm:w-auto bg-transparent p-0 rounded-none justify-start gap-8 border-b border-border">
               {isOwner && (
                 <TabsTrigger value="likes" className="px-0 mr-6 h-auto pb-2 bg-transparent rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary text-muted-foreground hover:text-foreground">Лайки</TabsTrigger>
@@ -319,7 +319,7 @@ const Profile = () => {
             </TabsList>
 
             {isOwner && (
-              <TabsContent value="likes" className="mt-8 -mx-6">
+              <TabsContent value="likes" className="mt-4 -mx-6">
                 {loadingLikes ? (
                   <p className="text-muted-foreground text-center py-8 px-6">Загрузка лайков...</p>
                 ) : likedItems.length > 0 ? (
@@ -395,16 +395,16 @@ const Profile = () => {
               </TabsContent>
             )}
 
-            <TabsContent value="posts" className="space-y-4 mt-8 -mx-6">
-              <div className="px-0 sm:px-6 space-y-4">
+            <TabsContent value="posts" className="space-y-2 mt-4 -mx-6">
+              <div className="px-0 sm:px-6 space-y-2">
                 {samplePosts.map((p) => (
                   <PostCard key={p.id} {...p} />
                 ))}
               </div>
             </TabsContent>
 
-            <TabsContent value="photos" className="mt-8">
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            <TabsContent value="photos" className="mt-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
                 {profilePhotos.map((src, idx) => (
                   <button
                     key={idx}
@@ -425,7 +425,7 @@ const Profile = () => {
               </div>
             </TabsContent>
 
-            <TabsContent value="about" className="mt-8">
+            <TabsContent value="about" className="mt-4">
               <article className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
                   <p><span className="text-muted-foreground">Имя:</span> {profile.display_name ?? "—"}</p>
