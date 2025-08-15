@@ -34,12 +34,35 @@ interface LikedItemProps {
   onUnlike?: (likeId: string) => void;
   viewMode?: 'compact' | 'full';
   candidateData?: any;
+  participantType?: 'candidate' | 'finalist' | 'winner';
 }
 
 const getInitials = (name: string) => {
   const parts = name.trim().split(/\s+/);
   const initials = parts.slice(0, 2).map(p => p[0]?.toUpperCase() ?? "").join("");
   return initials || "U";
+};
+
+const getParticipantBadge = (type?: 'candidate' | 'finalist' | 'winner') => {
+  if (!type) return null;
+  
+  const badgeStyles = {
+    candidate: "bg-blue-500 text-white",
+    finalist: "bg-orange-500 text-white", 
+    winner: "bg-yellow-500 text-black"
+  };
+  
+  const labels = {
+    candidate: "Candidate",
+    finalist: "Finalist",
+    winner: "Winner"
+  };
+  
+  return (
+    <div className={`absolute top-2 right-2 z-30 px-2 py-1 rounded-full text-xs font-semibold ${badgeStyles[type]}`}>
+      {labels[type]}
+    </div>
+  );
 };
 
 const LikedItem = ({
@@ -55,7 +78,8 @@ const LikedItem = ({
   comments = 0,
   onUnlike,
   viewMode = 'full',
-  candidateData
+  candidateData,
+  participantType
 }: LikedItemProps) => {
   const [isUnliking, setIsUnliking] = useState(false);
   const [isLiked, setIsLiked] = useState(true);
@@ -136,6 +160,8 @@ const LikedItem = ({
     return (
       <>
         <Card className="bg-card border-contest-border relative overflow-hidden flex h-32 sm:h-36 md:h-40">
+          {/* Participant Type Badge */}
+          {getParticipantBadge(participantType)}
           {/* Main two photos */}
           <div className="flex-shrink-0 flex h-full relative gap-px">
             <div className="relative">
@@ -251,6 +277,8 @@ const LikedItem = ({
   return (
     <>
       <Card className="bg-card border-contest-border relative overflow-hidden">
+        {/* Participant Type Badge */}
+        {getParticipantBadge(participantType)}
         {/* Name in top left - показываем всегда как в проголосованных */}
         <div className="absolute top-2 left-4 z-20">
           <h3 className="text-xl font-semibold text-contest-text">

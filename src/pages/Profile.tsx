@@ -199,9 +199,11 @@ const Profile = () => {
             "Daniela Ruiz", "Paula Jimenez", "Carolina Perez", "Mariana Santos", 
             "Fernanda Diaz", "Adriana Castro"
           ];
+          const participantTypes = ["candidate", "finalist", "winner"] as const;
           const mockImages = [c1face, c2face, c3face];
           const randomImageIndex = Math.floor(Math.random() * mockImages.length);
           const randomNameIndex = Math.floor(Math.random() * nextWeekNames.length);
+          const randomTypeIndex = Math.floor(Math.random() * participantTypes.length);
           
           return {
             likeId: like.id,
@@ -213,6 +215,7 @@ const Profile = () => {
             likes: Math.floor(Math.random() * 100), // Mock likes count
             comments: Math.floor(Math.random() * 20), // Mock comments count
             imageSrc: mockImages[randomImageIndex], // Use random contestant image
+            participantType: participantTypes[randomTypeIndex], // Add participant type
             candidateData: {
               name: nextWeekNames[randomNameIndex],
               age: 20 + Math.floor(Math.random() * 10),
@@ -221,7 +224,8 @@ const Profile = () => {
               country: 'Philippines',
               city: 'Manila',
               faceImage: mockImages[randomImageIndex],
-              fullBodyImage: mockImages[randomImageIndex]
+              fullBodyImage: mockImages[randomImageIndex],
+              participantType: participantTypes[randomTypeIndex]
             }
           };
         }
@@ -405,6 +409,7 @@ const Profile = () => {
                           onUnlike={handleUnlike}
                           viewMode={likesViewMode}
                           candidateData={item.candidateData}
+                          participantType={item.participantType}
                         />
                       ))}
                     </div>
