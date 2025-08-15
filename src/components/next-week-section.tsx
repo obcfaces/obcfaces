@@ -378,10 +378,8 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
           </div>
         </div>
       ) : (
-        <div className="text-center py-12">
-          <h3 className="text-2xl font-bold text-contest-text mb-2">All done!</h3>
-          <p className="text-muted-foreground">Check back later or invite others to join.</p>
-          <p className="text-muted-foreground mt-1">New ones will auto-update.</p>
+        <div className="text-center py-8">
+          <p className="text-lg text-contest-text">New ones will auto-update.</p>
         </div>
       )}
 
