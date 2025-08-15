@@ -484,8 +484,9 @@ export function ContestantCard({
     <>
       <Card className="bg-card border-contest-border relative overflow-hidden flex h-32 sm:h-36 md:h-40">
         {isWinner && (
-          <div className="absolute top-1 left-2 bg-contest-blue text-white px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 z-10">
-            🏆 WINNER
+          <div className="absolute top-0 left-48 sm:left-56 md:left-64 right-12 sm:right-14 md:right-16 bg-contest-blue text-white px-2 py-1 text-xs font-bold flex items-center justify-between z-10">
+            <span>🏆 WINNER</span>
+            <span>+ 5000 PHP</span>
           </div>
         )}
         
