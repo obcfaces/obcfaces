@@ -221,7 +221,7 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
   const currentCandidate = candidates[currentIndex];
 
   return (
-    <section className="max-w-6xl mx-auto py-8 mb-2 mt-2 bg-background rounded-lg shadow-lg shadow-foreground/35 mx-2 sm:mx-auto">
+    <section className="max-w-6xl mx-auto py-8 mb-2 mt-2 bg-background rounded-lg shadow-lg shadow-foreground/35">
       <div className="mb-8 px-6">
         <div className="mb-4">
           <div className="flex items-baseline gap-3 mb-1">
@@ -238,11 +238,13 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
 
       {currentIndex < candidates.length ? (
         <div className="flex flex-col items-center">
-          <ContestantCard
-            {...currentCandidate}
-            viewMode="compact"
-            showDislike={true}
-          />
+          <div className="w-full px-0 sm:px-6">
+            <ContestantCard
+              {...currentCandidate}
+              viewMode={viewMode}
+              showDislike={true}
+            />
+          </div>
           
           <div className="flex items-center justify-center gap-6 mt-6">
             <div className="flex items-center gap-4">

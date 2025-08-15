@@ -455,7 +455,7 @@ export function ContestantCard({
 
   return (
     <>
-      <Card className="bg-card border-contest-border relative overflow-hidden flex h-32 sm:h-36 md:h-40">
+      <Card className="bg-card border-contest-border relative overflow-hidden flex h-32 sm:h-36 md:h-40 mx-1 sm:mx-0">
         {isWinner && (
           <div className="absolute top-1 left-2 bg-contest-blue text-white px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 z-10">
             🏆 WINNER
