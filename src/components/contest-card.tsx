@@ -302,11 +302,6 @@ export function ContestantCard({
               </div>
               <div className="text-right pr-2 pt-1">
                 
-                {isWinner && prize && (
-                  <div className="text-contest-blue font-bold text-sm mt-1">
-                    {prize}
-                  </div>
-                )}
               </div>
             </div>
           )}
@@ -620,11 +615,6 @@ export function ContestantCard({
                 </div>
                 
                 <div className="text-right flex-shrink-0">
-                  {isWinner && prize && (
-                    <div className="text-contest-blue font-bold text-xs">
-                      {prize}
-                    </div>
-                  )}
                 </div>
               </div>
               
