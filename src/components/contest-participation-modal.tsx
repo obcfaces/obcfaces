@@ -49,8 +49,9 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
   const [photo1File, setPhoto1File] = useState<File | null>(null);
   const [photo2File, setPhoto2File] = useState<File | null>(null);
 
-  // Complete country list for contest participation
+  // Complete country list for contest participation - Philippines first like in contest filter
   const countries = useMemo(() => [
+    { name: "Philippines", isoCode: "PH" },
     { name: "Afghanistan", isoCode: "AF" },
     { name: "Albania", isoCode: "AL" },
     { name: "Algeria", isoCode: "DZ" },
@@ -117,7 +118,6 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
     { name: "Norway", isoCode: "NO" },
     { name: "Pakistan", isoCode: "PK" },
     { name: "Peru", isoCode: "PE" },
-    { name: "Philippines", isoCode: "PH" },
     { name: "Poland", isoCode: "PL" },
     { name: "Portugal", isoCode: "PT" },
     { name: "Qatar", isoCode: "QA" },
