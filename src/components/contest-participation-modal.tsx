@@ -561,6 +561,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
 
             <div className="space-y-4">
               <h3 className="text-sm font-medium text-center">Upload Photos</h3>
+              <p className="text-xs text-blue-600 text-center font-medium">no makeup, no filters, no nude, no color correction</p>
               <div className="grid gap-4 grid-cols-2">
                 {/* Portrait Photo */}
                 <div className={`relative border-2 border-dashed rounded-lg cursor-pointer hover:border-primary transition-colors ${hasRedBorder('photo1') ? 'border-red-500' : 'border-muted-foreground/25'}`}>
@@ -606,7 +607,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                             className="absolute inset-0 w-full h-full object-cover opacity-40 filter grayscale brightness-75"
                           />
                         </div>
-                        <p className="text-sm text-muted-foreground mb-2">one portrait photo</p>
+                        
                         <button type="button" className="px-4 py-2 bg-primary text-primary-foreground rounded text-sm hover:bg-primary/90 transition-colors">
                           Upload
                         </button>
@@ -659,7 +660,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                             className="absolute inset-0 w-full h-full object-contain opacity-50 filter grayscale brightness-50"
                           />
                         </div>
-                        <p className="text-sm text-muted-foreground mb-2">one full length photo</p>
+                        
                         <button type="button" className="px-4 py-2 bg-primary text-primary-foreground rounded text-sm hover:bg-primary/90 transition-colors">
                           Upload
                         </button>
@@ -669,10 +670,6 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                 </div>
               </div>
               
-              <p className="text-xs text-muted-foreground text-center leading-relaxed">
-                no makeup, without filters, sharp focus,<br />
-                good light, no nude, no color correction
-              </p>
             </div>
 
             <Button 
