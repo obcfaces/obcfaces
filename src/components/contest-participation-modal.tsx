@@ -42,7 +42,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
     birth_month: "",
     birth_year: "",
     marital_status: "",
-    has_children: false,
+    has_children: undefined as boolean | undefined,
     height_cm: "",
     weight_kg: "",
     measurement_system: "metric",
@@ -146,7 +146,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
             birth_month: profile.birthdate ? (new Date(profile.birthdate).getMonth() + 1).toString() : "",
             birth_year: profile.birthdate ? new Date(profile.birthdate).getFullYear().toString() : "",
             marital_status: profile.marital_status || "",
-            has_children: profile.has_children || false,
+            has_children: profile.has_children !== null ? profile.has_children : undefined,
             height_cm: profile.height_cm?.toString() || "",
             weight_kg: profile.weight_kg?.toString() || "",
             measurement_system: "metric",
@@ -431,6 +431,17 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
 
   // Helper function for field styling
   const getFieldClasses = (isInvalid: boolean, isFilled: boolean) => {
+    let classes = "text-sm placeholder:text-muted-foreground";
+    if (isInvalid) {
+      classes += " border-2 border-red-500 focus:ring-red-500 focus:border-red-500";
+    } else if (isFilled) {
+      classes += " border-2 border-green-500 focus:ring-green-500 focus:border-green-500";
+    }
+    return classes;
+  };
+
+  // Helper function for Select components
+  const getSelectClasses = (isInvalid: boolean, isFilled: boolean) => {
     if (isInvalid) {
       return "border-2 border-red-500 focus:ring-red-500 focus:border-red-500";
     } else if (isFilled) {
@@ -551,7 +562,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                 required
               />
               <Select value={formData.gender} onValueChange={(value) => setFormData({...formData, gender: value})}>
-                <SelectTrigger className={invalidGender ? "border-2 border-red-500 focus:ring-red-500" : isGenderFilled ? "border-2 border-green-500 focus:ring-green-500" : ""}>
+                <SelectTrigger className={getSelectClasses(invalidGender, isGenderFilled)}>
                   <SelectValue placeholder="Gender" />
                 </SelectTrigger>
                 <SelectContent>
@@ -640,7 +651,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
             <div className="grid gap-2 sm:grid-cols-2">
               <div className="grid grid-cols-3 gap-1">
                 <Select value={formData.birth_day} onValueChange={(value) => setFormData({...formData, birth_day: value})}>
-                  <SelectTrigger className={invalidBirthDay ? "border-2 border-red-500 focus:ring-red-500" : isBirthDayFilled ? "border-2 border-green-500 focus:ring-green-500" : ""}>
+                  <SelectTrigger className={getSelectClasses(invalidBirthDay, isBirthDayFilled)}>
                     <SelectValue placeholder="Day of birth" />
                   </SelectTrigger>
                   <SelectContent>
@@ -651,7 +662,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                 </Select>
                 
                 <Select value={formData.birth_month} onValueChange={(value) => setFormData({...formData, birth_month: value})}>
-                  <SelectTrigger className={invalidBirthMonth ? "border-2 border-red-500 focus:ring-red-500" : isBirthMonthFilled ? "border-2 border-green-500 focus:ring-green-500" : ""}>
+                  <SelectTrigger className={getSelectClasses(invalidBirthMonth, isBirthMonthFilled)}>
                     <SelectValue placeholder="Month of birth" />
                   </SelectTrigger>
                   <SelectContent>
@@ -665,7 +676,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                 </Select>
                 
                 <Select value={formData.birth_year} onValueChange={(value) => setFormData({...formData, birth_year: value})}>
-                  <SelectTrigger className={invalidBirthYear ? "border-2 border-red-500 focus:ring-red-500" : isBirthYearFilled ? "border-2 border-green-500 focus:ring-green-500" : ""}>
+                  <SelectTrigger className={getSelectClasses(invalidBirthYear, isBirthYearFilled)}>
                     <SelectValue placeholder="Year of birth" />
                   </SelectTrigger>
                   <SelectContent>
@@ -679,7 +690,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
 
             <div className="grid gap-2 grid-cols-2">
               <Select value={formData.marital_status} onValueChange={(value) => setFormData({...formData, marital_status: value})}>
-                <SelectTrigger className={invalidMaritalStatus ? "border-2 border-red-500 focus:ring-red-500" : isMaritalStatusFilled ? "border-2 border-green-500 focus:ring-green-500" : ""}>
+                <SelectTrigger className={getSelectClasses(invalidMaritalStatus, isMaritalStatusFilled)}>
                   <SelectValue placeholder="Marital status" />
                 </SelectTrigger>
                 <SelectContent>
@@ -691,10 +702,10 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
               </Select>
 
               <Select 
-                value={formData.has_children ? formData.has_children.toString() : ""} 
+                value={formData.has_children !== undefined ? formData.has_children.toString() : ""} 
                 onValueChange={(value) => setFormData({...formData, has_children: value === 'true'})}
               >
-                <SelectTrigger className={invalidChildren ? "border-2 border-red-500 focus:ring-red-500" : isChildrenFilled ? "border-2 border-green-500 focus:ring-green-500" : ""}>
+                <SelectTrigger className={getSelectClasses(invalidChildren, isChildrenFilled)}>
                   <SelectValue placeholder="Do you have children?" />
                 </SelectTrigger>
                 <SelectContent>
@@ -706,7 +717,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
 
             <div className="grid gap-2 grid-cols-3">
                <Select value={formData.measurement_system || 'metric'} onValueChange={(value) => setFormData({...formData, measurement_system: value})}>
-                <SelectTrigger className={getFieldClasses(false, !!formData.measurement_system)}>
+                <SelectTrigger className={getSelectClasses(false, !!formData.measurement_system)}>
                   <SelectValue placeholder="System" />
                 </SelectTrigger>
                 <SelectContent>
@@ -716,7 +727,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
               </Select>
               
               <Select value={formData.height_cm} onValueChange={(value) => setFormData({...formData, height_cm: value})}>
-                <SelectTrigger className={invalidHeight ? "border-2 border-red-500 focus:ring-red-500" : isHeightFilled ? "border-2 border-green-500 focus:ring-green-500" : ""}>
+                <SelectTrigger className={getSelectClasses(invalidHeight, isHeightFilled)}>
                   <SelectValue placeholder={formData.measurement_system === 'imperial' ? "Height (ft)" : "Height (cm)"} />
                 </SelectTrigger>
                 <SelectContent>
@@ -745,7 +756,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
               </Select>
               
               <Select value={formData.weight_kg} onValueChange={(value) => setFormData({...formData, weight_kg: value})}>
-                <SelectTrigger className={invalidWeight ? "border-2 border-red-500 focus:ring-red-500" : isWeightFilled ? "border-2 border-green-500 focus:ring-green-500" : ""}>
+                <SelectTrigger className={getSelectClasses(invalidWeight, isWeightFilled)}>
                   <SelectValue placeholder={formData.measurement_system === 'imperial' ? "Weight (lbs)" : "Weight (kg)"} />
                 </SelectTrigger>
                 <SelectContent>
