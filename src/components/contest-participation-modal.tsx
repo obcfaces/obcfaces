@@ -460,7 +460,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
     if (isInvalid) {
       return "border-2 border-red-500 focus:ring-red-500 focus:border-red-500";
     } else if (isFilled) {
-      return "border-2 border-green-500 focus:ring-green-500 focus:border-green-500";
+      return "border-2 border-blue-500 focus:ring-blue-500 focus:border-blue-500";
     }
     return "";
   };
@@ -799,7 +799,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
             <div className="space-y-3">
               <div className="text-sm font-medium">Photos (2 photos required)</div>
               <div className="grid gap-2 grid-cols-2">
-                <div className={`border-2 border-dashed rounded-lg p-4 text-center ${invalidPhoto1 ? 'border-red-500' : photo1File ? 'border-green-500' : 'border-gray-300'}`}>
+                <div className={`border-2 border-dashed rounded-lg p-4 text-center ${invalidPhoto1 ? 'border-red-500' : photo1File ? 'border-blue-500' : 'border-gray-300'}`}>
                   <input
                     id="photo1"
                     type="file"
@@ -811,14 +811,14 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                   <label htmlFor="photo1" className="cursor-pointer">
                     <Camera className="mx-auto h-8 w-8 text-gray-400 mb-2" />
                     {photo1File ? (
-                      <p className="text-sm text-green-600">{photo1File.name}</p>
+                      <p className="text-sm text-blue-600">{photo1File.name}</p>
                     ) : (
                       <p className="text-sm text-gray-500">Photo 1</p>
                     )}
                   </label>
                 </div>
                 
-                <div className={`border-2 border-dashed rounded-lg p-4 text-center ${invalidPhoto2 ? 'border-red-500' : photo2File ? 'border-green-500' : 'border-gray-300'}`}>
+                <div className={`border-2 border-dashed rounded-lg p-4 text-center ${invalidPhoto2 ? 'border-red-500' : photo2File ? 'border-blue-500' : 'border-gray-300'}`}>
                   <input
                     id="photo2"
                     type="file"
@@ -830,7 +830,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                   <label htmlFor="photo2" className="cursor-pointer">
                     <Camera className="mx-auto h-8 w-8 text-gray-400 mb-2" />
                     {photo2File ? (
-                      <p className="text-sm text-green-600">{photo2File.name}</p>
+                      <p className="text-sm text-blue-600">{photo2File.name}</p>
                     ) : (
                       <p className="text-sm text-gray-500">Photo 2</p>
                     )}
