@@ -12,26 +12,83 @@ const PHILIPPINES_CITIES = {
     'Dalaguete', 'Alcoy', 'Boljoon', 'Oslob', 'Santander', 'Samboan',
     'Ginatilan', 'Malabuyoc', 'Alegria', 'Tuburan', 'Asturias', 'Balamban'
   ],
-  'MNL': [ // Metro Manila
+  'MNL': [ // Metro Manila (NCR)
     'Manila', 'Quezon City', 'Makati', 'Pasig', 'Taguig', 'Marikina', 'Parañaque',
     'Las Piñas', 'Muntinlupa', 'Caloocan', 'Malabon', 'Navotas', 'Valenzuela',
     'Pasay', 'San Juan', 'Mandaluyong'
   ],
   'LAG': [ // Laguna
     'Santa Rosa', 'Biñan', 'San Pedro', 'Cabuyao', 'Calamba', 'Los Baños',
-    'Bay', 'Calauan', 'Alaminos', 'San Pablo', 'Sta. Cruz', 'Pagsanjan'
+    'Bay', 'Calauan', 'Alaminos', 'San Pablo', 'Sta. Cruz', 'Pagsanjan',
+    'Lumban', 'Kalayaan', 'Cavinti', 'Famy', 'Siniloan', 'Mabitac',
+    'Santa Maria', 'Majayjay', 'Liliw', 'Nagcarlan', 'Rizal', 'Pila'
   ],
   'BUL': [ // Bulacan
     'Malolos', 'Meycauayan', 'San Jose del Monte', 'Marilao', 'Bocaue',
-    'Balagtas', 'Guiguinto', 'Pandi', 'Plaridel', 'Pulilan', 'Calumpit'
+    'Balagtas', 'Guiguinto', 'Pandi', 'Plaridel', 'Pulilan', 'Calumpit',
+    'Hagonoy', 'Paombong', 'Bulakan', 'Obando', 'Santa Maria', 'Norzagaray',
+    'San Miguel', 'San Ildefonso', 'San Rafael', 'Angat', 'Bustos', 'Baliuag'
   ],
   'CAV': [ // Cavite
     'Bacoor', 'Imus', 'Dasmariñas', 'General Trias', 'Trece Martires',
-    'Kawit', 'Noveleta', 'Rosario', 'Tanza', 'Naic', 'Silang'
+    'Kawit', 'Noveleta', 'Rosario', 'Tanza', 'Naic', 'Silang',
+    'Carmona', 'General Emilio Aguinaldo', 'Alfonso', 'Tagaytay', 'Mendez',
+    'Indang', 'Maragondon', 'Magallanes', 'Amadeo', 'Ternate'
   ],
   'RIZ': [ // Rizal
     'Antipolo', 'Cainta', 'Taytay', 'Angono', 'Binangonan', 'Teresa',
-    'Morong', 'Baras', 'Tanay', 'Pililla', 'Jala-Jala', 'Pakil'
+    'Morong', 'Baras', 'Tanay', 'Pililla', 'Jala-Jala', 'Pakil',
+    'Cardona', 'Rodriguez', 'San Mateo'
+  ],
+  'BTG': [ // Batangas
+    'Batangas City', 'Lipa', 'Tanauan', 'Santo Tomas', 'Calaca', 'Lemery',
+    'Taal', 'Balayan', 'Nasugbu', 'Laurel', 'Agoncillo', 'Alitagtag',
+    'Balete', 'Cuenca', 'Ibaan', 'Lobo', 'Mabini', 'Malvar', 'Mataasnakahoy',
+    'Padre Garcia', 'Rosario', 'San Jose', 'San Juan', 'San Luis', 'San Nicolas',
+    'San Pascual', 'Santa Teresita', 'Talisay', 'Taysan', 'Tingloy', 'Tuy'
+  ],
+  'PAM': [ // Pampanga
+    'San Fernando', 'Angeles', 'Mabalacat', 'Apalit', 'Arayat', 'Bacolor',
+    'Candaba', 'Floridablanca', 'Guagua', 'Lubao', 'Macabebe', 'Magalang',
+    'Masantol', 'Mexico', 'Porac', 'Sasmuan', 'Santa Ana', 'Santa Rita',
+    'Santo Tomas', 'Minalin'
+  ],
+  'TAR': [ // Tarlac
+    'Tarlac City', 'Concepcion', 'Capas', 'Bamban', 'Camiling', 'Gerona',
+    'La Paz', 'Mayantoc', 'Moncada', 'Paniqui', 'Pura', 'Ramos',
+    'San Clemente', 'San Jose', 'San Manuel', 'Santa Ignacia', 'Victoria',
+    'Anao'
+  ],
+  'ZAM': [ // Zambales
+    'Olongapo', 'Subic', 'Castillejos', 'San Marcelino', 'San Antonio',
+    'San Felipe', 'San Narciso', 'Botolan', 'Cabangan', 'Candelaria',
+    'Iba', 'Masinloc', 'Palauig', 'Santa Cruz'
+  ],
+  'BAT': [ // Bataan
+    'Balanga', 'Mariveles', 'Bagac', 'Hermosa', 'Limay', 'Morong',
+    'Orani', 'Orion', 'Pilar', 'Samal', 'Abucay', 'Dinalupihan'
+  ],
+  'NUE': [ // Nueva Ecija
+    'Cabanatuan', 'Gapan', 'San Jose', 'Palayan', 'Muñoz', 'Aliaga',
+    'Bongabon', 'Cabiao', 'Carranglan', 'Cuyapo', 'Gabaldon', 'General Mamerto Natividad',
+    'General Tinio', 'Guimba', 'Jaen', 'Laur', 'Licab', 'Llanera',
+    'Lupao', 'Nampicuan', 'Pantabangan', 'Peñaranda', 'Quezon', 'Rizal',
+    'San Antonio', 'San Isidro', 'San Leonardo', 'Santa Rosa', 'Santo Domingo',
+    'Talavera', 'Talugtug', 'Zaragoza'
+  ],
+  'DAV': [ // Davao del Sur
+    'Davao City', 'Digos', 'Bansalan', 'Hagonoy', 'Kiblawan', 'Magsaysay',
+    'Malalag', 'Matanao', 'Padada', 'Santa Cruz', 'Sulop'
+  ],
+  'ILO': [ // Iloilo
+    'Iloilo City', 'Passi', 'Ajuy', 'Alimodian', 'Anilao', 'Badiangan',
+    'Balasan', 'Banate', 'Barotac Nuevo', 'Barotac Viejo', 'Batad',
+    'Bingawan', 'Bocari', 'Bugasong', 'Cabatuan', 'Calinog', 'Carles',
+    'Concepcion', 'Dingle', 'Duenas', 'Dumangas', 'Estancia', 'Guimbal',
+    'Igbaras', 'Janiuay', 'Lambunao', 'Leganes', 'Lemery', 'Leon',
+    'Maasin', 'Miagao', 'Mina', 'New Lucena', 'Oton', 'Pavia',
+    'Pototan', 'San Dionisio', 'San Enrique', 'San Joaquin', 'San Miguel',
+    'San Rafael', 'Santa Barbara', 'Sara', 'Tigbauan', 'Tubungan', 'Zarraga'
   ]
 } as Record<string, string[]>;
 
