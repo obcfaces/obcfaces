@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Heart, MessageCircle, Share2, ThumbsDown } from "lucide-react";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { PhotoModal } from "@/components/photo-modal";
 import { Link } from "react-router-dom";
@@ -31,6 +31,7 @@ interface LikedItemProps {
   imageSrc?: string;
   likes?: number;
   comments?: number;
+  dislikes?: number;
   onUnlike?: (likeId: string) => void;
   viewMode?: 'compact' | 'full';
   candidateData?: any;
@@ -53,6 +54,7 @@ const LikedItem = ({
   imageSrc,
   likes = 0,
   comments = 0,
+  dislikes = 0,
   onUnlike,
   viewMode = 'full',
   candidateData
@@ -63,6 +65,7 @@ const LikedItem = ({
   const [modalStartIndex, setModalStartIndex] = useState(0);
   const [user, setUser] = useState<any>(null);
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const { toast } = useToast();
 
   // Get current user
   useEffect(() => {
@@ -184,13 +187,29 @@ const LikedItem = ({
               <div className="flex items-center justify-end gap-4">
                 <button
                   type="button"
-                  className="inline-flex items-center gap-1 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors"
-                  aria-label="Like"
+                  className={cn(
+                    "inline-flex items-center gap-1 text-xs sm:text-sm transition-colors",
+                    "text-red-500 hover:text-red-600" // Always highlighted since it's a liked item
+                  )}
+                  onClick={handleUnlike}
+                  disabled={isUnliking}
+                  aria-label="Unlike"
                 >
-                  <Heart className="w-3.5 h-3.5" />
+                  <Heart className="w-3.5 h-3.5 fill-current" />
                   <span className="hidden xl:inline">Like</span>
                   <span>{likes}</span>
                 </button>
+                {dislikes > 0 && (
+                  <button
+                    type="button"
+                    className="inline-flex items-center gap-1 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors"
+                    aria-label="Dislikes"
+                  >
+                    <ThumbsDown className="w-3.5 h-3.5" />
+                    <span className="hidden xl:inline">Dislike</span>
+                    <span>{dislikes}</span>
+                  </button>
+                )}
                 <button
                   type="button"
                   className="inline-flex items-center gap-1 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors"
@@ -296,13 +315,29 @@ const LikedItem = ({
         <div className="border-t border-contest-border px-4 py-2 flex items-center justify-evenly gap-4">
           <button
             type="button"
-            className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
-            aria-label="Like"
+            className={cn(
+              "inline-flex items-center gap-1 text-sm transition-colors",
+              "text-red-500 hover:text-red-600" // Always highlighted since it's a liked item
+            )}
+            onClick={handleUnlike}
+            disabled={isUnliking}
+            aria-label="Unlike"
           >
-            <Heart className="w-4 h-4" />
+            <Heart className="w-4 h-4 fill-current" />
             <span className="hidden sm:inline">Like</span>
             <span>{likes}</span>
           </button>
+          {dislikes > 0 && (
+            <button
+              type="button"
+              className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
+              aria-label="Dislikes"
+            >
+              <ThumbsDown className="w-4 h-4" />
+              <span className="hidden sm:inline">Dislike</span>
+              <span>{dislikes}</span>
+            </button>
+          )}
           <button
             type="button"
             className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
