@@ -526,7 +526,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                 onValueChange={(value) => handleFieldChange('height_cm', value)}
               >
                 <SelectTrigger className={getFieldClasses('height_cm', "text-sm")}>
-                  <SelectValue placeholder="Рост (см)" />
+                  <SelectValue placeholder="Height (cm)" />
                 </SelectTrigger>
                 <SelectContent>
                   {Array.from({ length: 51 }, (_, i) => {
