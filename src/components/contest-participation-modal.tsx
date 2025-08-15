@@ -633,6 +633,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                       setFormData({...formData, city: value});
                     }
                   }}
+                  invalid={invalidCity}
                   highlightSelected={isCityFilled}
                 />
               )}
