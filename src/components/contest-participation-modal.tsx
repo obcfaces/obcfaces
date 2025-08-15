@@ -519,7 +519,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
             </div>
 
             <div className="grid gap-2 grid-cols-3">
-              <SearchableSelect
+               <SearchableSelect
                 placeholder="Country"
                 options={countries.map(c => ({ value: c.isoCode, label: c.name }))}
                 value={countryCode || ""}
@@ -537,6 +537,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                   setStateCode(null);
                 }}
                 invalid={invalidCountry}
+                highlightSelected={isCountryFilled}
               />
               
               <SearchableSelect
@@ -555,6 +556,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                   });
                   setShowCityInput(false); // Reset manual input when state changes
                 }}
+                highlightSelected={isStateFilled}
               />
               
               {cities.length === 0 ? (
@@ -562,14 +564,14 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                   placeholder="Enter city name"
                   value={formData.city}
                   onChange={(e) => setFormData({...formData, city: e.target.value})}
-                  className="text-sm placeholder:text-muted-foreground"
+                  className={getFieldClasses(false, isCityFilled)}
                 />
               ) : showCityInput ? (
                 <Input
                   placeholder="Enter city name"
                   value={formData.city}
                   onChange={(e) => setFormData({...formData, city: e.target.value})}
-                  className="text-sm placeholder:text-muted-foreground"
+                  className={getFieldClasses(false, isCityFilled)}
                 />
               ) : (
                 <SearchableSelect
@@ -585,6 +587,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                       setFormData({...formData, city: value});
                     }
                   }}
+                  highlightSelected={isCityFilled}
                 />
               )}
             </div>
@@ -657,8 +660,8 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
             </div>
 
             <div className="grid gap-2 grid-cols-3">
-              <Select value={formData.measurement_system || 'metric'} onValueChange={(value) => setFormData({...formData, measurement_system: value})}>
-                <SelectTrigger>
+               <Select value={formData.measurement_system || 'metric'} onValueChange={(value) => setFormData({...formData, measurement_system: value})}>
+                <SelectTrigger className={getFieldClasses(false, !!formData.measurement_system)}>
                   <SelectValue placeholder="System" />
                 </SelectTrigger>
                 <SelectContent>
