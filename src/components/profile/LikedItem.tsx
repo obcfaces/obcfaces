@@ -335,9 +335,9 @@ const LikedItem = ({
         
         {/* Photos section */}
         <div className="relative">
-          {/* Participant Type Badge - moved to top of photos */}
-          {getParticipantBadge(currentParticipantType, true)}
           <div className="grid grid-cols-2 gap-px">
+            {/* Participant Type Badge - overlaid on photos */}
+            {getParticipantBadge(currentParticipantType, true)}
             <div className="relative">
               <img 
                 src={displayFaceImage} 
