@@ -184,7 +184,7 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
       return;
     }
     
-    if (currentIndex < candidates.length - 1) {
+    if (currentIndex < candidates.length) {
       setHistory(prev => [...prev, currentIndex]);
       setCurrentIndex(prev => prev + 1);
       setRemainingCandidates(prev => prev - 1);
@@ -197,7 +197,7 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
       return;
     }
     
-    if (currentIndex < candidates.length - 1) {
+    if (currentIndex < candidates.length) {
       setHistory(prev => [...prev, currentIndex]);
       setCurrentIndex(prev => prev + 1);
       setRemainingCandidates(prev => prev - 1);
