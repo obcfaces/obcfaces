@@ -455,7 +455,7 @@ export function ContestantCard({
 
   return (
     <>
-      <Card className="bg-card border-contest-border relative overflow-hidden flex h-32 sm:h-36 md:h-40 mx-2 sm:mx-0">
+      <Card className="bg-card border-contest-border relative overflow-hidden flex h-32 sm:h-36 md:h-40 mx-1 sm:mx-0">
         {isWinner && (
           <div className="absolute top-1 left-2 bg-contest-blue text-white px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 z-10">
             🏆 WINNER
@@ -527,7 +527,7 @@ export function ContestantCard({
         </div>
         
         {/* Content area with potential voting overlay */}
-        <div className="flex-1 p-1.5 sm:p-2 md:p-3 flex flex-col relative">
+        <div className="flex-1 p-1 sm:p-2 md:p-3 flex flex-col relative">
           {/* Voting overlay - shown by default when not voted and not editing */}
           {!isVoted && !isEditing && !showThanks && (
             <div className="absolute inset-0 bg-gray-300 rounded-r flex flex-col items-center justify-center gap-3">
@@ -581,7 +581,7 @@ export function ContestantCard({
           
           {/* Contestant info - shown after voting instead of normal content */}
           {isVoted && !isEditing && !showThanks && (
-            <div className="absolute inset-0 bg-white rounded-r flex flex-col justify-between p-2 sm:p-3">
+            <div className="absolute inset-0 bg-white rounded-r flex flex-col justify-between p-1 sm:p-2 md:p-3">
               <div className="flex items-start justify-between">
                 <div className="min-w-0 flex-1 mr-2">
                    <h3 className="font-semibold text-contest-text text-base sm:text-lg truncate">{profileId ? (<Link to={`/u/${profileId}`} className="hover:text-primary underline-offset-2 hover:underline">{name}</Link>) : name}, {age}</h3>
@@ -600,7 +600,7 @@ export function ContestantCard({
                 </div>
               </div>
               
-              <div className="flex items-center justify-end gap-4">
+              <div className="flex items-center justify-end gap-2 sm:gap-4">
                 <button
                   type="button"
                   className={cn(
