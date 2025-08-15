@@ -80,6 +80,15 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
   const cities = useMemo(() => {
     if (!countryCode || !stateCode) return [];
     
+    // Helper function to format city names to Title Case
+    const formatCityName = (name: string) => {
+      return name
+        .toLowerCase()
+        .split(' ')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
+    };
+    
     // Debug: log the current codes
     console.log('Country Code:', countryCode, 'State Code:', stateCode);
     
@@ -91,7 +100,9 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
       if (stateName) {
         const philippinesCities = getCitiesForLocation(countryCode, stateCode, stateName);
         if (philippinesCities.length > 0) {
-          const cityList = philippinesCities.map(city => ({ name: city.name }));
+          const cityList = philippinesCities.map(city => ({ 
+            name: formatCityName(city.name) 
+          }));
           // Add "Other" option at the end
           cityList.push({ name: "Other (enter manually)" });
           return cityList;
@@ -105,7 +116,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
     
     // Sort cities and add "Other" option
     const cityList = cscCities
-      .map(c => ({ name: c.name }))
+      .map(c => ({ name: formatCityName(c.name) }))
       .sort((a, b) => a.name.localeCompare(b.name));
     
     // Always add "Other" option for manual entry
