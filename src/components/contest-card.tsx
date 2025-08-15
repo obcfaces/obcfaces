@@ -380,7 +380,7 @@ export function ContestantCard({
             </div>
            </div>
            <div className="border-t border-contest-border px-4 py-2 flex items-center justify-evenly gap-4">
-              <button
+               <button
                 type="button"
                 className={cn(
                   "inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors",
@@ -389,7 +389,7 @@ export function ContestantCard({
                 onClick={() => handleLike(0)}
                 aria-label="Like"
               >
-                <Heart className="w-4 h-4" />
+                <Heart className={cn("w-4 h-4", (isLiked[0] || isLiked[1]) && "fill-current")} />
                 <span className="hidden sm:inline">Like</span>
                 <span>{likesCount[0] + likesCount[1]}</span>
               </button>
@@ -601,19 +601,19 @@ export function ContestantCard({
               </div>
               
               <div className="flex items-center justify-end gap-2 sm:gap-4">
-                <button
-                  type="button"
-                  className={cn(
-                    "inline-flex items-center gap-1 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors",
-                    (isLiked[0] || isLiked[1]) && "text-contest-blue"
-                  )}
-                  onClick={() => handleLike(0)}
-                  aria-label="Like"
-                >
-                  <Heart className="w-3.5 h-3.5" />
-                  <span className="hidden xl:inline">Like</span>
-                  <span>{likesCount[0] + likesCount[1]}</span>
-                </button>
+                 <button
+                   type="button"
+                   className={cn(
+                     "inline-flex items-center gap-1 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors",
+                     (isLiked[0] || isLiked[1]) && "text-contest-blue"
+                   )}
+                   onClick={() => handleLike(0)}
+                   aria-label="Like"
+                 >
+                   <Heart className={cn("w-3.5 h-3.5", (isLiked[0] || isLiked[1]) && "fill-current")} />
+                   <span className="hidden xl:inline">Like</span>
+                   <span>{likesCount[0] + likesCount[1]}</span>
+                 </button>
                 {showDislike && (
                   <button
                     type="button"
