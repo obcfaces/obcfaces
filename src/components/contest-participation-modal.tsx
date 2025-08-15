@@ -559,10 +559,11 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
               </Select>
             </div>
 
-            <div className="space-y-3">
-              <h3 className="text-sm font-medium">Photos (2 photos required)</h3>
-              <div className="grid gap-3 grid-cols-2">
-                <div className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer hover:border-primary transition-colors ${hasRedBorder('photo1') ? 'border-red-500' : 'border-muted-foreground/25'}`}>
+            <div className="space-y-4">
+              <h3 className="text-sm font-medium text-center">Upload Photos</h3>
+              <div className="grid gap-4 grid-cols-2">
+                {/* Portrait Photo */}
+                <div className={`relative border-2 border-dashed rounded-lg cursor-pointer hover:border-primary transition-colors ${hasRedBorder('photo1') ? 'border-red-500' : 'border-muted-foreground/25'}`}>
                   <input
                     type="file"
                     accept="image/*"
@@ -570,26 +571,45 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                     className="hidden"
                     id="photo1-upload"
                   />
-                  <label htmlFor="photo1-upload" className="cursor-pointer">
+                  <label htmlFor="photo1-upload" className="cursor-pointer block">
                     {photo1File ? (
-                      <div className="space-y-2">
+                      <div className="p-2">
                         <img
                           src={URL.createObjectURL(photo1File)}
-                          alt="Photo 1 preview"
-                          className="w-full h-24 object-cover rounded"
+                          alt="Portrait photo preview"
+                          className="w-full h-48 object-cover rounded"
                         />
-                        <p className="text-xs text-muted-foreground">Photo 1 uploaded</p>
+                        <div className="mt-2 text-center">
+                          <button className="px-4 py-2 bg-primary text-primary-foreground rounded text-sm hover:bg-primary/90 transition-colors">
+                            Change
+                          </button>
+                        </div>
                       </div>
                     ) : (
-                      <div className="space-y-2">
-                        <Camera className="w-8 h-8 mx-auto text-muted-foreground" />
-                        <p className="text-sm text-muted-foreground">Photo 1</p>
+                      <div className="p-6 text-center">
+                        <div className="h-40 bg-muted/50 rounded-lg mb-3 flex items-center justify-center relative">
+                          <div className="w-16 h-16 bg-muted-foreground/20 rounded-full relative">
+                            <div className="w-6 h-6 bg-muted-foreground/40 rounded-full absolute top-2 left-1/2 transform -translate-x-1/2"></div>
+                            <div className="w-12 h-8 bg-muted-foreground/40 rounded-t-full absolute bottom-0 left-1/2 transform -translate-x-1/2"></div>
+                          </div>
+                          <button 
+                            type="button"
+                            className="absolute top-2 right-2 w-6 h-6 bg-muted-foreground/60 rounded-full flex items-center justify-center text-white text-xs hover:bg-muted-foreground/80 transition-colors"
+                          >
+                            ×
+                          </button>
+                        </div>
+                        <p className="text-sm text-muted-foreground mb-2">one portrait photo</p>
+                        <button className="px-4 py-2 bg-primary text-primary-foreground rounded text-sm hover:bg-primary/90 transition-colors">
+                          Upload
+                        </button>
                       </div>
                     )}
                   </label>
                 </div>
 
-                <div className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer hover:border-primary transition-colors ${hasRedBorder('photo2') ? 'border-red-500' : 'border-muted-foreground/25'}`}>
+                {/* Full Length Photo */}
+                <div className={`relative border-2 border-dashed rounded-lg cursor-pointer hover:border-primary transition-colors ${hasRedBorder('photo2') ? 'border-red-500' : 'border-muted-foreground/25'}`}>
                   <input
                     type="file"
                     accept="image/*"
@@ -597,25 +617,50 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                     className="hidden"
                     id="photo2-upload"
                   />
-                  <label htmlFor="photo2-upload" className="cursor-pointer">
+                  <label htmlFor="photo2-upload" className="cursor-pointer block">
                     {photo2File ? (
-                      <div className="space-y-2">
+                      <div className="p-2">
                         <img
                           src={URL.createObjectURL(photo2File)}
-                          alt="Photo 2 preview"
-                          className="w-full h-24 object-cover rounded"
+                          alt="Full length photo preview"
+                          className="w-full h-48 object-cover rounded"
                         />
-                        <p className="text-xs text-muted-foreground">Photo 2 uploaded</p>
+                        <div className="mt-2 text-center">
+                          <button className="px-4 py-2 bg-primary text-primary-foreground rounded text-sm hover:bg-primary/90 transition-colors">
+                            Change
+                          </button>
+                        </div>
                       </div>
                     ) : (
-                      <div className="space-y-2">
-                        <Camera className="w-8 h-8 mx-auto text-muted-foreground" />
-                        <p className="text-sm text-muted-foreground">Photo 2</p>
+                      <div className="p-6 text-center">
+                        <div className="h-40 bg-muted/50 rounded-lg mb-3 flex items-center justify-center relative">
+                          <div className="w-8 h-32 bg-muted-foreground/20 rounded-full relative flex flex-col">
+                            <div className="w-4 h-4 bg-muted-foreground/40 rounded-full mx-auto mt-2"></div>
+                            <div className="w-6 h-6 bg-muted-foreground/40 rounded-t-full mx-auto mt-1"></div>
+                            <div className="flex-1 bg-muted-foreground/30 mx-auto w-5 mt-1"></div>
+                            <div className="w-6 h-8 bg-muted-foreground/30 mx-auto rounded-b"></div>
+                          </div>
+                          <button 
+                            type="button"
+                            className="absolute top-2 right-2 w-6 h-6 bg-muted-foreground/60 rounded-full flex items-center justify-center text-white text-xs hover:bg-muted-foreground/80 transition-colors"
+                          >
+                            ×
+                          </button>
+                        </div>
+                        <p className="text-sm text-muted-foreground mb-2">one full length photo</p>
+                        <button className="px-4 py-2 bg-primary text-primary-foreground rounded text-sm hover:bg-primary/90 transition-colors">
+                          Upload
+                        </button>
                       </div>
                     )}
                   </label>
                 </div>
               </div>
+              
+              <p className="text-xs text-muted-foreground text-center leading-relaxed">
+                no makeup, without filters, sharp focus,<br />
+                good light, no nude, no color correction
+              </p>
             </div>
 
             <Button 
