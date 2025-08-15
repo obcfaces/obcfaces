@@ -77,9 +77,14 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
   
   const cities = useMemo(() => {
     if (!countryCode || !stateCode) return [];
-    return City.getCitiesOfState(countryCode, stateCode).map(c => ({
-      name: c.name
-    }));
+    
+    // Get cities from country-state-city library - this should provide comprehensive coverage
+    const cscCities = City.getCitiesOfState(countryCode, stateCode);
+    
+    // Sort and return cities
+    return cscCities
+      .map(c => ({ name: c.name }))
+      .sort((a, b) => a.name.localeCompare(b.name));
   }, [countryCode, stateCode]);
 
   useEffect(() => {
