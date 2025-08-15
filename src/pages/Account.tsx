@@ -2,8 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
-
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import SearchableSelect from "@/components/ui/searchable-select";
 import { toast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -193,115 +193,131 @@ const Account = () => {
         {loading ? (
           <p className="text-muted-foreground">Загрузка…</p>
         ) : (
-          <div className="space-y-6">
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="space-y-2">
-              
-              <Input id="display_name" placeholder="Имя на сайте" className="placeholder:italic placeholder:text-muted-foreground"
-                value={form.display_name}
-                onChange={(e) => setForm((f) => ({ ...f, display_name: e.target.value }))} />
-            </div>
-            <div className="space-y-2">
-              
-              <Input id="birthdate" type="date" value={form.birthdate ?? ""}
-                onChange={(e) => setForm((f) => ({ ...f, birthdate: e.target.value || null }))} />
-            </div>
-            <div className="space-y-2">
-              
-              <Input id="first_name" placeholder="Имя" className="placeholder:italic placeholder:text-muted-foreground" value={form.first_name}
-                onChange={(e) => setForm((f) => ({ ...f, first_name: e.target.value }))} />
-            </div>
-            <div className="space-y-2">
-              
-              <Input id="last_name" placeholder="Фамилия" className="placeholder:italic placeholder:text-muted-foreground" value={form.last_name}
-                onChange={(e) => setForm((f) => ({ ...f, last_name: e.target.value }))} />
-            </div>
-            <div className="space-y-2">
-              
-              <SearchableSelect
-                value={countryCode ?? ""}
-                onValueChange={(code) => {
-                  setCountryCode(code);
-                  const c = countries.find((c) => c.isoCode === code);
-                  setForm((f) => ({ ...f, country: c?.name || "", state: "", city: "" }));
-                  setStateCode(null);
-                }}
-                placeholder="Страна"
-                ariaLabel="Выбор страны"
-                options={countries.map((c) => ({ value: c.isoCode, label: c.name }))}
-              />
-            </div>
-            <div className="space-y-2">
-              
-              <SearchableSelect
-                disabled={!countryCode}
-                value={stateCode ?? ""}
-                onValueChange={(code) => {
-                  setStateCode(code);
-                  const s = states.find((s) => s.isoCode === code);
-                  setForm((f) => ({ ...f, state: s?.name || "", city: "" }));
-                }}
-                placeholder="Штат/Регион"
-                ariaLabel="Выбор региона"
-                options={states.map((s) => ({ value: s.isoCode, label: s.name }))}
-              />
-              {!countryCode && (
-                <p className="text-xs text-muted-foreground">Сначала выберите страну</p>
-              )}
-            </div>
-            <div className="space-y-2">
-              
-              {!countryCode ? (
-                <p className="text-xs text-muted-foreground">Сначала выберите страну</p>
-              ) : !stateCode ? (
-                <p className="text-xs text-muted-foreground">Сначала выберите штат/регион</p>
-              ) : cities.length > 0 ? (
-                <SearchableSelect
-                  value={form.city}
-                  onValueChange={(val) => setForm((f) => ({ ...f, city: val }))}
-                  placeholder="Город"
-                  ariaLabel="Выбор города"
-                  options={cities.map((ct) => ({ value: ct.name, label: ct.name }))}
-                />
-              ) : (
-                <>
-                  <Input
-                    id="city"
-                    placeholder="Город (введите вручную)"
-                    className="placeholder:italic placeholder:text-muted-foreground"
-                    value={form.city}
-                    onChange={(e) => setForm((f) => ({ ...f, city: e.target.value }))}
-                  />
-                  <p className="text-xs text-muted-foreground">Для выбранного региона нет списка городов — введите название вручную.</p>
-                </>
-              )}
-            </div>
-            <div className="space-y-2">
-              
-              <Input id="height_cm" type="number" inputMode="numeric" placeholder="Рост"
-                className="placeholder:italic placeholder:text-muted-foreground" value={form.height_cm ?? ""}
-                onChange={(e) => setForm((f) => ({ ...f, height_cm: e.target.value ? Number(e.target.value) : undefined }))} />
-            </div>
-            <div className="space-y-2">
-              
-              <Input id="weight_kg" type="number" inputMode="decimal" step="0.1" placeholder="Вес"
-                className="placeholder:italic placeholder:text-muted-foreground" value={form.weight_kg ?? ""}
-                onChange={(e) => setForm((f) => ({ ...f, weight_kg: e.target.value ? Number(e.target.value) : undefined }))} />
-            </div>
-            <div className="space-y-2">
-              
-              <Input id="age" type="number" inputMode="numeric" placeholder="Возраст" className="placeholder:italic placeholder:text-muted-foreground"
-                value={form.age ?? ""}
-                onChange={(e) => setForm((f) => ({ ...f, age: e.target.value ? Number(e.target.value) : undefined }))} />
-            </div>
-          </div>
-            <div className="flex items-center gap-4 text-sm text-muted-foreground">
-              <span>Возраст: {age ?? "—"}</span>
-            </div>
-            <div>
-              <Button onClick={save} disabled={saving}>{saving ? "Сохранение…" : "Сохранить"}</Button>
-            </div>
-          </div>
+          <Tabs defaultValue="profile" className="mt-8">
+            <TabsList className="w-full sm:w-auto bg-transparent p-0 rounded-none justify-start gap-8 border-b border-border">
+              <TabsTrigger value="profile" className="px-0 mr-6 h-auto pb-2 bg-transparent rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary text-muted-foreground hover:text-foreground">Profile</TabsTrigger>
+              <TabsTrigger value="settings" className="px-0 mr-6 h-auto pb-2 bg-transparent rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary text-muted-foreground hover:text-foreground">Settings</TabsTrigger>
+              <TabsTrigger value="privacy" className="px-0 h-auto pb-2 bg-transparent rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary text-muted-foreground hover:text-foreground">Privacy</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="profile" className="mt-8">
+              <div className="space-y-6">
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <Input id="display_name" placeholder="Имя на сайте" className="placeholder:italic placeholder:text-muted-foreground"
+                      value={form.display_name}
+                      onChange={(e) => setForm((f) => ({ ...f, display_name: e.target.value }))} />
+                  </div>
+                  <div className="space-y-2">
+                    <Input id="birthdate" type="date" value={form.birthdate ?? ""}
+                      onChange={(e) => setForm((f) => ({ ...f, birthdate: e.target.value || null }))} />
+                  </div>
+                  <div className="space-y-2">
+                    <Input id="first_name" placeholder="Имя" className="placeholder:italic placeholder:text-muted-foreground" value={form.first_name}
+                      onChange={(e) => setForm((f) => ({ ...f, first_name: e.target.value }))} />
+                  </div>
+                  <div className="space-y-2">
+                    <Input id="last_name" placeholder="Фамилия" className="placeholder:italic placeholder:text-muted-foreground" value={form.last_name}
+                      onChange={(e) => setForm((f) => ({ ...f, last_name: e.target.value }))} />
+                  </div>
+                  <div className="space-y-2">
+                    <SearchableSelect
+                      value={countryCode ?? ""}
+                      onValueChange={(code) => {
+                        setCountryCode(code);
+                        const c = countries.find((c) => c.isoCode === code);
+                        setForm((f) => ({ ...f, country: c?.name || "", state: "", city: "" }));
+                        setStateCode(null);
+                      }}
+                      placeholder="Страна"
+                      ariaLabel="Выбор страны"
+                      options={countries.map((c) => ({ value: c.isoCode, label: c.name }))}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <SearchableSelect
+                      disabled={!countryCode}
+                      value={stateCode ?? ""}
+                      onValueChange={(code) => {
+                        setStateCode(code);
+                        const s = states.find((s) => s.isoCode === code);
+                        setForm((f) => ({ ...f, state: s?.name || "", city: "" }));
+                      }}
+                      placeholder="Штат/Регион"
+                      ariaLabel="Выбор региона"
+                      options={states.map((s) => ({ value: s.isoCode, label: s.name }))}
+                    />
+                    {!countryCode && (
+                      <p className="text-xs text-muted-foreground">Сначала выберите страну</p>
+                    )}
+                  </div>
+                  <div className="space-y-2">
+                    {!countryCode ? (
+                      <p className="text-xs text-muted-foreground">Сначала выберите страну</p>
+                    ) : !stateCode ? (
+                      <p className="text-xs text-muted-foreground">Сначала выберите штат/регион</p>
+                    ) : cities.length > 0 ? (
+                      <SearchableSelect
+                        value={form.city}
+                        onValueChange={(val) => setForm((f) => ({ ...f, city: val }))}
+                        placeholder="Город"
+                        ariaLabel="Выбор города"
+                        options={cities.map((ct) => ({ value: ct.name, label: ct.name }))}
+                      />
+                    ) : (
+                      <>
+                        <Input
+                          id="city"
+                          placeholder="Город (введите вручную)"
+                          className="placeholder:italic placeholder:text-muted-foreground"
+                          value={form.city}
+                          onChange={(e) => setForm((f) => ({ ...f, city: e.target.value }))}
+                        />
+                        <p className="text-xs text-muted-foreground">Для выбранного региона нет списка городов — введите название вручную.</p>
+                      </>
+                    )}
+                  </div>
+                  <div className="space-y-2">
+                    <Input id="height_cm" type="number" inputMode="numeric" placeholder="Рост"
+                      className="placeholder:italic placeholder:text-muted-foreground" value={form.height_cm ?? ""}
+                      onChange={(e) => setForm((f) => ({ ...f, height_cm: e.target.value ? Number(e.target.value) : undefined }))} />
+                  </div>
+                  <div className="space-y-2">
+                    <Input id="weight_kg" type="number" inputMode="decimal" step="0.1" placeholder="Вес"
+                      className="placeholder:italic placeholder:text-muted-foreground" value={form.weight_kg ?? ""}
+                      onChange={(e) => setForm((f) => ({ ...f, weight_kg: e.target.value ? Number(e.target.value) : undefined }))} />
+                  </div>
+                  <div className="space-y-2">
+                    <Input id="age" type="number" inputMode="numeric" placeholder="Возраст" className="placeholder:italic placeholder:text-muted-foreground"
+                      value={form.age ?? ""}
+                      onChange={(e) => setForm((f) => ({ ...f, age: e.target.value ? Number(e.target.value) : undefined }))} />
+                  </div>
+                </div>
+                <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                  <span>Возраст: {age ?? "—"}</span>
+                </div>
+                <div>
+                  <Button onClick={save} disabled={saving}>{saving ? "Сохранение…" : "Сохранить"}</Button>
+                </div>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="settings" className="mt-8">
+              <div className="space-y-6">
+                <div className="text-center py-8">
+                  <p className="text-muted-foreground">Settings section is coming soon</p>
+                </div>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="privacy" className="mt-8">
+              <div className="space-y-6">
+                <div className="text-center py-8">
+                  <p className="text-muted-foreground">Privacy settings are coming soon</p>
+                </div>
+              </div>
+            </TabsContent>
+          </Tabs>
         )}
       </section>
     </main>
