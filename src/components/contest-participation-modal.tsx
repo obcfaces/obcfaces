@@ -59,7 +59,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
     
     return [
       ...(philippines ? [{ name: philippines.name, isoCode: philippines.isoCode }] : []),
-      { name: "divider", isoCode: "__divider__", disabled: true, divider: true },
+      { name: "", isoCode: "__divider__", disabled: true, divider: true },
       ...otherCountries.map(c => ({ name: c.name, isoCode: c.isoCode }))
     ];
   }, []);
