@@ -185,9 +185,9 @@ export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantNa
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="fixed inset-0 left-0 top-0 translate-x-0 translate-y-0 w-screen max-w-none h-dvh overflow-hidden p-0 bg-black/90 focus:outline-none">
+      <DialogContent className="fixed inset-0 left-0 top-0 translate-x-0 translate-y-0 w-full max-w-full h-dvh overflow-hidden p-0 bg-black/90 focus:outline-none border-0">
         {/* Desktop: flex layout, Mobile: block layout */}
-        <div className="h-full flex flex-col">
+        <div className="h-full w-full flex flex-col max-w-full">
           {/* Photo section */}
           <div className={cn(
             "relative flex items-center justify-center transition-all duration-300 pt-2 md:pt-4",
@@ -258,7 +258,7 @@ export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantNa
 
         {/* Comments section - Desktop: sidebar, Mobile: bottom panel */}
         <div className={cn(
-          "bg-background relative flex flex-col flex-shrink-0",
+          "bg-background relative flex flex-col flex-shrink-0 w-full",
           "h-[40dvh] min-h-0"
         )}>
             <div className="p-4 border-b">
