@@ -281,10 +281,16 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
 
   const handleProfileSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log("Submit clicked, setting submitted to true");
     setSubmitted(true);
     
-    // Wait for state update before checking validation
+    // Force state update and show validation immediately
     setTimeout(async () => {
+      console.log("Checking validation state...");
+      console.log("Form data:", formData);
+      console.log("Photo1File:", photo1File);
+      console.log("Photo2File:", photo2File);
+      
       setIsLoading(true);
 
       // Validation
@@ -304,31 +310,41 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
         formData.weight_kg
       ];
 
+      console.log("Required string fields:", requiredStringFields);
+
       if (requiredStringFields.some(field => !field)) {
+        console.log("Some required string fields are empty");
         isValid = false;
       }
 
       // Check photos
       if (!photo1File || !photo2File) {
+        console.log("Photos missing");
         isValid = false;
       }
 
       // Only validate state if country is selected
       if (formData.countryCode && !formData.stateCode) {
+        console.log("Country selected but no state");
         isValid = false;
       }
 
       // Only validate city if state is selected
       if (formData.stateCode && !formData.city.trim()) {
+        console.log("State selected but no city");
         isValid = false;
       }
 
       // Check has_children is defined
       if (formData.has_children === undefined) {
+        console.log("Has children not defined");
         isValid = false;
       }
 
+      console.log("Form is valid:", isValid);
+
       if (!isValid) {
+        console.log("Form validation failed, keeping submit state");
         setIsLoading(false);
         return;
       }
@@ -409,8 +425,9 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
     }
   };
 
-  // Validation states
+  // Validation states with debug logging
   const showProfileErrors = submitted;
+  console.log("showProfileErrors:", showProfileErrors);
   
   // Required field validations
   const invalidFirstName = showProfileErrors && !formData.first_name.trim();
@@ -428,6 +445,13 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
   const invalidWeight = showProfileErrors && !formData.weight_kg;
   const invalidPhoto1 = showProfileErrors && !photo1File;
   const invalidPhoto2 = showProfileErrors && !photo2File;
+
+  console.log("Validation states:", {
+    invalidFirstName, invalidLastName, invalidCountry, invalidState, invalidCity,
+    invalidGender, invalidBirthDay, invalidBirthMonth, invalidBirthYear,
+    invalidMaritalStatus, invalidChildren, invalidHeight, invalidWeight,
+    invalidPhoto1, invalidPhoto2
+  });
 
   // Helper function for ALL field styling - unified approach
   const getUnifiedFieldClasses = (isInvalid: boolean, isFilled: boolean) => {
