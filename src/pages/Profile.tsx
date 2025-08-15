@@ -35,6 +35,7 @@ interface ProfileRow {
 const Profile = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
+  const [logoutLoading, setLogoutLoading] = useState(false);
   const [data, setData] = useState<ProfileRow | null>(null);
   const [loading, setLoading] = useState(true);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
@@ -162,8 +163,15 @@ const Profile = () => {
   };
 
   const logout = async () => {
-    await supabase.auth.signOut();
-    navigate("/auth", { replace: true });
+    setLogoutLoading(true);
+    try {
+      await supabase.auth.signOut();
+      navigate("/contest", { replace: true });
+    } catch (error) {
+      toast({ description: "Ошибка при выходе" });
+    } finally {
+      setLogoutLoading(false);
+    }
   };
 
   const loadLikedItems = async () => {
@@ -353,10 +361,15 @@ const Profile = () => {
               {isOwner && (
                 <button
                   onClick={logout}
-                  className="px-0 h-auto pb-2 bg-transparent rounded-none border-b-2 border-transparent text-muted-foreground hover:text-destructive transition-colors"
+                  disabled={logoutLoading}
+                  className="px-0 h-auto pb-2 bg-transparent rounded-none border-b-2 border-transparent text-muted-foreground hover:text-destructive transition-colors disabled:opacity-50"
                   title="Выйти"
                 >
-                  <LogOut size={18} />
+                  {logoutLoading ? (
+                    <div className="w-[18px] h-[18px] border-2 border-muted-foreground border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    <LogOut size={18} />
+                  )}
                 </button>
               )}
             </TabsList>

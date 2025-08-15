@@ -26,6 +26,7 @@ const Account = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [logoutLoading, setLogoutLoading] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   const [form, setForm] = useState<ProfileForm>({
     display_name: "",
@@ -173,8 +174,15 @@ const Account = () => {
   };
 
   const logout = async () => {
-    await supabase.auth.signOut();
-    navigate("/auth", { replace: true });
+    setLogoutLoading(true);
+    try {
+      await supabase.auth.signOut();
+      navigate("/contest", { replace: true });
+    } catch (error) {
+      toast({ description: "Ошибка при выходе" });
+    } finally {
+      setLogoutLoading(false);
+    }
   };
 
   return (
@@ -187,7 +195,9 @@ const Account = () => {
       <section className="container mx-auto max-w-2xl py-10 px-4">
         <header className="flex items-center justify-between mb-6">
           <h1 className="text-2xl font-semibold">Личный кабинет</h1>
-          <Button variant="secondary" onClick={logout}>Выйти</Button>
+          <Button variant="secondary" onClick={logout} disabled={logoutLoading}>
+            {logoutLoading ? "Выход..." : "Выйти"}
+          </Button>
         </header>
 
         {loading ? (
@@ -311,8 +321,8 @@ const Account = () => {
                   <div className="flex flex-col space-y-4">
                     <h3 className="text-lg font-medium">Account Actions</h3>
                     <div className="flex justify-start">
-                      <Button variant="destructive" onClick={logout} className="w-auto">
-                        📚 Log Out
+                      <Button variant="destructive" onClick={logout} disabled={logoutLoading} className="w-auto">
+                        {logoutLoading ? "Выход..." : "📚 Log Out"}
                       </Button>
                     </div>
                   </div>
