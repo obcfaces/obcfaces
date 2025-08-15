@@ -252,7 +252,7 @@ const LikedItem = ({
                 </div>
               </div>
               
-              <div className="flex items-center justify-evenly w-full px-2">
+              <div className="flex items-center justify-end gap-4">
                 <button
                   type="button"
                   className="inline-flex items-center gap-1 text-xs sm:text-sm text-contest-blue hover:text-contest-blue/80 transition-colors"
