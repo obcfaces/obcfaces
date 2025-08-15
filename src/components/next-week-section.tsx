@@ -240,7 +240,7 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
         <div className="flex flex-col items-center">
           <ContestantCard
             {...currentCandidate}
-            viewMode={viewMode}
+            viewMode="compact"
             showDislike={true}
           />
           
