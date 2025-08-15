@@ -64,7 +64,7 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
                 opt.divider ? (
                   <div
                     key={`divider-${idx}`}
-                    className="my-2 h-px bg-border"
+                    className="mx-2 my-1 h-px bg-gray-300 dark:bg-gray-600"
                     role="separator"
                     aria-hidden="true"
                   />
