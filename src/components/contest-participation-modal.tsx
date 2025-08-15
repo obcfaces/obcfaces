@@ -281,75 +281,54 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
 
   const handleProfileSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Submit clicked, setting submitted to true");
+    console.log("=== SUBMIT CLICKED ===");
+    console.log("Setting submitted to TRUE");
+    
+    // Set submitted immediately
     setSubmitted(true);
     
-    // Force state update and show validation immediately
-    setTimeout(async () => {
-      console.log("Checking validation state...");
-      console.log("Form data:", formData);
-      console.log("Photo1File:", photo1File);
-      console.log("Photo2File:", photo2File);
-      
-      setIsLoading(true);
+    console.log("Current form data:", formData);
+    console.log("Photo1File:", photo1File);
+    console.log("Photo2File:", photo2File);
 
-      // Validation
-      let isValid = true;
+    // Check validation immediately
+    const isFirstNameEmpty = !formData.first_name.trim();
+    const isLastNameEmpty = !formData.last_name.trim();
+    const isCountryEmpty = !formData.countryCode;
+    const isStateEmpty = formData.countryCode && !formData.stateCode;
+    const isCityEmpty = formData.stateCode && !formData.city.trim();
+    const isGenderEmpty = !formData.gender;
+    const isBirthDayEmpty = !formData.birth_day;
+    const isBirthMonthEmpty = !formData.birth_month;
+    const isBirthYearEmpty = !formData.birth_year;
+    const isMaritalEmpty = !formData.marital_status;
+    const isChildrenEmpty = formData.has_children === undefined;
+    const isHeightEmpty = !formData.height_cm;
+    const isWeightEmpty = !formData.weight_kg;
+    const isPhoto1Empty = !photo1File;
+    const isPhoto2Empty = !photo2File;
 
-      // Check basic required fields
-      const requiredStringFields = [
-        formData.first_name.trim(),
-        formData.last_name.trim(), 
-        formData.countryCode,
-        formData.gender,
-        formData.birth_day,
-        formData.birth_month,
-        formData.birth_year,
-        formData.marital_status,
-        formData.height_cm,
-        formData.weight_kg
-      ];
+    console.log("Validation results:", {
+      isFirstNameEmpty, isLastNameEmpty, isCountryEmpty, isStateEmpty, isCityEmpty,
+      isGenderEmpty, isBirthDayEmpty, isBirthMonthEmpty, isBirthYearEmpty,
+      isMaritalEmpty, isChildrenEmpty, isHeightEmpty, isWeightEmpty,
+      isPhoto1Empty, isPhoto2Empty
+    });
 
-      console.log("Required string fields:", requiredStringFields);
+    const hasErrors = isFirstNameEmpty || isLastNameEmpty || isCountryEmpty || isStateEmpty || 
+                     isCityEmpty || isGenderEmpty || isBirthDayEmpty || isBirthMonthEmpty || 
+                     isBirthYearEmpty || isMaritalEmpty || isChildrenEmpty || isHeightEmpty || 
+                     isWeightEmpty || isPhoto1Empty || isPhoto2Empty;
 
-      if (requiredStringFields.some(field => !field)) {
-        console.log("Some required string fields are empty");
-        isValid = false;
-      }
+    if (hasErrors) {
+      console.log("FORM HAS ERRORS - stopping submission");
+      return;
+    }
 
-      // Check photos
-      if (!photo1File || !photo2File) {
-        console.log("Photos missing");
-        isValid = false;
-      }
+    console.log("FORM IS VALID - proceeding with submission");
+    setIsLoading(true);
 
-      // Only validate state if country is selected
-      if (formData.countryCode && !formData.stateCode) {
-        console.log("Country selected but no state");
-        isValid = false;
-      }
-
-      // Only validate city if state is selected
-      if (formData.stateCode && !formData.city.trim()) {
-        console.log("State selected but no city");
-        isValid = false;
-      }
-
-      // Check has_children is defined
-      if (formData.has_children === undefined) {
-        console.log("Has children not defined");
-        isValid = false;
-      }
-
-      console.log("Form is valid:", isValid);
-
-      if (!isValid) {
-        console.log("Form validation failed, keeping submit state");
-        setIsLoading(false);
-        return;
-      }
-
-      try {
+    try {
         const { data: { session } } = await supabase.auth.getSession();
         if (!session) return;
 
@@ -414,7 +393,6 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
       } finally {
         setIsLoading(false);
       }
-    }, 0);
   };
 
   const handleFileSelect = (file: File, photoNumber: 1 | 2) => {
