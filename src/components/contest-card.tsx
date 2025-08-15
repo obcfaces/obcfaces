@@ -455,7 +455,7 @@ export function ContestantCard({
 
   return (
     <>
-      <Card className="bg-card border-contest-border relative overflow-hidden flex h-32 sm:h-36 md:h-40">
+      <Card className="bg-card border-contest-border relative overflow-hidden flex h-32 sm:h-36 md:h-40 mx-2 sm:mx-0">
         {isWinner && (
           <div className="absolute top-1 left-2 bg-contest-blue text-white px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 z-10">
             🏆 WINNER
@@ -639,24 +639,24 @@ export function ContestantCard({
                   <span className="hidden xl:inline">Comment</span>
                   <span>{commentsCount[0] + commentsCount[1]}</span>
                 </button>
-                <button
-                  type="button"
-                  className="inline-flex items-center gap-1 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors"
-                  onClick={async () => {
-                    try {
-                      if ((navigator as any).share) {
-                        await (navigator as any).share({ title: name, url: window.location.href });
-                      } else if (navigator.clipboard) {
-                        await navigator.clipboard.writeText(window.location.href);
-                        toast({ title: "Link copied" });
-                      }
-                    } catch {}
-                  }}
-                  aria-label="Share"
-                >
-                  <Share2 className="w-3.5 h-3.5" />
-                  <span className="hidden xl:inline">Share</span>
-                </button>
+                 <button
+                   type="button"
+                   className="inline-flex items-center gap-1 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors"
+                   onClick={async () => {
+                     try {
+                       if ((navigator as any).share) {
+                         await (navigator as any).share({ title: name, url: window.location.href });
+                       } else if (navigator.clipboard) {
+                         await navigator.clipboard.writeText(window.location.href);
+                         toast({ title: "Link copied" });
+                       }
+                     } catch {}
+                   }}
+                   aria-label="Share"
+                 >
+                   <Share2 className="w-3.5 h-3.5" />
+                   <span className="hidden sm:inline">Share</span>
+                 </button>
               </div>
             </div>
           )}
