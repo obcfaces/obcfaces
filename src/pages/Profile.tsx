@@ -195,11 +195,12 @@ const Profile = () => {
             likeId: like.id,
             contentType: like.content_type as 'contest' | 'post',
             contentId: like.content_id,
-            authorName: `Участница #${like.content_id.slice(-4)}`, // Use last 4 chars of content_id for unique name
+            authorName: `Contestant #${like.content_id.slice(-4)}`, // Use last 4 chars of content_id for unique name
             authorProfileId: "profile-" + like.content_id,
             time: timeAgo,
             likes: Math.floor(Math.random() * 100), // Mock likes count
-            comments: Math.floor(Math.random() * 20) // Mock comments count
+            comments: Math.floor(Math.random() * 20), // Mock comments count
+            imageSrc: '/lovable-uploads/c4e9d90c-eeda-44db-94e3-08c6a959f1a5.png' // Default image for contest posts
           };
         }
       }) || [];
