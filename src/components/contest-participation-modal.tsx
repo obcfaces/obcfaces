@@ -7,6 +7,7 @@ import { Camera, Eye, EyeOff } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import SearchableSelect from "@/components/ui/searchable-select";
+import { Country, State, City } from 'country-state-city';
 
 interface ContestParticipationModalProps {
   children: React.ReactNode;
@@ -49,136 +50,37 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
   const [photo1File, setPhoto1File] = useState<File | null>(null);
   const [photo2File, setPhoto2File] = useState<File | null>(null);
 
-  // Complete country list for contest participation - Philippines first like in contest filter
-  const countries = useMemo(() => [
-    { name: "Philippines", isoCode: "PH" },
-    { name: "divider", isoCode: "__divider__", disabled: true, divider: true },
-    { name: "Afghanistan", isoCode: "AF" },
-    { name: "Albania", isoCode: "AL" },
-    { name: "Algeria", isoCode: "DZ" },
-    { name: "Argentina", isoCode: "AR" },
-    { name: "Armenia", isoCode: "AM" },
-    { name: "Australia", isoCode: "AU" },
-    { name: "Austria", isoCode: "AT" },
-    { name: "Azerbaijan", isoCode: "AZ" },
-    { name: "Bahrain", isoCode: "BH" },
-    { name: "Bangladesh", isoCode: "BD" },
-    { name: "Belarus", isoCode: "BY" },
-    { name: "Belgium", isoCode: "BE" },
-    { name: "Bolivia", isoCode: "BO" },
-    { name: "Bosnia and Herzegovina", isoCode: "BA" },
-    { name: "Brazil", isoCode: "BR" },
-    { name: "Bulgaria", isoCode: "BG" },
-    { name: "Cambodia", isoCode: "KH" },
-    { name: "Canada", isoCode: "CA" },
-    { name: "Chile", isoCode: "CL" },
-    { name: "China", isoCode: "CN" },
-    { name: "Colombia", isoCode: "CO" },
-    { name: "Croatia", isoCode: "HR" },
-    { name: "Cyprus", isoCode: "CY" },
-    { name: "Czech Republic", isoCode: "CZ" },
-    { name: "Denmark", isoCode: "DK" },
-    { name: "Ecuador", isoCode: "EC" },
-    { name: "Egypt", isoCode: "EG" },
-    { name: "Estonia", isoCode: "EE" },
-    { name: "Finland", isoCode: "FI" },
-    { name: "France", isoCode: "FR" },
-    { name: "Georgia", isoCode: "GE" },
-    { name: "Germany", isoCode: "DE" },
-    { name: "Greece", isoCode: "GR" },
-    { name: "Hungary", isoCode: "HU" },
-    { name: "Iceland", isoCode: "IS" },
-    { name: "India", isoCode: "IN" },
-    { name: "Indonesia", isoCode: "ID" },
-    { name: "Iran", isoCode: "IR" },
-    { name: "Iraq", isoCode: "IQ" },
-    { name: "Ireland", isoCode: "IE" },
-    { name: "Israel", isoCode: "IL" },
-    { name: "Italy", isoCode: "IT" },
-    { name: "Japan", isoCode: "JP" },
-    { name: "Jordan", isoCode: "JO" },
-    { name: "Kazakhstan", isoCode: "KZ" },
-    { name: "Kenya", isoCode: "KE" },
-    { name: "Kuwait", isoCode: "KW" },
-    { name: "Kyrgyzstan", isoCode: "KG" },
-    { name: "Latvia", isoCode: "LV" },
-    { name: "Lebanon", isoCode: "LB" },
-    { name: "Lithuania", isoCode: "LT" },
-    { name: "Luxembourg", isoCode: "LU" },
-    { name: "Malaysia", isoCode: "MY" },
-    { name: "Malta", isoCode: "MT" },
-    { name: "Mexico", isoCode: "MX" },
-    { name: "Moldova", isoCode: "MD" },
-    { name: "Mongolia", isoCode: "MN" },
-    { name: "Montenegro", isoCode: "ME" },
-    { name: "Morocco", isoCode: "MA" },
-    { name: "Netherlands", isoCode: "NL" },
-    { name: "New Zealand", isoCode: "NZ" },
-    { name: "Nigeria", isoCode: "NG" },
-    { name: "North Macedonia", isoCode: "MK" },
-    { name: "Norway", isoCode: "NO" },
-     { name: "Pakistan", isoCode: "PK" },
-     { name: "Peru", isoCode: "PE" },
-     { name: "Philippines", isoCode: "PH" },
-     { name: "Poland", isoCode: "PL" },
-    { name: "Portugal", isoCode: "PT" },
-    { name: "Qatar", isoCode: "QA" },
-    { name: "Romania", isoCode: "RO" },
-    { name: "Russia", isoCode: "RU" },
-    { name: "Saudi Arabia", isoCode: "SA" },
-    { name: "Serbia", isoCode: "RS" },
-    { name: "Singapore", isoCode: "SG" },
-    { name: "Slovakia", isoCode: "SK" },
-    { name: "Slovenia", isoCode: "SI" },
-    { name: "South Africa", isoCode: "ZA" },
-    { name: "South Korea", isoCode: "KR" },
-    { name: "Spain", isoCode: "ES" },
-    { name: "Sri Lanka", isoCode: "LK" },
-    { name: "Sweden", isoCode: "SE" },
-    { name: "Switzerland", isoCode: "CH" },
-    { name: "Taiwan", isoCode: "TW" },
-    { name: "Tajikistan", isoCode: "TJ" },
-    { name: "Thailand", isoCode: "TH" },
-    { name: "Turkey", isoCode: "TR" },
-    { name: "Turkmenistan", isoCode: "TM" },
-    { name: "Ukraine", isoCode: "UA" },
-    { name: "United Arab Emirates", isoCode: "AE" },
-    { name: "United Kingdom", isoCode: "GB" },
-    { name: "United States", isoCode: "US" },
-    { name: "Uruguay", isoCode: "UY" },
-    { name: "Uzbekistan", isoCode: "UZ" },
-    { name: "Venezuela", isoCode: "VE" },
-    { name: "Vietnam", isoCode: "VN" },
-  ], []);
+  // Use country-state-city library for full data
+  const countries = useMemo(() => {
+    const allCountries = Country.getAllCountries();
+    // Put Philippines first like in contest filter, then add divider and the rest
+    const philippines = allCountries.find(c => c.isoCode === 'PH');
+    const otherCountries = allCountries.filter(c => c.isoCode !== 'PH');
+    
+    return [
+      ...(philippines ? [{ name: philippines.name, isoCode: philippines.isoCode }] : []),
+      { name: "divider", isoCode: "__divider__", disabled: true, divider: true },
+      ...otherCountries.map(c => ({ name: c.name, isoCode: c.isoCode }))
+    ];
+  }, []);
   
   const [countryCode, setCountryCode] = useState<string | null>(null);
   const [stateCode, setStateCode] = useState<string | null>(null);
   
   const states = useMemo(() => {
-    if (countryCode === "PH") {
-      return [
-        { name: "Metro Manila", isoCode: "MM" },
-        { name: "Cebu", isoCode: "CE" },
-        { name: "Davao", isoCode: "DA" },
-      ];
-    }
-    return [];
+    if (!countryCode) return [];
+    return State.getStatesOfCountry(countryCode).map(s => ({
+      name: s.name,
+      isoCode: s.isoCode
+    }));
   }, [countryCode]);
   
   const cities = useMemo(() => {
-    if (!stateCode) return [];
-    const stateData = states.find(s => s.isoCode === stateCode);
-    if (stateData?.name === "Metro Manila") {
-      return [{ name: "Manila" }, { name: "Quezon City" }, { name: "Makati" }];
-    }
-    if (stateData?.name === "Cebu") {
-      return [{ name: "Cebu City" }, { name: "Lapu-Lapu" }];
-    }
-    if (stateData?.name === "Davao") {
-      return [{ name: "Davao City" }];
-    }
-    return [];
-  }, [stateCode, states]);
+    if (!countryCode || !stateCode) return [];
+    return City.getCitiesOfState(countryCode, stateCode).map(c => ({
+      name: c.name
+    }));
+  }, [countryCode, stateCode]);
 
   useEffect(() => {
     const checkUser = async () => {
