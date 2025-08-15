@@ -65,7 +65,7 @@ const getParticipantBadge = (type?: 'candidate' | 'finalist' | 'winner') => {
   };
   
   return (
-    <div className={`absolute top-0 left-1/2 right-0 z-30 px-2 py-1 text-xs font-semibold ${badgeStyles[type]} flex justify-between items-center`}>
+    <div className={`absolute top-0 left-0 right-0 z-30 px-2 py-1 text-xs font-semibold ${badgeStyles[type]} flex justify-between items-center`}>
       <span>{labels[type]}</span>
       <span>{dates[type]}</span>
     </div>
