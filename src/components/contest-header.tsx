@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Camera, Upload } from "lucide-react";
+import { ContestParticipationModal } from "@/components/contest-participation-modal";
 
 export function ContestHeader() {
   const [activeSection, setActiveSection] = useState("Contest");
@@ -16,10 +17,12 @@ export function ContestHeader() {
         {/* Title and button in one line */}
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold text-contest-text">OBC faces</h1>
-          <Button className="bg-contest-blue hover:bg-blue-600 text-white px-6">
-            <Camera className="w-4 h-4 mr-2" />
-            Join & Win 5,000 PHP
-          </Button>
+          <ContestParticipationModal>
+            <Button className="bg-contest-blue hover:bg-blue-600 text-white px-6">
+              <Camera className="w-4 h-4 mr-2" />
+              Join & Win 5,000 PHP
+            </Button>
+          </ContestParticipationModal>
         </div>
         
         {/* Contest info points */}

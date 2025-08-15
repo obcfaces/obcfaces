@@ -107,15 +107,19 @@ export type Database = {
           display_name: string | null
           first_name: string | null
           gender: string | null
+          has_children: boolean | null
           height_cm: number | null
           id: string
           is_approved: boolean | null
           is_contest_participant: boolean | null
           last_name: string | null
+          marital_status: string | null
           moderated_at: string | null
           moderated_by: string | null
           moderation_notes: string | null
           participant_type: string | null
+          photo_1_url: string | null
+          photo_2_url: string | null
           privacy_level: string | null
           state: string | null
           updated_at: string
@@ -132,15 +136,19 @@ export type Database = {
           display_name?: string | null
           first_name?: string | null
           gender?: string | null
+          has_children?: boolean | null
           height_cm?: number | null
           id: string
           is_approved?: boolean | null
           is_contest_participant?: boolean | null
           last_name?: string | null
+          marital_status?: string | null
           moderated_at?: string | null
           moderated_by?: string | null
           moderation_notes?: string | null
           participant_type?: string | null
+          photo_1_url?: string | null
+          photo_2_url?: string | null
           privacy_level?: string | null
           state?: string | null
           updated_at?: string
@@ -157,15 +165,19 @@ export type Database = {
           display_name?: string | null
           first_name?: string | null
           gender?: string | null
+          has_children?: boolean | null
           height_cm?: number | null
           id?: string
           is_approved?: boolean | null
           is_contest_participant?: boolean | null
           last_name?: string | null
+          marital_status?: string | null
           moderated_at?: string | null
           moderated_by?: string | null
           moderation_notes?: string | null
           participant_type?: string | null
+          photo_1_url?: string | null
+          photo_2_url?: string | null
           privacy_level?: string | null
           state?: string | null
           updated_at?: string
