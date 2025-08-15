@@ -78,7 +78,42 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
   const cities = useMemo(() => {
     if (!countryCode || !stateCode) return [];
     
-    // Get cities from country-state-city library - this should provide comprehensive coverage
+    // Extended static data for Philippines to ensure comprehensive coverage
+    const philippinesCities: Record<string, string[]> = {
+      // Cebu Province
+      'CE': [
+        'Cebu City', 'Lapu-Lapu City', 'Mandaue City', 'Talisay City', 'Toledo City',
+        'Danao City', 'Carcar City', 'Naga City', 'Bogo City', 'Minglanilla',
+        'Consolacion', 'Liloan', 'Compostela', 'Cordova', 'Balamban',
+        'Aloguinsan', 'Argao', 'Asturias', 'Bantayan', 'Barili',
+        'Boljoon', 'Borbon', 'Carmen', 'Catmon', 'Dalaguete',
+        'Dumanjug', 'Ginatilan', 'Madridejos', 'Malabuyoc', 'Medellin',
+        'Moalboal', 'Oslob', 'Pilar', 'Pinamungajan', 'Poro',
+        'Ronda', 'Samboan', 'San Fernando', 'San Francisco', 'San Remigio',
+        'Santa Fe', 'Santander', 'Sibonga', 'Sogod', 'Tabogon',
+        'Tabuelan', 'Tuburan', 'Tudela'
+      ],
+      // Metro Manila
+      'MM': [
+        'Manila', 'Quezon City', 'Makati', 'Pasig', 'Taguig', 'Marikina',
+        'Mandaluyong', 'San Juan', 'Pasay', 'Caloocan', 'Las Piñas',
+        'Muntinlupa', 'Parañaque', 'Valenzuela', 'Malabon', 'Navotas',
+        'Pateros'
+      ],
+      // Davao Region
+      'DA': [
+        'Davao City', 'Tagum', 'Panabo', 'Samal', 'Digos', 'Mati',
+        'General Santos', 'Koronadal', 'Tacurong', 'Kidapawan',
+        'Cotabato City', 'Malungon', 'Polomolok', 'Tupi', 'Tantangan'
+      ]
+    };
+    
+    // Get cities from static data for Philippines
+    if (countryCode === 'PH' && philippinesCities[stateCode]) {
+      return philippinesCities[stateCode].map(name => ({ name }));
+    }
+    
+    // Get cities from country-state-city library for other countries
     const cscCities = City.getCitiesOfState(countryCode, stateCode);
     
     // Sort and return cities
