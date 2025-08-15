@@ -378,8 +378,8 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
           </div>
         </div>
       ) : (
-        <div className="text-center py-8">
-          <p className="text-lg text-contest-text">New ones will auto-update.</p>
+        <div className="text-center py-4">
+          <p className="text-base text-contest-text">New ones will auto-update.</p>
         </div>
       )}
 
