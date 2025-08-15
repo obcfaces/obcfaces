@@ -21,6 +21,9 @@ const AuthCallbackHandler = () => {
 
     (async () => {
       try {
+        // Save current scroll position
+        const scrollY = window.scrollY;
+        
         const { data, error } = await supabase.auth.exchangeCodeForSession(href);
         if (cancelled) return;
         if (error) return; // Fail silently to avoid flashing forms
@@ -32,6 +35,11 @@ const AuthCallbackHandler = () => {
         ["code", "type", "redirect_to", "next"].forEach((k) => url.searchParams.delete(k));
         // Some links may put params after hash, normalize by dropping hash entirely
         window.history.replaceState({}, "", url.pathname + url.search);
+
+        // Restore scroll position after URL cleanup
+        setTimeout(() => {
+          window.scrollTo(0, scrollY);
+        }, 0);
 
         toast({ description: "Email confirmed. Welcome!" });
       } catch (_) {
