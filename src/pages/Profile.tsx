@@ -308,54 +308,25 @@ const Profile = () => {
           </div>
 
           {/* Tabs */}
-          <Tabs defaultValue="posts" className="mt-4">
+          <Tabs defaultValue={isOwner ? "likes" : "posts"} className="mt-8">
             <TabsList className="w-full sm:w-auto bg-transparent p-0 rounded-none justify-start gap-8 border-b border-border">
-              <TabsTrigger value="posts" className="px-0 mr-6 h-auto pb-2 bg-transparent rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary text-muted-foreground hover:text-foreground">Посты</TabsTrigger>
-              <TabsTrigger value="photos" className="px-0 mr-6 h-auto pb-2 bg-transparent rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary text-muted-foreground hover:text-foreground">Фото</TabsTrigger>
               {isOwner && (
                 <TabsTrigger value="likes" className="px-0 mr-6 h-auto pb-2 bg-transparent rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary text-muted-foreground hover:text-foreground">Лайки</TabsTrigger>
               )}
+              <TabsTrigger value="posts" className="px-0 mr-6 h-auto pb-2 bg-transparent rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary text-muted-foreground hover:text-foreground">Посты</TabsTrigger>
+              <TabsTrigger value="photos" className="px-0 mr-6 h-auto pb-2 bg-transparent rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary text-muted-foreground hover:text-foreground">Фото</TabsTrigger>
               <TabsTrigger value="about" className="px-0 h-auto pb-2 bg-transparent rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary text-muted-foreground hover:text-foreground">Инфо</TabsTrigger>
             </TabsList>
 
-            <TabsContent value="posts" className="space-y-4 mt-4 -mx-6">
-              <div className="px-0 sm:px-6 space-y-4">
-                {samplePosts.map((p) => (
-                  <PostCard key={p.id} {...p} />
-                ))}
-              </div>
-            </TabsContent>
-
-            <TabsContent value="photos" className="mt-4">
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                {profilePhotos.map((src, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => {
-                      setSelectedPhotoIndex(idx);
-                      setPhotoModalOpen(true);
-                    }}
-                    className="relative group cursor-pointer"
-                  >
-                    <img
-                      src={src}
-                      loading="lazy"
-                      alt={`Фото ${idx + 1} — ${profile.display_name ?? "пользователь"}`}
-                      className="w-full h-32 sm:h-36 object-cover rounded-md group-hover:opacity-90 transition-opacity"
-                    />
-                  </button>
-                ))}
-              </div>
-            </TabsContent>
-
             {isOwner && (
-              <TabsContent value="likes" className="mt-4 -mx-6">
+              <TabsContent value="likes" className="mt-8 -mx-6">
                 {loadingLikes ? (
                   <p className="text-muted-foreground text-center py-8 px-6">Загрузка лайков...</p>
                 ) : likedItems.length > 0 ? (
                   <div className="px-0 sm:px-6">
                     {/* View mode toggle buttons */}
                     <div className="flex justify-end items-center gap-1 mb-4 px-6 sm:px-0">
+
                       <button
                         type="button"
                         onClick={() => setLikesViewMode("compact")}
@@ -394,25 +365,25 @@ const Profile = () => {
                         ? 'grid-cols-1' 
                         : 'grid-cols-1 lg:grid-cols-2'
                     }`}>
-                       {likedItems.map((item) => (
-                         <LikedItem
-                           key={item.likeId}
-                           likeId={item.likeId}
-                           contentType={item.contentType}
-                           contentId={item.contentId}
-                           authorName={item.authorName}
-                           authorAvatarUrl={item.authorAvatarUrl}
-                           authorProfileId={item.authorProfileId}
-                           time={item.time}
-                           content={item.content}
-                           imageSrc={item.imageSrc}
-                           likes={item.likes}
-                           comments={item.comments}
-                           onUnlike={handleUnlike}
-                           viewMode={likesViewMode}
-                           candidateData={item.candidateData}
-                         />
-                       ))}
+                      {likedItems.map((item) => (
+                        <LikedItem
+                          key={item.likeId}
+                          likeId={item.likeId}
+                          contentType={item.contentType}
+                          contentId={item.contentId}
+                          authorName={item.authorName}
+                          authorAvatarUrl={item.authorAvatarUrl}
+                          authorProfileId={item.authorProfileId}
+                          time={item.time}
+                          content={item.content}
+                          imageSrc={item.imageSrc}
+                          likes={item.likes}
+                          comments={item.comments}
+                          onUnlike={handleUnlike}
+                          viewMode={likesViewMode}
+                          candidateData={item.candidateData}
+                        />
+                      ))}
                     </div>
                   </div>
                 ) : (
@@ -424,7 +395,37 @@ const Profile = () => {
               </TabsContent>
             )}
 
-            <TabsContent value="about" className="mt-4">
+            <TabsContent value="posts" className="space-y-4 mt-8 -mx-6">
+              <div className="px-0 sm:px-6 space-y-4">
+                {samplePosts.map((p) => (
+                  <PostCard key={p.id} {...p} />
+                ))}
+              </div>
+            </TabsContent>
+
+            <TabsContent value="photos" className="mt-8">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                {profilePhotos.map((src, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => {
+                      setSelectedPhotoIndex(idx);
+                      setPhotoModalOpen(true);
+                    }}
+                    className="relative group cursor-pointer"
+                  >
+                    <img
+                      src={src}
+                      loading="lazy"
+                      alt={`Фото ${idx + 1} — ${profile.display_name ?? "пользователь"}`}
+                      className="w-full h-32 sm:h-36 object-cover rounded-md group-hover:opacity-90 transition-opacity"
+                    />
+                  </button>
+                ))}
+              </div>
+            </TabsContent>
+
+            <TabsContent value="about" className="mt-8">
               <article className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
                   <p><span className="text-muted-foreground">Имя:</span> {profile.display_name ?? "—"}</p>
