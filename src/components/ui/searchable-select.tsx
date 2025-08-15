@@ -45,7 +45,7 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
           aria-invalid={invalid}
           className={cn(
             "w-full justify-between",
-            !selected && "italic text-muted-foreground",
+            !selected && "text-muted-foreground",
             invalid && "border-destructive focus:ring-destructive",
             highlightSelected && selected && "border-primary focus:ring-primary"
           )}
