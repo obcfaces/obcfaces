@@ -249,7 +249,7 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
           <div className="flex items-center justify-center gap-6 mt-6">
             <div className="flex items-center gap-4">
               <span className="text-lg text-contest-text font-medium">
-                {remainingCandidates}
+                {remainingCandidates} left
               </span>
               {history.length > 0 && (
                 <Button
@@ -284,8 +284,8 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
         </div>
       ) : (
         <div className="text-center py-12">
-          <h3 className="text-2xl font-bold text-contest-text mb-2">All candidates reviewed!</h3>
-          <p className="text-muted-foreground">You've made your choices for next week's finalists.</p>
+          <h3 className="text-2xl font-bold text-contest-text mb-2">All done!</h3>
+          <p className="text-muted-foreground">Check back later or invite others to join.</p>
         </div>
       )}
 
