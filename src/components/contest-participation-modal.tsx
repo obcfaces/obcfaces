@@ -656,7 +656,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                           <img 
                             src="/lovable-uploads/009d20f0-cac7-4c08-9bc9-146617664bc3.png" 
                             alt="Full body placeholder" 
-                            className="w-auto h-full object-contain opacity-30 filter grayscale"
+                            className="w-auto h-full object-contain opacity-30 scale-110 filter grayscale"
                           />
                         </div>
                         <p className="text-sm text-muted-foreground mb-2">one full length photo</p>
