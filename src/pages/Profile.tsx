@@ -316,7 +316,7 @@ const Profile = () => {
               <Button className="bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200">
                 🏆 Join Contest
               </Button>
-              <Button className="bg-blue-600 hover:bg-blue-700">Create</Button>
+              <Button variant="outline">Add Post</Button>
               <Button variant="outline">Edit Profile</Button>
             </div>
 
