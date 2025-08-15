@@ -178,13 +178,36 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
     return () => subscription.unsubscribe();
   }, []);
 
-  const handleLike = () => {
+  const handleLike = async () => {
     if (!user) {
       setShowLoginModal(true);
       return;
     }
     
     if (currentIndex < candidates.length) {
+      // Save like to database
+      try {
+        await supabase
+          .from('likes')
+          .insert({
+            user_id: user.id,
+            content_type: 'next_week_candidate',
+            content_id: JSON.stringify({
+              name: currentCandidate.name,
+              country: currentCandidate.country,
+              city: currentCandidate.city,
+              age: currentCandidate.age,
+              weight: currentCandidate.weight,
+              height: currentCandidate.height,
+              faceImage: currentCandidate.faceImage,
+              fullBodyImage: currentCandidate.fullBodyImage,
+              additionalPhotos: currentCandidate.additionalPhotos
+            })
+          });
+      } catch (error) {
+        console.error('Error saving like:', error);
+      }
+      
       setHistory(prev => [...prev, currentIndex]);
       setCurrentIndex(prev => prev + 1);
       setRemainingCandidates(prev => prev - 1);
