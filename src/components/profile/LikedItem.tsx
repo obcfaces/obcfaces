@@ -314,10 +314,8 @@ const LikedItem = ({
   return (
     <>
       <Card className="bg-card border-contest-border relative overflow-hidden">
-        {/* Participant Type Badge */}
-        {getParticipantBadge(currentParticipantType, true)}
         {/* Name in top left - показываем всегда как в проголосованных */}
-        <div className="absolute top-8 left-4 z-20">
+        <div className="absolute top-2 left-4 z-20">
           <h3 className="text-xl font-semibold text-contest-text">
             {authorProfileId ? (
               <Link to={`/u/${authorProfileId}`} className="hover:text-primary underline-offset-2 hover:underline">
@@ -337,6 +335,8 @@ const LikedItem = ({
         
         {/* Photos section */}
         <div className="relative">
+          {/* Participant Type Badge - moved to top of photos */}
+          {getParticipantBadge(currentParticipantType, true)}
           <div className="grid grid-cols-2 gap-px">
             <div className="relative">
               <img 
