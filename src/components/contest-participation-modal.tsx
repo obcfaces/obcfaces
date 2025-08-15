@@ -43,6 +43,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
     has_children: false,
     height_cm: "",
     weight_kg: "",
+    measurement_system: "metric",
   });
 
   const [photo1File, setPhoto1File] = useState<File | null>(null);
@@ -105,6 +106,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
             has_children: profile.has_children || false,
             height_cm: profile.height_cm?.toString() || "",
             weight_kg: profile.weight_kg?.toString() || "",
+            measurement_system: "metric",
           });
         }
       }
@@ -557,31 +559,71 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
               </Select>
             </div>
 
-            <div className="grid gap-2 grid-cols-2">
-              <Select value={formData.height_cm} onValueChange={(value) => setFormData({...formData, height_cm: value})}>
+            <div className="space-y-2">
+              <Select value={formData.measurement_system || 'metric'} onValueChange={(value) => setFormData({...formData, measurement_system: value})}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Height (cm)" />
+                  <SelectValue placeholder="Measurement System" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="less_130">Less than 130</SelectItem>
-                  {Array.from({length: 71}, (_, i) => 130 + i).map(height => (
-                    <SelectItem key={height} value={height.toString()}>{height}</SelectItem>
-                  ))}
-                  <SelectItem value="more_200">More than 200</SelectItem>
+                  <SelectItem value="metric">Metric (cm, kg)</SelectItem>
+                  <SelectItem value="imperial">Imperial (ft, lbs)</SelectItem>
                 </SelectContent>
               </Select>
-              <Select value={formData.weight_kg} onValueChange={(value) => setFormData({...formData, weight_kg: value})}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Weight (kg)" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="less_30">Less than 30</SelectItem>
-                  {Array.from({length: 41}, (_, i) => 30 + i).map(weight => (
-                    <SelectItem key={weight} value={weight.toString()}>{weight}</SelectItem>
-                  ))}
-                  <SelectItem value="more_70">More than 70</SelectItem>
-                </SelectContent>
-              </Select>
+              
+              <div className="grid gap-2 grid-cols-2">
+                <Select value={formData.height_cm} onValueChange={(value) => setFormData({...formData, height_cm: value})}>
+                  <SelectTrigger>
+                    <SelectValue placeholder={formData.measurement_system === 'imperial' ? "Height (ft)" : "Height (cm)"} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {formData.measurement_system === 'imperial' ? (
+                      <>
+                        <SelectItem value="less_4">Less than 4 ft</SelectItem>
+                        {Array.from({length: 5}, (_, i) => 4 + i).map(height => (
+                          Array.from({length: 12}, (_, j) => j).map(inches => (
+                            <SelectItem key={`${height}_${inches}`} value={`${height}_${inches}`}>
+                              {height}'{inches < 10 ? `0${inches}` : inches}"
+                            </SelectItem>
+                          ))
+                        )).flat()}
+                        <SelectItem value="more_8">More than 8 ft</SelectItem>
+                      </>
+                    ) : (
+                      <>
+                        <SelectItem value="less_130">Less than 130 cm</SelectItem>
+                        {Array.from({length: 71}, (_, i) => 130 + i).map(height => (
+                          <SelectItem key={height} value={height.toString()}>{height} cm</SelectItem>
+                        ))}
+                        <SelectItem value="more_200">More than 200 cm</SelectItem>
+                      </>
+                    )}
+                  </SelectContent>
+                </Select>
+                <Select value={formData.weight_kg} onValueChange={(value) => setFormData({...formData, weight_kg: value})}>
+                  <SelectTrigger>
+                    <SelectValue placeholder={formData.measurement_system === 'imperial' ? "Weight (lbs)" : "Weight (kg)"} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {formData.measurement_system === 'imperial' ? (
+                      <>
+                        <SelectItem value="less_65">Less than 65 lbs</SelectItem>
+                        {Array.from({length: 291}, (_, i) => 65 + i).map(weight => (
+                          <SelectItem key={weight} value={weight.toString()}>{weight} lbs</SelectItem>
+                        ))}
+                        <SelectItem value="more_355">More than 355 lbs</SelectItem>
+                      </>
+                    ) : (
+                      <>
+                        <SelectItem value="less_30">Less than 30 kg</SelectItem>
+                        {Array.from({length: 41}, (_, i) => 30 + i).map(weight => (
+                          <SelectItem key={weight} value={weight.toString()}>{weight} kg</SelectItem>
+                        ))}
+                        <SelectItem value="more_70">More than 70 kg</SelectItem>
+                      </>
+                    )}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
             <div className="space-y-3">
