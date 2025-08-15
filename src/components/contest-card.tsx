@@ -479,7 +479,7 @@ export function ContestantCard({
     <>
       <Card className="bg-card border-contest-border relative overflow-hidden flex h-32 sm:h-36 md:h-40">
         {isWinner && (
-          <div className="absolute top-0 left-48 sm:left-56 md:left-64 right-12 sm:right-14 md:right-16 bg-blue-100 text-blue-700 px-2 py-1 text-xs font-semibold flex items-center justify-between z-10">
+          <div className="absolute top-0 left-48 sm:left-56 md:left-64 right-0 bg-blue-100 text-blue-700 px-2 py-1 text-xs font-semibold flex items-center justify-between z-10">
             <span>🏆 WINNER</span>
             <span>+ 5000 PHP</span>
           </div>
@@ -605,7 +605,7 @@ export function ContestantCard({
           {/* Contestant info - shown after voting instead of normal content */}
           {isVoted && !isEditing && !showThanks && (
             <div className="absolute inset-0 bg-white rounded-r flex flex-col justify-between p-1 sm:p-2 md:p-3">
-              <div className="flex items-start justify-between">
+              <div className={cn("flex items-start justify-between", isWinner && "mt-6")}>
                 <div className="min-w-0 flex-1 mr-2">
                    <h3 className="font-semibold text-contest-text text-base sm:text-lg truncate">{profileId ? (<Link to={`/u/${profileId}`} className="hover:text-primary underline-offset-2 hover:underline">{name}</Link>) : name}, {age}</h3>
                    <div className="text-xs sm:text-sm text-muted-foreground font-normal">{weight} kg · {height} cm</div>
