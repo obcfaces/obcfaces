@@ -160,7 +160,7 @@ const Profile = () => {
   };
 
   const loadLikedItems = async () => {
-    if (!currentUserId || currentUserId !== id) return;
+    if (!currentUserId) return;
     
     setLoadingLikes(true);
     try {
@@ -241,10 +241,8 @@ const Profile = () => {
   };
 
   useEffect(() => {
-    if (isOwner) {
-      loadLikedItems();
-    }
-  }, [isOwner, currentUserId, id]);
+    loadLikedItems();
+  }, [currentUserId, id]);
 
   const handleUnlike = (likeId: string) => {
     setLikedItems(prev => prev.filter(item => item.likeId !== likeId));
@@ -335,18 +333,15 @@ const Profile = () => {
           </div>
 
           {/* Tabs */}
-          <Tabs defaultValue={isOwner ? "likes" : "posts"} className="mt-8">
+          <Tabs defaultValue="likes" className="mt-8">
             <TabsList className="w-full sm:w-auto bg-transparent p-0 rounded-none justify-start gap-8 border-b border-border">
-              {isOwner && (
-                <TabsTrigger value="likes" className="px-0 mr-6 h-auto pb-2 bg-transparent rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary text-muted-foreground hover:text-foreground">Likes</TabsTrigger>
-              )}
+              <TabsTrigger value="likes" className="px-0 mr-6 h-auto pb-2 bg-transparent rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary text-muted-foreground hover:text-foreground">Likes</TabsTrigger>
               <TabsTrigger value="posts" className="px-0 mr-6 h-auto pb-2 bg-transparent rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary text-muted-foreground hover:text-foreground">Posts</TabsTrigger>
               <TabsTrigger value="photos" className="px-0 mr-6 h-auto pb-2 bg-transparent rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary text-muted-foreground hover:text-foreground">Photos</TabsTrigger>
               <TabsTrigger value="about" className="px-0 h-auto pb-2 bg-transparent rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary text-muted-foreground hover:text-foreground">About</TabsTrigger>
             </TabsList>
 
-            {isOwner && (
-              <TabsContent value="likes" className="mt-8 -mx-6">
+            <TabsContent value="likes" className="mt-8 -mx-6">
                 {loadingLikes ? (
                   <p className="text-muted-foreground text-center py-8 px-6">Загрузка лайков...</p>
                 ) : likedItems.length > 0 ? (
@@ -421,7 +416,6 @@ const Profile = () => {
                   </div>
                 )}
               </TabsContent>
-            )}
 
             <TabsContent value="posts" className="space-y-4 mt-8 -mx-6">
               <div className="px-0 sm:px-6 space-y-4">
