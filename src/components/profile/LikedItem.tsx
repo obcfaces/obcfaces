@@ -57,10 +57,21 @@ const getParticipantBadge = (type?: 'candidate' | 'finalist' | 'winner') => {
     finalist: "Finalist",
     winner: "Winner"
   };
+
+  const dates = {
+    candidate: "1-8 Sep",
+    finalist: "9-15 Sep",
+    winner: "16-22 Sep"
+  };
   
   return (
-    <div className={`absolute top-2 right-2 z-30 px-2 py-1 rounded-full text-xs font-semibold ${badgeStyles[type]}`}>
-      {labels[type]}
+    <div className="absolute top-0 right-0 z-30">
+      <div className={`px-2 py-1 text-xs font-semibold ${badgeStyles[type]}`}>
+        {labels[type]}
+      </div>
+      <div className="bg-white/90 text-gray-700 px-2 py-0.5 text-xs font-medium">
+        {dates[type]}
+      </div>
     </div>
   );
 };
