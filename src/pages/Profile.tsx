@@ -319,7 +319,7 @@ const Profile = () => {
             </TabsList>
 
             {isOwner && (
-              <TabsContent value="likes" className="mt-2 -mx-6">
+              <TabsContent value="likes" className="mt-8 -mx-6">
                 {loadingLikes ? (
                   <p className="text-muted-foreground text-center py-8 px-6">Загрузка лайков...</p>
                 ) : likedItems.length > 0 ? (
@@ -395,15 +395,15 @@ const Profile = () => {
               </TabsContent>
             )}
 
-            <TabsContent value="posts" className="space-y-1 mt-2 -mx-6">
-              <div className="px-0 sm:px-6 space-y-1">
+            <TabsContent value="posts" className="space-y-4 mt-8 -mx-6">
+              <div className="px-0 sm:px-6 space-y-4">
                 {samplePosts.map((p) => (
                   <PostCard key={p.id} {...p} />
                 ))}
               </div>
             </TabsContent>
 
-            <TabsContent value="photos" className="mt-2">
+            <TabsContent value="photos" className="mt-8">
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-1">
                 {profilePhotos.map((src, idx) => (
                   <button
@@ -425,7 +425,7 @@ const Profile = () => {
               </div>
             </TabsContent>
 
-            <TabsContent value="about" className="mt-2">
+            <TabsContent value="about" className="mt-8">
               <article className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
                   <p><span className="text-muted-foreground">Имя:</span> {profile.display_name ?? "—"}</p>
