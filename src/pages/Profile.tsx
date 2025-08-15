@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { Helmet } from "react-helmet-async";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
+import { LogOut } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import PostCard from "@/components/profile/PostCard";
 import LikedItem from "@/components/profile/LikedItem";
@@ -32,6 +33,7 @@ interface ProfileRow {
 }
 
 const Profile = () => {
+  const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const [data, setData] = useState<ProfileRow | null>(null);
   const [loading, setLoading] = useState(true);
@@ -157,6 +159,11 @@ const Profile = () => {
     } finally {
       setSavingBio(false);
     }
+  };
+
+  const logout = async () => {
+    await supabase.auth.signOut();
+    navigate("/auth", { replace: true });
   };
 
   const loadLikedItems = async () => {
@@ -342,7 +349,16 @@ const Profile = () => {
               <TabsTrigger value="likes" className="px-0 mr-6 h-auto pb-2 bg-transparent rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary text-muted-foreground hover:text-foreground">Likes</TabsTrigger>
               <TabsTrigger value="posts" className="px-0 mr-6 h-auto pb-2 bg-transparent rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary text-muted-foreground hover:text-foreground">Posts</TabsTrigger>
               <TabsTrigger value="photos" className="px-0 mr-6 h-auto pb-2 bg-transparent rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary text-muted-foreground hover:text-foreground">Photos</TabsTrigger>
-              <TabsTrigger value="about" className="px-0 h-auto pb-2 bg-transparent rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary text-muted-foreground hover:text-foreground">About</TabsTrigger>
+              <TabsTrigger value="about" className="px-0 mr-6 h-auto pb-2 bg-transparent rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary text-muted-foreground hover:text-foreground">About</TabsTrigger>
+              {isOwner && (
+                <button
+                  onClick={logout}
+                  className="px-0 h-auto pb-2 bg-transparent rounded-none border-b-2 border-transparent text-muted-foreground hover:text-destructive transition-colors"
+                  title="Выйти"
+                >
+                  <LogOut size={18} />
+                </button>
+              )}
             </TabsList>
 
             <TabsContent value="likes" className="mt-8 -mx-6">
