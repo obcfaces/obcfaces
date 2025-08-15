@@ -33,7 +33,7 @@ const ContestFilters: React.FC<ContestFiltersProps> = ({
 }) => {
   const countryOptions: Option[] = useMemo(() => [
     { value: "PH", label: "Philippines" },
-    { value: "__divider__", label: "divider", disabled: true, divider: true },
+    { value: "__divider__", label: "", disabled: true, divider: true },
     { value: "US", label: "United States", disabled: true },
     { value: "GB", label: "United Kingdom", disabled: true },
     { value: "CA", label: "Canada", disabled: true },
