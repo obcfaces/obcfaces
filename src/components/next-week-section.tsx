@@ -162,9 +162,10 @@ interface NextWeekSectionProps {
 export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [history, setHistory] = useState<number[]>([]);
-  const [remainingCandidates, setRemainingCandidates] = useState(candidates.length);
   const [user, setUser] = useState<any>(null);
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const [filteredCandidates, setFilteredCandidates] = useState(candidates);
+  const [remainingCandidates, setRemainingCandidates] = useState(0);
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
@@ -178,15 +179,58 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
     return () => subscription.unsubscribe();
   }, []);
 
+  // Filter candidates based on user's previous votes
+  useEffect(() => {
+    const filterCandidates = async () => {
+      if (!user) {
+        setFilteredCandidates(candidates);
+        setRemainingCandidates(candidates.length);
+        return;
+      }
+
+      try {
+        const { data: votes } = await supabase
+          .from('next_week_votes')
+          .select('candidate_name')
+          .eq('user_id', user.id);
+
+        const votedNames = votes?.map(vote => vote.candidate_name) || [];
+        const unvoted = candidates.filter(candidate => !votedNames.includes(candidate.name));
+        
+        setFilteredCandidates(unvoted);
+        setRemainingCandidates(unvoted.length);
+        setCurrentIndex(0);
+        setHistory([]);
+      } catch (error) {
+        console.error('Error fetching votes:', error);
+        setFilteredCandidates(candidates);
+        setRemainingCandidates(candidates.length);
+      }
+    };
+
+    filterCandidates();
+  }, [user]);
+
   const handleLike = async () => {
     if (!user) {
       setShowLoginModal(true);
       return;
     }
     
-    if (currentIndex < candidates.length) {
-      // Save like to database
+    if (currentIndex < filteredCandidates.length) {
+      const currentCandidate = filteredCandidates[currentIndex];
+      
+      // Save vote to database
       try {
+        await supabase
+          .from('next_week_votes')
+          .insert({
+            user_id: user.id,
+            candidate_name: currentCandidate.name,
+            vote_type: 'like'
+          });
+
+        // Save like to likes table
         await supabase
           .from('likes')
           .insert({
@@ -205,7 +249,7 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
             })
           });
       } catch (error) {
-        console.error('Error saving like:', error);
+        console.error('Error saving vote:', error);
       }
       
       setHistory(prev => [...prev, currentIndex]);
@@ -214,13 +258,28 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
     }
   };
 
-  const handleDislike = () => {
+  const handleDislike = async () => {
     if (!user) {
       setShowLoginModal(true);
       return;
     }
     
-    if (currentIndex < candidates.length) {
+    if (currentIndex < filteredCandidates.length) {
+      const currentCandidate = filteredCandidates[currentIndex];
+      
+      // Save vote to database
+      try {
+        await supabase
+          .from('next_week_votes')
+          .insert({
+            user_id: user.id,
+            candidate_name: currentCandidate.name,
+            vote_type: 'dislike'
+          });
+      } catch (error) {
+        console.error('Error saving vote:', error);
+      }
+      
       setHistory(prev => [...prev, currentIndex]);
       setCurrentIndex(prev => prev + 1);
       setRemainingCandidates(prev => prev - 1);
@@ -241,7 +300,7 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
     }
   };
 
-  const currentCandidate = candidates[currentIndex];
+  const currentCandidate = filteredCandidates[currentIndex];
 
   return (
     <section className="max-w-6xl mx-auto py-8 mb-2 mt-2 bg-background rounded-lg shadow-lg shadow-foreground/15">
@@ -259,7 +318,7 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
         </div>
       </div>
 
-      {currentIndex < candidates.length ? (
+      {currentIndex < filteredCandidates.length ? (
         <div className="flex flex-col items-center">
           <div className="w-full px-0 sm:px-6">
             <ContestantCard

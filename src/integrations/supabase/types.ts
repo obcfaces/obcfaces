@@ -71,6 +71,30 @@ export type Database = {
         }
         Relationships: []
       }
+      next_week_votes: {
+        Row: {
+          candidate_name: string
+          created_at: string
+          id: string
+          user_id: string
+          vote_type: string
+        }
+        Insert: {
+          candidate_name: string
+          created_at?: string
+          id?: string
+          user_id: string
+          vote_type: string
+        }
+        Update: {
+          candidate_name?: string
+          created_at?: string
+          id?: string
+          user_id?: string
+          vote_type?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           age: number | null
