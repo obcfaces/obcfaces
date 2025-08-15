@@ -274,7 +274,7 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
   const contestants = getContestants();
 
   return (
-    <section className="max-w-6xl mx-auto py-8 mb-2 bg-background rounded-lg shadow-lg shadow-foreground/35">
+    <section className="max-w-6xl mx-auto py-8 mb-2 bg-background rounded-lg shadow-lg shadow-foreground/35 mx-2 sm:mx-auto">
       <div className="mb-8 px-6">
         <div className="mb-4">
           <div className="flex items-baseline gap-3 mb-1">
