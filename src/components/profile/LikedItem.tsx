@@ -47,9 +47,9 @@ const getParticipantBadge = (type?: 'candidate' | 'finalist' | 'winner') => {
   if (!type) return null;
   
   const badgeStyles = {
-    candidate: "bg-blue-100 text-blue-700",
+    candidate: "bg-yellow-100 text-yellow-700",
     finalist: "bg-orange-100 text-orange-700", 
-    winner: "bg-yellow-100 text-yellow-700"
+    winner: "bg-blue-100 text-blue-700"
   };
   
   const labels = {
