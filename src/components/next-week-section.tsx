@@ -237,7 +237,7 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
       </div>
 
       {currentIndex < candidates.length ? (
-        <div className="flex flex-col">
+        <div className="flex flex-col items-center">
           <div className="w-full px-0 sm:px-6">
             <ContestantCard
               {...currentCandidate}
@@ -247,7 +247,7 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
           </div>
           
           {/* Counter aligned left with same padding as NEXT WEEK title */}
-          <div className="px-6 mt-4">
+          <div className="w-full px-6 mt-4">
             <span className="text-lg text-contest-text font-medium">
               {remainingCandidates} left
             </span>
