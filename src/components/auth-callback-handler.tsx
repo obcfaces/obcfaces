@@ -34,7 +34,6 @@ const AuthCallbackHandler = () => {
         window.history.replaceState({}, "", url.pathname + url.search);
 
         toast({ description: "Email confirmed. Welcome!" });
-        // Stay on the same page by default; navigate if needed in future
       } catch (_) {
         // ignore
       }
