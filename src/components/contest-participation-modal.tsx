@@ -3,7 +3,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
 import { Camera, Eye, EyeOff } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -21,6 +20,8 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
   const [mode, setMode] = useState<'login' | 'signup'>('login');
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [authError, setAuthError] = useState<string>("");
   const { toast } = useToast();
 
   // Auth form data
@@ -95,6 +96,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
+    setAuthError("");
     setIsLoading(true);
 
     try {
@@ -105,11 +107,33 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
         });
 
         if (error) {
-          toast({
-            title: "Ошибка входа",
-            description: error.message,
-            variant: "destructive",
-          });
+          let errorMessage = "Ошибка входа";
+          
+          switch (error.message) {
+            case "Invalid login credentials":
+              errorMessage = "Неправильный email или пароль";
+              break;
+            case "Email not confirmed":
+              errorMessage = "Email не подтвержден. Проверьте почту";
+              break;
+            case "Too many requests":
+              errorMessage = "Слишком много попыток. Попробуйте позже";
+              break;
+            case "User not found":
+              errorMessage = "Пользователь не найден";
+              break;
+            case "Invalid email":
+              errorMessage = "Неправильный формат email";
+              break;
+            default:
+              if (error.message.toLowerCase().includes("password")) {
+                errorMessage = "Неправильный пароль";
+              } else if (error.message.toLowerCase().includes("email") || error.message.toLowerCase().includes("user")) {
+                errorMessage = "Пользователь с таким email не существует";
+              }
+          }
+          
+          setAuthError(errorMessage);
           return;
         }
 
@@ -129,11 +153,25 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
         });
 
         if (error) {
-          toast({
-            title: "Ошибка регистрации",
-            description: error.message,
-            variant: "destructive",
-          });
+          let errorMessage = "Ошибка регистрации";
+          
+          switch (error.message) {
+            case "User already registered":
+              errorMessage = "Пользователь с таким email уже существует";
+              break;
+            case "Password should be at least 6 characters":
+              errorMessage = "Пароль должен содержать минимум 6 символов";
+              break;
+            case "Invalid email":
+              errorMessage = "Неправильный формат email";
+              break;
+            default:
+              if (error.message.toLowerCase().includes("already registered")) {
+                errorMessage = "Пользователь с таким email уже зарегистрирован";
+              }
+          }
+          
+          setAuthError(errorMessage);
           return;
         }
 
@@ -143,11 +181,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
         });
       }
     } catch (error) {
-      toast({
-        title: "Ошибка",
-        description: "Произошла неожиданная ошибка",
-        variant: "destructive",
-      });
+      setAuthError("Произошла неожиданная ошибка");
     } finally {
       setIsLoading(false);
     }
@@ -180,7 +214,16 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
 
   const handleProfileSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSubmitted(true);
     setIsLoading(true);
+
+    // Validation
+    if (!formData.first_name.trim() || !formData.last_name.trim() || !formData.country || 
+        !formData.gender || !formData.birth_day || !formData.birth_month || 
+        !formData.birth_year || !photo1File || !photo2File) {
+      setIsLoading(false);
+      return;
+    }
 
     try {
       const { data: { session } } = await supabase.auth.getSession();
@@ -257,6 +300,18 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
     }
   };
 
+  // Validation states for profile form
+  const showProfileErrors = submitted;
+  const invalidFirstName = showProfileErrors && !formData.first_name.trim();
+  const invalidLastName = showProfileErrors && !formData.last_name.trim();
+  const invalidCountry = showProfileErrors && !formData.country;
+  const invalidGender = showProfileErrors && !formData.gender;
+  const invalidBirthDay = showProfileErrors && !formData.birth_day;
+  const invalidBirthMonth = showProfileErrors && !formData.birth_month;
+  const invalidBirthYear = showProfileErrors && !formData.birth_year;
+  const invalidPhoto1 = showProfileErrors && !photo1File;
+  const invalidPhoto2 = showProfileErrors && !photo2File;
+
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
@@ -270,69 +325,87 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
         </DialogHeader>
 
         {currentStep === 'auth' ? (
-          <form onSubmit={handleAuth} className="space-y-4">
-            <Input
-              id="email"
-              type="email"
-              placeholder="Email"
-              className="italic"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-
-            <div className="relative">
-              <Input
-                id="password"
-                type={showPassword ? "text" : "password"}
-                placeholder="Пароль"
-                className="italic"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
+          <form onSubmit={handleAuth} className="space-y-3">
+            {authError && (
+              <div className="text-destructive text-sm font-medium">
+                {authError}
+              </div>
+            )}
+            
+            <div className="space-y-2">
+              <Input 
+                id="email" 
+                type="email" 
+                placeholder="Email" 
+                className="placeholder:italic placeholder:text-muted-foreground" 
+                value={email} 
+                onChange={(e) => setEmail(e.target.value)} 
+                required 
               />
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                className="absolute right-2 top-1/2 transform -translate-y-1/2"
-                onClick={() => setShowPassword(!showPassword)}
-              >
-                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-              </Button>
             </div>
 
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {mode === 'login' ? 'Войти' : 'Зарегистрироваться'}
-            </Button>
+            <div className="space-y-2">
+              <div className="relative">
+                <Input 
+                  id="password" 
+                  type={showPassword ? "text" : "password"} 
+                  placeholder="Пароль" 
+                  className="pr-10 placeholder:italic placeholder:text-muted-foreground" 
+                  value={password} 
+                  onChange={(e) => setPassword(e.target.value)} 
+                  required 
+                />
+                <button 
+                  type="button" 
+                  aria-label={showPassword ? "Hide password" : "Show password"} 
+                  onClick={() => setShowPassword((v) => !v)} 
+                  className="absolute inset-y-0 right-2 inline-flex items-center text-muted-foreground hover:text-foreground"
+                >
+                  {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                </button>
+              </div>
+            </div>
 
-            <div className="text-center">
-              <Button
-                type="button"
-                variant="link"
-                onClick={() => setMode(mode === 'login' ? 'signup' : 'login')}
-              >
-                {mode === 'login' ? 'Нет аккаунта? Зарегистрироваться' : 'Уже есть аккаунт? Войти'}
-              </Button>
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-muted-foreground">
+                {mode === 'login' ? 'Нет аккаунта? ' : 'Уже есть аккаунт? '}
+                <button 
+                  type="button" 
+                  className="text-primary underline" 
+                  onClick={() => {
+                    setMode(mode === 'login' ? 'signup' : 'login');
+                    setAuthError("");
+                  }}
+                >
+                  {mode === 'login' ? 'Зарегистрироваться' : 'Войти'}
+                </button>
+              </span>
+              <div className="flex">
+                <Button type="submit" disabled={isLoading}>
+                  {isLoading ? "Подождите..." : mode === 'login' ? 'Войти' : 'Зарегистрироваться'}
+                </Button>
+              </div>
             </div>
           </form>
         ) : (
-          <form onSubmit={handleProfileSubmit} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+          <form onSubmit={handleProfileSubmit} className="space-y-3">
+            <div className="grid gap-2 sm:grid-cols-2">
               <Input
                 id="first_name"
                 placeholder="Имя"
-                className="italic"
+                className={`placeholder:italic placeholder:text-muted-foreground ${invalidFirstName ? 'border-destructive focus:ring-destructive' : ''}`}
                 value={formData.first_name}
                 onChange={(e) => setFormData({...formData, first_name: e.target.value})}
+                aria-invalid={invalidFirstName}
                 required
               />
               <Input
                 id="last_name"
                 placeholder="Фамилия"
-                className="italic"
+                className={`placeholder:italic placeholder:text-muted-foreground ${invalidLastName ? 'border-destructive focus:ring-destructive' : ''}`}
                 value={formData.last_name}
                 onChange={(e) => setFormData({...formData, last_name: e.target.value})}
+                aria-invalid={invalidLastName}
                 required
               />
             </div>
@@ -342,28 +415,29 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
               options={countryOptions.map(c => ({ value: c.isoCode, label: c.name }))}
               value={formData.country}
               onValueChange={(value) => setFormData({...formData, country: value, state: "", city: ""})}
+              invalid={invalidCountry}
             />
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid gap-2 sm:grid-cols-2">
               <Input
                 id="state"
                 placeholder="Штат/Область"
-                className="italic"
+                className="placeholder:italic placeholder:text-muted-foreground"
                 value={formData.state}
                 onChange={(e) => setFormData({...formData, state: e.target.value})}
               />
               <Input
                 id="city"
                 placeholder="Город"
-                className="italic"
+                className="placeholder:italic placeholder:text-muted-foreground"
                 value={formData.city}
                 onChange={(e) => setFormData({...formData, city: e.target.value})}
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid gap-2 sm:grid-cols-2">
               <Select value={formData.gender} onValueChange={(value) => setFormData({...formData, gender: value})}>
-                <SelectTrigger className="italic">
+                <SelectTrigger className={`${invalidGender ? "border-destructive focus:ring-destructive" : ""}`}>
                   <SelectValue placeholder="Выберите пол" />
                 </SelectTrigger>
                 <SelectContent>
@@ -372,9 +446,9 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                 </SelectContent>
               </Select>
               
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-3 gap-1">
                 <Select value={formData.birth_day} onValueChange={(value) => setFormData({...formData, birth_day: value})}>
-                  <SelectTrigger className="italic">
+                  <SelectTrigger className={`${invalidBirthDay ? "border-destructive focus:ring-destructive" : ""}`}>
                     <SelectValue placeholder="День" />
                   </SelectTrigger>
                   <SelectContent>
@@ -385,7 +459,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                 </Select>
                 
                 <Select value={formData.birth_month} onValueChange={(value) => setFormData({...formData, birth_month: value})}>
-                  <SelectTrigger className="italic">
+                  <SelectTrigger className={`${invalidBirthMonth ? "border-destructive focus:ring-destructive" : ""}`}>
                     <SelectValue placeholder="Месяц" />
                   </SelectTrigger>
                   <SelectContent>
@@ -399,7 +473,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                 </Select>
                 
                 <Select value={formData.birth_year} onValueChange={(value) => setFormData({...formData, birth_year: value})}>
-                  <SelectTrigger className="italic">
+                  <SelectTrigger className={`${invalidBirthYear ? "border-destructive focus:ring-destructive" : ""}`}>
                     <SelectValue placeholder="Год" />
                   </SelectTrigger>
                   <SelectContent>
@@ -412,7 +486,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
             </div>
 
             <Select value={formData.marital_status} onValueChange={(value) => setFormData({...formData, marital_status: value})}>
-              <SelectTrigger className="italic">
+              <SelectTrigger>
                 <SelectValue placeholder="Выберите семейное положение" />
               </SelectTrigger>
               <SelectContent>
@@ -424,7 +498,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
             </Select>
 
             <Select value={formData.has_children.toString()} onValueChange={(value) => setFormData({...formData, has_children: value === 'true'})}>
-              <SelectTrigger className="italic">
+              <SelectTrigger>
                 <SelectValue placeholder="Есть ли дети?" />
               </SelectTrigger>
               <SelectContent>
@@ -433,12 +507,12 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
               </SelectContent>
             </Select>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid gap-2 sm:grid-cols-2">
               <Input
                 id="height"
                 type="number"
                 placeholder="Рост (см)"
-                className="italic"
+                className="placeholder:italic placeholder:text-muted-foreground"
                 value={formData.height_cm}
                 onChange={(e) => setFormData({...formData, height_cm: e.target.value})}
               />
@@ -447,16 +521,16 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                 type="number"
                 step="0.1"
                 placeholder="Вес (кг)"
-                className="italic"
+                className="placeholder:italic placeholder:text-muted-foreground"
                 value={formData.weight_kg}
                 onChange={(e) => setFormData({...formData, weight_kg: e.target.value})}
               />
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-3">
               <div className="text-sm font-medium">Фотографии (обязательно 2 фото)</div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
+              <div className="grid gap-2 sm:grid-cols-2">
+                <div className={`border-2 border-dashed rounded-lg p-4 text-center ${invalidPhoto1 ? 'border-destructive' : 'border-gray-300'}`}>
                   <input
                     id="photo1"
                     type="file"
@@ -465,16 +539,17 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                     className="hidden"
                     required
                   />
-                    <label htmlFor="photo1" className="cursor-pointer">
-                      <Camera className="mx-auto h-8 w-8 text-gray-400 mb-2" />
-                      {photo1File ? (
-                        <p className="text-sm text-green-600">{photo1File.name}</p>
-                      ) : (
-                        <p className="text-sm text-gray-500">Нажмите для выбора</p>
-                      )}
-                    </label>
+                  <label htmlFor="photo1" className="cursor-pointer">
+                    <Camera className="mx-auto h-8 w-8 text-gray-400 mb-2" />
+                    {photo1File ? (
+                      <p className="text-sm text-green-600">{photo1File.name}</p>
+                    ) : (
+                      <p className="text-sm text-gray-500">Фото 1</p>
+                    )}
+                  </label>
                 </div>
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
+                
+                <div className={`border-2 border-dashed rounded-lg p-4 text-center ${invalidPhoto2 ? 'border-destructive' : 'border-gray-300'}`}>
                   <input
                     id="photo2"
                     type="file"
@@ -483,20 +558,20 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                     className="hidden"
                     required
                   />
-                    <label htmlFor="photo2" className="cursor-pointer">
-                      <Camera className="mx-auto h-8 w-8 text-gray-400 mb-2" />
-                      {photo2File ? (
-                        <p className="text-sm text-green-600">{photo2File.name}</p>
-                      ) : (
-                        <p className="text-sm text-gray-500">Нажмите для выбора</p>
-                      )}
+                  <label htmlFor="photo2" className="cursor-pointer">
+                    <Camera className="mx-auto h-8 w-8 text-gray-400 mb-2" />
+                    {photo2File ? (
+                      <p className="text-sm text-green-600">{photo2File.name}</p>
+                    ) : (
+                      <p className="text-sm text-gray-500">Фото 2</p>
+                    )}
                   </label>
                 </div>
               </div>
             </div>
 
-            <Button type="submit" className="w-full" disabled={isLoading || !photo1File || !photo2File}>
-              Отправить заявку на участие
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading ? "Отправка..." : "Отправить заявку на участие"}
             </Button>
           </form>
         )}
