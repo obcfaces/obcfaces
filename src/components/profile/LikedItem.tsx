@@ -43,7 +43,7 @@ const getInitials = (name: string) => {
   return initials || "U";
 };
 
-const getParticipantBadge = (type?: 'candidate' | 'finalist' | 'winner') => {
+const getParticipantBadge = (type?: 'candidate' | 'finalist' | 'winner', isFullView = false) => {
   if (!type) return null;
   
   const badgeStyles = {
@@ -64,8 +64,12 @@ const getParticipantBadge = (type?: 'candidate' | 'finalist' | 'winner') => {
     winner: "16-22 Sep"
   };
   
+  const positionClasses = isFullView 
+    ? "absolute top-0 left-0 right-0 z-30" 
+    : "absolute top-0 left-48 sm:left-56 md:left-64 right-0 z-30";
+  
   return (
-    <div className={`absolute top-0 left-48 sm:left-56 md:left-64 right-0 z-30 px-2 py-1 text-xs font-semibold ${badgeStyles[type]} flex justify-between items-center`}>
+    <div className={`${positionClasses} px-2 py-1 text-xs font-semibold ${badgeStyles[type]} flex justify-between items-center`}>
       <span>{labels[type]}</span>
       <span>{dates[type]}</span>
     </div>
@@ -311,7 +315,7 @@ const LikedItem = ({
     <>
       <Card className="bg-card border-contest-border relative overflow-hidden">
         {/* Participant Type Badge */}
-        {getParticipantBadge(currentParticipantType)}
+        {getParticipantBadge(currentParticipantType, true)}
         {/* Name in top left - показываем всегда как в проголосованных */}
         <div className="absolute top-8 left-4 z-20">
           <h3 className="text-xl font-semibold text-contest-text">
