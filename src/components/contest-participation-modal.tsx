@@ -358,7 +358,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                 id="email" 
                 type="email" 
                 placeholder="Email" 
-                className="placeholder:text-muted-foreground" 
+                className="text-sm placeholder:text-muted-foreground" 
                 value={email} 
                 onChange={(e) => setEmail(e.target.value)} 
                 required 
@@ -371,7 +371,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                   id="password" 
                   type={showPassword ? "text" : "password"} 
                   placeholder="Password" 
-                  className="pr-10 placeholder:text-muted-foreground" 
+                  className="pr-10 text-sm placeholder:text-muted-foreground" 
                   value={password} 
                   onChange={(e) => setPassword(e.target.value)} 
                   required 
@@ -414,7 +414,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
               <Input
                 id="first_name"
                 placeholder="First name"
-                className={`placeholder:text-muted-foreground ${invalidFirstName ? 'border-destructive focus:ring-destructive' : ''}`}
+                className={`text-sm placeholder:text-muted-foreground ${invalidFirstName ? 'border-destructive focus:ring-destructive' : ''}`}
                 value={formData.first_name}
                 onChange={(e) => setFormData({...formData, first_name: e.target.value})}
                 aria-invalid={invalidFirstName}
@@ -423,7 +423,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
               <Input
                 id="last_name"
                 placeholder="Last name"
-                className={`placeholder:text-muted-foreground ${invalidLastName ? 'border-destructive focus:ring-destructive' : ''}`}
+                className={`text-sm placeholder:text-muted-foreground ${invalidLastName ? 'border-destructive focus:ring-destructive' : ''}`}
                 value={formData.last_name}
                 onChange={(e) => setFormData({...formData, last_name: e.target.value})}
                 aria-invalid={invalidLastName}
@@ -558,7 +558,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                 id="height"
                 type="number"
                 placeholder="Height (cm)"
-                className="placeholder:text-muted-foreground"
+                className="text-sm placeholder:text-muted-foreground"
                 value={formData.height_cm}
                 onChange={(e) => setFormData({...formData, height_cm: e.target.value})}
               />
@@ -567,7 +567,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                 type="number"
                 step="0.1"
                 placeholder="Weight (kg)"
-                className="placeholder:text-muted-foreground"
+                className="text-sm placeholder:text-muted-foreground"
                 value={formData.weight_kg}
                 onChange={(e) => setFormData({...formData, weight_kg: e.target.value})}
               />
