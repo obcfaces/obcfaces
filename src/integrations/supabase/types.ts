@@ -86,6 +86,7 @@ export type Database = {
           height_cm: number | null
           id: string
           is_approved: boolean | null
+          is_contest_participant: boolean | null
           last_name: string | null
           moderated_at: string | null
           moderated_by: string | null
@@ -109,6 +110,7 @@ export type Database = {
           height_cm?: number | null
           id: string
           is_approved?: boolean | null
+          is_contest_participant?: boolean | null
           last_name?: string | null
           moderated_at?: string | null
           moderated_by?: string | null
@@ -132,6 +134,7 @@ export type Database = {
           height_cm?: number | null
           id?: string
           is_approved?: boolean | null
+          is_contest_participant?: boolean | null
           last_name?: string | null
           moderated_at?: string | null
           moderated_by?: string | null
@@ -169,6 +172,19 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_contest_participant_info: {
+        Args: Record<PropertyKey, never> | { participant_id: string }
+        Returns: {
+          age: number
+          avatar_url: string
+          city: string
+          country: string
+          display_name: string
+          height_cm: number
+          id: string
+          weight_kg: number
+        }[]
+      }
       get_follow_stats: {
         Args: { target_user_id: string }
         Returns: {
