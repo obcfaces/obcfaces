@@ -185,7 +185,7 @@ export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantNa
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="fixed inset-0 left-0 top-0 translate-x-0 translate-y-0 w-full max-w-full h-dvh overflow-hidden p-0 bg-black/90 focus:outline-none border-0">
+      <DialogContent className="!fixed !inset-0 !left-0 !top-0 !translate-x-0 !translate-y-0 !w-full !max-w-full !h-dvh !overflow-hidden !p-0 !bg-black/90 !border-0 !shadow-none !gap-0 !rounded-none focus:outline-none">
         {/* Desktop: flex layout, Mobile: block layout */}
         <div className="h-full w-full flex flex-col max-w-full">
           {/* Photo section */}
