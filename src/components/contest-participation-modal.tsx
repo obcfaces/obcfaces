@@ -445,10 +445,8 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
 
   // Helper function for ALL field styling - unified approach
   const getUnifiedFieldClasses = (isInvalid: boolean, isFilled: boolean) => {
-    if (isInvalid) {
-      return "border border-red-500 focus:ring-red-500 focus:border-red-500";
-    } else if (isFilled) {
-      return "border border-blue-500 focus:ring-blue-500 focus:border-blue-500";
+    if (submitted && isInvalid) {
+      return "border border-red-500";
     }
     return "";
   };
