@@ -58,20 +58,23 @@ const getParticipantBadge = (type?: 'candidate' | 'finalist' | 'winner', isFullV
     winner: "Winner"
   };
 
-  const dates = {
+  const rightContent = {
     candidate: "1-8 Sep",
     finalist: "9-15 Sep",
-    winner: "16-22 Sep"
+    winner: "+ 5000 PHP"
   };
   
+  // For winners in compact view, extend the badge to the rating boundary
   const positionClasses = isFullView 
     ? "absolute top-0 left-0 right-0 z-30" 
-    : "absolute top-0 left-48 sm:left-56 md:left-64 right-0 z-30";
+    : type === 'winner' 
+      ? "absolute top-0 left-48 sm:left-56 md:left-64 right-12 sm:right-14 md:right-16 z-30"
+      : "absolute top-0 left-48 sm:left-56 md:left-64 right-0 z-30";
   
   return (
     <div className={`${positionClasses} px-2 py-1 text-xs font-semibold ${badgeStyles[type]} flex justify-between items-center`}>
       <span>{labels[type]}</span>
-      <span>{dates[type]}</span>
+      <span>{rightContent[type]}</span>
     </div>
   );
 };
