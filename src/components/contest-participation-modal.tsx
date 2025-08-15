@@ -652,32 +652,12 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                       </div>
                     ) : (
                       <div className="p-6 text-center">
-                        <div className="h-40 bg-muted/50 rounded-lg mb-3 flex items-center justify-center relative">
-                          {/* Female full body silhouette */}
-                          <div className="relative">
-                            {/* Head */}
-                            <div className="w-6 h-8 bg-muted-foreground/30 rounded-full mx-auto relative">
-                              {/* Hair */}
-                              <div className="absolute -top-0.5 -left-0.5 -right-0.5 h-6 bg-muted-foreground/25 rounded-full"></div>
-                            </div>
-                            {/* Neck */}
-                            <div className="w-2 h-2 bg-muted-foreground/30 mx-auto"></div>
-                            {/* Torso */}
-                            <div className="w-8 h-16 bg-muted-foreground/25 rounded-t-lg mx-auto relative">
-                              {/* Arms at sides */}
-                              <div className="absolute -left-2 top-2 w-2 h-12 bg-muted-foreground/25 rounded-full"></div>
-                              <div className="absolute -right-2 top-2 w-2 h-12 bg-muted-foreground/25 rounded-full"></div>
-                              {/* Waist */}
-                              <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-6 h-4 bg-muted-foreground/30"></div>
-                            </div>
-                            {/* Hips */}
-                            <div className="w-7 h-4 bg-muted-foreground/25 mx-auto"></div>
-                            {/* Legs */}
-                            <div className="flex gap-0.5 justify-center">
-                              <div className="w-2.5 h-14 bg-muted-foreground/25 rounded-b-full"></div>
-                              <div className="w-2.5 h-14 bg-muted-foreground/25 rounded-b-full"></div>
-                            </div>
-                          </div>
+                        <div className="h-40 bg-muted/50 rounded-lg mb-3 flex items-center justify-center relative overflow-hidden">
+                          <img 
+                            src="/lovable-uploads/009d20f0-cac7-4c08-9bc9-146617664bc3.png" 
+                            alt="Full body placeholder" 
+                            className="w-[120%] h-[120%] object-cover opacity-30 scale-110"
+                          />
                         </div>
                         <p className="text-sm text-muted-foreground mb-2">one full length photo</p>
                         <button type="button" className="px-4 py-2 bg-primary text-primary-foreground rounded text-sm hover:bg-primary/90 transition-colors">
