@@ -48,9 +48,6 @@ const Profile = () => {
   const [likesViewMode, setLikesViewMode] = useState<'compact' | 'full'>('compact');
   const [photoModalOpen, setPhotoModalOpen] = useState(false);
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState(0);
-  const [isSwipeRevealed, setIsSwipeRevealed] = useState(false);
-  const [touchStartX, setTouchStartX] = useState(0);
-  const [touchEndX, setTouchEndX] = useState(0);
 
   // Sample photos for gallery
   const profilePhotos = [c1, c2, c3, c1, c2, c3];
@@ -251,34 +248,11 @@ const Profile = () => {
     setLikedItems(prev => prev.filter(item => item.likeId !== likeId));
   };
 
-  const handleTouchStart = (e: React.TouchEvent) => {
-    setTouchStartX(e.targetTouches[0].clientX);
-  };
-
-  const handleTouchMove = (e: React.TouchEvent) => {
-    setTouchEndX(e.targetTouches[0].clientX);
-  };
-
-  const handleTouchEnd = () => {
-    if (!touchStartX || !touchEndX) return;
-    
-    const distance = touchStartX - touchEndX;
-    const isLeftSwipe = distance > 50;
-    const isRightSwipe = distance < -50;
-
-    if (isLeftSwipe && !isSwipeRevealed) {
-      setIsSwipeRevealed(true);
-    } else if (isRightSwipe && isSwipeRevealed) {
-      setIsSwipeRevealed(false);
-    }
-  };
-
   const handleHideAccount = () => {
     toast({ 
       description: "Аккаунт скрыт",
       duration: 2000
     });
-    setIsSwipeRevealed(false);
   };
 
   // Sample posts data
@@ -328,17 +302,8 @@ const Profile = () => {
         <section className="max-w-4xl mx-auto">
           {/* Profile Header */}
           <div className="flex flex-col gap-6 mb-8">
-            <div 
-              className="relative overflow-hidden"
-              onTouchStart={handleTouchStart}
-              onTouchMove={handleTouchMove}
-              onTouchEnd={handleTouchEnd}
-            >
-              <div 
-                className={`flex items-center gap-4 transition-transform duration-300 ${
-                  isSwipeRevealed ? '-translate-x-32' : 'translate-x-0'
-                }`}
-              >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
                 <Avatar className="w-20 h-20 sm:w-24 sm:h-24">
                   <AvatarImage src={profile.avatar_url || ""} alt={`Avatar of ${profile.display_name || "User"}`} />
                   <AvatarFallback className="text-lg">
@@ -355,19 +320,13 @@ const Profile = () => {
                 </div>
               </div>
               
-              {/* Swipe reveal button */}
-              <div 
-                className={`absolute right-0 top-0 h-full flex items-center transition-transform duration-300 ${
-                  isSwipeRevealed ? 'translate-x-0' : 'translate-x-full'
-                }`}
+              {/* Hide Account Button */}
+              <button
+                onClick={handleHideAccount}
+                className="bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded-lg font-medium shadow-lg transition-colors duration-200 text-sm"
               >
-                <button
-                  onClick={handleHideAccount}
-                  className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg font-medium shadow-lg transition-colors duration-200"
-                >
-                  Скрыть аккаунт
-                </button>
-              </div>
+                Скрыть аккаунт
+              </button>
             </div>
             
             <div className="flex items-center gap-2">
