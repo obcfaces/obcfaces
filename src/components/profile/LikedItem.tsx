@@ -241,7 +241,7 @@ const LikedItem = ({
               <div className="flex items-center justify-end gap-4">
                 <button
                   type="button"
-                  className="inline-flex items-center gap-1 text-xs sm:text-sm text-red-500 hover:text-red-600 transition-colors"
+                  className="inline-flex items-center gap-1 text-xs sm:text-sm text-contest-blue hover:text-contest-blue/80 transition-colors"
                   aria-label="Unlike"
                   onClick={handleUnlike}
                   disabled={isUnliking}
@@ -357,7 +357,7 @@ const LikedItem = ({
         <div className="border-t border-contest-border px-4 py-2 flex items-center justify-evenly gap-4">
           <button
             type="button"
-            className="inline-flex items-center gap-1 text-sm text-red-500 hover:text-red-600 transition-colors"
+            className="inline-flex items-center gap-1 text-sm text-contest-blue hover:text-contest-blue/80 transition-colors"
             aria-label="Unlike"
             onClick={handleUnlike}
             disabled={isUnliking}
