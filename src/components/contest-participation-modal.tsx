@@ -594,7 +594,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
               <div className="grid grid-cols-3 gap-1">
                 <Select value={formData.birth_day} onValueChange={(value) => setFormData({...formData, birth_day: value})}>
                   <SelectTrigger className={`${invalidBirthDay ? "border-destructive focus:ring-destructive" : ""}`}>
-                    <SelectValue placeholder="Day" />
+                    <SelectValue placeholder="Day of birth" />
                   </SelectTrigger>
                   <SelectContent>
                     {Array.from({length: 31}, (_, i) => i + 1).map(day => (
@@ -605,7 +605,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                 
                 <Select value={formData.birth_month} onValueChange={(value) => setFormData({...formData, birth_month: value})}>
                   <SelectTrigger className={`${invalidBirthMonth ? "border-destructive focus:ring-destructive" : ""}`}>
-                    <SelectValue placeholder="Month" />
+                    <SelectValue placeholder="Month of birth" />
                   </SelectTrigger>
                   <SelectContent>
                     {[
@@ -619,7 +619,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                 
                 <Select value={formData.birth_year} onValueChange={(value) => setFormData({...formData, birth_year: value})}>
                   <SelectTrigger className={`${invalidBirthYear ? "border-destructive focus:ring-destructive" : ""}`}>
-                    <SelectValue placeholder="Year" />
+                    <SelectValue placeholder="Year of birth" />
                   </SelectTrigger>
                   <SelectContent>
                     {Array.from({length: 80}, (_, i) => new Date().getFullYear() - 18 - i).map(year => (
