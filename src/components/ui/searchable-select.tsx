@@ -46,8 +46,8 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
           className={cn(
             "w-full justify-between text-sm",
             !selected && "text-muted-foreground",
-            invalid && "border-2 border-red-500 focus:ring-red-500 focus:border-red-500",
-            highlightSelected && selected && "border-2 border-blue-500 focus:ring-blue-500 focus:border-blue-500"
+            invalid && "border border-red-500 focus:ring-red-500 focus:border-red-500",
+            highlightSelected && selected && "border border-blue-500 focus:ring-blue-500 focus:border-blue-500"
           )}
         >
           {selected ? selected.label : (placeholder || "Select...")}

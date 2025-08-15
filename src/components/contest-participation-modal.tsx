@@ -436,9 +436,9 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
   // Helper function for ALL field styling - unified approach
   const getUnifiedFieldClasses = (isInvalid: boolean, isFilled: boolean) => {
     if (isInvalid) {
-      return "border-2 border-red-500 focus:ring-red-500 focus:border-red-500";
+      return "border border-red-500 focus:ring-red-500 focus:border-red-500";
     } else if (isFilled) {
-      return "border-2 border-blue-500 focus:ring-blue-500 focus:border-blue-500";
+      return "border border-blue-500 focus:ring-blue-500 focus:border-blue-500";
     }
     return "";
   };
@@ -777,7 +777,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
             <div className="space-y-3">
               <div className="text-sm font-medium">Photos (2 photos required)</div>
               <div className="grid gap-2 grid-cols-2">
-                <div className={`border-2 border-dashed rounded-lg p-4 text-center ${invalidPhoto1 ? 'border-red-500' : photo1File ? 'border-blue-500' : 'border-gray-300'}`}>
+                <div className={`border border-dashed rounded-lg p-4 text-center ${invalidPhoto1 ? 'border-red-500' : photo1File ? 'border-blue-500' : 'border-gray-300'}`}>
                   <input
                     id="photo1"
                     type="file"
@@ -796,7 +796,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                   </label>
                 </div>
                 
-                <div className={`border-2 border-dashed rounded-lg p-4 text-center ${invalidPhoto2 ? 'border-red-500' : photo2File ? 'border-blue-500' : 'border-gray-300'}`}>
+                <div className={`border border-dashed rounded-lg p-4 text-center ${invalidPhoto2 ? 'border-red-500' : photo2File ? 'border-blue-500' : 'border-gray-300'}`}>
                   <input
                     id="photo2"
                     type="file"
