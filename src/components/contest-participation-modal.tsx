@@ -530,30 +530,32 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
               </div>
             </div>
 
-            <Select value={formData.marital_status} onValueChange={(value) => setFormData({...formData, marital_status: value})}>
-              <SelectTrigger>
-                <SelectValue placeholder="Marital status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="single">Single</SelectItem>
-                <SelectItem value="married">Married</SelectItem>
-                <SelectItem value="divorced">Divorced</SelectItem>
-                <SelectItem value="widowed">Widowed</SelectItem>
-              </SelectContent>
-            </Select>
+            <div className="grid gap-2 grid-cols-2">
+              <Select value={formData.marital_status} onValueChange={(value) => setFormData({...formData, marital_status: value})}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Marital status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="single">Single</SelectItem>
+                  <SelectItem value="married">Married</SelectItem>
+                  <SelectItem value="divorced">Divorced</SelectItem>
+                  <SelectItem value="widowed">Widowed</SelectItem>
+                </SelectContent>
+              </Select>
 
-            <Select 
-              value={formData.has_children ? formData.has_children.toString() : ""} 
-              onValueChange={(value) => setFormData({...formData, has_children: value === 'true'})}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Do you have children?" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="false">No</SelectItem>
-                <SelectItem value="true">Yes</SelectItem>
-              </SelectContent>
-            </Select>
+              <Select 
+                value={formData.has_children ? formData.has_children.toString() : ""} 
+                onValueChange={(value) => setFormData({...formData, has_children: value === 'true'})}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Do you have children?" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="false">No</SelectItem>
+                  <SelectItem value="true">Yes</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
             <div className="grid gap-2 sm:grid-cols-2">
               <Input
