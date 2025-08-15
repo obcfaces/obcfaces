@@ -50,6 +50,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
 
   const [photo1File, setPhoto1File] = useState<File | null>(null);
   const [photo2File, setPhoto2File] = useState<File | null>(null);
+  const [showCityInput, setShowCityInput] = useState(false);
 
   // Use country-state-city library for full data
   const countries = useMemo(() => {
@@ -90,7 +91,10 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
       if (stateName) {
         const philippinesCities = getCitiesForLocation(countryCode, stateCode, stateName);
         if (philippinesCities.length > 0) {
-          return philippinesCities.map(city => ({ name: city.name }));
+          const cityList = philippinesCities.map(city => ({ name: city.name }));
+          // Add "Other" option at the end
+          cityList.push({ name: "Other (enter manually)" });
+          return cityList;
         }
       }
     }
@@ -99,10 +103,17 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
     const cscCities = City.getCitiesOfState(countryCode, stateCode);
     console.log('CSC Cities found:', cscCities.length);
     
-    // Sort and return cities
-    return cscCities
+    // Sort cities and add "Other" option
+    const cityList = cscCities
       .map(c => ({ name: c.name }))
       .sort((a, b) => a.name.localeCompare(b.name));
+    
+    // Always add "Other" option for manual entry
+    if (cityList.length > 0) {
+      cityList.push({ name: "Other (enter manually)" });
+    }
+    
+    return cityList;
   }, [countryCode, stateCode, states]);
 
   useEffect(() => {
@@ -506,16 +517,40 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                     state: state?.name || "",
                     city: ""
                   });
+                  setShowCityInput(false); // Reset manual input when state changes
                 }}
               />
               
-              <SearchableSelect
-                disabled={!stateCode}
-                placeholder="City"
-                options={cities.map(ct => ({ value: ct.name, label: ct.name }))}
-                value={formData.city}
-                onValueChange={(value) => setFormData({...formData, city: value})}
-              />
+              {cities.length === 0 ? (
+                <Input
+                  placeholder="Enter city name"
+                  value={formData.city}
+                  onChange={(e) => setFormData({...formData, city: e.target.value})}
+                  className="text-sm placeholder:text-muted-foreground"
+                />
+              ) : showCityInput ? (
+                <Input
+                  placeholder="Enter city name"
+                  value={formData.city}
+                  onChange={(e) => setFormData({...formData, city: e.target.value})}
+                  className="text-sm placeholder:text-muted-foreground"
+                />
+              ) : (
+                <SearchableSelect
+                  disabled={!stateCode}
+                  placeholder="City"
+                  options={cities.map(ct => ({ value: ct.name, label: ct.name }))}
+                  value={formData.city}
+                  onValueChange={(value) => {
+                    if (value === "Other (enter manually)") {
+                      setShowCityInput(true);
+                      setFormData({...formData, city: ""});
+                    } else {
+                      setFormData({...formData, city: value});
+                    }
+                  }}
+                />
+              )}
             </div>
 
             <div className="grid gap-2 sm:grid-cols-2">
