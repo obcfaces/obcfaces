@@ -185,8 +185,8 @@ const Profile = () => {
             time: timeAgo,
             content: `${candidateData.country}, ${candidateData.city} • ${candidateData.age} лет • ${candidateData.height}см • ${candidateData.weight}кг`,
             imageSrc: candidateData.faceImage,
-            likes: 0,
-            comments: 0,
+            likes: Math.floor(Math.random() * 150), // Mock likes count
+            comments: Math.floor(Math.random() * 30), // Mock comments count
             candidateData
           };
         } else {
@@ -195,11 +195,11 @@ const Profile = () => {
             likeId: like.id,
             contentType: like.content_type as 'contest' | 'post',
             contentId: like.content_id,
-            authorName: "Участница конкурса",
+            authorName: `Участница #${like.content_id.slice(-4)}`, // Use last 4 chars of content_id for unique name
             authorProfileId: "profile-" + like.content_id,
             time: timeAgo,
-            likes: 0,
-            comments: 0
+            likes: Math.floor(Math.random() * 100), // Mock likes count
+            comments: Math.floor(Math.random() * 20) // Mock comments count
           };
         }
       }) || [];
@@ -394,24 +394,25 @@ const Profile = () => {
                         ? 'grid-cols-1' 
                         : 'grid-cols-1 lg:grid-cols-2'
                     }`}>
-                      {likedItems.map((item) => (
-                        <LikedItem
-                          key={item.likeId}
-                          likeId={item.likeId}
-                          contentType={item.contentType}
-                          contentId={item.contentId}
-                          authorName={item.authorName}
-                          authorAvatarUrl={item.authorAvatarUrl}
-                          authorProfileId={item.authorProfileId}
-                          time={item.time}
-                          content={item.content}
-                          imageSrc={item.imageSrc}
-                          likes={item.likes}
-                          comments={item.comments}
-                          onUnlike={handleUnlike}
-                          viewMode={likesViewMode}
-                        />
-                      ))}
+                       {likedItems.map((item) => (
+                         <LikedItem
+                           key={item.likeId}
+                           likeId={item.likeId}
+                           contentType={item.contentType}
+                           contentId={item.contentId}
+                           authorName={item.authorName}
+                           authorAvatarUrl={item.authorAvatarUrl}
+                           authorProfileId={item.authorProfileId}
+                           time={item.time}
+                           content={item.content}
+                           imageSrc={item.imageSrc}
+                           likes={item.likes}
+                           comments={item.comments}
+                           onUnlike={handleUnlike}
+                           viewMode={likesViewMode}
+                           candidateData={item.candidateData}
+                         />
+                       ))}
                     </div>
                   </div>
                 ) : (
