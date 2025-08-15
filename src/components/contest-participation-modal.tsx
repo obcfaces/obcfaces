@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Camera, Eye, EyeOff } from "lucide-react";
@@ -262,37 +261,33 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
 
         {currentStep === 'auth' ? (
           <form onSubmit={handleAuth} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+            <Input
+              id="email"
+              type="email"
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+
+            <div className="relative">
               <Input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                id="password"
+                type={showPassword ? "text" : "password"}
+                placeholder="Пароль"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 required
               />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="password">Пароль</Label>
-              <div className="relative">
-                <Input
-                  id="password"
-                  type={showPassword ? "text" : "password"}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="absolute right-2 top-1/2 transform -translate-y-1/2"
-                  onClick={() => setShowPassword(!showPassword)}
-                >
-                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </Button>
-              </div>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="absolute right-2 top-1/2 transform -translate-y-1/2"
+                onClick={() => setShowPassword(!showPassword)}
+              >
+                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </Button>
             </div>
 
             <Button type="submit" className="w-full" disabled={isLoading}>
@@ -312,146 +307,116 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
         ) : (
           <form onSubmit={handleProfileSubmit} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="first_name">Имя *</Label>
-                <Input
-                  id="first_name"
-                  value={formData.first_name}
-                  onChange={(e) => setFormData({...formData, first_name: e.target.value})}
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="last_name">Фамилия *</Label>
-                <Input
-                  id="last_name"
-                  value={formData.last_name}
-                  onChange={(e) => setFormData({...formData, last_name: e.target.value})}
-                  required
-                />
-              </div>
+              <Input
+                id="first_name"
+                placeholder="Имя *"
+                value={formData.first_name}
+                onChange={(e) => setFormData({...formData, first_name: e.target.value})}
+                required
+              />
+              <Input
+                id="last_name"
+                placeholder="Фамилия *"
+                value={formData.last_name}
+                onChange={(e) => setFormData({...formData, last_name: e.target.value})}
+                required
+              />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="country">Страна *</Label>
-              <SearchableSelect
-                placeholder="Выберите страну"
-                options={countryOptions.map(c => ({ value: c.isoCode, label: c.name }))}
-                value={formData.country}
-                onValueChange={(value) => setFormData({...formData, country: value, state: "", city: ""})}
+            <SearchableSelect
+              placeholder="Выберите страну *"
+              options={countryOptions.map(c => ({ value: c.isoCode, label: c.name }))}
+              value={formData.country}
+              onValueChange={(value) => setFormData({...formData, country: value, state: "", city: ""})}
+            />
+
+            <div className="grid grid-cols-2 gap-4">
+              <Input
+                id="state"
+                placeholder="Штат/Область"
+                value={formData.state}
+                onChange={(e) => setFormData({...formData, state: e.target.value})}
+              />
+              <Input
+                id="city"
+                placeholder="Город"
+                value={formData.city}
+                onChange={(e) => setFormData({...formData, city: e.target.value})}
               />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="state">Штат/Область</Label>
-                <Input
-                  id="state"
-                  value={formData.state}
-                  onChange={(e) => setFormData({...formData, state: e.target.value})}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="city">Город</Label>
-                <Input
-                  id="city"
-                  value={formData.city}
-                  onChange={(e) => setFormData({...formData, city: e.target.value})}
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="gender">Пол *</Label>
-                <Select value={formData.gender} onValueChange={(value) => setFormData({...formData, gender: value})}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Выберите пол" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="male">Мужской</SelectItem>
-                    <SelectItem value="female">Женский</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="birthdate">Дата рождения *</Label>
-                <Input
-                  id="birthdate"
-                  type="date"
-                  value={formData.birthdate}
-                  onChange={(e) => setFormData({...formData, birthdate: e.target.value})}
-                  required
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="marital_status">Семейное положение</Label>
-              <Select value={formData.marital_status} onValueChange={(value) => setFormData({...formData, marital_status: value})}>
+              <Select value={formData.gender} onValueChange={(value) => setFormData({...formData, gender: value})}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Выберите семейное положение" />
+                  <SelectValue placeholder="Выберите пол *" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="single">Холост/Не замужем</SelectItem>
-                  <SelectItem value="married">Женат/Замужем</SelectItem>
-                  <SelectItem value="divorced">Разведен(а)</SelectItem>
-                  <SelectItem value="widowed">Вдовец/Вдова</SelectItem>
+                  <SelectItem value="male">Мужской</SelectItem>
+                  <SelectItem value="female">Женский</SelectItem>
                 </SelectContent>
               </Select>
+              <Input
+                id="birthdate"
+                type="date"
+                placeholder="Дата рождения *"
+                value={formData.birthdate}
+                onChange={(e) => setFormData({...formData, birthdate: e.target.value})}
+                required
+              />
             </div>
 
-            <div className="space-y-2">
-              <Label>Есть ли дети?</Label>
-              <Select value={formData.has_children.toString()} onValueChange={(value) => setFormData({...formData, has_children: value === 'true'})}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Есть ли дети?" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="false">Нет</SelectItem>
-                  <SelectItem value="true">Да</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+            <Select value={formData.marital_status} onValueChange={(value) => setFormData({...formData, marital_status: value})}>
+              <SelectTrigger>
+                <SelectValue placeholder="Выберите семейное положение" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="single">Холост/Не замужем</SelectItem>
+                <SelectItem value="married">Женат/Замужем</SelectItem>
+                <SelectItem value="divorced">Разведен(а)</SelectItem>
+                <SelectItem value="widowed">Вдовец/Вдова</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select value={formData.has_children.toString()} onValueChange={(value) => setFormData({...formData, has_children: value === 'true'})}>
+              <SelectTrigger>
+                <SelectValue placeholder="Есть ли дети?" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="false">Нет</SelectItem>
+                <SelectItem value="true">Да</SelectItem>
+              </SelectContent>
+            </Select>
 
             <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="height">Рост (см)</Label>
-                <Input
-                  id="height"
-                  type="number"
-                  value={formData.height_cm}
-                  onChange={(e) => setFormData({...formData, height_cm: e.target.value})}
-                  placeholder="170"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="weight">Вес (кг)</Label>
-                <Input
-                  id="weight"
-                  type="number"
-                  step="0.1"
-                  value={formData.weight_kg}
-                  onChange={(e) => setFormData({...formData, weight_kg: e.target.value})}
-                  placeholder="65.5"
-                />
-              </div>
+              <Input
+                id="height"
+                type="number"
+                placeholder="Рост (см)"
+                value={formData.height_cm}
+                onChange={(e) => setFormData({...formData, height_cm: e.target.value})}
+              />
+              <Input
+                id="weight"
+                type="number"
+                step="0.1"
+                placeholder="Вес (кг)"
+                value={formData.weight_kg}
+                onChange={(e) => setFormData({...formData, weight_kg: e.target.value})}
+              />
             </div>
 
             <div className="space-y-4">
-              <Label>Фотографии (обязательно 2 фото)</Label>
+              <div className="text-sm font-medium">Фотографии (обязательно 2 фото)</div>
               <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="photo1">Фото 1 *</Label>
-                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
-                    <input
-                      id="photo1"
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => e.target.files?.[0] && handleFileSelect(e.target.files[0], 1)}
-                      className="hidden"
-                      required
-                    />
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
+                  <input
+                    id="photo1"
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => e.target.files?.[0] && handleFileSelect(e.target.files[0], 1)}
+                    className="hidden"
+                    required
+                  />
                     <label htmlFor="photo1" className="cursor-pointer">
                       <Camera className="mx-auto h-8 w-8 text-gray-400 mb-2" />
                       {photo1File ? (
@@ -460,19 +425,16 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                         <p className="text-sm text-gray-500">Нажмите для выбора</p>
                       )}
                     </label>
-                  </div>
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="photo2">Фото 2 *</Label>
-                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
-                    <input
-                      id="photo2"
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => e.target.files?.[0] && handleFileSelect(e.target.files[0], 2)}
-                      className="hidden"
-                      required
-                    />
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
+                  <input
+                    id="photo2"
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => e.target.files?.[0] && handleFileSelect(e.target.files[0], 2)}
+                    className="hidden"
+                    required
+                  />
                     <label htmlFor="photo2" className="cursor-pointer">
                       <Camera className="mx-auto h-8 w-8 text-gray-400 mb-2" />
                       {photo2File ? (
@@ -480,8 +442,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                       ) : (
                         <p className="text-sm text-gray-500">Нажмите для выбора</p>
                       )}
-                    </label>
-                  </div>
+                  </label>
                 </div>
               </div>
             </div>
