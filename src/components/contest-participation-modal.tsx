@@ -558,14 +558,18 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
             </div>
 
             <div className="grid gap-2 grid-cols-2">
-              <Input
-                id="height"
-                type="number"
-                placeholder="Height (cm)"
-                className="text-sm placeholder:text-muted-foreground"
-                value={formData.height_cm}
-                onChange={(e) => setFormData({...formData, height_cm: e.target.value})}
-              />
+              <Select value={formData.height_cm} onValueChange={(value) => setFormData({...formData, height_cm: value})}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Height (cm)" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="less_130">Less than 130</SelectItem>
+                  {Array.from({length: 71}, (_, i) => 130 + i).map(height => (
+                    <SelectItem key={height} value={height.toString()}>{height}</SelectItem>
+                  ))}
+                  <SelectItem value="more_200">More than 200</SelectItem>
+                </SelectContent>
+              </Select>
               <Select value={formData.weight_kg} onValueChange={(value) => setFormData({...formData, weight_kg: value})}>
                 <SelectTrigger>
                   <SelectValue placeholder="Weight (kg)" />
