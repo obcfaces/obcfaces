@@ -162,34 +162,52 @@ const Profile = () => {
     
     setLoadingLikes(true);
     try {
-      // Mock liked items for now
-      const mockLikedItems = [
-        {
-          likeId: "1",
-          contentType: "contest" as const,
-          contentId: "c1",
-          authorName: "Elena Kozlova",
-          authorProfileId: "profile-1",
-          time: "2 часа назад",
-          likes: 44,
-          comments: 8
-        },
-        {
-          likeId: "2",
-          contentType: "post" as const,
-          contentId: "p1",
-          authorName: "Maria Smirnova",
-          authorProfileId: "profile-2",
-          time: "5 часов назад",
-          content: "Beautiful sunset from my window",
-          imageSrc: c2,
-          likes: 23,
-          comments: 4
+      const { data: likes, error } = await supabase
+        .from('likes')
+        .select('*')
+        .eq('user_id', currentUserId)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      const formattedLikes = likes?.map(like => {
+        const timeAgo = new Date(like.created_at).toLocaleString('ru-RU');
+        
+        if (like.content_type === 'next_week_candidate') {
+          // Parse the JSON content for next week candidates
+          const candidateData = JSON.parse(like.content_id);
+          return {
+            likeId: like.id,
+            contentType: 'next_week_candidate' as const,
+            contentId: like.content_id,
+            authorName: candidateData.name,
+            authorProfileId: 'next-week',
+            time: timeAgo,
+            content: `${candidateData.country}, ${candidateData.city} • ${candidateData.age} лет • ${candidateData.height}см • ${candidateData.weight}кг`,
+            imageSrc: candidateData.faceImage,
+            likes: 0,
+            comments: 0,
+            candidateData
+          };
+        } else {
+          // Handle other content types (posts, contests, etc.)
+          return {
+            likeId: like.id,
+            contentType: like.content_type as 'contest' | 'post',
+            contentId: like.content_id,
+            authorName: "Участница конкурса",
+            authorProfileId: "profile-" + like.content_id,
+            time: timeAgo,
+            likes: 0,
+            comments: 0
+          };
         }
-      ];
-      setLikedItems(mockLikedItems);
+      }) || [];
+
+      setLikedItems(formattedLikes);
     } catch (error) {
       console.error("Error loading liked items:", error);
+      setLikedItems([]);
     } finally {
       setLoadingLikes(false);
     }

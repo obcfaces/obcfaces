@@ -21,7 +21,7 @@ import contestant3Full from "@/assets/contestant-3-full.jpg";
 
 interface LikedItemProps {
   likeId: string;
-  contentType: 'post' | 'photo' | 'contest';
+  contentType: 'post' | 'photo' | 'contest' | 'next_week_candidate';
   contentId: string;
   authorName: string;
   authorAvatarUrl?: string;
@@ -33,6 +33,7 @@ interface LikedItemProps {
   comments?: number;
   onUnlike?: (likeId: string) => void;
   viewMode?: 'compact' | 'full';
+  candidateData?: any;
 }
 
 const getInitials = (name: string) => {
@@ -53,7 +54,8 @@ const LikedItem = ({
   likes = 0,
   comments = 0,
   onUnlike,
-  viewMode = 'full'
+  viewMode = 'full',
+  candidateData
 }: LikedItemProps) => {
   const [isUnliking, setIsUnliking] = useState(false);
   const [isLiked, setIsLiked] = useState(true);
@@ -109,11 +111,25 @@ const LikedItem = ({
     openModal(0);
   };
 
+  // Use candidate data if available, otherwise fallback to mock images
+  const candidateAge = candidateData?.age || 25;
+  const candidateWeight = candidateData?.weight || 52;
+  const candidateHeight = candidateData?.height || 168;
+  const candidateCountry = candidateData?.country || "Philippines";
+  const candidateCity = candidateData?.city || "Unknown";
+  const candidateFaceImage = candidateData?.faceImage || imageSrc;
+  const candidateFullImage = candidateData?.fullBodyImage || imageSrc;
+  const candidateAdditionalPhotos = candidateData?.additionalPhotos || [];
+  
   // All cards use the exact same contest card structure
   const images = [contestant1Face, contestant2Face, contestant3Face];
   const fullImages = [contestant1Full, contestant2Full, contestant3Full];
   const randomIndex = Math.floor(Math.random() * images.length);
-  const allPhotos = contentType === 'contest' ? [images[randomIndex], fullImages[randomIndex]] : [imageSrc || images[randomIndex]];
+  
+  // Use real candidate photos if available, otherwise use mock images
+  const displayFaceImage = candidateFaceImage || images[randomIndex];
+  const displayFullImage = candidateFullImage || fullImages[randomIndex];
+  const allPhotos = [displayFaceImage, displayFullImage, ...candidateAdditionalPhotos].filter(Boolean);
   
   // Compact view (same as contest compact mode) 
   if (viewMode === 'compact') {
@@ -124,7 +140,7 @@ const LikedItem = ({
           <div className="flex-shrink-0 flex h-full relative gap-px">
             <div className="relative">
               <img 
-                src={imageSrc || images[randomIndex]} 
+                src={displayFaceImage}
                 alt={`${authorName} face`}
                 className="w-24 sm:w-28 md:w-32 h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
                 onClick={() => openModal(0)}
@@ -132,7 +148,7 @@ const LikedItem = ({
             </div>
             <div className="relative">
               <img 
-                src={imageSrc || fullImages[randomIndex]} 
+                src={displayFullImage} 
                 alt={`${authorName} full body`}
                 className="w-24 sm:w-28 md:w-32 h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
                 onClick={() => openModal(1)}
@@ -152,11 +168,11 @@ const LikedItem = ({
                       </Link>
                     ) : (
                       authorName
-                    )}, 25
+                    )}, {candidateAge}
                   </h3>
-                  <div className="text-xs sm:text-sm text-muted-foreground font-normal">52 kg · 168 cm</div>
+                  <div className="text-xs sm:text-sm text-muted-foreground font-normal">{candidateWeight} kg · {candidateHeight} cm</div>
                   <div className="text-sm sm:text-base text-contest-blue truncate">
-                    Philippines
+                    {candidateCountry}
                   </div>
                 </div>
                 
@@ -214,11 +230,11 @@ const LikedItem = ({
           photos={allPhotos}
           currentIndex={modalStartIndex}
           contestantName={authorName}
-          age={25}
-          weight={52}
-          height={168}
-          country="Philippines"
-          city="Unknown"
+          age={candidateAge}
+          weight={candidateWeight}
+          height={candidateHeight}
+          country={candidateCountry}
+          city={candidateCity}
         />
 
         {/* Login Modal */}
@@ -244,9 +260,9 @@ const LikedItem = ({
               </Link>
             ) : (
               authorName
-            )}, 25 <span className="text-sm text-muted-foreground font-normal">(52 kg · 168 cm)</span>
+            )}, {candidateAge} <span className="text-sm text-muted-foreground font-normal">({candidateWeight} kg · {candidateHeight} cm)</span>
           </h3>
-          <div className="text-contest-blue text-sm">Philippines</div>
+          <div className="text-contest-blue text-sm">{candidateCountry}</div>
         </div>
         
         {/* Header - пустой как в проголосованных карточках конкурса */}
@@ -259,7 +275,7 @@ const LikedItem = ({
           <div className="grid grid-cols-2 gap-px">
             <div className="relative">
               <img 
-                src={imageSrc || images[randomIndex]} 
+                src={displayFaceImage} 
                 alt={`${authorName} face`}
                 className="w-full aspect-[4/5] object-cover cursor-pointer hover:opacity-90 transition-opacity"
                 onClick={() => openModal(0)}
@@ -267,7 +283,7 @@ const LikedItem = ({
             </div>
             <div className="relative">
               <img 
-                src={imageSrc || fullImages[randomIndex]} 
+                src={displayFullImage} 
                 alt={`${authorName} full body`}
                 className="w-full aspect-[4/5] object-cover cursor-pointer hover:opacity-90 transition-opacity"
                 onClick={() => openModal(1)}
@@ -324,11 +340,11 @@ const LikedItem = ({
         photos={allPhotos}
         currentIndex={modalStartIndex}
         contestantName={authorName}
-        age={25}
-        weight={52}
-        height={168}
-        country="Philippines"
-        city="Unknown"
+        age={candidateAge}
+        weight={candidateWeight}
+        height={candidateHeight}
+        country={candidateCountry}
+        city={candidateCity}
       />
 
       {/* Login Modal */}
