@@ -65,13 +65,9 @@ const getParticipantBadge = (type?: 'candidate' | 'finalist' | 'winner') => {
   };
   
   return (
-    <div className="absolute top-0 right-0 z-30">
-      <div className={`px-2 py-1 text-xs font-semibold ${badgeStyles[type]}`}>
-        {labels[type]}
-      </div>
-      <div className="bg-white/90 text-gray-700 px-2 py-0.5 text-xs font-medium">
-        {dates[type]}
-      </div>
+    <div className={`absolute top-0 left-1/2 right-0 z-30 px-2 py-1 text-xs font-semibold ${badgeStyles[type]} flex justify-between items-center`}>
+      <span>{labels[type]}</span>
+      <span>{dates[type]}</span>
     </div>
   );
 };
@@ -196,7 +192,7 @@ const LikedItem = ({
           {/* Content area - показываем информацию как в проголосованных карточках конкурса */}
           <div className="flex-1 p-1.5 sm:p-2 md:p-3 flex flex-col relative">
             <div className="absolute inset-0 bg-white rounded-r flex flex-col justify-between p-2 sm:p-3">
-              <div className="flex items-start justify-between">
+              <div className="flex items-start justify-between mt-6">
                 <div className="min-w-0 flex-1 mr-2">
                   <h3 className="font-semibold text-contest-text text-base sm:text-lg truncate">
                     {authorProfileId ? (
@@ -291,7 +287,7 @@ const LikedItem = ({
         {/* Participant Type Badge */}
         {getParticipantBadge(participantType)}
         {/* Name in top left - показываем всегда как в проголосованных */}
-        <div className="absolute top-2 left-4 z-20">
+        <div className="absolute top-8 left-4 z-20">
           <h3 className="text-xl font-semibold text-contest-text">
             {authorProfileId ? (
               <Link to={`/u/${authorProfileId}`} className="hover:text-primary underline-offset-2 hover:underline">
