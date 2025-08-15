@@ -185,13 +185,13 @@ export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantNa
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="fixed inset-0 left-0 top-0 translate-x-0 translate-y-0 w-screen max-w-none h-dvh overflow-hidden p-0 bg-black/90">
+      <DialogContent className="fixed inset-0 left-0 top-0 translate-x-0 translate-y-0 w-screen max-w-none h-dvh overflow-hidden p-0 bg-black/90 focus:outline-none">
         {/* Desktop: flex layout, Mobile: block layout */}
         <div className="h-full flex flex-col">
           {/* Photo section */}
           <div className={cn(
-            "relative flex items-start justify-center transition-all duration-300 pt-2 md:pt-4",
-            "w-full h-[60dvh]"
+            "relative flex items-center justify-center transition-all duration-300 pt-2 md:pt-4",
+            "w-full h-[60dvh] overflow-hidden"
           )}>
 
           {photos.length > 1 && (
@@ -216,10 +216,17 @@ export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantNa
           <img
             src={photos[activeIndex]}
             alt={`${contestantName} photo ${activeIndex + 1}`}
-            className="w-full max-w-full max-h-full object-contain self-start"
+            className="max-w-full max-h-full object-contain touch-manipulation select-none"
+            style={{ 
+              width: 'auto', 
+              height: 'auto',
+              maxWidth: '100%',
+              maxHeight: '100%'
+            }}
             onTouchStart={onTouchStart}
             onTouchMove={onTouchMove}
             onTouchEnd={onTouchEnd}
+            draggable={false}
           />
 
           {/* actions moved to header */}
@@ -251,8 +258,8 @@ export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantNa
 
         {/* Comments section - Desktop: sidebar, Mobile: bottom panel */}
         <div className={cn(
-          "bg-background relative flex flex-col",
-          "h-[40dvh]"
+          "bg-background relative flex flex-col flex-shrink-0",
+          "h-[40dvh] min-h-0"
         )}>
             <div className="p-4 border-b">
               <div className="flex items-start justify-between gap-3">
@@ -328,7 +335,8 @@ export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantNa
                   setCommentText(e.target.value);
                   const el = e.currentTarget;
                   el.style.height = 'auto';
-                  const maxH = Math.floor(window.innerHeight * 0.3);
+                  // Limit height to prevent layout shifts and photo enlargement
+                  const maxH = Math.min(120, Math.floor(window.innerHeight * 0.15));
                   el.style.height = Math.min(el.scrollHeight, maxH) + 'px';
                 }}
                 onKeyDown={(e) => {
@@ -337,7 +345,7 @@ export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantNa
                     handleCommentSubmit();
                   }
                 }}
-                className="flex-1 resize-none overflow-y-auto text-base md:text-sm min-h-[44px] max-h-[30dvh]"
+                className="flex-1 resize-none overflow-y-auto text-base md:text-sm min-h-[44px] max-h-[120px]"
                 aria-label="Comment for current photo"
               />
               <Button
