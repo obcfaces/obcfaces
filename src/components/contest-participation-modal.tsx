@@ -173,6 +173,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
         toast({
           title: "Успешный вход",
           description: "Добро пожаловать!",
+          duration: 1000,
         });
         setCurrentStep('profile');
       } else {

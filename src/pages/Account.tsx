@@ -165,7 +165,7 @@ const Account = () => {
         { onConflict: "id" }
       );
       if (error) throw error;
-      toast({ description: "Профиль сохранён" });
+      toast({ description: "Профиль сохранён", duration: 1000 });
     } catch (err: any) {
       toast({ description: err.message ?? "Не удалось сохранить профиль" });
     } finally {
