@@ -193,22 +193,28 @@ const Profile = () => {
           };
         } else {
           // Handle other content types (posts, contests, etc.)
-          // Use one of the contestant images for mock data
+          // Use same names as in next-week section
+          const nextWeekNames = [
+            "Victoria Morales", "Alejandra Silva", "Andrea Vargas", "Natalia Castillo",
+            "Daniela Ruiz", "Paula Jimenez", "Carolina Perez", "Mariana Santos", 
+            "Fernanda Diaz", "Adriana Castro"
+          ];
           const mockImages = [c1face, c2face, c3face];
           const randomImageIndex = Math.floor(Math.random() * mockImages.length);
+          const randomNameIndex = Math.floor(Math.random() * nextWeekNames.length);
           
           return {
             likeId: like.id,
             contentType: like.content_type as 'contest' | 'post',
             contentId: like.content_id,
-            authorName: `Contestant #${like.content_id.slice(-4)}`, // Use last 4 chars of content_id for unique name
+            authorName: nextWeekNames[randomNameIndex], // Use same names as in next week section
             authorProfileId: "profile-" + like.content_id,
             time: timeAgo,
             likes: Math.floor(Math.random() * 100), // Mock likes count
             comments: Math.floor(Math.random() * 20), // Mock comments count
             imageSrc: mockImages[randomImageIndex], // Use random contestant image
             candidateData: {
-              name: `Contestant #${like.content_id.slice(-4)}`,
+              name: nextWeekNames[randomNameIndex],
               age: 20 + Math.floor(Math.random() * 10),
               weight: 45 + Math.floor(Math.random() * 15),
               height: 155 + Math.floor(Math.random() * 20),
