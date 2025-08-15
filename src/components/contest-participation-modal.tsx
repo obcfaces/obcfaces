@@ -284,8 +284,14 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
     console.log("=== SUBMIT CLICKED ===");
     console.log("Setting submitted to TRUE");
     
-    // Set submitted immediately
+    // Set submitted immediately and force re-render
     setSubmitted(true);
+    
+    // Force immediate re-render with useState callback
+    setSubmitted(prev => {
+      console.log("Previous submitted state:", prev);
+      return true;
+    });
     
     console.log("Current form data:", formData);
     console.log("Photo1File:", photo1File);
@@ -321,7 +327,11 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                      isWeightEmpty || isPhoto1Empty || isPhoto2Empty;
 
     if (hasErrors) {
-      console.log("FORM HAS ERRORS - stopping submission");
+      console.log("FORM HAS ERRORS - stopping submission but KEEPING validation state");
+      // Force component re-render to show validation errors
+      setTimeout(() => {
+        console.log("Forced re-render after validation");
+      }, 100);
       return;
     }
 
@@ -463,7 +473,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
       <DialogTrigger asChild>
         {children}
       </DialogTrigger>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" onOpenAutoFocus={(e) => console.log("Dialog opened, current step:", currentStep)}>
         <DialogHeader>
           <DialogTitle>
             {currentStep === 'auth' ? 'Sign in' : 'Contest participation form'}
