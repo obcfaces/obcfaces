@@ -72,6 +72,7 @@ export function ContestantCard({
   });
   const [isLiked, setIsLiked] = useState<boolean[]>([false, false]);
   const [isDisliked, setIsDisliked] = useState(false);
+  const [hasCommented, setHasCommented] = useState(false);
   const [likesCount, setLikesCount] = useState<number[]>([
     Math.floor(Math.random() * 50) + 5,
     Math.floor(Math.random() * 50) + 5,
@@ -235,6 +236,8 @@ export function ContestantCard({
       return;
     }
     
+    // Mark as commented when opening modal (simulating comment creation)
+    setHasCommented(true);
     openModal(0);
   };
 
@@ -410,11 +413,14 @@ export function ContestantCard({
               )}
               <button
                 type="button"
-                className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                className={cn(
+                  "inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors",
+                  hasCommented && "text-contest-blue"
+                )}
                 onClick={handleComment}
                 aria-label="Comments"
               >
-                <MessageCircle className="w-4 h-4" />
+                <MessageCircle className={cn("w-4 h-4", hasCommented && "fill-current")} />
                 <span className="hidden sm:inline">Comment</span>
                 <span>{commentsCount[0] + commentsCount[1]}</span>
               </button>
@@ -629,16 +635,19 @@ export function ContestantCard({
                     <span>{dislikesCount}</span>
                   </button>
                 )}
-                <button
-                  type="button"
-                  className="inline-flex items-center gap-1 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors"
-                  onClick={handleComment}
-                  aria-label="Comments"
-                >
-                  <MessageCircle className="w-3.5 h-3.5" />
-                  <span className="hidden xl:inline">Comment</span>
-                  <span>{commentsCount[0] + commentsCount[1]}</span>
-                </button>
+                 <button
+                   type="button"
+                   className={cn(
+                     "inline-flex items-center gap-1 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors",
+                     hasCommented && "text-contest-blue"
+                   )}
+                   onClick={handleComment}
+                   aria-label="Comments"
+                 >
+                   <MessageCircle className={cn("w-3.5 h-3.5", hasCommented && "fill-current")} />
+                   <span className="hidden xl:inline">Comment</span>
+                   <span>{commentsCount[0] + commentsCount[1]}</span>
+                 </button>
                  <button
                    type="button"
                    className="inline-flex items-center gap-1 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors"
