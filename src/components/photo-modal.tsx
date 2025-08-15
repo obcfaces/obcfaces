@@ -184,190 +184,201 @@ export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantNa
   }
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="!fixed !inset-0 !left-0 !top-0 !translate-x-0 !translate-y-0 !w-full !max-w-full !h-dvh !overflow-hidden !p-0 !bg-black/90 !border-0 !shadow-none !gap-0 !rounded-none focus:outline-none">
-        {/* Desktop: flex layout, Mobile: block layout */}
-        <div className="h-full w-full flex flex-col max-w-full">
-          {/* Photo section */}
-          <div className={cn(
-            "relative flex items-center justify-center transition-all duration-300 pt-2 md:pt-4",
-            "w-full h-[60dvh] overflow-hidden"
-          )}>
+    <>
+      {isOpen && (
+        <div className="fixed inset-0 z-50 bg-black/90 overflow-hidden">
+          {/* Close button */}
+          <button
+            onClick={onClose}
+            className="absolute right-4 top-4 z-[60] w-10 h-10 md:w-12 md:h-12 rounded-full bg-black/50 hover:bg-black/70 flex items-center justify-center text-white focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+            aria-label="Close"
+          >
+            <X className="h-5 w-5 md:h-6 md:w-6 text-white" />
+          </button>
 
-          {photos.length > 1 && (
-            <>
-              <button
-                onClick={prevPhoto}
-                className="absolute left-4 top-1/2 -translate-y-1/2 z-50 text-white hover:text-white/90 transition-colors w-12 h-12 rounded-full bg-black/50 hover:bg-black/70 backdrop-blur flex items-center justify-center"
-                aria-label="Previous photo"
-              >
-                <ChevronLeft className="w-7 h-7" />
-              </button>
-              <button
-                onClick={nextPhoto}
-                className="absolute right-4 top-1/2 -translate-y-1/2 z-50 text-white hover:text-white/90 transition-colors w-12 h-12 rounded-full bg-black/50 hover:bg-black/70 backdrop-blur flex items-center justify-center"
-                aria-label="Next photo"
-              >
-                <ChevronRight className="w-7 h-7" />
-              </button>
-            </>
-          )}
+          {/* Main content */}
+          <div className="h-full w-full flex flex-col max-w-full">
+            {/* Photo section */}
+            <div className={cn(
+              "relative flex items-center justify-center transition-all duration-300 pt-2 md:pt-4",
+              "w-full h-[60dvh] overflow-hidden"
+            )}>
 
-          <img
-            src={photos[activeIndex]}
-            alt={`${contestantName} photo ${activeIndex + 1}`}
-            className="max-w-full max-h-full object-contain touch-manipulation select-none"
-            style={{ 
-              width: 'auto', 
-              height: 'auto',
-              maxWidth: '100%',
-              maxHeight: '100%'
-            }}
-            onTouchStart={onTouchStart}
-            onTouchMove={onTouchMove}
-            onTouchEnd={onTouchEnd}
-            draggable={false}
-          />
-
-          {/* actions moved to header */}
-
-
-          {photos.length > 1 && (
-            <div className="absolute bottom-4 right-4 flex items-center gap-2">
-              {photos.map((src, index) => (
+            {photos.length > 1 && (
+              <>
                 <button
-                  key={index}
-                  onClick={() => setActiveIndex(index)}
-                  aria-label={`Go to photo ${index + 1}`}
-                  className={cn(
-                    "relative w-8 h-8 sm:w-10 sm:h-10 rounded-full overflow-hidden ring-1 ring-white/40 border border-white/20 transition-all",
-                    index === activeIndex ? "ring-2 ring-white opacity-100" : "opacity-70 hover:opacity-100"
-                  )}
+                  onClick={prevPhoto}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 z-50 text-white hover:text-white/90 transition-colors w-12 h-12 rounded-full bg-black/50 hover:bg-black/70 backdrop-blur flex items-center justify-center"
+                  aria-label="Previous photo"
                 >
-                  <img
-                    src={src}
-                    alt={`Thumbnail ${index + 1}`}
-                    className="w-full h-full object-cover"
-                    loading="lazy"
-                  />
+                  <ChevronLeft className="w-7 h-7" />
                 </button>
-              ))}
-            </div>
-          )}
-        </div>
+                <button
+                  onClick={nextPhoto}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 z-50 text-white hover:text-white/90 transition-colors w-12 h-12 rounded-full bg-black/50 hover:bg-black/70 backdrop-blur flex items-center justify-center"
+                  aria-label="Next photo"
+                >
+                  <ChevronRight className="w-7 h-7" />
+                </button>
+              </>
+            )}
 
-        {/* Comments section - Desktop: sidebar, Mobile: bottom panel */}
-        <div className={cn(
-          "bg-background relative flex flex-col flex-shrink-0 w-full",
-          "h-[40dvh] min-h-0"
-        )}>
-            <div className="p-4 border-b">
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <h3 className="font-semibold text-contest-text truncate">
-                    {contestantName}
-                    {age ? `, ${age}` : ""}
-                    {(weight || height) ? (
-                      <span className="ml-1 text-xs sm:text-sm text-muted-foreground font-normal">
-                        (
-                        {weight ? `${weight} kg` : ""}
-                        {(weight && height) ? " · " : ""}
-                        {height ? `${height} cm` : ""}
-                        )
-                      </span>
-                    ) : null}
-                  </h3>
-                  <div className="text-sm text-contest-blue truncate">
-                    {(country || "")}
-                    {(country && city) ? " · " : ""}
-                    {(city || "")}
+            <img
+              src={photos[activeIndex]}
+              alt={`${contestantName} photo ${activeIndex + 1}`}
+              className="max-w-full max-h-full object-contain touch-manipulation select-none"
+              style={{ 
+                width: 'auto', 
+                height: 'auto',
+                maxWidth: '100%',
+                maxHeight: '100%'
+              }}
+              onTouchStart={onTouchStart}
+              onTouchMove={onTouchMove}
+              onTouchEnd={onTouchEnd}
+              draggable={false}
+            />
+
+            {/* actions moved to header */}
+
+
+            {photos.length > 1 && (
+              <div className="absolute bottom-4 right-4 flex items-center gap-2">
+                {photos.map((src, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setActiveIndex(index)}
+                    aria-label={`Go to photo ${index + 1}`}
+                    className={cn(
+                      "relative w-8 h-8 sm:w-10 sm:h-10 rounded-full overflow-hidden ring-1 ring-white/40 border border-white/20 transition-all",
+                      index === activeIndex ? "ring-2 ring-white opacity-100" : "opacity-70 hover:opacity-100"
+                    )}
+                  >
+                    <img
+                      src={src}
+                      alt={`Thumbnail ${index + 1}`}
+                      className="w-full h-full object-cover"
+                      loading="lazy"
+                    />
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Comments section - Desktop: sidebar, Mobile: bottom panel */}
+          <div className={cn(
+            "bg-background relative flex flex-col flex-shrink-0 w-full",
+            "h-[40dvh] min-h-0"
+          )}>
+              <div className="p-4 border-b">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <h3 className="font-semibold text-contest-text truncate">
+                      {contestantName}
+                      {age ? `, ${age}` : ""}
+                      {(weight || height) ? (
+                        <span className="ml-1 text-xs sm:text-sm text-muted-foreground font-normal">
+                          (
+                          {weight ? `${weight} kg` : ""}
+                          {(weight && height) ? " · " : ""}
+                          {height ? `${height} cm` : ""}
+                          )
+                        </span>
+                      ) : null}
+                    </h3>
+                    <div className="text-sm text-contest-blue truncate">
+                      {(country || "")}
+                      {(country && city) ? " · " : ""}
+                      {(city || "")}
+                    </div>
                   </div>
-                </div>
-                <div className="flex items-center gap-2 shrink-0">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className={cn(currentPhotoLikes.isLiked && "text-red-400")}
-                    onClick={handleLike}
-                    aria-label="Like"
-                  >
-                    <Heart className={cn("w-4 h-4 mr-1", currentPhotoLikes.isLiked && "fill-current")} />
-                    {currentPhotoLikes.count}
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={focusCommentInput}
-                    aria-label="Open comment field"
-                  >
-                    <MessageCircle className="w-4 h-4 mr-1" />
-                    {currentPhotoComments.length}
-                  </Button>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className={cn(currentPhotoLikes.isLiked && "text-red-400")}
+                      onClick={handleLike}
+                      aria-label="Like"
+                    >
+                      <Heart className={cn("w-4 h-4 mr-1", currentPhotoLikes.isLiked && "fill-current")} />
+                      {currentPhotoLikes.count}
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={focusCommentInput}
+                      aria-label="Open comment field"
+                    >
+                      <MessageCircle className="w-4 h-4 mr-1" />
+                      {currentPhotoComments.length}
+                    </Button>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            <div ref={commentsListRef} className="flex-1 overflow-y-auto p-4 pb-24 md:pb-28 space-y-3 min-h-0">
-              {currentPhotoComments.length === 0 ? (
-                <p className="text-center text-muted-foreground text-sm">
-                  No comments yet for this photo
-                </p>
-              ) : (
-                currentPhotoComments.map((comment) => (
-                  <div key={comment.id} className="space-y-1">
-                    <div className="flex justify-between items-start">
-                      <span className="font-medium text-sm">{comment.author}</span>
-                      <span className="text-xs text-muted-foreground">{comment.timestamp}</span>
+              <div ref={commentsListRef} className="flex-1 overflow-y-auto p-4 pb-24 md:pb-28 space-y-3 min-h-0">
+                {currentPhotoComments.length === 0 ? (
+                  <p className="text-center text-muted-foreground text-sm">
+                    No comments yet for this photo
+                  </p>
+                ) : (
+                  currentPhotoComments.map((comment) => (
+                    <div key={comment.id} className="space-y-1">
+                      <div className="flex justify-between items-start">
+                        <span className="font-medium text-sm">{comment.author}</span>
+                        <span className="text-xs text-muted-foreground">{comment.timestamp}</span>
+                      </div>
+                      <p className="text-sm">{comment.text}</p>
                     </div>
-                    <p className="text-sm">{comment.text}</p>
-                  </div>
-                ))
-              )}
-            </div>
+                  ))
+                )}
+              </div>
 
-            <div className="sticky bottom-0 left-0 right-0 p-3 md:p-4 border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 pb-2 md:pb-3 flex items-end gap-2 md:gap-3">
-              <Textarea
-                ref={textareaRef}
-                placeholder="Write a comment for this photo..."
-                value={commentText}
-                rows={1}
-                onChange={(e) => {
-                  setCommentText(e.target.value);
-                  const el = e.currentTarget;
-                  el.style.height = 'auto';
-                  // Limit height to prevent layout shifts and photo enlargement
-                  const maxH = Math.min(120, Math.floor(window.innerHeight * 0.15));
-                  el.style.height = Math.min(el.scrollHeight, maxH) + 'px';
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    handleCommentSubmit();
-                  }
-                }}
-                className="flex-1 resize-none overflow-y-auto text-base md:text-sm min-h-[44px] max-h-[120px]"
-                aria-label="Comment for current photo"
-              />
-              <Button
-                onClick={handleCommentSubmit}
-                disabled={!commentText.trim()}
-                size="icon"
-                className="shrink-0 rounded-full h-10 w-10 bg-contest-blue text-white hover:bg-contest-blue/90"
-                aria-label="Send comment"
-              >
-                <Send className="w-4 h-4" />
-              </Button>
+              <div className="sticky bottom-0 left-0 right-0 p-3 md:p-4 border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 pb-2 md:pb-3 flex items-end gap-2 md:gap-3">
+                <Textarea
+                  ref={textareaRef}
+                  placeholder="Write a comment for this photo..."
+                  value={commentText}
+                  rows={1}
+                  onChange={(e) => {
+                    setCommentText(e.target.value);
+                    const el = e.currentTarget;
+                    el.style.height = 'auto';
+                    // Limit height to prevent layout shifts and photo enlargement
+                    const maxH = Math.min(120, Math.floor(window.innerHeight * 0.15));
+                    el.style.height = Math.min(el.scrollHeight, maxH) + 'px';
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault();
+                      handleCommentSubmit();
+                    }
+                  }}
+                  className="flex-1 resize-none overflow-y-auto text-base md:text-sm min-h-[44px] max-h-[120px]"
+                  aria-label="Comment for current photo"
+                />
+                <Button
+                  onClick={handleCommentSubmit}
+                  disabled={!commentText.trim()}
+                  size="icon"
+                  className="shrink-0 rounded-full h-10 w-10 bg-contest-blue text-white hover:bg-contest-blue/90"
+                  aria-label="Send comment"
+                >
+                  <Send className="w-4 h-4" />
+                </Button>
+              </div>
             </div>
           </div>
         </div>
+      )}
 
-        {/* Login Modal */}
-        <Dialog open={showLoginModal} onOpenChange={setShowLoginModal}>
-          <DialogContent className="sm:max-w-lg">
-            <LoginModalContent onClose={() => setShowLoginModal(false)} />
-          </DialogContent>
-        </Dialog>
-      </DialogContent>
-    </Dialog>
+      {/* Login Modal */}
+      <Dialog open={showLoginModal} onOpenChange={setShowLoginModal}>
+        <DialogContent className="sm:max-w-lg">
+          <LoginModalContent onClose={() => setShowLoginModal(false)} />
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
