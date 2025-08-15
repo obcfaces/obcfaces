@@ -573,14 +573,26 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                   />
                   <label htmlFor="photo1-upload" className="cursor-pointer block">
                     {photo1File ? (
-                      <div className="p-2">
+                      <div className="p-2 relative">
                         <img
                           src={URL.createObjectURL(photo1File)}
                           alt="Portrait photo preview"
                           className="w-full h-48 object-cover rounded"
                         />
+                        <button 
+                          type="button"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            setPhoto1File(null);
+                            handleFieldChange('photo1', null);
+                          }}
+                          className="absolute top-1 right-1 w-6 h-6 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center text-white text-sm font-bold transition-colors shadow-md"
+                        >
+                          ×
+                        </button>
                         <div className="mt-2 text-center">
-                          <button className="px-4 py-2 bg-primary text-primary-foreground rounded text-sm hover:bg-primary/90 transition-colors">
+                          <button type="button" className="px-4 py-2 bg-primary text-primary-foreground rounded text-sm hover:bg-primary/90 transition-colors">
                             Change
                           </button>
                         </div>
@@ -588,19 +600,25 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                     ) : (
                       <div className="p-6 text-center">
                         <div className="h-40 bg-muted/50 rounded-lg mb-3 flex items-center justify-center relative">
-                          <div className="w-16 h-16 bg-muted-foreground/20 rounded-full relative">
-                            <div className="w-6 h-6 bg-muted-foreground/40 rounded-full absolute top-2 left-1/2 transform -translate-x-1/2"></div>
-                            <div className="w-12 h-8 bg-muted-foreground/40 rounded-t-full absolute bottom-0 left-1/2 transform -translate-x-1/2"></div>
+                          {/* Female portrait silhouette */}
+                          <div className="relative">
+                            {/* Head */}
+                            <div className="w-12 h-16 bg-muted-foreground/30 rounded-full mx-auto relative">
+                              {/* Hair */}
+                              <div className="absolute -top-1 -left-1 -right-1 h-12 bg-muted-foreground/25 rounded-full"></div>
+                              {/* Face */}
+                              <div className="absolute top-3 left-1/2 transform -translate-x-1/2 w-8 h-10 bg-muted-foreground/35 rounded-full"></div>
+                            </div>
+                            {/* Neck */}
+                            <div className="w-3 h-3 bg-muted-foreground/30 mx-auto"></div>
+                            {/* Shoulders */}
+                            <div className="w-20 h-8 bg-muted-foreground/25 rounded-t-full mx-auto relative">
+                              <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-4 h-6 bg-muted-foreground/30"></div>
+                            </div>
                           </div>
-                          <button 
-                            type="button"
-                            className="absolute top-2 right-2 w-6 h-6 bg-muted-foreground/60 rounded-full flex items-center justify-center text-white text-xs hover:bg-muted-foreground/80 transition-colors"
-                          >
-                            ×
-                          </button>
                         </div>
                         <p className="text-sm text-muted-foreground mb-2">one portrait photo</p>
-                        <button className="px-4 py-2 bg-primary text-primary-foreground rounded text-sm hover:bg-primary/90 transition-colors">
+                        <button type="button" className="px-4 py-2 bg-primary text-primary-foreground rounded text-sm hover:bg-primary/90 transition-colors">
                           Upload
                         </button>
                       </div>
@@ -619,14 +637,26 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                   />
                   <label htmlFor="photo2-upload" className="cursor-pointer block">
                     {photo2File ? (
-                      <div className="p-2">
+                      <div className="p-2 relative">
                         <img
                           src={URL.createObjectURL(photo2File)}
                           alt="Full length photo preview"
                           className="w-full h-48 object-cover rounded"
                         />
+                        <button 
+                          type="button"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            setPhoto2File(null);
+                            handleFieldChange('photo2', null);
+                          }}
+                          className="absolute top-1 right-1 w-6 h-6 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center text-white text-sm font-bold transition-colors shadow-md"
+                        >
+                          ×
+                        </button>
                         <div className="mt-2 text-center">
-                          <button className="px-4 py-2 bg-primary text-primary-foreground rounded text-sm hover:bg-primary/90 transition-colors">
+                          <button type="button" className="px-4 py-2 bg-primary text-primary-foreground rounded text-sm hover:bg-primary/90 transition-colors">
                             Change
                           </button>
                         </div>
@@ -634,21 +664,34 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                     ) : (
                       <div className="p-6 text-center">
                         <div className="h-40 bg-muted/50 rounded-lg mb-3 flex items-center justify-center relative">
-                          <div className="w-8 h-32 bg-muted-foreground/20 rounded-full relative flex flex-col">
-                            <div className="w-4 h-4 bg-muted-foreground/40 rounded-full mx-auto mt-2"></div>
-                            <div className="w-6 h-6 bg-muted-foreground/40 rounded-t-full mx-auto mt-1"></div>
-                            <div className="flex-1 bg-muted-foreground/30 mx-auto w-5 mt-1"></div>
-                            <div className="w-6 h-8 bg-muted-foreground/30 mx-auto rounded-b"></div>
+                          {/* Female full body silhouette */}
+                          <div className="relative">
+                            {/* Head */}
+                            <div className="w-6 h-8 bg-muted-foreground/30 rounded-full mx-auto relative">
+                              {/* Hair */}
+                              <div className="absolute -top-0.5 -left-0.5 -right-0.5 h-6 bg-muted-foreground/25 rounded-full"></div>
+                            </div>
+                            {/* Neck */}
+                            <div className="w-2 h-2 bg-muted-foreground/30 mx-auto"></div>
+                            {/* Torso */}
+                            <div className="w-8 h-16 bg-muted-foreground/25 rounded-t-lg mx-auto relative">
+                              {/* Arms at sides */}
+                              <div className="absolute -left-2 top-2 w-2 h-12 bg-muted-foreground/25 rounded-full"></div>
+                              <div className="absolute -right-2 top-2 w-2 h-12 bg-muted-foreground/25 rounded-full"></div>
+                              {/* Waist */}
+                              <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-6 h-4 bg-muted-foreground/30"></div>
+                            </div>
+                            {/* Hips */}
+                            <div className="w-7 h-4 bg-muted-foreground/25 mx-auto"></div>
+                            {/* Legs */}
+                            <div className="flex gap-0.5 justify-center">
+                              <div className="w-2.5 h-14 bg-muted-foreground/25 rounded-b-full"></div>
+                              <div className="w-2.5 h-14 bg-muted-foreground/25 rounded-b-full"></div>
+                            </div>
                           </div>
-                          <button 
-                            type="button"
-                            className="absolute top-2 right-2 w-6 h-6 bg-muted-foreground/60 rounded-full flex items-center justify-center text-white text-xs hover:bg-muted-foreground/80 transition-colors"
-                          >
-                            ×
-                          </button>
                         </div>
                         <p className="text-sm text-muted-foreground mb-2">one full length photo</p>
-                        <button className="px-4 py-2 bg-primary text-primary-foreground rounded text-sm hover:bg-primary/90 transition-colors">
+                        <button type="button" className="px-4 py-2 bg-primary text-primary-foreground rounded text-sm hover:bg-primary/90 transition-colors">
                           Upload
                         </button>
                       </div>
