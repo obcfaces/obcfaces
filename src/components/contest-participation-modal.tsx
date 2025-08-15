@@ -599,11 +599,11 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                       </div>
                     ) : (
                       <div className="p-6 text-center">
-                        <div className="h-40 bg-muted/50 rounded-lg mb-3 flex items-center justify-center relative">
+                        <div className="h-40 bg-muted/50 rounded-lg mb-3 flex items-center justify-center relative overflow-hidden">
                           <img 
                             src="/lovable-uploads/1147be30-a1d2-466f-a9a8-067f4628cbb2.png" 
                             alt="Portrait placeholder" 
-                            className="w-20 h-24 object-contain opacity-60"
+                            className="w-full h-full object-cover opacity-30"
                           />
                         </div>
                         <p className="text-sm text-muted-foreground mb-2">one portrait photo</p>
