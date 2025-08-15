@@ -564,7 +564,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
               <p className="text-xs text-blue-600 text-center font-medium">no makeup, no filters, no nude, no color correction</p>
               <div className="grid gap-4 grid-cols-2">
                 {/* Portrait Photo */}
-                <div className={`relative border-2 border-dashed rounded-lg cursor-pointer hover:border-primary transition-colors ${hasRedBorder('photo1') ? 'border-red-500' : 'border-muted-foreground/25'}`}>
+                <div className="relative">
                   <input
                     type="file"
                     accept="image/*"
@@ -600,7 +600,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                       </div>
                     ) : (
                       <div className="p-6 text-center">
-                        <div className="h-48 bg-muted/50 rounded-lg mb-3 flex items-center justify-center relative overflow-hidden aspect-[4/5]">
+                        <div className={`h-48 rounded-lg mb-3 flex items-center justify-center relative overflow-hidden aspect-[4/5] border-2 border-dashed cursor-pointer hover:border-primary transition-colors ${hasRedBorder('photo1') ? 'border-red-500' : 'border-muted-foreground/25'}`}>
                           <img 
                             src="/lovable-uploads/1147be30-a1d2-466f-a9a8-067f4628cbb2.png" 
                             alt="Portrait placeholder" 
@@ -618,7 +618,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                 </div>
 
                 {/* Full Length Photo */}
-                <div className={`relative border-2 border-dashed rounded-lg cursor-pointer hover:border-primary transition-colors ${hasRedBorder('photo2') ? 'border-red-500' : 'border-muted-foreground/25'}`}>
+                <div className="relative">
                   <input
                     type="file"
                     accept="image/*"
@@ -654,7 +654,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                       </div>
                     ) : (
                       <div className="p-6 text-center">
-                        <div className="h-48 bg-muted/50 rounded-lg mb-3 flex items-center justify-center relative overflow-hidden aspect-[4/5]">
+                        <div className={`h-48 rounded-lg mb-3 flex items-center justify-center relative overflow-hidden aspect-[4/5] border-2 border-dashed cursor-pointer hover:border-primary transition-colors ${hasRedBorder('photo2') ? 'border-red-500' : 'border-muted-foreground/25'}`}>
                           <img 
                             src="/lovable-uploads/009d20f0-cac7-4c08-9bc9-146617664bc3.png" 
                             alt="Full body placeholder" 
