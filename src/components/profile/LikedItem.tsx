@@ -113,6 +113,16 @@ const LikedItem = ({
     return () => subscription.unsubscribe();
   }, []);
 
+  // Auto-close login modal after 1 second
+  useEffect(() => {
+    if (showLoginModal) {
+      const timer = setTimeout(() => {
+        setShowLoginModal(false);
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [showLoginModal]);
+
   // Fetch current participant type from database
   useEffect(() => {
     if (authorProfileId && contentType === 'next_week_candidate') {

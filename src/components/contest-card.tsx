@@ -124,6 +124,16 @@ export function ContestantCard({
     return () => subscription.unsubscribe();
   }, []);
 
+  // Auto-close login modal after 1 second
+  useEffect(() => {
+    if (showLoginModal) {
+      const timer = setTimeout(() => {
+        setShowLoginModal(false);
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [showLoginModal]);
+
   // Load user's likes and ratings on component mount
   useEffect(() => {
     if (!user) return;
