@@ -561,9 +561,9 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
 
             <div className="space-y-4">
               <h3 className="text-sm font-medium text-center">Upload Photos</h3>
-              <div className="flex gap-8 items-center justify-center">
+              <div className="flex flex-col md:flex-row gap-4 md:gap-8 items-center justify-center">
                 {/* Portrait Photo */}
-                <div className="relative">
+                <div className="relative w-full max-w-xs">
                   <input
                     type="file"
                     accept="image/*"
@@ -577,7 +577,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                         <img
                           src={URL.createObjectURL(photo1File)}
                           alt="Portrait photo preview"
-                          className="w-full h-48 object-cover rounded"
+                          className="w-full h-32 md:h-48 object-cover rounded"
                         />
                         <button 
                           type="button"
@@ -592,23 +592,23 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                           ×
                         </button>
                         <div className="mt-2 text-center">
-                          <button type="button" className="px-4 py-2 bg-primary text-primary-foreground rounded text-sm hover:bg-primary/90 transition-colors">
+                          <button type="button" className="px-3 py-1 md:px-4 md:py-2 bg-primary text-primary-foreground rounded text-xs md:text-sm hover:bg-primary/90 transition-colors">
                             Change
                           </button>
                         </div>
                       </div>
                     ) : (
-                      <div className="p-6 text-center">
-                        <div className={`h-48 rounded-lg mb-3 flex items-center justify-center relative overflow-hidden aspect-[4/5] border-2 border-dashed cursor-pointer hover:border-primary transition-colors ${hasRedBorder('photo1') ? 'border-red-500' : 'border-muted-foreground/25'}`}>
+                      <div className="p-3 md:p-6 text-center">
+                        <div className={`h-32 md:h-48 rounded-lg mb-2 md:mb-3 flex items-center justify-center relative overflow-hidden aspect-[4/5] border-2 border-dashed cursor-pointer hover:border-primary transition-colors ${hasRedBorder('photo1') ? 'border-red-500' : 'border-muted-foreground/25'}`}>
                           <img 
                             src="/lovable-uploads/1147be30-a1d2-466f-a9a8-067f4628cbb2.png" 
                             alt="Portrait placeholder" 
                             className="absolute inset-0 w-full h-full object-cover opacity-40 filter grayscale brightness-75"
                           />
                         </div>
-                        <p className="text-sm text-muted-foreground mb-2">one portrait photo</p>
+                        <p className="text-xs md:text-sm text-muted-foreground mb-2">one portrait photo</p>
                         
-                        <button type="button" className="px-4 py-2 bg-primary text-primary-foreground rounded text-sm hover:bg-primary/90 transition-colors">
+                        <button type="button" className="px-3 py-1 md:px-4 md:py-2 bg-primary text-primary-foreground rounded text-xs md:text-sm hover:bg-primary/90 transition-colors">
                           Upload
                         </button>
                       </div>
@@ -617,14 +617,16 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                 </div>
 
                 {/* Central text column */}
-                <div className="flex flex-col justify-center items-center space-y-1 text-xs text-muted-foreground">
+                <div className="flex flex-row md:flex-col justify-center items-center space-x-2 md:space-x-0 md:space-y-1 text-xs text-muted-foreground order-last md:order-none">
                   <span>no makeup</span>
+                  <span className="md:hidden">•</span>
                   <span>no filters</span>
+                  <span className="md:hidden">•</span>
                   <span>no color correction</span>
                 </div>
 
                 {/* Full Length Photo */}
-                <div className="relative">
+                <div className="relative w-full max-w-xs">
                   <input
                     type="file"
                     accept="image/*"
@@ -658,18 +660,18 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                           </button>
                         </div>
                       </div>
-                    ) : (
-                      <div className="p-6 text-center">
-                        <div className={`h-48 rounded-lg mb-3 flex items-center justify-center relative overflow-hidden aspect-[4/5] border-2 border-dashed cursor-pointer hover:border-primary transition-colors ${hasRedBorder('photo2') ? 'border-red-500' : 'border-muted-foreground/25'}`}>
+                     ) : (
+                      <div className="p-3 md:p-6 text-center">
+                        <div className={`h-32 md:h-48 rounded-lg mb-2 md:mb-3 flex items-center justify-center relative overflow-hidden aspect-[4/5] border-2 border-dashed cursor-pointer hover:border-primary transition-colors ${hasRedBorder('photo2') ? 'border-red-500' : 'border-muted-foreground/25'}`}>
                           <img 
                             src="/lovable-uploads/009d20f0-cac7-4c08-9bc9-146617664bc3.png" 
                             alt="Full body placeholder" 
                             className="absolute inset-0 w-full h-full object-contain opacity-50 filter grayscale brightness-50"
                           />
                         </div>
-                        <p className="text-sm text-muted-foreground mb-2">one full length photo</p>
+                        <p className="text-xs md:text-sm text-muted-foreground mb-2">one full length photo</p>
                         
-                        <button type="button" className="px-4 py-2 bg-primary text-primary-foreground rounded text-sm hover:bg-primary/90 transition-colors">
+                        <button type="button" className="px-3 py-1 md:px-4 md:py-2 bg-primary text-primary-foreground rounded text-xs md:text-sm hover:bg-primary/90 transition-colors">
                           Upload
                         </button>
                       </div>
