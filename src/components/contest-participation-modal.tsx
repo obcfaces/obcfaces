@@ -607,6 +607,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                             className="absolute inset-0 w-full h-full object-cover opacity-40 filter grayscale brightness-75"
                           />
                         </div>
+                        <p className="text-sm text-muted-foreground mb-2">one portrait photo</p>
                         
                         <button type="button" className="px-4 py-2 bg-primary text-primary-foreground rounded text-sm hover:bg-primary/90 transition-colors">
                           Upload
@@ -660,6 +661,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                             className="absolute inset-0 w-full h-full object-contain opacity-50 filter grayscale brightness-50"
                           />
                         </div>
+                        <p className="text-sm text-muted-foreground mb-2">one full length photo</p>
                         
                         <button type="button" className="px-4 py-2 bg-primary text-primary-foreground rounded text-sm hover:bg-primary/90 transition-colors">
                           Upload
