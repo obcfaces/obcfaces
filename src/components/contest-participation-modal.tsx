@@ -557,7 +557,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
               </Select>
             </div>
 
-            <div className="grid gap-2 sm:grid-cols-2">
+            <div className="grid gap-2 grid-cols-2">
               <Input
                 id="height"
                 type="number"
@@ -579,7 +579,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
 
             <div className="space-y-3">
               <div className="text-sm font-medium">Photos (2 photos required)</div>
-              <div className="grid gap-2 sm:grid-cols-2">
+              <div className="grid gap-2 grid-cols-2">
                 <div className={`border-2 border-dashed rounded-lg p-4 text-center ${invalidPhoto1 ? 'border-destructive' : 'border-gray-300'}`}>
                   <input
                     id="photo1"
