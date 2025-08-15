@@ -565,8 +565,8 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                   <SelectValue placeholder="System" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="metric">Metric</SelectItem>
-                  <SelectItem value="imperial">Imperial</SelectItem>
+                  <SelectItem value="metric">Metric (cm, kg)</SelectItem>
+                  <SelectItem value="imperial">Imperial (ft, lbs)</SelectItem>
                 </SelectContent>
               </Select>
               
