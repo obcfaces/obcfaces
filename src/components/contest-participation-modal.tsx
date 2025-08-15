@@ -599,7 +599,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                       </div>
                     ) : (
                       <div className="p-6 text-center">
-                        <div className="h-40 bg-muted/50 rounded-lg mb-3 flex items-center justify-center relative overflow-hidden">
+                        <div className="h-48 bg-muted/50 rounded-lg mb-3 flex items-center justify-center relative overflow-hidden aspect-[4/5]">
                           <img 
                             src="/lovable-uploads/1147be30-a1d2-466f-a9a8-067f4628cbb2.png" 
                             alt="Portrait placeholder" 
@@ -652,11 +652,11 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                       </div>
                     ) : (
                       <div className="p-6 text-center">
-                        <div className="h-40 bg-muted/50 rounded-lg mb-3 flex items-center justify-center relative overflow-hidden">
+                        <div className="h-48 bg-muted/50 rounded-lg mb-3 flex items-center justify-center relative overflow-hidden aspect-[4/5]">
                           <img 
                             src="/lovable-uploads/009d20f0-cac7-4c08-9bc9-146617664bc3.png" 
                             alt="Full body placeholder" 
-                            className="w-auto h-4/5 object-contain opacity-50 filter grayscale brightness-50"
+                            className="w-auto h-[90%] object-contain opacity-50 filter grayscale brightness-50"
                           />
                         </div>
                         <p className="text-sm text-muted-foreground mb-2">one full length photo</p>
