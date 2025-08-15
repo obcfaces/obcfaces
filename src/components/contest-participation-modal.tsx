@@ -292,11 +292,47 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
     setIsLoading(true);
 
     // Validation
-    if (!formData.first_name.trim() || !formData.last_name.trim() || !formData.countryCode || 
-        !formData.stateCode || !formData.city.trim() || !formData.gender || !formData.birth_day || 
-        !formData.birth_month || !formData.birth_year || !formData.marital_status || 
-        formData.has_children === undefined || !formData.height_cm || !formData.weight_kg ||
-        !photo1File || !photo2File) {
+    let isValid = true;
+
+    // Check basic required fields
+    const requiredStringFields = [
+      formData.first_name.trim(),
+      formData.last_name.trim(), 
+      formData.countryCode,
+      formData.gender,
+      formData.birth_day,
+      formData.birth_month,
+      formData.birth_year,
+      formData.marital_status,
+      formData.height_cm,
+      formData.weight_kg
+    ];
+
+    if (requiredStringFields.some(field => !field)) {
+      isValid = false;
+    }
+
+    // Check photos
+    if (!photo1File || !photo2File) {
+      isValid = false;
+    }
+
+    // Only validate state if country is selected
+    if (formData.countryCode && !formData.stateCode) {
+      isValid = false;
+    }
+
+    // Only validate city if state is selected
+    if (formData.stateCode && !formData.city.trim()) {
+      isValid = false;
+    }
+
+    // Check has_children is defined
+    if (formData.has_children === undefined) {
+      isValid = false;
+    }
+
+    if (!isValid) {
       setIsLoading(false);
       return;
     }
@@ -381,8 +417,8 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
   const invalidFirstName = showProfileErrors && !formData.first_name.trim();
   const invalidLastName = showProfileErrors && !formData.last_name.trim();
   const invalidCountry = showProfileErrors && !formData.countryCode;
-  const invalidState = showProfileErrors && !formData.stateCode;
-  const invalidCity = showProfileErrors && !formData.city.trim();
+  const invalidState = showProfileErrors && formData.countryCode && !formData.stateCode;
+  const invalidCity = showProfileErrors && formData.stateCode && !formData.city.trim();
   const invalidGender = showProfileErrors && !formData.gender;
   const invalidBirthDay = showProfileErrors && !formData.birth_day;
   const invalidBirthMonth = showProfileErrors && !formData.birth_month;
