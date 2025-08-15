@@ -175,14 +175,9 @@ export type Database = {
       get_contest_participant_info: {
         Args: Record<PropertyKey, never> | { participant_id: string }
         Returns: {
-          age: number
           avatar_url: string
-          city: string
-          country: string
           display_name: string
-          height_cm: number
           id: string
-          weight_kg: number
         }[]
       }
       get_follow_stats: {
