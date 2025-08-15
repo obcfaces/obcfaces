@@ -246,15 +246,11 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
             />
           </div>
           
-          {/* Counter aligned left with same padding as NEXT WEEK title */}
-          <div className="w-full px-6 mt-4">
-            <span className="text-lg text-contest-text font-medium">
-              {remainingCandidates} left
-            </span>
-          </div>
-          
-          <div className="flex items-center justify-center gap-6 mt-4">
+          <div className="flex items-center justify-center gap-6 mt-6">
             <div className="flex items-center gap-4">
+              <span className="text-lg text-contest-text font-medium">
+                {remainingCandidates} left
+              </span>
               {history.length > 0 && (
                 <Button
                   onClick={handleUndo}
