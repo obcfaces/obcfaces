@@ -2,7 +2,8 @@ import { useState, useEffect, useMemo } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Eye, EyeOff } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Camera, Eye, EyeOff } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import SearchableSelect from "@/components/ui/searchable-select";
@@ -15,7 +16,7 @@ interface ContestParticipationModalProps {
 
 export const ContestParticipationModal = ({ children }: ContestParticipationModalProps) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [currentStep, setCurrentStep] = useState<'auth' | 'location'>('auth');
+  const [currentStep, setCurrentStep] = useState<'auth' | 'profile'>('auth');
   const [mode, setMode] = useState<'login' | 'signup'>('login');
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -27,14 +28,28 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  // Location form data
+  // Profile form data
   const [formData, setFormData] = useState({
+    first_name: "",
+    last_name: "",
     country: "",
     countryCode: "",
     state: "",
     stateCode: "",
     city: "",
+    gender: "",
+    birth_day: "",
+    birth_month: "",
+    birth_year: "",
+    marital_status: "",
+    has_children: false,
+    height_cm: "",
+    weight_kg: "",
+    measurement_system: "metric",
   });
+
+  const [photo1File, setPhoto1File] = useState<File | null>(null);
+  const [photo2File, setPhoto2File] = useState<File | null>(null);
 
   const [showCityInput, setShowCityInput] = useState(false);
 
@@ -109,21 +124,32 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
     const checkUser = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
-        setCurrentStep('location');
+        setCurrentStep('profile');
         // Load existing profile data
         const { data: profile } = await supabase
           .from('profiles')
-          .select('country, state, city')
+          .select('*')
           .eq('id', session.user.id)
           .single();
         
         if (profile) {
           setFormData({
+            first_name: profile.first_name || "",
+            last_name: profile.last_name || "",
             country: profile.country || "",
             countryCode: profile.country || "",
             state: profile.state || "",
             stateCode: profile.state || "",
             city: profile.city || "",
+            gender: profile.gender || "",
+            birth_day: profile.birthdate ? new Date(profile.birthdate).getDate().toString() : "",
+            birth_month: profile.birthdate ? (new Date(profile.birthdate).getMonth() + 1).toString() : "",
+            birth_year: profile.birthdate ? new Date(profile.birthdate).getFullYear().toString() : "",
+            marital_status: profile.marital_status || "",
+            has_children: profile.has_children || false,
+            height_cm: profile.height_cm?.toString() || "",
+            weight_kg: profile.weight_kg?.toString() || "",
+            measurement_system: "metric",
           });
         }
       }
@@ -182,7 +208,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
           description: "Добро пожаловать!",
           duration: 1000,
         });
-        setCurrentStep('location');
+        setCurrentStep('profile');
       } else {
         const redirectUrl = `${window.location.origin}/`;
         const { error } = await supabase.auth.signUp({
@@ -228,7 +254,32 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
     }
   };
 
-  const handleLocationSubmit = async (e: React.FormEvent) => {
+  const uploadPhoto = async (file: File, photoNumber: 1 | 2): Promise<string | null> => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) return null;
+
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${session.user.id}/photo-${photoNumber}.${fileExt}`;
+
+    const { error } = await supabase.storage
+      .from('contest-photos')
+      .upload(fileName, file, {
+        upsert: true
+      });
+
+    if (error) {
+      console.error('Upload error:', error);
+      return null;
+    }
+
+    const { data } = supabase.storage
+      .from('contest-photos')
+      .getPublicUrl(fileName);
+
+    return data.publicUrl;
+  };
+
+  const handleProfileSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitted(true);
     
@@ -239,8 +290,26 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
       // Validation
       let isValid = true;
 
-      // Check required fields
-      if (!formData.countryCode) {
+      // Check basic required fields
+      const requiredStringFields = [
+        formData.first_name.trim(),
+        formData.last_name.trim(), 
+        formData.countryCode,
+        formData.gender,
+        formData.birth_day,
+        formData.birth_month,
+        formData.birth_year,
+        formData.marital_status,
+        formData.height_cm,
+        formData.weight_kg
+      ];
+
+      if (requiredStringFields.some(field => !field)) {
+        isValid = false;
+      }
+
+      // Check photos
+      if (!photo1File || !photo2File) {
         isValid = false;
       }
 
@@ -254,6 +323,11 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
         isValid = false;
       }
 
+      // Check has_children is defined
+      if (formData.has_children === undefined) {
+        isValid = false;
+      }
+
       if (!isValid) {
         setIsLoading(false);
         return;
@@ -263,14 +337,42 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
         const { data: { session } } = await supabase.auth.getSession();
         if (!session) return;
 
-        // Update profile with location data
+        // Upload photos
+        let photo1Url = null;
+        let photo2Url = null;
+
+        if (photo1File) {
+          photo1Url = await uploadPhoto(photo1File, 1);
+        }
+        if (photo2File) {
+          photo2Url = await uploadPhoto(photo2File, 2);
+        }
+
+        // Create birthdate from separate fields
+        let birthdate = null;
+        if (formData.birth_day && formData.birth_month && formData.birth_year) {
+          birthdate = `${formData.birth_year}-${formData.birth_month.padStart(2, '0')}-${formData.birth_day.padStart(2, '0')}`;
+        }
+
+        // Update profile with all data
         const { error } = await supabase
           .from('profiles')
           .upsert({
             id: session.user.id,
+            first_name: formData.first_name,
+            last_name: formData.last_name,
             country: formData.country,
             state: formData.state,
             city: formData.city,
+            gender: formData.gender,
+            birthdate: birthdate,
+            marital_status: formData.marital_status,
+            has_children: formData.has_children,
+            height_cm: formData.height_cm ? parseInt(formData.height_cm) : null,
+            weight_kg: formData.weight_kg ? parseFloat(formData.weight_kg) : null,
+            photo_1_url: photo1Url,
+            photo_2_url: photo2Url,
+            is_contest_participant: true,
           });
 
         if (error) {
@@ -284,7 +386,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
 
         toast({
           title: "Успешно!",
-          description: "Ваша локация сохранена",
+          description: "Ваша заявка на участие отправлена",
         });
         setIsOpen(false);
       } catch (error) {
@@ -299,36 +401,68 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
     }, 0);
   };
 
+  const handleFileSelect = (file: File, photoNumber: 1 | 2) => {
+    if (photoNumber === 1) {
+      setPhoto1File(file);
+    } else {
+      setPhoto2File(file);
+    }
+  };
+
   // Validation states
-  const showLocationErrors = submitted;
-  const invalidCountry = showLocationErrors && !formData.countryCode;
-  const invalidState = showLocationErrors && formData.countryCode && !formData.stateCode;
-  const invalidCity = showLocationErrors && formData.stateCode && !formData.city.trim();
+  const showProfileErrors = submitted;
+  
+  // Required field validations
+  const invalidFirstName = showProfileErrors && !formData.first_name.trim();
+  const invalidLastName = showProfileErrors && !formData.last_name.trim();
+  const invalidCountry = showProfileErrors && !formData.countryCode;
+  const invalidState = showProfileErrors && formData.countryCode && !formData.stateCode;
+  const invalidCity = showProfileErrors && formData.stateCode && !formData.city.trim();
+  const invalidGender = showProfileErrors && !formData.gender;
+  const invalidBirthDay = showProfileErrors && !formData.birth_day;
+  const invalidBirthMonth = showProfileErrors && !formData.birth_month;
+  const invalidBirthYear = showProfileErrors && !formData.birth_year;
+  const invalidMaritalStatus = showProfileErrors && !formData.marital_status;
+  const invalidChildren = showProfileErrors && formData.has_children === undefined;
+  const invalidHeight = showProfileErrors && !formData.height_cm;
+  const invalidWeight = showProfileErrors && !formData.weight_kg;
+  const invalidPhoto1 = showProfileErrors && !photo1File;
+  const invalidPhoto2 = showProfileErrors && !photo2File;
 
   // Helper function for field styling
   const getFieldClasses = (isInvalid: boolean, isFilled: boolean) => {
     if (isInvalid) {
       return "border-2 border-red-500 focus:ring-red-500 focus:border-red-500";
     } else if (isFilled) {
-      return "border-2 border-blue-500 focus:ring-blue-500 focus:border-blue-500";
+      return "border-2 border-green-500 focus:ring-green-500 focus:border-green-500";
     }
     return "";
   };
 
   // Check if fields are filled
+  const isFirstNameFilled = formData.first_name.trim() !== "";
+  const isLastNameFilled = formData.last_name.trim() !== "";
   const isCountryFilled = !!formData.countryCode;
   const isStateFilled = !!formData.stateCode;
   const isCityFilled = formData.city.trim() !== "";
+  const isGenderFilled = !!formData.gender;
+  const isBirthDayFilled = !!formData.birth_day;
+  const isBirthMonthFilled = !!formData.birth_month;
+  const isBirthYearFilled = !!formData.birth_year;
+  const isMaritalStatusFilled = !!formData.marital_status;
+  const isChildrenFilled = formData.has_children !== undefined;
+  const isHeightFilled = !!formData.height_cm;
+  const isWeightFilled = !!formData.weight_kg;
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         {children}
       </DialogTrigger>
-      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
-            {currentStep === 'auth' ? 'Sign in' : 'Select your location'}
+            {currentStep === 'auth' ? 'Sign in' : 'Contest participation form'}
           </DialogTitle>
         </DialogHeader>
 
@@ -396,97 +530,291 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
             </div>
           </form>
         ) : (
-          <form onSubmit={handleLocationSubmit} className="space-y-4">
+          <form onSubmit={handleProfileSubmit} className="space-y-3">
+            <div className="grid gap-2 grid-cols-3">
+              <Input
+                id="first_name"
+                placeholder="First name"
+                className={getFieldClasses(invalidFirstName, isFirstNameFilled)}
+                value={formData.first_name}
+                onChange={(e) => setFormData({...formData, first_name: e.target.value})}
+                aria-invalid={invalidFirstName}
+                required
+              />
+              <Input
+                id="last_name"
+                placeholder="Last name"
+                className={getFieldClasses(invalidLastName, isLastNameFilled)}
+                value={formData.last_name}
+                onChange={(e) => setFormData({...formData, last_name: e.target.value})}
+                aria-invalid={invalidLastName}
+                required
+              />
+              <Select value={formData.gender} onValueChange={(value) => setFormData({...formData, gender: value})}>
+                <SelectTrigger className={invalidGender ? "border-2 border-red-500 focus:ring-red-500" : isGenderFilled ? "border-2 border-green-500 focus:ring-green-500" : ""}>
+                  <SelectValue placeholder="Gender" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="male">Male</SelectItem>
+                  <SelectItem value="female">Female</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="grid gap-2 grid-cols-3">
+              <SearchableSelect
+                placeholder="Country"
+                options={countries.map(c => ({ value: c.isoCode, label: c.name }))}
+                value={countryCode || ""}
+                onValueChange={(code) => {
+                  setCountryCode(code);
+                  const country = countries.find(c => c.isoCode === code);
+                  setFormData({
+                    ...formData, 
+                    countryCode: code,
+                    country: country?.name || "",
+                    state: "", 
+                    stateCode: "",
+                    city: ""
+                  });
+                  setStateCode(null);
+                }}
+                invalid={invalidCountry}
+                highlightSelected={isCountryFilled}
+              />
+              
+              <SearchableSelect
+                disabled={!countryCode}
+                placeholder="State/Region"
+                options={states.map(s => ({ value: s.isoCode, label: s.name }))}
+                value={stateCode || ""}
+                onValueChange={(code) => {
+                  setStateCode(code);
+                  const state = states.find(s => s.isoCode === code);
+                  setFormData({
+                    ...formData, 
+                    stateCode: code,
+                    state: state?.name || "",
+                    city: ""
+                  });
+                  setShowCityInput(false); // Reset manual input when state changes
+                }}
+                invalid={invalidState}
+                highlightSelected={isStateFilled}
+              />
+              
+              {cities.length === 0 ? (
+                <Input
+                  placeholder="Enter city name"
+                  value={formData.city}
+                  onChange={(e) => setFormData({...formData, city: e.target.value})}
+                  className={getFieldClasses(invalidCity, isCityFilled)}
+                />
+              ) : showCityInput ? (
+                <Input
+                  placeholder="Enter city name"
+                  value={formData.city}
+                  onChange={(e) => setFormData({...formData, city: e.target.value})}
+                  className={getFieldClasses(invalidCity, isCityFilled)}
+                />
+              ) : (
+                <SearchableSelect
+                  disabled={!stateCode}
+                  placeholder="City"
+                  options={cities.map(ct => ({ value: ct.name, label: ct.name }))}
+                  value={formData.city}
+                  onValueChange={(value) => {
+                    if (value === "Other (enter manually)") {
+                      setShowCityInput(true);
+                      setFormData({...formData, city: ""});
+                    } else {
+                      setFormData({...formData, city: value});
+                    }
+                  }}
+                  invalid={invalidCity}
+                  highlightSelected={isCityFilled}
+                />
+              )}
+            </div>
+
+            <div className="grid gap-2 sm:grid-cols-2">
+              <div className="grid grid-cols-3 gap-1">
+                <Select value={formData.birth_day} onValueChange={(value) => setFormData({...formData, birth_day: value})}>
+                  <SelectTrigger className={invalidBirthDay ? "border-2 border-red-500 focus:ring-red-500" : isBirthDayFilled ? "border-2 border-green-500 focus:ring-green-500" : ""}>
+                    <SelectValue placeholder="Day of birth" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Array.from({length: 31}, (_, i) => i + 1).map(day => (
+                      <SelectItem key={day} value={day.toString()}>{day}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                
+                <Select value={formData.birth_month} onValueChange={(value) => setFormData({...formData, birth_month: value})}>
+                  <SelectTrigger className={invalidBirthMonth ? "border-2 border-red-500 focus:ring-red-500" : isBirthMonthFilled ? "border-2 border-green-500 focus:ring-green-500" : ""}>
+                    <SelectValue placeholder="Month of birth" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {[
+                      'January', 'February', 'March', 'April', 'May', 'June',
+                      'July', 'August', 'September', 'October', 'November', 'December'
+                    ].map((month, index) => (
+                      <SelectItem key={index + 1} value={(index + 1).toString()}>{month}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                
+                <Select value={formData.birth_year} onValueChange={(value) => setFormData({...formData, birth_year: value})}>
+                  <SelectTrigger className={invalidBirthYear ? "border-2 border-red-500 focus:ring-red-500" : isBirthYearFilled ? "border-2 border-green-500 focus:ring-green-500" : ""}>
+                    <SelectValue placeholder="Year of birth" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Array.from({length: 80}, (_, i) => new Date().getFullYear() - 18 - i).map(year => (
+                      <SelectItem key={year} value={year.toString()}>{year}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="grid gap-2 grid-cols-2">
+              <Select value={formData.marital_status} onValueChange={(value) => setFormData({...formData, marital_status: value})}>
+                <SelectTrigger className={invalidMaritalStatus ? "border-2 border-red-500 focus:ring-red-500" : isMaritalStatusFilled ? "border-2 border-green-500 focus:ring-green-500" : ""}>
+                  <SelectValue placeholder="Marital status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="single">Single</SelectItem>
+                  <SelectItem value="married">Married</SelectItem>
+                  <SelectItem value="divorced">Divorced</SelectItem>
+                  <SelectItem value="widowed">Widowed</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Select 
+                value={formData.has_children ? formData.has_children.toString() : ""} 
+                onValueChange={(value) => setFormData({...formData, has_children: value === 'true'})}
+              >
+                <SelectTrigger className={invalidChildren ? "border-2 border-red-500 focus:ring-red-500" : isChildrenFilled ? "border-2 border-green-500 focus:ring-green-500" : ""}>
+                  <SelectValue placeholder="Do you have children?" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="false">No</SelectItem>
+                  <SelectItem value="true">Yes</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="grid gap-2 grid-cols-3">
+               <Select value={formData.measurement_system || 'metric'} onValueChange={(value) => setFormData({...formData, measurement_system: value})}>
+                <SelectTrigger className={getFieldClasses(false, !!formData.measurement_system)}>
+                  <SelectValue placeholder="System" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="metric">Metric (cm, kg)</SelectItem>
+                  <SelectItem value="imperial">Imperial (ft, lbs)</SelectItem>
+                </SelectContent>
+              </Select>
+              
+              <Select value={formData.height_cm} onValueChange={(value) => setFormData({...formData, height_cm: value})}>
+                <SelectTrigger className={invalidHeight ? "border-2 border-red-500 focus:ring-red-500" : isHeightFilled ? "border-2 border-green-500 focus:ring-green-500" : ""}>
+                  <SelectValue placeholder={formData.measurement_system === 'imperial' ? "Height (ft)" : "Height (cm)"} />
+                </SelectTrigger>
+                <SelectContent>
+                  {formData.measurement_system === 'imperial' ? (
+                    <>
+                      <SelectItem value="less_4">Less than 4 ft</SelectItem>
+                      {Array.from({length: 5}, (_, i) => 4 + i).map(height => (
+                        Array.from({length: 12}, (_, j) => j).map(inches => (
+                          <SelectItem key={`${height}_${inches}`} value={`${height}_${inches}`}>
+                            {height}'{inches < 10 ? `0${inches}` : inches}"
+                          </SelectItem>
+                        ))
+                      )).flat()}
+                      <SelectItem value="more_8">More than 8 ft</SelectItem>
+                    </>
+                  ) : (
+                    <>
+                      <SelectItem value="less_130">Less than 130 cm</SelectItem>
+                      {Array.from({length: 71}, (_, i) => 130 + i).map(height => (
+                        <SelectItem key={height} value={height.toString()}>{height} cm</SelectItem>
+                      ))}
+                      <SelectItem value="more_200">More than 200 cm</SelectItem>
+                    </>
+                  )}
+                </SelectContent>
+              </Select>
+              
+              <Select value={formData.weight_kg} onValueChange={(value) => setFormData({...formData, weight_kg: value})}>
+                <SelectTrigger className={invalidWeight ? "border-2 border-red-500 focus:ring-red-500" : isWeightFilled ? "border-2 border-green-500 focus:ring-green-500" : ""}>
+                  <SelectValue placeholder={formData.measurement_system === 'imperial' ? "Weight (lbs)" : "Weight (kg)"} />
+                </SelectTrigger>
+                <SelectContent>
+                  {formData.measurement_system === 'imperial' ? (
+                    <>
+                      <SelectItem value="less_65">Less than 65 lbs</SelectItem>
+                      {Array.from({length: 291}, (_, i) => 65 + i).map(weight => (
+                        <SelectItem key={weight} value={weight.toString()}>{weight} lbs</SelectItem>
+                      ))}
+                      <SelectItem value="more_355">More than 355 lbs</SelectItem>
+                    </>
+                  ) : (
+                    <>
+                      <SelectItem value="less_30">Less than 30 kg</SelectItem>
+                      {Array.from({length: 41}, (_, i) => 30 + i).map(weight => (
+                        <SelectItem key={weight} value={weight.toString()}>{weight} kg</SelectItem>
+                      ))}
+                      <SelectItem value="more_70">More than 70 kg</SelectItem>
+                    </>
+                  )}
+                </SelectContent>
+              </Select>
+            </div>
+
             <div className="space-y-3">
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Country *</label>
-                <SearchableSelect 
-                  options={countries.map(c => ({ value: c.isoCode, label: c.name }))}
-                  value={countryCode || ""}
-                  onValueChange={(value) => {
-                    setCountryCode(value);
-                    const country = countries.find(c => c.isoCode === value);
-                    setFormData(prev => ({ 
-                      ...prev, 
-                      countryCode: value,
-                      country: country?.name || "",
-                      state: "",
-                      stateCode: "",
-                      city: ""
-                    }));
-                    setStateCode(null);
-                    setShowCityInput(false);
-                  }}
-                  placeholder="Select Country"
-                  invalid={invalidCountry}
-                  highlightSelected={isCountryFilled}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-sm font-medium">State/Region *</label>
-                <SearchableSelect 
-                  options={states.map(s => ({ value: s.isoCode, label: s.name }))}
-                  value={stateCode || ""}
-                  onValueChange={(value) => {
-                    setStateCode(value);
-                    const state = states.find(s => s.isoCode === value);
-                    setFormData(prev => ({ 
-                      ...prev, 
-                      stateCode: value,
-                      state: state?.name || "",
-                      city: ""
-                    }));
-                    setShowCityInput(false);
-                  }}
-                  placeholder="Select State/Province"
-                  disabled={!formData.countryCode}
-                  invalid={invalidState}
-                  highlightSelected={isStateFilled}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-sm font-medium">City *</label>
-                {cities.length === 0 && formData.stateCode ? (
-                  <Input 
-                    type="text" 
-                    placeholder="Enter your city" 
-                    value={formData.city} 
-                    onChange={(e) => setFormData(prev => ({ ...prev, city: e.target.value }))} 
-                    className={getFieldClasses(invalidCity, isCityFilled)}
+              <div className="text-sm font-medium">Photos (2 photos required)</div>
+              <div className="grid gap-2 grid-cols-2">
+                <div className={`border-2 border-dashed rounded-lg p-4 text-center ${invalidPhoto1 ? 'border-red-500' : photo1File ? 'border-green-500' : 'border-gray-300'}`}>
+                  <input
+                    id="photo1"
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => e.target.files?.[0] && handleFileSelect(e.target.files[0], 1)}
+                    className="hidden"
+                    required
                   />
-                ) : showCityInput ? (
-                  <Input 
-                    type="text" 
-                    placeholder="Enter your city" 
-                    value={formData.city} 
-                    onChange={(e) => setFormData(prev => ({ ...prev, city: e.target.value }))} 
-                    className={getFieldClasses(invalidCity, isCityFilled)}
+                  <label htmlFor="photo1" className="cursor-pointer">
+                    <Camera className="mx-auto h-8 w-8 text-gray-400 mb-2" />
+                    {photo1File ? (
+                      <p className="text-sm text-green-600">{photo1File.name}</p>
+                    ) : (
+                      <p className="text-sm text-gray-500">Photo 1</p>
+                    )}
+                  </label>
+                </div>
+                
+                <div className={`border-2 border-dashed rounded-lg p-4 text-center ${invalidPhoto2 ? 'border-red-500' : photo2File ? 'border-green-500' : 'border-gray-300'}`}>
+                  <input
+                    id="photo2"
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => e.target.files?.[0] && handleFileSelect(e.target.files[0], 2)}
+                    className="hidden"
+                    required
                   />
-                ) : (
-                  <SearchableSelect 
-                    options={cities.map(ct => ({ value: ct.name, label: ct.name }))}
-                    value={formData.city}
-                    onValueChange={(value) => {
-                      if (value === "Other (enter manually)") {
-                        setShowCityInput(true);
-                        setFormData(prev => ({ ...prev, city: "" }));
-                      } else {
-                        setFormData(prev => ({ ...prev, city: value }));
-                      }
-                    }}
-                    placeholder="Select City"
-                    disabled={!formData.stateCode}
-                    invalid={invalidCity}
-                    highlightSelected={isCityFilled}
-                  />
-                )}
+                  <label htmlFor="photo2" className="cursor-pointer">
+                    <Camera className="mx-auto h-8 w-8 text-gray-400 mb-2" />
+                    {photo2File ? (
+                      <p className="text-sm text-green-600">{photo2File.name}</p>
+                    ) : (
+                      <p className="text-sm text-gray-500">Photo 2</p>
+                    )}
+                  </label>
+                </div>
               </div>
             </div>
 
             <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? "Saving..." : "Save Location"}
+              {isLoading ? "Submitting..." : "Submit application"}
             </Button>
           </form>
         )}
