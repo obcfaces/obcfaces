@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Heart, MessageCircle, Share2, ThumbsDown } from "lucide-react";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "@/components/ui/use-toast";
+import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { PhotoModal } from "@/components/photo-modal";
 import { Link } from "react-router-dom";
@@ -184,11 +184,18 @@ const LikedItem = ({
               <div className="flex items-center justify-end gap-4">
                 <button
                   type="button"
-                  className="inline-flex items-center gap-1 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors"
-                  aria-label="Like"
+                  className={cn(
+                    "inline-flex items-center gap-1 text-xs sm:text-sm transition-colors",
+                    isLiked 
+                      ? "text-red-500 hover:text-red-600" 
+                      : "text-muted-foreground hover:text-foreground"
+                  )}
+                  onClick={handleUnlike}
+                  disabled={isUnliking}
+                  aria-label="Unlike"
                 >
-                  <Heart className="w-3.5 h-3.5" />
-                  <span className="hidden xl:inline">Like</span>
+                  <Heart className={cn("w-3.5 h-3.5", isLiked && "fill-current")} />
+                  <span className="hidden xl:inline">{isLiked ? "Unlike" : "Like"}</span>
                   <span>{likes}</span>
                 </button>
                 <button
@@ -296,11 +303,18 @@ const LikedItem = ({
         <div className="border-t border-contest-border px-4 py-2 flex items-center justify-evenly gap-4">
           <button
             type="button"
-            className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
-            aria-label="Like"
+            className={cn(
+              "inline-flex items-center gap-1 text-sm transition-colors",
+              isLiked 
+                ? "text-red-500 hover:text-red-600" 
+                : "text-muted-foreground hover:text-foreground"
+            )}
+            onClick={handleUnlike}
+            disabled={isUnliking}
+            aria-label="Unlike"
           >
-            <Heart className="w-4 h-4" />
-            <span className="hidden sm:inline">Like</span>
+            <Heart className={cn("w-4 h-4", isLiked && "fill-current")} />
+            <span className="hidden sm:inline">{isLiked ? "Unlike" : "Like"}</span>
             <span>{likes}</span>
           </button>
           <button
