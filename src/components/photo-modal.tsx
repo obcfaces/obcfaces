@@ -26,9 +26,10 @@ interface PhotoModalProps {
   height?: number;
   country?: string;
   city?: string;
+  onCommentSubmit?: () => void;
 }
 
-export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantName, age, weight, height, country, city }: PhotoModalProps) {
+export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantName, age, weight, height, country, city, onCommentSubmit }: PhotoModalProps) {
   const [activeIndex, setActiveIndex] = useState(currentIndex);
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
@@ -123,6 +124,10 @@ export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantNa
       if (textareaRef.current) {
         textareaRef.current.style.height = '44px';
       }
+      
+      // Call the callback to mark as commented in parent component
+      onCommentSubmit?.();
+      
       toast({
         title: "Comment added",
         description: "Your comment was added",

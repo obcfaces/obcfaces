@@ -145,6 +145,10 @@ export function ContestantCard({
         setIsLiked(likedState);
       }
       
+      // Check if user has commented on this contestant (from localStorage)
+      const hasUserCommented = localStorage.getItem(`commented-${name}-${user.id}`);
+      setHasCommented(!!hasUserCommented);
+      
       // Load user's rating (if any)
       const savedRating = localStorage.getItem(`rating-${name}-${user.id}`);
       if (savedRating) {
@@ -236,9 +240,15 @@ export function ContestantCard({
       return;
     }
     
-    // Mark as commented when opening modal (simulating comment creation)
-    setHasCommented(true);
     openModal(0);
+  };
+
+  // Function to mark as commented (called from PhotoModal when comment is submitted)
+  const markAsCommented = () => {
+    if (user) {
+      localStorage.setItem(`commented-${name}-${user.id}`, 'true');
+      setHasCommented(true);
+    }
   };
 
 
@@ -447,6 +457,7 @@ export function ContestantCard({
           height={height}
           country={country}
           city={city}
+          onCommentSubmit={markAsCommented}
         />
 
         {/* Login Modal */}
@@ -686,6 +697,7 @@ export function ContestantCard({
         height={height}
         country={country}
         city={city}
+        onCommentSubmit={markAsCommented}
       />
 
       {/* Login Modal */}
