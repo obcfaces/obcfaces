@@ -429,19 +429,8 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
   const invalidPhoto1 = showProfileErrors && !photo1File;
   const invalidPhoto2 = showProfileErrors && !photo2File;
 
-  // Helper function for field styling
-  const getFieldClasses = (isInvalid: boolean, isFilled: boolean) => {
-    let classes = "text-sm placeholder:text-muted-foreground";
-    if (isInvalid) {
-      classes += " border-2 border-red-500 focus:ring-red-500 focus:border-red-500";
-    } else if (isFilled) {
-      classes += " border-2 border-green-500 focus:ring-green-500 focus:border-green-500";
-    }
-    return classes;
-  };
-
-  // Helper function for Select components
-  const getSelectClasses = (isInvalid: boolean, isFilled: boolean) => {
+  // Helper function for ALL field styling - unified approach
+  const getUnifiedFieldClasses = (isInvalid: boolean, isFilled: boolean) => {
     if (isInvalid) {
       return "border-2 border-red-500 focus:ring-red-500 focus:border-red-500";
     } else if (isFilled) {
@@ -546,7 +535,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
               <Input
                 id="first_name"
                 placeholder="First name"
-                className={getFieldClasses(invalidFirstName, isFirstNameFilled)}
+                className={getUnifiedFieldClasses(invalidFirstName, isFirstNameFilled)}
                 value={formData.first_name}
                 onChange={(e) => setFormData({...formData, first_name: e.target.value})}
                 aria-invalid={invalidFirstName}
@@ -555,14 +544,14 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
               <Input
                 id="last_name"
                 placeholder="Last name"
-                className={getFieldClasses(invalidLastName, isLastNameFilled)}
+                className={getUnifiedFieldClasses(invalidLastName, isLastNameFilled)}
                 value={formData.last_name}
                 onChange={(e) => setFormData({...formData, last_name: e.target.value})}
                 aria-invalid={invalidLastName}
                 required
               />
               <Select value={formData.gender} onValueChange={(value) => setFormData({...formData, gender: value})}>
-                <SelectTrigger className={getSelectClasses(invalidGender, isGenderFilled)}>
+                <SelectTrigger className={getUnifiedFieldClasses(invalidGender, isGenderFilled)}>
                   <SelectValue placeholder="Gender" />
                 </SelectTrigger>
                 <SelectContent>
@@ -590,8 +579,8 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                   });
                   setStateCode(null);
                 }}
-                invalid={invalidCountry}
-                highlightSelected={isCountryFilled}
+                  invalid={invalidCountry}
+                  highlightSelected={isCountryFilled}
               />
               
               <SearchableSelect
@@ -610,8 +599,8 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                   });
                   setShowCityInput(false); // Reset manual input when state changes
                 }}
-                invalid={invalidState}
-                highlightSelected={isStateFilled}
+                  invalid={invalidState}
+                  highlightSelected={isStateFilled}
               />
               
               {cities.length === 0 ? (
@@ -619,14 +608,14 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                   placeholder="Enter city name"
                   value={formData.city}
                   onChange={(e) => setFormData({...formData, city: e.target.value})}
-                  className={getFieldClasses(invalidCity, isCityFilled)}
+                  className={getUnifiedFieldClasses(invalidCity, isCityFilled)}
                 />
               ) : showCityInput ? (
                 <Input
                   placeholder="Enter city name"
                   value={formData.city}
                   onChange={(e) => setFormData({...formData, city: e.target.value})}
-                  className={getFieldClasses(invalidCity, isCityFilled)}
+                  className={getUnifiedFieldClasses(invalidCity, isCityFilled)}
                 />
               ) : (
                 <SearchableSelect
@@ -642,8 +631,8 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                       setFormData({...formData, city: value});
                     }
                   }}
-                  invalid={invalidCity}
-                  highlightSelected={isCityFilled}
+                    invalid={invalidCity}
+                    highlightSelected={isCityFilled}
                 />
               )}
             </div>
@@ -651,7 +640,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
             <div className="grid gap-2 sm:grid-cols-2">
               <div className="grid grid-cols-3 gap-1">
                 <Select value={formData.birth_day} onValueChange={(value) => setFormData({...formData, birth_day: value})}>
-                  <SelectTrigger className={getSelectClasses(invalidBirthDay, isBirthDayFilled)}>
+                  <SelectTrigger className={getUnifiedFieldClasses(invalidBirthDay, isBirthDayFilled)}>
                     <SelectValue placeholder="Day of birth" />
                   </SelectTrigger>
                   <SelectContent>
@@ -662,7 +651,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                 </Select>
                 
                 <Select value={formData.birth_month} onValueChange={(value) => setFormData({...formData, birth_month: value})}>
-                  <SelectTrigger className={getSelectClasses(invalidBirthMonth, isBirthMonthFilled)}>
+                  <SelectTrigger className={getUnifiedFieldClasses(invalidBirthMonth, isBirthMonthFilled)}>
                     <SelectValue placeholder="Month of birth" />
                   </SelectTrigger>
                   <SelectContent>
@@ -676,7 +665,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                 </Select>
                 
                 <Select value={formData.birth_year} onValueChange={(value) => setFormData({...formData, birth_year: value})}>
-                  <SelectTrigger className={getSelectClasses(invalidBirthYear, isBirthYearFilled)}>
+                  <SelectTrigger className={getUnifiedFieldClasses(invalidBirthYear, isBirthYearFilled)}>
                     <SelectValue placeholder="Year of birth" />
                   </SelectTrigger>
                   <SelectContent>
@@ -690,7 +679,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
 
             <div className="grid gap-2 grid-cols-2">
               <Select value={formData.marital_status} onValueChange={(value) => setFormData({...formData, marital_status: value})}>
-                <SelectTrigger className={getSelectClasses(invalidMaritalStatus, isMaritalStatusFilled)}>
+                <SelectTrigger className={getUnifiedFieldClasses(invalidMaritalStatus, isMaritalStatusFilled)}>
                   <SelectValue placeholder="Marital status" />
                 </SelectTrigger>
                 <SelectContent>
@@ -705,7 +694,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                 value={formData.has_children !== undefined ? formData.has_children.toString() : ""} 
                 onValueChange={(value) => setFormData({...formData, has_children: value === 'true'})}
               >
-                <SelectTrigger className={getSelectClasses(invalidChildren, isChildrenFilled)}>
+                <SelectTrigger className={getUnifiedFieldClasses(invalidChildren, isChildrenFilled)}>
                   <SelectValue placeholder="Do you have children?" />
                 </SelectTrigger>
                 <SelectContent>
@@ -717,7 +706,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
 
             <div className="grid gap-2 grid-cols-3">
                <Select value={formData.measurement_system || 'metric'} onValueChange={(value) => setFormData({...formData, measurement_system: value})}>
-                <SelectTrigger className={getSelectClasses(false, !!formData.measurement_system)}>
+                <SelectTrigger className={getUnifiedFieldClasses(false, !!formData.measurement_system)}>
                   <SelectValue placeholder="System" />
                 </SelectTrigger>
                 <SelectContent>
@@ -727,7 +716,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
               </Select>
               
               <Select value={formData.height_cm} onValueChange={(value) => setFormData({...formData, height_cm: value})}>
-                <SelectTrigger className={getSelectClasses(invalidHeight, isHeightFilled)}>
+                <SelectTrigger className={getUnifiedFieldClasses(invalidHeight, isHeightFilled)}>
                   <SelectValue placeholder={formData.measurement_system === 'imperial' ? "Height (ft)" : "Height (cm)"} />
                 </SelectTrigger>
                 <SelectContent>
@@ -756,7 +745,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
               </Select>
               
               <Select value={formData.weight_kg} onValueChange={(value) => setFormData({...formData, weight_kg: value})}>
-                <SelectTrigger className={getSelectClasses(invalidWeight, isWeightFilled)}>
+                <SelectTrigger className={getUnifiedFieldClasses(invalidWeight, isWeightFilled)}>
                   <SelectValue placeholder={formData.measurement_system === 'imperial' ? "Weight (lbs)" : "Weight (kg)"} />
                 </SelectTrigger>
                 <SelectContent>
