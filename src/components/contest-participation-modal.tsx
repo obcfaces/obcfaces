@@ -600,22 +600,11 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                     ) : (
                       <div className="p-6 text-center">
                         <div className="h-40 bg-muted/50 rounded-lg mb-3 flex items-center justify-center relative">
-                          {/* Female portrait silhouette */}
-                          <div className="relative">
-                            {/* Head */}
-                            <div className="w-12 h-16 bg-muted-foreground/30 rounded-full mx-auto relative">
-                              {/* Hair */}
-                              <div className="absolute -top-1 -left-1 -right-1 h-12 bg-muted-foreground/25 rounded-full"></div>
-                              {/* Face */}
-                              <div className="absolute top-3 left-1/2 transform -translate-x-1/2 w-8 h-10 bg-muted-foreground/35 rounded-full"></div>
-                            </div>
-                            {/* Neck */}
-                            <div className="w-3 h-3 bg-muted-foreground/30 mx-auto"></div>
-                            {/* Shoulders */}
-                            <div className="w-20 h-8 bg-muted-foreground/25 rounded-t-full mx-auto relative">
-                              <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-4 h-6 bg-muted-foreground/30"></div>
-                            </div>
-                          </div>
+                          <img 
+                            src="/lovable-uploads/1147be30-a1d2-466f-a9a8-067f4628cbb2.png" 
+                            alt="Portrait placeholder" 
+                            className="w-20 h-24 object-contain opacity-60"
+                          />
                         </div>
                         <p className="text-sm text-muted-foreground mb-2">one portrait photo</p>
                         <button type="button" className="px-4 py-2 bg-primary text-primary-foreground rounded text-sm hover:bg-primary/90 transition-colors">
