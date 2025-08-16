@@ -1240,7 +1240,7 @@ const Profile = () => {
                             setEditingField('avatar');
                             setIsEditingProfile(true);
                           }}
-                          className="p-1 hover:bg-accent rounded-md transition-colors ml-2"
+                          className="p-1 hover:bg-accent rounded-md transition-colors"
                           aria-label="Edit profile photo"
                         >
                           <Pencil className="h-4 w-4 text-muted-foreground" />
@@ -1253,7 +1253,7 @@ const Profile = () => {
                   <div className="space-y-4">
                     <div className="space-y-3">
                       {/* Display Name */}
-                      <div className="flex items-center justify-between py-3 border-b border-border">
+                      <div className="flex items-center py-3 border-b border-border">
                         <div className="flex-1">
                           {editingField === 'display_name' ? (
                             <div className="space-y-2">
@@ -1301,7 +1301,7 @@ const Profile = () => {
                               setEditingField('display_name');
                               setEditForm(prev => ({ ...prev, display_name: profile.display_name || '' }));
                             }}
-                            className="p-1 hover:bg-accent rounded-md transition-colors ml-2"
+                            className="p-1 hover:bg-accent rounded-md transition-colors ml-3"
                             aria-label="Edit display name"
                           >
                             <Pencil className="h-4 w-4 text-muted-foreground" />
@@ -1311,7 +1311,7 @@ const Profile = () => {
 
                       {/* Email */}
                       {isOwner && (
-                        <div className="flex items-center justify-between py-3 border-b border-border">
+                        <div className="flex items-center py-3 border-b border-border">
                           <div className="flex-1">
                             {editingField === 'email' ? (
                               <div className="space-y-2">
@@ -1364,7 +1364,7 @@ const Profile = () => {
                                 setEditingField('email');
                                 setEditForm(prev => ({ ...prev, email: currentUserEmail || '' }));
                               }}
-                              className="p-1 hover:bg-accent rounded-md transition-colors ml-2"
+                              className="p-1 hover:bg-accent rounded-md transition-colors ml-3"
                               aria-label="Edit email"
                             >
                               <Pencil className="h-4 w-4 text-muted-foreground" />
@@ -1373,26 +1373,9 @@ const Profile = () => {
                         </div>
                       )}
 
-                      {/* Add pronouns link */}
-                      {isOwner && (
-                        <div className="py-3 border-b border-border">
-                          <button className="text-sm text-primary hover:underline">
-                            Add pronouns
-                          </button>
-                        </div>
-                      )}
-
-                      {/* Add languages link */}
-                      {isOwner && (
-                        <div className="py-3 border-b border-border">
-                          <button className="text-sm text-primary hover:underline">
-                            Add languages
-                          </button>
-                        </div>
-                      )}
 
                       {/* Gender */}
-                      <div className="flex items-center justify-between py-3 border-b border-border">
+                      <div className="flex items-center py-3 border-b border-border">
                         <div className="flex-1">
                           {editingField === 'gender' ? (
                             <div className="space-y-2">
@@ -1442,7 +1425,7 @@ const Profile = () => {
                               setEditingField('gender');
                               setEditForm(prev => ({ ...prev, gender: profile.gender || '' }));
                             }}
-                            className="p-1 hover:bg-accent rounded-md transition-colors ml-2"
+                            className="p-1 hover:bg-accent rounded-md transition-colors ml-3"
                             aria-label="Edit gender"
                           >
                             <Pencil className="h-4 w-4 text-muted-foreground" />
@@ -1451,7 +1434,7 @@ const Profile = () => {
                       </div>
 
                       {/* Date of birth */}
-                      <div className="flex items-center justify-between py-3 border-b border-border">
+                      <div className="flex items-center py-3 border-b border-border">
                         <div className="flex-1">
                           <div className="text-sm text-muted-foreground">Date of birth</div>
                           <div className="text-sm font-medium text-foreground">
@@ -1469,7 +1452,7 @@ const Profile = () => {
                         {isOwner && (
                           <button
                             onClick={() => setEditingField('birthdate')}
-                            className="p-1 hover:bg-accent rounded-md transition-colors ml-2"
+                            className="p-1 hover:bg-accent rounded-md transition-colors ml-3"
                             aria-label="Edit date of birth"
                           >
                             <Pencil className="h-4 w-4 text-muted-foreground" />
@@ -1478,7 +1461,7 @@ const Profile = () => {
                       </div>
                       
                       {/* Country */}
-                      <div className="flex items-center justify-between py-3 border-b border-border">
+                      <div className="flex items-center py-3 border-b border-border">
                         <div className="flex-1">
                           {editingField === 'country' ? (
                             <div className="space-y-2">
@@ -1525,7 +1508,7 @@ const Profile = () => {
                               setEditingField('country');
                               setEditForm(prev => ({ ...prev, country: profile.country || '' }));
                             }}
-                            className="p-1 hover:bg-accent rounded-md transition-colors ml-2"
+                            className="p-1 hover:bg-accent rounded-md transition-colors ml-3"
                             aria-label="Edit country"
                           >
                             <Pencil className="h-4 w-4 text-muted-foreground" />
@@ -1534,7 +1517,7 @@ const Profile = () => {
                       </div>
                       
                       {/* Bio */}
-                      <div className="flex items-center justify-between py-3">
+                      <div className="flex items-center py-3">
                         <div className="flex-1">
                           {editingField === 'bio' ? (
                             <div className="space-y-2">
@@ -1582,7 +1565,7 @@ const Profile = () => {
                               setEditingField('bio');
                               setEditForm(prev => ({ ...prev, bio: profile.bio || '' }));
                             }}
-                            className="p-1 hover:bg-accent rounded-md transition-colors ml-2"
+                            className="p-1 hover:bg-accent rounded-md transition-colors ml-3"
                             aria-label="Edit bio"
                           >
                             <Pencil className="h-4 w-4 text-muted-foreground" />
