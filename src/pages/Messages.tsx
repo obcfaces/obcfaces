@@ -5,103 +5,144 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 interface Message {
   id: string;
-  senderId: string;
+  sender_id: string;
   content: string;
-  timestamp: Date;
-  type: 'text' | 'image';
+  created_at: string;
+  message_type: string;
 }
 
 interface Chat {
   id: string;
   name: string;
-  avatar?: string;
-  lastMessage: string;
-  lastMessageTime: Date;
-  unreadCount: number;
-  isOnline: boolean;
+  avatar_url?: string;
+  last_message: string;
+  last_message_time: string;
+  unread_count: number;
+  is_online: boolean;
+  other_user_id: string;
 }
 
 const Messages = () => {
   const [selectedChat, setSelectedChat] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [newMessage, setNewMessage] = useState("");
+  const [chats, setChats] = useState<Chat[]>([]);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const { toast } = useToast();
 
-  // Mock data
-  const chats: Chat[] = [
-    {
-      id: "1",
-      name: "Anna Petrova",
-      lastMessage: "Hey! How are you doing?",
-      lastMessageTime: new Date(Date.now() - 1000 * 60 * 5), // 5 minutes ago
-      unreadCount: 2,
-      isOnline: true
-    },
-    {
-      id: "2", 
-      name: "Maria Santos",
-      lastMessage: "Thanks for the support!",
-      lastMessageTime: new Date(Date.now() - 1000 * 60 * 30), // 30 minutes ago
-      unreadCount: 0,
-      isOnline: false
-    },
-    {
-      id: "3",
-      name: "Sofia Rodriguez",
-      lastMessage: "Looking forward to the contest!",
-      lastMessageTime: new Date(Date.now() - 1000 * 60 * 60 * 2), // 2 hours ago
-      unreadCount: 1,
-      isOnline: true
+  // Get current user
+  useEffect(() => {
+    const getCurrentUser = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        setCurrentUserId(session.user.id);
+        await loadConversations(session.user.id);
+      }
+      setLoading(false);
+    };
+
+    getCurrentUser();
+  }, []);
+
+  // Load conversations
+  const loadConversations = async (userId: string) => {
+    try {
+      const { data: conversations, error } = await supabase
+        .from('conversation_participants')
+        .select(`
+          conversation_id,
+          conversations!inner(
+            id,
+            updated_at
+          )
+        `)
+        .eq('user_id', userId);
+
+      if (error) throw error;
+
+      // For each conversation, get the other participant and last message
+      const chatPromises = conversations?.map(async (conv) => {
+        // Get other participant
+        const { data: otherParticipant } = await supabase
+          .from('conversation_participants')
+          .select('user_id')
+          .eq('conversation_id', conv.conversation_id)
+          .neq('user_id', userId)
+          .single();
+
+        // Get participant profile
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('display_name, avatar_url, first_name, last_name')
+          .eq('id', otherParticipant?.user_id)
+          .single();
+
+        // Get last message
+        const { data: lastMessage } = await supabase
+          .from('messages')
+          .select('content, created_at')
+          .eq('conversation_id', conv.conversation_id)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .single();
+
+        const displayName = profile?.display_name || 
+          [profile?.first_name, profile?.last_name].filter(Boolean).join(' ') || 
+          'Unknown User';
+
+        return {
+          id: conv.conversation_id,
+          name: displayName,
+          avatar_url: profile?.avatar_url,
+          last_message: lastMessage?.content || 'No messages yet',
+          last_message_time: lastMessage?.created_at || conv.conversations.updated_at,
+          unread_count: 0, // TODO: Implement unread count
+          is_online: false, // TODO: Implement online status
+          other_user_id: otherParticipant?.user_id || ''
+        };
+      }) || [];
+
+      const chatsData = await Promise.all(chatPromises);
+      setChats(chatsData.sort((a, b) => 
+        new Date(b.last_message_time).getTime() - new Date(a.last_message_time).getTime()
+      ));
+    } catch (error) {
+      console.error('Error loading conversations:', error);
     }
-  ];
-
-  const messages: { [chatId: string]: Message[] } = {
-    "1": [
-      {
-        id: "m1",
-        senderId: "other",
-        content: "Hey! How are you doing?",
-        timestamp: new Date(Date.now() - 1000 * 60 * 5),
-        type: 'text'
-      },
-      {
-        id: "m2",
-        senderId: "me", 
-        content: "Hi Anna! I'm doing great, thanks for asking. How about you?",
-        timestamp: new Date(Date.now() - 1000 * 60 * 3),
-        type: 'text'
-      },
-      {
-        id: "m3",
-        senderId: "other",
-        content: "I'm good too! Excited about the contest this week.",
-        timestamp: new Date(Date.now() - 1000 * 60 * 1),
-        type: 'text'
-      }
-    ],
-    "2": [
-      {
-        id: "m4",
-        senderId: "other",
-        content: "Thanks for the support!",
-        timestamp: new Date(Date.now() - 1000 * 60 * 30),
-        type: 'text'
-      }
-    ],
-    "3": [
-      {
-        id: "m5",
-        senderId: "other",
-        content: "Looking forward to the contest!",
-        timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2),
-        type: 'text'
-      }
-    ]
   };
 
-  const formatTime = (date: Date) => {
+  // Load messages for selected conversation
+  const loadMessages = async (conversationId: string) => {
+    try {
+      const { data: messagesData, error } = await supabase
+        .from('messages')
+        .select('*')
+        .eq('conversation_id', conversationId)
+        .order('created_at', { ascending: true });
+
+      if (error) throw error;
+      setMessages(messagesData || []);
+    } catch (error) {
+      console.error('Error loading messages:', error);
+    }
+  };
+
+  // Handle chat selection
+  useEffect(() => {
+    if (selectedChat) {
+      loadMessages(selectedChat);
+    }
+  }, [selectedChat]);
+
+  const formatTime = (dateString: string) => {
+    const date = new Date(dateString);
     const now = new Date();
     const diffInHours = (now.getTime() - date.getTime()) / (1000 * 60 * 60);
     
@@ -115,7 +156,8 @@ const Messages = () => {
     }
   };
 
-  const formatMessageTime = (date: Date) => {
+  const formatMessageTime = (dateString: string) => {
+    const date = new Date(dateString);
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
 
@@ -124,14 +166,37 @@ const Messages = () => {
   );
 
   const selectedChatData = chats.find(chat => chat.id === selectedChat);
-  const chatMessages = selectedChat ? messages[selectedChat] || [] : [];
 
-  const handleSendMessage = () => {
-    if (!newMessage.trim() || !selectedChat) return;
+  const handleSendMessage = async () => {
+    if (!newMessage.trim() || !selectedChat || !currentUserId) return;
     
-    // Here you would typically send the message to your backend
-    console.log('Sending message:', newMessage);
-    setNewMessage("");
+    try {
+      const { error } = await supabase
+        .from('messages')
+        .insert({
+          conversation_id: selectedChat,
+          sender_id: currentUserId,
+          content: newMessage.trim(),
+          message_type: 'text'
+        });
+
+      if (error) throw error;
+
+      setNewMessage("");
+      await loadMessages(selectedChat);
+      
+      // Update conversations list to reflect new message
+      if (currentUserId) {
+        await loadConversations(currentUserId);
+      }
+    } catch (error) {
+      console.error('Error sending message:', error);
+      toast({
+        title: "Error",
+        description: "Failed to send message. Please try again.",
+        variant: "destructive"
+      });
+    }
   };
 
   return (
@@ -161,47 +226,61 @@ const Messages = () => {
 
           {/* Chat List */}
           <ScrollArea className="flex-1">
-            <div className="divide-y divide-border">
-              {filteredChats.map((chat) => (
-                <div
-                  key={chat.id}
-                  onClick={() => setSelectedChat(chat.id)}
-                  className={`p-3 cursor-pointer hover:bg-accent transition-colors ${
-                    selectedChat === chat.id ? 'bg-accent' : ''
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="relative">
-                      <Avatar className="h-12 w-12">
-                        <AvatarImage src={chat.avatar} alt={chat.name} />
-                        <AvatarFallback>
-                          {chat.name.split(' ').map(n => n[0]).join('')}
-                        </AvatarFallback>
-                      </Avatar>
-                      {chat.isOnline && (
-                        <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-background"></div>
-                      )}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between">
-                        <h3 className="font-medium text-sm truncate">{chat.name}</h3>
-                        <span className="text-xs text-muted-foreground">
-                          {formatTime(chat.lastMessageTime)}
-                        </span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <p className="text-sm text-muted-foreground truncate">{chat.lastMessage}</p>
-                        {chat.unreadCount > 0 && (
-                          <span className="bg-primary text-primary-foreground text-xs rounded-full px-2 py-1 min-w-[20px] text-center">
-                            {chat.unreadCount}
-                          </span>
+            {loading ? (
+              <div className="flex items-center justify-center p-8">
+                <div className="text-center">
+                  <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
+                  <p className="text-sm text-muted-foreground">Loading conversations...</p>
+                </div>
+              </div>
+            ) : (
+              <div className="divide-y divide-border">
+                {filteredChats.length > 0 ? filteredChats.map((chat) => (
+                  <div
+                    key={chat.id}
+                    onClick={() => setSelectedChat(chat.id)}
+                    className={`p-3 cursor-pointer hover:bg-accent transition-colors ${
+                      selectedChat === chat.id ? 'bg-accent' : ''
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="relative">
+                        <Avatar className="h-12 w-12">
+                          <AvatarImage src={chat.avatar_url} alt={chat.name} />
+                          <AvatarFallback>
+                            {chat.name.split(' ').map(n => n[0]).join('')}
+                          </AvatarFallback>
+                        </Avatar>
+                        {chat.is_online && (
+                          <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-background"></div>
                         )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between">
+                          <h3 className="font-medium text-sm truncate">{chat.name}</h3>
+                          <span className="text-xs text-muted-foreground">
+                            {formatTime(chat.last_message_time)}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <p className="text-sm text-muted-foreground truncate">{chat.last_message}</p>
+                          {chat.unread_count > 0 && (
+                            <span className="bg-primary text-primary-foreground text-xs rounded-full px-2 py-1 min-w-[20px] text-center">
+                              {chat.unread_count}
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                )) : (
+                  <div className="p-8 text-center">
+                    <MessageCircle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                    <p className="text-muted-foreground">No conversations yet</p>
+                  </div>
+                )}
+              </div>
+            )}
           </ScrollArea>
         </div>
 
@@ -214,19 +293,19 @@ const Messages = () => {
                 <div className="flex items-center gap-3">
                   <div className="relative">
                     <Avatar className="h-10 w-10">
-                      <AvatarImage src={selectedChatData.avatar} alt={selectedChatData.name} />
+                      <AvatarImage src={selectedChatData.avatar_url} alt={selectedChatData.name} />
                       <AvatarFallback>
                         {selectedChatData.name.split(' ').map(n => n[0]).join('')}
                       </AvatarFallback>
                     </Avatar>
-                    {selectedChatData.isOnline && (
+                    {selectedChatData.is_online && (
                       <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-background"></div>
                     )}
                   </div>
                   <div>
                     <h2 className="font-medium">{selectedChatData.name}</h2>
                     <p className="text-sm text-muted-foreground">
-                      {selectedChatData.isOnline ? 'Active now' : 'Last seen recently'}
+                      {selectedChatData.is_online ? 'Active now' : 'Last seen recently'}
                     </p>
                   </div>
                 </div>
@@ -246,23 +325,23 @@ const Messages = () => {
               {/* Messages Area */}
               <ScrollArea className="flex-1 p-4">
                 <div className="space-y-4">
-                  {chatMessages.map((message) => (
+                  {messages.map((message) => (
                     <div
                       key={message.id}
-                      className={`flex ${message.senderId === 'me' ? 'justify-end' : 'justify-start'}`}
+                      className={`flex ${message.sender_id === currentUserId ? 'justify-end' : 'justify-start'}`}
                     >
                       <div className={`max-w-xs lg:max-w-md px-4 py-2 rounded-2xl ${
-                        message.senderId === 'me'
+                        message.sender_id === currentUserId
                           ? 'bg-primary text-primary-foreground'
                           : 'bg-muted'
                       }`}>
                         <p className="text-sm">{message.content}</p>
                         <p className={`text-xs mt-1 ${
-                          message.senderId === 'me' 
+                          message.sender_id === currentUserId
                             ? 'text-primary-foreground/70' 
                             : 'text-muted-foreground'
                         }`}>
-                          {formatMessageTime(message.timestamp)}
+                          {formatMessageTime(message.created_at)}
                         </p>
                       </div>
                     </div>

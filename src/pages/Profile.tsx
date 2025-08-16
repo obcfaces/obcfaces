@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import SearchableSelect from "@/components/ui/searchable-select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { LogOut, Eye, EyeOff, UserIcon, MapPin, Pencil, Lock } from "lucide-react";
+import { LogOut, Eye, EyeOff, UserIcon, MapPin, Pencil, Lock, MessageCircle } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import PostCard from "@/components/profile/PostCard";
 import LikedItem from "@/components/profile/LikedItem";
@@ -765,8 +765,16 @@ const Profile = () => {
                  <Button className="bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200">
                    🏆 Join & Win 5,000 PHP
                  </Button>
-              </ContestParticipationModal>
+               </ContestParticipationModal>
                <Button variant="outline">Add Post</Button>
+               {!isOwner && (
+                 <Button variant="outline" asChild>
+                   <Link to="/messages">
+                     <MessageCircle className="w-4 h-4 mr-1" />
+                     Message
+                   </Link>
+                 </Button>
+               )}
                {!isOwner && (
                  <div className="text-xs text-muted-foreground">
                    Debug: isOwner={String(isOwner)}, currentUserId={currentUserId}, id={id}
