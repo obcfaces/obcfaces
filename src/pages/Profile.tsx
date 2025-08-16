@@ -7,7 +7,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { LogOut } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { LogOut, Eye, EyeOff, UserIcon, MapPin } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import PostCard from "@/components/profile/PostCard";
 import LikedItem from "@/components/profile/LikedItem";
@@ -35,6 +36,7 @@ interface ProfileRow {
   city?: string | null;
   country?: string | null;
   bio?: string | null;
+  gender?: string | null;
 }
 
 const Profile = () => {
@@ -53,15 +55,18 @@ const Profile = () => {
   const [savingBio, setSavingBio] = useState(false);
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [editForm, setEditForm] = useState({
-    first_name: "",
-    last_name: "",
-    display_name: "",
-    birthdate: "",
-    height_cm: "",
-    weight_kg: "",
-    bio: ""
+    display_name: '',
+    gender: '',
+    country: '',
+    bio: '',
+    email: '',
+    password: ''
   });
+  const [showPassword, setShowPassword] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [invalidFields, setInvalidFields] = useState<Set<string>>(new Set());
   const [savingProfile, setSavingProfile] = useState(false);
+  const [activeTab, setActiveTab] = useState("Posts");
   const [likedItems, setLikedItems] = useState<any[]>([]);
   const [loadingLikes, setLoadingLikes] = useState(true);
   const [likesViewMode, setLikesViewMode] = useState<'compact' | 'full'>('compact');
@@ -99,7 +104,7 @@ const Profile = () => {
       try {
         const { data: profileData } = await supabase
           .from("profiles")
-          .select("display_name, first_name, last_name, birthdate, height_cm, weight_kg, avatar_url, city, country, bio")
+          .select("display_name, first_name, last_name, birthdate, height_cm, weight_kg, avatar_url, city, country, bio, gender")
           .eq("id", id)
           .maybeSingle();
         
@@ -183,50 +188,103 @@ const Profile = () => {
     }
   };
 
+  // Check if a field should have red border
+  const hasRedBorder = (fieldName: string) => {
+    return submitted && invalidFields.has(fieldName);
+  };
+
+  // Get CSS classes for form fields
+  const getFieldClasses = (fieldName: string, baseClasses: string = "") => {
+    if (hasRedBorder(fieldName)) {
+      return `${baseClasses} border border-red-500`.trim();
+    }
+    return baseClasses;
+  };
+
   const initEditForm = () => {
     setEditForm({
-      first_name: profile.first_name || "",
-      last_name: profile.last_name || "",
-      display_name: profile.display_name || "",
-      birthdate: profile.birthdate || "",
-      height_cm: profile.height_cm?.toString() || "",
-      weight_kg: profile.weight_kg?.toString() || "",
-      bio: profile.bio || ""
+      display_name: profile.display_name || '',
+      gender: data?.gender || '',
+      country: profile.country || '',
+      bio: profile.bio || '',
+      email: currentUserId ? '' : '', // We'll need to get this from auth
+      password: ''
     });
     setIsEditingProfile(true);
+    setActiveTab('About');
+    setSubmitted(false);
+    setInvalidFields(new Set());
   };
 
   const handleEditFormChange = (field: string, value: string) => {
     setEditForm(prev => ({ ...prev, [field]: value }));
+    
+    // Remove field from invalid set when user types
+    if (invalidFields.has(field)) {
+      setInvalidFields(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(field);
+        return newSet;
+      });
+    }
   };
 
   const handleSaveProfile = async () => {
     if (!currentUserId || currentUserId !== id) return;
     
+    setSubmitted(true);
+
+    // Validate required fields
+    const newInvalidFields = new Set<string>();
+    if (!editForm.display_name.trim()) newInvalidFields.add('display_name');
+    if (!editForm.gender) newInvalidFields.add('gender');
+    if (!editForm.country.trim()) newInvalidFields.add('country');
+    if (editForm.email && !editForm.email.trim()) newInvalidFields.add('email');
+
+    setInvalidFields(newInvalidFields);
+
+    if (newInvalidFields.size > 0) {
+      return;
+    }
+    
     setSavingProfile(true);
     try {
+      // Update profile data
       const updates: any = {
-        first_name: editForm.first_name,
-        last_name: editForm.last_name,
         display_name: editForm.display_name,
-        birthdate: editForm.birthdate || null,
-        height_cm: editForm.height_cm ? parseInt(editForm.height_cm) : null,
-        weight_kg: editForm.weight_kg ? parseInt(editForm.weight_kg) : null,
+        gender: editForm.gender,
+        country: editForm.country,
         bio: editForm.bio
       };
 
-      const { error } = await supabase
+      const { error: profileError } = await supabase
         .from("profiles")
         .update(updates)
         .eq("id", id);
       
-      if (error) throw error;
+      if (profileError) throw profileError;
+
+      // Update email if provided
+      if (editForm.email) {
+        const { error: emailError } = await supabase.auth.updateUser({
+          email: editForm.email
+        });
+        if (emailError) throw emailError;
+      }
+
+      // Update password if provided
+      if (editForm.password) {
+        const { error: passwordError } = await supabase.auth.updateUser({
+          password: editForm.password
+        });
+        if (passwordError) throw passwordError;
+      }
       
       setData(prev => prev ? { ...prev, ...updates } : null);
       setIsEditingProfile(false);
       toast({ description: "Профиль сохранен" });
-    } catch (error) {
-      toast({ description: "Ошибка при сохранении профиля" });
+    } catch (error: any) {
+      toast({ description: error.message || "Ошибка при сохранении профиля" });
     } finally {
       setSavingProfile(false);
     }
@@ -515,7 +573,7 @@ const Profile = () => {
           </div>
 
           {/* Tabs */}
-          <Tabs defaultValue="likes" value={isEditingProfile ? "about" : undefined} className="mt-8">
+          <Tabs defaultValue="likes" value={isEditingProfile ? "about" : activeTab} className="mt-8">
             <TabsList className="w-full bg-transparent p-0 rounded-none justify-start gap-2 sm:gap-8 border-b border-border overflow-x-auto">
               <TabsTrigger value="likes" className="px-0 mr-2 sm:mr-6 h-auto pb-2 bg-transparent rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary text-muted-foreground hover:text-foreground text-sm sm:text-base whitespace-nowrap">Likes</TabsTrigger>
               <TabsTrigger value="posts" className="px-0 mr-2 sm:mr-6 h-auto pb-2 bg-transparent rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary text-muted-foreground hover:text-foreground text-sm sm:text-base whitespace-nowrap">Posts</TabsTrigger>
@@ -718,113 +776,105 @@ const Profile = () => {
 
             <TabsContent value="about" className="mt-8">
               {isEditingProfile ? (
-                <div className="space-y-6">
-                  <div className="flex items-center justify-between">
-                    <h2 className="text-lg font-semibold">Редактирование профиля</h2>
-                    <div className="flex gap-2">
-                      <Button 
-                        variant="outline" 
-                        onClick={() => setIsEditingProfile(false)}
-                        disabled={savingProfile}
+                <div className="space-y-3">
+                  <div className="space-y-2">
+                    <Input 
+                      placeholder="Имя на сайте" 
+                      className={getFieldClasses('display_name', "text-sm placeholder:text-muted-foreground")}
+                      value={editForm.display_name} 
+                      onChange={(e) => handleEditFormChange('display_name', e.target.value)} 
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Select value={editForm.gender} onValueChange={(value) => handleEditFormChange('gender', value)}>
+                      <SelectTrigger className={getFieldClasses('gender', "text-sm")}>
+                        <SelectValue placeholder="Пол" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="male">Мужской</SelectItem>
+                        <SelectItem value="female">Женский</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Input 
+                      placeholder="Страна" 
+                      className={getFieldClasses('country', "text-sm placeholder:text-muted-foreground")}
+                      value={editForm.country} 
+                      onChange={(e) => handleEditFormChange('country', e.target.value)} 
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Input 
+                      placeholder="О себе" 
+                      className="text-sm placeholder:text-muted-foreground"
+                      value={editForm.bio} 
+                      onChange={(e) => handleEditFormChange('bio', e.target.value)} 
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Input 
+                      type="email"
+                      placeholder="Email" 
+                      className={getFieldClasses('email', "text-sm placeholder:text-muted-foreground")}
+                      value={editForm.email} 
+                      onChange={(e) => handleEditFormChange('email', e.target.value)} 
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="relative">
+                      <Input 
+                        type={showPassword ? "text" : "password"} 
+                        placeholder="Новый пароль (оставьте пустым если не хотите менять)" 
+                        className="pr-10 text-sm placeholder:text-muted-foreground"
+                        value={editForm.password} 
+                        onChange={(e) => handleEditFormChange('password', e.target.value)} 
+                      />
+                      <button 
+                        type="button" 
+                        aria-label={showPassword ? "Hide password" : "Show password"} 
+                        onClick={() => setShowPassword((v) => !v)} 
+                        className="absolute inset-y-0 right-2 inline-flex items-center text-muted-foreground hover:text-foreground"
                       >
-                        Отмена
-                      </Button>
-                      <Button 
-                        onClick={handleSaveProfile}
-                        disabled={savingProfile}
-                      >
-                        {savingProfile ? "Сохранение..." : "Сохранить"}
-                      </Button>
+                        {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                      </button>
                     </div>
                   </div>
                   
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    <div className="space-y-4">
-                      <div>
-                        <Label htmlFor="first_name">Имя</Label>
-                        <Input
-                          id="first_name"
-                          value={editForm.first_name}
-                          onChange={(e) => handleEditFormChange("first_name", e.target.value)}
-                          placeholder="Введите имя"
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="last_name">Фамилия</Label>
-                        <Input
-                          id="last_name"
-                          value={editForm.last_name}
-                          onChange={(e) => handleEditFormChange("last_name", e.target.value)}
-                          placeholder="Введите фамилию"
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="display_name">Отображаемое имя</Label>
-                        <Input
-                          id="display_name"
-                          value={editForm.display_name}
-                          onChange={(e) => handleEditFormChange("display_name", e.target.value)}
-                          placeholder="Введите отображаемое имя"
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="birthdate">Дата рождения</Label>
-                        <Input
-                          id="birthdate"
-                          type="date"
-                          value={editForm.birthdate}
-                          onChange={(e) => handleEditFormChange("birthdate", e.target.value)}
-                        />
-                      </div>
-                    </div>
-                    
-                    <div className="space-y-4">
-                      <div>
-                        <Label htmlFor="height_cm">Рост (см)</Label>
-                        <Input
-                          id="height_cm"
-                          type="number"
-                          value={editForm.height_cm}
-                          onChange={(e) => handleEditFormChange("height_cm", e.target.value)}
-                          placeholder="Введите рост в см"
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="weight_kg">Вес (кг)</Label>
-                        <Input
-                          id="weight_kg"
-                          type="number"
-                          value={editForm.weight_kg}
-                          onChange={(e) => handleEditFormChange("weight_kg", e.target.value)}
-                          placeholder="Введите вес в кг"
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="bio">О себе</Label>
-                        <Input
-                          id="bio"
-                          value={editForm.bio}
-                          onChange={(e) => handleEditFormChange("bio", e.target.value)}
-                          placeholder="Расскажите о себе"
-                        />
-                      </div>
-                    </div>
+                  <div className="flex gap-2">
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      onClick={() => setIsEditingProfile(false)}
+                    >
+                      Отмена
+                    </Button>
+                    <Button onClick={handleSaveProfile}>
+                      Сохранить
+                    </Button>
                   </div>
                 </div>
               ) : (
-                <article className="grid gap-4 sm:grid-cols-2">
-                  <div className="space-y-2">
-                    <p><span className="text-muted-foreground">Имя:</span> {profile.first_name ?? "—"}</p>
-                    <p><span className="text-muted-foreground">Фамилия:</span> {profile.last_name ?? "—"}</p>
-                    <p><span className="text-muted-foreground">Отображаемое имя:</span> {profile.display_name ?? "—"}</p>
-                    <p><span className="text-muted-foreground">Дата рождения:</span> {profile.birthdate ?? "—"}</p>
-                  </div>
-                  <div className="space-y-2">
-                    <p><span className="text-muted-foreground">Рост:</span> {profile.height_cm ? `${profile.height_cm} см` : "—"}</p>
-                    <p><span className="text-muted-foreground">Вес:</span> {profile.weight_kg ? `${profile.weight_kg} кг` : "—"}</p>
-                    <p><span className="text-muted-foreground">О себе:</span> {profile.bio ?? "—"}</p>
-                  </div>
-                </article>
+                <div className="space-y-4">
+                  <p className="text-muted-foreground">{profile?.bio || "Информация о себе не указана"}</p>
+                  {profile?.gender && (
+                    <div className="flex items-center gap-2">
+                      <UserIcon className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-sm">{profile.gender === 'male' ? 'Мужской' : 'Женский'}</span>
+                    </div>
+                  )}
+                  {profile?.country && (
+                    <div className="flex items-center gap-2">
+                      <MapPin className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-sm">{profile.country}</span>
+                    </div>
+                  )}
+                </div>
               )}
             </TabsContent>
           </Tabs>
