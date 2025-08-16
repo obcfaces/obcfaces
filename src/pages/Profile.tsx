@@ -1341,7 +1341,7 @@ const Profile = () => {
                         <div className="flex items-center gap-3">
                           <Avatar className="h-16 w-16">
                             <AvatarImage 
-                              src={profile.avatar_url || ""} 
+                              src={avatarPreview || profile.avatar_url || ""} 
                               alt="Profile photo"
                               className="object-cover"
                             />
@@ -1354,17 +1354,101 @@ const Profile = () => {
                             <div className="text-xs text-muted-foreground">JPG, PNG up to 5MB</div>
                           </div>
                         </div>
-                        <button
-                          onClick={() => {
-                            setEditingField('avatar');
-                            // Не открываем полный режим редактирования профиля
-                            // setIsEditingProfile(true);
-                          }}
-                          className="p-1 hover:bg-accent rounded-md transition-colors"
-                          aria-label="Edit profile photo"
-                        >
-                          <Pencil className="h-4 w-4 text-muted-foreground" />
-                        </button>
+                        {editingField === 'avatar' ? (
+                          <div className="flex items-center gap-2">
+                            <input
+                              id="avatar-upload"
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) {
+                                  setAvatarFile(file);
+                                  const reader = new FileReader();
+                                  reader.onloadend = () => {
+                                    setAvatarPreview(reader.result as string);
+                                  };
+                                  reader.readAsDataURL(file);
+                                }
+                              }}
+                            />
+                            <button 
+                              type="button" 
+                              onClick={() => document.getElementById('avatar-upload')?.click()}
+                              className="px-3 py-1 bg-primary text-primary-foreground rounded text-sm hover:bg-primary/90 transition-colors"
+                            >
+                              Choose
+                            </button>
+                            <button
+                              onClick={() => {
+                                setEditingField(null);
+                                setAvatarPreview(null);
+                                setAvatarFile(null);
+                              }}
+                              className="px-3 py-1 bg-secondary text-secondary-foreground rounded text-sm hover:bg-secondary/80 transition-colors"
+                            >
+                              Cancel
+                            </button>
+                            {avatarFile && (
+                              <button
+                                onClick={async () => {
+                                  if (!avatarFile) return;
+                                  setUploadingAvatar(true);
+                                  try {
+                                    const fileExt = avatarFile.name.split('.').pop();
+                                    const fileName = `avatar.${fileExt}`;
+                                    const filePath = `${currentUserId}/${fileName}`;
+
+                                    // Upload to Supabase Storage
+                                    const { error: uploadError } = await supabase.storage
+                                      .from('avatars')
+                                      .upload(filePath, avatarFile, { upsert: true });
+
+                                    if (uploadError) throw uploadError;
+
+                                    // Get public URL
+                                    const { data: { publicUrl } } = supabase.storage
+                                      .from('avatars')
+                                      .getPublicUrl(filePath);
+
+                                    // Update profile
+                                    const { error: updateError } = await supabase
+                                      .from('profiles')
+                                      .update({ avatar_url: publicUrl })
+                                      .eq('id', currentUserId);
+
+                                    if (updateError) throw updateError;
+
+                                    // Update local state
+                                    setData(prev => prev ? { ...prev, avatar_url: publicUrl } : null);
+                                    setEditingField(null);
+                                    setAvatarPreview(null);
+                                    setAvatarFile(null);
+                                  } catch (error) {
+                                    console.error('Error updating avatar:', error);
+                                  } finally {
+                                    setUploadingAvatar(false);
+                                  }
+                                }}
+                                disabled={uploadingAvatar}
+                                className="px-3 py-1 bg-primary text-primary-foreground rounded text-sm hover:bg-primary/90 transition-colors disabled:opacity-50"
+                              >
+                                {uploadingAvatar ? 'Uploading...' : 'Save'}
+                              </button>
+                            )}
+                          </div>
+                        ) : (
+                          <button
+                            onClick={() => {
+                              setEditingField('avatar');
+                            }}
+                            className="p-1 hover:bg-accent rounded-md transition-colors"
+                            aria-label="Edit profile photo"
+                          >
+                            <Pencil className="h-4 w-4 text-muted-foreground" />
+                          </button>
+                        )}
                       </div>
                     </div>
                   )}
@@ -1699,97 +1783,6 @@ const Profile = () => {
                     </div>
                   </div>
 
-                  {/* Avatar upload for full edit mode */}
-                  {editingField === 'avatar' && (
-                    <div className="space-y-4 pt-4 border-t border-border">
-                      <div className="space-y-2">
-                        <label htmlFor="avatar-upload" className="block text-sm font-medium">
-                          Profile Photo
-                        </label>
-                        <input
-                          id="avatar-upload"
-                          type="file"
-                          accept="image/*"
-                          className="hidden"
-                          onChange={(e) => {
-                            const file = e.target.files?.[0];
-                            if (file) {
-                              setAvatarFile(file);
-                              const reader = new FileReader();
-                              reader.onloadend = () => {
-                                setAvatarPreview(reader.result as string);
-                              };
-                              reader.readAsDataURL(file);
-                            }
-                          }}
-                        />
-                        {avatarPreview ? (
-                          <div className="text-center">
-                            <img 
-                              src={avatarPreview} 
-                              alt="Avatar preview" 
-                              className="h-32 w-32 object-cover rounded-full border-2 border-primary mx-auto"
-                            />
-                            <p className="text-xs text-muted-foreground mt-2 mb-2">Preview</p>
-                            <div className="flex gap-2 justify-center">
-                              <button 
-                                type="button" 
-                                onClick={() => document.getElementById('avatar-upload')?.click()}
-                                className="px-3 py-1 bg-secondary text-secondary-foreground rounded text-sm hover:bg-secondary/80 transition-colors"
-                              >
-                                Change
-                              </button>
-                            </div>
-                          </div>
-                        ) : (
-                          <div className="text-center">
-                            <Avatar className="h-32 w-32 border-2 border-dashed border-muted-foreground/25 hover:border-primary transition-colors cursor-pointer mx-auto">
-                              <AvatarImage 
-                                src={profile.avatar_url || ""} 
-                                alt="Current profile"
-                                className="h-full w-full object-cover opacity-60"
-                              />
-                              <AvatarFallback className="text-sm opacity-60">
-                                {(profile.display_name || "U").charAt(0).toUpperCase()}
-                              </AvatarFallback>
-                            </Avatar>
-                            <p className="text-xs text-muted-foreground mt-2 mb-2">JPG, PNG up to 5MB</p>
-                            <button 
-                              type="button" 
-                              onClick={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                document.getElementById('avatar-upload')?.click();
-                              }}
-                              className="px-3 py-1 bg-primary text-primary-foreground rounded text-sm hover:bg-primary/90 transition-colors"
-                            >
-                              Choose File
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                      <div className="flex gap-2">
-                        <Button 
-                          onClick={() => {
-                            setEditingField(null);
-                            setAvatarFile(null);
-                            setAvatarPreview(null);
-                          }}
-                          variant="outline"
-                        >
-                          Cancel
-                        </Button>
-                        <Button 
-                          onClick={async () => {
-                            await handleSaveProfile();
-                            setEditingField(null);
-                          }}
-                        >
-                          Save
-                        </Button>
-                      </div>
-                    </div>
-                  )}
                 </div>
               )}
             </TabsContent>
