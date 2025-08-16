@@ -1003,27 +1003,80 @@ const Profile = () => {
                   {/* Avatar Upload */}
                   <div className="space-y-2">
                     <Label className="text-sm font-medium">Profile Photo</Label>
-                    <div className="flex items-center gap-4">
-                      <Avatar className="w-16 h-16">
-                        <AvatarImage 
-                          src={avatarPreview || profile.avatar_url || ""} 
-                          alt="Profile preview" 
-                        />
-                        <AvatarFallback className="text-sm">
-                          {(editForm.display_name || profile.display_name || "U").charAt(0).toUpperCase()}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <Input 
-                          type="file"
-                          accept="image/*"
-                          onChange={handleAvatarChange}
-                          className="text-sm"
-                        />
-                        <p className="text-xs text-muted-foreground mt-1">
-                          JPG, PNG up to 5MB
-                        </p>
-                      </div>
+                    <div className="flex justify-center">
+                      <input
+                        id="avatar-upload"
+                        type="file"
+                        accept="image/*"
+                        onChange={handleAvatarChange}
+                        className="hidden"
+                      />
+                      <label htmlFor="avatar-upload" className="cursor-pointer block">
+                        {avatarFile ? (
+                          <div className="relative">
+                            <Avatar className="h-32 w-32">
+                              <AvatarImage 
+                                src={avatarPreview || ""} 
+                                alt="Profile photo preview"
+                                className="h-full w-full object-cover"
+                              />
+                              <AvatarFallback className="text-sm">
+                                {(editForm.display_name || profile.display_name || "U").charAt(0).toUpperCase()}
+                              </AvatarFallback>
+                            </Avatar>
+                            <button 
+                              type="button"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                setAvatarFile(null);
+                                setAvatarPreview(null);
+                              }}
+                              className="absolute -top-2 -right-2 w-6 h-6 bg-gray-500 hover:bg-gray-600 rounded-full flex items-center justify-center text-white text-sm font-bold transition-colors shadow-md"
+                            >
+                              ×
+                            </button>
+                            <div className="mt-2 text-center">
+                              <button 
+                                type="button" 
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  document.getElementById('avatar-upload')?.click();
+                                }}
+                                className="px-3 py-1 bg-primary text-primary-foreground rounded text-sm hover:bg-primary/90 transition-colors"
+                              >
+                                Change
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="text-center">
+                            <Avatar className="h-32 w-32 border-2 border-dashed border-muted-foreground/25 hover:border-primary transition-colors cursor-pointer">
+                              <AvatarImage 
+                                src={profile.avatar_url || ""} 
+                                alt="Current profile"
+                                className="h-full w-full object-cover opacity-60"
+                              />
+                              <AvatarFallback className="text-sm opacity-60">
+                                {(profile.display_name || "U").charAt(0).toUpperCase()}
+                              </AvatarFallback>
+                            </Avatar>
+                            <p className="text-xs text-muted-foreground mt-2 mb-2">JPG, PNG up to 5MB</p>
+                            <button 
+                              type="button" 
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                document.getElementById('avatar-upload')?.click();
+                              }}
+                              className="px-3 py-1 bg-primary text-primary-foreground rounded text-sm hover:bg-primary/90 transition-colors"
+                            >
+                              Choose File
+                            </button>
+                          </div>
+                        )}
+                      </label>
                     </div>
                   </div>
 
