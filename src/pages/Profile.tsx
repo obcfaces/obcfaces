@@ -313,7 +313,7 @@ const Profile = () => {
         likeId: `participation-${currentUserId}`,
         contentType: 'contest' as const,
         contentId: currentUserId,
-        authorName: profileData.display_name || 'Участник',
+        authorName: `${profileData.first_name || ''} ${profileData.last_name || ''}`.trim() || 'Участник',
         authorProfileId: currentUserId,
         time: new Date(profileData.created_at).toLocaleString('ru-RU'),
         likes: Math.floor(Math.random() * 200) + 50, // Mock likes
