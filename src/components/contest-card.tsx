@@ -266,15 +266,6 @@ export function ContestantCard({
     return (
       <>
         <Card className="bg-card border-contest-border relative overflow-hidden">
-          {isWinner && (
-            <div className="absolute top-0 right-0 z-30 flex flex-col items-end">
-              <div className="bg-contest-blue text-white px-3 py-1.5 rounded-bl-lg text-sm font-bold shadow-sm flex items-center gap-2">
-                <span>#{rank}</span>
-                <span className="text-yellow-300">★</span>
-                <span>{rating.toFixed(1)}</span>
-              </div>
-            </div>
-          )}
           
           {/* Name in top left - only after voting */}
            {(isVoted && !showThanks && !isEditing) && (
@@ -367,6 +358,13 @@ export function ContestantCard({
           {/* Photos section */}
           <div className="relative">
             <div className="grid grid-cols-2 gap-px">
+              {/* Winner Badge - overlaid on photos like in profile */}
+              {isWinner && (
+                <div className="absolute top-0 left-0 right-0 z-20 bg-blue-100 text-blue-700 px-2 py-1 text-xs font-semibold flex justify-between items-center">
+                  <span>🏆 WINNER</span>
+                  <span>+ 5000 PHP</span>
+                </div>
+              )}
               <div className="relative">
                 <img 
                   src={faceImage} 
