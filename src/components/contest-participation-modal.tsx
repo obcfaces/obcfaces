@@ -28,25 +28,41 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
+  // Cache key for localStorage
+  const FORM_CACHE_KEY = 'contest_form_cache';
+
+  // Load cached form data
+  const loadCachedFormData = () => {
+    try {
+      const cached = localStorage.getItem(FORM_CACHE_KEY);
+      if (cached) {
+        return JSON.parse(cached);
+      }
+    } catch (error) {
+      console.warn('Failed to load cached form data:', error);
+    }
+    return {
+      first_name: "",
+      last_name: "",
+      country: "",
+      countryCode: "",
+      state: "",
+      stateCode: "",
+      city: "",
+      gender: "",
+      birth_day: "",
+      birth_month: "",
+      birth_year: "",
+      marital_status: "",
+      has_children: undefined as boolean | undefined,
+      height_cm: "",
+      weight_kg: "",
+      measurement_system: "metric",
+    };
+  };
+
   // Profile form data
-  const [formData, setFormData] = useState({
-    first_name: "",
-    last_name: "",
-    country: "",
-    countryCode: "",
-    state: "",
-    stateCode: "",
-    city: "",
-    gender: "",
-    birth_day: "",
-    birth_month: "",
-    birth_year: "",
-    marital_status: "",
-    has_children: undefined as boolean | undefined,
-    height_cm: "",
-    weight_kg: "",
-    measurement_system: "metric",
-  });
+  const [formData, setFormData] = useState(loadCachedFormData);
 
   // Photo files
   const [photo1File, setPhoto1File] = useState<File | null>(null);
@@ -68,11 +84,51 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
     return baseClasses;
   };
 
+  // Photo cache handling
+  const savePhotoToCache = (photoNumber: number, file: File) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const photoData = {
+          name: file.name,
+          type: file.type,
+          data: reader.result as string,
+          lastModified: file.lastModified
+        };
+        localStorage.setItem(`contest_photo_${photoNumber}_cache`, JSON.stringify(photoData));
+      } catch (error) {
+        console.warn('Failed to cache photo:', error);
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const loadPhotoFromCache = (photoNumber: number): File | null => {
+    try {
+      const cached = localStorage.getItem(`contest_photo_${photoNumber}_cache`);
+      if (cached) {
+        const photoData = JSON.parse(cached);
+        // Convert base64 back to File
+        const byteCharacters = atob(photoData.data.split(',')[1]);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        return new File([byteArray], photoData.name, { type: photoData.type, lastModified: photoData.lastModified });
+      }
+    } catch (error) {
+      console.warn('Failed to load cached photo:', error);
+    }
+    return null;
+  };
+
   // Photo upload handlers
   const handlePhoto1Upload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
       setPhoto1File(file);
+      savePhotoToCache(1, file);
       // Remove from invalid fields when photo is uploaded
       if (invalidFields.has('photo1')) {
         setInvalidFields(prev => {
@@ -88,6 +144,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
     const file = event.target.files?.[0];
     if (file) {
       setPhoto2File(file);
+      savePhotoToCache(2, file);
       // Remove from invalid fields when photo is uploaded
       if (invalidFields.has('photo2')) {
         setInvalidFields(prev => {
@@ -243,6 +300,9 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
         description: "Your contest application has been submitted successfully."
       });
 
+      // Clear cache after successful submission
+      clearFormCache();
+      
       setIsOpen(false);
     } catch (error: any) {
       console.error('Submission error:', error);
@@ -261,6 +321,13 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
     if (isOpen) {
       setSubmitted(false);
       setInvalidFields(new Set());
+      
+      // Load cached photos
+      const cachedPhoto1 = loadPhotoFromCache(1);
+      const cachedPhoto2 = loadPhotoFromCache(2);
+      if (cachedPhoto1) setPhoto1File(cachedPhoto1);
+      if (cachedPhoto2) setPhoto2File(cachedPhoto2);
+      
       const checkAuth = async () => {
         const { data: { session } } = await supabase.auth.getSession();
         if (session) {
@@ -273,9 +340,33 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
     }
   }, [isOpen]);
 
+  // Save form data to cache
+  const saveFormDataToCache = (data: typeof formData) => {
+    try {
+      localStorage.setItem(FORM_CACHE_KEY, JSON.stringify(data));
+    } catch (error) {
+      console.warn('Failed to save form data to cache:', error);
+    }
+  };
+
+  // Clear cache
+  const clearFormCache = () => {
+    try {
+      localStorage.removeItem(FORM_CACHE_KEY);
+      localStorage.removeItem('contest_photo_1_cache');
+      localStorage.removeItem('contest_photo_2_cache');
+    } catch (error) {
+      console.warn('Failed to clear form cache:', error);
+    }
+  };
+
   // Clear field from invalid set when user starts typing
   const handleFieldChange = (fieldName: string, value: any) => {
-    setFormData(prev => ({ ...prev, [fieldName]: value }));
+    const newFormData = { ...formData, [fieldName]: value };
+    setFormData(newFormData);
+    
+    // Save to cache whenever data changes
+    saveFormDataToCache(newFormData);
     
     // Remove field from invalid set when user types
     if (invalidFields.has(fieldName)) {
