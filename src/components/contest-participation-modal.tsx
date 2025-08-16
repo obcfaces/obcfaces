@@ -308,6 +308,34 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
         throw new Error(`Database error: ${dbError.message}`);
       }
 
+      // Update user profile to mark as contest participant and add all form data
+      const profileUpdateData = {
+        is_contest_participant: true,
+        participant_type: 'candidate',
+        first_name: formData.first_name,
+        last_name: formData.last_name,
+        gender: formData.gender,
+        height_cm: parseInt(formData.height_cm),
+        weight_kg: parseFloat(formData.weight_kg),
+        marital_status: formData.marital_status,
+        has_children: formData.has_children,
+        photo_1_url: photo1Url,
+        photo_2_url: photo2Url,
+        birthdate: `${formData.birth_year}-${formData.birth_month.padStart(2, '0')}-${formData.birth_day.padStart(2, '0')}`,
+        country: Country.getAllCountries().find(c => c.isoCode === formData.countryCode)?.name || formData.countryCode,
+        state: formData.stateCode,
+        city: formData.city
+      };
+
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .update(profileUpdateData)
+        .eq('id', session.user.id);
+
+      if (profileError) {
+        console.warn('Failed to update profile:', profileError);
+      }
+
       toast({
         title: "Success!",
         description: "Your contest application has been submitted successfully."
