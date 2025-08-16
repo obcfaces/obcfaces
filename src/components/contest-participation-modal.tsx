@@ -656,10 +656,10 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                 {/* Left text column */}
                 <div className="flex flex-col justify-center items-start space-y-2 text-sm text-muted-foreground flex-shrink-0 mt-2">
                   <span className="font-bold">Upload Photos</span>
-                  <span className="text-blue-600">no makeup</span>
-                  <span className="text-blue-600">no filters</span>
-                  <span className="text-blue-600">no nudes</span>
-                  <span className="text-blue-600">no color correction</span>
+                  <span className="text-red-600">no makeup</span>
+                  <span className="text-red-600">no filters</span>
+                  <span className="text-red-600">no nudes</span>
+                  <span className="text-red-600">no color correction</span>
                 </div>
 
                 {/* Right photo upload areas */}
@@ -689,7 +689,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                               setPhoto1File(null);
                               handleFieldChange('photo1', null);
                             }}
-                            className="absolute top-1 right-1 w-6 h-6 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center text-white text-sm font-bold transition-colors shadow-md"
+                            className="absolute top-1 right-1 w-6 h-6 bg-gray-500 hover:bg-gray-600 rounded-full flex items-center justify-center text-white text-sm font-bold transition-colors shadow-md"
                           >
                             ×
                           </button>
@@ -743,7 +743,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                               setPhoto2File(null);
                               handleFieldChange('photo2', null);
                             }}
-                            className="absolute top-1 right-1 w-6 h-6 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center text-white text-sm font-bold transition-colors shadow-md"
+                            className="absolute top-1 right-1 w-6 h-6 bg-gray-500 hover:bg-gray-600 rounded-full flex items-center justify-center text-white text-sm font-bold transition-colors shadow-md"
                           >
                             ×
                           </button>
