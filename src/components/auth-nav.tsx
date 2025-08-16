@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Settings } from "lucide-react";
+import { Settings, MessageCircle } from "lucide-react";
 import LoginModalTrigger from "@/components/login-modal";
 
 // Shows Login button when logged out and a round avatar linking to the user's profile when logged in
@@ -77,6 +77,11 @@ const AuthNav = () => {
           </Button>
         </Link>
       )}
+      <Link to="/messages">
+        <Button variant="outline" size="icon" className="h-9 w-9">
+          <MessageCircle className="w-4 h-4" />
+        </Button>
+      </Link>
       <Link
         to={`/u/${session.user.id}`}
         className="inline-flex items-center"

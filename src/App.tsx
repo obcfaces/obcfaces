@@ -12,6 +12,7 @@ import Profile from "./pages/Profile";
 import Contest from "./pages/Contest";
 import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
+import Messages from "./pages/Messages";
 import Admin from "./pages/Admin";
 import AuthCallbackHandler from "@/components/auth-callback-handler";
 import TopBar from "@/components/top-bar";
@@ -39,6 +40,7 @@ const App = () => {
                   <Route path="/auth" element={<Auth />} />
                   <Route path="/account" element={<Account />} />
                   <Route path="/u/:id" element={<Profile />} />
+                  <Route path="/messages" element={<Messages />} />
                   <Route path="/admin" element={<Admin />} />
                   <Route path="/terms" element={<Terms />} />
                   <Route path="/privacy" element={<Privacy />} />
