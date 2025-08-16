@@ -5,6 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Upload, X, Image, Video, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface CreatePostModalProps {
   children: React.ReactNode;
@@ -85,10 +86,53 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
 
     setIsUploading(true);
     try {
-      // TODO: Implement actual upload to Supabase Storage and create post record
-      // For now, just simulate success
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Get current user
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      if (userError || !user) {
+        throw new Error("Вы должны войти в систему для создания поста");
+      }
+
+      // Upload files to Supabase Storage
+      const uploadedUrls: string[] = [];
+      const mediaTypes: string[] = [];
       
+      for (let i = 0; i < selectedFiles.length; i++) {
+        const file = selectedFiles[i];
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Date.now()}-${i}.${fileExt}`;
+        const filePath = `${user.id}/${fileName}`;
+
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('posts')
+          .upload(filePath, file);
+
+        if (uploadError) {
+          throw uploadError;
+        }
+
+        // Get public URL
+        const { data: { publicUrl } } = supabase.storage
+          .from('posts')
+          .getPublicUrl(filePath);
+
+        uploadedUrls.push(publicUrl);
+        mediaTypes.push(file.type.startsWith('video/') ? 'video' : 'image');
+      }
+
+      // Create post record
+      const { error: postError } = await supabase
+        .from('posts')
+        .insert({
+          user_id: user.id,
+          caption: caption.trim() || null,
+          media_urls: uploadedUrls,
+          media_types: mediaTypes
+        });
+
+      if (postError) {
+        throw postError;
+      }
+
       toast({
         title: "Пост создан!",
         description: "Ваш пост успешно опубликован"
@@ -103,10 +147,11 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
       if (onPostCreated) {
         onPostCreated();
       }
-    } catch (error) {
+    } catch (error: any) {
+      console.error('Error creating post:', error);
       toast({
         title: "Ошибка",
-        description: "Не удалось создать пост. Попробуйте снова.",
+        description: error.message || "Не удалось создать пост. Попробуйте снова.",
         variant: "destructive"
       });
     } finally {
