@@ -398,8 +398,8 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                 options={countries}
                 value={formData.countryCode}
                 onValueChange={(value) => {
-                  handleFieldChange('countryCode', value);
-                  setFormData(prev => ({ ...prev, stateCode: "", city: "" }));
+                  handleFieldChange('country', value);
+                  setFormData(prev => ({ ...prev, countryCode: value, stateCode: "", city: "" }));
                 }}
                 placeholder="Country"
                 invalid={hasRedBorder('country')}
@@ -408,8 +408,8 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                 options={states}
                 value={formData.stateCode}
                 onValueChange={(value) => {
-                  handleFieldChange('stateCode', value);
-                  setFormData(prev => ({ ...prev, city: "" }));
+                  handleFieldChange('state', value);
+                  setFormData(prev => ({ ...prev, stateCode: value, city: "" }));
                 }}
                 placeholder="State/Region"
                 disabled={!formData.countryCode}
