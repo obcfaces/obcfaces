@@ -19,31 +19,39 @@ import TopBar from "@/components/top-bar";
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <HelmetProvider>
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <AuthCallbackHandler />
-          <TopBar />
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/contest" element={<Contest />} />
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/account" element={<Account />} />
-            <Route path="/u/:id" element={<Profile />} />
-            <Route path="/admin" element={<Admin />} />
-            <Route path="/terms" element={<Terms />} />
-            <Route path="/privacy" element={<Privacy />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
-    </QueryClientProvider>
-  </HelmetProvider>
-);
+const App = () => {
+  console.log("App component rendering");
+  
+  return (
+    <div className="min-h-screen w-full">
+      <HelmetProvider>
+        <QueryClientProvider client={queryClient}>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <AuthCallbackHandler />
+              <TopBar />
+              <main className="w-full">
+                <Routes>
+                  <Route path="/" element={<Index />} />
+                  <Route path="/contest" element={<Contest />} />
+                  <Route path="/auth" element={<Auth />} />
+                  <Route path="/account" element={<Account />} />
+                  <Route path="/u/:id" element={<Profile />} />
+                  <Route path="/admin" element={<Admin />} />
+                  <Route path="/terms" element={<Terms />} />
+                  <Route path="/privacy" element={<Privacy />} />
+                  {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </main>
+            </BrowserRouter>
+          </TooltipProvider>
+        </QueryClientProvider>
+      </HelmetProvider>
+    </div>
+  );
+};
 
 export default App;
