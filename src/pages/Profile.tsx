@@ -5,6 +5,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { LogOut } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import PostCard from "@/components/profile/PostCard";
@@ -49,6 +51,17 @@ const Profile = () => {
   const [isEditingBio, setIsEditingBio] = useState(false);
   const [bioDraft, setBioDraft] = useState("");
   const [savingBio, setSavingBio] = useState(false);
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [editForm, setEditForm] = useState({
+    first_name: "",
+    last_name: "",
+    display_name: "",
+    birthdate: "",
+    height_cm: "",
+    weight_kg: "",
+    bio: ""
+  });
+  const [savingProfile, setSavingProfile] = useState(false);
   const [likedItems, setLikedItems] = useState<any[]>([]);
   const [loadingLikes, setLoadingLikes] = useState(true);
   const [likesViewMode, setLikesViewMode] = useState<'compact' | 'full'>('compact');
@@ -167,6 +180,55 @@ const Profile = () => {
       toast({ description: "Ошибка при сохранении био" });
     } finally {
       setSavingBio(false);
+    }
+  };
+
+  const initEditForm = () => {
+    setEditForm({
+      first_name: profile.first_name || "",
+      last_name: profile.last_name || "",
+      display_name: profile.display_name || "",
+      birthdate: profile.birthdate || "",
+      height_cm: profile.height_cm?.toString() || "",
+      weight_kg: profile.weight_kg?.toString() || "",
+      bio: profile.bio || ""
+    });
+    setIsEditingProfile(true);
+  };
+
+  const handleEditFormChange = (field: string, value: string) => {
+    setEditForm(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleSaveProfile = async () => {
+    if (!currentUserId || currentUserId !== id) return;
+    
+    setSavingProfile(true);
+    try {
+      const updates: any = {
+        first_name: editForm.first_name,
+        last_name: editForm.last_name,
+        display_name: editForm.display_name,
+        birthdate: editForm.birthdate || null,
+        height_cm: editForm.height_cm ? parseInt(editForm.height_cm) : null,
+        weight_kg: editForm.weight_kg ? parseInt(editForm.weight_kg) : null,
+        bio: editForm.bio
+      };
+
+      const { error } = await supabase
+        .from("profiles")
+        .update(updates)
+        .eq("id", id);
+      
+      if (error) throw error;
+      
+      setData(prev => prev ? { ...prev, ...updates } : null);
+      setIsEditingProfile(false);
+      toast({ description: "Профиль сохранен" });
+    } catch (error) {
+      toast({ description: "Ошибка при сохранении профиля" });
+    } finally {
+      setSavingProfile(false);
     }
   };
 
@@ -431,8 +493,10 @@ const Profile = () => {
                   🏆 Join Contest
                 </Button>
               </ContestParticipationModal>
-              <Button variant="outline">Add Post</Button>
-              <Button variant="outline">Edit Profile</Button>
+               <Button variant="outline">Add Post</Button>
+               {isOwner && (
+                 <Button variant="outline" onClick={initEditForm}>Edit Profile</Button>
+               )}
             </div>
 
             {!isOwner && (
@@ -451,7 +515,7 @@ const Profile = () => {
           </div>
 
           {/* Tabs */}
-          <Tabs defaultValue="likes" className="mt-8">
+          <Tabs defaultValue="likes" value={isEditingProfile ? "about" : undefined} className="mt-8">
             <TabsList className="w-full bg-transparent p-0 rounded-none justify-start gap-2 sm:gap-8 border-b border-border overflow-x-auto">
               <TabsTrigger value="likes" className="px-0 mr-2 sm:mr-6 h-auto pb-2 bg-transparent rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary text-muted-foreground hover:text-foreground text-sm sm:text-base whitespace-nowrap">Likes</TabsTrigger>
               <TabsTrigger value="posts" className="px-0 mr-2 sm:mr-6 h-auto pb-2 bg-transparent rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary text-muted-foreground hover:text-foreground text-sm sm:text-base whitespace-nowrap">Posts</TabsTrigger>
@@ -653,16 +717,115 @@ const Profile = () => {
             </TabsContent>
 
             <TabsContent value="about" className="mt-8">
-              <article className="grid gap-4 sm:grid-cols-2">
-                <div className="space-y-2">
-                  <p><span className="text-muted-foreground">Имя:</span> {profile.display_name ?? "—"}</p>
-                  <p><span className="text-muted-foreground">Дата рождения:</span> {profile.birthdate ?? "—"}</p>
+              {isEditingProfile ? (
+                <div className="space-y-6">
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-lg font-semibold">Редактирование профиля</h2>
+                    <div className="flex gap-2">
+                      <Button 
+                        variant="outline" 
+                        onClick={() => setIsEditingProfile(false)}
+                        disabled={savingProfile}
+                      >
+                        Отмена
+                      </Button>
+                      <Button 
+                        onClick={handleSaveProfile}
+                        disabled={savingProfile}
+                      >
+                        {savingProfile ? "Сохранение..." : "Сохранить"}
+                      </Button>
+                    </div>
+                  </div>
+                  
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div className="space-y-4">
+                      <div>
+                        <Label htmlFor="first_name">Имя</Label>
+                        <Input
+                          id="first_name"
+                          value={editForm.first_name}
+                          onChange={(e) => handleEditFormChange("first_name", e.target.value)}
+                          placeholder="Введите имя"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="last_name">Фамилия</Label>
+                        <Input
+                          id="last_name"
+                          value={editForm.last_name}
+                          onChange={(e) => handleEditFormChange("last_name", e.target.value)}
+                          placeholder="Введите фамилию"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="display_name">Отображаемое имя</Label>
+                        <Input
+                          id="display_name"
+                          value={editForm.display_name}
+                          onChange={(e) => handleEditFormChange("display_name", e.target.value)}
+                          placeholder="Введите отображаемое имя"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="birthdate">Дата рождения</Label>
+                        <Input
+                          id="birthdate"
+                          type="date"
+                          value={editForm.birthdate}
+                          onChange={(e) => handleEditFormChange("birthdate", e.target.value)}
+                        />
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-4">
+                      <div>
+                        <Label htmlFor="height_cm">Рост (см)</Label>
+                        <Input
+                          id="height_cm"
+                          type="number"
+                          value={editForm.height_cm}
+                          onChange={(e) => handleEditFormChange("height_cm", e.target.value)}
+                          placeholder="Введите рост в см"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="weight_kg">Вес (кг)</Label>
+                        <Input
+                          id="weight_kg"
+                          type="number"
+                          value={editForm.weight_kg}
+                          onChange={(e) => handleEditFormChange("weight_kg", e.target.value)}
+                          placeholder="Введите вес в кг"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="bio">О себе</Label>
+                        <Input
+                          id="bio"
+                          value={editForm.bio}
+                          onChange={(e) => handleEditFormChange("bio", e.target.value)}
+                          placeholder="Расскажите о себе"
+                        />
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <p><span className="text-muted-foreground">Рост:</span> {profile.height_cm ? `${profile.height_cm} см` : "—"}</p>
-                  <p><span className="text-muted-foreground">Вес:</span> {profile.weight_kg ? `${profile.weight_kg} кг` : "—"}</p>
-                </div>
-              </article>
+              ) : (
+                <article className="grid gap-4 sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <p><span className="text-muted-foreground">Имя:</span> {profile.first_name ?? "—"}</p>
+                    <p><span className="text-muted-foreground">Фамилия:</span> {profile.last_name ?? "—"}</p>
+                    <p><span className="text-muted-foreground">Отображаемое имя:</span> {profile.display_name ?? "—"}</p>
+                    <p><span className="text-muted-foreground">Дата рождения:</span> {profile.birthdate ?? "—"}</p>
+                  </div>
+                  <div className="space-y-2">
+                    <p><span className="text-muted-foreground">Рост:</span> {profile.height_cm ? `${profile.height_cm} см` : "—"}</p>
+                    <p><span className="text-muted-foreground">Вес:</span> {profile.weight_kg ? `${profile.weight_kg} кг` : "—"}</p>
+                    <p><span className="text-muted-foreground">О себе:</span> {profile.bio ?? "—"}</p>
+                  </div>
+                </article>
+              )}
             </TabsContent>
           </Tabs>
         </section>
