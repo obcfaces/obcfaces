@@ -674,9 +674,10 @@ const Profile = () => {
               </Avatar>
                <div>
                 <h1 className="text-2xl font-bold">
-                  {profile.first_name && profile.last_name 
-                    ? `${profile.first_name} ${profile.last_name}` 
-                    : (profile.display_name || "Пользователь")
+                  {profile.display_name || 
+                    (profile.first_name && profile.last_name 
+                      ? `${profile.first_name} ${profile.last_name}` 
+                      : "Пользователь")
                   }
                 </h1>
                 {profile.country && (
