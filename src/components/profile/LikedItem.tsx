@@ -222,7 +222,7 @@ const LikedItem = ({
           {/* Content area - показываем информацию как в проголосованных карточках конкурса */}
           <div className="flex-1 p-1.5 sm:p-2 md:p-3 flex flex-col relative">
             <div className="absolute inset-0 bg-white rounded-r flex flex-col justify-between p-2 sm:p-3">
-              <div className="flex items-start justify-between mt-6">
+              <div className="flex items-start justify-between">
                 <div className="min-w-0 flex-1 mr-2">
                   <h3 className="font-semibold text-contest-text text-base sm:text-lg truncate">
                     {authorProfileId ? (
