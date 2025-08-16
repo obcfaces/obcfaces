@@ -694,7 +694,15 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                             ×
                           </button>
                           <div className="mt-2 text-center">
-                            <button type="button" className="px-2 py-1 bg-primary text-primary-foreground rounded text-xs hover:bg-primary/90 transition-colors">
+                            <button 
+                              type="button" 
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                document.getElementById('photo1-upload')?.click();
+                              }}
+                              className="px-2 py-1 bg-primary text-primary-foreground rounded text-xs hover:bg-primary/90 transition-colors"
+                            >
                               Change
                             </button>
                           </div>
@@ -710,7 +718,15 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                           </div>
                           <p className="text-xs text-muted-foreground mb-2">portrait photo</p>
                           
-                          <button type="button" className="px-2 py-1 bg-primary text-primary-foreground rounded text-xs hover:bg-primary/90 transition-colors">
+                          <button 
+                            type="button" 
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              document.getElementById('photo1-upload')?.click();
+                            }}
+                            className="px-2 py-1 bg-primary text-primary-foreground rounded text-xs hover:bg-primary/90 transition-colors"
+                          >
                             Upload
                           </button>
                         </div>
@@ -748,7 +764,15 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                             ×
                           </button>
                           <div className="mt-2 text-center">
-                            <button type="button" className="px-2 py-1 bg-primary text-primary-foreground rounded text-xs hover:bg-primary/90 transition-colors">
+                            <button 
+                              type="button" 
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                document.getElementById('photo2-upload')?.click();
+                              }}
+                              className="px-2 py-1 bg-primary text-primary-foreground rounded text-xs hover:bg-primary/90 transition-colors"
+                            >
                               Change
                             </button>
                           </div>
@@ -764,7 +788,15 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                           </div>
                           <p className="text-xs text-muted-foreground mb-2">full length photo</p>
                           
-                          <button type="button" className="px-2 py-1 bg-primary text-primary-foreground rounded text-xs hover:bg-primary/90 transition-colors">
+                          <button 
+                            type="button" 
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              document.getElementById('photo2-upload')?.click();
+                            }}
+                            className="px-2 py-1 bg-primary text-primary-foreground rounded text-xs hover:bg-primary/90 transition-colors"
+                          >
                             Upload
                           </button>
                         </div>
