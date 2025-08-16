@@ -60,6 +60,7 @@ const Profile = () => {
     display_name: '',
     gender: '',
     country: '',
+    country_privacy: 'public',
     bio: '',
     email: ''
   });
@@ -294,6 +295,7 @@ const Profile = () => {
       display_name: profile.display_name || '',
       gender: data?.gender || '',
       country: profile.country || '',
+      country_privacy: 'public',
       bio: profile.bio || '',
       email: currentUserEmail
     });
@@ -739,12 +741,17 @@ const Profile = () => {
                       : "Пользователь")
                   }
                 </h1>
-                {profile.country && (
-                  <p className="text-muted-foreground">
-                    {profile.country}
-                  </p>
-                )}
-               </div>
+                 {profile.country && (
+                   <p className="text-muted-foreground">
+                     {profile.country}
+                   </p>
+                 )}
+                 {profile.bio && (
+                   <p className="text-sm text-muted-foreground mt-1">
+                     {profile.bio}
+                   </p>
+                 )}
+                </div>
             </div>
             
             <div className="flex items-center gap-2">
@@ -991,7 +998,7 @@ const Profile = () => {
 
             <TabsContent value="about" className="mt-8">
               {isEditingProfile ? (
-                <div className="max-w-md space-y-3">
+                <div className="max-w-xs space-y-3">
                   {/* Avatar Upload */}
                   <div className="space-y-2">
                     <Label className="text-sm font-medium">Profile Photo</Label>
@@ -1041,13 +1048,31 @@ const Profile = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <SearchableSelect
-                      value={editForm.country}
-                      onValueChange={(value) => handleEditFormChange('country', value)}
-                      options={countryOptions}
-                      placeholder="Country"
-                      invalid={hasRedBorder('country')}
-                    />
+                    <div className="flex gap-2">
+                      <div className="flex-1">
+                        <SearchableSelect
+                          value={editForm.country}
+                          onValueChange={(value) => handleEditFormChange('country', value)}
+                          options={countryOptions}
+                          placeholder="Country"
+                          invalid={hasRedBorder('country')}
+                        />
+                      </div>
+                      <div className="w-20">
+                        <Select value={editForm.country_privacy} onValueChange={(value) => handleEditFormChange('country_privacy', value)}>
+                          <SelectTrigger className="text-xs">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="public">🌍 Everyone</SelectItem>
+                            <SelectItem value="friends">👥 Friends</SelectItem>
+                            <SelectItem value="friends_of_friends">👥+ Friends+</SelectItem>
+                            <SelectItem value="only_me">🔒 Only me</SelectItem>
+                            <SelectItem value="custom">⚙️ Custom</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
                   </div>
 
                   <div className="space-y-2">
