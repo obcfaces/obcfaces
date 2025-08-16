@@ -6,6 +6,7 @@ import { useUnreadMessages } from "@/hooks/useUnreadMessages";
 
 const TopBar = () => {
   const { unreadCount } = useUnreadMessages();
+  console.log('TopBar: unreadCount =', unreadCount);
 
   return (
     <header role="banner" className="w-full bg-background border-b">
