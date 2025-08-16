@@ -68,7 +68,7 @@ const Auth = () => {
         <meta name="description" content={description} />
         <link rel="canonical" href={`${window.location.origin}/auth`} />
       </Helmet>
-      <article className="w-full max-w-md rounded-lg border border-input bg-card p-6 shadow-sm">
+      <article className="w-full max-w-xs rounded-lg border border-input bg-card p-6 shadow-sm">
         <header className="mb-6 text-center">
           <h1 className="text-2xl font-semibold">{title}</h1>
           <p className="text-sm text-muted-foreground mt-1">{description}</p>
