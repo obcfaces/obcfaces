@@ -285,7 +285,7 @@ export function ContestantCard({
           )}
           
           {/* Rank, rating and location in top right corner - show rank always if rank > 0 and user has voted */}
-          {rank > 0 && isVoted && (
+          {rank > 0 && isVoted && !isWinner && (
             <div className="absolute top-0 right-0 z-20 flex flex-col items-end">
               <div className="flex items-center gap-1">
                 <div className="text-xl font-bold text-contest-blue">#{rank}</div>
