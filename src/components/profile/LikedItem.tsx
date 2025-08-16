@@ -35,6 +35,7 @@ interface LikedItemProps {
   viewMode?: 'compact' | 'full';
   candidateData?: any;
   participantType?: 'candidate' | 'finalist' | 'winner';
+  showStatusBadge?: boolean;
 }
 
 const getInitials = (name: string) => {
@@ -90,7 +91,8 @@ const LikedItem = ({
   onUnlike,
   viewMode = 'full',
   candidateData,
-  participantType
+  participantType,
+  showStatusBadge = true
 }: LikedItemProps) => {
   const [isUnliking, setIsUnliking] = useState(false);
   const [isLiked, setIsLiked] = useState(true);
@@ -198,7 +200,7 @@ const LikedItem = ({
       <>
         <Card className="bg-card border-contest-border relative overflow-hidden flex h-32 sm:h-36 md:h-40">
           {/* Participant Type Badge */}
-          {getParticipantBadge(currentParticipantType)}
+          {showStatusBadge && getParticipantBadge(currentParticipantType)}
           {/* Main two photos */}
           <div className="flex-shrink-0 flex h-full relative gap-px">
             <div className="relative">
@@ -339,7 +341,7 @@ const LikedItem = ({
         <div className="relative">
           <div className="grid grid-cols-2 gap-px">
             {/* Participant Type Badge - overlaid on photos */}
-            {getParticipantBadge(currentParticipantType, true)}
+            {showStatusBadge && getParticipantBadge(currentParticipantType, true)}
             <div className="relative">
               <img 
                 src={displayFaceImage} 

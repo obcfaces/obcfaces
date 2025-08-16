@@ -913,6 +913,7 @@ const Profile = () => {
                           viewMode={likesViewMode}
                           candidateData={item.candidateData}
                           participantType={item.participantType}
+                          showStatusBadge={false}
                         />
                       ))}
                     </div>
