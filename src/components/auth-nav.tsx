@@ -77,11 +77,6 @@ const AuthNav = () => {
           </Button>
         </Link>
       )}
-      <Link to="/messages">
-        <Button variant="outline" size="icon" className="h-9 w-9">
-          <MessageCircle className="w-4 h-4" />
-        </Button>
-      </Link>
       <Link
         to={`/u/${session.user.id}`}
         className="inline-flex items-center"
