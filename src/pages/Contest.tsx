@@ -6,7 +6,7 @@ import contestant2 from "@/assets/contestant-2.jpg";
 import contestant3 from "@/assets/contestant-3.jpg";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
-import { List, Grid2X2 } from "lucide-react";
+import { AlignJustify, Grid2X2 } from "lucide-react";
 
 interface Week {
   key: string;
@@ -103,7 +103,7 @@ const Contest = () => {
                   aria-label="List view"
                   className="p-1 rounded-md hover:bg-accent transition-colors"
                 >
-                  <List 
+                  <AlignJustify 
                     size={28} 
                     strokeWidth={1}
                     className={viewMode === 'full' ? "text-primary" : "text-muted-foreground"}

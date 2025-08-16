@@ -1,6 +1,6 @@
 import React, { useMemo } from "react";
 import SearchableSelect, { type Option } from "@/components/ui/searchable-select";
-import { List, Grid2X2 } from "lucide-react";
+import { AlignJustify, Grid2X2 } from "lucide-react";
 
 type Gender = "male" | "female";
 export type Category = "teen" | "miss" | "ms" | "mrs";
@@ -88,7 +88,7 @@ const categoryOptions: Option[] = useMemo(() => [
           aria-label="List view"
           className="p-1 rounded-md hover:bg-accent transition-colors"
         >
-          <List 
+          <AlignJustify 
             size={28} 
             strokeWidth={1}
             className={viewMode === "compact" ? "text-primary" : "text-muted-foreground"}
