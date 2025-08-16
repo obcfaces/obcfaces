@@ -35,6 +35,10 @@ export function ContestHeader() {
             <span>Free entry with just 2 photos</span>
           </div>
           <div className="flex items-center gap-2">
+            <span>✅</span>
+            <span>Natural. Honest. Voted by People.</span>
+          </div>
+          <div className="flex items-center gap-2">
             <span>🏆</span>
             <span>Weekly winner gets 5,000 PHP</span>
           </div>
