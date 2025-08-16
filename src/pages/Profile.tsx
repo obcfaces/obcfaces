@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Helmet } from "react-helmet-async";
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { useParams, Link, useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -44,6 +44,7 @@ interface ProfileRow {
 const Profile = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
+  const [searchParams] = useSearchParams();
   const [logoutLoading, setLogoutLoading] = useState(false);
   const [data, setData] = useState<ProfileRow | null>(null);
   const [loading, setLoading] = useState(true);
@@ -81,7 +82,7 @@ const Profile = () => {
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
-  const [activeTab, setActiveTab] = useState("Posts");
+  const [activeTab, setActiveTab] = useState("posts");
   const [likedItems, setLikedItems] = useState<any[]>([]);
   const [loadingLikes, setLoadingLikes] = useState(true);
   const [likesViewMode, setLikesViewMode] = useState<'compact' | 'full'>('compact');
@@ -211,6 +212,14 @@ const Profile = () => {
     };
     getCurrentUser();
   }, []);
+
+  // Handle tab parameter from URL
+  useEffect(() => {
+    const tabParam = searchParams.get('tab');
+    if (tabParam && ['likes', 'posts', 'photos', 'participation', 'about'].includes(tabParam)) {
+      setActiveTab(tabParam);
+    }
+  }, [searchParams]);
 
   // Check following status
   useEffect(() => {
