@@ -275,9 +275,9 @@ export function ContestantCard({
             </div>
           )}
           
-          {/* Name in top left - only after voting */}
+           {/* Name in top left - only after voting */}
            {(isVoted && !showThanks && !isEditing) && (
-             <div className="absolute top-2 left-4 z-20">
+             <div className={cn("absolute top-2 left-4 z-20", isWinner && "pr-40")}>
               <h3 className="text-xl font-semibold text-contest-text">{profileId ? (<Link to={`/u/${profileId}`} className="hover:text-primary underline-offset-2 hover:underline">{name}</Link>) : name}, {age} <span className="text-sm text-muted-foreground font-normal">({weight} kg · {height} cm)</span></h3>
               <div className="text-contest-blue text-sm">{country} · {city}</div>
             </div>
