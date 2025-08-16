@@ -18,9 +18,8 @@ export function ContestHeader() {
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold text-contest-text">OBC faces</h1>
           <ContestParticipationModal>
-            <Button className="bg-contest-blue hover:bg-blue-600 text-white px-6">
-              <Camera className="w-4 h-4 mr-2" />
-              Join & Win 5,000 PHP
+            <Button className="bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200">
+              🏆 Join & Win 5,000 PHP
             </Button>
           </ContestParticipationModal>
         </div>
