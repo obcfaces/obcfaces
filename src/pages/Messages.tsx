@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
 import { Helmet } from "react-helmet-async";
-import { MessageCircle, Search, MoreHorizontal, Phone, Video, Info, Send, Paperclip, Smile } from "lucide-react";
+import { MessageCircle, Search, Phone, Video, Info, Send, Paperclip, Smile, ArrowLeft } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface Message {
   id: string;
@@ -36,14 +37,22 @@ const Messages = () => {
   const [loading, setLoading] = useState(true);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const { toast } = useToast();
+  const isMobile = useIsMobile();
 
-  // Get current user
+  // Get current user and handle URL params
   useEffect(() => {
     const getCurrentUser = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.user) {
         setCurrentUserId(session.user.id);
         await loadConversations(session.user.id);
+        
+        // Check if there's a chat parameter in URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const chatId = urlParams.get('chat');
+        if (chatId) {
+          setSelectedChat(chatId);
+        }
       }
       setLoading(false);
     };
@@ -199,6 +208,192 @@ const Messages = () => {
     }
   };
 
+  if (isMobile) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Helmet>
+          <title>Messages | OBC</title>
+          <meta name="description" content="Chat with other contest participants" />
+          <link rel="canonical" href="/messages" />
+        </Helmet>
+
+        {selectedChat ? (
+          // Mobile Chat View
+          <div className="flex flex-col h-screen">
+            {/* Mobile Chat Header */}
+            <div className="p-4 border-b border-border flex items-center gap-3 bg-background sticky top-0 z-10">
+              <Button 
+                variant="ghost" 
+                size="icon"
+                onClick={() => setSelectedChat(null)}
+                className="shrink-0"
+              >
+                <ArrowLeft className="h-5 w-5" />
+              </Button>
+              {selectedChatData && (
+                <>
+                  <Avatar className="h-10 w-10 shrink-0">
+                    <AvatarImage src={selectedChatData.avatar_url} alt={selectedChatData.name} />
+                    <AvatarFallback>
+                      {selectedChatData.name.split(' ').map(n => n[0]).join('')}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1 min-w-0">
+                    <h2 className="font-medium text-sm truncate">{selectedChatData.name}</h2>
+                    <p className="text-xs text-muted-foreground">
+                      {selectedChatData.is_online ? 'Active now' : 'Last seen recently'}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Button variant="ghost" size="icon" className="h-8 w-8">
+                      <Phone className="h-4 w-4" />
+                    </Button>
+                    <Button variant="ghost" size="icon" className="h-8 w-8">
+                      <Video className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* Mobile Messages Area */}
+            <ScrollArea className="flex-1 p-3">
+              <div className="space-y-3">
+                {messages.map((message) => (
+                  <div
+                    key={message.id}
+                    className={`flex ${message.sender_id === currentUserId ? 'justify-end' : 'justify-start'}`}
+                  >
+                    <div className={`max-w-[80%] px-3 py-2 rounded-2xl animate-fade-in ${
+                      message.sender_id === currentUserId
+                        ? 'bg-primary text-primary-foreground'
+                        : 'bg-muted'
+                    }`}>
+                      <p className="text-sm">{message.content}</p>
+                      <p className={`text-xs mt-1 ${
+                        message.sender_id === currentUserId
+                          ? 'text-primary-foreground/70' 
+                          : 'text-muted-foreground'
+                      }`}>
+                        {formatMessageTime(message.created_at)}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </ScrollArea>
+
+            {/* Mobile Message Input */}
+            <div className="p-3 border-t border-border bg-background sticky bottom-0">
+              <div className="flex items-center gap-2">
+                <div className="flex-1 relative">
+                  <Input
+                    placeholder="Message..."
+                    value={newMessage}
+                    onChange={(e) => setNewMessage(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                    className="pr-10 rounded-full border-2 focus:border-primary"
+                  />
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="absolute right-1 top-1/2 transform -translate-y-1/2 h-8 w-8"
+                  >
+                    <Smile className="h-4 w-4" />
+                  </Button>
+                </div>
+                <Button 
+                  onClick={handleSendMessage}
+                  disabled={!newMessage.trim()}
+                  size="icon"
+                  className="rounded-full h-10 w-10 hover-scale"
+                >
+                  <Send className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          </div>
+        ) : (
+          // Mobile Chat List
+          <div className="flex flex-col h-screen">
+            {/* Mobile Header */}
+            <div className="p-4 border-b border-border bg-background sticky top-0 z-10">
+              <h1 className="text-xl font-semibold mb-3">Messages</h1>
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10 rounded-full"
+                />
+              </div>
+            </div>
+
+            {/* Mobile Chat List */}
+            <ScrollArea className="flex-1">
+              {loading ? (
+                <div className="flex items-center justify-center p-8">
+                  <div className="text-center">
+                    <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
+                    <p className="text-sm text-muted-foreground">Loading...</p>
+                  </div>
+                </div>
+              ) : (
+                <div className="divide-y divide-border">
+                  {filteredChats.length > 0 ? filteredChats.map((chat) => (
+                    <div
+                      key={chat.id}
+                      onClick={() => setSelectedChat(chat.id)}
+                      className="p-4 cursor-pointer hover:bg-accent transition-colors active:bg-accent/50 animate-fade-in"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="relative">
+                          <Avatar className="h-14 w-14">
+                            <AvatarImage src={chat.avatar_url} alt={chat.name} />
+                            <AvatarFallback className="text-lg">
+                              {chat.name.split(' ').map(n => n[0]).join('')}
+                            </AvatarFallback>
+                          </Avatar>
+                          {chat.is_online && (
+                            <div className="absolute bottom-0 right-0 w-4 h-4 bg-green-500 rounded-full border-2 border-background"></div>
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between mb-1">
+                            <h3 className="font-medium text-base truncate">{chat.name}</h3>
+                            <span className="text-xs text-muted-foreground shrink-0">
+                              {formatTime(chat.last_message_time)}
+                            </span>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <p className="text-sm text-muted-foreground truncate">{chat.last_message}</p>
+                            {chat.unread_count > 0 && (
+                              <span className="bg-primary text-primary-foreground text-xs rounded-full px-2 py-1 min-w-[20px] text-center ml-2 shrink-0">
+                                {chat.unread_count}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )) : (
+                    <div className="p-8 text-center">
+                      <MessageCircle className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+                      <h3 className="text-lg font-medium mb-2">No messages yet</h3>
+                      <p className="text-muted-foreground">Start a conversation with someone!</p>
+                    </div>
+                  )}
+                </div>
+              )}
+            </ScrollArea>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // Desktop Layout
   return (
     <div className="min-h-screen bg-background">
       <Helmet>

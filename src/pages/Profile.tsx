@@ -768,11 +768,9 @@ const Profile = () => {
                </ContestParticipationModal>
                <Button variant="outline">Add Post</Button>
                {!isOwner && (
-                 <Button variant="outline" asChild>
-                   <Link to="/messages">
-                     <MessageCircle className="w-4 h-4 mr-1" />
-                     Message
-                   </Link>
+                 <Button variant="outline" onClick={handleMessage}>
+                   <MessageCircle className="w-4 h-4 mr-1" />
+                   Message
                  </Button>
                )}
                {!isOwner && (
