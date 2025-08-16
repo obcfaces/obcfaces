@@ -690,22 +690,29 @@ const Profile = () => {
     try {
       const { data: posts, error } = await supabase
         .from('posts')
-        .select(`
-          *,
-          profiles!posts_user_id_fkey (
-            display_name,
-            avatar_url
-          )
-        `)
+        .select('*')
         .eq('user_id', id)
         .order('created_at', { ascending: false });
+
+      // Получаем профиль автора для каждого поста
+      const postsWithProfiles = await Promise.all(
+        (posts || []).map(async (post) => {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('display_name, avatar_url')
+            .eq('id', post.user_id)
+            .single();
+          
+          return { ...post, profiles: profile };
+        })
+      );
 
       if (error) {
         console.error('Error loading posts:', error);
         return;
       }
 
-      setUserPosts(posts || []);
+      setUserPosts(postsWithProfiles || []);
     } catch (error) {
       console.error('Error loading posts:', error);
     } finally {
