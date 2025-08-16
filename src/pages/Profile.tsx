@@ -834,7 +834,7 @@ const Profile = () => {
                 ) : likedItems.length > 0 ? (
                   <div className="px-0 sm:px-6">
                     {/* View mode toggle buttons */}
-                    <div className="flex justify-end items-center gap-1 mb-4 px-6 sm:px-0 -mt-[10px]">
+                    <div className="flex justify-end items-center gap-1 mb-4 px-6 sm:px-0 -mt-[15px]">
 
                       <button
                         type="button"
@@ -940,7 +940,7 @@ const Profile = () => {
               ) : participationItems.length > 0 ? (
                 <div className="px-0 sm:px-6">
                   {/* View mode toggle buttons */}
-                  <div className="flex justify-end items-center gap-1 mb-4 px-6 sm:px-0 -mt-[10px]">
+                  <div className="flex justify-end items-center gap-1 mb-4 px-6 sm:px-0 -mt-[15px]">
                     <button
                       type="button"
                       onClick={() => setParticipationViewMode("compact")}
