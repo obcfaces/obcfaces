@@ -133,6 +133,7 @@ export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantNa
       toast({
         title: "Comment added",
         description: "Your comment was added",
+        duration: 1000,
       });
     }
   };
