@@ -332,8 +332,8 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
           </div>
         </div>
       ) : currentIndex < filteredCandidates.length ? (
-        <div className="flex flex-col items-center">
-          <div className="w-full px-0 sm:px-6">
+        <>
+          <div className="px-0 sm:px-6 grid grid-cols-1 lg:grid-cols-2 gap-1 sm:gap-3">
             <ContestantCard
               {...currentCandidate}
               viewMode={viewMode}
@@ -376,7 +376,7 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
               <Heart className="w-8 h-8 text-green-500" />
             </Button>
           </div>
-        </div>
+        </>
       ) : (
         <div className="text-center py-4">
           <p className="text-base text-contest-text lowercase">New ones will auto-update.</p>
