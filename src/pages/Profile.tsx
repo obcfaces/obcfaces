@@ -844,9 +844,12 @@ const Profile = () => {
                           </SelectTrigger>
                           <SelectContent>
                             <SelectItem value="all">Все страны</SelectItem>
-                            {countryOptions.map((country) => (
-                              <SelectItem key={country.value} value={country.value}>
-                                {country.label}
+                            {Array.from(new Set(likedItems
+                              .map(item => item.candidateData?.country)
+                              .filter(Boolean)
+                            )).sort().map((country) => (
+                              <SelectItem key={country} value={country}>
+                                {country}
                               </SelectItem>
                             ))}
                           </SelectContent>
