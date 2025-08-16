@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Input } from "@/components/ui/input";
-
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import SearchableSelect from "@/components/ui/searchable-select";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -13,7 +14,30 @@ const Auth = () => {
   const [mode, setMode] = useState<"login" | "signup">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [displayName, setDisplayName] = useState("");
+  const [gender, setGender] = useState("");
+  const [country, setCountry] = useState("");
+  const [bio, setBio] = useState("");
   const [loading, setLoading] = useState(false);
+
+  // Country options for Facebook-style dropdown
+  const countryOptions = [
+    { value: "USA", label: "🇺🇸 United States" },
+    { value: "Canada", label: "🇨🇦 Canada" },
+    { value: "UK", label: "🇬🇧 United Kingdom" },
+    { value: "Germany", label: "🇩🇪 Germany" },
+    { value: "France", label: "🇫🇷 France" },
+    { value: "Spain", label: "🇪🇸 Spain" },
+    { value: "Italy", label: "🇮🇹 Italy" },
+    { value: "Russia", label: "🇷🇺 Russia" },
+    { value: "China", label: "🇨🇳 China" },
+    { value: "Japan", label: "🇯🇵 Japan" },
+    { value: "Australia", label: "🇦🇺 Australia" },
+    { value: "Brazil", label: "🇧🇷 Brazil" },
+    { value: "Mexico", label: "🇲🇽 Mexico" },
+    { value: "India", label: "🇮🇳 India" },
+    { value: "Philippines", label: "🇵🇭 Philippines" },
+  ];
 
   useEffect(() => {
     const m = searchParams.get("mode");
@@ -75,13 +99,58 @@ const Auth = () => {
         </header>
         <form onSubmit={onSubmit} className="space-y-4">
           <div className="space-y-2">
-            
             <Input id="email" type="email" placeholder="email" className="placeholder:italic placeholder:text-muted-foreground" value={email} onChange={(e) => setEmail(e.target.value)} required />
           </div>
           <div className="space-y-2">
-            
             <Input id="password" type="password" placeholder="password" className="placeholder:italic placeholder:text-muted-foreground" value={password} onChange={(e) => setPassword(e.target.value)} required />
           </div>
+
+          {mode === "signup" && (
+            <>
+              <div className="space-y-2">
+                <Input 
+                  id="displayName" 
+                  type="text" 
+                  placeholder="Display Name" 
+                  className="placeholder:italic placeholder:text-muted-foreground" 
+                  value={displayName} 
+                  onChange={(e) => setDisplayName(e.target.value)} 
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Select value={gender} onValueChange={setGender}>
+                  <SelectTrigger className="text-sm">
+                    <SelectValue placeholder="🧑‍🤝‍🧑 Gender" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="male">👨 Male</SelectItem>
+                    <SelectItem value="female">👩 Female</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <SearchableSelect
+                  value={country}
+                  onValueChange={setCountry}
+                  options={countryOptions}
+                  placeholder="🌍 Select Country"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Input 
+                  id="bio" 
+                  type="text" 
+                  placeholder="💭 About Me" 
+                  className="placeholder:italic placeholder:text-muted-foreground" 
+                  value={bio} 
+                  onChange={(e) => setBio(e.target.value)} 
+                />
+              </div>
+            </>
+          )}
           <Button type="submit" className="w-full" disabled={loading}>
             {loading ? "Подождите..." : mode === "login" ? "Войти" : "Зарегистрироваться"}
           </Button>
