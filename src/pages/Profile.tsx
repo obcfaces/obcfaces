@@ -24,6 +24,8 @@ import tableActiveIcon from "@/assets/icons/sdisplay-table-active.png";
 
 interface ProfileRow {
   display_name: string | null;
+  first_name: string | null;
+  last_name: string | null;
   birthdate: string | null;
   height_cm: number | null;
   weight_kg: number | null;
@@ -62,6 +64,8 @@ const Profile = () => {
   // Demo profile for fallback
   const demoProfile: ProfileRow = {
     display_name: "Anna Petrova",
+    first_name: "Anna",
+    last_name: "Petrova",
     birthdate: "1999-03-15",
     height_cm: 165,
     weight_kg: 55,
@@ -82,7 +86,7 @@ const Profile = () => {
       try {
         const { data: profileData } = await supabase
           .from("profiles")
-          .select("display_name, birthdate, height_cm, weight_kg, avatar_url, city, country, bio")
+          .select("display_name, first_name, last_name, birthdate, height_cm, weight_kg, avatar_url, city, country, bio")
           .eq("id", id)
           .maybeSingle();
         
@@ -406,14 +410,19 @@ const Profile = () => {
                   {(profile.display_name || "U").charAt(0).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
-              <div>
-                <h1 className="text-2xl font-bold">{profile.display_name || "Пользователь"}</h1>
-                {(profile.city || profile.country) && (
+               <div>
+                <h1 className="text-2xl font-bold">
+                  {profile.first_name && profile.last_name 
+                    ? `${profile.first_name} ${profile.last_name}` 
+                    : (profile.display_name || "Пользователь")
+                  }
+                </h1>
+                {profile.country && (
                   <p className="text-muted-foreground">
-                    {[profile.city, profile.country].filter(Boolean).join(", ")}
+                    {profile.country}
                   </p>
                 )}
-              </div>
+               </div>
             </div>
             
             <div className="flex items-center gap-2">
