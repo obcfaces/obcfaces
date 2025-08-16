@@ -22,10 +22,7 @@ import c3 from "@/assets/contestant-3.jpg";
 import c1face from "@/assets/contestant-1-face.jpg";
 import c2face from "@/assets/contestant-2-face.jpg";
 import c3face from "@/assets/contestant-3-face.jpg";
-import listIcon from "@/assets/icons/sdisplay-list.png";
-import listActiveIcon from "@/assets/icons/sdisplay-list-active.png";
-import tableIcon from "@/assets/icons/sdisplay-table.png";
-import tableActiveIcon from "@/assets/icons/sdisplay-table-active.png";
+import { List, Grid3X3 } from "lucide-react";
 
 interface ProfileRow {
   display_name: string | null;
@@ -865,12 +862,10 @@ const Profile = () => {
                           aria-label="List view"
                           className="p-1 rounded-md hover:bg-accent transition-colors"
                         >
-                          <img
-                            src={likesViewMode === "compact" ? listActiveIcon : listIcon}
-                            alt="List view icon"
-                            width={28}
-                            height={28}
-                            loading="lazy"
+                          <List 
+                            size={28} 
+                            strokeWidth={1}
+                            className={likesViewMode === "compact" ? "text-primary" : "text-muted-foreground"}
                           />
                         </button>
                         <button
@@ -880,12 +875,10 @@ const Profile = () => {
                           aria-label="Grid view"
                           className="p-1 rounded-md hover:bg-accent transition-colors"
                         >
-                          <img
-                            src={likesViewMode === "full" ? tableActiveIcon : tableIcon}
-                            alt="Grid view icon"
-                            width={28}
-                            height={28}
-                            loading="lazy"
+                          <Grid3X3 
+                            size={28} 
+                            strokeWidth={1}
+                            className={likesViewMode === "full" ? "text-primary" : "text-muted-foreground"}
                           />
                         </button>
                       </div>
@@ -976,12 +969,10 @@ const Profile = () => {
                       aria-label="List view"
                       className="p-1 rounded-md hover:bg-accent transition-colors"
                     >
-                      <img
-                        src={participationViewMode === "compact" ? listActiveIcon : listIcon}
-                        alt="List view icon"
-                        width={28}
-                        height={28}
-                        loading="lazy"
+                      <List 
+                        size={28} 
+                        strokeWidth={1}
+                        className={participationViewMode === "compact" ? "text-primary" : "text-muted-foreground"}
                       />
                     </button>
                     <button
@@ -991,12 +982,10 @@ const Profile = () => {
                       aria-label="Grid view"
                       className="p-1 rounded-md hover:bg-accent transition-colors"
                     >
-                      <img
-                        src={participationViewMode === "full" ? tableActiveIcon : tableIcon}
-                        alt="Grid view icon"
-                        width={28}
-                        height={28}
-                        loading="lazy"
+                      <Grid3X3 
+                        size={28} 
+                        strokeWidth={1}
+                        className={participationViewMode === "full" ? "text-primary" : "text-muted-foreground"}
                       />
                     </button>
                   </div>
