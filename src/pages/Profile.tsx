@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import SearchableSelect from "@/components/ui/searchable-select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { LogOut, Eye, EyeOff, UserIcon, MapPin } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import PostCard from "@/components/profile/PostCard";
@@ -60,13 +61,21 @@ const Profile = () => {
     gender: '',
     country: '',
     bio: '',
-    email: '',
-    password: ''
+    email: ''
   });
-  const [showPassword, setShowPassword] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [invalidFields, setInvalidFields] = useState<Set<string>>(new Set());
   const [savingProfile, setSavingProfile] = useState(false);
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [passwordForm, setPasswordForm] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  });
+  const [passwordSubmitted, setPasswordSubmitted] = useState(false);
+  const [passwordInvalidFields, setPasswordInvalidFields] = useState<Set<string>>(new Set());
+  const [savingPassword, setSavingPassword] = useState(false);
+  const [currentUserEmail, setCurrentUserEmail] = useState('');
   const [activeTab, setActiveTab] = useState("Posts");
   const [likedItems, setLikedItems] = useState<any[]>([]);
   const [loadingLikes, setLoadingLikes] = useState(true);
@@ -266,14 +275,24 @@ const Profile = () => {
     return baseClasses;
   };
 
+  // Load current user email
+  useEffect(() => {
+    const loadCurrentUserEmail = async () => {
+      if (currentUserId && currentUserId === id) {
+        const { data: { user } } = await supabase.auth.getUser();
+        setCurrentUserEmail(user?.email || '');
+      }
+    };
+    loadCurrentUserEmail();
+  }, [currentUserId, id]);
+
   const initEditForm = () => {
     setEditForm({
       display_name: profile.display_name || '',
       gender: data?.gender || '',
       country: profile.country || '',
       bio: profile.bio || '',
-      email: currentUserId ? '' : '', // We'll need to get this from auth
-      password: ''
+      email: currentUserEmail
     });
     setIsEditingProfile(true);
     setSubmitted(false);
@@ -291,6 +310,73 @@ const Profile = () => {
         return newSet;
       });
     }
+  };
+
+  const handlePasswordFormChange = (field: string, value: string) => {
+    setPasswordForm(prev => ({ ...prev, [field]: value }));
+    
+    // Remove field from invalid set when user types
+    if (passwordInvalidFields.has(field)) {
+      setPasswordInvalidFields(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(field);
+        return newSet;
+      });
+    }
+  };
+
+  const handleChangePassword = async () => {
+    setPasswordSubmitted(true);
+
+    // Validate password form
+    const newInvalidFields = new Set<string>();
+    if (!passwordForm.currentPassword.trim()) newInvalidFields.add('currentPassword');
+    if (!passwordForm.newPassword.trim()) newInvalidFields.add('newPassword');
+    if (!passwordForm.confirmPassword.trim()) newInvalidFields.add('confirmPassword');
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      newInvalidFields.add('confirmPassword');
+    }
+
+    setPasswordInvalidFields(newInvalidFields);
+
+    if (newInvalidFields.size > 0) {
+      if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+        toast({ description: "Пароли не совпадают" });
+      }
+      return;
+    }
+
+    setSavingPassword(true);
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password: passwordForm.newPassword
+      });
+      
+      if (error) throw error;
+      
+      setShowPasswordModal(false);
+      setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+      setPasswordSubmitted(false);
+      setPasswordInvalidFields(new Set());
+      toast({ description: "Пароль изменен" });
+    } catch (error: any) {
+      toast({ description: error.message || "Ошибка при смене пароля" });
+    } finally {
+      setSavingPassword(false);
+    }
+  };
+
+  // Check if a password field should have red border
+  const hasPasswordRedBorder = (fieldName: string) => {
+    return passwordSubmitted && passwordInvalidFields.has(fieldName);
+  };
+
+  // Get CSS classes for password form fields
+  const getPasswordFieldClasses = (fieldName: string, baseClasses: string = "") => {
+    if (hasPasswordRedBorder(fieldName)) {
+      return `${baseClasses} border border-red-500`.trim();
+    }
+    return baseClasses;
   };
 
   const handleSaveProfile = async () => {
@@ -328,20 +414,12 @@ const Profile = () => {
       
       if (profileError) throw profileError;
 
-      // Update email if provided
-      if (editForm.email) {
+      // Update email if provided and different from current
+      if (editForm.email && editForm.email !== currentUserEmail) {
         const { error: emailError } = await supabase.auth.updateUser({
           email: editForm.email
         });
         if (emailError) throw emailError;
-      }
-
-      // Update password if provided
-      if (editForm.password) {
-        const { error: passwordError } = await supabase.auth.updateUser({
-          password: editForm.password
-        });
-        if (passwordError) throw passwordError;
       }
       
       setData(prev => prev ? { ...prev, ...updates } : null);
@@ -892,23 +970,64 @@ const Profile = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <div className="relative">
-                      <Input 
-                        type={showPassword ? "text" : "password"} 
-                        placeholder="New Password (leave empty to keep current)" 
-                        className="pr-10 text-sm placeholder:text-muted-foreground"
-                        value={editForm.password} 
-                        onChange={(e) => handleEditFormChange('password', e.target.value)} 
-                      />
-                      <button 
-                        type="button" 
-                        aria-label={showPassword ? "Hide password" : "Show password"} 
-                        onClick={() => setShowPassword((v) => !v)} 
-                        className="absolute inset-y-0 right-2 inline-flex items-center text-muted-foreground hover:text-foreground"
-                      >
-                        {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
-                      </button>
-                    </div>
+                    <Dialog open={showPasswordModal} onOpenChange={setShowPasswordModal}>
+                      <DialogTrigger asChild>
+                        <Button variant="link" className="p-0 h-auto text-sm text-primary">
+                          Change Password
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="max-w-md">
+                        <DialogHeader>
+                          <DialogTitle>Change Password</DialogTitle>
+                        </DialogHeader>
+                        <div className="space-y-3">
+                          <div>
+                            <Input 
+                              type="password"
+                              placeholder="Current Password" 
+                              className={getPasswordFieldClasses('currentPassword', "text-sm placeholder:text-muted-foreground")}
+                              value={passwordForm.currentPassword} 
+                              onChange={(e) => handlePasswordFormChange('currentPassword', e.target.value)} 
+                            />
+                          </div>
+                          <div>
+                            <Input 
+                              type="password"
+                              placeholder="New Password" 
+                              className={getPasswordFieldClasses('newPassword', "text-sm placeholder:text-muted-foreground")}
+                              value={passwordForm.newPassword} 
+                              onChange={(e) => handlePasswordFormChange('newPassword', e.target.value)} 
+                            />
+                          </div>
+                          <div>
+                            <Input 
+                              type="password"
+                              placeholder="Confirm New Password" 
+                              className={getPasswordFieldClasses('confirmPassword', "text-sm placeholder:text-muted-foreground")}
+                              value={passwordForm.confirmPassword} 
+                              onChange={(e) => handlePasswordFormChange('confirmPassword', e.target.value)} 
+                            />
+                          </div>
+                          <div className="flex gap-2 pt-2">
+                            <Button 
+                              type="button" 
+                              variant="outline" 
+                              onClick={() => {
+                                setShowPasswordModal(false);
+                                setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+                                setPasswordSubmitted(false);
+                                setPasswordInvalidFields(new Set());
+                              }}
+                            >
+                              Cancel
+                            </Button>
+                            <Button onClick={handleChangePassword} disabled={savingPassword}>
+                              {savingPassword ? "Saving..." : "Save"}
+                            </Button>
+                          </div>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
                   </div>
                   
                   <div className="flex gap-2">
