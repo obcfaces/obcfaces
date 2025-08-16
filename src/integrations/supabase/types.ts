@@ -346,11 +346,34 @@ export type Database = {
           id: string
         }[]
       }
+      get_detailed_profile: {
+        Args: { profile_user_id: string }
+        Returns: {
+          age: number
+          avatar_url: string
+          bio: string
+          city: string
+          country: string
+          display_name: string
+          id: string
+          is_contest_participant: boolean
+        }[]
+      }
       get_follow_stats: {
         Args: { target_user_id: string }
         Returns: {
           followers_count: number
           following_count: number
+        }[]
+      }
+      get_friend_profile_summary: {
+        Args: { profile_user_id: string }
+        Returns: {
+          avatar_url: string
+          city: string
+          country: string
+          display_name: string
+          id: string
         }[]
       }
       get_or_create_conversation: {
@@ -361,8 +384,6 @@ export type Database = {
         Args: { profile_user_id: string }
         Returns: {
           avatar_url: string
-          city: string
-          country: string
           display_name: string
           id: string
         }[]
