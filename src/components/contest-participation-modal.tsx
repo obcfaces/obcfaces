@@ -587,7 +587,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                           <img
                             src={URL.createObjectURL(photo1File)}
                             alt="Portrait photo preview"
-                            className="w-full h-32 md:h-40 object-cover rounded"
+                            className="w-full h-32 md:h-40 object-contain rounded bg-white"
                           />
                           <button 
                             type="button"
@@ -641,7 +641,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                           <img
                             src={URL.createObjectURL(photo2File)}
                             alt="Full length photo preview"
-                            className="w-full h-32 md:h-40 object-cover rounded"
+                            className="w-full h-32 md:h-40 object-contain rounded bg-white"
                           />
                           <button 
                             type="button"
