@@ -692,7 +692,7 @@ const Profile = () => {
         .from('posts')
         .select(`
           *,
-          profiles!posts_user_id_fkey (
+          profiles!user_id (
             display_name,
             avatar_url
           )
