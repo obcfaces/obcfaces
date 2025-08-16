@@ -10,6 +10,7 @@ import { toast } from "@/components/ui/use-toast";
 import PostCard from "@/components/profile/PostCard";
 import LikedItem from "@/components/profile/LikedItem";
 import { PhotoModal } from "@/components/photo-modal";
+import { ContestParticipationModal } from "@/components/contest-participation-modal";
 import c1 from "@/assets/contestant-1.jpg";
 import c2 from "@/assets/contestant-2.jpg";
 import c3 from "@/assets/contestant-3.jpg";
@@ -416,9 +417,11 @@ const Profile = () => {
             </div>
             
             <div className="flex items-center gap-2">
-              <Button className="bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200">
-                🏆 Join Contest
-              </Button>
+              <ContestParticipationModal>
+                <Button className="bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200">
+                  🏆 Join Contest
+                </Button>
+              </ContestParticipationModal>
               <Button variant="outline">Add Post</Button>
               <Button variant="outline">Edit Profile</Button>
             </div>
