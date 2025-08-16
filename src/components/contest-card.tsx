@@ -267,14 +267,16 @@ export function ContestantCard({
       <>
         <Card className="bg-card border-contest-border relative overflow-hidden">
           {isWinner && (
-            <div className="absolute top-0 left-0 z-30">
-              <div className="bg-contest-blue text-white px-2 py-1 text-xs font-bold flex items-center gap-1">
-                <span>🏆 WINNER</span>
+            <div className="absolute top-0 right-0 z-30 flex flex-col items-end">
+              <div className="bg-contest-blue text-white px-3 py-1.5 rounded-bl-lg text-sm font-bold shadow-sm flex items-center gap-2">
+                <span>#{rank}</span>
+                <span className="text-yellow-300">★</span>
+                <span>{rating.toFixed(1)}</span>
               </div>
             </div>
           )}
           
-           {/* Name in top left - only after voting */}
+          {/* Name in top left - only after voting */}
            {(isVoted && !showThanks && !isEditing) && (
              <div className="absolute top-2 left-4 z-20">
               <h3 className="text-xl font-semibold text-contest-text">{profileId ? (<Link to={`/u/${profileId}`} className="hover:text-primary underline-offset-2 hover:underline">{name}</Link>) : name}, {age} <span className="text-sm text-muted-foreground font-normal">({weight} kg · {height} cm)</span></h3>
@@ -283,7 +285,7 @@ export function ContestantCard({
           )}
           
           {/* Rank, rating and location in top right corner - show rank always if rank > 0 and user has voted */}
-          {rank > 0 && isVoted && !isWinner && (
+          {rank > 0 && isVoted && (
             <div className="absolute top-0 right-0 z-20 flex flex-col items-end">
               <div className="flex items-center gap-1">
                 <div className="text-xl font-bold text-contest-blue">#{rank}</div>
