@@ -90,6 +90,9 @@ const Profile = () => {
   const [participationViewMode, setParticipationViewMode] = useState<'compact' | 'full'>('compact');
   const [photoModalOpen, setPhotoModalOpen] = useState(false);
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState(0);
+  const [userPosts, setUserPosts] = useState<any[]>([]);
+  const [loadingPosts, setLoadingPosts] = useState(true);
+  const [postsViewMode, setPostsViewMode] = useState<'compact' | 'full'>('full');
 
   // Sample photos for gallery
   const profilePhotos = [c1, c2, c3, c1, c2, c3];
@@ -679,9 +682,49 @@ const Profile = () => {
     }
   };
 
+  // Load user posts
+  const loadUserPosts = async () => {
+    if (!id) return;
+    
+    setLoadingPosts(true);
+    try {
+      const { data: posts, error } = await supabase
+        .from('posts')
+        .select(`
+          *,
+          profiles!posts_user_id_fkey (
+            display_name,
+            avatar_url
+          )
+        `)
+        .eq('user_id', id)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error loading posts:', error);
+        return;
+      }
+
+      setUserPosts(posts || []);
+    } catch (error) {
+      console.error('Error loading posts:', error);
+    } finally {
+      setLoadingPosts(false);
+    }
+  };
+
+  const handlePostCreated = () => {
+    // Reload posts after creating a new one
+    loadUserPosts();
+  };
+
   useEffect(() => {
     loadParticipationItems();
   }, [currentUserId, id]);
+
+  useEffect(() => {
+    loadUserPosts();
+  }, [id]);
 
   const handleRemoveParticipation = (participationId: string) => {
     setParticipationItems(prev => prev.filter(item => item.likeId !== participationId));
@@ -774,7 +817,7 @@ const Profile = () => {
                    🏆 Join & Win 5,000 PHP
                  </Button>
                </ContestParticipationModal>
-                <CreatePostModal>
+                <CreatePostModal onPostCreated={handlePostCreated}>
                   <Button variant="outline">Add Post</Button>
                 </CreatePostModal>
                {!isOwner && (
@@ -930,11 +973,44 @@ const Profile = () => {
               </TabsContent>
 
             <TabsContent value="posts" className="space-y-4 mt-8 -mx-6">
-              <div className="px-0 sm:px-6 space-y-4">
-                {samplePosts.map((p) => (
-                  <PostCard key={p.id} {...p} />
-                ))}
-              </div>
+              {loadingPosts ? (
+                <div className="text-center py-8 px-6">
+                  <p className="text-muted-foreground">Загрузка постов...</p>
+                </div>
+              ) : userPosts.length > 0 ? (
+                <div className="px-0 sm:px-6 space-y-4">
+                  {userPosts.map((post) => (
+                    <PostCard 
+                      key={post.id} 
+                      id={post.id}
+                      authorName={post.profiles?.display_name || "Пользователь"}
+                      time={new Date(post.created_at).toLocaleDateString('ru-RU', {
+                        day: 'numeric',
+                        month: 'long',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      })}
+                      content={post.caption || ""}
+                      imageSrc={post.media_urls?.[0] || ""}
+                      likes={post.likes_count || 0}
+                      comments={post.comments_count || 0}
+                      mediaUrls={post.media_urls || []}
+                      mediaTypes={post.media_types || []}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8 px-6">
+                  <p className="text-muted-foreground">
+                    {isOwner ? "У вас пока нет постов" : "У пользователя пока нет постов"}
+                  </p>
+                  {isOwner && (
+                    <p className="text-sm text-muted-foreground mt-2">
+                      Создайте свой первый пост, нажав "Add Post"
+                    </p>
+                  )}
+                </div>
+              )}
             </TabsContent>
 
             <TabsContent value="photos" className="mt-8">
