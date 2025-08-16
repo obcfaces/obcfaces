@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { X, ChevronLeft, ChevronRight, Heart, MessageCircle, Send } from "lucide-react";
+import { X, ChevronLeft, ChevronRight, ThumbsUp, MessageCircle, Send } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -316,7 +316,7 @@ export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantNa
                       onClick={handleLike}
                       aria-label="Like"
                     >
-                      <Heart className={cn("w-4 h-4 mr-1", currentPhotoLikes.isLiked && "fill-current")} />
+                      <ThumbsUp className={cn("w-4 h-4 mr-1", currentPhotoLikes.isLiked && "fill-current")} />
                       {currentPhotoLikes.count}
                     </Button>
                     <Button

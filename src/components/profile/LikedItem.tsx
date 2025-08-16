@@ -1,7 +1,7 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Heart, MessageCircle, Share2, ThumbsDown } from "lucide-react";
+import { ThumbsUp, MessageCircle, Share2, ThumbsDown } from "lucide-react";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
@@ -260,7 +260,7 @@ const LikedItem = ({
                   onClick={handleUnlike}
                   disabled={isUnliking}
                 >
-                  <Heart className="w-3.5 h-3.5 fill-current" />
+                  <ThumbsUp className="w-3.5 h-3.5 fill-current" />
                   <span className="hidden xl:inline">Unlike</span>
                   <span>{likes}</span>
                 </button>
@@ -376,7 +376,7 @@ const LikedItem = ({
             onClick={handleUnlike}
             disabled={isUnliking}
           >
-            <Heart className="w-4 h-4 fill-current" />
+            <ThumbsUp className="w-4 h-4 fill-current" />
             <span className="hidden sm:inline">Unlike</span>
             <span>{likes}</span>
           </button>

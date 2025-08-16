@@ -1,7 +1,7 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Heart, MessageCircle, Share2 } from "lucide-react";
+import { ThumbsUp, MessageCircle, Share2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
@@ -184,7 +184,7 @@ const PostCard = ({
             disabled={loading}
             aria-label="Like"
           >
-            <Heart className="w-4 h-4" />
+            <ThumbsUp className="w-4 h-4" />
             <span className="hidden sm:inline">Like</span>
             <span>{currentLikes}</span>
           </button>

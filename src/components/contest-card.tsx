@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Heart, MessageCircle, Star, Pencil, Send, Share, Share2, ExternalLink, Upload, ArrowUpRight, ThumbsDown } from "lucide-react";
+import { ThumbsUp, MessageCircle, Star, Pencil, Send, Share, Share2, ExternalLink, Upload, ArrowUpRight, ThumbsDown } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -407,7 +407,7 @@ export function ContestantCard({
                 onClick={() => handleLike(0)}
                 aria-label="Like"
               >
-                <Heart className={cn("w-4 h-4", (isLiked[0] || isLiked[1]) && "fill-current")} />
+                <ThumbsUp className={cn("w-4 h-4", (isLiked[0] || isLiked[1]) && "fill-current")} />
                 <span className="hidden sm:inline">Like</span>
                 <span>{likesCount[0] + likesCount[1]}</span>
               </button>
@@ -628,7 +628,7 @@ export function ContestantCard({
                    onClick={() => handleLike(0)}
                    aria-label="Like"
                  >
-                   <Heart className={cn("w-3.5 h-3.5", (isLiked[0] || isLiked[1]) && "fill-current")} />
+                   <ThumbsUp className={cn("w-3.5 h-3.5", (isLiked[0] || isLiked[1]) && "fill-current")} />
                    <span className="hidden xl:inline">Like</span>
                    <span>{likesCount[0] + likesCount[1]}</span>
                  </button>
