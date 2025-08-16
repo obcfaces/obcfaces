@@ -74,15 +74,7 @@ export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantNa
     return () => subscription.unsubscribe();
   }, []);
 
-  // Auto-close login modal after 1 second
-  useEffect(() => {
-    if (showLoginModal) {
-      const timer = setTimeout(() => {
-        setShowLoginModal(false);
-      }, 1000);
-      return () => clearTimeout(timer);
-    }
-  }, [showLoginModal]);
+  // Login modal removed auto-close
 
   // Reset activeIndex when currentIndex changes
   useEffect(() => {

@@ -113,15 +113,7 @@ const LikedItem = ({
     return () => subscription.unsubscribe();
   }, []);
 
-  // Auto-close login modal after 1 second
-  useEffect(() => {
-    if (showLoginModal) {
-      const timer = setTimeout(() => {
-        setShowLoginModal(false);
-      }, 1000);
-      return () => clearTimeout(timer);
-    }
-  }, [showLoginModal]);
+  // Login modal removed auto-close
 
   // Fetch current participant type from database
   useEffect(() => {
