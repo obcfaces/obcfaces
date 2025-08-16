@@ -1357,7 +1357,8 @@ const Profile = () => {
                         <button
                           onClick={() => {
                             setEditingField('avatar');
-                            setIsEditingProfile(true);
+                            // Не открываем полный режим редактирования профиля
+                            // setIsEditingProfile(true);
                           }}
                           className="p-1 hover:bg-accent rounded-md transition-colors"
                           aria-label="Edit profile photo"
