@@ -321,11 +321,11 @@ const Profile = () => {
         imageSrc: profileData.photo_1_url || c1face, // Use first photo as main display
         participantType: (profileData.participant_type as 'candidate' | 'finalist' | 'winner') || 'candidate',
         candidateData: {
-          name: profileData.display_name || `${profileData.first_name || ''} ${profileData.last_name || ''}`.trim() || 'Участник',
+          name: `${profileData.first_name || ''} ${profileData.last_name || ''}`.trim() || 'Участник',
           age: profileData.age || 25,
           weight: profileData.weight_kg || 55,
           height: profileData.height_cm || 165,
-          country: profileData.country || 'Philippines',
+          country: [profileData.country, profileData.state, profileData.city].filter(Boolean).join(', ') || 'Philippines',
           city: profileData.city || 'Manila',
           faceImage: profileData.photo_1_url || c1face, // Formal photo (first image)
           fullBodyImage: profileData.photo_2_url || c1, // Casual photo (second image)
