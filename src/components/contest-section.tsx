@@ -304,7 +304,7 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
       )}
 
       <div className={`${viewMode === 'compact'
-        ? "px-0 sm:px-6 grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-1 sm:gap-3"
+        ? "px-0 sm:px-6 grid grid-cols-1 lg:grid-cols-2 gap-1 sm:gap-3"
         : "px-0 sm:px-6 grid grid-cols-1 lg:grid-cols-2 gap-6"
       }`}>
         {contestants.map((contestant) => (
