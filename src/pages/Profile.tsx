@@ -742,13 +742,14 @@ const Profile = () => {
                   }
                 </h1>
                  {profile.country && (
-                   <p className="text-muted-foreground">
-                     {profile.country}
-                   </p>
+                   <div className="flex items-center gap-1 text-primary font-medium">
+                     <MapPin className="h-3 w-3" />
+                     <span className="text-sm">{profile.country}</span>
+                   </div>
                  )}
                  {profile.bio && (
-                   <p className="text-sm text-muted-foreground mt-1">
-                     {profile.bio}
+                   <p className="text-sm text-muted-foreground mt-2 italic leading-relaxed">
+                     "{profile.bio}"
                    </p>
                  )}
                 </div>
