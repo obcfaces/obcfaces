@@ -98,30 +98,47 @@ const Auth = () => {
           <p className="text-sm text-muted-foreground mt-1">{description}</p>
         </header>
         <form onSubmit={onSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Input id="email" type="email" placeholder="email" className="placeholder:italic placeholder:text-muted-foreground" value={email} onChange={(e) => setEmail(e.target.value)} required />
+          <div className="space-y-1">
+            <label htmlFor="email" className="text-sm font-medium text-foreground">Email</label>
+            <Input 
+              id="email" 
+              type="email" 
+              value={email} 
+              onChange={(e) => setEmail(e.target.value)} 
+              required 
+              className="h-12 text-base"
+            />
           </div>
-          <div className="space-y-2">
-            <Input id="password" type="password" placeholder="password" className="placeholder:italic placeholder:text-muted-foreground" value={password} onChange={(e) => setPassword(e.target.value)} required />
+          <div className="space-y-1">
+            <label htmlFor="password" className="text-sm font-medium text-foreground">Password</label>
+            <Input 
+              id="password" 
+              type="password" 
+              value={password} 
+              onChange={(e) => setPassword(e.target.value)} 
+              required 
+              className="h-12 text-base"
+            />
           </div>
 
           {mode === "signup" && (
             <>
-              <div className="space-y-2">
+              <div className="space-y-1">
+                <label htmlFor="displayName" className="text-sm font-medium text-foreground">Display Name</label>
                 <Input 
                   id="displayName" 
                   type="text" 
-                  placeholder="Display Name" 
-                  className="placeholder:italic placeholder:text-muted-foreground" 
                   value={displayName} 
                   onChange={(e) => setDisplayName(e.target.value)} 
+                  className="h-12 text-base"
                 />
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-1">
+                <label className="text-sm font-medium text-foreground">Gender</label>
                 <Select value={gender} onValueChange={setGender}>
-                  <SelectTrigger className="text-sm">
-                    <SelectValue placeholder="🧑‍🤝‍🧑 Gender" />
+                  <SelectTrigger className="h-12 text-base">
+                    <SelectValue placeholder="Select gender" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="male">👨 Male</SelectItem>
@@ -130,23 +147,24 @@ const Auth = () => {
                 </Select>
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-1">
+                <label className="text-sm font-medium text-foreground">Country</label>
                 <SearchableSelect
                   value={country}
                   onValueChange={setCountry}
                   options={countryOptions}
-                  placeholder="🌍 Select Country"
+                  placeholder="Select country"
                 />
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-1">
+                <label htmlFor="bio" className="text-sm font-medium text-foreground">About Me</label>
                 <Input 
                   id="bio" 
                   type="text" 
-                  placeholder="💭 About Me" 
-                  className="placeholder:italic placeholder:text-muted-foreground" 
                   value={bio} 
                   onChange={(e) => setBio(e.target.value)} 
+                  className="h-12 text-base"
                 />
               </div>
             </>
