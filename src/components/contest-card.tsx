@@ -477,7 +477,7 @@ export function ContestantCard({
 
   return (
     <>
-      <Card className="bg-card border-contest-border relative overflow-hidden flex h-32 sm:h-36 md:h-40">
+      <Card className="bg-card border-contest-border relative overflow-hidden flex h-36 sm:h-40 md:h-44">
         {isWinner && (
           <div className="absolute top-0 left-48 sm:left-56 md:left-64 right-0 bg-blue-100 text-blue-700 pl-2 pr-12 sm:pr-14 md:pr-16 py-1 text-xs font-semibold flex items-center justify-between z-10">
             <span>🏆 WINNER</span>
@@ -555,7 +555,7 @@ export function ContestantCard({
           {!isVoted && !isEditing && !showThanks && (
             <div className="absolute inset-0 bg-gray-300 rounded-r flex flex-col items-center justify-center gap-3">
               <span className="text-lg sm:text-xl font-medium text-gray-800">Vote</span>
-              <div className="scale-[1.7] sm:scale-[2.2]">
+               <div className="scale-[1.5] sm:scale-[1.8]">
                 <StarRating 
                   rating={0} 
                   isVoted={false}
@@ -581,7 +581,7 @@ export function ContestantCard({
           {isVoted && isEditing && !showThanks && (
             <div className="absolute inset-0 bg-gray-300 rounded-r flex flex-col items-center justify-center gap-3">
               <span className="text-lg sm:text-xl font-medium text-gray-800">Vote</span>
-              <div className="scale-[1.7] sm:scale-[2.2]">
+              <div className="scale-[1.5] sm:scale-[1.8]">
                 <StarRating 
                   rating={0} 
                   isVoted={false}
