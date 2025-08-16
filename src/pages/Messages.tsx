@@ -32,8 +32,105 @@ const Messages = () => {
   const [selectedChat, setSelectedChat] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [newMessage, setNewMessage] = useState("");
-  const [chats, setChats] = useState<Chat[]>([]);
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [chats, setChats] = useState<Chat[]>([
+    // Demo data for preview
+    {
+      id: "demo-1",
+      name: "Анна Петрова",
+      avatar_url: "/lovable-uploads/009d20f0-cac7-4c08-9bc9-146617664bc3.png",
+      last_message: "Привет! Как дела? Готовишься к конкурсу?",
+      last_message_time: new Date(Date.now() - 1000 * 60 * 15).toISOString(),
+      unread_count: 2,
+      is_online: true,
+      other_user_id: "demo-user-1"
+    },
+    {
+      id: "demo-2",
+      name: "Дмитрий Иванов",
+      avatar_url: "/lovable-uploads/1147be30-a1d2-466f-a9a8-067f4628cbb2.png",
+      last_message: "Спасибо за совет! Буду использовать эти упражнения 💪",
+      last_message_time: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(),
+      unread_count: 0,
+      is_online: false,
+      other_user_id: "demo-user-2"
+    },
+    {
+      id: "demo-3",
+      name: "Елена Смирнова",
+      avatar_url: "/lovable-uploads/c4e9d90c-eeda-44db-94e3-08c6a959f1a5.png",
+      last_message: "Увидимся завтра на тренировке!",
+      last_message_time: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(),
+      unread_count: 1,
+      is_online: true,
+      other_user_id: "demo-user-3"
+    }
+  ]);
+  const [messages, setMessages] = useState<Message[]>([
+    // Demo messages for chat demo-1
+    {
+      id: "msg-1",
+      sender_id: "demo-user-1",
+      content: "Привет! Как дела?",
+      created_at: new Date(Date.now() - 1000 * 60 * 60).toISOString(),
+      message_type: "text"
+    },
+    {
+      id: "msg-2", 
+      sender_id: "current-user",
+      content: "Привет! Все отлично, готовлюсь к конкурсу 😊",
+      created_at: new Date(Date.now() - 1000 * 60 * 55).toISOString(),
+      message_type: "text"
+    },
+    {
+      id: "msg-3",
+      sender_id: "demo-user-1", 
+      content: "Это здорово! Какие упражнения делаешь?",
+      created_at: new Date(Date.now() - 1000 * 60 * 50).toISOString(),
+      message_type: "text"
+    },
+    {
+      id: "msg-4",
+      sender_id: "current-user",
+      content: "Сейчас фокусируюсь на кардио и силовых тренировках. А ты как готовишься?",
+      created_at: new Date(Date.now() - 1000 * 60 * 45).toISOString(),
+      message_type: "text"
+    },
+    {
+      id: "msg-5",
+      sender_id: "demo-user-1",
+      content: "Тоже самое! Плюс правильное питание очень важно 🥗",
+      created_at: new Date(Date.now() - 1000 * 60 * 40).toISOString(),
+      message_type: "text"
+    },
+    {
+      id: "msg-6",
+      sender_id: "current-user", 
+      content: "Абсолютно согласен! Можешь поделиться своим рационом?",
+      created_at: new Date(Date.now() - 1000 * 60 * 35).toISOString(),
+      message_type: "text"
+    },
+    {
+      id: "msg-7",
+      sender_id: "demo-user-1",
+      content: "Конечно! Завтрак: овсянка с ягодами, обед: курица с овощами, ужин: рыба с салатом",
+      created_at: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
+      message_type: "text"
+    },
+    {
+      id: "msg-8",
+      sender_id: "current-user",
+      content: "Звучит отлично! Спасибо за советы 👍",
+      created_at: new Date(Date.now() - 1000 * 60 * 25).toISOString(),
+      message_type: "text"
+    },
+    {
+      id: "msg-9",
+      sender_id: "demo-user-1",
+      content: "Готовишься к конкурсу?",
+      created_at: new Date(Date.now() - 1000 * 60 * 15).toISOString(),
+      message_type: "text"
+    }
+  ]);
   const [loading, setLoading] = useState(true);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const { toast } = useToast();
@@ -53,6 +150,11 @@ const Messages = () => {
         if (chatId) {
           setSelectedChat(chatId);
         }
+      } else {
+        // For demo purposes, set a demo user ID
+        setCurrentUserId("current-user");
+        // Auto-select first chat for demo
+        setSelectedChat("demo-1");
       }
       setLoading(false);
     };
