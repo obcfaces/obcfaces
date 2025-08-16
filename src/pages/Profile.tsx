@@ -318,17 +318,17 @@ const Profile = () => {
         time: new Date(profileData.created_at).toLocaleString('ru-RU'),
         likes: Math.floor(Math.random() * 200) + 50, // Mock likes
         comments: Math.floor(Math.random() * 40) + 5, // Mock comments
-        imageSrc: profileData.avatar_url || c1face,
+        imageSrc: profileData.photo_1_url || c1face, // Use first photo as main display
         participantType: (profileData.participant_type as 'candidate' | 'finalist' | 'winner') || 'candidate',
         candidateData: {
-          name: profileData.display_name || 'Участник',
+          name: profileData.display_name || `${profileData.first_name || ''} ${profileData.last_name || ''}`.trim() || 'Участник',
           age: profileData.age || 25,
           weight: profileData.weight_kg || 55,
           height: profileData.height_cm || 165,
           country: profileData.country || 'Philippines',
           city: profileData.city || 'Manila',
-          faceImage: profileData.avatar_url || c1face,
-          fullBodyImage: profileData.photo_1_url || profileData.avatar_url || c1,
+          faceImage: profileData.photo_1_url || c1face, // Formal photo (first image)
+          fullBodyImage: profileData.photo_2_url || c1, // Casual photo (second image)
           participantType: (profileData.participant_type as 'candidate' | 'finalist' | 'winner') || 'candidate'
         }
       };
