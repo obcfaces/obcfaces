@@ -86,6 +86,7 @@ const Profile = () => {
   const [likedItems, setLikedItems] = useState<any[]>([]);
   const [loadingLikes, setLoadingLikes] = useState(true);
   const [likesViewMode, setLikesViewMode] = useState<'compact' | 'full'>('compact');
+  const [likesCountryFilter, setLikesCountryFilter] = useState<string>("all");
   const [participationItems, setParticipationItems] = useState<any[]>([]);
   const [loadingParticipation, setLoadingParticipation] = useState(true);
   const [participationViewMode, setParticipationViewMode] = useState<'compact' | 'full'>('compact');
@@ -833,39 +834,58 @@ const Profile = () => {
                   <p className="text-muted-foreground text-center py-8 px-6">Загрузка лайков...</p>
                 ) : likedItems.length > 0 ? (
                   <div className="px-0 sm:px-6">
-                    {/* View mode toggle buttons */}
-                    <div className="flex justify-end items-center gap-1 mb-4 px-6 sm:px-0 -mt-[15px]">
-
-                      <button
-                        type="button"
-                        onClick={() => setLikesViewMode("compact")}
-                        aria-pressed={likesViewMode === "compact"}
-                        aria-label="List view"
-                        className="p-1 rounded-md hover:bg-accent transition-colors"
-                      >
-                        <img
-                          src={likesViewMode === "compact" ? listActiveIcon : listIcon}
-                          alt="List view icon"
-                          width={28}
-                          height={28}
-                          loading="lazy"
-                        />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setLikesViewMode("full")}
-                        aria-pressed={likesViewMode === "full"}
-                        aria-label="Grid view"
-                        className="p-1 rounded-md hover:bg-accent transition-colors"
-                      >
-                        <img
-                          src={likesViewMode === "full" ? tableActiveIcon : tableIcon}
-                          alt="Grid view icon"
-                          width={28}
-                          height={28}
-                          loading="lazy"
-                        />
-                      </button>
+                    {/* Country filter and view mode toggle */}
+                    <div className="flex justify-between items-center gap-4 mb-4 px-6 sm:px-0 -mt-[15px]">
+                      {/* Country filter */}
+                      <div className="flex-1 max-w-48">
+                        <Select value={likesCountryFilter} onValueChange={setLikesCountryFilter}>
+                          <SelectTrigger className="text-sm">
+                            <SelectValue placeholder="Все страны" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">Все страны</SelectItem>
+                            {countryOptions.map((country) => (
+                              <SelectItem key={country.value} value={country.value}>
+                                {country.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      
+                      {/* View mode toggle buttons */}
+                      <div className="flex items-center gap-1">
+                        <button
+                          type="button"
+                          onClick={() => setLikesViewMode("compact")}
+                          aria-pressed={likesViewMode === "compact"}
+                          aria-label="List view"
+                          className="p-1 rounded-md hover:bg-accent transition-colors"
+                        >
+                          <img
+                            src={likesViewMode === "compact" ? listActiveIcon : listIcon}
+                            alt="List view icon"
+                            width={28}
+                            height={28}
+                            loading="lazy"
+                          />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setLikesViewMode("full")}
+                          aria-pressed={likesViewMode === "full"}
+                          aria-label="Grid view"
+                          className="p-1 rounded-md hover:bg-accent transition-colors"
+                        >
+                          <img
+                            src={likesViewMode === "full" ? tableActiveIcon : tableIcon}
+                            alt="Grid view icon"
+                            width={28}
+                            height={28}
+                            loading="lazy"
+                          />
+                        </button>
+                      </div>
                     </div>
                     
                     {/* Liked items grid */}
@@ -874,7 +894,12 @@ const Profile = () => {
                         ? 'grid-cols-1' 
                         : 'grid-cols-1 lg:grid-cols-2'
                     }`}>
-                      {likedItems.map((item) => (
+                      {likedItems
+                        .filter(item => 
+                          likesCountryFilter === "all" || 
+                          item.candidateData?.country === likesCountryFilter
+                        )
+                        .map((item) => (
                         <LikedItem
                           key={item.likeId}
                           likeId={item.likeId}
