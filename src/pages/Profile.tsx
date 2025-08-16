@@ -276,7 +276,6 @@ const Profile = () => {
       password: ''
     });
     setIsEditingProfile(true);
-    setActiveTab('About');
     setSubmitted(false);
     setInvalidFields(new Set());
   };
@@ -638,7 +637,7 @@ const Profile = () => {
           </div>
 
           {/* Tabs */}
-          <Tabs defaultValue="likes" value={isEditingProfile ? "about" : activeTab} className="mt-8">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-8">
             <TabsList className="w-full bg-transparent p-0 rounded-none justify-start gap-2 sm:gap-8 border-b border-border overflow-x-auto">
               <TabsTrigger value="likes" className="px-0 mr-2 sm:mr-6 h-auto pb-2 bg-transparent rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary text-muted-foreground hover:text-foreground text-sm sm:text-base whitespace-nowrap">Likes</TabsTrigger>
               <TabsTrigger value="posts" className="px-0 mr-2 sm:mr-6 h-auto pb-2 bg-transparent rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary text-muted-foreground hover:text-foreground text-sm sm:text-base whitespace-nowrap">Posts</TabsTrigger>
