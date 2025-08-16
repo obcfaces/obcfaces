@@ -209,7 +209,8 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) throw new Error('Not authenticated');
 
-    const fileName = `${session.user.id}-photo${photoNumber}-${Date.now()}.${file.name.split('.').pop()}`;
+    // Create file path with user folder structure for RLS to work
+    const fileName = `${session.user.id}/photo${photoNumber}-${Date.now()}.${file.name.split('.').pop()}`;
     
     const { error: uploadError } = await supabase.storage
       .from('contest-photos')
