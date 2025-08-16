@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import SearchableSelect from "@/components/ui/searchable-select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { LogOut, Eye, EyeOff, UserIcon, MapPin } from "lucide-react";
+import { LogOut, Eye, EyeOff, UserIcon, MapPin, Pencil, Lock } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import PostCard from "@/components/profile/PostCard";
 import LikedItem from "@/components/profile/LikedItem";
@@ -766,17 +766,6 @@ const Profile = () => {
                 </Button>
               </ContestParticipationModal>
                <Button variant="outline">Add Post</Button>
-               {isOwner && (
-                 <Button 
-                   variant="outline" 
-                   onClick={() => {
-                     console.log('Edit button clicked, isOwner:', isOwner, 'currentUserId:', currentUserId, 'id:', id);
-                     initEditForm();
-                   }}
-                 >
-                   Edit Profile
-                 </Button>
-               )}
                {!isOwner && (
                  <div className="text-xs text-muted-foreground">
                    Debug: isOwner={String(isOwner)}, currentUserId={currentUserId}, id={id}
@@ -1225,39 +1214,188 @@ const Profile = () => {
                 </div>
               ) : (
                 <div className="space-y-6">
-                  {/* Basic Information */}
-                  <div className="space-y-3">
-                    {profile?.display_name && (
-                      <div>
-                        <span className="text-sm font-medium text-foreground">Display Name: </span>
-                        <span className="text-sm text-muted-foreground">{profile.display_name}</span>
+                  {/* Profile Photo Section */}
+                  {isOwner && (
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <Avatar className="h-16 w-16">
+                            <AvatarImage 
+                              src={profile.avatar_url || ""} 
+                              alt="Profile photo"
+                              className="object-cover"
+                            />
+                            <AvatarFallback className="text-lg">
+                              {(profile.display_name || "U").charAt(0).toUpperCase()}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <div className="text-sm font-medium text-foreground">Profile photo</div>
+                            <div className="text-xs text-muted-foreground">JPG, PNG up to 5MB</div>
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => setIsEditingProfile(true)}
+                          className="p-2 hover:bg-accent rounded-md transition-colors"
+                          aria-label="Edit profile photo"
+                        >
+                          <Pencil className="h-4 w-4 text-muted-foreground" />
+                        </button>
                       </div>
-                    )}
-                    
-                    {profile?.gender && (
-                      <div>
-                        <span className="text-sm font-medium text-foreground">Gender: </span>
-                        <span className="text-sm text-muted-foreground">{profile.gender === 'male' ? 'Male' : 'Female'}</span>
-                      </div>
-                    )}
-                    
-                    {profile?.country && (
-                      <div>
-                        <span className="text-sm font-medium text-foreground">Country: </span>
-                        <span className="text-sm text-muted-foreground">{profile.country}</span>
-                      </div>
-                    )}
-                    
-                    {profile?.bio && (
-                      <div>
-                        <span className="text-sm font-medium text-foreground">About Me: </span>
-                        <span className="text-sm text-muted-foreground">{profile.bio}</span>
-                      </div>
-                    )}
+                    </div>
+                  )}
 
-                    {!profile?.display_name && !profile?.gender && !profile?.country && !profile?.bio && (
-                      <p className="text-muted-foreground text-center py-8">Нет информации для отображения</p>
-                    )}
+                  {/* Basic Information */}
+                  <div className="space-y-4">
+                    <div className="space-y-3">
+                      {/* Display Name */}
+                      <div className="flex items-center justify-between py-3 border-b border-border">
+                        <div>
+                          <div className="text-sm text-muted-foreground">Display Name</div>
+                          <div className="text-sm font-medium text-foreground">
+                            {profile?.display_name || "Add display name"}
+                          </div>
+                        </div>
+                        {isOwner && (
+                          <button
+                            onClick={() => setIsEditingProfile(true)}
+                            className="p-2 hover:bg-accent rounded-md transition-colors"
+                            aria-label="Edit display name"
+                          >
+                            <Pencil className="h-4 w-4 text-muted-foreground" />
+                          </button>
+                        )}
+                      </div>
+
+                      {/* Email */}
+                      {isOwner && (
+                        <div className="flex items-center justify-between py-3 border-b border-border">
+                          <div>
+                            <div className="text-sm text-muted-foreground">Email</div>
+                            <div className="text-sm font-medium text-foreground">
+                              {editForm.email || "Add email"}
+                            </div>
+                            <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
+                              <Lock className="h-3 w-3" />
+                              <span>Only me</span>
+                            </div>
+                          </div>
+                          <button
+                            onClick={() => setIsEditingProfile(true)}
+                            className="p-2 hover:bg-accent rounded-md transition-colors"
+                            aria-label="Edit email"
+                          >
+                            <Pencil className="h-4 w-4 text-muted-foreground" />
+                          </button>
+                        </div>
+                      )}
+
+                      {/* Add pronouns link */}
+                      {isOwner && (
+                        <div className="py-3 border-b border-border">
+                          <button className="text-sm text-primary hover:underline">
+                            Add pronouns
+                          </button>
+                        </div>
+                      )}
+
+                      {/* Add languages link */}
+                      {isOwner && (
+                        <div className="py-3 border-b border-border">
+                          <button className="text-sm text-primary hover:underline">
+                            Add languages
+                          </button>
+                        </div>
+                      )}
+
+                      {/* Gender */}
+                      <div className="flex items-center justify-between py-3 border-b border-border">
+                        <div>
+                          <div className="text-sm text-muted-foreground">Gender</div>
+                          <div className="text-sm font-medium text-foreground">
+                            {profile?.gender ? (profile.gender === 'male' ? 'Male' : 'Female') : "Add gender"}
+                          </div>
+                        </div>
+                        {isOwner && (
+                          <button
+                            onClick={() => setIsEditingProfile(true)}
+                            className="p-2 hover:bg-accent rounded-md transition-colors"
+                            aria-label="Edit gender"
+                          >
+                            <Pencil className="h-4 w-4 text-muted-foreground" />
+                          </button>
+                        )}
+                      </div>
+
+                      {/* Date of birth */}
+                      <div className="flex items-center justify-between py-3 border-b border-border">
+                        <div>
+                          <div className="text-sm text-muted-foreground">Date of birth</div>
+                          <div className="text-sm font-medium text-foreground">
+                            {profile?.birthdate ? new Date(profile.birthdate).toLocaleDateString('en-GB', {
+                              day: 'numeric',
+                              month: 'long',
+                              year: 'numeric'
+                            }) : "Add date of birth"}
+                          </div>
+                          <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
+                            <Lock className="h-3 w-3" />
+                            <span>Only me</span>
+                          </div>
+                        </div>
+                        {isOwner && (
+                          <button
+                            onClick={() => setIsEditingProfile(true)}
+                            className="p-2 hover:bg-accent rounded-md transition-colors"
+                            aria-label="Edit date of birth"
+                          >
+                            <Pencil className="h-4 w-4 text-muted-foreground" />
+                          </button>
+                        )}
+                      </div>
+                      
+                      {/* Country */}
+                      <div className="flex items-center justify-between py-3 border-b border-border">
+                        <div>
+                          <div className="text-sm text-muted-foreground">Country</div>
+                          <div className="text-sm font-medium text-foreground">
+                            {profile?.country || "Add country"}
+                          </div>
+                        </div>
+                        {isOwner && (
+                          <button
+                            onClick={() => setIsEditingProfile(true)}
+                            className="p-2 hover:bg-accent rounded-md transition-colors"
+                            aria-label="Edit country"
+                          >
+                            <Pencil className="h-4 w-4 text-muted-foreground" />
+                          </button>
+                        )}
+                      </div>
+                      
+                      {/* Bio */}
+                      <div className="flex items-center justify-between py-3">
+                        <div>
+                          <div className="text-sm text-muted-foreground">About Me</div>
+                          <div className="text-sm font-medium text-foreground">
+                            {profile?.bio || "Add bio"}
+                          </div>
+                        </div>
+                        {isOwner && (
+                          <button
+                            onClick={() => setIsEditingProfile(true)}
+                            className="p-2 hover:bg-accent rounded-md transition-colors"
+                            aria-label="Edit bio"
+                          >
+                            <Pencil className="h-4 w-4 text-muted-foreground" />
+                          </button>
+                        )}
+                      </div>
+
+                      {!profile?.display_name && !profile?.gender && !profile?.country && !profile?.bio && !isOwner && (
+                        <p className="text-muted-foreground text-center py-8">Нет информации для отображения</p>
+                      )}
+                    </div>
                   </div>
                 </div>
               )}
