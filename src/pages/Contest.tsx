@@ -6,7 +6,7 @@ import contestant2 from "@/assets/contestant-2.jpg";
 import contestant3 from "@/assets/contestant-3.jpg";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
-import { List, Grid3X3 } from "lucide-react";
+import { List, Grid2X2 } from "lucide-react";
 
 interface Week {
   key: string;
@@ -116,7 +116,7 @@ const Contest = () => {
                   aria-label="Grid view"
                   className="p-1 rounded-md hover:bg-accent transition-colors"
                 >
-                  <Grid3X3 
+                  <Grid2X2 
                     size={28} 
                     strokeWidth={1}
                     className={viewMode === 'compact' ? "text-primary" : "text-muted-foreground"}

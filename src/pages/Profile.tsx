@@ -22,7 +22,7 @@ import c3 from "@/assets/contestant-3.jpg";
 import c1face from "@/assets/contestant-1-face.jpg";
 import c2face from "@/assets/contestant-2-face.jpg";
 import c3face from "@/assets/contestant-3-face.jpg";
-import { List, Grid3X3 } from "lucide-react";
+import { List, Grid2X2 } from "lucide-react";
 
 interface ProfileRow {
   display_name: string | null;
@@ -875,7 +875,7 @@ const Profile = () => {
                           aria-label="Grid view"
                           className="p-1 rounded-md hover:bg-accent transition-colors"
                         >
-                          <Grid3X3 
+                          <Grid2X2 
                             size={28} 
                             strokeWidth={1}
                             className={likesViewMode === "full" ? "text-primary" : "text-muted-foreground"}
@@ -982,7 +982,7 @@ const Profile = () => {
                       aria-label="Grid view"
                       className="p-1 rounded-md hover:bg-accent transition-colors"
                     >
-                      <Grid3X3 
+                      <Grid2X2 
                         size={28} 
                         strokeWidth={1}
                         className={participationViewMode === "full" ? "text-primary" : "text-muted-foreground"}
