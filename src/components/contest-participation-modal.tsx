@@ -276,9 +276,8 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
         photo2Url = await uploadPhoto(photo2File, 2);
       }
 
-      // For now, just show success message (database table doesn't exist yet)
-      console.log("Form data to submit:", {
-        user_id: session.user.id,
+      // Save application to database
+      const applicationData = {
         first_name: formData.first_name,
         last_name: formData.last_name,
         country: formData.countryCode,
@@ -294,7 +293,20 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
         weight_kg: parseFloat(formData.weight_kg),
         photo1_url: photo1Url,
         photo2_url: photo2Url,
-      });
+      };
+
+      // Insert into contest_applications table
+      const { error: dbError } = await supabase
+        .from('contest_applications')
+        .insert({
+          user_id: session.user.id,
+          application_data: applicationData,
+          status: 'pending'
+        });
+
+      if (dbError) {
+        throw new Error(`Database error: ${dbError.message}`);
+      }
 
       toast({
         title: "Success!",
