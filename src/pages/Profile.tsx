@@ -727,8 +727,12 @@ const Profile = () => {
           {/* Profile Header */}
           <div className="flex flex-col gap-6 mb-8">
             <div className="flex items-center gap-4">
-              <Avatar className="w-20 h-20 sm:w-24 sm:h-24">
-                <AvatarImage src={profile.avatar_url || ""} alt={`Avatar of ${profile.display_name || "User"}`} />
+              <Avatar className="w-32 h-32">
+                <AvatarImage 
+                  src={profile.avatar_url || ""} 
+                  alt={`Avatar of ${profile.display_name || "User"}`}
+                  className="object-cover"
+                />
                 <AvatarFallback className="text-lg">
                   {(profile.display_name || "U").charAt(0).toUpperCase()}
                 </AvatarFallback>
@@ -1119,10 +1123,7 @@ const Profile = () => {
                           </SelectTrigger>
                           <SelectContent>
                             <SelectItem value="public">🌍 Everyone</SelectItem>
-                            <SelectItem value="friends">👥 Friends</SelectItem>
-                            <SelectItem value="friends_of_friends">👥+ Friends+</SelectItem>
                             <SelectItem value="only_me">🔒 Only me</SelectItem>
-                            <SelectItem value="custom">⚙️ Custom</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
