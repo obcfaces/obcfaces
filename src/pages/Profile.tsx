@@ -49,6 +49,9 @@ const Profile = () => {
   const [likedItems, setLikedItems] = useState<any[]>([]);
   const [loadingLikes, setLoadingLikes] = useState(true);
   const [likesViewMode, setLikesViewMode] = useState<'compact' | 'full'>('compact');
+  const [participationItems, setParticipationItems] = useState<any[]>([]);
+  const [loadingParticipation, setLoadingParticipation] = useState(true);
+  const [participationViewMode, setParticipationViewMode] = useState<'compact' | 'full'>('compact');
   const [photoModalOpen, setPhotoModalOpen] = useState(false);
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState(0);
 
@@ -263,6 +266,68 @@ const Profile = () => {
     setLikedItems(prev => prev.filter(item => item.likeId !== likeId));
   };
 
+  const loadParticipationItems = async () => {
+    if (!currentUserId) return;
+    
+    setLoadingParticipation(true);
+    try {
+      // Mock participation data - карточки участия аналогичные лайкам
+      const participantTypes = ["candidate", "finalist", "winner"] as const;
+      const mockImages = [c1face, c2face, c3face];
+      const mockFullImages = [c1, c2, c3];
+      const participationNames = [
+        "Victoria Morales", "Alejandra Silva", "Andrea Vargas", "Natalia Castillo",
+        "Daniela Ruiz", "Paula Jimenez", "Carolina Perez", "Mariana Santos"
+      ];
+      
+      const mockParticipation = Array.from({ length: 3 }, (_, index) => {
+        const randomImageIndex = Math.floor(Math.random() * mockImages.length);
+        const randomNameIndex = Math.floor(Math.random() * participationNames.length);
+        const randomTypeIndex = Math.floor(Math.random() * participantTypes.length);
+        const participationId = `participation-${index + 1}`;
+        
+        return {
+          likeId: participationId,
+          contentType: 'contest' as const,
+          contentId: participationId,
+          authorName: participationNames[randomNameIndex],
+          authorProfileId: currentUserId,
+          time: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toLocaleString('ru-RU'),
+          likes: Math.floor(Math.random() * 200) + 50,
+          comments: Math.floor(Math.random() * 40) + 5,
+          imageSrc: mockImages[randomImageIndex],
+          participantType: participantTypes[randomTypeIndex],
+          candidateData: {
+            name: participationNames[randomNameIndex],
+            age: 20 + Math.floor(Math.random() * 10),
+            weight: 45 + Math.floor(Math.random() * 15),
+            height: 155 + Math.floor(Math.random() * 20),
+            country: 'Philippines',
+            city: 'Manila',
+            faceImage: mockImages[randomImageIndex],
+            fullBodyImage: mockFullImages[randomImageIndex],
+            participantType: participantTypes[randomTypeIndex]
+          }
+        };
+      });
+
+      setParticipationItems(mockParticipation);
+    } catch (error) {
+      console.error("Error loading participation items:", error);
+      setParticipationItems([]);
+    } finally {
+      setLoadingParticipation(false);
+    }
+  };
+
+  useEffect(() => {
+    loadParticipationItems();
+  }, [currentUserId, id]);
+
+  const handleRemoveParticipation = (participationId: string) => {
+    setParticipationItems(prev => prev.filter(item => item.likeId !== participationId));
+  };
+
 
   // Sample posts data
   const samplePosts = [
@@ -357,6 +422,7 @@ const Profile = () => {
               <TabsTrigger value="likes" className="px-0 mr-6 h-auto pb-2 bg-transparent rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary text-muted-foreground hover:text-foreground">Likes</TabsTrigger>
               <TabsTrigger value="posts" className="px-0 mr-6 h-auto pb-2 bg-transparent rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary text-muted-foreground hover:text-foreground">Posts</TabsTrigger>
               <TabsTrigger value="photos" className="px-0 mr-6 h-auto pb-2 bg-transparent rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary text-muted-foreground hover:text-foreground">Photos</TabsTrigger>
+              <TabsTrigger value="participation" className="px-0 mr-6 h-auto pb-2 bg-transparent rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary text-muted-foreground hover:text-foreground">My Participation</TabsTrigger>
               <TabsTrigger value="about" className="px-0 mr-6 h-auto pb-2 bg-transparent rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary text-muted-foreground hover:text-foreground">About</TabsTrigger>
               {isOwner && (
                 <button
@@ -478,6 +544,78 @@ const Profile = () => {
                   </button>
                 ))}
               </div>
+            </TabsContent>
+
+            <TabsContent value="participation" className="mt-8 -mx-6">
+              {loadingParticipation ? (
+                <p className="text-muted-foreground text-center py-8 px-6">Загрузка участий...</p>
+              ) : participationItems.length > 0 ? (
+                <div className="px-0 sm:px-6">
+                  {/* View mode toggle buttons */}
+                  <div className="flex justify-end items-center gap-1 mb-4 px-6 sm:px-0">
+                    <button
+                      type="button"
+                      onClick={() => setParticipationViewMode("compact")}
+                      aria-pressed={participationViewMode === "compact"}
+                      aria-label="List view"
+                      className="p-1 rounded-md hover:bg-accent transition-colors"
+                    >
+                      <img
+                        src={participationViewMode === "compact" ? listActiveIcon : listIcon}
+                        alt="List view icon"
+                        width={28}
+                        height={28}
+                        loading="lazy"
+                      />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setParticipationViewMode("full")}
+                      aria-pressed={participationViewMode === "full"}
+                      aria-label="Grid view"
+                      className="p-1 rounded-md hover:bg-accent transition-colors"
+                    >
+                      <img
+                        src={participationViewMode === "full" ? tableActiveIcon : tableIcon}
+                        alt="Grid view icon"
+                        width={28}
+                        height={28}
+                        loading="lazy"
+                      />
+                    </button>
+                  </div>
+                  
+                  {/* Participation items grid */}
+                  <div className={`grid gap-1 sm:gap-3 ${
+                    participationViewMode === 'compact' 
+                      ? 'grid-cols-1' 
+                      : 'grid-cols-1 lg:grid-cols-2'
+                  }`}>
+                    {participationItems.map((item) => (
+                      <LikedItem
+                        key={item.likeId}
+                        likeId={item.likeId}
+                        contentType={item.contentType}
+                        contentId={item.contentId}
+                        authorName={item.authorName}
+                        authorAvatarUrl={item.authorAvatarUrl}
+                        authorProfileId={item.authorProfileId}
+                        time={item.time}
+                        content={item.content}
+                        imageSrc={item.imageSrc}
+                        likes={item.likes}
+                        comments={item.comments}
+                        onUnlike={handleRemoveParticipation}
+                        viewMode={participationViewMode}
+                        candidateData={item.candidateData}
+                        participantType={item.participantType}
+                      />
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <p className="text-muted-foreground text-center py-8 px-6">Нет участий в конкурсах</p>
+              )}
             </TabsContent>
 
             <TabsContent value="about" className="mt-8">
