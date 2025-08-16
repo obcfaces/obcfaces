@@ -762,9 +762,9 @@ const Profile = () => {
             
             <div className="flex items-center gap-2">
               <ContestParticipationModal>
-                <Button className="bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200">
-                  🏆 Join Contest
-                </Button>
+                 <Button className="bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200">
+                   🏆 Join & Win 5,000 PHP
+                 </Button>
               </ContestParticipationModal>
                <Button variant="outline">Add Post</Button>
                {!isOwner && (
