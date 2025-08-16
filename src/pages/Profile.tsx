@@ -166,7 +166,7 @@ const Profile = () => {
     setLogoutLoading(true);
     try {
       await supabase.auth.signOut();
-      navigate("/contest", { replace: true });
+      navigate("/", { replace: true });
     } catch (error) {
       toast({ description: "Ошибка при выходе" });
     } finally {
