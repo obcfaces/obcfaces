@@ -69,9 +69,8 @@ const getParticipantBadge = (type?: 'candidate' | 'finalist' | 'winner', isFullV
     : "absolute top-0 left-48 sm:left-56 md:left-64 right-0 z-20";
   
   return (
-    <div className={`${positionClasses} px-2 py-1 text-xs font-semibold ${badgeStyles[type]} flex justify-between items-center`}>
-      <span>{labels[type]}</span>
-      <span>{dates[type]}</span>
+    <div className={`${positionClasses} px-2 py-1 text-xs font-semibold ${badgeStyles[type]} flex justify-start items-center`}>
+      <span>🏆 WINNER   + 5000 PHP</span>
     </div>
   );
 };
