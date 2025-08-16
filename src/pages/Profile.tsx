@@ -16,6 +16,7 @@ import PostCard from "@/components/profile/PostCard";
 import LikedItem from "@/components/profile/LikedItem";
 import { PhotoModal } from "@/components/photo-modal";
 import { ContestParticipationModal } from "@/components/contest-participation-modal";
+import CreatePostModal from "@/components/create-post-modal";
 import c1 from "@/assets/contestant-1.jpg";
 import c2 from "@/assets/contestant-2.jpg";
 import c3 from "@/assets/contestant-3.jpg";
@@ -773,7 +774,9 @@ const Profile = () => {
                    🏆 Join & Win 5,000 PHP
                  </Button>
                </ContestParticipationModal>
-               <Button variant="outline">Add Post</Button>
+                <CreatePostModal>
+                  <Button variant="outline">Add Post</Button>
+                </CreatePostModal>
                {!isOwner && (
                  <Button variant="outline" onClick={handleMessage}>
                    <MessageCircle className="w-4 h-4 mr-1" />
