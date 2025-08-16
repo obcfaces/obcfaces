@@ -267,8 +267,12 @@ export function ContestantCard({
       <>
         <Card className="bg-card border-contest-border relative overflow-hidden">
           {isWinner && (
-            <div className="absolute top-2 left-4 bg-contest-blue text-white px-3 py-1 rounded-full text-sm font-bold flex items-center gap-1 z-20">
-              🏆 WINNER
+            <div className="absolute top-0 right-0 z-30 flex flex-col items-end">
+              <div className="bg-contest-blue text-white px-3 py-1.5 rounded-bl-lg text-sm font-bold shadow-sm flex items-center gap-2">
+                <span>#{rank}</span>
+                <span className="text-yellow-300">★</span>
+                <span>{rating.toFixed(1)}</span>
+              </div>
             </div>
           )}
           
