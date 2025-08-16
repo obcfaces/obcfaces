@@ -76,6 +76,9 @@ const Profile = () => {
   const [passwordInvalidFields, setPasswordInvalidFields] = useState<Set<string>>(new Set());
   const [savingPassword, setSavingPassword] = useState(false);
   const [currentUserEmail, setCurrentUserEmail] = useState('');
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [activeTab, setActiveTab] = useState("Posts");
   const [likedItems, setLikedItems] = useState<any[]>([]);
   const [loadingLikes, setLoadingLikes] = useState(true);
@@ -297,6 +300,48 @@ const Profile = () => {
     setIsEditingProfile(true);
     setSubmitted(false);
     setInvalidFields(new Set());
+    setAvatarFile(null);
+    setAvatarPreview(null);
+  };
+
+  const handleAvatarChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setAvatarFile(file);
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setAvatarPreview(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const uploadAvatar = async (file: File): Promise<string | null> => {
+    if (!currentUserId) return null;
+    
+    setUploadingAvatar(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${currentUserId}/avatar.${fileExt}`;
+      
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(fileName, file, { upsert: true });
+      
+      if (uploadError) throw uploadError;
+      
+      const { data } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(fileName);
+      
+      return data.publicUrl;
+    } catch (error) {
+      console.error('Error uploading avatar:', error);
+      toast({ description: "Ошибка загрузки фото" });
+      return null;
+    } finally {
+      setUploadingAvatar(false);
+    }
   };
 
   const handleEditFormChange = (field: string, value: string) => {
@@ -399,6 +444,15 @@ const Profile = () => {
     
     setSavingProfile(true);
     try {
+      // Upload avatar if a new one was selected
+      let avatarUrl = profile.avatar_url;
+      if (avatarFile) {
+        const uploadedUrl = await uploadAvatar(avatarFile);
+        if (uploadedUrl) {
+          avatarUrl = uploadedUrl;
+        }
+      }
+
       // Update profile data
       const updates: any = {
         display_name: editForm.display_name,
@@ -406,6 +460,11 @@ const Profile = () => {
         country: editForm.country,
         bio: editForm.bio
       };
+
+      // Add avatar URL if we have one
+      if (avatarUrl) {
+        updates.avatar_url = avatarUrl;
+      }
 
       const { error: profileError } = await supabase
         .from("profiles")
@@ -920,6 +979,33 @@ const Profile = () => {
             <TabsContent value="about" className="mt-8">
               {isEditingProfile ? (
                 <div className="max-w-md space-y-3">
+                  {/* Avatar Upload */}
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium">Profile Photo</Label>
+                    <div className="flex items-center gap-4">
+                      <Avatar className="w-16 h-16">
+                        <AvatarImage 
+                          src={avatarPreview || profile.avatar_url || ""} 
+                          alt="Profile preview" 
+                        />
+                        <AvatarFallback className="text-sm">
+                          {(editForm.display_name || profile.display_name || "U").charAt(0).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <Input 
+                          type="file"
+                          accept="image/*"
+                          onChange={handleAvatarChange}
+                          className="text-sm"
+                        />
+                        <p className="text-xs text-muted-foreground mt-1">
+                          JPG, PNG up to 5MB
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
                   <div className="space-y-2">
                     <Input 
                       placeholder="Display Name" 
