@@ -838,22 +838,22 @@ const Profile = () => {
                     <div className="flex justify-between items-center gap-4 mb-4 px-6 sm:px-0 -mt-[15px]">
                       {/* Country filter */}
                       <div className="flex-1 max-w-48">
-                        <Select value={likesCountryFilter} onValueChange={setLikesCountryFilter}>
-                          <SelectTrigger className="text-sm">
-                            <SelectValue placeholder="Все страны" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="all">Все страны</SelectItem>
-                            {Array.from(new Set(likedItems
+                        <SearchableSelect
+                          value={likesCountryFilter}
+                          onValueChange={setLikesCountryFilter}
+                          options={[
+                            { value: "all", label: "Все страны" },
+                            ...Array.from(new Set(likedItems
                               .map(item => item.candidateData?.country)
                               .filter(Boolean)
-                            )).sort().map((country) => (
-                              <SelectItem key={country} value={country}>
-                                {country}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                            )).sort().map((country) => ({
+                              value: country,
+                              label: country
+                            }))
+                          ]}
+                          placeholder="Все страны"
+                          highlightSelected
+                        />
                       </div>
                       
                       {/* View mode toggle buttons */}
