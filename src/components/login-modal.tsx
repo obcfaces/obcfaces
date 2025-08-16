@@ -153,7 +153,7 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
   const invalidTerms = showErrors && !acceptTerms;
 
   return (
-    <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) { setMode("login"); setSubmitted(false); } }}>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <button className="text-sm underline text-primary">Sign in</button>
       </DialogTrigger>
