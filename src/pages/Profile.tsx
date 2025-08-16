@@ -1225,111 +1225,37 @@ const Profile = () => {
                 </div>
               ) : (
                 <div className="space-y-6">
-                  {/* Profile Photo */}
-                  {profile?.avatar_url && (
-                    <div className="flex justify-center">
-                      <Avatar className="h-32 w-32">
-                        <AvatarImage 
-                          src={profile.avatar_url} 
-                          alt="Profile photo"
-                          className="object-cover"
-                        />
-                        <AvatarFallback className="text-lg">
-                          {(profile.display_name || "U").charAt(0).toUpperCase()}
-                        </AvatarFallback>
-                      </Avatar>
-                    </div>
-                  )}
-
                   {/* Basic Information */}
-                  <div className="grid gap-3">
-                    <div>
-                      <h3 className="text-sm font-medium text-muted-foreground mb-2">Basic Information</h3>
-                      <div className="space-y-2">
-                        {profile?.display_name && (
-                          <div className="flex justify-between">
-                            <span className="text-sm text-muted-foreground">Display Name:</span>
-                            <span className="text-sm">{profile.display_name}</span>
-                          </div>
-                        )}
-                        {profile?.first_name && (
-                          <div className="flex justify-between">
-                            <span className="text-sm text-muted-foreground">First Name:</span>
-                            <span className="text-sm">{profile.first_name}</span>
-                          </div>
-                        )}
-                        {profile?.last_name && (
-                          <div className="flex justify-between">
-                            <span className="text-sm text-muted-foreground">Last Name:</span>
-                            <span className="text-sm">{profile.last_name}</span>
-                          </div>
-                        )}
-                        {profile?.gender && (
-                          <div className="flex justify-between">
-                            <span className="text-sm text-muted-foreground">Gender:</span>
-                            <span className="text-sm">{profile.gender === 'male' ? 'Male' : 'Female'}</span>
-                          </div>
-                        )}
-                        {profile?.birthdate && (
-                          <div className="flex justify-between">
-                            <span className="text-sm text-muted-foreground">Age:</span>
-                            <span className="text-sm">{new Date().getFullYear() - new Date(profile.birthdate).getFullYear()} years</span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Location */}
-                    {(profile?.country || profile?.city) && (
+                  <div className="space-y-3">
+                    {profile?.display_name && (
                       <div>
-                        <h3 className="text-sm font-medium text-muted-foreground mb-2">Location</h3>
-                        <div className="space-y-2">
-                          {profile?.country && (
-                            <div className="flex justify-between">
-                              <span className="text-sm text-muted-foreground">Country:</span>
-                              <span className="text-sm">{profile.country}</span>
-                            </div>
-                          )}
-                          {profile?.city && (
-                            <div className="flex justify-between">
-                              <span className="text-sm text-muted-foreground">City:</span>
-                              <span className="text-sm">{profile.city}</span>
-                            </div>
-                          )}
-                        </div>
+                        <span className="text-sm font-medium text-foreground">Display Name: </span>
+                        <span className="text-sm text-muted-foreground">{profile.display_name}</span>
                       </div>
                     )}
-
-                    {/* Physical Information */}
-                    {(profile?.height_cm || profile?.weight_kg) && (
+                    
+                    {profile?.gender && (
                       <div>
-                        <h3 className="text-sm font-medium text-muted-foreground mb-2">Physical Information</h3>
-                        <div className="space-y-2">
-                          {profile?.height_cm && (
-                            <div className="flex justify-between">
-                              <span className="text-sm text-muted-foreground">Height:</span>
-                              <span className="text-sm">{profile.height_cm} cm</span>
-                            </div>
-                          )}
-                          {profile?.weight_kg && (
-                            <div className="flex justify-between">
-                              <span className="text-sm text-muted-foreground">Weight:</span>
-                              <span className="text-sm">{profile.weight_kg} kg</span>
-                            </div>
-                          )}
-                        </div>
+                        <span className="text-sm font-medium text-foreground">Gender: </span>
+                        <span className="text-sm text-muted-foreground">{profile.gender === 'male' ? 'Male' : 'Female'}</span>
                       </div>
                     )}
-
-                    {/* About Me */}
+                    
+                    {profile?.country && (
+                      <div>
+                        <span className="text-sm font-medium text-foreground">Country: </span>
+                        <span className="text-sm text-muted-foreground">{profile.country}</span>
+                      </div>
+                    )}
+                    
                     {profile?.bio && (
                       <div>
-                        <h3 className="text-sm font-medium text-muted-foreground mb-2">About Me</h3>
-                        <p className="text-sm leading-relaxed">{profile.bio}</p>
+                        <span className="text-sm font-medium text-foreground">About Me: </span>
+                        <span className="text-sm text-muted-foreground">{profile.bio}</span>
                       </div>
                     )}
 
-                    {!profile?.bio && !profile?.gender && !profile?.country && !profile?.height_cm && !profile?.weight_kg && (
+                    {!profile?.display_name && !profile?.gender && !profile?.country && !profile?.bio && (
                       <p className="text-muted-foreground text-center py-8">Нет информации для отображения</p>
                     )}
                   </div>
