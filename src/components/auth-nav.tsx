@@ -82,15 +82,19 @@ const AuthNav = () => {
         className="inline-flex items-center"
         aria-label="Open your profile"
       >
-        <Avatar className="h-9 w-9 ring-1 ring-border hover:ring-primary transition-colors">
+        <div className="h-9 w-9 ring-1 ring-border hover:ring-primary transition-colors rounded-full overflow-hidden bg-muted flex items-center justify-center">
           {avatarUrl ? (
-            <AvatarImage src={avatarUrl} alt={(displayName || "User") + " avatar"} />
+            <img 
+              src={avatarUrl} 
+              alt={(displayName || "User") + " avatar"} 
+              className="w-full h-full object-cover"
+            />
           ) : (
-            <AvatarFallback className="text-sm font-medium">
+            <span className="text-sm font-medium text-muted-foreground">
               {fallbackInitial}
-            </AvatarFallback>
+            </span>
           )}
-        </Avatar>
+        </div>
       </Link>
     </div>
   );
