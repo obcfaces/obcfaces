@@ -333,7 +333,11 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
         </div>
       ) : currentIndex < filteredCandidates.length ? (
         <div className="flex flex-col items-center">
-          <div className="w-full px-0 sm:px-6">
+          <div className="w-full px-0 sm:px-6 max-w-full overflow-hidden">
+            {/* Debug info for mobile */}
+            <div className="text-xs text-muted-foreground p-2 sm:hidden">
+              Mobile NEXT WEEK - Current: {currentCandidate?.name}
+            </div>
             <ContestantCard
               {...currentCandidate}
               viewMode={viewMode}
