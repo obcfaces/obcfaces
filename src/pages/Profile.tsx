@@ -749,7 +749,7 @@ const Profile = () => {
                  )}
                  {profile.bio && (
                    <p className="text-sm text-muted-foreground mt-2 italic leading-relaxed">
-                     "{profile.bio}"
+                     {profile.bio}
                    </p>
                  )}
                 </div>
