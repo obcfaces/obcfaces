@@ -55,7 +55,7 @@ const getParticipantBadge = (type?: 'candidate' | 'finalist' | 'winner', isFullV
   const labels = {
     candidate: "Candidate",
     finalist: "Finalist",
-    winner: "Winner"
+    winner: "🏆 Winner + 5000 PHP"
   };
 
   const dates = {
