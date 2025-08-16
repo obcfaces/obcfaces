@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import SearchableSelect from "@/components/ui/searchable-select";
 import { LogOut, Eye, EyeOff, UserIcon, MapPin } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import PostCard from "@/components/profile/PostCard";
@@ -92,6 +93,70 @@ const Profile = () => {
     country: "Russia",
     bio: "Model and photographer. Love traveling and discovering new places. Always looking for inspiration in everyday moments."
   };
+
+  // Country options
+  const countryOptions = [
+    { value: "Philippines", label: "Philippines" },
+    { value: "Indonesia", label: "Indonesia" },
+    { value: "Malaysia", label: "Malaysia" },
+    { value: "Singapore", label: "Singapore" },
+    { value: "Thailand", label: "Thailand" },
+    { value: "Vietnam", label: "Vietnam" },
+    { value: "Myanmar", label: "Myanmar" },
+    { value: "Cambodia", label: "Cambodia" },
+    { value: "Laos", label: "Laos" },
+    { value: "Brunei", label: "Brunei" },
+    { value: "Russia", label: "Russia" },
+    { value: "Ukraine", label: "Ukraine" },
+    { value: "Belarus", label: "Belarus" },
+    { value: "Kazakhstan", label: "Kazakhstan" },
+    { value: "USA", label: "United States" },
+    { value: "Canada", label: "Canada" },
+    { value: "Mexico", label: "Mexico" },
+    { value: "Brazil", label: "Brazil" },
+    { value: "Argentina", label: "Argentina" },
+    { value: "Colombia", label: "Colombia" },
+    { value: "Venezuela", label: "Venezuela" },
+    { value: "Peru", label: "Peru" },
+    { value: "Chile", label: "Chile" },
+    { value: "Ecuador", label: "Ecuador" },
+    { value: "Bolivia", label: "Bolivia" },
+    { value: "Paraguay", label: "Paraguay" },
+    { value: "Uruguay", label: "Uruguay" },
+    { value: "Germany", label: "Germany" },
+    { value: "France", label: "France" },
+    { value: "Italy", label: "Italy" },
+    { value: "Spain", label: "Spain" },
+    { value: "Poland", label: "Poland" },
+    { value: "Netherlands", label: "Netherlands" },
+    { value: "Belgium", label: "Belgium" },
+    { value: "Switzerland", label: "Switzerland" },
+    { value: "Austria", label: "Austria" },
+    { value: "Czech Republic", label: "Czech Republic" },
+    { value: "Hungary", label: "Hungary" },
+    { value: "Romania", label: "Romania" },
+    { value: "Bulgaria", label: "Bulgaria" },
+    { value: "Greece", label: "Greece" },
+    { value: "Portugal", label: "Portugal" },
+    { value: "Sweden", label: "Sweden" },
+    { value: "Norway", label: "Norway" },
+    { value: "Denmark", label: "Denmark" },
+    { value: "Finland", label: "Finland" },
+    { value: "UK", label: "United Kingdom" },
+    { value: "Ireland", label: "Ireland" },
+    { value: "China", label: "China" },
+    { value: "Japan", label: "Japan" },
+    { value: "South Korea", label: "South Korea" },
+    { value: "India", label: "India" },
+    { value: "Australia", label: "Australia" },
+    { value: "New Zealand", label: "New Zealand" },
+    { value: "South Africa", label: "South Africa" },
+    { value: "Egypt", label: "Egypt" },
+    { value: "Morocco", label: "Morocco" },
+    { value: "Nigeria", label: "Nigeria" },
+    { value: "Kenya", label: "Kenya" },
+    { value: "Other", label: "Other" }
+  ];
 
   const profile = data || demoProfile;
   const isOwner = currentUserId && currentUserId === id;
@@ -776,10 +841,10 @@ const Profile = () => {
 
             <TabsContent value="about" className="mt-8">
               {isEditingProfile ? (
-                <div className="space-y-3">
+                <div className="max-w-md space-y-3">
                   <div className="space-y-2">
                     <Input 
-                      placeholder="Имя на сайте" 
+                      placeholder="Display Name" 
                       className={getFieldClasses('display_name', "text-sm placeholder:text-muted-foreground")}
                       value={editForm.display_name} 
                       onChange={(e) => handleEditFormChange('display_name', e.target.value)} 
@@ -789,27 +854,28 @@ const Profile = () => {
                   <div className="space-y-2">
                     <Select value={editForm.gender} onValueChange={(value) => handleEditFormChange('gender', value)}>
                       <SelectTrigger className={getFieldClasses('gender', "text-sm")}>
-                        <SelectValue placeholder="Пол" />
+                        <SelectValue placeholder="Gender" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="male">Мужской</SelectItem>
-                        <SelectItem value="female">Женский</SelectItem>
+                        <SelectItem value="male">Male</SelectItem>
+                        <SelectItem value="female">Female</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
 
                   <div className="space-y-2">
-                    <Input 
-                      placeholder="Страна" 
-                      className={getFieldClasses('country', "text-sm placeholder:text-muted-foreground")}
-                      value={editForm.country} 
-                      onChange={(e) => handleEditFormChange('country', e.target.value)} 
+                    <SearchableSelect
+                      value={editForm.country}
+                      onValueChange={(value) => handleEditFormChange('country', value)}
+                      options={countryOptions}
+                      placeholder="Country"
+                      invalid={hasRedBorder('country')}
                     />
                   </div>
 
                   <div className="space-y-2">
                     <Input 
-                      placeholder="О себе" 
+                      placeholder="About Me" 
                       className="text-sm placeholder:text-muted-foreground"
                       value={editForm.bio} 
                       onChange={(e) => handleEditFormChange('bio', e.target.value)} 
@@ -830,7 +896,7 @@ const Profile = () => {
                     <div className="relative">
                       <Input 
                         type={showPassword ? "text" : "password"} 
-                        placeholder="Новый пароль (оставьте пустым если не хотите менять)" 
+                        placeholder="New Password (leave empty to keep current)" 
                         className="pr-10 text-sm placeholder:text-muted-foreground"
                         value={editForm.password} 
                         onChange={(e) => handleEditFormChange('password', e.target.value)} 
@@ -852,10 +918,10 @@ const Profile = () => {
                       variant="outline" 
                       onClick={() => setIsEditingProfile(false)}
                     >
-                      Отмена
+                      Cancel
                     </Button>
                     <Button onClick={handleSaveProfile}>
-                      Сохранить
+                      Save
                     </Button>
                   </div>
                 </div>
