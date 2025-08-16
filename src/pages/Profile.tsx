@@ -271,15 +271,37 @@ const Profile = () => {
     
     setLoadingParticipation(true);
     try {
-      // Проверяем, является ли пользователь участником конкурса
+      console.log('Loading participation for user:', currentUserId);
+      
+      // Сначала получаем профиль пользователя
       const { data: profileData, error } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', currentUserId)
-        .eq('is_contest_participant', true)
-        .single();
+        .maybeSingle();
 
-      if (error || !profileData) {
+      console.log('Profile data:', profileData);
+      console.log('Profile error:', error);
+
+      if (error) {
+        console.error('Error fetching profile:', error);
+        setParticipationItems([]);
+        setLoadingParticipation(false);
+        return;
+      }
+
+      if (!profileData) {
+        console.log('No profile found for user');
+        setParticipationItems([]);
+        setLoadingParticipation(false);
+        return;
+      }
+
+      // Проверяем, является ли пользователь участником конкурса
+      console.log('is_contest_participant:', profileData.is_contest_participant);
+      
+      if (!profileData.is_contest_participant) {
+        console.log('User is not a contest participant');
         setParticipationItems([]);
         setLoadingParticipation(false);
         return;
@@ -310,6 +332,7 @@ const Profile = () => {
         }
       };
 
+      console.log('Created participation card:', participationCard);
       setParticipationItems([participationCard]);
     } catch (error) {
       console.error("Error loading participation items:", error);
