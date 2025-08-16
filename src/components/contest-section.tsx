@@ -304,10 +304,6 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
       )}
 
       <div className="px-0 sm:px-6 grid grid-cols-1 lg:grid-cols-2 gap-1 sm:gap-3 max-w-full overflow-hidden">
-        {/* Debug info */}
-        <div className="text-xs text-muted-foreground p-2 sm:hidden">
-          Mobile view - {contestants.length} contestants
-        </div>
         {contestants.map((contestant) => (
           <ContestantCard
             key={contestant.rank}
