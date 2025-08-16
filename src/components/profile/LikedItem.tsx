@@ -66,7 +66,7 @@ const getParticipantBadge = (type?: 'candidate' | 'finalist' | 'winner', isFullV
   
   const positionClasses = isFullView 
     ? "absolute bottom-0 left-0 right-0 z-20" 
-    : "absolute bottom-0 left-48 sm:left-56 md:left-64 right-0 z-20";
+    : "absolute bottom-0 left-0 w-[193px] sm:w-[225px] md:w-[257px] z-20";
   
   return (
     <div className={`${positionClasses} px-2 py-1 text-xs font-semibold ${badgeStyles[type]} flex justify-between items-center`}>
