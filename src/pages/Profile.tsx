@@ -271,47 +271,46 @@ const Profile = () => {
     
     setLoadingParticipation(true);
     try {
-      // Mock participation data - карточки участия аналогичные лайкам
-      const participantTypes = ["candidate", "finalist", "winner"] as const;
-      const mockImages = [c1face, c2face, c3face];
-      const mockFullImages = [c1, c2, c3];
-      const participationNames = [
-        "Victoria Morales", "Alejandra Silva", "Andrea Vargas", "Natalia Castillo",
-        "Daniela Ruiz", "Paula Jimenez", "Carolina Perez", "Mariana Santos"
-      ];
-      
-      const mockParticipation = Array.from({ length: 3 }, (_, index) => {
-        const randomImageIndex = Math.floor(Math.random() * mockImages.length);
-        const randomNameIndex = Math.floor(Math.random() * participationNames.length);
-        const randomTypeIndex = Math.floor(Math.random() * participantTypes.length);
-        const participationId = `participation-${index + 1}`;
-        
-        return {
-          likeId: participationId,
-          contentType: 'contest' as const,
-          contentId: participationId,
-          authorName: participationNames[randomNameIndex],
-          authorProfileId: currentUserId,
-          time: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toLocaleString('ru-RU'),
-          likes: Math.floor(Math.random() * 200) + 50,
-          comments: Math.floor(Math.random() * 40) + 5,
-          imageSrc: mockImages[randomImageIndex],
-          participantType: participantTypes[randomTypeIndex],
-          candidateData: {
-            name: participationNames[randomNameIndex],
-            age: 20 + Math.floor(Math.random() * 10),
-            weight: 45 + Math.floor(Math.random() * 15),
-            height: 155 + Math.floor(Math.random() * 20),
-            country: 'Philippines',
-            city: 'Manila',
-            faceImage: mockImages[randomImageIndex],
-            fullBodyImage: mockFullImages[randomImageIndex],
-            participantType: participantTypes[randomTypeIndex]
-          }
-        };
-      });
+      // Проверяем, является ли пользователь участником конкурса
+      const { data: profileData, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', currentUserId)
+        .eq('is_contest_participant', true)
+        .single();
 
-      setParticipationItems(mockParticipation);
+      if (error || !profileData) {
+        setParticipationItems([]);
+        setLoadingParticipation(false);
+        return;
+      }
+
+      // Создаем карточку участия пользователя на основе его профиля
+      const participationCard = {
+        likeId: `participation-${currentUserId}`,
+        contentType: 'contest' as const,
+        contentId: currentUserId,
+        authorName: profileData.display_name || 'Участник',
+        authorProfileId: currentUserId,
+        time: new Date(profileData.created_at).toLocaleString('ru-RU'),
+        likes: Math.floor(Math.random() * 200) + 50, // Mock likes
+        comments: Math.floor(Math.random() * 40) + 5, // Mock comments
+        imageSrc: profileData.avatar_url || c1face,
+        participantType: (profileData.participant_type as 'candidate' | 'finalist' | 'winner') || 'candidate',
+        candidateData: {
+          name: profileData.display_name || 'Участник',
+          age: profileData.age || 25,
+          weight: profileData.weight_kg || 55,
+          height: profileData.height_cm || 165,
+          country: profileData.country || 'Philippines',
+          city: profileData.city || 'Manila',
+          faceImage: profileData.avatar_url || c1face,
+          fullBodyImage: profileData.photo_1_url || profileData.avatar_url || c1,
+          participantType: (profileData.participant_type as 'candidate' | 'finalist' | 'winner') || 'candidate'
+        }
+      };
+
+      setParticipationItems([participationCard]);
     } catch (error) {
       console.error("Error loading participation items:", error);
       setParticipationItems([]);
