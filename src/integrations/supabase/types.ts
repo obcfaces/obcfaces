@@ -222,6 +222,112 @@ export type Database = {
         }
         Relationships: []
       }
+      post_likes: {
+        Row: {
+          created_at: string
+          id: string
+          post_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          post_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          post_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_likes_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      posts: {
+        Row: {
+          caption: string | null
+          comments_count: number | null
+          created_at: string
+          id: string
+          likes_count: number | null
+          media_types: string[]
+          media_urls: string[]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          caption?: string | null
+          comments_count?: number | null
+          created_at?: string
+          id?: string
+          likes_count?: number | null
+          media_types: string[]
+          media_urls: string[]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          caption?: string | null
+          comments_count?: number | null
+          created_at?: string
+          id?: string
+          likes_count?: number | null
+          media_types?: string[]
+          media_urls?: string[]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      posts_media: {
+        Row: {
+          created_at: string
+          file_size: number | null
+          file_type: string
+          file_url: string
+          id: string
+          mime_type: string | null
+          order_index: number
+          post_id: string
+        }
+        Insert: {
+          created_at?: string
+          file_size?: number | null
+          file_type: string
+          file_url: string
+          id?: string
+          mime_type?: string | null
+          order_index?: number
+          post_id: string
+        }
+        Update: {
+          created_at?: string
+          file_size?: number | null
+          file_type?: string
+          file_url?: string
+          id?: string
+          mime_type?: string | null
+          order_index?: number
+          post_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "posts_media_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           age: number | null
