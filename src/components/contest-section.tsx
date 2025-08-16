@@ -303,7 +303,7 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
         </div>
       )}
 
-      <div className="px-0 sm:px-6 grid grid-cols-1 gap-1 sm:gap-3 max-w-full overflow-hidden">
+      <div className="px-0 sm:px-6 grid grid-cols-1 sm:grid-cols-2 gap-1 sm:gap-3 max-w-full overflow-hidden">
         {/* Debug info */}
         <div className="text-xs text-muted-foreground p-2 sm:hidden">
           Mobile view - {contestants.length} contestants
