@@ -560,12 +560,13 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
             </div>
 
             <div className="space-y-4">
-              <h3 className="text-sm font-medium text-center">Upload Photos</h3>
               <div className="flex flex-row gap-4 items-start justify-between">
                 {/* Left text column */}
                 <div className="flex flex-col justify-center items-start space-y-2 text-sm text-muted-foreground flex-shrink-0">
+                  <span>Upload Photos</span>
                   <span>no makeup</span>
                   <span>no filters</span>
+                  <span>no nudes</span>
                   <span>no color correction</span>
                 </div>
 
