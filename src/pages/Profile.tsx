@@ -755,7 +755,20 @@ const Profile = () => {
               </ContestParticipationModal>
                <Button variant="outline">Add Post</Button>
                {isOwner && (
-                 <Button variant="outline" onClick={initEditForm}>Edit Profile</Button>
+                 <Button 
+                   variant="outline" 
+                   onClick={() => {
+                     console.log('Edit button clicked, isOwner:', isOwner, 'currentUserId:', currentUserId, 'id:', id);
+                     initEditForm();
+                   }}
+                 >
+                   Edit Profile
+                 </Button>
+               )}
+               {!isOwner && (
+                 <div className="text-xs text-muted-foreground">
+                   Debug: isOwner={String(isOwner)}, currentUserId={currentUserId}, id={id}
+                 </div>
                )}
             </div>
 
@@ -776,12 +789,12 @@ const Profile = () => {
 
           {/* Tabs */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-8">
-            <TabsList className="w-full bg-transparent p-0 rounded-none justify-start gap-2 sm:gap-8 border-b border-border overflow-x-auto">
-              <TabsTrigger value="likes" className="px-0 mr-2 sm:mr-6 h-auto pb-2 bg-transparent rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary text-muted-foreground hover:text-foreground text-sm sm:text-base whitespace-nowrap">Likes</TabsTrigger>
-              <TabsTrigger value="posts" className="px-0 mr-2 sm:mr-6 h-auto pb-2 bg-transparent rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary text-muted-foreground hover:text-foreground text-sm sm:text-base whitespace-nowrap">Posts</TabsTrigger>
-              <TabsTrigger value="photos" className="px-0 mr-2 sm:mr-6 h-auto pb-2 bg-transparent rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary text-muted-foreground hover:text-foreground text-sm sm:text-base whitespace-nowrap">Photos</TabsTrigger>
-              <TabsTrigger value="participation" className="px-0 mr-2 sm:mr-6 h-auto pb-2 bg-transparent rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary text-muted-foreground hover:text-foreground text-sm sm:text-base whitespace-nowrap">Participation</TabsTrigger>
-              <TabsTrigger value="about" className="px-0 mr-2 sm:mr-6 h-auto pb-2 bg-transparent rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary text-muted-foreground hover:text-foreground text-sm sm:text-base whitespace-nowrap">About</TabsTrigger>
+            <TabsList className="w-full bg-transparent p-0 rounded-none justify-start gap-2 sm:gap-8 border-b border-border flex-wrap">
+              <TabsTrigger value="likes" className="px-0 mr-2 sm:mr-6 h-auto pb-2 bg-transparent rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary text-muted-foreground hover:text-foreground text-sm sm:text-base">Likes</TabsTrigger>
+              <TabsTrigger value="posts" className="px-0 mr-2 sm:mr-6 h-auto pb-2 bg-transparent rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary text-muted-foreground hover:text-foreground text-sm sm:text-base">Posts</TabsTrigger>
+              <TabsTrigger value="photos" className="px-0 mr-2 sm:mr-6 h-auto pb-2 bg-transparent rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary text-muted-foreground hover:text-foreground text-sm sm:text-base">Photos</TabsTrigger>
+              <TabsTrigger value="participation" className="px-0 mr-2 sm:mr-6 h-auto pb-2 bg-transparent rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary text-muted-foreground hover:text-foreground text-sm sm:text-base">Participation</TabsTrigger>
+              <TabsTrigger value="about" className="px-0 mr-2 sm:mr-6 h-auto pb-2 bg-transparent rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary text-muted-foreground hover:text-foreground text-sm sm:text-base">About</TabsTrigger>
               {isOwner && (
                 <button
                   onClick={logout}
