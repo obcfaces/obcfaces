@@ -59,9 +59,9 @@ const getParticipantBadge = (type?: 'candidate' | 'finalist' | 'winner', isFullV
   };
 
   const dates = {
-    candidate: "1-8 Sep",
-    finalist: "9-15 Sep",
-    winner: "16-22 Sep"
+    candidate: "1 Sep",
+    finalist: "9 Sep",
+    winner: "16 Sep"
   };
   
   const positionClasses = isFullView 
