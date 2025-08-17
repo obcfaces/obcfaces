@@ -1733,11 +1733,11 @@ const Profile = () => {
                                 autoFocus
                               />
                               <div className="flex gap-2">
-                                <Button 
-                                  size="sm"
-                                  onClick={() => {
-                                    setEditingField(null);
-                                    setEditForm(prev => ({ ...prev, bio: profile.bio || '' }));
+                                 <Button 
+                                   size="sm"
+                                   onClick={() => {
+                                     setEditingField(null);
+                                     setEditForm(prev => ({ ...prev, bio: data?.bio || '' }));
                                   }}
                                   variant="outline"
                                 >
@@ -1764,10 +1764,10 @@ const Profile = () => {
                           )}
                         </div>
                         {isOwner && editingField !== 'bio' && (
-                          <button
-                            onClick={() => {
-                              setEditingField('bio');
-                              setEditForm(prev => ({ ...prev, bio: profile.bio || '' }));
+                           <button
+                             onClick={() => {
+                               setEditingField('bio');
+                               setEditForm(prev => ({ ...prev, bio: data?.bio || '' }));
                             }}
                             className="p-1 hover:bg-accent rounded-md transition-colors ml-3"
                             aria-label="Edit bio"
