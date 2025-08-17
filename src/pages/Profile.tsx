@@ -304,11 +304,11 @@ const Profile = () => {
 
   const initEditForm = () => {
     setEditForm({
-      display_name: profile.display_name || '',
+      display_name: data?.display_name || '',
       gender: data?.gender || '',
-      country: profile.country || '',
+      country: data?.country || '',
       country_privacy: 'public',
-      bio: profile.bio || '',
+      bio: data?.bio || '',
       email: currentUserEmail
     });
     setIsEditingProfile(true);
