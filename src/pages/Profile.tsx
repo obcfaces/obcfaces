@@ -193,6 +193,16 @@ const Profile = () => {
         setData(profileData);
         setBioDraft(profileData?.bio ?? "");
         
+        // Initialize edit form with loaded data
+        setEditForm({
+          display_name: profileData?.display_name || '',
+          gender: profileData?.gender || '',
+          country: profileData?.country || '',
+          country_privacy: 'public',
+          bio: profileData?.bio || '',
+          email: ''
+        });
+        
         // Get follower/following counts (mock for now)
         setFollowersCount(Math.floor(Math.random() * 1000) + 100);
         setFollowingCount(Math.floor(Math.random() * 500) + 50);
@@ -296,7 +306,11 @@ const Profile = () => {
     const loadCurrentUserEmail = async () => {
       if (currentUserId && currentUserId === id) {
         const { data: { user } } = await supabase.auth.getUser();
-        setCurrentUserEmail(user?.email || '');
+        const userEmail = user?.email || '';
+        setCurrentUserEmail(userEmail);
+        
+        // Update the editForm with the email
+        setEditForm(prev => ({ ...prev, email: userEmail }));
       }
     };
     loadCurrentUserEmail();
