@@ -3,8 +3,12 @@ import { Button } from "@/components/ui/button";
 import { Camera, Upload } from "lucide-react";
 import { ContestParticipationModal } from "@/components/contest-participation-modal";
 
-export function ContestHeader() {
-  const [activeSection, setActiveSection] = useState("Contest");
+interface ContestHeaderProps {
+  activeSection: string;
+  onSectionChange: (section: string) => void;
+}
+
+export function ContestHeader({ activeSection, onSectionChange }: ContestHeaderProps) {
 
   const navItems = [
     { name: "Contest", href: "#" },
@@ -50,78 +54,12 @@ export function ContestHeader() {
           </div>
         )}
         
-        {/* How it works content */}
-        {activeSection === "How it works" && (
-          <div className="mt-6 space-y-6 text-contest-text">
-            <div className="text-center">
-              <h2 className="text-2xl font-bold mb-4">🌟 How It Works – OBC (Online Beauty Contest)</h2>
-            </div>
-            
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {/* Weekly Photo Contest */}
-              <div className="bg-white/50 p-4 rounded-lg">
-                <h3 className="text-lg font-semibold mb-2">1. Weekly Photo Contest</h3>
-                <p className="text-sm">Every week, we select the most beautiful girls from across the Philippines and post them on our site and social media.</p>
-              </div>
-              
-              {/* How to Join */}
-              <div className="bg-white/50 p-4 rounded-lg">
-                <h3 className="text-lg font-semibold mb-2">2. How to Join</h3>
-                <p className="text-sm mb-2">To participate, send us:</p>
-                <ul className="text-sm space-y-1">
-                  <li>📸 1 full-body photo (no filter, no makeup)</li>
-                  <li>📸 1 close-up face photo (no makeup)</li>
-                </ul>
-                <p className="text-sm mt-2">Submit your entry anytime! If not selected this week, you may be chosen for the next.</p>
-              </div>
-              
-              {/* Selection & Voting */}
-              <div className="bg-white/50 p-4 rounded-lg">
-                <h3 className="text-lg font-semibold mb-2">3. Selection & Voting</h3>
-                <ul className="text-sm space-y-1">
-                  <li>Each Monday, we post new contestants.</li>
-                  <li>Our audience votes by liking photos ❤️</li>
-                  <li>Admins make the final decision to ensure fairness.</li>
-                </ul>
-              </div>
-              
-              {/* Prizes */}
-              <div className="bg-white/50 p-4 rounded-lg">
-                <h3 className="text-lg font-semibold mb-2">4. Prizes</h3>
-                <ul className="text-sm space-y-1">
-                  <li>🏆 <strong>Weekly Winner:</strong> ₱5,000</li>
-                  <li>👑 <strong>End-of-Year Grand Prize:</strong></li>
-                  <li className="ml-4">1st Place – ₱200,000</li>
-                  <li className="ml-4">2nd Place – ₱100,000</li>
-                  <li className="ml-4">3rd Place – ₱50,000</li>
-                </ul>
-              </div>
-              
-              {/* Rules */}
-              <div className="bg-white/50 p-4 rounded-lg">
-                <h3 className="text-lg font-semibold mb-2">5. Rules</h3>
-                <ul className="text-sm space-y-1">
-                  <li>Girls only, aged 18–35</li>
-                  <li>No editing, filters, or makeup</li>
-                  <li>By sending photos, you agree we can use them for the contest and promotion</li>
-                </ul>
-              </div>
-              
-              {/* Questions */}
-              <div className="bg-white/50 p-4 rounded-lg">
-                <h3 className="text-lg font-semibold mb-2">Questions?</h3>
-                <p className="text-sm">Just message us anytime 💬</p>
-              </div>
-            </div>
-          </div>
-        )}
-        
         {/* Navigation sections below description */}
         <nav className="flex items-center gap-6 text-sm -mb-6 mt-8">
           {navItems.map((item) => (
             <button
               key={item.name}
-              onClick={() => setActiveSection(item.name)}
+              onClick={() => onSectionChange(item.name)}
               className={`py-0 transition-colors ${
                 activeSection === item.name
                   ? "text-contest-blue font-medium"
