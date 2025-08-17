@@ -28,31 +28,29 @@ export function ContestHeader({ activeSection, onSectionChange }: ContestHeaderP
           </ContestParticipationModal>
         </div>
         
-        {/* Contest info points - only show on Contest tab */}
-        {activeSection === "Contest" && (
-          <div className="mt-3 space-y-1 text-sm text-contest-text">
-            <div className="flex items-center gap-2">
-              <span>🌍</span>
-              <span>Anyone can join — open to all!</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span>📸</span>
-              <span>Free entry with just 2 photos</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span>⭐</span>
-              <span>Natural. Honest. Voted by People.</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span>🏆</span>
-              <span>Weekly winner gets 5,000 PHP</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span>💰</span>
-              <span>Annual winner takes 200,000 PHP</span>
-            </div>
+        {/* Contest info points - always visible */}
+        <div className="mt-3 space-y-1 text-sm text-contest-text">
+          <div className="flex items-center gap-2">
+            <span>🌍</span>
+            <span>Anyone can join — open to all!</span>
           </div>
-        )}
+          <div className="flex items-center gap-2">
+            <span>📸</span>
+            <span>Free entry with just 2 photos</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span>⭐</span>
+            <span>Natural. Honest. Voted by People.</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span>🏆</span>
+            <span>Weekly winner gets 5,000 PHP</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span>💰</span>
+            <span>Annual winner takes 200,000 PHP</span>
+          </div>
+        </div>
         
         {/* Navigation sections below description */}
         <nav className="flex items-center gap-6 text-sm -mb-6 mt-8">
