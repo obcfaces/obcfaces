@@ -37,7 +37,68 @@ const Index = () => {
         onSectionChange={setActiveSection} 
       />
       
-      {/* How it works content - displayed under header when that section is active */}
+      {/* Content area that changes based on active section */}
+      {activeSection === "Contest" && (
+        <>
+          <div className="max-w-6xl mx-auto px-6 pt-6 pb-6 rounded-lg shadow-lg shadow-foreground/15">
+            <ContestFilters
+              country={country}
+              onCountryChange={setCountry}
+              gender={gender}
+              onGenderChange={setGender}
+              viewMode={viewMode}
+              onViewModeChange={setViewMode}
+              category={category}
+              onCategoryChange={handleCategoryChange}
+              genderAvailability={{ male: false, female: true }}
+            />
+          </div>
+          
+          <NextWeekSection viewMode={viewMode} />
+
+          <ContestSection
+            title="THIS WEEK"
+            subtitle="25-31 august 2025"
+            description="Choose the winner of the week."
+            isActive={true}
+            noWrapTitle
+            viewMode={viewMode}
+          />
+
+          <ContestSection
+            title="1 WEEK AGO"
+            titleSuffix="(Closed)"
+            subtitle="18-24 August 2025"
+            centerSubtitle
+            showWinner={true}
+            viewMode={viewMode}
+          />
+
+          <ContestSection
+            title="2 WEEKS AGO"
+            titleSuffix="(Closed)"
+            subtitle="11-17 August 2025"
+            centerSubtitle
+            showWinner={true}
+            viewMode={viewMode}
+          />
+
+          <ContestSection
+            title="3 WEEKS AGO"
+            titleSuffix="(Closed)"
+            subtitle="4-10 August 2025"
+            centerSubtitle
+            showWinner={true}
+            viewMode={viewMode}
+          />
+
+          <section className="max-w-6xl mx-auto px-6 mb-8">
+            <AiChat />
+          </section>
+        </>
+      )}
+
+      {/* How it works content */}
       {activeSection === "How it works" && (
         <div className="max-w-6xl mx-auto px-6 py-8 space-y-6 text-foreground">
           <div className="text-center">
@@ -101,73 +162,6 @@ const Index = () => {
             </div>
           </div>
         </div>
-      )}
-      
-      {/* Contest content - only show when Contest section is active */}
-      {activeSection === "Contest" && (
-        <>
-          <div className="max-w-6xl mx-auto px-6 pt-6 pb-6 rounded-lg shadow-lg shadow-foreground/15">
-            <ContestFilters
-              country={country}
-              onCountryChange={setCountry}
-              gender={gender}
-              onGenderChange={setGender}
-              viewMode={viewMode}
-              onViewModeChange={setViewMode}
-              category={category}
-              onCategoryChange={handleCategoryChange}
-              genderAvailability={{ male: false, female: true }}
-            />
-          </div>
-          
-          
-          <NextWeekSection viewMode={viewMode} />
-
-
-          <ContestSection
-            title="THIS WEEK"
-            subtitle="25-31 august 2025"
-            description="Choose the winner of the week."
-            isActive={true}
-            noWrapTitle
-            viewMode={viewMode}
-          />
-
-
-          <ContestSection
-            title="1 WEEK AGO"
-            titleSuffix="(Closed)"
-            subtitle="18-24 August 2025"
-            centerSubtitle
-            showWinner={true}
-            viewMode={viewMode}
-          />
-
-
-          <ContestSection
-            title="2 WEEKS AGO"
-            titleSuffix="(Closed)"
-            subtitle="11-17 August 2025"
-            centerSubtitle
-            showWinner={true}
-            viewMode={viewMode}
-          />
-
-
-          <ContestSection
-            title="3 WEEKS AGO"
-            titleSuffix="(Closed)"
-            subtitle="4-10 August 2025"
-            centerSubtitle
-            showWinner={true}
-            viewMode={viewMode}
-          />
-
-
-          <section className="max-w-6xl mx-auto px-6 mb-8">
-            <AiChat />
-          </section>
-        </>
       )}
     </div>
   );
