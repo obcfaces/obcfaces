@@ -97,13 +97,13 @@ const GlobalSearch = () => {
       ) : (
         <div className="flex items-center gap-2">
           <div className="relative">
-            <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" strokeWidth={1} />
+            <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" strokeWidth={1} />
             <Input
               ref={inputRef}
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Find a user..."
-              className="h-9 w-56 sm:w-64 md:w-80 pl-8"
+              className="h-9 w-56 sm:w-64 md:w-80 pl-10"
               aria-label="Search"
             />
           </div>
