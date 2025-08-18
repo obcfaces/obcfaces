@@ -1,4 +1,4 @@
-import { City, State } from 'country-state-city';
+// Removed heavy country-state-city import to fix mobile loading issues
 
 // Comprehensive city database for Philippines provinces
 const PHILIPPINES_CITIES = {
@@ -101,15 +101,7 @@ export function getCitiesForLocation(countryCode: string | null, stateCode: stri
   }
   
   try {
-    // First try the country-state-city library
-    const cscCities = City.getCitiesOfState(countryCode, stateCode);
-    console.log('CSC Cities found:', cscCities.length, cscCities.slice(0, 5));
-    
-    if (cscCities.length > 0) {
-      return cscCities.map(city => city.name);
-    }
-    
-    // Fallback for Philippines with comprehensive city database
+    // Use comprehensive Philippines city database
     if (countryCode === 'PH' && PHILIPPINES_CITIES[stateCode]) {
       const cities = PHILIPPINES_CITIES[stateCode];
       console.log(`Using comprehensive database for ${stateCode}:`, cities.length, 'cities');
