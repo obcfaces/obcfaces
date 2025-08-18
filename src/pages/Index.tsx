@@ -54,6 +54,8 @@ const Index = () => {
   };
   
   console.log('Index component rendering, viewMode:', viewMode);
+  console.log('Index state:', { country, gender, viewMode, activeSection, isAdmin, category });
+  
   return (
     <div className="min-h-screen bg-background">
       <ContestHeader 

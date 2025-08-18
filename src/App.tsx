@@ -22,6 +22,7 @@ const queryClient = new QueryClient();
 
 const App = () => {
   console.log("App component rendering");
+  console.log("Window dimensions:", typeof window !== 'undefined' ? { width: window.innerWidth, height: window.innerHeight } : 'SSR');
   
   return (
     <div className="min-h-screen w-full">
