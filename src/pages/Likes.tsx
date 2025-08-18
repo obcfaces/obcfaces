@@ -165,9 +165,9 @@ const Likes = () => {
 
       <div className="max-w-4xl mx-auto px-4 py-8">
         <Tabs defaultValue="i-liked" className="w-full">
-          <TabsList className="w-full bg-transparent p-0 rounded-none justify-start gap-2 sm:gap-8 border-b border-border flex-wrap">
-            <TabsTrigger value="i-liked" className="px-0 mr-2 sm:mr-6 h-auto pb-2 bg-transparent rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary text-muted-foreground hover:text-foreground text-sm sm:text-base">I Liked</TabsTrigger>
-            <TabsTrigger value="i-was-liked" className="px-0 mr-2 sm:mr-6 h-auto pb-2 bg-transparent rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary text-muted-foreground hover:text-foreground text-sm sm:text-base">I Was Liked</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="i-liked">I Liked</TabsTrigger>
+            <TabsTrigger value="i-was-liked">I Was Liked</TabsTrigger>
           </TabsList>
 
           <TabsContent value="i-liked" className="mt-6">
