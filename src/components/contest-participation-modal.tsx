@@ -843,40 +843,31 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                   <SelectValue placeholder="Select height" />
                 </SelectTrigger>
                 <SelectContent>
-                  <div className="height-ruler">
-                    <div className="scale cm">
-                      {Array.from({ length: 71 }, (_, i) => {
-                        const height = 130 + i;
-                        return <div key={height}>{height}</div>;
-                      })}
+                  <div className="ruler">
+                    <div className="guide"></div>
+                    
+                    <div className="col cm">
+                      <ul>
+                        {Array.from({ length: 71 }, (_, i) => {
+                          const height = 130 + i;
+                          return <li key={height}>{height} см</li>;
+                        })}
+                      </ul>
                     </div>
-                    <div className="scale ft">
-                      {Array.from({ length: 71 }, (_, i) => {
-                        const cm = 130 + i;
-                        
-                        const ftInValues = [
-                          "4'3\"", "4'4\"", "4'5\"", "4'6\"", "4'7\"", "4'8\"", "4'9\"", "4'10\"", "4'11\"",
-                          "5'0\"", "5'1\"", "5'2\"", "5'3\"", "5'4\"", "5'5\"", "5'6\"", "5'7\"", "5'8\"", "5'9\"", "5'10\"", "5'11\"",
-                          "6'0\"", "6'1\"", "6'2\"", "6'3\"", "6'4\"", "6'5\""
-                        ];
-                        
-                        let displayValue = '';
-                        
-                        // Равномерное распределение всех 26 значений между позициями 2 (132см) и 68 (198см)
-                        const startPos = 2; // 132 см
-                        const endPos = 68;   // 198 см
-                        const totalPositions = endPos - startPos; // 66 позиций
-                        const step = totalPositions / (ftInValues.length - 1); // шаг между значениями
-                        
-                        ftInValues.forEach((value, valueIndex) => {
-                          const targetPosition = Math.round(startPos + valueIndex * step);
-                          if (i === targetPosition) {
-                            displayValue = value;
-                          }
-                        });
-                        
-                        return <div key={cm}>{displayValue}</div>;
-                      })}
+                    
+                    <div className="col ft">
+                      <ul>
+                        {(() => {
+                          const ftInValues = [
+                            "4'3\"", "4'4\"", "4'5\"", "4'6\"", "4'7\"", "4'8\"", "4'9\"", "4'10\"", "4'11\"",
+                            "5'0\"", "5'1\"", "5'2\"", "5'3\"", "5'4\"", "5'5\"", "5'6\"", "5'7\"", "5'8\"", "5'9\"", "5'10\"", "5'11\"",
+                            "6'0\"", "6'1\"", "6'2\"", "6'3\"", "6'4\"", "6'5\"", "6'6\"", "6'7\""
+                          ];
+                          return ftInValues.map((value, index) => (
+                            <li key={index}>{value}</li>
+                          ));
+                        })()}
+                      </ul>
                     </div>
                   </div>
                   {Array.from({ length: 71 }, (_, i) => {
