@@ -46,8 +46,8 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
           className={cn(
             "w-full justify-between text-sm",
             !selected && "text-muted-foreground",
-            invalid && "border border-red-500 focus:ring-red-500 focus:border-red-500",
-            highlightSelected && selected && "border border-blue-500 focus:ring-blue-500 focus:border-blue-500"
+            invalid && "border-destructive focus:ring-destructive",
+            highlightSelected && selected && "border-primary focus:ring-primary"
           )}
         >
           {selected ? selected.label : (placeholder || "Select...")}
@@ -64,7 +64,7 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
                 opt.divider ? (
                   <div
                     key={`divider-${idx}`}
-                    className="mx-2 my-1 border-t border-gray-400 dark:border-gray-500"
+                    className="my-1 border-t border-border"
                     role="separator"
                     aria-hidden="true"
                   />
