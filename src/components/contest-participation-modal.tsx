@@ -7,7 +7,7 @@ import { Camera, Eye, EyeOff } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import SearchableSelect from "@/components/ui/searchable-select";
-import { Country, State, City } from 'country-state-city';
+import { getCitiesForLocation } from "@/lib/location-utils";
 
 interface ContestParticipationModalProps {
   children: React.ReactNode;
@@ -50,36 +50,33 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
   const [photo1File, setPhoto1File] = useState<File | null>(null);
   const [photo2File, setPhoto2File] = useState<File | null>(null);
 
-  // Use country-state-city library for full data
-  const countries = useMemo(() => {
-    const allCountries = Country.getAllCountries();
-    // Put Philippines first like in contest filter, then add divider and the rest
-    const philippines = allCountries.find(c => c.isoCode === 'PH');
-    const otherCountries = allCountries.filter(c => c.isoCode !== 'PH');
-    
-    return [
-      ...(philippines ? [{ name: philippines.name, isoCode: philippines.isoCode }] : []),
-      { name: "divider", isoCode: "__divider__", disabled: true, divider: true },
-      ...otherCountries.map(c => ({ name: c.name, isoCode: c.isoCode }))
-    ];
-  }, []);
+  // Simplified country data for mobile performance
+  const countries = useMemo(() => [
+    { name: "Philippines", isoCode: "PH" },
+    { name: "divider", isoCode: "__divider__", disabled: true, divider: true },
+    { name: "United States", isoCode: "US" },
+    { name: "United Kingdom", isoCode: "GB" },
+    { name: "Canada", isoCode: "CA" },
+    { name: "Australia", isoCode: "AU" },
+  ], []);
   
   const [countryCode, setCountryCode] = useState<string | null>(null);
   const [stateCode, setStateCode] = useState<string | null>(null);
   
+  // Simplified states data for Philippines
   const states = useMemo(() => {
-    if (!countryCode) return [];
-    return State.getStatesOfCountry(countryCode).map(s => ({
-      name: s.name,
-      isoCode: s.isoCode
-    }));
+    if (countryCode !== "PH") return [];
+    return [
+      { name: "Metro Manila", isoCode: "NCR" },
+      { name: "Luzon", isoCode: "LUZ" },
+      { name: "Visayas", isoCode: "VIS" },
+      { name: "Mindanao", isoCode: "MIN" },
+    ];
   }, [countryCode]);
   
   const cities = useMemo(() => {
     if (!countryCode || !stateCode) return [];
-    return City.getCitiesOfState(countryCode, stateCode).map(c => ({
-      name: c.name
-    }));
+    return getCitiesForLocation(countryCode, stateCode);
   }, [countryCode, stateCode]);
 
   useEffect(() => {
