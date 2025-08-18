@@ -16,32 +16,17 @@ const Index = () => {
   
   return (
     <div className="min-h-screen bg-background">
-      <ContestHeader 
-        activeSection={activeSection} 
-        onSectionChange={setActiveSection} 
-      />
-      
-      {activeSection === "Contest" && (
-        <div className="max-w-6xl mx-auto px-6 py-8">
-          <div className="bg-card p-5 rounded-lg shadow-md mb-5">
-            <h1 className="text-primary text-2xl mb-4 text-center font-bold">
-              🏆 OBC Contest - This Week
-            </h1>
-            <p className="text-center text-muted-foreground">
-              Основной функционал постепенно восстанавливается ✅
-            </p>
-          </div>
+      {/* Временно убираем ContestHeader для диагностики */}
+      <div className="max-w-6xl mx-auto px-6 py-8">
+        <div className="bg-card p-5 rounded-lg shadow-md mb-5">
+          <h1 className="text-primary text-2xl mb-4 text-center font-bold">
+            🏆 OBC Contest - This Week
+          </h1>
+          <p className="text-center text-muted-foreground">
+            Основной функционал постепенно восстанавливается ✅
+          </p>
         </div>
-      )}
-
-      {activeSection === "How it works" && (
-        <div className="max-w-6xl mx-auto px-6 py-8">
-          <div className="text-center">
-            <h2 className="text-2xl font-bold mb-4">🌟 How It Works – OBC</h2>
-            <p className="text-muted-foreground">Раздел "Как это работает"</p>
-          </div>
-        </div>
-      )}
+      </div>
     </div>
   );
 };
