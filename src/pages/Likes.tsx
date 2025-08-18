@@ -3,6 +3,7 @@ import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import LikedItem from "@/components/profile/LikedItem";
 import SearchableSelect from "@/components/ui/searchable-select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Heart, AlignJustify, Grid2X2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
@@ -65,13 +66,56 @@ const mockLikedItems = [
   }
 ];
 
+// Mock data for who liked me
+const mockWhoLikedMe = [
+  {
+    likeId: "w1",
+    contentType: "post" as const,
+    contentId: "my1",
+    authorName: "Maria Santos",
+    authorAvatarUrl: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&crop=face",
+    authorProfileId: "liker1",
+    time: "1 час назад",
+    content: "liked your photo",
+    imageSrc: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&fit=crop&crop=face",
+    likes: 67,
+    comments: 5,
+    candidateData: {
+      country: "Brazil",
+      age: 23,
+      height: 168
+    }
+  },
+  {
+    likeId: "w2",
+    contentType: "contest" as const,
+    contentId: "my2",
+    authorName: "Lisa Johnson",
+    authorAvatarUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop&crop=face",
+    authorProfileId: "liker2",
+    time: "4 часа назад",
+    content: "liked your contest participation",
+    imageSrc: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&h=400&fit=crop&crop=face",
+    likes: 156,
+    comments: 23,
+    candidateData: {
+      country: "USA",
+      age: 25,
+      height: 172
+    }
+  }
+];
+
 const Likes = () => {
   const navigate = useNavigate();
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [likedItems, setLikedItems] = useState<any[]>([]);
+  const [whoLikedMe, setWhoLikedMe] = useState<any[]>([]);
   const [likesViewMode, setLikesViewMode] = useState<'compact' | 'full'>('compact');
   const [likesCountryFilter, setLikesCountryFilter] = useState<string>("all");
+  const [whoLikedMeViewMode, setWhoLikedMeViewMode] = useState<'compact' | 'full'>('compact');
+  const [whoLikedMeCountryFilter, setWhoLikedMeCountryFilter] = useState<string>("all");
 
   // Get current user
   useEffect(() => {
@@ -92,11 +136,16 @@ const Likes = () => {
     if (currentUserId) {
       // For now, using mock data
       setLikedItems(mockLikedItems);
+      setWhoLikedMe(mockWhoLikedMe);
     }
   }, [currentUserId]);
 
   const handleUnlike = (likeId: string) => {
     setLikedItems(prev => prev.filter(item => item.likeId !== likeId));
+  };
+
+  const handleRemoveWhoLikedMe = (likeId: string) => {
+    setWhoLikedMe(prev => prev.filter(item => item.likeId !== likeId));
   };
 
   if (loading) {
@@ -117,105 +166,213 @@ const Likes = () => {
       <div className="max-w-4xl mx-auto px-4 py-8">
         <div className="flex items-center gap-3 mb-8">
           <Heart className="h-8 w-8 text-primary" />
-          <h1 className="text-3xl font-bold">I Like</h1>
+          <h1 className="text-3xl font-bold">Likes</h1>
         </div>
 
-        {likedItems.length > 0 ? (
-          <div className="px-0 sm:px-6">
-            {/* Country filter and view mode toggle */}
-            <div className="flex justify-between items-center gap-4 mb-4 px-6 sm:px-0">
-              {/* Country filter */}
-              <div className="flex-1 max-w-48">
-                <SearchableSelect
-                  value={likesCountryFilter}
-                  onValueChange={setLikesCountryFilter}
-                  options={[
-                    { value: "all", label: "All countries" },
-                    ...Array.from(new Set(likedItems
-                      .map(item => item.candidateData?.country)
-                      .filter(Boolean)
-                    )).sort().map((country) => ({
-                      value: country,
-                      label: country
-                    }))
-                  ]}
-                  placeholder="All countries"
-                  highlightSelected
-                />
+        <Tabs defaultValue="i-liked" className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="i-liked">I Liked</TabsTrigger>
+            <TabsTrigger value="i-was-liked">I Was Liked</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="i-liked" className="mt-6">
+            {likedItems.length > 0 ? (
+              <div className="px-0 sm:px-6">
+                {/* Country filter and view mode toggle */}
+                <div className="flex justify-between items-center gap-4 mb-4 px-6 sm:px-0">
+                  {/* Country filter */}
+                  <div className="flex-1 max-w-48">
+                    <SearchableSelect
+                      value={likesCountryFilter}
+                      onValueChange={setLikesCountryFilter}
+                      options={[
+                        { value: "all", label: "All countries" },
+                        ...Array.from(new Set(likedItems
+                          .map(item => item.candidateData?.country)
+                          .filter(Boolean)
+                        )).sort().map((country) => ({
+                          value: country,
+                          label: country
+                        }))
+                      ]}
+                      placeholder="All countries"
+                      highlightSelected
+                    />
+                  </div>
+                  
+                  {/* View mode toggle buttons */}
+                  <div className="flex items-center gap-1">
+                    <button
+                      type="button"
+                      onClick={() => setLikesViewMode("compact")}
+                      aria-pressed={likesViewMode === "compact"}
+                      aria-label="List view"
+                      className="p-1 rounded-md hover:bg-accent transition-colors"
+                    >
+                      <AlignJustify 
+                        size={28} 
+                        strokeWidth={1}
+                        className={likesViewMode === "compact" ? "text-primary" : "text-muted-foreground"}
+                      />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setLikesViewMode("full")}
+                      aria-pressed={likesViewMode === "full"}
+                      aria-label="Grid view"
+                      className="p-1 rounded-md hover:bg-accent transition-colors"
+                    >
+                      <Grid2X2 
+                        size={28} 
+                        strokeWidth={1}
+                        className={likesViewMode === "full" ? "text-primary" : "text-muted-foreground"}
+                      />
+                    </button>
+                  </div>
+                </div>
+                
+                {/* Liked items grid */}
+                <div className={`grid gap-1 sm:gap-3 ${
+                  likesViewMode === 'compact' 
+                    ? 'grid-cols-1' 
+                    : 'grid-cols-1 lg:grid-cols-2'
+                }`}>
+                  {likedItems
+                    .filter(item => 
+                      likesCountryFilter === "all" || 
+                      item.candidateData?.country === likesCountryFilter
+                    )
+                    .map((item) => (
+                    <LikedItem
+                      key={item.likeId}
+                      likeId={item.likeId}
+                      contentType={item.contentType}
+                      contentId={item.contentId}
+                      authorName={item.authorName}
+                      authorAvatarUrl={item.authorAvatarUrl}
+                      authorProfileId={item.authorProfileId}
+                      time={item.time}
+                      content={item.content}
+                      imageSrc={item.imageSrc}
+                      likes={item.likes}
+                      comments={item.comments}
+                      onUnlike={handleUnlike}
+                      viewMode={likesViewMode}
+                      candidateData={item.candidateData}
+                      participantType={item.participantType}
+                      showStatusBadge={false}
+                    />
+                  ))}
+                </div>
               </div>
-              
-              {/* View mode toggle buttons */}
-              <div className="flex items-center gap-1">
-                <button
-                  type="button"
-                  onClick={() => setLikesViewMode("compact")}
-                  aria-pressed={likesViewMode === "compact"}
-                  aria-label="List view"
-                  className="p-1 rounded-md hover:bg-accent transition-colors"
-                >
-                  <AlignJustify 
-                    size={28} 
-                    strokeWidth={1}
-                    className={likesViewMode === "compact" ? "text-primary" : "text-muted-foreground"}
-                  />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setLikesViewMode("full")}
-                  aria-pressed={likesViewMode === "full"}
-                  aria-label="Grid view"
-                  className="p-1 rounded-md hover:bg-accent transition-colors"
-                >
-                  <Grid2X2 
-                    size={28} 
-                    strokeWidth={1}
-                    className={likesViewMode === "full" ? "text-primary" : "text-muted-foreground"}
-                  />
-                </button>
+            ) : (
+              <div className="text-center py-12">
+                <Heart className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+                <p className="text-muted-foreground text-lg">You haven't liked anything yet</p>
+                <p className="text-sm text-muted-foreground mt-2">Like posts and photos to see them here</p>
               </div>
-            </div>
-            
-            {/* Liked items grid */}
-            <div className={`grid gap-1 sm:gap-3 ${
-              likesViewMode === 'compact' 
-                ? 'grid-cols-1' 
-                : 'grid-cols-1 lg:grid-cols-2'
-            }`}>
-              {likedItems
-                .filter(item => 
-                  likesCountryFilter === "all" || 
-                  item.candidateData?.country === likesCountryFilter
-                )
-                .map((item) => (
-                <LikedItem
-                  key={item.likeId}
-                  likeId={item.likeId}
-                  contentType={item.contentType}
-                  contentId={item.contentId}
-                  authorName={item.authorName}
-                  authorAvatarUrl={item.authorAvatarUrl}
-                  authorProfileId={item.authorProfileId}
-                  time={item.time}
-                  content={item.content}
-                  imageSrc={item.imageSrc}
-                  likes={item.likes}
-                  comments={item.comments}
-                  onUnlike={handleUnlike}
-                  viewMode={likesViewMode}
-                  candidateData={item.candidateData}
-                  participantType={item.participantType}
-                  showStatusBadge={false}
-                />
-              ))}
-            </div>
-          </div>
-        ) : (
-          <div className="text-center py-12">
-            <Heart className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-            <p className="text-muted-foreground text-lg">You haven't liked anything yet</p>
-            <p className="text-sm text-muted-foreground mt-2">Like posts and photos to see them here</p>
-          </div>
-        )}
+            )}
+          </TabsContent>
+
+          <TabsContent value="i-was-liked" className="mt-6">
+            {whoLikedMe.length > 0 ? (
+              <div className="px-0 sm:px-6">
+                {/* Country filter and view mode toggle */}
+                <div className="flex justify-between items-center gap-4 mb-4 px-6 sm:px-0">
+                  {/* Country filter */}
+                  <div className="flex-1 max-w-48">
+                    <SearchableSelect
+                      value={whoLikedMeCountryFilter}
+                      onValueChange={setWhoLikedMeCountryFilter}
+                      options={[
+                        { value: "all", label: "All countries" },
+                        ...Array.from(new Set(whoLikedMe
+                          .map(item => item.candidateData?.country)
+                          .filter(Boolean)
+                        )).sort().map((country) => ({
+                          value: country,
+                          label: country
+                        }))
+                      ]}
+                      placeholder="All countries"
+                      highlightSelected
+                    />
+                  </div>
+                  
+                  {/* View mode toggle buttons */}
+                  <div className="flex items-center gap-1">
+                    <button
+                      type="button"
+                      onClick={() => setWhoLikedMeViewMode("compact")}
+                      aria-pressed={whoLikedMeViewMode === "compact"}
+                      aria-label="List view"
+                      className="p-1 rounded-md hover:bg-accent transition-colors"
+                    >
+                      <AlignJustify 
+                        size={28} 
+                        strokeWidth={1}
+                        className={whoLikedMeViewMode === "compact" ? "text-primary" : "text-muted-foreground"}
+                      />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setWhoLikedMeViewMode("full")}
+                      aria-pressed={whoLikedMeViewMode === "full"}
+                      aria-label="Grid view"
+                      className="p-1 rounded-md hover:bg-accent transition-colors"
+                    >
+                      <Grid2X2 
+                        size={28} 
+                        strokeWidth={1}
+                        className={whoLikedMeViewMode === "full" ? "text-primary" : "text-muted-foreground"}
+                      />
+                    </button>
+                  </div>
+                </div>
+                
+                {/* Who liked me grid */}
+                <div className={`grid gap-1 sm:gap-3 ${
+                  whoLikedMeViewMode === 'compact' 
+                    ? 'grid-cols-1' 
+                    : 'grid-cols-1 lg:grid-cols-2'
+                }`}>
+                  {whoLikedMe
+                    .filter(item => 
+                      whoLikedMeCountryFilter === "all" || 
+                      item.candidateData?.country === whoLikedMeCountryFilter
+                    )
+                    .map((item) => (
+                    <LikedItem
+                      key={item.likeId}
+                      likeId={item.likeId}
+                      contentType={item.contentType}
+                      contentId={item.contentId}
+                      authorName={item.authorName}
+                      authorAvatarUrl={item.authorAvatarUrl}
+                      authorProfileId={item.authorProfileId}
+                      time={item.time}
+                      content={item.content}
+                      imageSrc={item.imageSrc}
+                      likes={item.likes}
+                      comments={item.comments}
+                      onUnlike={handleRemoveWhoLikedMe}
+                      viewMode={whoLikedMeViewMode}
+                      candidateData={item.candidateData}
+                      participantType={item.participantType}
+                      showStatusBadge={false}
+                    />
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <Heart className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+                <p className="text-muted-foreground text-lg">No one has liked your content yet</p>
+                <p className="text-sm text-muted-foreground mt-2">Share more content to get likes</p>
+              </div>
+            )}
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );
