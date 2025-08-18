@@ -107,28 +107,7 @@ All colors MUST be HSL.
     @apply border-border;
   }
 
-  html {
-    /* Fix for iOS Safari viewport height issues */
-    height: 100%;
-    height: -webkit-fill-available;
-  }
-
   body {
     @apply bg-background text-foreground;
-    /* Ensure full height on mobile Safari */
-    min-height: 100vh;
-    min-height: -webkit-fill-available;
-    /* Prevent zoom on iOS when focusing inputs */
-    -webkit-text-size-adjust: 100%;
-    /* Improve performance on iOS */
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-  }
-
-  /* Fix for iOS Safari safe area */
-  #root {
-    min-height: 100vh;
-    min-height: -webkit-fill-available;
-    width: 100%;
   }
 }

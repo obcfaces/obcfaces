@@ -81,10 +81,7 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
       if (mode === "login") {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
-        toast({ 
-          description: "Signed in",
-          duration: 1000  // Автоматическое исчезновение через 1 секунду
-        });
+        toast({ description: "Signed in" });
         setOpen(false); // Close modal after successful login
       } else {
         const redirectUrl = window.location.href; // Confirm email back to current page

@@ -1,6 +1,9 @@
 import React, { useMemo } from "react";
 import SearchableSelect, { type Option } from "@/components/ui/searchable-select";
-import { AlignJustify, Grid2X2 } from "lucide-react";
+import listIcon from "@/assets/icons/sdisplay-list.png";
+import listActiveIcon from "@/assets/icons/sdisplay-list-active.png";
+import tableIcon from "@/assets/icons/sdisplay-table.png";
+import tableActiveIcon from "@/assets/icons/sdisplay-table-active.png";
 
 type Gender = "male" | "female";
 export type Category = "teen" | "miss" | "ms" | "mrs";
@@ -88,10 +91,12 @@ const categoryOptions: Option[] = useMemo(() => [
           aria-label="List view"
           className="p-1 rounded-md hover:bg-accent transition-colors"
         >
-          <AlignJustify 
-            size={28} 
-            strokeWidth={1}
-            className={viewMode === "compact" ? "text-primary" : "text-muted-foreground"}
+          <img
+            src={viewMode === "compact" ? listActiveIcon : listIcon}
+            alt="List view icon"
+            width={28}
+            height={28}
+            loading="lazy"
           />
         </button>
         <button
@@ -101,10 +106,12 @@ const categoryOptions: Option[] = useMemo(() => [
           aria-label="Grid view"
           className="p-1 rounded-md hover:bg-accent transition-colors"
         >
-          <Grid2X2 
-            size={28} 
-            strokeWidth={1}
-            className={viewMode === "full" ? "text-primary" : "text-muted-foreground"}
+          <img
+            src={viewMode === "full" ? tableActiveIcon : tableIcon}
+            alt="Grid view icon"
+            width={28}
+            height={28}
+            loading="lazy"
           />
         </button>
       </div>

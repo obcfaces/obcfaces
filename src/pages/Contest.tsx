@@ -6,7 +6,10 @@ import contestant2 from "@/assets/contestant-2.jpg";
 import contestant3 from "@/assets/contestant-3.jpg";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
-import { AlignJustify, Grid2X2 } from "lucide-react";
+import listIcon from "@/assets/icons/sdisplay-list.png";
+import listActiveIcon from "@/assets/icons/sdisplay-list-active.png";
+import tableIcon from "@/assets/icons/sdisplay-table.png";
+import tableActiveIcon from "@/assets/icons/sdisplay-table-active.png";
 
 interface Week {
   key: string;
@@ -103,10 +106,12 @@ const Contest = () => {
                   aria-label="List view"
                   className="p-1 rounded-md hover:bg-accent transition-colors"
                 >
-                  <AlignJustify 
-                    size={28} 
-                    strokeWidth={1}
-                    className={viewMode === 'full' ? "text-primary" : "text-muted-foreground"}
+                  <img
+                    src={viewMode === 'full' ? listActiveIcon : listIcon}
+                    alt="List view"
+                    width={28}
+                    height={28}
+                    loading="lazy"
                   />
                 </button>
                 <button
@@ -116,10 +121,12 @@ const Contest = () => {
                   aria-label="Grid view"
                   className="p-1 rounded-md hover:bg-accent transition-colors"
                 >
-                  <Grid2X2 
-                    size={28} 
-                    strokeWidth={1}
-                    className={viewMode === 'compact' ? "text-primary" : "text-muted-foreground"}
+                  <img
+                    src={viewMode === 'compact' ? tableActiveIcon : tableIcon}
+                    alt="Grid view"
+                    width={28}
+                    height={28}
+                    loading="lazy"
                   />
                 </button>
               </div>

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Helmet } from "react-helmet-async";
-import { useParams, Link, useNavigate, useSearchParams } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -16,14 +16,16 @@ import PostCard from "@/components/profile/PostCard";
 import LikedItem from "@/components/profile/LikedItem";
 import { PhotoModal } from "@/components/photo-modal";
 import { ContestParticipationModal } from "@/components/contest-participation-modal";
-import CreatePostModal from "@/components/create-post-modal";
 import c1 from "@/assets/contestant-1.jpg";
 import c2 from "@/assets/contestant-2.jpg";
 import c3 from "@/assets/contestant-3.jpg";
 import c1face from "@/assets/contestant-1-face.jpg";
 import c2face from "@/assets/contestant-2-face.jpg";
 import c3face from "@/assets/contestant-3-face.jpg";
-import { AlignJustify, Grid2X2 } from "lucide-react";
+import listIcon from "@/assets/icons/sdisplay-list.png";
+import listActiveIcon from "@/assets/icons/sdisplay-list-active.png";
+import tableIcon from "@/assets/icons/sdisplay-table.png";
+import tableActiveIcon from "@/assets/icons/sdisplay-table-active.png";
 
 interface ProfileRow {
   display_name: string | null;
@@ -42,7 +44,6 @@ interface ProfileRow {
 const Profile = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
-  const [searchParams] = useSearchParams();
   const [logoutLoading, setLogoutLoading] = useState(false);
   const [data, setData] = useState<ProfileRow | null>(null);
   const [loading, setLoading] = useState(true);
@@ -59,10 +60,8 @@ const Profile = () => {
   const [editForm, setEditForm] = useState({
     display_name: '',
     gender: '',
-    gender_privacy: 'public',
     country: '',
     country_privacy: 'public',
-    birthdate_privacy: 'only_me',
     bio: '',
     email: ''
   });
@@ -82,19 +81,15 @@ const Profile = () => {
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
-  const [activeTab, setActiveTab] = useState("posts");
+  const [activeTab, setActiveTab] = useState("Posts");
   const [likedItems, setLikedItems] = useState<any[]>([]);
   const [loadingLikes, setLoadingLikes] = useState(true);
   const [likesViewMode, setLikesViewMode] = useState<'compact' | 'full'>('compact');
-  const [likesCountryFilter, setLikesCountryFilter] = useState<string>("all");
   const [participationItems, setParticipationItems] = useState<any[]>([]);
   const [loadingParticipation, setLoadingParticipation] = useState(true);
   const [participationViewMode, setParticipationViewMode] = useState<'compact' | 'full'>('compact');
   const [photoModalOpen, setPhotoModalOpen] = useState(false);
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState(0);
-  const [userPosts, setUserPosts] = useState<any[]>([]);
-  const [loadingPosts, setLoadingPosts] = useState(true);
-  const [postsViewMode, setPostsViewMode] = useState<'compact' | 'full'>('full');
 
   // Sample photos for gallery
   const profilePhotos = [c1, c2, c3, c1, c2, c3];
@@ -195,18 +190,6 @@ const Profile = () => {
         setData(profileData);
         setBioDraft(profileData?.bio ?? "");
         
-        // Initialize edit form with loaded data
-        setEditForm({
-          display_name: profileData?.display_name || '',
-          gender: profileData?.gender || '',
-          gender_privacy: 'public',
-          country: profileData?.country || '',
-          country_privacy: 'public',
-          birthdate_privacy: 'only_me',
-          bio: profileData?.bio || '',
-          email: ''
-        });
-        
         // Get follower/following counts (mock for now)
         setFollowersCount(Math.floor(Math.random() * 1000) + 100);
         setFollowingCount(Math.floor(Math.random() * 500) + 50);
@@ -228,14 +211,6 @@ const Profile = () => {
     };
     getCurrentUser();
   }, []);
-
-  // Handle tab parameter from URL
-  useEffect(() => {
-    const tabParam = searchParams.get('tab');
-    if (tabParam && ['likes', 'posts', 'photos', 'participation', 'about'].includes(tabParam)) {
-      setActiveTab(tabParam);
-    }
-  }, [searchParams]);
 
   // Check following status
   useEffect(() => {
@@ -310,11 +285,7 @@ const Profile = () => {
     const loadCurrentUserEmail = async () => {
       if (currentUserId && currentUserId === id) {
         const { data: { user } } = await supabase.auth.getUser();
-        const userEmail = user?.email || '';
-        setCurrentUserEmail(userEmail);
-        
-        // Update the editForm with the email
-        setEditForm(prev => ({ ...prev, email: userEmail }));
+        setCurrentUserEmail(user?.email || '');
       }
     };
     loadCurrentUserEmail();
@@ -322,13 +293,11 @@ const Profile = () => {
 
   const initEditForm = () => {
     setEditForm({
-      display_name: data?.display_name || '',
+      display_name: profile.display_name || '',
       gender: data?.gender || '',
-      gender_privacy: 'public',
-      country: data?.country || '',
+      country: profile.country || '',
       country_privacy: 'public',
-      birthdate_privacy: 'only_me',
-      bio: data?.bio || '',
+      bio: profile.bio || '',
       email: currentUserEmail
     });
     setIsEditingProfile(true);
@@ -702,56 +671,9 @@ const Profile = () => {
     }
   };
 
-  // Load user posts
-  const loadUserPosts = async () => {
-    if (!id) return;
-    
-    setLoadingPosts(true);
-    try {
-      const { data: posts, error } = await supabase
-        .from('posts')
-        .select('*')
-        .eq('user_id', id)
-        .order('created_at', { ascending: false });
-
-      // Получаем профиль автора для каждого поста
-      const postsWithProfiles = await Promise.all(
-        (posts || []).map(async (post) => {
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('display_name, avatar_url')
-            .eq('id', post.user_id)
-            .single();
-          
-          return { ...post, profiles: profile };
-        })
-      );
-
-      if (error) {
-        console.error('Error loading posts:', error);
-        return;
-      }
-
-      setUserPosts(postsWithProfiles || []);
-    } catch (error) {
-      console.error('Error loading posts:', error);
-    } finally {
-      setLoadingPosts(false);
-    }
-  };
-
-  const handlePostCreated = () => {
-    // Reload posts after creating a new one
-    loadUserPosts();
-  };
-
   useEffect(() => {
     loadParticipationItems();
   }, [currentUserId, id]);
-
-  useEffect(() => {
-    loadUserPosts();
-  }, [id]);
 
   const handleRemoveParticipation = (participationId: string) => {
     setParticipationItems(prev => prev.filter(item => item.likeId !== participationId));
@@ -844,9 +766,7 @@ const Profile = () => {
                    🏆 Join & Win 5,000 PHP
                  </Button>
                </ContestParticipationModal>
-                <CreatePostModal onPostCreated={handlePostCreated}>
-                  <Button variant="outline">Add Post</Button>
-                </CreatePostModal>
+               <Button variant="outline">Add Post</Button>
                {!isOwner && (
                  <Button variant="outline" onClick={handleMessage}>
                    <MessageCircle className="w-4 h-4 mr-1" />
@@ -904,57 +824,39 @@ const Profile = () => {
                   <p className="text-muted-foreground text-center py-8 px-6">Загрузка лайков...</p>
                 ) : likedItems.length > 0 ? (
                   <div className="px-0 sm:px-6">
-                    {/* Country filter and view mode toggle */}
-                    <div className="flex justify-between items-center gap-4 mb-4 px-6 sm:px-0 -mt-[15px]">
-                      {/* Country filter */}
-                      <div className="flex-1 max-w-48">
-                        <SearchableSelect
-                          value={likesCountryFilter}
-                          onValueChange={setLikesCountryFilter}
-                          options={[
-                            { value: "all", label: "Все страны" },
-                            ...Array.from(new Set(likedItems
-                              .map(item => item.candidateData?.country)
-                              .filter(Boolean)
-                            )).sort().map((country) => ({
-                              value: country,
-                              label: country
-                            }))
-                          ]}
-                          placeholder="Все страны"
-                          highlightSelected
+                    {/* View mode toggle buttons */}
+                    <div className="flex justify-end items-center gap-1 mb-4 px-6 sm:px-0">
+
+                      <button
+                        type="button"
+                        onClick={() => setLikesViewMode("compact")}
+                        aria-pressed={likesViewMode === "compact"}
+                        aria-label="List view"
+                        className="p-1 rounded-md hover:bg-accent transition-colors"
+                      >
+                        <img
+                          src={likesViewMode === "compact" ? listActiveIcon : listIcon}
+                          alt="List view icon"
+                          width={28}
+                          height={28}
+                          loading="lazy"
                         />
-                      </div>
-                      
-                      {/* View mode toggle buttons */}
-                      <div className="flex items-center gap-1">
-                        <button
-                          type="button"
-                          onClick={() => setLikesViewMode("compact")}
-                          aria-pressed={likesViewMode === "compact"}
-                          aria-label="List view"
-                          className="p-1 rounded-md hover:bg-accent transition-colors"
-                        >
-                  <AlignJustify 
-                    size={28} 
-                    strokeWidth={1}
-                    className={likesViewMode === "compact" ? "text-primary" : "text-muted-foreground"}
-                  />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setLikesViewMode("full")}
-                          aria-pressed={likesViewMode === "full"}
-                          aria-label="Grid view"
-                          className="p-1 rounded-md hover:bg-accent transition-colors"
-                        >
-                          <Grid2X2 
-                            size={28} 
-                            strokeWidth={1}
-                            className={likesViewMode === "full" ? "text-primary" : "text-muted-foreground"}
-                          />
-                        </button>
-                      </div>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setLikesViewMode("full")}
+                        aria-pressed={likesViewMode === "full"}
+                        aria-label="Grid view"
+                        className="p-1 rounded-md hover:bg-accent transition-colors"
+                      >
+                        <img
+                          src={likesViewMode === "full" ? tableActiveIcon : tableIcon}
+                          alt="Grid view icon"
+                          width={28}
+                          height={28}
+                          loading="lazy"
+                        />
+                      </button>
                     </div>
                     
                     {/* Liked items grid */}
@@ -963,12 +865,7 @@ const Profile = () => {
                         ? 'grid-cols-1' 
                         : 'grid-cols-1 lg:grid-cols-2'
                     }`}>
-                      {likedItems
-                        .filter(item => 
-                          likesCountryFilter === "all" || 
-                          item.candidateData?.country === likesCountryFilter
-                        )
-                        .map((item) => (
+                      {likedItems.map((item) => (
                         <LikedItem
                           key={item.likeId}
                           likeId={item.likeId}
@@ -986,7 +883,6 @@ const Profile = () => {
                           viewMode={likesViewMode}
                           candidateData={item.candidateData}
                           participantType={item.participantType}
-                          showStatusBadge={false}
                         />
                       ))}
                     </div>
@@ -1000,44 +896,11 @@ const Profile = () => {
               </TabsContent>
 
             <TabsContent value="posts" className="space-y-4 mt-8 -mx-6">
-              {loadingPosts ? (
-                <div className="text-center py-8 px-6">
-                  <p className="text-muted-foreground">Загрузка постов...</p>
-                </div>
-              ) : userPosts.length > 0 ? (
-                <div className="px-0 sm:px-6 space-y-4">
-                  {userPosts.map((post) => (
-                    <PostCard 
-                      key={post.id} 
-                      id={post.id}
-                      authorName={post.profiles?.display_name || "Пользователь"}
-                      time={new Date(post.created_at).toLocaleDateString('ru-RU', {
-                        day: 'numeric',
-                        month: 'long',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                      })}
-                      content={post.caption || ""}
-                      imageSrc={post.media_urls?.[0] || ""}
-                      likes={post.likes_count || 0}
-                      comments={post.comments_count || 0}
-                      mediaUrls={post.media_urls || []}
-                      mediaTypes={post.media_types || []}
-                    />
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-8 px-6">
-                  <p className="text-muted-foreground">
-                    {isOwner ? "У вас пока нет постов" : "У пользователя пока нет постов"}
-                  </p>
-                  {isOwner && (
-                    <p className="text-sm text-muted-foreground mt-2">
-                      Создайте свой первый пост, нажав "Add Post"
-                    </p>
-                  )}
-                </div>
-              )}
+              <div className="px-0 sm:px-6 space-y-4">
+                {samplePosts.map((p) => (
+                  <PostCard key={p.id} {...p} />
+                ))}
+              </div>
             </TabsContent>
 
             <TabsContent value="photos" className="mt-8">
@@ -1068,7 +931,7 @@ const Profile = () => {
               ) : participationItems.length > 0 ? (
                 <div className="px-0 sm:px-6">
                   {/* View mode toggle buttons */}
-                  <div className="flex justify-end items-center gap-1 mb-4 px-6 sm:px-0 -mt-[15px]">
+                  <div className="flex justify-end items-center gap-1 mb-4 px-6 sm:px-0">
                     <button
                       type="button"
                       onClick={() => setParticipationViewMode("compact")}
@@ -1076,10 +939,12 @@ const Profile = () => {
                       aria-label="List view"
                       className="p-1 rounded-md hover:bg-accent transition-colors"
                     >
-                      <AlignJustify 
-                        size={28} 
-                        strokeWidth={1}
-                        className={participationViewMode === "compact" ? "text-primary" : "text-muted-foreground"}
+                      <img
+                        src={participationViewMode === "compact" ? listActiveIcon : listIcon}
+                        alt="List view icon"
+                        width={28}
+                        height={28}
+                        loading="lazy"
                       />
                     </button>
                     <button
@@ -1089,10 +954,12 @@ const Profile = () => {
                       aria-label="Grid view"
                       className="p-1 rounded-md hover:bg-accent transition-colors"
                     >
-                      <Grid2X2 
-                        size={28} 
-                        strokeWidth={1}
-                        className={participationViewMode === "full" ? "text-primary" : "text-muted-foreground"}
+                      <img
+                        src={participationViewMode === "full" ? tableActiveIcon : tableIcon}
+                        alt="Grid view icon"
+                        width={28}
+                        height={28}
+                        loading="lazy"
                       />
                     </button>
                   </div>
@@ -1361,7 +1228,7 @@ const Profile = () => {
                         <div className="flex items-center gap-3">
                           <Avatar className="h-16 w-16">
                             <AvatarImage 
-                              src={avatarPreview || profile.avatar_url || ""} 
+                              src={profile.avatar_url || ""} 
                               alt="Profile photo"
                               className="object-cover"
                             />
@@ -1374,101 +1241,16 @@ const Profile = () => {
                             <div className="text-xs text-muted-foreground">JPG, PNG up to 5MB</div>
                           </div>
                         </div>
-                        {editingField === 'avatar' ? (
-                          <div className="flex items-center gap-2">
-                            <input
-                              id="avatar-upload"
-                              type="file"
-                              accept="image/*"
-                              className="hidden"
-                              onChange={(e) => {
-                                const file = e.target.files?.[0];
-                                if (file) {
-                                  setAvatarFile(file);
-                                  const reader = new FileReader();
-                                  reader.onloadend = () => {
-                                    setAvatarPreview(reader.result as string);
-                                  };
-                                  reader.readAsDataURL(file);
-                                }
-                              }}
-                            />
-                            <button 
-                              type="button" 
-                              onClick={() => document.getElementById('avatar-upload')?.click()}
-                              className="px-3 py-1 bg-primary text-primary-foreground rounded text-sm hover:bg-primary/90 transition-colors"
-                            >
-                              Choose
-                            </button>
-                            <button
-                              onClick={() => {
-                                setEditingField(null);
-                                setAvatarPreview(null);
-                                setAvatarFile(null);
-                              }}
-                              className="px-3 py-1 bg-secondary text-secondary-foreground rounded text-sm hover:bg-secondary/80 transition-colors"
-                            >
-                              Cancel
-                            </button>
-                            {avatarFile && (
-                              <button
-                                onClick={async () => {
-                                  if (!avatarFile) return;
-                                  setUploadingAvatar(true);
-                                  try {
-                                    const fileExt = avatarFile.name.split('.').pop();
-                                    const fileName = `avatar.${fileExt}`;
-                                    const filePath = `${currentUserId}/${fileName}`;
-
-                                    // Upload to Supabase Storage
-                                    const { error: uploadError } = await supabase.storage
-                                      .from('avatars')
-                                      .upload(filePath, avatarFile, { upsert: true });
-
-                                    if (uploadError) throw uploadError;
-
-                                    // Get public URL
-                                    const { data: { publicUrl } } = supabase.storage
-                                      .from('avatars')
-                                      .getPublicUrl(filePath);
-
-                                    // Update profile
-                                    const { error: updateError } = await supabase
-                                      .from('profiles')
-                                      .update({ avatar_url: publicUrl })
-                                      .eq('id', currentUserId);
-
-                                    if (updateError) throw updateError;
-
-                                    // Update local state
-                                    setData(prev => prev ? { ...prev, avatar_url: publicUrl } : null);
-                                    setEditingField(null);
-                                    setAvatarPreview(null);
-                                    setAvatarFile(null);
-                                  } catch (error) {
-                                    console.error('Error updating avatar:', error);
-                                  } finally {
-                                    setUploadingAvatar(false);
-                                  }
-                                }}
-                                disabled={uploadingAvatar}
-                                className="px-3 py-1 bg-primary text-primary-foreground rounded text-sm hover:bg-primary/90 transition-colors disabled:opacity-50"
-                              >
-                                {uploadingAvatar ? 'Uploading...' : 'Save'}
-                              </button>
-                            )}
-                          </div>
-                        ) : (
-                          <button
-                            onClick={() => {
-                              setEditingField('avatar');
-                            }}
-                            className="p-1 hover:bg-accent rounded-md transition-colors"
-                            aria-label="Edit profile photo"
-                          >
-                            <Pencil className="h-4 w-4 text-muted-foreground" />
-                          </button>
-                        )}
+                        <button
+                          onClick={() => {
+                            setEditingField('avatar');
+                            setIsEditingProfile(true);
+                          }}
+                          className="p-1 hover:bg-accent rounded-md transition-colors"
+                          aria-label="Edit profile photo"
+                        >
+                          <Pencil className="h-4 w-4 text-muted-foreground" />
+                        </button>
                       </div>
                     </div>
                   )}
@@ -1601,71 +1383,54 @@ const Profile = () => {
                       {/* Gender */}
                       <div className="flex items-center py-3 border-b border-border">
                         <div className="flex-1">
-                           {editingField === 'gender' ? (
-                             <div className="space-y-2">
-                               <Select value={editForm.gender} onValueChange={(value) => handleEditFormChange('gender', value)}>
-                                 <SelectTrigger className="text-sm">
-                                   <SelectValue placeholder="Gender" />
-                                 </SelectTrigger>
-                                 <SelectContent>
-                                   <SelectItem value="male">Male</SelectItem>
-                                   <SelectItem value="female">Female</SelectItem>
-                                 </SelectContent>
-                               </Select>
-                               <Select value={editForm.gender_privacy} onValueChange={(value) => handleEditFormChange('gender_privacy', value)}>
-                                 <SelectTrigger className="text-sm">
-                                   <SelectValue placeholder="Privacy" />
-                                 </SelectTrigger>
-                                 <SelectContent>
-                                   <SelectItem value="public">🌐 Public</SelectItem>
-                                   <SelectItem value="friends">👥 Friends</SelectItem>
-                                   <SelectItem value="only_me">🔒 Only me</SelectItem>
-                                 </SelectContent>
-                               </Select>
-                               <div className="flex gap-2">
-                                 <Button 
-                                   size="sm"
-                                   onClick={() => {
-                                     setEditingField(null);
-                                     setEditForm(prev => ({ ...prev, gender: data?.gender || '', gender_privacy: 'public' }));
-                                   }}
-                                   variant="outline"
-                                 >
-                                   Cancel
-                                 </Button>
-                                 <Button 
-                                   size="sm"
-                                   onClick={async () => {
-                                     await handleSaveProfile();
-                                     setEditingField(null);
-                                   }}
-                                 >
-                                   Save
-                                 </Button>
-                               </div>
-                             </div>
-                           ) : (
-                             <div>
-                               <div className="text-sm text-muted-foreground">Gender</div>
-                               <div className="text-sm font-medium text-foreground">
-                                 {profile?.gender ? (profile.gender === 'male' ? 'Male' : 'Female') : "Add gender"}
-                               </div>
-                               <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
-                                 <Lock className="h-3 w-3" />
-                                 <span>
-                                   {editForm.gender_privacy === 'public' ? 'Public' : 
-                                    editForm.gender_privacy === 'friends' ? 'Friends' : 'Only me'}
-                                 </span>
-                               </div>
-                             </div>
+                          {editingField === 'gender' ? (
+                            <div className="space-y-2">
+                              <Select value={editForm.gender} onValueChange={(value) => handleEditFormChange('gender', value)}>
+                                <SelectTrigger className="text-sm">
+                                  <SelectValue placeholder="Gender" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="male">Male</SelectItem>
+                                  <SelectItem value="female">Female</SelectItem>
+                                </SelectContent>
+                              </Select>
+                              <div className="flex gap-2">
+                                <Button 
+                                  size="sm"
+                                  onClick={() => {
+                                    setEditingField(null);
+                                    setEditForm(prev => ({ ...prev, gender: profile.gender || '' }));
+                                  }}
+                                  variant="outline"
+                                >
+                                  Cancel
+                                </Button>
+                                <Button 
+                                  size="sm"
+                                  onClick={async () => {
+                                    await handleSaveProfile();
+                                    setEditingField(null);
+                                  }}
+                                >
+                                  Save
+                                </Button>
+                              </div>
+                            </div>
+                          ) : (
+                            <div>
+                              <div className="text-sm text-muted-foreground">Gender</div>
+                              <div className="text-sm font-medium text-foreground">
+                                {profile?.gender ? (profile.gender === 'male' ? 'Male' : 'Female') : "Add gender"}
+                              </div>
+                            </div>
                           )}
                         </div>
-                         {isOwner && editingField !== 'gender' && (
-                           <button
-                             onClick={() => {
-                               setEditingField('gender');
-                               setEditForm(prev => ({ ...prev, gender: data?.gender || '', gender_privacy: 'public' }));
-                             }}
+                        {isOwner && editingField !== 'gender' && (
+                          <button
+                            onClick={() => {
+                              setEditingField('gender');
+                              setEditForm(prev => ({ ...prev, gender: profile.gender || '' }));
+                            }}
                             className="p-1 hover:bg-accent rounded-md transition-colors ml-3"
                             aria-label="Edit gender"
                           >
@@ -1674,86 +1439,32 @@ const Profile = () => {
                         )}
                       </div>
 
-                       {/* Date of birth */}
-                       <div className="flex items-center py-3 border-b border-border">
-                         <div className="flex-1">
-                           {editingField === 'birthdate' ? (
-                             <div className="space-y-2">
-                               <Input 
-                                 type="date"
-                                 className="text-sm"
-                                 value={data?.birthdate || ''} 
-                                 onChange={(e) => {
-                                   // This would need to be handled differently since we're not storing birthdate in editForm
-                                   // For now, just show the interface
-                                 }}
-                                 autoFocus
-                               />
-                               <Select value={editForm.birthdate_privacy} onValueChange={(value) => handleEditFormChange('birthdate_privacy', value)}>
-                                 <SelectTrigger className="text-sm">
-                                   <SelectValue placeholder="Privacy" />
-                                 </SelectTrigger>
-                                 <SelectContent>
-                                   <SelectItem value="public">🌐 Public</SelectItem>
-                                   <SelectItem value="friends">👥 Friends</SelectItem>
-                                   <SelectItem value="only_me">🔒 Only me</SelectItem>
-                                 </SelectContent>
-                               </Select>
-                               <div className="flex gap-2">
-                                 <Button 
-                                   size="sm"
-                                   onClick={() => {
-                                     setEditingField(null);
-                                     setEditForm(prev => ({ ...prev, birthdate_privacy: 'only_me' }));
-                                   }}
-                                   variant="outline"
-                                 >
-                                   Cancel
-                                 </Button>
-                                 <Button 
-                                   size="sm"
-                                   onClick={async () => {
-                                     await handleSaveProfile();
-                                     setEditingField(null);
-                                   }}
-                                 >
-                                   Save
-                                 </Button>
-                               </div>
-                             </div>
-                           ) : (
-                             <div>
-                               <div className="text-sm text-muted-foreground">Date of birth</div>
-                               <div className="text-sm font-medium text-foreground">
-                                 {profile?.birthdate ? new Date(profile.birthdate).toLocaleDateString('en-GB', {
-                                   day: 'numeric',
-                                   month: 'long',
-                                   year: 'numeric'
-                                 }) : "Add date of birth"}
-                               </div>
-                               <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
-                                 <Lock className="h-3 w-3" />
-                                 <span>
-                                   {editForm.birthdate_privacy === 'public' ? 'Public' : 
-                                    editForm.birthdate_privacy === 'friends' ? 'Friends' : 'Only me'}
-                                 </span>
-                               </div>
-                             </div>
-                           )}
-                         </div>
-                         {isOwner && editingField !== 'birthdate' && (
-                           <button
-                             onClick={() => {
-                               setEditingField('birthdate');
-                               setEditForm(prev => ({ ...prev, birthdate_privacy: 'only_me' }));
-                             }}
-                             className="p-1 hover:bg-accent rounded-md transition-colors ml-3"
-                             aria-label="Edit date of birth"
-                           >
-                             <Pencil className="h-4 w-4 text-muted-foreground" />
-                           </button>
-                         )}
-                       </div>
+                      {/* Date of birth */}
+                      <div className="flex items-center py-3 border-b border-border">
+                        <div className="flex-1">
+                          <div className="text-sm text-muted-foreground">Date of birth</div>
+                          <div className="text-sm font-medium text-foreground">
+                            {profile?.birthdate ? new Date(profile.birthdate).toLocaleDateString('en-GB', {
+                              day: 'numeric',
+                              month: 'long',
+                              year: 'numeric'
+                            }) : "Add date of birth"}
+                          </div>
+                          <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
+                            <Lock className="h-3 w-3" />
+                            <span>Only me</span>
+                          </div>
+                        </div>
+                        {isOwner && (
+                          <button
+                            onClick={() => setEditingField('birthdate')}
+                            className="p-1 hover:bg-accent rounded-md transition-colors ml-3"
+                            aria-label="Edit date of birth"
+                          >
+                            <Pencil className="h-4 w-4 text-muted-foreground" />
+                          </button>
+                        )}
+                      </div>
                       
                       {/* Country */}
                       <div className="flex items-center py-3 border-b border-border">
@@ -1824,11 +1535,11 @@ const Profile = () => {
                                 autoFocus
                               />
                               <div className="flex gap-2">
-                                 <Button 
-                                   size="sm"
-                                   onClick={() => {
-                                     setEditingField(null);
-                                     setEditForm(prev => ({ ...prev, bio: data?.bio || '' }));
+                                <Button 
+                                  size="sm"
+                                  onClick={() => {
+                                    setEditingField(null);
+                                    setEditForm(prev => ({ ...prev, bio: profile.bio || '' }));
                                   }}
                                   variant="outline"
                                 >
@@ -1855,10 +1566,10 @@ const Profile = () => {
                           )}
                         </div>
                         {isOwner && editingField !== 'bio' && (
-                           <button
-                             onClick={() => {
-                               setEditingField('bio');
-                               setEditForm(prev => ({ ...prev, bio: data?.bio || '' }));
+                          <button
+                            onClick={() => {
+                              setEditingField('bio');
+                              setEditForm(prev => ({ ...prev, bio: profile.bio || '' }));
                             }}
                             className="p-1 hover:bg-accent rounded-md transition-colors ml-3"
                             aria-label="Edit bio"
@@ -1874,6 +1585,97 @@ const Profile = () => {
                     </div>
                   </div>
 
+                  {/* Avatar upload for full edit mode */}
+                  {editingField === 'avatar' && (
+                    <div className="space-y-4 pt-4 border-t border-border">
+                      <div className="space-y-2">
+                        <label htmlFor="avatar-upload" className="block text-sm font-medium">
+                          Profile Photo
+                        </label>
+                        <input
+                          id="avatar-upload"
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              setAvatarFile(file);
+                              const reader = new FileReader();
+                              reader.onloadend = () => {
+                                setAvatarPreview(reader.result as string);
+                              };
+                              reader.readAsDataURL(file);
+                            }
+                          }}
+                        />
+                        {avatarPreview ? (
+                          <div className="text-center">
+                            <img 
+                              src={avatarPreview} 
+                              alt="Avatar preview" 
+                              className="h-32 w-32 object-cover rounded-full border-2 border-primary mx-auto"
+                            />
+                            <p className="text-xs text-muted-foreground mt-2 mb-2">Preview</p>
+                            <div className="flex gap-2 justify-center">
+                              <button 
+                                type="button" 
+                                onClick={() => document.getElementById('avatar-upload')?.click()}
+                                className="px-3 py-1 bg-secondary text-secondary-foreground rounded text-sm hover:bg-secondary/80 transition-colors"
+                              >
+                                Change
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="text-center">
+                            <Avatar className="h-32 w-32 border-2 border-dashed border-muted-foreground/25 hover:border-primary transition-colors cursor-pointer mx-auto">
+                              <AvatarImage 
+                                src={profile.avatar_url || ""} 
+                                alt="Current profile"
+                                className="h-full w-full object-cover opacity-60"
+                              />
+                              <AvatarFallback className="text-sm opacity-60">
+                                {(profile.display_name || "U").charAt(0).toUpperCase()}
+                              </AvatarFallback>
+                            </Avatar>
+                            <p className="text-xs text-muted-foreground mt-2 mb-2">JPG, PNG up to 5MB</p>
+                            <button 
+                              type="button" 
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                document.getElementById('avatar-upload')?.click();
+                              }}
+                              className="px-3 py-1 bg-primary text-primary-foreground rounded text-sm hover:bg-primary/90 transition-colors"
+                            >
+                              Choose File
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex gap-2">
+                        <Button 
+                          onClick={() => {
+                            setEditingField(null);
+                            setAvatarFile(null);
+                            setAvatarPreview(null);
+                          }}
+                          variant="outline"
+                        >
+                          Cancel
+                        </Button>
+                        <Button 
+                          onClick={async () => {
+                            await handleSaveProfile();
+                            setEditingField(null);
+                          }}
+                        >
+                          Save
+                        </Button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </TabsContent>

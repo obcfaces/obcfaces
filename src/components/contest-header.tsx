@@ -3,12 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Camera, Upload } from "lucide-react";
 import { ContestParticipationModal } from "@/components/contest-participation-modal";
 
-interface ContestHeaderProps {
-  activeSection: string;
-  onSectionChange: (section: string) => void;
-}
-
-export function ContestHeader({ activeSection, onSectionChange }: ContestHeaderProps) {
+export function ContestHeader() {
+  const [activeSection, setActiveSection] = useState("Contest");
 
   const navItems = [
     { name: "Contest", href: "#" },
@@ -28,7 +24,7 @@ export function ContestHeader({ activeSection, onSectionChange }: ContestHeaderP
           </ContestParticipationModal>
         </div>
         
-        {/* Contest info points - always visible */}
+        {/* Contest info points */}
         <div className="mt-3 space-y-1 text-sm text-contest-text">
           <div className="flex items-center gap-2">
             <span>🌍</span>
@@ -57,7 +53,7 @@ export function ContestHeader({ activeSection, onSectionChange }: ContestHeaderP
           {navItems.map((item) => (
             <button
               key={item.name}
-              onClick={() => onSectionChange(item.name)}
+              onClick={() => setActiveSection(item.name)}
               className={`py-0 transition-colors ${
                 activeSection === item.name
                   ? "text-contest-blue font-medium"
