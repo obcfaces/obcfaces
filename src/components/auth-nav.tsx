@@ -69,18 +69,10 @@ const AuthNav = () => {
 
   return (
     <div className="flex items-center gap-2">
-      {isAdmin && (
-        <Link to="/admin">
-          <Button variant="outline" size="sm" className="h-9">
-            <Settings className="w-4 h-4 mr-1" />
-            Admin
-          </Button>
-        </Link>
-      )}
       <Link
-        to={`/u/${session.user.id}?tab=likes`}
+        to={`/u/${session.user.id}`}
         className="inline-flex items-center"
-        aria-label="Open your likes"
+        aria-label="Open your profile"
       >
         <div className="h-9 w-9 ring-1 ring-border hover:ring-primary transition-colors rounded-full overflow-hidden bg-muted flex items-center justify-center">
           {avatarUrl ? (

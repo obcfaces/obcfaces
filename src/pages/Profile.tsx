@@ -232,7 +232,7 @@ const Profile = () => {
   // Handle tab parameter from URL
   useEffect(() => {
     const tabParam = searchParams.get('tab');
-    if (tabParam && ['likes', 'posts', 'photos', 'participation', 'about'].includes(tabParam)) {
+    if (tabParam && ['posts', 'photos', 'participation', 'about'].includes(tabParam)) {
       setActiveTab(tabParam);
     }
   }, [searchParams]);
@@ -878,7 +878,6 @@ const Profile = () => {
           {/* Tabs */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-8">
             <TabsList className="w-full bg-transparent p-0 rounded-none justify-start gap-2 sm:gap-8 border-b border-border flex-wrap">
-              <TabsTrigger value="likes" className="px-0 mr-2 sm:mr-6 h-auto pb-2 bg-transparent rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary text-muted-foreground hover:text-foreground text-sm sm:text-base">Likes</TabsTrigger>
               <TabsTrigger value="posts" className="px-0 mr-2 sm:mr-6 h-auto pb-2 bg-transparent rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary text-muted-foreground hover:text-foreground text-sm sm:text-base">Posts</TabsTrigger>
               <TabsTrigger value="photos" className="px-0 mr-2 sm:mr-6 h-auto pb-2 bg-transparent rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary text-muted-foreground hover:text-foreground text-sm sm:text-base">Photos</TabsTrigger>
               <TabsTrigger value="participation" className="px-0 mr-2 sm:mr-6 h-auto pb-2 bg-transparent rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary text-muted-foreground hover:text-foreground text-sm sm:text-base">Participation</TabsTrigger>
@@ -899,105 +898,6 @@ const Profile = () => {
               )}
             </TabsList>
 
-            <TabsContent value="likes" className="mt-8 -mx-6">
-                {loadingLikes ? (
-                  <p className="text-muted-foreground text-center py-8 px-6">Загрузка лайков...</p>
-                ) : likedItems.length > 0 ? (
-                  <div className="px-0 sm:px-6">
-                    {/* Country filter and view mode toggle */}
-                    <div className="flex justify-between items-center gap-4 mb-4 px-6 sm:px-0 -mt-[15px]">
-                      {/* Country filter */}
-                      <div className="flex-1 max-w-48">
-                        <SearchableSelect
-                          value={likesCountryFilter}
-                          onValueChange={setLikesCountryFilter}
-                          options={[
-                            { value: "all", label: "Все страны" },
-                            ...Array.from(new Set(likedItems
-                              .map(item => item.candidateData?.country)
-                              .filter(Boolean)
-                            )).sort().map((country) => ({
-                              value: country,
-                              label: country
-                            }))
-                          ]}
-                          placeholder="Все страны"
-                          highlightSelected
-                        />
-                      </div>
-                      
-                      {/* View mode toggle buttons */}
-                      <div className="flex items-center gap-1">
-                        <button
-                          type="button"
-                          onClick={() => setLikesViewMode("compact")}
-                          aria-pressed={likesViewMode === "compact"}
-                          aria-label="List view"
-                          className="p-1 rounded-md hover:bg-accent transition-colors"
-                        >
-                  <AlignJustify 
-                    size={28} 
-                    strokeWidth={1}
-                    className={likesViewMode === "compact" ? "text-primary" : "text-muted-foreground"}
-                  />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setLikesViewMode("full")}
-                          aria-pressed={likesViewMode === "full"}
-                          aria-label="Grid view"
-                          className="p-1 rounded-md hover:bg-accent transition-colors"
-                        >
-                          <Grid2X2 
-                            size={28} 
-                            strokeWidth={1}
-                            className={likesViewMode === "full" ? "text-primary" : "text-muted-foreground"}
-                          />
-                        </button>
-                      </div>
-                    </div>
-                    
-                    {/* Liked items grid */}
-                    <div className={`grid gap-1 sm:gap-3 ${
-                      likesViewMode === 'compact' 
-                        ? 'grid-cols-1' 
-                        : 'grid-cols-1 lg:grid-cols-2'
-                    }`}>
-                      {likedItems
-                        .filter(item => 
-                          likesCountryFilter === "all" || 
-                          item.candidateData?.country === likesCountryFilter
-                        )
-                        .map((item) => (
-                        <LikedItem
-                          key={item.likeId}
-                          likeId={item.likeId}
-                          contentType={item.contentType}
-                          contentId={item.contentId}
-                          authorName={item.authorName}
-                          authorAvatarUrl={item.authorAvatarUrl}
-                          authorProfileId={item.authorProfileId}
-                          time={item.time}
-                          content={item.content}
-                          imageSrc={item.imageSrc}
-                          likes={item.likes}
-                          comments={item.comments}
-                          onUnlike={handleUnlike}
-                          viewMode={likesViewMode}
-                          candidateData={item.candidateData}
-                          participantType={item.participantType}
-                          showStatusBadge={false}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                ) : (
-                  <div className="text-center py-8 px-6">
-                    <p className="text-muted-foreground">Вы еще ничего не лайкали</p>
-                    <p className="text-sm text-muted-foreground mt-2">Лайкните посты и фото, чтобы они отображались здесь</p>
-                  </div>
-                )}
-              </TabsContent>
 
             <TabsContent value="posts" className="space-y-4 mt-8 -mx-6">
               {loadingPosts ? (
