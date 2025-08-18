@@ -10,7 +10,6 @@ import { toast } from "@/components/ui/use-toast";
 import PostCard from "@/components/profile/PostCard";
 import LikedItem from "@/components/profile/LikedItem";
 import { PhotoModal } from "@/components/photo-modal";
-import { ContestParticipationModal } from "@/components/contest-participation-modal";
 import c1 from "@/assets/contestant-1.jpg";
 import c2 from "@/assets/contestant-2.jpg";
 import c3 from "@/assets/contestant-3.jpg";
@@ -50,9 +49,6 @@ const Profile = () => {
   const [likedItems, setLikedItems] = useState<any[]>([]);
   const [loadingLikes, setLoadingLikes] = useState(true);
   const [likesViewMode, setLikesViewMode] = useState<'compact' | 'full'>('compact');
-  const [participationItems, setParticipationItems] = useState<any[]>([]);
-  const [loadingParticipation, setLoadingParticipation] = useState(true);
-  const [participationViewMode, setParticipationViewMode] = useState<'compact' | 'full'>('compact');
   const [photoModalOpen, setPhotoModalOpen] = useState(false);
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState(0);
 
@@ -267,90 +263,6 @@ const Profile = () => {
     setLikedItems(prev => prev.filter(item => item.likeId !== likeId));
   };
 
-  const loadParticipationItems = async () => {
-    if (!currentUserId) return;
-    
-    setLoadingParticipation(true);
-    try {
-      console.log('Loading participation for user:', currentUserId);
-      
-      // Сначала получаем профиль пользователя
-      const { data: profileData, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', currentUserId)
-        .maybeSingle();
-
-      console.log('Profile data:', profileData);
-      console.log('Profile error:', error);
-
-      if (error) {
-        console.error('Error fetching profile:', error);
-        setParticipationItems([]);
-        setLoadingParticipation(false);
-        return;
-      }
-
-      if (!profileData) {
-        console.log('No profile found for user');
-        setParticipationItems([]);
-        setLoadingParticipation(false);
-        return;
-      }
-
-      // Проверяем, является ли пользователь участником конкурса
-      console.log('is_contest_participant:', profileData.is_contest_participant);
-      
-      if (!profileData.is_contest_participant) {
-        console.log('User is not a contest participant');
-        setParticipationItems([]);
-        setLoadingParticipation(false);
-        return;
-      }
-
-      // Создаем карточку участия пользователя на основе его профиля
-      const participationCard = {
-        likeId: `participation-${currentUserId}`,
-        contentType: 'contest' as const,
-        contentId: currentUserId,
-        authorName: `${profileData.first_name || ''} ${profileData.last_name || ''}`.trim() || 'Участник',
-        authorProfileId: currentUserId,
-        time: new Date(profileData.created_at).toLocaleString('ru-RU'),
-        likes: Math.floor(Math.random() * 200) + 50, // Mock likes
-        comments: Math.floor(Math.random() * 40) + 5, // Mock comments
-        imageSrc: profileData.photo_1_url || c1face, // Use first photo as main display
-        participantType: (profileData.participant_type as 'candidate' | 'finalist' | 'winner') || 'candidate',
-        candidateData: {
-          name: `${profileData.first_name || ''} ${profileData.last_name || ''}`.trim() || 'Участник',
-          age: profileData.age || 25,
-          weight: profileData.weight_kg || 55,
-          height: profileData.height_cm || 165,
-          country: [profileData.country, profileData.state, profileData.city].filter(Boolean).join(', ') || 'Philippines',
-          city: profileData.city || 'Manila',
-          faceImage: profileData.photo_1_url || c1face, // Formal photo (first image)
-          fullBodyImage: profileData.photo_2_url || c1, // Casual photo (second image)
-          participantType: (profileData.participant_type as 'candidate' | 'finalist' | 'winner') || 'candidate'
-        }
-      };
-
-      console.log('Created participation card:', participationCard);
-      setParticipationItems([participationCard]);
-    } catch (error) {
-      console.error("Error loading participation items:", error);
-      setParticipationItems([]);
-    } finally {
-      setLoadingParticipation(false);
-    }
-  };
-
-  useEffect(() => {
-    loadParticipationItems();
-  }, [currentUserId, id]);
-
-  const handleRemoveParticipation = (participationId: string) => {
-    setParticipationItems(prev => prev.filter(item => item.likeId !== participationId));
-  };
-
 
   // Sample posts data
   const samplePosts = [
@@ -417,11 +329,9 @@ const Profile = () => {
             </div>
             
             <div className="flex items-center gap-2">
-              <ContestParticipationModal>
-                <Button className="bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200">
-                  🏆 Join Contest
-                </Button>
-              </ContestParticipationModal>
+              <Button className="bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200">
+                🏆 Join Contest
+              </Button>
               <Button variant="outline">Add Post</Button>
               <Button variant="outline">Edit Profile</Button>
             </div>
@@ -443,12 +353,11 @@ const Profile = () => {
 
           {/* Tabs */}
           <Tabs defaultValue="likes" className="mt-8">
-            <TabsList className="w-full bg-transparent p-0 rounded-none justify-start gap-2 sm:gap-8 border-b border-border overflow-x-auto">
-              <TabsTrigger value="likes" className="px-0 mr-2 sm:mr-6 h-auto pb-2 bg-transparent rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary text-muted-foreground hover:text-foreground text-sm sm:text-base whitespace-nowrap">Likes</TabsTrigger>
-              <TabsTrigger value="posts" className="px-0 mr-2 sm:mr-6 h-auto pb-2 bg-transparent rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary text-muted-foreground hover:text-foreground text-sm sm:text-base whitespace-nowrap">Posts</TabsTrigger>
-              <TabsTrigger value="photos" className="px-0 mr-2 sm:mr-6 h-auto pb-2 bg-transparent rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary text-muted-foreground hover:text-foreground text-sm sm:text-base whitespace-nowrap">Photos</TabsTrigger>
-              <TabsTrigger value="participation" className="px-0 mr-2 sm:mr-6 h-auto pb-2 bg-transparent rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary text-muted-foreground hover:text-foreground text-sm sm:text-base whitespace-nowrap">Participation</TabsTrigger>
-              <TabsTrigger value="about" className="px-0 mr-2 sm:mr-6 h-auto pb-2 bg-transparent rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary text-muted-foreground hover:text-foreground text-sm sm:text-base whitespace-nowrap">About</TabsTrigger>
+            <TabsList className="w-full sm:w-auto bg-transparent p-0 rounded-none justify-start gap-8 border-b border-border">
+              <TabsTrigger value="likes" className="px-0 mr-6 h-auto pb-2 bg-transparent rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary text-muted-foreground hover:text-foreground">Likes</TabsTrigger>
+              <TabsTrigger value="posts" className="px-0 mr-6 h-auto pb-2 bg-transparent rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary text-muted-foreground hover:text-foreground">Posts</TabsTrigger>
+              <TabsTrigger value="photos" className="px-0 mr-6 h-auto pb-2 bg-transparent rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary text-muted-foreground hover:text-foreground">Photos</TabsTrigger>
+              <TabsTrigger value="about" className="px-0 mr-6 h-auto pb-2 bg-transparent rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary text-muted-foreground hover:text-foreground">About</TabsTrigger>
               {isOwner && (
                 <button
                   onClick={logout}
@@ -569,78 +478,6 @@ const Profile = () => {
                   </button>
                 ))}
               </div>
-            </TabsContent>
-
-            <TabsContent value="participation" className="mt-8 -mx-6">
-              {loadingParticipation ? (
-                <p className="text-muted-foreground text-center py-8 px-6">Загрузка участий...</p>
-              ) : participationItems.length > 0 ? (
-                <div className="px-0 sm:px-6">
-                  {/* View mode toggle buttons */}
-                  <div className="flex justify-end items-center gap-1 mb-4 px-6 sm:px-0">
-                    <button
-                      type="button"
-                      onClick={() => setParticipationViewMode("compact")}
-                      aria-pressed={participationViewMode === "compact"}
-                      aria-label="List view"
-                      className="p-1 rounded-md hover:bg-accent transition-colors"
-                    >
-                      <img
-                        src={participationViewMode === "compact" ? listActiveIcon : listIcon}
-                        alt="List view icon"
-                        width={28}
-                        height={28}
-                        loading="lazy"
-                      />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setParticipationViewMode("full")}
-                      aria-pressed={participationViewMode === "full"}
-                      aria-label="Grid view"
-                      className="p-1 rounded-md hover:bg-accent transition-colors"
-                    >
-                      <img
-                        src={participationViewMode === "full" ? tableActiveIcon : tableIcon}
-                        alt="Grid view icon"
-                        width={28}
-                        height={28}
-                        loading="lazy"
-                      />
-                    </button>
-                  </div>
-                  
-                  {/* Participation items grid */}
-                  <div className={`grid gap-1 sm:gap-3 ${
-                    participationViewMode === 'compact' 
-                      ? 'grid-cols-1' 
-                      : 'grid-cols-1 lg:grid-cols-2'
-                  }`}>
-                    {participationItems.map((item) => (
-                      <LikedItem
-                        key={item.likeId}
-                        likeId={item.likeId}
-                        contentType={item.contentType}
-                        contentId={item.contentId}
-                        authorName={item.authorName}
-                        authorAvatarUrl={item.authorAvatarUrl}
-                        authorProfileId={item.authorProfileId}
-                        time={item.time}
-                        content={item.content}
-                        imageSrc={item.imageSrc}
-                        likes={item.likes}
-                        comments={item.comments}
-                        onUnlike={handleRemoveParticipation}
-                        viewMode={participationViewMode}
-                        candidateData={item.candidateData}
-                        participantType={item.participantType}
-                      />
-                    ))}
-                  </div>
-                </div>
-              ) : (
-                <p className="text-muted-foreground text-center py-8 px-6">Нет участий в конкурсах</p>
-              )}
             </TabsContent>
 
             <TabsContent value="about" className="mt-8">

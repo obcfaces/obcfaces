@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { ThumbsUp, MessageCircle, Star, Pencil, Send, Share, Share2, ExternalLink, Upload, ArrowUpRight, ThumbsDown } from "lucide-react";
+import { Heart, MessageCircle, Star, Pencil, Send, Share, Share2, ExternalLink, Upload, ArrowUpRight, ThumbsDown } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -124,7 +124,15 @@ export function ContestantCard({
     return () => subscription.unsubscribe();
   }, []);
 
-  // Login modal removed auto-close
+  // Auto-close login modal after 1 second
+  useEffect(() => {
+    if (showLoginModal) {
+      const timer = setTimeout(() => {
+        setShowLoginModal(false);
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [showLoginModal]);
 
   // Load user's likes and ratings on component mount
   useEffect(() => {
@@ -399,7 +407,7 @@ export function ContestantCard({
                 onClick={() => handleLike(0)}
                 aria-label="Like"
               >
-                <ThumbsUp className={cn("w-4 h-4", (isLiked[0] || isLiked[1]) && "fill-current")} />
+                <Heart className={cn("w-4 h-4", (isLiked[0] || isLiked[1]) && "fill-current")} />
                 <span className="hidden sm:inline">Like</span>
                 <span>{likesCount[0] + likesCount[1]}</span>
               </button>
@@ -620,7 +628,7 @@ export function ContestantCard({
                    onClick={() => handleLike(0)}
                    aria-label="Like"
                  >
-                   <ThumbsUp className={cn("w-3.5 h-3.5", (isLiked[0] || isLiked[1]) && "fill-current")} />
+                   <Heart className={cn("w-3.5 h-3.5", (isLiked[0] || isLiked[1]) && "fill-current")} />
                    <span className="hidden xl:inline">Like</span>
                    <span>{likesCount[0] + likesCount[1]}</span>
                  </button>
