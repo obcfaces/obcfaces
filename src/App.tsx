@@ -30,13 +30,7 @@ const App = () => {
         <QueryClientProvider client={queryClient}>
           <TooltipProvider>
             <BrowserRouter>
-              {/* Простой топбар */}
-              <header className="w-full bg-card border-b border-border">
-                <div className="max-w-6xl mx-auto flex justify-between items-center px-6 py-2">
-                  <div className="font-bold text-primary">OBC</div>
-                  <div className="text-sm text-muted-foreground">Menu</div>
-                </div>
-              </header>
+              <TopBar />
               
               <main className="w-full">
                 <Routes>
