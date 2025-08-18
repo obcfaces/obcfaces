@@ -91,9 +91,13 @@ const GlobalSearch = () => {
   return (
     <div ref={wrapRef} className="relative">
       {!open ? (
-        <Button variant="ghost" size="icon" aria-label="Search" onClick={() => setOpen(true)}>
+        <button 
+          className="inline-flex items-center justify-center h-10 w-10 rounded-full hover:bg-accent transition-colors"
+          aria-label="Search" 
+          onClick={() => setOpen(true)}
+        >
           <Search className="h-5 w-5" strokeWidth={1} />
-        </Button>
+        </button>
       ) : (
         <div className="flex items-center gap-2">
           <div className="relative">
