@@ -378,22 +378,8 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
           </div>
         </div>
       ) : (
-        <div className="text-center py-12">
-          <div className="max-w-md mx-auto">
-            <h3 className="text-xl font-semibold text-contest-text mb-3">
-              Голосование завершено! 🎉
-            </h3>
-            <p className="text-muted-foreground mb-4">
-              Вы проголосовали за всех кандидатов этой недели. Новые кандидаты появятся в следующем туре.
-            </p>
-            <Button 
-              onClick={() => window.location.reload()} 
-              variant="outline"
-              className="border-primary text-primary hover:bg-primary hover:text-primary-foreground"
-            >
-              Обновить страницу
-            </Button>
-          </div>
+        <div className="text-center py-4">
+          <p className="text-base text-contest-text lowercase">New ones will auto-update.</p>
         </div>
       )}
 
