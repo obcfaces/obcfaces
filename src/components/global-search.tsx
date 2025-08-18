@@ -92,12 +92,12 @@ const GlobalSearch = () => {
     <div ref={wrapRef} className="relative">
       {!open ? (
         <Button variant="ghost" size="icon" aria-label="Search" onClick={() => setOpen(true)}>
-          <Search className="h-5 w-5" />
+          <Search className="h-5 w-5" strokeWidth={1} />
         </Button>
       ) : (
         <div className="flex items-center gap-2">
           <div className="relative">
-            <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" strokeWidth={1} />
             <Input
               ref={inputRef}
               value={query}
