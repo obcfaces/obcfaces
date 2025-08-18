@@ -29,22 +29,11 @@ const App = () => {
       <HelmetProvider>
         <QueryClientProvider client={queryClient}>
           <TooltipProvider>
-            <Toaster />
-            <Sonner />
             <BrowserRouter>
-              <TopBar />
               <main className="w-full">
                 <Routes>
                   <Route path="/" element={<Index />} />
-                  <Route path="/contest" element={<Contest />} />
-                  <Route path="/auth" element={<Auth />} />
-                  <Route path="/account" element={<Account />} />
-                  <Route path="/u/:id" element={<Profile />} />
-                  <Route path="/messages" element={<Messages />} />
-                  <Route path="/admin" element={<Admin />} />
-                  <Route path="/terms" element={<Terms />} />
-                  <Route path="/privacy" element={<Privacy />} />
-                  <Route path="*" element={<NotFound />} />
+                  <Route path="*" element={<div style={{padding: '20px'}}>Страница не найдена</div>} />
                 </Routes>
               </main>
             </BrowserRouter>
