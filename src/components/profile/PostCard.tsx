@@ -230,7 +230,7 @@ const PostCard = ({
             disabled={loading}
             aria-label="Like"
           >
-            <ThumbsUp className="w-4 h-4" />
+            <ThumbsUp className="w-4 h-4" strokeWidth={1} />
             <span className="hidden sm:inline">Like</span>
             <span>{currentLikes}</span>
           </button>

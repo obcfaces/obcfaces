@@ -254,7 +254,7 @@ const LikedItem = ({
                   onClick={handleUnlike}
                   disabled={isUnliking}
                 >
-                  <ThumbsUp className="w-3.5 h-3.5 fill-current" />
+                  <ThumbsUp className="w-3.5 h-3.5 fill-current" strokeWidth={1} />
                   <span className="hidden xl:inline">Unlike</span>
                   <span>{likes}</span>
                 </button>
@@ -370,7 +370,7 @@ const LikedItem = ({
             onClick={handleUnlike}
             disabled={isUnliking}
           >
-            <ThumbsUp className="w-4 h-4 fill-current" />
+            <ThumbsUp className="w-4 h-4 fill-current" strokeWidth={1} />
             <span className="hidden sm:inline">Unlike</span>
             <span>{likes}</span>
           </button>
