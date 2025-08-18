@@ -37,15 +37,15 @@ const ContestFilters: React.FC<ContestFiltersProps> = ({
     { value: "AU", label: "Australia", disabled: true },
   ], []);
 
-const genderOptions: Option[] = useMemo(() => {
-  const av = genderAvailability ?? { male: false, female: true };
-  return [
-    { value: "female", label: "Female", disabled: !av.female },
-    { value: "male", label: "Male", disabled: !av.male },
-  ];
-}, [genderAvailability]);
+  const genderOptions: Option[] = useMemo(() => {
+    const av = genderAvailability ?? { male: false, female: true };
+    return [
+      { value: "female", label: "Female", disabled: !av.female },
+      { value: "male", label: "Male", disabled: !av.male },
+    ];
+  }, [genderAvailability]);
 
-const categoryOptions: Option[] = useMemo(() => [
+  const categoryOptions: Option[] = useMemo(() => [
   { value: "teen", label: "Teen (13-17 y.o.)", disabled: true },
   { value: "miss", label: "Miss (18-27 y.o.)", disabled: true },
   { value: "ms", label: "Ms (28-39 y.o.)", disabled: true },
