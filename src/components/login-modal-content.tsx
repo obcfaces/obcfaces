@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import SearchableSelect from "@/components/ui/searchable-select";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { toast } from "@/components/ui/use-toast";
+import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate, Link } from "react-router-dom";
 // Simplified location data for mobile performance
@@ -132,7 +132,7 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
           throw new Error(errorMessage);
         }
         toast({ description: "Вход выполнен успешно" });
-        setTimeout(() => onClose?.(), 1000); // Close modal after 1 second
+        onClose?.(); // Close modal after successful login
       } else {
         const redirectUrl = window.location.href; // Confirm email back to current page
         const { data, error } = await supabase.auth.signUp({
@@ -206,11 +206,11 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
         if (data.session?.user) {
           // User is immediately logged in
           toast({ description: "Регистрация завершена успешно" });
-          setTimeout(() => onClose?.(), 1000); // Close modal after 1 second
+          onClose?.(); // Close modal after successful registration
         } else {
           // User needs to confirm email but registration was successful
           toast({ description: "Регистрация завершена. Проверьте почту для подтверждения" });
-          setTimeout(() => onClose?.(), 1000); // Close modal after 1 second
+          onClose?.(); // Close modal after signup (user needs to check email)
         }
       }
     } catch (err: any) {
