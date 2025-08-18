@@ -1,13 +1,12 @@
 import { useState } from "react";
 import { ContestantCard } from "@/components/contest-card";
 
-// Use public directory images instead of imports to fix mobile loading issues
-const contestant1Face = "/lovable-uploads/009d20f0-cac7-4c08-9bc9-146617664bc3.png";
-const contestant1Full = "/lovable-uploads/1147be30-a1d2-466f-a9a8-067f4628cbb2.png";
-const contestant2Face = "/lovable-uploads/c4e9d90c-eeda-44db-94e3-08c6a959f1a5.png";
-const contestant2Full = "/lovable-uploads/009d20f0-cac7-4c08-9bc9-146617664bc3.png";
-const contestant3Face = "/lovable-uploads/1147be30-a1d2-466f-a9a8-067f4628cbb2.png";
-const contestant3Full = "/lovable-uploads/c4e9d90c-eeda-44db-94e3-08c6a959f1a5.png";
+import contestant1Face from "@/assets/contestant-1-face.jpg";
+import contestant1Full from "@/assets/contestant-1-full.jpg";
+import contestant2Face from "@/assets/contestant-2-face.jpg";
+import contestant2Full from "@/assets/contestant-2-full.jpg";
+import contestant3Face from "@/assets/contestant-3-face.jpg";
+import contestant3Full from "@/assets/contestant-3-full.jpg";
 
 interface ContestSectionProps {
   title: string;
