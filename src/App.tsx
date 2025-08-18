@@ -30,7 +30,7 @@ const App = () => {
         <QueryClientProvider client={queryClient}>
           <TooltipProvider>
             <BrowserRouter>
-              <TopBar />
+              {/* Временно убираем TopBar для диагностики */}
               
               <main className="w-full">
                 <Routes>
