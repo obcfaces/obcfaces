@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { MessageCircle } from "lucide-react";
+import { MessageCircle, Heart } from "lucide-react";
 import AuthNav from "@/components/auth-nav";
 import GlobalSearch from "@/components/global-search";
 import { useUnreadMessages } from "@/hooks/useUnreadMessages";
@@ -25,6 +25,15 @@ const TopBar = () => {
         </div>
         
         <div className="flex items-center gap-4">
+          {/* Likes Icon */}
+          <Link
+            to="/likes"
+            className="relative inline-flex items-center justify-center h-10 w-10 rounded-full hover:bg-accent transition-colors"
+            aria-label="Likes"
+          >
+            <Heart className="h-5 w-5 text-foreground" />
+          </Link>
+          
           {/* Messages Icon with Unread Count */}
           <Link
             to="/messages"
