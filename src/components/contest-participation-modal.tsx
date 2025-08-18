@@ -856,7 +856,22 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                         const totalInches = Math.round(cm / 2.54);
                         const feet = Math.floor(totalInches / 12);
                         const inches = totalInches % 12;
-                        return <div key={cm}>{feet}'{inches}"</div>;
+                        
+                        // Показываем ft/in только для определенных см значений
+                        const cmToFtMap: Record<number, string> = {
+                          132: "4'3\"", 135: "4'4\"", 137: "4'5\"", 140: "4'6\"", 142: "4'7\"", 
+                          145: "4'8\"", 147: "4'9\"", 150: "4'10\"", 152: "4'11\"", 154: "5'0\"",
+                          157: "5'1\"", 160: "5'2\"", 162: "5'3\"", 165: "5'4\"", 168: "5'5\"",
+                          170: "5'6\"", 173: "5'7\"", 175: "5'8\"", 178: "5'9\"", 180: "5'10\"",
+                          183: "5'11\"", 185: "6'0\"", 188: "6'1\"", 191: "6'2\"", 193: "6'3\"",
+                          196: "6'4\"", 198: "6'5\""
+                        };
+                        
+                        return (
+                          <div key={cm}>
+                            {cmToFtMap[cm] || ''}
+                          </div>
+                        );
                       })}
                     </div>
                   </div>
