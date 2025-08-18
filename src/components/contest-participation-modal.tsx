@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,8 +7,6 @@ import { Camera, Eye, EyeOff } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import SearchableSelect from "@/components/ui/searchable-select";
-import countries from "world-countries";
-import { getCitiesForLocation } from "@/lib/location-utils";
 
 interface ContestParticipationModalProps {
   children: React.ReactNode;
@@ -33,7 +31,9 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
     first_name: "",
     last_name: "",
     country: "",
+    countryCode: "",
     state: "",
+    stateCode: "",
     city: "",
     gender: "",
     birth_day: "",
@@ -43,19 +43,140 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
     has_children: false,
     height_cm: "",
     weight_kg: "",
+    measurement_system: "metric",
   });
 
   const [photo1File, setPhoto1File] = useState<File | null>(null);
   const [photo2File, setPhoto2File] = useState<File | null>(null);
 
-  // Location data
-  const countryOptions = countries.map(country => ({
-    name: country.name.common,
-    isoCode: country.cca2
-  })).sort((a, b) => a.name.localeCompare(b.name));
-
-  const selectedCountry = countryOptions.find(c => c.isoCode === formData.country);
-  const cities = getCitiesForLocation(formData.country, formData.state, selectedCountry?.name);
+  // Complete country list for contest participation - Philippines first like in contest filter
+  const countries = useMemo(() => [
+    { name: "Philippines", isoCode: "PH" },
+    { name: "Afghanistan", isoCode: "AF" },
+    { name: "Albania", isoCode: "AL" },
+    { name: "Algeria", isoCode: "DZ" },
+    { name: "Argentina", isoCode: "AR" },
+    { name: "Armenia", isoCode: "AM" },
+    { name: "Australia", isoCode: "AU" },
+    { name: "Austria", isoCode: "AT" },
+    { name: "Azerbaijan", isoCode: "AZ" },
+    { name: "Bahrain", isoCode: "BH" },
+    { name: "Bangladesh", isoCode: "BD" },
+    { name: "Belarus", isoCode: "BY" },
+    { name: "Belgium", isoCode: "BE" },
+    { name: "Bolivia", isoCode: "BO" },
+    { name: "Bosnia and Herzegovina", isoCode: "BA" },
+    { name: "Brazil", isoCode: "BR" },
+    { name: "Bulgaria", isoCode: "BG" },
+    { name: "Cambodia", isoCode: "KH" },
+    { name: "Canada", isoCode: "CA" },
+    { name: "Chile", isoCode: "CL" },
+    { name: "China", isoCode: "CN" },
+    { name: "Colombia", isoCode: "CO" },
+    { name: "Croatia", isoCode: "HR" },
+    { name: "Cyprus", isoCode: "CY" },
+    { name: "Czech Republic", isoCode: "CZ" },
+    { name: "Denmark", isoCode: "DK" },
+    { name: "Ecuador", isoCode: "EC" },
+    { name: "Egypt", isoCode: "EG" },
+    { name: "Estonia", isoCode: "EE" },
+    { name: "Finland", isoCode: "FI" },
+    { name: "France", isoCode: "FR" },
+    { name: "Georgia", isoCode: "GE" },
+    { name: "Germany", isoCode: "DE" },
+    { name: "Greece", isoCode: "GR" },
+    { name: "Hungary", isoCode: "HU" },
+    { name: "Iceland", isoCode: "IS" },
+    { name: "India", isoCode: "IN" },
+    { name: "Indonesia", isoCode: "ID" },
+    { name: "Iran", isoCode: "IR" },
+    { name: "Iraq", isoCode: "IQ" },
+    { name: "Ireland", isoCode: "IE" },
+    { name: "Israel", isoCode: "IL" },
+    { name: "Italy", isoCode: "IT" },
+    { name: "Japan", isoCode: "JP" },
+    { name: "Jordan", isoCode: "JO" },
+    { name: "Kazakhstan", isoCode: "KZ" },
+    { name: "Kenya", isoCode: "KE" },
+    { name: "Kuwait", isoCode: "KW" },
+    { name: "Kyrgyzstan", isoCode: "KG" },
+    { name: "Latvia", isoCode: "LV" },
+    { name: "Lebanon", isoCode: "LB" },
+    { name: "Lithuania", isoCode: "LT" },
+    { name: "Luxembourg", isoCode: "LU" },
+    { name: "Malaysia", isoCode: "MY" },
+    { name: "Malta", isoCode: "MT" },
+    { name: "Mexico", isoCode: "MX" },
+    { name: "Moldova", isoCode: "MD" },
+    { name: "Mongolia", isoCode: "MN" },
+    { name: "Montenegro", isoCode: "ME" },
+    { name: "Morocco", isoCode: "MA" },
+    { name: "Netherlands", isoCode: "NL" },
+    { name: "New Zealand", isoCode: "NZ" },
+    { name: "Nigeria", isoCode: "NG" },
+    { name: "North Macedonia", isoCode: "MK" },
+    { name: "Norway", isoCode: "NO" },
+    { name: "Pakistan", isoCode: "PK" },
+    { name: "Peru", isoCode: "PE" },
+    { name: "Poland", isoCode: "PL" },
+    { name: "Portugal", isoCode: "PT" },
+    { name: "Qatar", isoCode: "QA" },
+    { name: "Romania", isoCode: "RO" },
+    { name: "Russia", isoCode: "RU" },
+    { name: "Saudi Arabia", isoCode: "SA" },
+    { name: "Serbia", isoCode: "RS" },
+    { name: "Singapore", isoCode: "SG" },
+    { name: "Slovakia", isoCode: "SK" },
+    { name: "Slovenia", isoCode: "SI" },
+    { name: "South Africa", isoCode: "ZA" },
+    { name: "South Korea", isoCode: "KR" },
+    { name: "Spain", isoCode: "ES" },
+    { name: "Sri Lanka", isoCode: "LK" },
+    { name: "Sweden", isoCode: "SE" },
+    { name: "Switzerland", isoCode: "CH" },
+    { name: "Taiwan", isoCode: "TW" },
+    { name: "Tajikistan", isoCode: "TJ" },
+    { name: "Thailand", isoCode: "TH" },
+    { name: "Turkey", isoCode: "TR" },
+    { name: "Turkmenistan", isoCode: "TM" },
+    { name: "Ukraine", isoCode: "UA" },
+    { name: "United Arab Emirates", isoCode: "AE" },
+    { name: "United Kingdom", isoCode: "GB" },
+    { name: "United States", isoCode: "US" },
+    { name: "Uruguay", isoCode: "UY" },
+    { name: "Uzbekistan", isoCode: "UZ" },
+    { name: "Venezuela", isoCode: "VE" },
+    { name: "Vietnam", isoCode: "VN" },
+  ], []);
+  
+  const [countryCode, setCountryCode] = useState<string | null>(null);
+  const [stateCode, setStateCode] = useState<string | null>(null);
+  
+  const states = useMemo(() => {
+    if (countryCode === "PH") {
+      return [
+        { name: "Metro Manila", isoCode: "MM" },
+        { name: "Cebu", isoCode: "CE" },
+        { name: "Davao", isoCode: "DA" },
+      ];
+    }
+    return [];
+  }, [countryCode]);
+  
+  const cities = useMemo(() => {
+    if (!stateCode) return [];
+    const stateData = states.find(s => s.isoCode === stateCode);
+    if (stateData?.name === "Metro Manila") {
+      return [{ name: "Manila" }, { name: "Quezon City" }, { name: "Makati" }];
+    }
+    if (stateData?.name === "Cebu") {
+      return [{ name: "Cebu City" }, { name: "Lapu-Lapu" }];
+    }
+    if (stateData?.name === "Davao") {
+      return [{ name: "Davao City" }];
+    }
+    return [];
+  }, [stateCode, states]);
 
   useEffect(() => {
     const checkUser = async () => {
@@ -74,7 +195,9 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
             first_name: profile.first_name || "",
             last_name: profile.last_name || "",
             country: profile.country || "",
+            countryCode: profile.country || "",
             state: profile.state || "",
+            stateCode: profile.state || "",
             city: profile.city || "",
             gender: profile.gender || "",
             birth_day: profile.birthdate ? new Date(profile.birthdate).getDate().toString() : "",
@@ -84,6 +207,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
             has_children: profile.has_children || false,
             height_cm: profile.height_cm?.toString() || "",
             weight_kg: profile.weight_kg?.toString() || "",
+            measurement_system: "metric",
           });
         }
       }
@@ -218,7 +342,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
     setIsLoading(true);
 
     // Validation
-    if (!formData.first_name.trim() || !formData.last_name.trim() || !formData.country || 
+    if (!formData.first_name.trim() || !formData.last_name.trim() || !formData.countryCode || 
         !formData.gender || !formData.birth_day || !formData.birth_month || 
         !formData.birth_year || !photo1File || !photo2File) {
       setIsLoading(false);
@@ -304,7 +428,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
   const showProfileErrors = submitted;
   const invalidFirstName = showProfileErrors && !formData.first_name.trim();
   const invalidLastName = showProfileErrors && !formData.last_name.trim();
-  const invalidCountry = showProfileErrors && !formData.country;
+  const invalidCountry = showProfileErrors && !formData.countryCode;
   const invalidGender = showProfileErrors && !formData.gender;
   const invalidBirthDay = showProfileErrors && !formData.birth_day;
   const invalidBirthMonth = showProfileErrors && !formData.birth_month;
@@ -320,7 +444,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
-            {currentStep === 'auth' ? 'Вход в систему' : 'Форма участия в конкурсе'}
+            {currentStep === 'auth' ? 'Sign in' : 'Contest participation form'}
           </DialogTitle>
         </DialogHeader>
 
@@ -337,7 +461,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                 id="email" 
                 type="email" 
                 placeholder="Email" 
-                className="placeholder:italic placeholder:text-muted-foreground" 
+                className="text-sm placeholder:text-muted-foreground" 
                 value={email} 
                 onChange={(e) => setEmail(e.target.value)} 
                 required 
@@ -349,8 +473,8 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                 <Input 
                   id="password" 
                   type={showPassword ? "text" : "password"} 
-                  placeholder="Пароль" 
-                  className="pr-10 placeholder:italic placeholder:text-muted-foreground" 
+                  placeholder="Password" 
+                  className="pr-10 text-sm placeholder:text-muted-foreground" 
                   value={password} 
                   onChange={(e) => setPassword(e.target.value)} 
                   required 
@@ -368,7 +492,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
 
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground">
-                {mode === 'login' ? 'Нет аккаунта? ' : 'Уже есть аккаунт? '}
+                {mode === 'login' ? 'No account? ' : 'Already have an account? '}
                 <button 
                   type="button" 
                   className="text-primary underline" 
@@ -377,23 +501,23 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                     setAuthError("");
                   }}
                 >
-                  {mode === 'login' ? 'Зарегистрироваться' : 'Войти'}
+                  {mode === 'login' ? 'Sign up' : 'Sign in'}
                 </button>
               </span>
               <div className="flex">
                 <Button type="submit" disabled={isLoading}>
-                  {isLoading ? "Подождите..." : mode === 'login' ? 'Войти' : 'Зарегистрироваться'}
+                  {isLoading ? "Please wait..." : mode === 'login' ? 'Sign in' : 'Sign up'}
                 </Button>
               </div>
             </div>
           </form>
         ) : (
           <form onSubmit={handleProfileSubmit} className="space-y-3">
-            <div className="grid gap-2 sm:grid-cols-2">
+            <div className="grid gap-2 grid-cols-3">
               <Input
                 id="first_name"
-                placeholder="Имя"
-                className={`placeholder:italic placeholder:text-muted-foreground ${invalidFirstName ? 'border-destructive focus:ring-destructive' : ''}`}
+                placeholder="First name"
+                className={`text-sm placeholder:text-muted-foreground ${invalidFirstName ? 'border-destructive focus:ring-destructive' : ''}`}
                 value={formData.first_name}
                 onChange={(e) => setFormData({...formData, first_name: e.target.value})}
                 aria-invalid={invalidFirstName}
@@ -401,55 +525,76 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
               />
               <Input
                 id="last_name"
-                placeholder="Фамилия"
-                className={`placeholder:italic placeholder:text-muted-foreground ${invalidLastName ? 'border-destructive focus:ring-destructive' : ''}`}
+                placeholder="Last name"
+                className={`text-sm placeholder:text-muted-foreground ${invalidLastName ? 'border-destructive focus:ring-destructive' : ''}`}
                 value={formData.last_name}
                 onChange={(e) => setFormData({...formData, last_name: e.target.value})}
                 aria-invalid={invalidLastName}
                 required
               />
-            </div>
-
-            <SearchableSelect
-              placeholder="Выберите страну"
-              options={countryOptions.map(c => ({ value: c.isoCode, label: c.name }))}
-              value={formData.country}
-              onValueChange={(value) => setFormData({...formData, country: value, state: "", city: ""})}
-              invalid={invalidCountry}
-            />
-
-            <div className="grid gap-2 sm:grid-cols-2">
-              <Input
-                id="state"
-                placeholder="Штат/Область"
-                className="placeholder:italic placeholder:text-muted-foreground"
-                value={formData.state}
-                onChange={(e) => setFormData({...formData, state: e.target.value})}
-              />
-              <Input
-                id="city"
-                placeholder="Город"
-                className="placeholder:italic placeholder:text-muted-foreground"
-                value={formData.city}
-                onChange={(e) => setFormData({...formData, city: e.target.value})}
-              />
-            </div>
-
-            <div className="grid gap-2 sm:grid-cols-2">
               <Select value={formData.gender} onValueChange={(value) => setFormData({...formData, gender: value})}>
                 <SelectTrigger className={`${invalidGender ? "border-destructive focus:ring-destructive" : ""}`}>
-                  <SelectValue placeholder="Выберите пол" />
+                  <SelectValue placeholder="Gender" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="male">Мужской</SelectItem>
-                  <SelectItem value="female">Женский</SelectItem>
+                  <SelectItem value="male">Male</SelectItem>
+                  <SelectItem value="female">Female</SelectItem>
                 </SelectContent>
               </Select>
+            </div>
+
+            <div className="grid gap-2 grid-cols-3">
+              <SearchableSelect
+                placeholder="Country"
+                options={countries.map(c => ({ value: c.isoCode, label: c.name }))}
+                value={countryCode || ""}
+                onValueChange={(code) => {
+                  setCountryCode(code);
+                  const country = countries.find(c => c.isoCode === code);
+                  setFormData({
+                    ...formData, 
+                    countryCode: code,
+                    country: country?.name || "",
+                    state: "", 
+                    stateCode: "",
+                    city: ""
+                  });
+                  setStateCode(null);
+                }}
+                invalid={invalidCountry}
+              />
               
+              <SearchableSelect
+                disabled={!countryCode}
+                placeholder="State/Region"
+                options={states.map(s => ({ value: s.isoCode, label: s.name }))}
+                value={stateCode || ""}
+                onValueChange={(code) => {
+                  setStateCode(code);
+                  const state = states.find(s => s.isoCode === code);
+                  setFormData({
+                    ...formData, 
+                    stateCode: code,
+                    state: state?.name || "",
+                    city: ""
+                  });
+                }}
+              />
+              
+              <SearchableSelect
+                disabled={!stateCode}
+                placeholder="City"
+                options={cities.map(ct => ({ value: ct.name, label: ct.name }))}
+                value={formData.city}
+                onValueChange={(value) => setFormData({...formData, city: value})}
+              />
+            </div>
+
+            <div className="grid gap-2 sm:grid-cols-2">
               <div className="grid grid-cols-3 gap-1">
                 <Select value={formData.birth_day} onValueChange={(value) => setFormData({...formData, birth_day: value})}>
                   <SelectTrigger className={`${invalidBirthDay ? "border-destructive focus:ring-destructive" : ""}`}>
-                    <SelectValue placeholder="День" />
+                    <SelectValue placeholder="Day of birth" />
                   </SelectTrigger>
                   <SelectContent>
                     {Array.from({length: 31}, (_, i) => i + 1).map(day => (
@@ -460,12 +605,12 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                 
                 <Select value={formData.birth_month} onValueChange={(value) => setFormData({...formData, birth_month: value})}>
                   <SelectTrigger className={`${invalidBirthMonth ? "border-destructive focus:ring-destructive" : ""}`}>
-                    <SelectValue placeholder="Месяц" />
+                    <SelectValue placeholder="Month of birth" />
                   </SelectTrigger>
                   <SelectContent>
                     {[
-                      'Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
-                      'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'
+                      'January', 'February', 'March', 'April', 'May', 'June',
+                      'July', 'August', 'September', 'October', 'November', 'December'
                     ].map((month, index) => (
                       <SelectItem key={index + 1} value={(index + 1).toString()}>{month}</SelectItem>
                     ))}
@@ -474,7 +619,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                 
                 <Select value={formData.birth_year} onValueChange={(value) => setFormData({...formData, birth_year: value})}>
                   <SelectTrigger className={`${invalidBirthYear ? "border-destructive focus:ring-destructive" : ""}`}>
-                    <SelectValue placeholder="Год" />
+                    <SelectValue placeholder="Year of birth" />
                   </SelectTrigger>
                   <SelectContent>
                     {Array.from({length: 80}, (_, i) => new Date().getFullYear() - 18 - i).map(year => (
@@ -485,51 +630,102 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
               </div>
             </div>
 
-            <Select value={formData.marital_status} onValueChange={(value) => setFormData({...formData, marital_status: value})}>
-              <SelectTrigger>
-                <SelectValue placeholder="Выберите семейное положение" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="single">Холост/Не замужем</SelectItem>
-                <SelectItem value="married">Женат/Замужем</SelectItem>
-                <SelectItem value="divorced">Разведен(а)</SelectItem>
-                <SelectItem value="widowed">Вдовец/Вдова</SelectItem>
-              </SelectContent>
-            </Select>
+            <div className="grid gap-2 grid-cols-2">
+              <Select value={formData.marital_status} onValueChange={(value) => setFormData({...formData, marital_status: value})}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Marital status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="single">Single</SelectItem>
+                  <SelectItem value="married">Married</SelectItem>
+                  <SelectItem value="divorced">Divorced</SelectItem>
+                  <SelectItem value="widowed">Widowed</SelectItem>
+                </SelectContent>
+              </Select>
 
-            <Select value={formData.has_children.toString()} onValueChange={(value) => setFormData({...formData, has_children: value === 'true'})}>
-              <SelectTrigger>
-                <SelectValue placeholder="Есть ли дети?" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="false">Нет</SelectItem>
-                <SelectItem value="true">Да</SelectItem>
-              </SelectContent>
-            </Select>
+              <Select 
+                value={formData.has_children ? formData.has_children.toString() : ""} 
+                onValueChange={(value) => setFormData({...formData, has_children: value === 'true'})}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Do you have children?" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="false">No</SelectItem>
+                  <SelectItem value="true">Yes</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
-            <div className="grid gap-2 sm:grid-cols-2">
-              <Input
-                id="height"
-                type="number"
-                placeholder="Рост (см)"
-                className="placeholder:italic placeholder:text-muted-foreground"
-                value={formData.height_cm}
-                onChange={(e) => setFormData({...formData, height_cm: e.target.value})}
-              />
-              <Input
-                id="weight"
-                type="number"
-                step="0.1"
-                placeholder="Вес (кг)"
-                className="placeholder:italic placeholder:text-muted-foreground"
-                value={formData.weight_kg}
-                onChange={(e) => setFormData({...formData, weight_kg: e.target.value})}
-              />
+            <div className="grid gap-2 grid-cols-3">
+              <Select value={formData.measurement_system || 'metric'} onValueChange={(value) => setFormData({...formData, measurement_system: value})}>
+                <SelectTrigger>
+                  <SelectValue placeholder="System" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="metric">Metric (cm, kg)</SelectItem>
+                  <SelectItem value="imperial">Imperial (ft, lbs)</SelectItem>
+                </SelectContent>
+              </Select>
+              
+              <Select value={formData.height_cm} onValueChange={(value) => setFormData({...formData, height_cm: value})}>
+                <SelectTrigger>
+                  <SelectValue placeholder={formData.measurement_system === 'imperial' ? "Height (ft)" : "Height (cm)"} />
+                </SelectTrigger>
+                <SelectContent>
+                  {formData.measurement_system === 'imperial' ? (
+                    <>
+                      <SelectItem value="less_4">Less than 4 ft</SelectItem>
+                      {Array.from({length: 5}, (_, i) => 4 + i).map(height => (
+                        Array.from({length: 12}, (_, j) => j).map(inches => (
+                          <SelectItem key={`${height}_${inches}`} value={`${height}_${inches}`}>
+                            {height}'{inches < 10 ? `0${inches}` : inches}"
+                          </SelectItem>
+                        ))
+                      )).flat()}
+                      <SelectItem value="more_8">More than 8 ft</SelectItem>
+                    </>
+                  ) : (
+                    <>
+                      <SelectItem value="less_130">Less than 130 cm</SelectItem>
+                      {Array.from({length: 71}, (_, i) => 130 + i).map(height => (
+                        <SelectItem key={height} value={height.toString()}>{height} cm</SelectItem>
+                      ))}
+                      <SelectItem value="more_200">More than 200 cm</SelectItem>
+                    </>
+                  )}
+                </SelectContent>
+              </Select>
+              
+              <Select value={formData.weight_kg} onValueChange={(value) => setFormData({...formData, weight_kg: value})}>
+                <SelectTrigger>
+                  <SelectValue placeholder={formData.measurement_system === 'imperial' ? "Weight (lbs)" : "Weight (kg)"} />
+                </SelectTrigger>
+                <SelectContent>
+                  {formData.measurement_system === 'imperial' ? (
+                    <>
+                      <SelectItem value="less_65">Less than 65 lbs</SelectItem>
+                      {Array.from({length: 291}, (_, i) => 65 + i).map(weight => (
+                        <SelectItem key={weight} value={weight.toString()}>{weight} lbs</SelectItem>
+                      ))}
+                      <SelectItem value="more_355">More than 355 lbs</SelectItem>
+                    </>
+                  ) : (
+                    <>
+                      <SelectItem value="less_30">Less than 30 kg</SelectItem>
+                      {Array.from({length: 41}, (_, i) => 30 + i).map(weight => (
+                        <SelectItem key={weight} value={weight.toString()}>{weight} kg</SelectItem>
+                      ))}
+                      <SelectItem value="more_70">More than 70 kg</SelectItem>
+                    </>
+                  )}
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="space-y-3">
-              <div className="text-sm font-medium">Фотографии (обязательно 2 фото)</div>
-              <div className="grid gap-2 sm:grid-cols-2">
+              <div className="text-sm font-medium">Photos (2 photos required)</div>
+              <div className="grid gap-2 grid-cols-2">
                 <div className={`border-2 border-dashed rounded-lg p-4 text-center ${invalidPhoto1 ? 'border-destructive' : 'border-gray-300'}`}>
                   <input
                     id="photo1"
@@ -544,7 +740,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                     {photo1File ? (
                       <p className="text-sm text-green-600">{photo1File.name}</p>
                     ) : (
-                      <p className="text-sm text-gray-500">Фото 1</p>
+                      <p className="text-sm text-gray-500">Photo 1</p>
                     )}
                   </label>
                 </div>
@@ -563,7 +759,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                     {photo2File ? (
                       <p className="text-sm text-green-600">{photo2File.name}</p>
                     ) : (
-                      <p className="text-sm text-gray-500">Фото 2</p>
+                      <p className="text-sm text-gray-500">Photo 2</p>
                     )}
                   </label>
                 </div>
@@ -571,7 +767,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
             </div>
 
             <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? "Отправка..." : "Отправить заявку на участие"}
+              {isLoading ? "Submitting..." : "Submit application"}
             </Button>
           </form>
         )}
