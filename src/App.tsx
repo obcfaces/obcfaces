@@ -15,7 +15,7 @@ import Privacy from "./pages/Privacy";
 import Messages from "./pages/Messages";
 import Admin from "./pages/Admin";
 import AuthCallbackHandler from "@/components/auth-callback-handler";
-import TopBar from "@/components/top-bar";
+import MobileSafeTopBar from "@/components/mobile-safe-top-bar";
 
 
 const queryClient = new QueryClient();
@@ -30,7 +30,7 @@ const App = () => {
         <QueryClientProvider client={queryClient}>
           <TooltipProvider>
             <BrowserRouter>
-              {/* TopBar отключен для мобильных устройств */}
+              <MobileSafeTopBar />
               
               <main className="w-full">
                 <Routes>
