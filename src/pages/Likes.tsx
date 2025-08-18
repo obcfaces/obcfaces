@@ -159,20 +159,15 @@ const Likes = () => {
   return (
     <div className="min-h-screen bg-background">
       <Helmet>
-        <title>I Like - OBC faces</title>
+        <title>Likes - OBC faces</title>
         <meta name="description" content="Content you liked" />
       </Helmet>
 
       <div className="max-w-4xl mx-auto px-4 py-8">
-        <div className="flex items-center gap-3 mb-8">
-          <Heart className="h-8 w-8 text-primary" />
-          <h1 className="text-3xl font-bold">Likes</h1>
-        </div>
-
         <Tabs defaultValue="i-liked" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="i-liked">I Liked</TabsTrigger>
-            <TabsTrigger value="i-was-liked">I Was Liked</TabsTrigger>
+          <TabsList className="w-full bg-transparent p-0 rounded-none justify-start gap-2 sm:gap-8 border-b border-border flex-wrap">
+            <TabsTrigger value="i-liked" className="px-0 mr-2 sm:mr-6 h-auto pb-2 bg-transparent rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary text-muted-foreground hover:text-foreground text-sm sm:text-base">I Liked</TabsTrigger>
+            <TabsTrigger value="i-was-liked" className="px-0 mr-2 sm:mr-6 h-auto pb-2 bg-transparent rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary text-muted-foreground hover:text-foreground text-sm sm:text-base">I Was Liked</TabsTrigger>
           </TabsList>
 
           <TabsContent value="i-liked" className="mt-6">
