@@ -845,24 +845,19 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                 <SelectContent>
                   <div className="height-ruler">
                     <div className="scale cm">
-                      <div>130 см</div>
-                      <div>140 см</div>
-                      <div>150 см</div>
-                      <div>160 см</div>
-                      <div>170 см</div>
-                      <div>180 см</div>
-                      <div>190 см</div>
-                      <div>200 см</div>
+                      {Array.from({ length: 71 }, (_, i) => {
+                        const height = 130 + i;
+                        return <div key={height}>{height}</div>;
+                      })}
                     </div>
                     <div className="scale ft">
-                      <div>4'3"</div>
-                      <div>4'7"</div>
-                      <div>5'0"</div>
-                      <div>5'4"</div>
-                      <div>5'8"</div>
-                      <div>6'0"</div>
-                      <div>6'4"</div>
-                      <div>6'7"</div>
+                      {Array.from({ length: 71 }, (_, i) => {
+                        const cm = 130 + i;
+                        const totalInches = Math.round(cm / 2.54);
+                        const feet = Math.floor(totalInches / 12);
+                        const inches = totalInches % 12;
+                        return <div key={cm}>{feet}'{inches}"</div>;
+                      })}
                     </div>
                   </div>
                   {Array.from({ length: 71 }, (_, i) => {
