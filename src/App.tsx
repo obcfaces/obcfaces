@@ -35,9 +35,6 @@ const App = () => {
               <main className="w-full">
                 <Routes>
                   <Route path="/" element={<Index />} />
-                  <Route path="/auth" element={<Auth />} />
-                  <Route path="/profile" element={<Profile />} />
-                  <Route path="/contest" element={<Contest />} />
                   <Route path="/terms" element={<Terms />} />
                   <Route path="/privacy" element={<Privacy />} />
                   <Route path="*" element={<NotFound />} />
