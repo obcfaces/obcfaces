@@ -230,7 +230,7 @@ const Likes = () => {
                 <div className={`grid gap-1 sm:gap-3 ${
                   likesViewMode === 'compact' 
                     ? 'grid-cols-1' 
-                    : 'grid-cols-1 lg:grid-cols-2'
+                    : 'grid-cols-1'
                 }`}>
                   {likedItems
                     .filter(item => 
@@ -329,7 +329,7 @@ const Likes = () => {
                 <div className={`grid gap-1 sm:gap-3 ${
                   whoLikedMeViewMode === 'compact' 
                     ? 'grid-cols-1' 
-                    : 'grid-cols-1 lg:grid-cols-2'
+                    : 'grid-cols-1'
                 }`}>
                   {whoLikedMe
                     .filter(item => 
