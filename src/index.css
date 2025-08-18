@@ -2,6 +2,30 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Prevent zoom on input focus on mobile devices */
+@media screen and (max-width: 768px) {
+  input[type="email"], 
+  input[type="password"], 
+  input[type="text"], 
+  input[type="number"], 
+  input[type="tel"], 
+  input[type="url"], 
+  input[type="search"], 
+  select, 
+  textarea {
+    font-size: 16px !important;
+    transform-origin: left top;
+    zoom: 1;
+  }
+  
+  /* Prevent zoom on focus */
+  input:focus,
+  select:focus,
+  textarea:focus {
+    zoom: 1;
+  }
+}
+
 /* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
 All colors MUST be HSL.
 */
