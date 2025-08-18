@@ -59,7 +59,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
     
     return [
       ...(philippines ? [{ name: philippines.name, isoCode: philippines.isoCode }] : []),
-      { name: "", isoCode: "__divider__", disabled: true, divider: true },
+      { name: "divider", isoCode: "__divider__", disabled: true, divider: true },
       ...otherCountries.map(c => ({ name: c.name, isoCode: c.isoCode }))
     ];
   }, []);
@@ -77,14 +77,9 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
   
   const cities = useMemo(() => {
     if (!countryCode || !stateCode) return [];
-    
-    // Get cities from country-state-city library - this should provide comprehensive coverage
-    const cscCities = City.getCitiesOfState(countryCode, stateCode);
-    
-    // Sort and return cities
-    return cscCities
-      .map(c => ({ name: c.name }))
-      .sort((a, b) => a.name.localeCompare(b.name));
+    return City.getCitiesOfState(countryCode, stateCode).map(c => ({
+      name: c.name
+    }));
   }, [countryCode, stateCode]);
 
   useEffect(() => {
