@@ -53,53 +53,6 @@ export type Database = {
         }
         Relationships: []
       }
-      conversation_participants: {
-        Row: {
-          conversation_id: string
-          id: string
-          joined_at: string
-          user_id: string
-        }
-        Insert: {
-          conversation_id: string
-          id?: string
-          joined_at?: string
-          user_id: string
-        }
-        Update: {
-          conversation_id?: string
-          id?: string
-          joined_at?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "conversation_participants_conversation_id_fkey"
-            columns: ["conversation_id"]
-            isOneToOne: false
-            referencedRelation: "conversations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      conversations: {
-        Row: {
-          created_at: string
-          id: string
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
       follows: {
         Row: {
           created_at: string
@@ -156,47 +109,6 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
-      }
-      messages: {
-        Row: {
-          content: string
-          conversation_id: string
-          created_at: string
-          edited_at: string | null
-          id: string
-          is_deleted: boolean
-          message_type: string
-          sender_id: string
-        }
-        Insert: {
-          content: string
-          conversation_id: string
-          created_at?: string
-          edited_at?: string | null
-          id?: string
-          is_deleted?: boolean
-          message_type?: string
-          sender_id: string
-        }
-        Update: {
-          content?: string
-          conversation_id?: string
-          created_at?: string
-          edited_at?: string | null
-          id?: string
-          is_deleted?: boolean
-          message_type?: string
-          sender_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "messages_conversation_id_fkey"
-            columns: ["conversation_id"]
-            isOneToOne: false
-            referencedRelation: "conversations"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       next_week_votes: {
         Row: {
@@ -346,19 +258,6 @@ export type Database = {
           id: string
         }[]
       }
-      get_detailed_profile: {
-        Args: { profile_user_id: string }
-        Returns: {
-          age: number
-          avatar_url: string
-          bio: string
-          city: string
-          country: string
-          display_name: string
-          id: string
-          is_contest_participant: boolean
-        }[]
-      }
       get_follow_stats: {
         Args: { target_user_id: string }
         Returns: {
@@ -366,24 +265,12 @@ export type Database = {
           following_count: number
         }[]
       }
-      get_friend_profile_summary: {
+      get_public_profile_summary: {
         Args: { profile_user_id: string }
         Returns: {
           avatar_url: string
           city: string
           country: string
-          display_name: string
-          id: string
-        }[]
-      }
-      get_or_create_conversation: {
-        Args: { user1_id: string; user2_id: string }
-        Returns: string
-      }
-      get_public_profile_summary: {
-        Args: { profile_user_id: string }
-        Returns: {
-          avatar_url: string
           display_name: string
           id: string
         }[]

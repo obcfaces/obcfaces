@@ -432,7 +432,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
         </DialogHeader>
 
         {currentStep === 'auth' ? (
-          <form onSubmit={handleAuth} className="space-y-3 max-w-xs mx-auto">
+          <form onSubmit={handleAuth} className="space-y-3">
             {authError && (
               <div className="text-destructive text-sm font-medium">
                 {authError}

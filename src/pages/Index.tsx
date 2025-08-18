@@ -33,7 +33,7 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       <ContestHeader />
       
-      <div className="max-w-6xl mx-auto px-6 pt-6 pb-6 rounded-lg shadow-lg shadow-foreground/15">
+      <div className="max-w-6xl mx-auto px-6 pt-3 pb-6 rounded-lg shadow-lg shadow-foreground/15">
         <ContestFilters
           country={country}
           onCountryChange={setCountry}

@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import SearchableSelect from "@/components/ui/searchable-select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { LogOut, Eye, EyeOff, UserIcon, MapPin, Pencil, Lock, MessageCircle } from "lucide-react";
+import { LogOut, Eye, EyeOff, UserIcon, MapPin } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import PostCard from "@/components/profile/PostCard";
 import LikedItem from "@/components/profile/LikedItem";
@@ -56,12 +56,10 @@ const Profile = () => {
   const [bioDraft, setBioDraft] = useState("");
   const [savingBio, setSavingBio] = useState(false);
   const [isEditingProfile, setIsEditingProfile] = useState(false);
-  const [editingField, setEditingField] = useState<string | null>(null);
   const [editForm, setEditForm] = useState({
     display_name: '',
     gender: '',
     country: '',
-    country_privacy: 'public',
     bio: '',
     email: ''
   });
@@ -296,7 +294,6 @@ const Profile = () => {
       display_name: profile.display_name || '',
       gender: data?.gender || '',
       country: profile.country || '',
-      country_privacy: 'public',
       bio: profile.bio || '',
       email: currentUserEmail
     });
@@ -728,12 +725,8 @@ const Profile = () => {
           {/* Profile Header */}
           <div className="flex flex-col gap-6 mb-8">
             <div className="flex items-center gap-4">
-              <Avatar className="w-32 h-32">
-                <AvatarImage 
-                  src={profile.avatar_url || ""} 
-                  alt={`Avatar of ${profile.display_name || "User"}`}
-                  className="object-cover"
-                />
+              <Avatar className="w-20 h-20 sm:w-24 sm:h-24">
+                <AvatarImage src={profile.avatar_url || ""} alt={`Avatar of ${profile.display_name || "User"}`} />
                 <AvatarFallback className="text-lg">
                   {(profile.display_name || "U").charAt(0).toUpperCase()}
                 </AvatarFallback>
@@ -746,37 +739,23 @@ const Profile = () => {
                       : "Пользователь")
                   }
                 </h1>
-                 {profile.country && (
-                   <div className="flex items-center gap-1 text-primary font-medium">
-                     <MapPin className="h-3 w-3" />
-                     <span className="text-sm">{profile.country}</span>
-                   </div>
-                 )}
-                 {profile.bio && (
-                   <p className="text-sm text-muted-foreground mt-2 italic leading-relaxed">
-                     {profile.bio}
-                   </p>
-                 )}
-                </div>
+                {profile.country && (
+                  <p className="text-muted-foreground">
+                    {profile.country}
+                  </p>
+                )}
+               </div>
             </div>
             
             <div className="flex items-center gap-2">
               <ContestParticipationModal>
-                 <Button className="bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200">
-                   🏆 Join & Win 5,000 PHP
-                 </Button>
-               </ContestParticipationModal>
+                <Button className="bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200">
+                  🏆 Join Contest
+                </Button>
+              </ContestParticipationModal>
                <Button variant="outline">Add Post</Button>
-               {!isOwner && (
-                 <Button variant="outline" onClick={handleMessage}>
-                   <MessageCircle className="w-4 h-4 mr-1" />
-                   Message
-                 </Button>
-               )}
-               {!isOwner && (
-                 <div className="text-xs text-muted-foreground">
-                   Debug: isOwner={String(isOwner)}, currentUserId={currentUserId}, id={id}
-                 </div>
+               {isOwner && (
+                 <Button variant="outline" onClick={initEditForm}>Edit Profile</Button>
                )}
             </div>
 
@@ -797,12 +776,12 @@ const Profile = () => {
 
           {/* Tabs */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-8">
-            <TabsList className="w-full bg-transparent p-0 rounded-none justify-start gap-2 sm:gap-8 border-b border-border flex-wrap">
-              <TabsTrigger value="likes" className="px-0 mr-2 sm:mr-6 h-auto pb-2 bg-transparent rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary text-muted-foreground hover:text-foreground text-sm sm:text-base">Likes</TabsTrigger>
-              <TabsTrigger value="posts" className="px-0 mr-2 sm:mr-6 h-auto pb-2 bg-transparent rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary text-muted-foreground hover:text-foreground text-sm sm:text-base">Posts</TabsTrigger>
-              <TabsTrigger value="photos" className="px-0 mr-2 sm:mr-6 h-auto pb-2 bg-transparent rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary text-muted-foreground hover:text-foreground text-sm sm:text-base">Photos</TabsTrigger>
-              <TabsTrigger value="participation" className="px-0 mr-2 sm:mr-6 h-auto pb-2 bg-transparent rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary text-muted-foreground hover:text-foreground text-sm sm:text-base">Participation</TabsTrigger>
-              <TabsTrigger value="about" className="px-0 mr-2 sm:mr-6 h-auto pb-2 bg-transparent rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary text-muted-foreground hover:text-foreground text-sm sm:text-base">About</TabsTrigger>
+            <TabsList className="w-full bg-transparent p-0 rounded-none justify-start gap-2 sm:gap-8 border-b border-border overflow-x-auto">
+              <TabsTrigger value="likes" className="px-0 mr-2 sm:mr-6 h-auto pb-2 bg-transparent rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary text-muted-foreground hover:text-foreground text-sm sm:text-base whitespace-nowrap">Likes</TabsTrigger>
+              <TabsTrigger value="posts" className="px-0 mr-2 sm:mr-6 h-auto pb-2 bg-transparent rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary text-muted-foreground hover:text-foreground text-sm sm:text-base whitespace-nowrap">Posts</TabsTrigger>
+              <TabsTrigger value="photos" className="px-0 mr-2 sm:mr-6 h-auto pb-2 bg-transparent rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary text-muted-foreground hover:text-foreground text-sm sm:text-base whitespace-nowrap">Photos</TabsTrigger>
+              <TabsTrigger value="participation" className="px-0 mr-2 sm:mr-6 h-auto pb-2 bg-transparent rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary text-muted-foreground hover:text-foreground text-sm sm:text-base whitespace-nowrap">Participation</TabsTrigger>
+              <TabsTrigger value="about" className="px-0 mr-2 sm:mr-6 h-auto pb-2 bg-transparent rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary text-muted-foreground hover:text-foreground text-sm sm:text-base whitespace-nowrap">About</TabsTrigger>
               {isOwner && (
                 <button
                   onClick={logout}
@@ -999,84 +978,31 @@ const Profile = () => {
 
             <TabsContent value="about" className="mt-8">
               {isEditingProfile ? (
-                <div className="max-w-xs space-y-3">
+                <div className="max-w-md space-y-3">
                   {/* Avatar Upload */}
                   <div className="space-y-2">
                     <Label className="text-sm font-medium">Profile Photo</Label>
-                    <div className="flex justify-center">
-                      <input
-                        id="avatar-upload"
-                        type="file"
-                        accept="image/*"
-                        onChange={handleAvatarChange}
-                        className="hidden"
-                      />
-                      <label htmlFor="avatar-upload" className="cursor-pointer block">
-                        {avatarFile ? (
-                          <div className="relative">
-                            <Avatar className="h-32 w-32">
-                              <AvatarImage 
-                                src={avatarPreview || ""} 
-                                alt="Profile photo preview"
-                                className="h-full w-full object-cover"
-                              />
-                              <AvatarFallback className="text-sm">
-                                {(editForm.display_name || profile.display_name || "U").charAt(0).toUpperCase()}
-                              </AvatarFallback>
-                            </Avatar>
-                            <button 
-                              type="button"
-                              onClick={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                setAvatarFile(null);
-                                setAvatarPreview(null);
-                              }}
-                              className="absolute -top-2 -right-2 w-6 h-6 bg-gray-500 hover:bg-gray-600 rounded-full flex items-center justify-center text-white text-sm font-bold transition-colors shadow-md"
-                            >
-                              ×
-                            </button>
-                            <div className="mt-2 text-center">
-                              <button 
-                                type="button" 
-                                onClick={(e) => {
-                                  e.preventDefault();
-                                  e.stopPropagation();
-                                  document.getElementById('avatar-upload')?.click();
-                                }}
-                                className="px-3 py-1 bg-primary text-primary-foreground rounded text-sm hover:bg-primary/90 transition-colors"
-                              >
-                                Change
-                              </button>
-                            </div>
-                          </div>
-                        ) : (
-                          <div className="text-center">
-                            <Avatar className="h-32 w-32 border-2 border-dashed border-muted-foreground/25 hover:border-primary transition-colors cursor-pointer">
-                              <AvatarImage 
-                                src={profile.avatar_url || ""} 
-                                alt="Current profile"
-                                className="h-full w-full object-cover opacity-60"
-                              />
-                              <AvatarFallback className="text-sm opacity-60">
-                                {(profile.display_name || "U").charAt(0).toUpperCase()}
-                              </AvatarFallback>
-                            </Avatar>
-                            <p className="text-xs text-muted-foreground mt-2 mb-2">JPG, PNG up to 5MB</p>
-                            <button 
-                              type="button" 
-                              onClick={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                document.getElementById('avatar-upload')?.click();
-                              }}
-                              className="px-3 py-1 bg-primary text-primary-foreground rounded text-sm hover:bg-primary/90 transition-colors"
-                            >
-                              Choose File
-                            </button>
-                          </div>
-                        )}
-                      </label>
+                    <div className="flex items-center gap-4">
+                      <Avatar className="w-16 h-16">
+                        <AvatarImage 
+                          src={avatarPreview || profile.avatar_url || ""} 
+                          alt="Profile preview" 
+                        />
+                        <AvatarFallback className="text-sm">
+                          {(editForm.display_name || profile.display_name || "U").charAt(0).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <Input 
+                          type="file"
+                          accept="image/*"
+                          onChange={handleAvatarChange}
+                          className="text-sm"
+                        />
+                        <p className="text-xs text-muted-foreground mt-1">
+                          JPG, PNG up to 5MB
+                        </p>
+                      </div>
                     </div>
                   </div>
 
@@ -1102,28 +1028,13 @@ const Profile = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <div className="flex gap-2">
-                      <div className="flex-1">
-                        <SearchableSelect
-                          value={editForm.country}
-                          onValueChange={(value) => handleEditFormChange('country', value)}
-                          options={countryOptions}
-                          placeholder="Country"
-                          invalid={hasRedBorder('country')}
-                        />
-                      </div>
-                      <div className="w-20">
-                        <Select value={editForm.country_privacy} onValueChange={(value) => handleEditFormChange('country_privacy', value)}>
-                          <SelectTrigger className="text-xs">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="public">🌍 Everyone</SelectItem>
-                            <SelectItem value="only_me">🔒 Only me</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
+                    <SearchableSelect
+                      value={editForm.country}
+                      onValueChange={(value) => handleEditFormChange('country', value)}
+                      options={countryOptions}
+                      placeholder="Country"
+                      invalid={hasRedBorder('country')}
+                    />
                   </div>
 
                   <div className="space-y-2">
@@ -1220,460 +1131,18 @@ const Profile = () => {
                   </div>
                 </div>
               ) : (
-                <div className="space-y-6">
-                  {/* Profile Photo Section */}
-                  {isOwner && (
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <Avatar className="h-16 w-16">
-                            <AvatarImage 
-                              src={profile.avatar_url || ""} 
-                              alt="Profile photo"
-                              className="object-cover"
-                            />
-                            <AvatarFallback className="text-lg">
-                              {(profile.display_name || "U").charAt(0).toUpperCase()}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <div className="text-sm font-medium text-foreground">Profile photo</div>
-                            <div className="text-xs text-muted-foreground">JPG, PNG up to 5MB</div>
-                          </div>
-                        </div>
-                        <button
-                          onClick={() => {
-                            setEditingField('avatar');
-                            setIsEditingProfile(true);
-                          }}
-                          className="p-1 hover:bg-accent rounded-md transition-colors"
-                          aria-label="Edit profile photo"
-                        >
-                          <Pencil className="h-4 w-4 text-muted-foreground" />
-                        </button>
-                      </div>
+                <div className="space-y-4">
+                  <p className="text-muted-foreground">{profile?.bio || "Информация о себе не указана"}</p>
+                  {profile?.gender && (
+                    <div className="flex items-center gap-2">
+                      <UserIcon className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-sm">{profile.gender === 'male' ? 'Мужской' : 'Женский'}</span>
                     </div>
                   )}
-
-                  {/* Basic Information */}
-                  <div className="space-y-4">
-                    <div className="space-y-3">
-                      {/* Display Name */}
-                      <div className="flex items-center py-3 border-b border-border">
-                        <div className="flex-1">
-                          {editingField === 'display_name' ? (
-                            <div className="space-y-2">
-                              <Input 
-                                placeholder="Display Name" 
-                                className="text-sm placeholder:text-muted-foreground"
-                                value={editForm.display_name} 
-                                onChange={(e) => handleEditFormChange('display_name', e.target.value)} 
-                                autoFocus
-                              />
-                              <div className="flex gap-2">
-                                <Button 
-                                  size="sm"
-                                  onClick={() => {
-                                    setEditingField(null);
-                                    setEditForm(prev => ({ ...prev, display_name: profile.display_name || '' }));
-                                  }}
-                                  variant="outline"
-                                >
-                                  Cancel
-                                </Button>
-                                <Button 
-                                  size="sm"
-                                  onClick={async () => {
-                                    await handleSaveProfile();
-                                    setEditingField(null);
-                                  }}
-                                >
-                                  Save
-                                </Button>
-                              </div>
-                            </div>
-                          ) : (
-                            <div>
-                              <div className="text-sm text-muted-foreground">Display Name</div>
-                              <div className="text-sm font-medium text-foreground">
-                                {profile?.display_name || "Add display name"}
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                        {isOwner && editingField !== 'display_name' && (
-                          <button
-                            onClick={() => {
-                              setEditingField('display_name');
-                              setEditForm(prev => ({ ...prev, display_name: profile.display_name || '' }));
-                            }}
-                            className="p-1 hover:bg-accent rounded-md transition-colors ml-3"
-                            aria-label="Edit display name"
-                          >
-                            <Pencil className="h-4 w-4 text-muted-foreground" />
-                          </button>
-                        )}
-                      </div>
-
-                      {/* Email */}
-                      {isOwner && (
-                        <div className="flex items-center py-3 border-b border-border">
-                          <div className="flex-1">
-                            {editingField === 'email' ? (
-                              <div className="space-y-2">
-                                <Input 
-                                  type="email"
-                                  placeholder="Email" 
-                                  className="text-sm placeholder:text-muted-foreground"
-                                  value={editForm.email} 
-                                  onChange={(e) => handleEditFormChange('email', e.target.value)} 
-                                  autoFocus
-                                />
-                                <div className="flex gap-2">
-                                  <Button 
-                                    size="sm"
-                                    onClick={() => {
-                                      setEditingField(null);
-                                      setEditForm(prev => ({ ...prev, email: currentUserEmail || '' }));
-                                    }}
-                                    variant="outline"
-                                  >
-                                    Cancel
-                                  </Button>
-                                  <Button 
-                                    size="sm"
-                                    onClick={async () => {
-                                      await handleSaveProfile();
-                                      setEditingField(null);
-                                    }}
-                                  >
-                                    Save
-                                  </Button>
-                                </div>
-                              </div>
-                            ) : (
-                              <div>
-                                <div className="text-sm text-muted-foreground">Email</div>
-                                <div className="text-sm font-medium text-foreground">
-                                  {editForm.email || "Add email"}
-                                </div>
-                                <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
-                                  <Lock className="h-3 w-3" />
-                                  <span>Only me</span>
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                          {editingField !== 'email' && (
-                            <button
-                              onClick={() => {
-                                setEditingField('email');
-                                setEditForm(prev => ({ ...prev, email: currentUserEmail || '' }));
-                              }}
-                              className="p-1 hover:bg-accent rounded-md transition-colors ml-3"
-                              aria-label="Edit email"
-                            >
-                              <Pencil className="h-4 w-4 text-muted-foreground" />
-                            </button>
-                          )}
-                        </div>
-                      )}
-
-
-                      {/* Gender */}
-                      <div className="flex items-center py-3 border-b border-border">
-                        <div className="flex-1">
-                          {editingField === 'gender' ? (
-                            <div className="space-y-2">
-                              <Select value={editForm.gender} onValueChange={(value) => handleEditFormChange('gender', value)}>
-                                <SelectTrigger className="text-sm">
-                                  <SelectValue placeholder="Gender" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="male">Male</SelectItem>
-                                  <SelectItem value="female">Female</SelectItem>
-                                </SelectContent>
-                              </Select>
-                              <div className="flex gap-2">
-                                <Button 
-                                  size="sm"
-                                  onClick={() => {
-                                    setEditingField(null);
-                                    setEditForm(prev => ({ ...prev, gender: profile.gender || '' }));
-                                  }}
-                                  variant="outline"
-                                >
-                                  Cancel
-                                </Button>
-                                <Button 
-                                  size="sm"
-                                  onClick={async () => {
-                                    await handleSaveProfile();
-                                    setEditingField(null);
-                                  }}
-                                >
-                                  Save
-                                </Button>
-                              </div>
-                            </div>
-                          ) : (
-                            <div>
-                              <div className="text-sm text-muted-foreground">Gender</div>
-                              <div className="text-sm font-medium text-foreground">
-                                {profile?.gender ? (profile.gender === 'male' ? 'Male' : 'Female') : "Add gender"}
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                        {isOwner && editingField !== 'gender' && (
-                          <button
-                            onClick={() => {
-                              setEditingField('gender');
-                              setEditForm(prev => ({ ...prev, gender: profile.gender || '' }));
-                            }}
-                            className="p-1 hover:bg-accent rounded-md transition-colors ml-3"
-                            aria-label="Edit gender"
-                          >
-                            <Pencil className="h-4 w-4 text-muted-foreground" />
-                          </button>
-                        )}
-                      </div>
-
-                      {/* Date of birth */}
-                      <div className="flex items-center py-3 border-b border-border">
-                        <div className="flex-1">
-                          <div className="text-sm text-muted-foreground">Date of birth</div>
-                          <div className="text-sm font-medium text-foreground">
-                            {profile?.birthdate ? new Date(profile.birthdate).toLocaleDateString('en-GB', {
-                              day: 'numeric',
-                              month: 'long',
-                              year: 'numeric'
-                            }) : "Add date of birth"}
-                          </div>
-                          <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
-                            <Lock className="h-3 w-3" />
-                            <span>Only me</span>
-                          </div>
-                        </div>
-                        {isOwner && (
-                          <button
-                            onClick={() => setEditingField('birthdate')}
-                            className="p-1 hover:bg-accent rounded-md transition-colors ml-3"
-                            aria-label="Edit date of birth"
-                          >
-                            <Pencil className="h-4 w-4 text-muted-foreground" />
-                          </button>
-                        )}
-                      </div>
-                      
-                      {/* Country */}
-                      <div className="flex items-center py-3 border-b border-border">
-                        <div className="flex-1">
-                          {editingField === 'country' ? (
-                            <div className="space-y-2">
-                              <SearchableSelect
-                                value={editForm.country}
-                                onValueChange={(value) => handleEditFormChange('country', value)}
-                                options={countryOptions}
-                                placeholder="Country"
-                              />
-                              <div className="flex gap-2">
-                                <Button 
-                                  size="sm"
-                                  onClick={() => {
-                                    setEditingField(null);
-                                    setEditForm(prev => ({ ...prev, country: profile.country || '' }));
-                                  }}
-                                  variant="outline"
-                                >
-                                  Cancel
-                                </Button>
-                                <Button 
-                                  size="sm"
-                                  onClick={async () => {
-                                    await handleSaveProfile();
-                                    setEditingField(null);
-                                  }}
-                                >
-                                  Save
-                                </Button>
-                              </div>
-                            </div>
-                          ) : (
-                            <div>
-                              <div className="text-sm text-muted-foreground">Country</div>
-                              <div className="text-sm font-medium text-foreground">
-                                {profile?.country || "Add country"}
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                        {isOwner && editingField !== 'country' && (
-                          <button
-                            onClick={() => {
-                              setEditingField('country');
-                              setEditForm(prev => ({ ...prev, country: profile.country || '' }));
-                            }}
-                            className="p-1 hover:bg-accent rounded-md transition-colors ml-3"
-                            aria-label="Edit country"
-                          >
-                            <Pencil className="h-4 w-4 text-muted-foreground" />
-                          </button>
-                        )}
-                      </div>
-                      
-                      {/* Bio */}
-                      <div className="flex items-center py-3">
-                        <div className="flex-1">
-                          {editingField === 'bio' ? (
-                            <div className="space-y-2">
-                              <Input 
-                                placeholder="About Me" 
-                                className="text-sm placeholder:text-muted-foreground"
-                                value={editForm.bio} 
-                                onChange={(e) => handleEditFormChange('bio', e.target.value)} 
-                                autoFocus
-                              />
-                              <div className="flex gap-2">
-                                <Button 
-                                  size="sm"
-                                  onClick={() => {
-                                    setEditingField(null);
-                                    setEditForm(prev => ({ ...prev, bio: profile.bio || '' }));
-                                  }}
-                                  variant="outline"
-                                >
-                                  Cancel
-                                </Button>
-                                <Button 
-                                  size="sm"
-                                  onClick={async () => {
-                                    await handleSaveProfile();
-                                    setEditingField(null);
-                                  }}
-                                >
-                                  Save
-                                </Button>
-                              </div>
-                            </div>
-                          ) : (
-                            <div>
-                              <div className="text-sm text-muted-foreground">About Me</div>
-                              <div className="text-sm font-medium text-foreground">
-                                {profile?.bio || "Add bio"}
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                        {isOwner && editingField !== 'bio' && (
-                          <button
-                            onClick={() => {
-                              setEditingField('bio');
-                              setEditForm(prev => ({ ...prev, bio: profile.bio || '' }));
-                            }}
-                            className="p-1 hover:bg-accent rounded-md transition-colors ml-3"
-                            aria-label="Edit bio"
-                          >
-                            <Pencil className="h-4 w-4 text-muted-foreground" />
-                          </button>
-                        )}
-                      </div>
-
-                      {!profile?.display_name && !profile?.gender && !profile?.country && !profile?.bio && !isOwner && (
-                        <p className="text-muted-foreground text-center py-8">Нет информации для отображения</p>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Avatar upload for full edit mode */}
-                  {editingField === 'avatar' && (
-                    <div className="space-y-4 pt-4 border-t border-border">
-                      <div className="space-y-2">
-                        <label htmlFor="avatar-upload" className="block text-sm font-medium">
-                          Profile Photo
-                        </label>
-                        <input
-                          id="avatar-upload"
-                          type="file"
-                          accept="image/*"
-                          className="hidden"
-                          onChange={(e) => {
-                            const file = e.target.files?.[0];
-                            if (file) {
-                              setAvatarFile(file);
-                              const reader = new FileReader();
-                              reader.onloadend = () => {
-                                setAvatarPreview(reader.result as string);
-                              };
-                              reader.readAsDataURL(file);
-                            }
-                          }}
-                        />
-                        {avatarPreview ? (
-                          <div className="text-center">
-                            <img 
-                              src={avatarPreview} 
-                              alt="Avatar preview" 
-                              className="h-32 w-32 object-cover rounded-full border-2 border-primary mx-auto"
-                            />
-                            <p className="text-xs text-muted-foreground mt-2 mb-2">Preview</p>
-                            <div className="flex gap-2 justify-center">
-                              <button 
-                                type="button" 
-                                onClick={() => document.getElementById('avatar-upload')?.click()}
-                                className="px-3 py-1 bg-secondary text-secondary-foreground rounded text-sm hover:bg-secondary/80 transition-colors"
-                              >
-                                Change
-                              </button>
-                            </div>
-                          </div>
-                        ) : (
-                          <div className="text-center">
-                            <Avatar className="h-32 w-32 border-2 border-dashed border-muted-foreground/25 hover:border-primary transition-colors cursor-pointer mx-auto">
-                              <AvatarImage 
-                                src={profile.avatar_url || ""} 
-                                alt="Current profile"
-                                className="h-full w-full object-cover opacity-60"
-                              />
-                              <AvatarFallback className="text-sm opacity-60">
-                                {(profile.display_name || "U").charAt(0).toUpperCase()}
-                              </AvatarFallback>
-                            </Avatar>
-                            <p className="text-xs text-muted-foreground mt-2 mb-2">JPG, PNG up to 5MB</p>
-                            <button 
-                              type="button" 
-                              onClick={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                document.getElementById('avatar-upload')?.click();
-                              }}
-                              className="px-3 py-1 bg-primary text-primary-foreground rounded text-sm hover:bg-primary/90 transition-colors"
-                            >
-                              Choose File
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                      <div className="flex gap-2">
-                        <Button 
-                          onClick={() => {
-                            setEditingField(null);
-                            setAvatarFile(null);
-                            setAvatarPreview(null);
-                          }}
-                          variant="outline"
-                        >
-                          Cancel
-                        </Button>
-                        <Button 
-                          onClick={async () => {
-                            await handleSaveProfile();
-                            setEditingField(null);
-                          }}
-                        >
-                          Save
-                        </Button>
-                      </div>
+                  {profile?.country && (
+                    <div className="flex items-center gap-2">
+                      <MapPin className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-sm">{profile.country}</span>
                     </div>
                   )}
                 </div>

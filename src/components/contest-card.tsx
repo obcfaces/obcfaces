@@ -266,6 +266,11 @@ export function ContestantCard({
     return (
       <>
         <Card className="bg-card border-contest-border relative overflow-hidden">
+          {isWinner && (
+            <div className="absolute top-2 left-4 bg-contest-blue text-white px-3 py-1 rounded-full text-sm font-bold flex items-center gap-1 z-20">
+              🏆 WINNER
+            </div>
+          )}
           
           {/* Name in top left - only after voting */}
            {(isVoted && !showThanks && !isEditing) && (
@@ -358,13 +363,6 @@ export function ContestantCard({
           {/* Photos section */}
           <div className="relative">
             <div className="grid grid-cols-2 gap-px">
-              {/* Winner Badge - overlaid on photos like in profile */}
-              {isWinner && (
-                <div className="absolute top-0 left-0 right-0 z-20 bg-blue-100 text-blue-700 px-2 py-1 text-xs font-semibold flex justify-between items-center">
-                  <span>🏆 WINNER</span>
-                  <span>+ 5000 PHP</span>
-                </div>
-              )}
               <div className="relative">
                 <img 
                   src={faceImage} 
@@ -473,8 +471,9 @@ export function ContestantCard({
     <>
       <Card className="bg-card border-contest-border relative overflow-hidden flex h-36 sm:h-40 md:h-44">
         {isWinner && (
-          <div className="absolute bottom-0 left-0 w-[193px] sm:w-[225px] md:w-[257px] bg-blue-100 text-blue-700 pl-2 pr-2 py-1 text-xs font-semibold flex items-center justify-start z-20">
+          <div className="absolute top-0 left-48 sm:left-56 md:left-64 right-0 bg-blue-100 text-blue-700 pl-2 pr-12 sm:pr-14 md:pr-16 py-1 text-xs font-semibold flex items-center justify-between z-20">
             <span>🏆 WINNER</span>
+            <span>+ 5000 PHP</span>
           </div>
         )}
         
@@ -598,7 +597,7 @@ export function ContestantCard({
           {/* Contestant info - shown after voting instead of normal content */}
           {isVoted && !isEditing && !showThanks && (
             <div className="absolute inset-0 bg-white rounded-r flex flex-col justify-between p-1 sm:p-2 md:p-3">
-              <div className="flex items-start justify-between">
+              <div className={cn("flex items-start justify-between", isWinner && "mt-6")}>
                 <div className="min-w-0 flex-1 mr-2">
                    <h3 className="font-semibold text-contest-text text-base sm:text-lg truncate">{profileId ? (<Link to={`/u/${profileId}`} className="hover:text-primary underline-offset-2 hover:underline">{name}</Link>) : name}, {age}</h3>
                    <div className="text-xs sm:text-sm text-muted-foreground font-normal">{weight} kg · {height} cm</div>
