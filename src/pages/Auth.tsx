@@ -106,7 +106,8 @@ const Auth = () => {
               value={email} 
               onChange={(e) => setEmail(e.target.value)} 
               required 
-              className="h-12 text-base"
+              className="h-12 text-base md:text-base" 
+              style={{ fontSize: '16px' }}
             />
           </div>
           <div className="space-y-1">
@@ -117,7 +118,8 @@ const Auth = () => {
               value={password} 
               onChange={(e) => setPassword(e.target.value)} 
               required 
-              className="h-12 text-base"
+              className="h-12 text-base md:text-base" 
+              style={{ fontSize: '16px' }}
             />
           </div>
 
@@ -130,7 +132,8 @@ const Auth = () => {
                   type="text" 
                   value={displayName} 
                   onChange={(e) => setDisplayName(e.target.value)} 
-                  className="h-12 text-base"
+                  className="h-12 text-base md:text-base" 
+                  style={{ fontSize: '16px' }}
                 />
               </div>
 
@@ -164,7 +167,8 @@ const Auth = () => {
                   type="text" 
                   value={bio} 
                   onChange={(e) => setBio(e.target.value)} 
-                  className="h-12 text-base"
+                  className="h-12 text-base md:text-base" 
+                  style={{ fontSize: '16px' }}
                 />
               </div>
             </>
