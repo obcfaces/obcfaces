@@ -316,7 +316,7 @@ export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantNa
                       onClick={focusCommentInput}
                       aria-label="Open comment field"
                     >
-                      <MessageCircle className="w-4 h-4 mr-1" />
+                      <MessageCircle className="w-4 h-4 mr-1" strokeWidth={1} />
                       {currentPhotoComments.length}
                     </Button>
                   </div>
