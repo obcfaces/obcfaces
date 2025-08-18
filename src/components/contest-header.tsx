@@ -29,7 +29,7 @@ export function ContestHeader({ activeSection, onSectionChange }: ContestHeaderP
         </div>
         
         {/* Contest info points - always visible */}
-        <div className="mt-3 space-y-1 text-sm text-contest-text">
+        <div className="mt-3 space-y-1 text-sm text-contest-text" style={{ marginTop: '15px' }}>
           <div className="flex items-center gap-2">
             <span>🌍</span>
             <span>Anyone can join — open to all!</span>
