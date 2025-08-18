@@ -177,7 +177,7 @@ const Account = () => {
     setLogoutLoading(true);
     try {
       await supabase.auth.signOut();
-      navigate("/", { replace: true });
+      navigate("/contest", { replace: true });
     } catch (error) {
       toast({ description: "Ошибка при выходе" });
     } finally {

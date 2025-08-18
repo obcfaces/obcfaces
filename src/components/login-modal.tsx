@@ -82,6 +82,7 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
         toast({ description: "Signed in" });
+        setTimeout(() => setOpen(false), 1000); // Close modal after 1 second
       } else {
         const redirectUrl = window.location.href; // Confirm email back to current page
         const { data, error } = await supabase.auth.signUp({
@@ -121,8 +122,10 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
             );
           if (upsertErr) throw upsertErr;
           toast({ description: "Registration complete" });
+          setTimeout(() => setOpen(false), 1000); // Close modal after 1 second
         } else {
           toast({ description: "Check your email to confirm." });
+          setTimeout(() => setOpen(false), 1000); // Close modal after 1 second
         }
       }
     } catch (err: any) {

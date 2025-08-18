@@ -28,41 +28,25 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  // Cache key for localStorage
-  const FORM_CACHE_KEY = 'contest_form_cache';
-
-  // Load cached form data
-  const loadCachedFormData = () => {
-    try {
-      const cached = localStorage.getItem(FORM_CACHE_KEY);
-      if (cached) {
-        return JSON.parse(cached);
-      }
-    } catch (error) {
-      console.warn('Failed to load cached form data:', error);
-    }
-    return {
-      first_name: "",
-      last_name: "",
-      country: "",
-      countryCode: "",
-      state: "",
-      stateCode: "",
-      city: "",
-      gender: "",
-      birth_day: "",
-      birth_month: "",
-      birth_year: "",
-      marital_status: "",
-      has_children: undefined as boolean | undefined,
-      height_cm: "",
-      weight_kg: "",
-      measurement_system: "metric",
-    };
-  };
-
   // Profile form data
-  const [formData, setFormData] = useState(loadCachedFormData);
+  const [formData, setFormData] = useState({
+    first_name: "",
+    last_name: "",
+    country: "",
+    countryCode: "",
+    state: "",
+    stateCode: "",
+    city: "",
+    gender: "",
+    birth_day: "",
+    birth_month: "",
+    birth_year: "",
+    marital_status: "",
+    has_children: undefined as boolean | undefined,
+    height_cm: "",
+    weight_kg: "",
+    measurement_system: "metric",
+  });
 
   // Photo files
   const [photo1File, setPhoto1File] = useState<File | null>(null);
@@ -84,51 +68,11 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
     return baseClasses;
   };
 
-  // Photo cache handling
-  const savePhotoToCache = (photoNumber: number, file: File) => {
-    const reader = new FileReader();
-    reader.onload = () => {
-      try {
-        const photoData = {
-          name: file.name,
-          type: file.type,
-          data: reader.result as string,
-          lastModified: file.lastModified
-        };
-        localStorage.setItem(`contest_photo_${photoNumber}_cache`, JSON.stringify(photoData));
-      } catch (error) {
-        console.warn('Failed to cache photo:', error);
-      }
-    };
-    reader.readAsDataURL(file);
-  };
-
-  const loadPhotoFromCache = (photoNumber: number): File | null => {
-    try {
-      const cached = localStorage.getItem(`contest_photo_${photoNumber}_cache`);
-      if (cached) {
-        const photoData = JSON.parse(cached);
-        // Convert base64 back to File
-        const byteCharacters = atob(photoData.data.split(',')[1]);
-        const byteNumbers = new Array(byteCharacters.length);
-        for (let i = 0; i < byteCharacters.length; i++) {
-          byteNumbers[i] = byteCharacters.charCodeAt(i);
-        }
-        const byteArray = new Uint8Array(byteNumbers);
-        return new File([byteArray], photoData.name, { type: photoData.type, lastModified: photoData.lastModified });
-      }
-    } catch (error) {
-      console.warn('Failed to load cached photo:', error);
-    }
-    return null;
-  };
-
   // Photo upload handlers
   const handlePhoto1Upload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
       setPhoto1File(file);
-      savePhotoToCache(1, file);
       // Remove from invalid fields when photo is uploaded
       if (invalidFields.has('photo1')) {
         setInvalidFields(prev => {
@@ -144,7 +88,6 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
     const file = event.target.files?.[0];
     if (file) {
       setPhoto2File(file);
-      savePhotoToCache(2, file);
       // Remove from invalid fields when photo is uploaded
       if (invalidFields.has('photo2')) {
         setInvalidFields(prev => {
@@ -209,8 +152,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) throw new Error('Not authenticated');
 
-    // Create file path with user folder structure for RLS to work
-    const fileName = `${session.user.id}/photo${photoNumber}-${Date.now()}.${file.name.split('.').pop()}`;
+    const fileName = `${session.user.id}-photo${photoNumber}-${Date.now()}.${file.name.split('.').pop()}`;
     
     const { error: uploadError } = await supabase.storage
       .from('contest-photos')
@@ -301,9 +243,6 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
         description: "Your contest application has been submitted successfully."
       });
 
-      // Clear cache after successful submission
-      clearFormCache();
-      
       setIsOpen(false);
     } catch (error: any) {
       console.error('Submission error:', error);
@@ -322,13 +261,6 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
     if (isOpen) {
       setSubmitted(false);
       setInvalidFields(new Set());
-      
-      // Load cached photos
-      const cachedPhoto1 = loadPhotoFromCache(1);
-      const cachedPhoto2 = loadPhotoFromCache(2);
-      if (cachedPhoto1) setPhoto1File(cachedPhoto1);
-      if (cachedPhoto2) setPhoto2File(cachedPhoto2);
-      
       const checkAuth = async () => {
         const { data: { session } } = await supabase.auth.getSession();
         if (session) {
@@ -341,33 +273,9 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
     }
   }, [isOpen]);
 
-  // Save form data to cache
-  const saveFormDataToCache = (data: typeof formData) => {
-    try {
-      localStorage.setItem(FORM_CACHE_KEY, JSON.stringify(data));
-    } catch (error) {
-      console.warn('Failed to save form data to cache:', error);
-    }
-  };
-
-  // Clear cache
-  const clearFormCache = () => {
-    try {
-      localStorage.removeItem(FORM_CACHE_KEY);
-      localStorage.removeItem('contest_photo_1_cache');
-      localStorage.removeItem('contest_photo_2_cache');
-    } catch (error) {
-      console.warn('Failed to clear form cache:', error);
-    }
-  };
-
   // Clear field from invalid set when user starts typing
   const handleFieldChange = (fieldName: string, value: any) => {
-    const newFormData = { ...formData, [fieldName]: value };
-    setFormData(newFormData);
-    
-    // Save to cache whenever data changes
-    saveFormDataToCache(newFormData);
+    setFormData(prev => ({ ...prev, [fieldName]: value }));
     
     // Remove field from invalid set when user types
     if (invalidFields.has(fieldName)) {
@@ -490,8 +398,8 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                 options={countries}
                 value={formData.countryCode}
                 onValueChange={(value) => {
-                  handleFieldChange('country', value);
-                  setFormData(prev => ({ ...prev, countryCode: value, stateCode: "", city: "" }));
+                  handleFieldChange('countryCode', value);
+                  setFormData(prev => ({ ...prev, stateCode: "", city: "" }));
                 }}
                 placeholder="Country"
                 invalid={hasRedBorder('country')}
@@ -500,8 +408,8 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                 options={states}
                 value={formData.stateCode}
                 onValueChange={(value) => {
-                  handleFieldChange('state', value);
-                  setFormData(prev => ({ ...prev, stateCode: value, city: "" }));
+                  handleFieldChange('stateCode', value);
+                  setFormData(prev => ({ ...prev, city: "" }));
                 }}
                 placeholder="State/Region"
                 disabled={!formData.countryCode}
@@ -652,159 +560,119 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
             </div>
 
             <div className="space-y-4">
-              <div className="flex flex-row gap-4 items-start justify-between">
-                {/* Left text column */}
-                <div className="flex flex-col justify-center items-start space-y-2 text-sm text-muted-foreground flex-shrink-0 mt-2">
-                  <span className="font-bold">Upload Photos</span>
-                  <span className="text-red-600">no makeup</span>
-                  <span className="text-red-600">no filters</span>
-                  <span className="text-red-600">no nudes</span>
-                  <span className="text-red-600">no color correction</span>
+              <h3 className="text-sm font-medium text-center">Upload Photos</h3>
+              <div className="grid gap-4 grid-cols-2">
+                {/* Portrait Photo */}
+                <div className={`relative border-2 border-dashed rounded-lg cursor-pointer hover:border-primary transition-colors ${hasRedBorder('photo1') ? 'border-red-500' : 'border-muted-foreground/25'}`}>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handlePhoto1Upload}
+                    className="hidden"
+                    id="photo1-upload"
+                  />
+                  <label htmlFor="photo1-upload" className="cursor-pointer block">
+                    {photo1File ? (
+                      <div className="p-2 relative">
+                        <img
+                          src={URL.createObjectURL(photo1File)}
+                          alt="Portrait photo preview"
+                          className="w-full h-48 object-cover rounded"
+                        />
+                        <button 
+                          type="button"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            setPhoto1File(null);
+                            handleFieldChange('photo1', null);
+                          }}
+                          className="absolute top-1 right-1 w-6 h-6 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center text-white text-sm font-bold transition-colors shadow-md"
+                        >
+                          ×
+                        </button>
+                        <div className="mt-2 text-center">
+                          <button type="button" className="px-4 py-2 bg-primary text-primary-foreground rounded text-sm hover:bg-primary/90 transition-colors">
+                            Change
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="p-6 text-center">
+                        <div className="h-40 bg-muted/50 rounded-lg mb-3 flex items-center justify-center relative overflow-hidden">
+                          <img 
+                            src="/lovable-uploads/1147be30-a1d2-466f-a9a8-067f4628cbb2.png" 
+                            alt="Portrait placeholder" 
+                            className="w-[120%] h-[120%] object-cover opacity-30 scale-110"
+                          />
+                        </div>
+                        <p className="text-sm text-muted-foreground mb-2">one portrait photo</p>
+                        <button type="button" className="px-4 py-2 bg-primary text-primary-foreground rounded text-sm hover:bg-primary/90 transition-colors">
+                          Upload
+                        </button>
+                      </div>
+                    )}
+                  </label>
                 </div>
 
-                {/* Right photo upload areas */}
-                <div className="flex flex-row gap-4 items-start">
-                  {/* Portrait Photo */}
-                  <div className="relative w-32 md:w-40">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handlePhoto1Upload}
-                      className="hidden"
-                      id="photo1-upload"
-                    />
-                    <label htmlFor="photo1-upload" className="cursor-pointer block">
-                      {photo1File ? (
-                        <div className="p-2 relative">
-                          <img
-                            src={URL.createObjectURL(photo1File)}
-                            alt="Portrait photo preview"
-                            className="w-full h-32 md:h-40 object-contain rounded bg-white"
+                {/* Full Length Photo */}
+                <div className={`relative border-2 border-dashed rounded-lg cursor-pointer hover:border-primary transition-colors ${hasRedBorder('photo2') ? 'border-red-500' : 'border-muted-foreground/25'}`}>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handlePhoto2Upload}
+                    className="hidden"
+                    id="photo2-upload"
+                  />
+                  <label htmlFor="photo2-upload" className="cursor-pointer block">
+                    {photo2File ? (
+                      <div className="p-2 relative">
+                        <img
+                          src={URL.createObjectURL(photo2File)}
+                          alt="Full length photo preview"
+                          className="w-full h-48 object-cover rounded"
+                        />
+                        <button 
+                          type="button"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            setPhoto2File(null);
+                            handleFieldChange('photo2', null);
+                          }}
+                          className="absolute top-1 right-1 w-6 h-6 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center text-white text-sm font-bold transition-colors shadow-md"
+                        >
+                          ×
+                        </button>
+                        <div className="mt-2 text-center">
+                          <button type="button" className="px-4 py-2 bg-primary text-primary-foreground rounded text-sm hover:bg-primary/90 transition-colors">
+                            Change
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="p-6 text-center">
+                        <div className="h-40 bg-muted/50 rounded-lg mb-3 flex items-center justify-center relative overflow-hidden">
+                          <img 
+                            src="/lovable-uploads/009d20f0-cac7-4c08-9bc9-146617664bc3.png" 
+                            alt="Full body placeholder" 
+                            className="w-[120%] h-[120%] object-cover opacity-30 scale-110"
                           />
-                          <button 
-                            type="button"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              setPhoto1File(null);
-                              handleFieldChange('photo1', null);
-                            }}
-                            className="absolute top-1 right-1 w-6 h-6 bg-gray-500 hover:bg-gray-600 rounded-full flex items-center justify-center text-white text-sm font-bold transition-colors shadow-md"
-                          >
-                            ×
-                          </button>
-                          <div className="mt-2 text-center">
-                            <button 
-                              type="button" 
-                              onClick={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                document.getElementById('photo1-upload')?.click();
-                              }}
-                              className="px-2 py-1 bg-primary text-primary-foreground rounded text-xs hover:bg-primary/90 transition-colors"
-                            >
-                              Change
-                            </button>
-                          </div>
                         </div>
-                      ) : (
-                        <div className="p-2 text-center">
-                          <div className={`h-32 md:h-40 rounded-lg mb-2 flex items-center justify-center relative overflow-hidden aspect-[4/5] border-2 border-dashed cursor-pointer hover:border-primary transition-colors ${hasRedBorder('photo1') ? 'border-red-500' : 'border-muted-foreground/25'}`}>
-                            <img 
-                              src="/lovable-uploads/1147be30-a1d2-466f-a9a8-067f4628cbb2.png" 
-                              alt="Portrait placeholder" 
-                              className="absolute inset-0 w-full h-full object-cover opacity-40 filter grayscale brightness-75"
-                            />
-                          </div>
-                          <p className="text-xs text-muted-foreground mb-2">portrait photo</p>
-                          
-                          <button 
-                            type="button" 
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              document.getElementById('photo1-upload')?.click();
-                            }}
-                            className="px-2 py-1 bg-primary text-primary-foreground rounded text-xs hover:bg-primary/90 transition-colors"
-                          >
-                            Upload
-                          </button>
-                        </div>
-                      )}
-                    </label>
-                  </div>
-
-                  {/* Full Length Photo */}
-                  <div className="relative w-32 md:w-40">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handlePhoto2Upload}
-                      className="hidden"
-                      id="photo2-upload"
-                    />
-                    <label htmlFor="photo2-upload" className="cursor-pointer block">
-                      {photo2File ? (
-                        <div className="p-2 relative">
-                          <img
-                            src={URL.createObjectURL(photo2File)}
-                            alt="Full length photo preview"
-                            className="w-full h-32 md:h-40 object-contain rounded bg-white"
-                          />
-                          <button 
-                            type="button"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              setPhoto2File(null);
-                              handleFieldChange('photo2', null);
-                            }}
-                            className="absolute top-1 right-1 w-6 h-6 bg-gray-500 hover:bg-gray-600 rounded-full flex items-center justify-center text-white text-sm font-bold transition-colors shadow-md"
-                          >
-                            ×
-                          </button>
-                          <div className="mt-2 text-center">
-                            <button 
-                              type="button" 
-                              onClick={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                document.getElementById('photo2-upload')?.click();
-                              }}
-                              className="px-2 py-1 bg-primary text-primary-foreground rounded text-xs hover:bg-primary/90 transition-colors"
-                            >
-                              Change
-                            </button>
-                          </div>
-                        </div>
-                       ) : (
-                        <div className="p-2 text-center">
-                          <div className={`h-32 md:h-40 rounded-lg mb-2 flex items-center justify-center relative overflow-hidden aspect-[4/5] border-2 border-dashed cursor-pointer hover:border-primary transition-colors ${hasRedBorder('photo2') ? 'border-red-500' : 'border-muted-foreground/25'}`}>
-                            <img 
-                              src="/lovable-uploads/009d20f0-cac7-4c08-9bc9-146617664bc3.png" 
-                              alt="Full body placeholder" 
-                              className="absolute inset-0 w-full h-full object-contain opacity-50 filter grayscale brightness-50"
-                            />
-                          </div>
-                          <p className="text-xs text-muted-foreground mb-2">full length photo</p>
-                          
-                          <button 
-                            type="button" 
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              document.getElementById('photo2-upload')?.click();
-                            }}
-                            className="px-2 py-1 bg-primary text-primary-foreground rounded text-xs hover:bg-primary/90 transition-colors"
-                          >
-                            Upload
-                          </button>
-                        </div>
-                      )}
-                    </label>
-                  </div>
+                        <p className="text-sm text-muted-foreground mb-2">one full length photo</p>
+                        <button type="button" className="px-4 py-2 bg-primary text-primary-foreground rounded text-sm hover:bg-primary/90 transition-colors">
+                          Upload
+                        </button>
+                      </div>
+                    )}
+                  </label>
                 </div>
               </div>
+              
+              <p className="text-xs text-muted-foreground text-center leading-relaxed">
+                no makeup, without filters, sharp focus,<br />
+                good light, no nude, no color correction
+              </p>
             </div>
 
             <Button 

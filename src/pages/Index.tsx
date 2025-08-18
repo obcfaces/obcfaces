@@ -27,8 +27,6 @@ const Index = () => {
     setCategory(newCategory);
     localStorage.setItem('contest-category-filter', newCategory);
   };
-  
-  console.log('Index component rendering, viewMode:', viewMode);
   return (
     <div className="min-h-screen bg-background">
       <ContestHeader />
