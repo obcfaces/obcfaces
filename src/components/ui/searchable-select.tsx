@@ -51,7 +51,7 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
           )}
         >
           {selected ? selected.label : (placeholder || "Select...")}
-          <ChevronDown className="ml-2 h-4 w-4 opacity-50 mr-2" />
+          <ChevronDown className="ml-2 h-4 w-4 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[calc(var(--radix-popover-trigger-width)*1.3)] p-0 z-50 bg-popover" onWheelCapture={(e) => e.stopPropagation()} onOpenAutoFocus={(e) => e.preventDefault()}>
