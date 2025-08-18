@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Heart, ThumbsDown, RotateCcw } from "lucide-react";
+import { ThumbsUp, ThumbsDown, RotateCcw } from "lucide-react";
 import { ContestantCard } from "@/components/contest-card";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -333,7 +333,7 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
         </div>
       ) : currentIndex < filteredCandidates.length ? (
         <div className="flex flex-col items-center">
-          <div className="w-full px-0 sm:px-6">
+          <div className="w-full px-0 sm:px-6 max-w-full overflow-hidden">
             <ContestantCard
               {...currentCandidate}
               viewMode={viewMode}
@@ -373,7 +373,7 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
               size="lg"
               className="rounded-full w-16 h-16 p-0 border-2 border-green-300 hover:border-green-500 hover:bg-green-50"
             >
-              <Heart className="w-8 h-8 text-green-500" />
+              <ThumbsUp className="w-8 h-8 text-green-500" />
             </Button>
           </div>
         </div>

@@ -1,7 +1,7 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Heart, MessageCircle, Share2, ThumbsDown } from "lucide-react";
+import { ThumbsUp, MessageCircle, Share2, ThumbsDown } from "lucide-react";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
@@ -35,6 +35,7 @@ interface LikedItemProps {
   viewMode?: 'compact' | 'full';
   candidateData?: any;
   participantType?: 'candidate' | 'finalist' | 'winner';
+  showStatusBadge?: boolean;
 }
 
 const getInitials = (name: string) => {
@@ -55,18 +56,18 @@ const getParticipantBadge = (type?: 'candidate' | 'finalist' | 'winner', isFullV
   const labels = {
     candidate: "Candidate",
     finalist: "Finalist",
-    winner: "Winner"
+    winner: "🏆 Winner + 5000 PHP"
   };
 
   const dates = {
-    candidate: "1-8 Sep",
-    finalist: "9-15 Sep",
-    winner: "16-22 Sep"
+    candidate: "1 Sep",
+    finalist: "9 Sep",
+    winner: "16 Sep"
   };
   
   const positionClasses = isFullView 
-    ? "absolute top-0 left-0 right-0 z-30" 
-    : "absolute top-0 left-48 sm:left-56 md:left-64 right-0 z-30";
+    ? "absolute bottom-0 left-0 right-0 z-20" 
+    : "absolute bottom-0 left-0 w-[193px] sm:w-[225px] md:w-[257px] z-20";
   
   return (
     <div className={`${positionClasses} px-2 py-1 text-xs font-semibold ${badgeStyles[type]} flex justify-between items-center`}>
@@ -90,7 +91,8 @@ const LikedItem = ({
   onUnlike,
   viewMode = 'full',
   candidateData,
-  participantType
+  participantType,
+  showStatusBadge = true
 }: LikedItemProps) => {
   const [isUnliking, setIsUnliking] = useState(false);
   const [isLiked, setIsLiked] = useState(true);
@@ -113,15 +115,7 @@ const LikedItem = ({
     return () => subscription.unsubscribe();
   }, []);
 
-  // Auto-close login modal after 1 second
-  useEffect(() => {
-    if (showLoginModal) {
-      const timer = setTimeout(() => {
-        setShowLoginModal(false);
-      }, 1000);
-      return () => clearTimeout(timer);
-    }
-  }, [showLoginModal]);
+  // Login modal removed auto-close
 
   // Fetch current participant type from database
   useEffect(() => {
@@ -206,7 +200,7 @@ const LikedItem = ({
       <>
         <Card className="bg-card border-contest-border relative overflow-hidden flex h-32 sm:h-36 md:h-40">
           {/* Participant Type Badge */}
-          {getParticipantBadge(currentParticipantType)}
+          {showStatusBadge && getParticipantBadge(currentParticipantType)}
           {/* Main two photos */}
           <div className="flex-shrink-0 flex h-full relative gap-px">
             <div className="relative">
@@ -230,7 +224,7 @@ const LikedItem = ({
           {/* Content area - показываем информацию как в проголосованных карточках конкурса */}
           <div className="flex-1 p-1.5 sm:p-2 md:p-3 flex flex-col relative">
             <div className="absolute inset-0 bg-white rounded-r flex flex-col justify-between p-2 sm:p-3">
-              <div className="flex items-start justify-between mt-6">
+              <div className="flex items-start justify-between">
                 <div className="min-w-0 flex-1 mr-2">
                   <h3 className="font-semibold text-contest-text text-base sm:text-lg truncate">
                     {authorProfileId ? (
@@ -260,7 +254,7 @@ const LikedItem = ({
                   onClick={handleUnlike}
                   disabled={isUnliking}
                 >
-                  <Heart className="w-3.5 h-3.5 fill-current" />
+                  <ThumbsUp className="w-3.5 h-3.5 fill-current" />
                   <span className="hidden xl:inline">Unlike</span>
                   <span>{likes}</span>
                 </button>
@@ -347,7 +341,7 @@ const LikedItem = ({
         <div className="relative">
           <div className="grid grid-cols-2 gap-px">
             {/* Participant Type Badge - overlaid on photos */}
-            {getParticipantBadge(currentParticipantType, true)}
+            {showStatusBadge && getParticipantBadge(currentParticipantType, true)}
             <div className="relative">
               <img 
                 src={displayFaceImage} 
@@ -376,7 +370,7 @@ const LikedItem = ({
             onClick={handleUnlike}
             disabled={isUnliking}
           >
-            <Heart className="w-4 h-4 fill-current" />
+            <ThumbsUp className="w-4 h-4 fill-current" />
             <span className="hidden sm:inline">Unlike</span>
             <span>{likes}</span>
           </button>

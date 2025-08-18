@@ -1,28 +1,34 @@
 import { useEffect, useMemo, useState } from "react";
 import { Helmet } from "react-helmet-async";
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { useParams, Link, useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { LogOut } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import SearchableSelect from "@/components/ui/searchable-select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { LogOut, Eye, EyeOff, UserIcon, MapPin, Pencil, Lock, MessageCircle } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import PostCard from "@/components/profile/PostCard";
 import LikedItem from "@/components/profile/LikedItem";
 import { PhotoModal } from "@/components/photo-modal";
+import { ContestParticipationModal } from "@/components/contest-participation-modal";
+import CreatePostModal from "@/components/create-post-modal";
 import c1 from "@/assets/contestant-1.jpg";
 import c2 from "@/assets/contestant-2.jpg";
 import c3 from "@/assets/contestant-3.jpg";
 import c1face from "@/assets/contestant-1-face.jpg";
 import c2face from "@/assets/contestant-2-face.jpg";
 import c3face from "@/assets/contestant-3-face.jpg";
-import listIcon from "@/assets/icons/sdisplay-list.png";
-import listActiveIcon from "@/assets/icons/sdisplay-list-active.png";
-import tableIcon from "@/assets/icons/sdisplay-table.png";
-import tableActiveIcon from "@/assets/icons/sdisplay-table-active.png";
+import { AlignJustify, Grid2X2 } from "lucide-react";
 
 interface ProfileRow {
   display_name: string | null;
+  first_name: string | null;
+  last_name: string | null;
   birthdate: string | null;
   height_cm: number | null;
   weight_kg: number | null;
@@ -30,11 +36,13 @@ interface ProfileRow {
   city?: string | null;
   country?: string | null;
   bio?: string | null;
+  gender?: string | null;
 }
 
 const Profile = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
+  const [searchParams] = useSearchParams();
   const [logoutLoading, setLogoutLoading] = useState(false);
   const [data, setData] = useState<ProfileRow | null>(null);
   const [loading, setLoading] = useState(true);
@@ -46,11 +54,47 @@ const Profile = () => {
   const [isEditingBio, setIsEditingBio] = useState(false);
   const [bioDraft, setBioDraft] = useState("");
   const [savingBio, setSavingBio] = useState(false);
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [editingField, setEditingField] = useState<string | null>(null);
+  const [editForm, setEditForm] = useState({
+    display_name: '',
+    gender: '',
+    gender_privacy: 'public',
+    country: '',
+    country_privacy: 'public',
+    birthdate_privacy: 'only_me',
+    bio: '',
+    email: ''
+  });
+  const [submitted, setSubmitted] = useState(false);
+  const [invalidFields, setInvalidFields] = useState<Set<string>>(new Set());
+  const [savingProfile, setSavingProfile] = useState(false);
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [passwordForm, setPasswordForm] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  });
+  const [passwordSubmitted, setPasswordSubmitted] = useState(false);
+  const [passwordInvalidFields, setPasswordInvalidFields] = useState<Set<string>>(new Set());
+  const [savingPassword, setSavingPassword] = useState(false);
+  const [currentUserEmail, setCurrentUserEmail] = useState('');
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [activeTab, setActiveTab] = useState("posts");
   const [likedItems, setLikedItems] = useState<any[]>([]);
   const [loadingLikes, setLoadingLikes] = useState(true);
   const [likesViewMode, setLikesViewMode] = useState<'compact' | 'full'>('compact');
+  const [likesCountryFilter, setLikesCountryFilter] = useState<string>("all");
+  const [participationItems, setParticipationItems] = useState<any[]>([]);
+  const [loadingParticipation, setLoadingParticipation] = useState(true);
+  const [participationViewMode, setParticipationViewMode] = useState<'compact' | 'full'>('compact');
   const [photoModalOpen, setPhotoModalOpen] = useState(false);
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState(0);
+  const [userPosts, setUserPosts] = useState<any[]>([]);
+  const [loadingPosts, setLoadingPosts] = useState(true);
+  const [postsViewMode, setPostsViewMode] = useState<'compact' | 'full'>('full');
 
   // Sample photos for gallery
   const profilePhotos = [c1, c2, c3, c1, c2, c3];
@@ -58,6 +102,8 @@ const Profile = () => {
   // Demo profile for fallback
   const demoProfile: ProfileRow = {
     display_name: "Anna Petrova",
+    first_name: "Anna",
+    last_name: "Petrova",
     birthdate: "1999-03-15",
     height_cm: 165,
     weight_kg: 55,
@@ -66,6 +112,70 @@ const Profile = () => {
     country: "Russia",
     bio: "Model and photographer. Love traveling and discovering new places. Always looking for inspiration in everyday moments."
   };
+
+  // Country options
+  const countryOptions = [
+    { value: "Philippines", label: "Philippines" },
+    { value: "Indonesia", label: "Indonesia" },
+    { value: "Malaysia", label: "Malaysia" },
+    { value: "Singapore", label: "Singapore" },
+    { value: "Thailand", label: "Thailand" },
+    { value: "Vietnam", label: "Vietnam" },
+    { value: "Myanmar", label: "Myanmar" },
+    { value: "Cambodia", label: "Cambodia" },
+    { value: "Laos", label: "Laos" },
+    { value: "Brunei", label: "Brunei" },
+    { value: "Russia", label: "Russia" },
+    { value: "Ukraine", label: "Ukraine" },
+    { value: "Belarus", label: "Belarus" },
+    { value: "Kazakhstan", label: "Kazakhstan" },
+    { value: "USA", label: "United States" },
+    { value: "Canada", label: "Canada" },
+    { value: "Mexico", label: "Mexico" },
+    { value: "Brazil", label: "Brazil" },
+    { value: "Argentina", label: "Argentina" },
+    { value: "Colombia", label: "Colombia" },
+    { value: "Venezuela", label: "Venezuela" },
+    { value: "Peru", label: "Peru" },
+    { value: "Chile", label: "Chile" },
+    { value: "Ecuador", label: "Ecuador" },
+    { value: "Bolivia", label: "Bolivia" },
+    { value: "Paraguay", label: "Paraguay" },
+    { value: "Uruguay", label: "Uruguay" },
+    { value: "Germany", label: "Germany" },
+    { value: "France", label: "France" },
+    { value: "Italy", label: "Italy" },
+    { value: "Spain", label: "Spain" },
+    { value: "Poland", label: "Poland" },
+    { value: "Netherlands", label: "Netherlands" },
+    { value: "Belgium", label: "Belgium" },
+    { value: "Switzerland", label: "Switzerland" },
+    { value: "Austria", label: "Austria" },
+    { value: "Czech Republic", label: "Czech Republic" },
+    { value: "Hungary", label: "Hungary" },
+    { value: "Romania", label: "Romania" },
+    { value: "Bulgaria", label: "Bulgaria" },
+    { value: "Greece", label: "Greece" },
+    { value: "Portugal", label: "Portugal" },
+    { value: "Sweden", label: "Sweden" },
+    { value: "Norway", label: "Norway" },
+    { value: "Denmark", label: "Denmark" },
+    { value: "Finland", label: "Finland" },
+    { value: "UK", label: "United Kingdom" },
+    { value: "Ireland", label: "Ireland" },
+    { value: "China", label: "China" },
+    { value: "Japan", label: "Japan" },
+    { value: "South Korea", label: "South Korea" },
+    { value: "India", label: "India" },
+    { value: "Australia", label: "Australia" },
+    { value: "New Zealand", label: "New Zealand" },
+    { value: "South Africa", label: "South Africa" },
+    { value: "Egypt", label: "Egypt" },
+    { value: "Morocco", label: "Morocco" },
+    { value: "Nigeria", label: "Nigeria" },
+    { value: "Kenya", label: "Kenya" },
+    { value: "Other", label: "Other" }
+  ];
 
   const profile = data || demoProfile;
   const isOwner = currentUserId && currentUserId === id;
@@ -78,12 +188,24 @@ const Profile = () => {
       try {
         const { data: profileData } = await supabase
           .from("profiles")
-          .select("display_name, birthdate, height_cm, weight_kg, avatar_url, city, country, bio")
+          .select("display_name, first_name, last_name, birthdate, height_cm, weight_kg, avatar_url, city, country, bio, gender")
           .eq("id", id)
           .maybeSingle();
         
         setData(profileData);
         setBioDraft(profileData?.bio ?? "");
+        
+        // Initialize edit form with loaded data
+        setEditForm({
+          display_name: profileData?.display_name || '',
+          gender: profileData?.gender || '',
+          gender_privacy: 'public',
+          country: profileData?.country || '',
+          country_privacy: 'public',
+          birthdate_privacy: 'only_me',
+          bio: profileData?.bio || '',
+          email: ''
+        });
         
         // Get follower/following counts (mock for now)
         setFollowersCount(Math.floor(Math.random() * 1000) + 100);
@@ -106,6 +228,14 @@ const Profile = () => {
     };
     getCurrentUser();
   }, []);
+
+  // Handle tab parameter from URL
+  useEffect(() => {
+    const tabParam = searchParams.get('tab');
+    if (tabParam && ['likes', 'posts', 'photos', 'participation', 'about'].includes(tabParam)) {
+      setActiveTab(tabParam);
+    }
+  }, [searchParams]);
 
   // Check following status
   useEffect(() => {
@@ -162,11 +292,244 @@ const Profile = () => {
     }
   };
 
+  // Check if a field should have red border
+  const hasRedBorder = (fieldName: string) => {
+    return submitted && invalidFields.has(fieldName);
+  };
+
+  // Get CSS classes for form fields
+  const getFieldClasses = (fieldName: string, baseClasses: string = "") => {
+    if (hasRedBorder(fieldName)) {
+      return `${baseClasses} border border-red-500`.trim();
+    }
+    return baseClasses;
+  };
+
+  // Load current user email
+  useEffect(() => {
+    const loadCurrentUserEmail = async () => {
+      if (currentUserId && currentUserId === id) {
+        const { data: { user } } = await supabase.auth.getUser();
+        const userEmail = user?.email || '';
+        setCurrentUserEmail(userEmail);
+        
+        // Update the editForm with the email
+        setEditForm(prev => ({ ...prev, email: userEmail }));
+      }
+    };
+    loadCurrentUserEmail();
+  }, [currentUserId, id]);
+
+  const initEditForm = () => {
+    setEditForm({
+      display_name: data?.display_name || '',
+      gender: data?.gender || '',
+      gender_privacy: 'public',
+      country: data?.country || '',
+      country_privacy: 'public',
+      birthdate_privacy: 'only_me',
+      bio: data?.bio || '',
+      email: currentUserEmail
+    });
+    setIsEditingProfile(true);
+    setSubmitted(false);
+    setInvalidFields(new Set());
+    setAvatarFile(null);
+    setAvatarPreview(null);
+  };
+
+  const handleAvatarChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setAvatarFile(file);
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setAvatarPreview(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const uploadAvatar = async (file: File): Promise<string | null> => {
+    if (!currentUserId) return null;
+    
+    setUploadingAvatar(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${currentUserId}/avatar.${fileExt}`;
+      
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(fileName, file, { upsert: true });
+      
+      if (uploadError) throw uploadError;
+      
+      const { data } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(fileName);
+      
+      return data.publicUrl;
+    } catch (error) {
+      console.error('Error uploading avatar:', error);
+      toast({ description: "Ошибка загрузки фото" });
+      return null;
+    } finally {
+      setUploadingAvatar(false);
+    }
+  };
+
+  const handleEditFormChange = (field: string, value: string) => {
+    setEditForm(prev => ({ ...prev, [field]: value }));
+    
+    // Remove field from invalid set when user types
+    if (invalidFields.has(field)) {
+      setInvalidFields(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(field);
+        return newSet;
+      });
+    }
+  };
+
+  const handlePasswordFormChange = (field: string, value: string) => {
+    setPasswordForm(prev => ({ ...prev, [field]: value }));
+    
+    // Remove field from invalid set when user types
+    if (passwordInvalidFields.has(field)) {
+      setPasswordInvalidFields(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(field);
+        return newSet;
+      });
+    }
+  };
+
+  const handleChangePassword = async () => {
+    setPasswordSubmitted(true);
+
+    // Validate password form
+    const newInvalidFields = new Set<string>();
+    if (!passwordForm.currentPassword.trim()) newInvalidFields.add('currentPassword');
+    if (!passwordForm.newPassword.trim()) newInvalidFields.add('newPassword');
+    if (!passwordForm.confirmPassword.trim()) newInvalidFields.add('confirmPassword');
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      newInvalidFields.add('confirmPassword');
+    }
+
+    setPasswordInvalidFields(newInvalidFields);
+
+    if (newInvalidFields.size > 0) {
+      if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+        toast({ description: "Пароли не совпадают" });
+      }
+      return;
+    }
+
+    setSavingPassword(true);
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password: passwordForm.newPassword
+      });
+      
+      if (error) throw error;
+      
+      setShowPasswordModal(false);
+      setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+      setPasswordSubmitted(false);
+      setPasswordInvalidFields(new Set());
+      toast({ description: "Пароль изменен" });
+    } catch (error: any) {
+      toast({ description: error.message || "Ошибка при смене пароля" });
+    } finally {
+      setSavingPassword(false);
+    }
+  };
+
+  // Check if a password field should have red border
+  const hasPasswordRedBorder = (fieldName: string) => {
+    return passwordSubmitted && passwordInvalidFields.has(fieldName);
+  };
+
+  // Get CSS classes for password form fields
+  const getPasswordFieldClasses = (fieldName: string, baseClasses: string = "") => {
+    if (hasPasswordRedBorder(fieldName)) {
+      return `${baseClasses} border border-red-500`.trim();
+    }
+    return baseClasses;
+  };
+
+  const handleSaveProfile = async () => {
+    if (!currentUserId || currentUserId !== id) return;
+    
+    setSubmitted(true);
+
+    // Validate required fields
+    const newInvalidFields = new Set<string>();
+    if (!editForm.display_name.trim()) newInvalidFields.add('display_name');
+    if (!editForm.gender) newInvalidFields.add('gender');
+    if (!editForm.country.trim()) newInvalidFields.add('country');
+    if (editForm.email && !editForm.email.trim()) newInvalidFields.add('email');
+
+    setInvalidFields(newInvalidFields);
+
+    if (newInvalidFields.size > 0) {
+      return;
+    }
+    
+    setSavingProfile(true);
+    try {
+      // Upload avatar if a new one was selected
+      let avatarUrl = profile.avatar_url;
+      if (avatarFile) {
+        const uploadedUrl = await uploadAvatar(avatarFile);
+        if (uploadedUrl) {
+          avatarUrl = uploadedUrl;
+        }
+      }
+
+      // Update profile data
+      const updates: any = {
+        display_name: editForm.display_name,
+        gender: editForm.gender,
+        country: editForm.country,
+        bio: editForm.bio
+      };
+
+      // Add avatar URL if we have one
+      if (avatarUrl) {
+        updates.avatar_url = avatarUrl;
+      }
+
+      const { error: profileError } = await supabase
+        .from("profiles")
+        .update(updates)
+        .eq("id", id);
+      
+      if (profileError) throw profileError;
+
+      // Update email if provided and different from current
+      if (editForm.email && editForm.email !== currentUserEmail) {
+        const { error: emailError } = await supabase.auth.updateUser({
+          email: editForm.email
+        });
+        if (emailError) throw emailError;
+      }
+      
+      setData(prev => prev ? { ...prev, ...updates } : null);
+      setIsEditingProfile(false);
+      toast({ description: "Профиль сохранен" });
+    } catch (error: any) {
+      toast({ description: error.message || "Ошибка при сохранении профиля" });
+    } finally {
+      setSavingProfile(false);
+    }
+  };
+
   const logout = async () => {
     setLogoutLoading(true);
     try {
       await supabase.auth.signOut();
-      navigate("/contest", { replace: true });
+      navigate("/", { replace: true });
     } catch (error) {
       toast({ description: "Ошибка при выходе" });
     } finally {
@@ -263,6 +626,137 @@ const Profile = () => {
     setLikedItems(prev => prev.filter(item => item.likeId !== likeId));
   };
 
+  const loadParticipationItems = async () => {
+    if (!currentUserId) return;
+    
+    setLoadingParticipation(true);
+    try {
+      console.log('Loading participation for user:', currentUserId);
+      
+      // Сначала получаем профиль пользователя
+      const { data: profileData, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', currentUserId)
+        .maybeSingle();
+
+      console.log('Profile data:', profileData);
+      console.log('Profile error:', error);
+
+      if (error) {
+        console.error('Error fetching profile:', error);
+        setParticipationItems([]);
+        setLoadingParticipation(false);
+        return;
+      }
+
+      if (!profileData) {
+        console.log('No profile found for user');
+        setParticipationItems([]);
+        setLoadingParticipation(false);
+        return;
+      }
+
+      // Проверяем, является ли пользователь участником конкурса
+      console.log('is_contest_participant:', profileData.is_contest_participant);
+      
+      if (!profileData.is_contest_participant) {
+        console.log('User is not a contest participant');
+        setParticipationItems([]);
+        setLoadingParticipation(false);
+        return;
+      }
+
+      // Создаем карточку участия пользователя на основе его профиля
+      const participationCard = {
+        likeId: `participation-${currentUserId}`,
+        contentType: 'contest' as const,
+        contentId: currentUserId,
+        authorName: `${profileData.first_name || ''} ${profileData.last_name || ''}`.trim() || 'Участник',
+        authorProfileId: currentUserId,
+        time: new Date(profileData.created_at).toLocaleString('ru-RU'),
+        likes: Math.floor(Math.random() * 200) + 50, // Mock likes
+        comments: Math.floor(Math.random() * 40) + 5, // Mock comments
+        imageSrc: profileData.photo_1_url || c1face, // Use first photo as main display
+        participantType: (profileData.participant_type as 'candidate' | 'finalist' | 'winner') || 'candidate',
+        candidateData: {
+          name: `${profileData.first_name || ''} ${profileData.last_name || ''}`.trim() || 'Участник',
+          age: profileData.age || 25,
+          weight: profileData.weight_kg || 55,
+          height: profileData.height_cm || 165,
+          country: [profileData.country, profileData.state, profileData.city].filter(Boolean).join(', ') || 'Philippines',
+          city: profileData.city || 'Manila',
+          faceImage: profileData.photo_1_url || c1face, // Formal photo (first image)
+          fullBodyImage: profileData.photo_2_url || c1, // Casual photo (second image)
+          participantType: (profileData.participant_type as 'candidate' | 'finalist' | 'winner') || 'candidate'
+        }
+      };
+
+      console.log('Created participation card:', participationCard);
+      setParticipationItems([participationCard]);
+    } catch (error) {
+      console.error("Error loading participation items:", error);
+      setParticipationItems([]);
+    } finally {
+      setLoadingParticipation(false);
+    }
+  };
+
+  // Load user posts
+  const loadUserPosts = async () => {
+    if (!id) return;
+    
+    setLoadingPosts(true);
+    try {
+      const { data: posts, error } = await supabase
+        .from('posts')
+        .select('*')
+        .eq('user_id', id)
+        .order('created_at', { ascending: false });
+
+      // Получаем профиль автора для каждого поста
+      const postsWithProfiles = await Promise.all(
+        (posts || []).map(async (post) => {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('display_name, avatar_url')
+            .eq('id', post.user_id)
+            .single();
+          
+          return { ...post, profiles: profile };
+        })
+      );
+
+      if (error) {
+        console.error('Error loading posts:', error);
+        return;
+      }
+
+      setUserPosts(postsWithProfiles || []);
+    } catch (error) {
+      console.error('Error loading posts:', error);
+    } finally {
+      setLoadingPosts(false);
+    }
+  };
+
+  const handlePostCreated = () => {
+    // Reload posts after creating a new one
+    loadUserPosts();
+  };
+
+  useEffect(() => {
+    loadParticipationItems();
+  }, [currentUserId, id]);
+
+  useEffect(() => {
+    loadUserPosts();
+  }, [id]);
+
+  const handleRemoveParticipation = (participationId: string) => {
+    setParticipationItems(prev => prev.filter(item => item.likeId !== participationId));
+  };
+
 
   // Sample posts data
   const samplePosts = [
@@ -312,28 +806,58 @@ const Profile = () => {
           {/* Profile Header */}
           <div className="flex flex-col gap-6 mb-8">
             <div className="flex items-center gap-4">
-              <Avatar className="w-20 h-20 sm:w-24 sm:h-24">
-                <AvatarImage src={profile.avatar_url || ""} alt={`Avatar of ${profile.display_name || "User"}`} />
+              <Avatar className="w-32 h-32">
+                <AvatarImage 
+                  src={profile.avatar_url || ""} 
+                  alt={`Avatar of ${profile.display_name || "User"}`}
+                  className="object-cover"
+                />
                 <AvatarFallback className="text-lg">
                   {(profile.display_name || "U").charAt(0).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
-              <div>
-                <h1 className="text-2xl font-bold">{profile.display_name || "Пользователь"}</h1>
-                {(profile.city || profile.country) && (
-                  <p className="text-muted-foreground">
-                    {[profile.city, profile.country].filter(Boolean).join(", ")}
-                  </p>
-                )}
-              </div>
+               <div>
+                <h1 className="text-2xl font-bold">
+                  {profile.display_name || 
+                    (profile.first_name && profile.last_name 
+                      ? `${profile.first_name} ${profile.last_name}` 
+                      : "Пользователь")
+                  }
+                </h1>
+                 {profile.country && (
+                   <div className="flex items-center gap-1 text-primary font-medium">
+                     <MapPin className="h-3 w-3" />
+                     <span className="text-sm">{profile.country}</span>
+                   </div>
+                 )}
+                 {profile.bio && (
+                   <p className="text-sm text-muted-foreground mt-2 italic leading-relaxed">
+                     {profile.bio}
+                   </p>
+                 )}
+                </div>
             </div>
             
             <div className="flex items-center gap-2">
-              <Button className="bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200">
-                🏆 Join Contest
-              </Button>
-              <Button variant="outline">Add Post</Button>
-              <Button variant="outline">Edit Profile</Button>
+              <ContestParticipationModal>
+                 <Button className="bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200">
+                   🏆 Join & Win 5,000 PHP
+                 </Button>
+               </ContestParticipationModal>
+                <CreatePostModal onPostCreated={handlePostCreated}>
+                  <Button variant="outline">Add Post</Button>
+                </CreatePostModal>
+               {!isOwner && (
+                 <Button variant="outline" onClick={handleMessage}>
+                   <MessageCircle className="w-4 h-4 mr-1" />
+                   Message
+                 </Button>
+               )}
+               {!isOwner && (
+                 <div className="text-xs text-muted-foreground">
+                   Debug: isOwner={String(isOwner)}, currentUserId={currentUserId}, id={id}
+                 </div>
+               )}
             </div>
 
             {!isOwner && (
@@ -352,12 +876,13 @@ const Profile = () => {
           </div>
 
           {/* Tabs */}
-          <Tabs defaultValue="likes" className="mt-8">
-            <TabsList className="w-full sm:w-auto bg-transparent p-0 rounded-none justify-start gap-8 border-b border-border">
-              <TabsTrigger value="likes" className="px-0 mr-6 h-auto pb-2 bg-transparent rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary text-muted-foreground hover:text-foreground">Likes</TabsTrigger>
-              <TabsTrigger value="posts" className="px-0 mr-6 h-auto pb-2 bg-transparent rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary text-muted-foreground hover:text-foreground">Posts</TabsTrigger>
-              <TabsTrigger value="photos" className="px-0 mr-6 h-auto pb-2 bg-transparent rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary text-muted-foreground hover:text-foreground">Photos</TabsTrigger>
-              <TabsTrigger value="about" className="px-0 mr-6 h-auto pb-2 bg-transparent rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary text-muted-foreground hover:text-foreground">About</TabsTrigger>
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-8">
+            <TabsList className="w-full bg-transparent p-0 rounded-none justify-start gap-2 sm:gap-8 border-b border-border flex-wrap">
+              <TabsTrigger value="likes" className="px-0 mr-2 sm:mr-6 h-auto pb-2 bg-transparent rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary text-muted-foreground hover:text-foreground text-sm sm:text-base">Likes</TabsTrigger>
+              <TabsTrigger value="posts" className="px-0 mr-2 sm:mr-6 h-auto pb-2 bg-transparent rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary text-muted-foreground hover:text-foreground text-sm sm:text-base">Posts</TabsTrigger>
+              <TabsTrigger value="photos" className="px-0 mr-2 sm:mr-6 h-auto pb-2 bg-transparent rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary text-muted-foreground hover:text-foreground text-sm sm:text-base">Photos</TabsTrigger>
+              <TabsTrigger value="participation" className="px-0 mr-2 sm:mr-6 h-auto pb-2 bg-transparent rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary text-muted-foreground hover:text-foreground text-sm sm:text-base">Participation</TabsTrigger>
+              <TabsTrigger value="about" className="px-0 mr-2 sm:mr-6 h-auto pb-2 bg-transparent rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary text-muted-foreground hover:text-foreground text-sm sm:text-base">About</TabsTrigger>
               {isOwner && (
                 <button
                   onClick={logout}
@@ -379,39 +904,57 @@ const Profile = () => {
                   <p className="text-muted-foreground text-center py-8 px-6">Загрузка лайков...</p>
                 ) : likedItems.length > 0 ? (
                   <div className="px-0 sm:px-6">
-                    {/* View mode toggle buttons */}
-                    <div className="flex justify-end items-center gap-1 mb-4 px-6 sm:px-0">
-
-                      <button
-                        type="button"
-                        onClick={() => setLikesViewMode("compact")}
-                        aria-pressed={likesViewMode === "compact"}
-                        aria-label="List view"
-                        className="p-1 rounded-md hover:bg-accent transition-colors"
-                      >
-                        <img
-                          src={likesViewMode === "compact" ? listActiveIcon : listIcon}
-                          alt="List view icon"
-                          width={28}
-                          height={28}
-                          loading="lazy"
+                    {/* Country filter and view mode toggle */}
+                    <div className="flex justify-between items-center gap-4 mb-4 px-6 sm:px-0 -mt-[15px]">
+                      {/* Country filter */}
+                      <div className="flex-1 max-w-48">
+                        <SearchableSelect
+                          value={likesCountryFilter}
+                          onValueChange={setLikesCountryFilter}
+                          options={[
+                            { value: "all", label: "Все страны" },
+                            ...Array.from(new Set(likedItems
+                              .map(item => item.candidateData?.country)
+                              .filter(Boolean)
+                            )).sort().map((country) => ({
+                              value: country,
+                              label: country
+                            }))
+                          ]}
+                          placeholder="Все страны"
+                          highlightSelected
                         />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setLikesViewMode("full")}
-                        aria-pressed={likesViewMode === "full"}
-                        aria-label="Grid view"
-                        className="p-1 rounded-md hover:bg-accent transition-colors"
-                      >
-                        <img
-                          src={likesViewMode === "full" ? tableActiveIcon : tableIcon}
-                          alt="Grid view icon"
-                          width={28}
-                          height={28}
-                          loading="lazy"
-                        />
-                      </button>
+                      </div>
+                      
+                      {/* View mode toggle buttons */}
+                      <div className="flex items-center gap-1">
+                        <button
+                          type="button"
+                          onClick={() => setLikesViewMode("compact")}
+                          aria-pressed={likesViewMode === "compact"}
+                          aria-label="List view"
+                          className="p-1 rounded-md hover:bg-accent transition-colors"
+                        >
+                  <AlignJustify 
+                    size={28} 
+                    strokeWidth={1}
+                    className={likesViewMode === "compact" ? "text-primary" : "text-muted-foreground"}
+                  />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setLikesViewMode("full")}
+                          aria-pressed={likesViewMode === "full"}
+                          aria-label="Grid view"
+                          className="p-1 rounded-md hover:bg-accent transition-colors"
+                        >
+                          <Grid2X2 
+                            size={28} 
+                            strokeWidth={1}
+                            className={likesViewMode === "full" ? "text-primary" : "text-muted-foreground"}
+                          />
+                        </button>
+                      </div>
                     </div>
                     
                     {/* Liked items grid */}
@@ -420,7 +963,12 @@ const Profile = () => {
                         ? 'grid-cols-1' 
                         : 'grid-cols-1 lg:grid-cols-2'
                     }`}>
-                      {likedItems.map((item) => (
+                      {likedItems
+                        .filter(item => 
+                          likesCountryFilter === "all" || 
+                          item.candidateData?.country === likesCountryFilter
+                        )
+                        .map((item) => (
                         <LikedItem
                           key={item.likeId}
                           likeId={item.likeId}
@@ -438,6 +986,7 @@ const Profile = () => {
                           viewMode={likesViewMode}
                           candidateData={item.candidateData}
                           participantType={item.participantType}
+                          showStatusBadge={false}
                         />
                       ))}
                     </div>
@@ -451,11 +1000,44 @@ const Profile = () => {
               </TabsContent>
 
             <TabsContent value="posts" className="space-y-4 mt-8 -mx-6">
-              <div className="px-0 sm:px-6 space-y-4">
-                {samplePosts.map((p) => (
-                  <PostCard key={p.id} {...p} />
-                ))}
-              </div>
+              {loadingPosts ? (
+                <div className="text-center py-8 px-6">
+                  <p className="text-muted-foreground">Загрузка постов...</p>
+                </div>
+              ) : userPosts.length > 0 ? (
+                <div className="px-0 sm:px-6 space-y-4">
+                  {userPosts.map((post) => (
+                    <PostCard 
+                      key={post.id} 
+                      id={post.id}
+                      authorName={post.profiles?.display_name || "Пользователь"}
+                      time={new Date(post.created_at).toLocaleDateString('ru-RU', {
+                        day: 'numeric',
+                        month: 'long',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      })}
+                      content={post.caption || ""}
+                      imageSrc={post.media_urls?.[0] || ""}
+                      likes={post.likes_count || 0}
+                      comments={post.comments_count || 0}
+                      mediaUrls={post.media_urls || []}
+                      mediaTypes={post.media_types || []}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8 px-6">
+                  <p className="text-muted-foreground">
+                    {isOwner ? "У вас пока нет постов" : "У пользователя пока нет постов"}
+                  </p>
+                  {isOwner && (
+                    <p className="text-sm text-muted-foreground mt-2">
+                      Создайте свой первый пост, нажав "Add Post"
+                    </p>
+                  )}
+                </div>
+              )}
             </TabsContent>
 
             <TabsContent value="photos" className="mt-8">
@@ -480,17 +1062,820 @@ const Profile = () => {
               </div>
             </TabsContent>
 
+            <TabsContent value="participation" className="mt-8 -mx-6">
+              {loadingParticipation ? (
+                <p className="text-muted-foreground text-center py-8 px-6">Загрузка участий...</p>
+              ) : participationItems.length > 0 ? (
+                <div className="px-0 sm:px-6">
+                  {/* View mode toggle buttons */}
+                  <div className="flex justify-end items-center gap-1 mb-4 px-6 sm:px-0 -mt-[15px]">
+                    <button
+                      type="button"
+                      onClick={() => setParticipationViewMode("compact")}
+                      aria-pressed={participationViewMode === "compact"}
+                      aria-label="List view"
+                      className="p-1 rounded-md hover:bg-accent transition-colors"
+                    >
+                      <AlignJustify 
+                        size={28} 
+                        strokeWidth={1}
+                        className={participationViewMode === "compact" ? "text-primary" : "text-muted-foreground"}
+                      />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setParticipationViewMode("full")}
+                      aria-pressed={participationViewMode === "full"}
+                      aria-label="Grid view"
+                      className="p-1 rounded-md hover:bg-accent transition-colors"
+                    >
+                      <Grid2X2 
+                        size={28} 
+                        strokeWidth={1}
+                        className={participationViewMode === "full" ? "text-primary" : "text-muted-foreground"}
+                      />
+                    </button>
+                  </div>
+                  
+                  {/* Participation items grid */}
+                  <div className={`grid gap-1 sm:gap-3 ${
+                    participationViewMode === 'compact' 
+                      ? 'grid-cols-1' 
+                      : 'grid-cols-1 lg:grid-cols-2'
+                  }`}>
+                    {participationItems.map((item) => (
+                      <LikedItem
+                        key={item.likeId}
+                        likeId={item.likeId}
+                        contentType={item.contentType}
+                        contentId={item.contentId}
+                        authorName={item.authorName}
+                        authorAvatarUrl={item.authorAvatarUrl}
+                        authorProfileId={item.authorProfileId}
+                        time={item.time}
+                        content={item.content}
+                        imageSrc={item.imageSrc}
+                        likes={item.likes}
+                        comments={item.comments}
+                        onUnlike={handleRemoveParticipation}
+                        viewMode={participationViewMode}
+                        candidateData={item.candidateData}
+                        participantType={item.participantType}
+                      />
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <p className="text-muted-foreground text-center py-8 px-6">Нет участий в конкурсах</p>
+              )}
+            </TabsContent>
+
             <TabsContent value="about" className="mt-8">
-              <article className="grid gap-4 sm:grid-cols-2">
-                <div className="space-y-2">
-                  <p><span className="text-muted-foreground">Имя:</span> {profile.display_name ?? "—"}</p>
-                  <p><span className="text-muted-foreground">Дата рождения:</span> {profile.birthdate ?? "—"}</p>
+              {isEditingProfile ? (
+                <div className="max-w-xs space-y-3">
+                  {/* Avatar Upload */}
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium">Profile Photo</Label>
+                    <div className="flex justify-center">
+                      <input
+                        id="avatar-upload"
+                        type="file"
+                        accept="image/*"
+                        onChange={handleAvatarChange}
+                        className="hidden"
+                      />
+                      <label htmlFor="avatar-upload" className="cursor-pointer block">
+                        {avatarFile ? (
+                          <div className="relative">
+                            <Avatar className="h-32 w-32">
+                              <AvatarImage 
+                                src={avatarPreview || ""} 
+                                alt="Profile photo preview"
+                                className="h-full w-full object-cover"
+                              />
+                              <AvatarFallback className="text-sm">
+                                {(editForm.display_name || profile.display_name || "U").charAt(0).toUpperCase()}
+                              </AvatarFallback>
+                            </Avatar>
+                            <button 
+                              type="button"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                setAvatarFile(null);
+                                setAvatarPreview(null);
+                              }}
+                              className="absolute -top-2 -right-2 w-6 h-6 bg-gray-500 hover:bg-gray-600 rounded-full flex items-center justify-center text-white text-sm font-bold transition-colors shadow-md"
+                            >
+                              ×
+                            </button>
+                            <div className="mt-2 text-center">
+                              <button 
+                                type="button" 
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  document.getElementById('avatar-upload')?.click();
+                                }}
+                                className="px-3 py-1 bg-primary text-primary-foreground rounded text-sm hover:bg-primary/90 transition-colors"
+                              >
+                                Change
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="text-center">
+                            <Avatar className="h-32 w-32 border-2 border-dashed border-muted-foreground/25 hover:border-primary transition-colors cursor-pointer">
+                              <AvatarImage 
+                                src={profile.avatar_url || ""} 
+                                alt="Current profile"
+                                className="h-full w-full object-cover opacity-60"
+                              />
+                              <AvatarFallback className="text-sm opacity-60">
+                                {(profile.display_name || "U").charAt(0).toUpperCase()}
+                              </AvatarFallback>
+                            </Avatar>
+                            <p className="text-xs text-muted-foreground mt-2 mb-2">JPG, PNG up to 5MB</p>
+                            <button 
+                              type="button" 
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                document.getElementById('avatar-upload')?.click();
+                              }}
+                              className="px-3 py-1 bg-primary text-primary-foreground rounded text-sm hover:bg-primary/90 transition-colors"
+                            >
+                              Choose File
+                            </button>
+                          </div>
+                        )}
+                      </label>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Input 
+                      placeholder="Display Name" 
+                      className={getFieldClasses('display_name', "text-sm placeholder:text-muted-foreground")}
+                      value={editForm.display_name} 
+                      onChange={(e) => handleEditFormChange('display_name', e.target.value)} 
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Select value={editForm.gender} onValueChange={(value) => handleEditFormChange('gender', value)}>
+                      <SelectTrigger className={getFieldClasses('gender', "text-sm")}>
+                        <SelectValue placeholder="Gender" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="male">Male</SelectItem>
+                        <SelectItem value="female">Female</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="flex gap-2">
+                      <div className="flex-1">
+                        <SearchableSelect
+                          value={editForm.country}
+                          onValueChange={(value) => handleEditFormChange('country', value)}
+                          options={countryOptions}
+                          placeholder="Country"
+                          invalid={hasRedBorder('country')}
+                        />
+                      </div>
+                      <div className="w-20">
+                        <Select value={editForm.country_privacy} onValueChange={(value) => handleEditFormChange('country_privacy', value)}>
+                          <SelectTrigger className="text-xs">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="public">🌍 Everyone</SelectItem>
+                            <SelectItem value="only_me">🔒 Only me</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Input 
+                      placeholder="About Me" 
+                      className="text-sm placeholder:text-muted-foreground"
+                      value={editForm.bio} 
+                      onChange={(e) => handleEditFormChange('bio', e.target.value)} 
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Input 
+                      type="email"
+                      placeholder="Email" 
+                      className={getFieldClasses('email', "text-sm placeholder:text-muted-foreground")}
+                      value={editForm.email} 
+                      onChange={(e) => handleEditFormChange('email', e.target.value)} 
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Dialog open={showPasswordModal} onOpenChange={setShowPasswordModal}>
+                      <DialogTrigger asChild>
+                        <Button variant="link" className="p-0 h-auto text-sm text-primary">
+                          Change Password
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="max-w-md">
+                        <DialogHeader>
+                          <DialogTitle>Change Password</DialogTitle>
+                        </DialogHeader>
+                        <div className="space-y-3">
+                          <div>
+                            <Input 
+                              type="password"
+                              placeholder="Current Password" 
+                              className={getPasswordFieldClasses('currentPassword', "text-sm placeholder:text-muted-foreground")}
+                              value={passwordForm.currentPassword} 
+                              onChange={(e) => handlePasswordFormChange('currentPassword', e.target.value)} 
+                            />
+                          </div>
+                          <div>
+                            <Input 
+                              type="password"
+                              placeholder="New Password" 
+                              className={getPasswordFieldClasses('newPassword', "text-sm placeholder:text-muted-foreground")}
+                              value={passwordForm.newPassword} 
+                              onChange={(e) => handlePasswordFormChange('newPassword', e.target.value)} 
+                            />
+                          </div>
+                          <div>
+                            <Input 
+                              type="password"
+                              placeholder="Confirm New Password" 
+                              className={getPasswordFieldClasses('confirmPassword', "text-sm placeholder:text-muted-foreground")}
+                              value={passwordForm.confirmPassword} 
+                              onChange={(e) => handlePasswordFormChange('confirmPassword', e.target.value)} 
+                            />
+                          </div>
+                          <div className="flex gap-2 pt-2">
+                            <Button 
+                              type="button" 
+                              variant="outline" 
+                              onClick={() => {
+                                setShowPasswordModal(false);
+                                setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+                                setPasswordSubmitted(false);
+                                setPasswordInvalidFields(new Set());
+                              }}
+                            >
+                              Cancel
+                            </Button>
+                            <Button onClick={handleChangePassword} disabled={savingPassword}>
+                              {savingPassword ? "Saving..." : "Save"}
+                            </Button>
+                          </div>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
+                  </div>
+                  
+                  <div className="flex gap-2">
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      onClick={() => setIsEditingProfile(false)}
+                    >
+                      Cancel
+                    </Button>
+                    <Button onClick={handleSaveProfile}>
+                      Save
+                    </Button>
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <p><span className="text-muted-foreground">Рост:</span> {profile.height_cm ? `${profile.height_cm} см` : "—"}</p>
-                  <p><span className="text-muted-foreground">Вес:</span> {profile.weight_kg ? `${profile.weight_kg} кг` : "—"}</p>
+              ) : (
+                <div className="space-y-6">
+                  {/* Profile Photo Section */}
+                  {isOwner && (
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <Avatar className="h-16 w-16">
+                            <AvatarImage 
+                              src={avatarPreview || profile.avatar_url || ""} 
+                              alt="Profile photo"
+                              className="object-cover"
+                            />
+                            <AvatarFallback className="text-lg">
+                              {(profile.display_name || "U").charAt(0).toUpperCase()}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <div className="text-sm font-medium text-foreground">Profile photo</div>
+                            <div className="text-xs text-muted-foreground">JPG, PNG up to 5MB</div>
+                          </div>
+                        </div>
+                        {editingField === 'avatar' ? (
+                          <div className="flex items-center gap-2">
+                            <input
+                              id="avatar-upload"
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) {
+                                  setAvatarFile(file);
+                                  const reader = new FileReader();
+                                  reader.onloadend = () => {
+                                    setAvatarPreview(reader.result as string);
+                                  };
+                                  reader.readAsDataURL(file);
+                                }
+                              }}
+                            />
+                            <button 
+                              type="button" 
+                              onClick={() => document.getElementById('avatar-upload')?.click()}
+                              className="px-3 py-1 bg-primary text-primary-foreground rounded text-sm hover:bg-primary/90 transition-colors"
+                            >
+                              Choose
+                            </button>
+                            <button
+                              onClick={() => {
+                                setEditingField(null);
+                                setAvatarPreview(null);
+                                setAvatarFile(null);
+                              }}
+                              className="px-3 py-1 bg-secondary text-secondary-foreground rounded text-sm hover:bg-secondary/80 transition-colors"
+                            >
+                              Cancel
+                            </button>
+                            {avatarFile && (
+                              <button
+                                onClick={async () => {
+                                  if (!avatarFile) return;
+                                  setUploadingAvatar(true);
+                                  try {
+                                    const fileExt = avatarFile.name.split('.').pop();
+                                    const fileName = `avatar.${fileExt}`;
+                                    const filePath = `${currentUserId}/${fileName}`;
+
+                                    // Upload to Supabase Storage
+                                    const { error: uploadError } = await supabase.storage
+                                      .from('avatars')
+                                      .upload(filePath, avatarFile, { upsert: true });
+
+                                    if (uploadError) throw uploadError;
+
+                                    // Get public URL
+                                    const { data: { publicUrl } } = supabase.storage
+                                      .from('avatars')
+                                      .getPublicUrl(filePath);
+
+                                    // Update profile
+                                    const { error: updateError } = await supabase
+                                      .from('profiles')
+                                      .update({ avatar_url: publicUrl })
+                                      .eq('id', currentUserId);
+
+                                    if (updateError) throw updateError;
+
+                                    // Update local state
+                                    setData(prev => prev ? { ...prev, avatar_url: publicUrl } : null);
+                                    setEditingField(null);
+                                    setAvatarPreview(null);
+                                    setAvatarFile(null);
+                                  } catch (error) {
+                                    console.error('Error updating avatar:', error);
+                                  } finally {
+                                    setUploadingAvatar(false);
+                                  }
+                                }}
+                                disabled={uploadingAvatar}
+                                className="px-3 py-1 bg-primary text-primary-foreground rounded text-sm hover:bg-primary/90 transition-colors disabled:opacity-50"
+                              >
+                                {uploadingAvatar ? 'Uploading...' : 'Save'}
+                              </button>
+                            )}
+                          </div>
+                        ) : (
+                          <button
+                            onClick={() => {
+                              setEditingField('avatar');
+                            }}
+                            className="p-1 hover:bg-accent rounded-md transition-colors"
+                            aria-label="Edit profile photo"
+                          >
+                            <Pencil className="h-4 w-4 text-muted-foreground" />
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Basic Information */}
+                  <div className="space-y-4">
+                    <div className="space-y-3">
+                      {/* Display Name */}
+                      <div className="flex items-center py-3 border-b border-border">
+                        <div className="flex-1">
+                          {editingField === 'display_name' ? (
+                            <div className="space-y-2">
+                              <Input 
+                                placeholder="Display Name" 
+                                className="text-sm placeholder:text-muted-foreground"
+                                value={editForm.display_name} 
+                                onChange={(e) => handleEditFormChange('display_name', e.target.value)} 
+                                autoFocus
+                              />
+                              <div className="flex gap-2">
+                                <Button 
+                                  size="sm"
+                                  onClick={() => {
+                                    setEditingField(null);
+                                    setEditForm(prev => ({ ...prev, display_name: profile.display_name || '' }));
+                                  }}
+                                  variant="outline"
+                                >
+                                  Cancel
+                                </Button>
+                                <Button 
+                                  size="sm"
+                                  onClick={async () => {
+                                    await handleSaveProfile();
+                                    setEditingField(null);
+                                  }}
+                                >
+                                  Save
+                                </Button>
+                              </div>
+                            </div>
+                          ) : (
+                            <div>
+                              <div className="text-sm text-muted-foreground">Display Name</div>
+                              <div className="text-sm font-medium text-foreground">
+                                {profile?.display_name || "Add display name"}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                        {isOwner && editingField !== 'display_name' && (
+                          <button
+                            onClick={() => {
+                              setEditingField('display_name');
+                              setEditForm(prev => ({ ...prev, display_name: profile.display_name || '' }));
+                            }}
+                            className="p-1 hover:bg-accent rounded-md transition-colors ml-3"
+                            aria-label="Edit display name"
+                          >
+                            <Pencil className="h-4 w-4 text-muted-foreground" />
+                          </button>
+                        )}
+                      </div>
+
+                      {/* Email */}
+                      {isOwner && (
+                        <div className="flex items-center py-3 border-b border-border">
+                          <div className="flex-1">
+                            {editingField === 'email' ? (
+                              <div className="space-y-2">
+                                <Input 
+                                  type="email"
+                                  placeholder="Email" 
+                                  className="text-sm placeholder:text-muted-foreground"
+                                  value={editForm.email} 
+                                  onChange={(e) => handleEditFormChange('email', e.target.value)} 
+                                  autoFocus
+                                />
+                                <div className="flex gap-2">
+                                  <Button 
+                                    size="sm"
+                                    onClick={() => {
+                                      setEditingField(null);
+                                      setEditForm(prev => ({ ...prev, email: currentUserEmail || '' }));
+                                    }}
+                                    variant="outline"
+                                  >
+                                    Cancel
+                                  </Button>
+                                  <Button 
+                                    size="sm"
+                                    onClick={async () => {
+                                      await handleSaveProfile();
+                                      setEditingField(null);
+                                    }}
+                                  >
+                                    Save
+                                  </Button>
+                                </div>
+                              </div>
+                            ) : (
+                              <div>
+                                <div className="text-sm text-muted-foreground">Email</div>
+                                <div className="text-sm font-medium text-foreground">
+                                  {editForm.email || "Add email"}
+                                </div>
+                                <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
+                                  <Lock className="h-3 w-3" />
+                                  <span>Only me</span>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                          {editingField !== 'email' && (
+                            <button
+                              onClick={() => {
+                                setEditingField('email');
+                                setEditForm(prev => ({ ...prev, email: currentUserEmail || '' }));
+                              }}
+                              className="p-1 hover:bg-accent rounded-md transition-colors ml-3"
+                              aria-label="Edit email"
+                            >
+                              <Pencil className="h-4 w-4 text-muted-foreground" />
+                            </button>
+                          )}
+                        </div>
+                      )}
+
+
+                      {/* Gender */}
+                      <div className="flex items-center py-3 border-b border-border">
+                        <div className="flex-1">
+                           {editingField === 'gender' ? (
+                             <div className="space-y-2">
+                               <Select value={editForm.gender} onValueChange={(value) => handleEditFormChange('gender', value)}>
+                                 <SelectTrigger className="text-sm">
+                                   <SelectValue placeholder="Gender" />
+                                 </SelectTrigger>
+                                 <SelectContent>
+                                   <SelectItem value="male">Male</SelectItem>
+                                   <SelectItem value="female">Female</SelectItem>
+                                 </SelectContent>
+                               </Select>
+                               <Select value={editForm.gender_privacy} onValueChange={(value) => handleEditFormChange('gender_privacy', value)}>
+                                 <SelectTrigger className="text-sm">
+                                   <SelectValue placeholder="Privacy" />
+                                 </SelectTrigger>
+                                 <SelectContent>
+                                   <SelectItem value="public">🌐 Public</SelectItem>
+                                   <SelectItem value="friends">👥 Friends</SelectItem>
+                                   <SelectItem value="only_me">🔒 Only me</SelectItem>
+                                 </SelectContent>
+                               </Select>
+                               <div className="flex gap-2">
+                                 <Button 
+                                   size="sm"
+                                   onClick={() => {
+                                     setEditingField(null);
+                                     setEditForm(prev => ({ ...prev, gender: data?.gender || '', gender_privacy: 'public' }));
+                                   }}
+                                   variant="outline"
+                                 >
+                                   Cancel
+                                 </Button>
+                                 <Button 
+                                   size="sm"
+                                   onClick={async () => {
+                                     await handleSaveProfile();
+                                     setEditingField(null);
+                                   }}
+                                 >
+                                   Save
+                                 </Button>
+                               </div>
+                             </div>
+                           ) : (
+                             <div>
+                               <div className="text-sm text-muted-foreground">Gender</div>
+                               <div className="text-sm font-medium text-foreground">
+                                 {profile?.gender ? (profile.gender === 'male' ? 'Male' : 'Female') : "Add gender"}
+                               </div>
+                               <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
+                                 <Lock className="h-3 w-3" />
+                                 <span>
+                                   {editForm.gender_privacy === 'public' ? 'Public' : 
+                                    editForm.gender_privacy === 'friends' ? 'Friends' : 'Only me'}
+                                 </span>
+                               </div>
+                             </div>
+                          )}
+                        </div>
+                         {isOwner && editingField !== 'gender' && (
+                           <button
+                             onClick={() => {
+                               setEditingField('gender');
+                               setEditForm(prev => ({ ...prev, gender: data?.gender || '', gender_privacy: 'public' }));
+                             }}
+                            className="p-1 hover:bg-accent rounded-md transition-colors ml-3"
+                            aria-label="Edit gender"
+                          >
+                            <Pencil className="h-4 w-4 text-muted-foreground" />
+                          </button>
+                        )}
+                      </div>
+
+                       {/* Date of birth */}
+                       <div className="flex items-center py-3 border-b border-border">
+                         <div className="flex-1">
+                           {editingField === 'birthdate' ? (
+                             <div className="space-y-2">
+                               <Input 
+                                 type="date"
+                                 className="text-sm"
+                                 value={data?.birthdate || ''} 
+                                 onChange={(e) => {
+                                   // This would need to be handled differently since we're not storing birthdate in editForm
+                                   // For now, just show the interface
+                                 }}
+                                 autoFocus
+                               />
+                               <Select value={editForm.birthdate_privacy} onValueChange={(value) => handleEditFormChange('birthdate_privacy', value)}>
+                                 <SelectTrigger className="text-sm">
+                                   <SelectValue placeholder="Privacy" />
+                                 </SelectTrigger>
+                                 <SelectContent>
+                                   <SelectItem value="public">🌐 Public</SelectItem>
+                                   <SelectItem value="friends">👥 Friends</SelectItem>
+                                   <SelectItem value="only_me">🔒 Only me</SelectItem>
+                                 </SelectContent>
+                               </Select>
+                               <div className="flex gap-2">
+                                 <Button 
+                                   size="sm"
+                                   onClick={() => {
+                                     setEditingField(null);
+                                     setEditForm(prev => ({ ...prev, birthdate_privacy: 'only_me' }));
+                                   }}
+                                   variant="outline"
+                                 >
+                                   Cancel
+                                 </Button>
+                                 <Button 
+                                   size="sm"
+                                   onClick={async () => {
+                                     await handleSaveProfile();
+                                     setEditingField(null);
+                                   }}
+                                 >
+                                   Save
+                                 </Button>
+                               </div>
+                             </div>
+                           ) : (
+                             <div>
+                               <div className="text-sm text-muted-foreground">Date of birth</div>
+                               <div className="text-sm font-medium text-foreground">
+                                 {profile?.birthdate ? new Date(profile.birthdate).toLocaleDateString('en-GB', {
+                                   day: 'numeric',
+                                   month: 'long',
+                                   year: 'numeric'
+                                 }) : "Add date of birth"}
+                               </div>
+                               <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
+                                 <Lock className="h-3 w-3" />
+                                 <span>
+                                   {editForm.birthdate_privacy === 'public' ? 'Public' : 
+                                    editForm.birthdate_privacy === 'friends' ? 'Friends' : 'Only me'}
+                                 </span>
+                               </div>
+                             </div>
+                           )}
+                         </div>
+                         {isOwner && editingField !== 'birthdate' && (
+                           <button
+                             onClick={() => {
+                               setEditingField('birthdate');
+                               setEditForm(prev => ({ ...prev, birthdate_privacy: 'only_me' }));
+                             }}
+                             className="p-1 hover:bg-accent rounded-md transition-colors ml-3"
+                             aria-label="Edit date of birth"
+                           >
+                             <Pencil className="h-4 w-4 text-muted-foreground" />
+                           </button>
+                         )}
+                       </div>
+                      
+                      {/* Country */}
+                      <div className="flex items-center py-3 border-b border-border">
+                        <div className="flex-1">
+                          {editingField === 'country' ? (
+                            <div className="space-y-2">
+                              <SearchableSelect
+                                value={editForm.country}
+                                onValueChange={(value) => handleEditFormChange('country', value)}
+                                options={countryOptions}
+                                placeholder="Country"
+                              />
+                              <div className="flex gap-2">
+                                <Button 
+                                  size="sm"
+                                  onClick={() => {
+                                    setEditingField(null);
+                                    setEditForm(prev => ({ ...prev, country: profile.country || '' }));
+                                  }}
+                                  variant="outline"
+                                >
+                                  Cancel
+                                </Button>
+                                <Button 
+                                  size="sm"
+                                  onClick={async () => {
+                                    await handleSaveProfile();
+                                    setEditingField(null);
+                                  }}
+                                >
+                                  Save
+                                </Button>
+                              </div>
+                            </div>
+                          ) : (
+                            <div>
+                              <div className="text-sm text-muted-foreground">Country</div>
+                              <div className="text-sm font-medium text-foreground">
+                                {profile?.country || "Add country"}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                        {isOwner && editingField !== 'country' && (
+                          <button
+                            onClick={() => {
+                              setEditingField('country');
+                              setEditForm(prev => ({ ...prev, country: profile.country || '' }));
+                            }}
+                            className="p-1 hover:bg-accent rounded-md transition-colors ml-3"
+                            aria-label="Edit country"
+                          >
+                            <Pencil className="h-4 w-4 text-muted-foreground" />
+                          </button>
+                        )}
+                      </div>
+                      
+                      {/* Bio */}
+                      <div className="flex items-center py-3">
+                        <div className="flex-1">
+                          {editingField === 'bio' ? (
+                            <div className="space-y-2">
+                              <Input 
+                                placeholder="About Me" 
+                                className="text-sm placeholder:text-muted-foreground"
+                                value={editForm.bio} 
+                                onChange={(e) => handleEditFormChange('bio', e.target.value)} 
+                                autoFocus
+                              />
+                              <div className="flex gap-2">
+                                 <Button 
+                                   size="sm"
+                                   onClick={() => {
+                                     setEditingField(null);
+                                     setEditForm(prev => ({ ...prev, bio: data?.bio || '' }));
+                                  }}
+                                  variant="outline"
+                                >
+                                  Cancel
+                                </Button>
+                                <Button 
+                                  size="sm"
+                                  onClick={async () => {
+                                    await handleSaveProfile();
+                                    setEditingField(null);
+                                  }}
+                                >
+                                  Save
+                                </Button>
+                              </div>
+                            </div>
+                          ) : (
+                            <div>
+                              <div className="text-sm text-muted-foreground">About Me</div>
+                              <div className="text-sm font-medium text-foreground">
+                                {profile?.bio || "Add bio"}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                        {isOwner && editingField !== 'bio' && (
+                           <button
+                             onClick={() => {
+                               setEditingField('bio');
+                               setEditForm(prev => ({ ...prev, bio: data?.bio || '' }));
+                            }}
+                            className="p-1 hover:bg-accent rounded-md transition-colors ml-3"
+                            aria-label="Edit bio"
+                          >
+                            <Pencil className="h-4 w-4 text-muted-foreground" />
+                          </button>
+                        )}
+                      </div>
+
+                      {!profile?.display_name && !profile?.gender && !profile?.country && !profile?.bio && !isOwner && (
+                        <p className="text-muted-foreground text-center py-8">Нет информации для отображения</p>
+                      )}
+                    </div>
+                  </div>
+
                 </div>
-              </article>
+              )}
             </TabsContent>
           </Tabs>
         </section>

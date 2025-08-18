@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Heart, MessageCircle, Star, Pencil, Send, Share, Share2, ExternalLink, Upload, ArrowUpRight, ThumbsDown } from "lucide-react";
+import { ThumbsUp, MessageCircle, Star, Pencil, Send, Share, Share2, ExternalLink, Upload, ArrowUpRight, ThumbsDown } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -124,15 +124,7 @@ export function ContestantCard({
     return () => subscription.unsubscribe();
   }, []);
 
-  // Auto-close login modal after 1 second
-  useEffect(() => {
-    if (showLoginModal) {
-      const timer = setTimeout(() => {
-        setShowLoginModal(false);
-      }, 1000);
-      return () => clearTimeout(timer);
-    }
-  }, [showLoginModal]);
+  // Login modal removed auto-close
 
   // Load user's likes and ratings on component mount
   useEffect(() => {
@@ -274,11 +266,6 @@ export function ContestantCard({
     return (
       <>
         <Card className="bg-card border-contest-border relative overflow-hidden">
-          {isWinner && (
-            <div className="absolute top-2 left-4 bg-contest-blue text-white px-3 py-1 rounded-full text-sm font-bold flex items-center gap-1 z-10">
-              🏆 WINNER
-            </div>
-          )}
           
           {/* Name in top left - only after voting */}
            {(isVoted && !showThanks && !isEditing) && (
@@ -371,6 +358,12 @@ export function ContestantCard({
           {/* Photos section */}
           <div className="relative">
             <div className="grid grid-cols-2 gap-px">
+              {/* Winner Badge - overlaid on photos like in profile */}
+              {isWinner && (
+                <div className="absolute top-0 left-0 right-0 z-20 bg-blue-100 text-blue-700 px-2 py-1 text-xs font-semibold flex justify-start items-center">
+                  <span>🏆 WINNER   + 5000 PHP</span>
+                </div>
+              )}
               <div className="relative">
                 <img 
                   src={faceImage} 
@@ -407,7 +400,7 @@ export function ContestantCard({
                 onClick={() => handleLike(0)}
                 aria-label="Like"
               >
-                <Heart className={cn("w-4 h-4", (isLiked[0] || isLiked[1]) && "fill-current")} />
+                <ThumbsUp className={cn("w-4 h-4", (isLiked[0] || isLiked[1]) && "fill-current")} />
                 <span className="hidden sm:inline">Like</span>
                 <span>{likesCount[0] + likesCount[1]}</span>
               </button>
@@ -477,11 +470,10 @@ export function ContestantCard({
 
   return (
     <>
-      <Card className="bg-card border-contest-border relative overflow-hidden flex h-32 sm:h-36 md:h-40">
+      <Card className="bg-card border-contest-border relative overflow-hidden flex h-36 sm:h-40 md:h-44">
         {isWinner && (
-          <div className="absolute top-0 left-48 sm:left-56 md:left-64 right-0 bg-blue-100 text-blue-700 pl-2 pr-12 sm:pr-14 md:pr-16 py-1 text-xs font-semibold flex items-center justify-between z-10">
-            <span>🏆 WINNER</span>
-            <span>+ 5000 PHP</span>
+          <div className="absolute bottom-0 left-0 w-[193px] sm:w-[225px] md:w-[257px] bg-blue-100 text-blue-700 pl-2 pr-2 py-1 text-xs font-semibold flex items-center justify-start z-20">
+            <span>🏆 WINNER   + 5000 PHP</span>
           </div>
         )}
         
@@ -555,7 +547,7 @@ export function ContestantCard({
           {!isVoted && !isEditing && !showThanks && (
             <div className="absolute inset-0 bg-gray-300 rounded-r flex flex-col items-center justify-center gap-3">
               <span className="text-lg sm:text-xl font-medium text-gray-800">Vote</span>
-              <div className="scale-[1.7] sm:scale-[2.2]">
+               <div className="scale-[1.5] sm:scale-[1.8]">
                 <StarRating 
                   rating={0} 
                   isVoted={false}
@@ -581,7 +573,7 @@ export function ContestantCard({
           {isVoted && isEditing && !showThanks && (
             <div className="absolute inset-0 bg-gray-300 rounded-r flex flex-col items-center justify-center gap-3">
               <span className="text-lg sm:text-xl font-medium text-gray-800">Vote</span>
-              <div className="scale-[1.7] sm:scale-[2.2]">
+              <div className="scale-[1.5] sm:scale-[1.8]">
                 <StarRating 
                   rating={0} 
                   isVoted={false}
@@ -605,7 +597,7 @@ export function ContestantCard({
           {/* Contestant info - shown after voting instead of normal content */}
           {isVoted && !isEditing && !showThanks && (
             <div className="absolute inset-0 bg-white rounded-r flex flex-col justify-between p-1 sm:p-2 md:p-3">
-              <div className={cn("flex items-start justify-between", isWinner && "mt-6")}>
+              <div className="flex items-start justify-between">
                 <div className="min-w-0 flex-1 mr-2">
                    <h3 className="font-semibold text-contest-text text-base sm:text-lg truncate">{profileId ? (<Link to={`/u/${profileId}`} className="hover:text-primary underline-offset-2 hover:underline">{name}</Link>) : name}, {age}</h3>
                    <div className="text-xs sm:text-sm text-muted-foreground font-normal">{weight} kg · {height} cm</div>
@@ -628,7 +620,7 @@ export function ContestantCard({
                    onClick={() => handleLike(0)}
                    aria-label="Like"
                  >
-                   <Heart className={cn("w-3.5 h-3.5", (isLiked[0] || isLiked[1]) && "fill-current")} />
+                   <ThumbsUp className={cn("w-3.5 h-3.5", (isLiked[0] || isLiked[1]) && "fill-current")} />
                    <span className="hidden xl:inline">Like</span>
                    <span>{likesCount[0] + likesCount[1]}</span>
                  </button>
