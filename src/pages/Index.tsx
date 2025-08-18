@@ -126,7 +126,8 @@ const Index = () => {
       {activeSection === "How it works" && (
         <div className="max-w-6xl mx-auto px-6 py-8 space-y-6 text-foreground">
           <div className="text-center">
-            <h2 className="text-2xl font-bold mb-4">🌟 How It Works – OBC (Online Beauty Contest)</h2>
+            <h2 className="text-2xl font-bold mb-1">🌟 How It Works</h2>
+            <h3 className="text-lg text-muted-foreground mb-4">OBC (Online Beauty Contest)</h3>
           </div>
           
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
