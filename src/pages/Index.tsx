@@ -54,6 +54,8 @@ const Index = () => {
   };
   
   console.log('Index component rendering, viewMode:', viewMode);
+  console.log('Index: window dimensions:', typeof window !== 'undefined' ? { width: window.innerWidth, height: window.innerHeight } : 'SSR');
+  
   return (
     <div className="min-h-screen bg-background">
       <ContestHeader 
