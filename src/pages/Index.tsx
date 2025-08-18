@@ -10,68 +10,44 @@ import { supabase } from "@/integrations/supabase/client";
 import type { Category } from "@/components/contest-filters";
 
 const Index = () => {
+  const [activeSection, setActiveSection] = useState("Contest");
+  
   console.log('Index component начинает рендер');
   
   return (
-    <div style={{ 
-      padding: '20px', 
-      backgroundColor: '#e8f4fd', 
-      minHeight: '400px',
-      border: '2px solid #0066cc'
-    }}>
-      <h2 style={{ color: '#0066cc', fontSize: '20px', marginBottom: '15px' }}>
-        Index Компонент - Мобильный Тест
-      </h2>
+    <div className="min-h-screen bg-background">
+      <ContestHeader 
+        activeSection={activeSection} 
+        onSectionChange={setActiveSection} 
+      />
       
-      <div style={{ marginBottom: '15px' }}>
-        <p style={{ color: '#333', marginBottom: '5px' }}>
-          ✅ React компонент загружен
-        </p>
-        <p style={{ color: '#333', marginBottom: '5px' }}>
-          ✅ Стили применены
-        </p>
-        <p style={{ color: '#333', marginBottom: '5px' }}>
-          ✅ JavaScript работает
-        </p>
-      </div>
-      
-      <div style={{ 
-        backgroundColor: '#fff', 
-        padding: '15px', 
-        borderRadius: '5px',
-        border: '1px solid #ddd'
-      }}>
-        <h3 style={{ color: '#333', fontSize: '16px', marginBottom: '10px' }}>
-          Диагностическая информация:
-        </h3>
-        <ul style={{ margin: 0, paddingLeft: '20px' }}>
-          <li style={{ color: '#666', marginBottom: '5px' }}>
-            User Agent: {typeof navigator !== 'undefined' ? navigator.userAgent.substring(0, 50) + '...' : 'N/A'}
-          </li>
-          <li style={{ color: '#666', marginBottom: '5px' }}>
-            Текущий URL: {typeof window !== 'undefined' ? window.location.href : 'N/A'}
-          </li>
-          <li style={{ color: '#666', marginBottom: '5px' }}>
-            Время загрузки: {new Date().toLocaleString()}
-          </li>
-        </ul>
-      </div>
-      
-      <button 
-        onClick={() => alert('Кнопка работает!')}
-        style={{
-          marginTop: '15px',
-          padding: '10px 20px',
-          backgroundColor: '#0066cc',
-          color: '#fff',
-          border: 'none',
-          borderRadius: '5px',
-          fontSize: '14px',
-          cursor: 'pointer'
-        }}
-      >
-        Тест интерактивности
-      </button>
+      {activeSection === "Contest" && (
+        <div className="max-w-6xl mx-auto px-6 py-8">
+          <div style={{ 
+            padding: '20px', 
+            backgroundColor: '#e8f4fd', 
+            borderRadius: '8px',
+            border: '2px solid #0066cc',
+            marginBottom: '20px'
+          }}>
+            <h2 style={{ color: '#0066cc', fontSize: '20px', marginBottom: '15px' }}>
+              OBC Contest - Мобильная версия работает!
+            </h2>
+            <p style={{ color: '#333' }}>
+              ✅ Базовая структура восстановлена
+            </p>
+          </div>
+        </div>
+      )}
+
+      {activeSection === "How it works" && (
+        <div className="max-w-6xl mx-auto px-6 py-8">
+          <div className="text-center">
+            <h2 className="text-2xl font-bold mb-4">🌟 How It Works – OBC</h2>
+            <p className="text-foreground">Раздел "Как это работает"</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
