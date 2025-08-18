@@ -853,25 +853,29 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                     <div className="scale ft">
                       {Array.from({ length: 71 }, (_, i) => {
                         const cm = 130 + i;
-                        const totalInches = Math.round(cm / 2.54);
-                        const feet = Math.floor(totalInches / 12);
-                        const inches = totalInches % 12;
                         
-                        // Показываем ft/in только для определенных см значений
-                        const cmToFtMap: Record<number, string> = {
-                          132: "4'3\"", 135: "4'4\"", 137: "4'5\"", 140: "4'6\"", 142: "4'7\"", 
-                          145: "4'8\"", 147: "4'9\"", 150: "4'10\"", 152: "4'11\"", 154: "5'0\"",
-                          157: "5'1\"", 160: "5'2\"", 162: "5'3\"", 165: "5'4\"", 168: "5'5\"",
-                          170: "5'6\"", 173: "5'7\"", 175: "5'8\"", 178: "5'9\"", 180: "5'10\"",
-                          183: "5'11\"", 185: "6'0\"", 188: "6'1\"", 191: "6'2\"", 193: "6'3\"",
-                          196: "6'4\"", 198: "6'5\""
-                        };
+                        // Создаем равномерно распределенные ft/in значения
+                        const ftInValues = [
+                          "4'3\"", "4'4\"", "4'5\"", "4'6\"", "4'7\"", "4'8\"", "4'9\"", "4'10\"", "4'11\"",
+                          "5'0\"", "5'1\"", "5'2\"", "5'3\"", "5'4\"", "5'5\"", "5'6\"", "5'7\"", "5'8\"", "5'9\"", "5'10\"", "5'11\"",
+                          "6'0\"", "6'1\"", "6'2\"", "6'3\"", "6'4\"", "6'5\""
+                        ];
                         
-                        return (
-                          <div key={cm}>
-                            {cmToFtMap[cm] || ''}
-                          </div>
-                        );
+                        // Первый на позиции 132 см (i=2), последний на позиции 198 см (i=68)
+                        const startIndex = 2; // 132 см
+                        const endIndex = 68;   // 198 см
+                        const totalRange = endIndex - startIndex;
+                        const valueStep = totalRange / (ftInValues.length - 1);
+                        
+                        let displayValue = '';
+                        ftInValues.forEach((value, valueIndex) => {
+                          const targetPosition = Math.round(startIndex + valueIndex * valueStep);
+                          if (i === targetPosition) {
+                            displayValue = value;
+                          }
+                        });
+                        
+                        return <div key={cm}>{displayValue}</div>;
                       })}
                     </div>
                   </div>
