@@ -56,8 +56,20 @@ const Index = () => {
   console.log('Index component rendering, viewMode:', viewMode);
   console.log('Index state:', { country, gender, viewMode, activeSection, isAdmin, category });
   
+  // Простая проверка рендеринга
+  if (typeof window === 'undefined') {
+    return <div>Loading...</div>;
+  }
+  
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen w-full" style={{ backgroundColor: '#f5f5f5', minHeight: '100vh' }}>
+      <div style={{ padding: '20px', color: '#000' }}>
+        <h1>OBC Faces - Mobile Test</h1>
+        <p>Viewmode: {viewMode}</p>
+        <p>Screen width: {typeof window !== 'undefined' ? window.innerWidth : 'unknown'}</p>
+        <p>Active section: {activeSection}</p>
+      </div>
+      
       <ContestHeader 
         activeSection={activeSection} 
         onSectionChange={setActiveSection} 
@@ -65,8 +77,8 @@ const Index = () => {
       
       {/* Content area that changes based on active section */}
       {activeSection === "Contest" && (
-        <>
-          <div className="max-w-6xl mx-auto px-6 pt-6 pb-6 rounded-lg shadow-lg shadow-foreground/15">
+        <div style={{ padding: '20px' }}>
+          <div className="max-w-6xl mx-auto px-6 pt-6 pb-6">
             <ContestFilters
               country={country}
               onCountryChange={setCountry}
@@ -90,124 +102,20 @@ const Index = () => {
             noWrapTitle
             viewMode={viewMode}
           />
-
-          <ContestSection
-            title="1 WEEK AGO"
-            titleSuffix="(Closed)"
-            subtitle="18-24 August 2025"
-            centerSubtitle
-            showWinner={true}
-            viewMode={viewMode}
-          />
-
-          <ContestSection
-            title="2 WEEKS AGO"
-            titleSuffix="(Closed)"
-            subtitle="11-17 August 2025"
-            centerSubtitle
-            showWinner={true}
-            viewMode={viewMode}
-          />
-
-          <ContestSection
-            title="3 WEEKS AGO"
-            titleSuffix="(Closed)"
-            subtitle="4-10 August 2025"
-            centerSubtitle
-            showWinner={true}
-            viewMode={viewMode}
-          />
-
-          <section className="max-w-6xl mx-auto px-6 mb-8">
-            <AiChat />
-          </section>
-        </>
+        </div>
       )}
 
       {/* How it works content */}
       {activeSection === "How it works" && (
-        <div className="max-w-6xl mx-auto px-6 py-8 space-y-6 text-foreground">
+        <div className="max-w-6xl mx-auto px-6 py-8 space-y-6">
           <div className="text-center">
             <h2 className="text-2xl font-bold mb-4">🌟 How It Works – OBC (Online Beauty Contest)</h2>
           </div>
           
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {/* Weekly Photo Contest */}
-            <div className="bg-white/50 p-4 rounded-lg shadow-sm border">
+            <div className="bg-white p-4 rounded-lg shadow-sm border">
               <h3 className="text-lg font-semibold mb-2">1. Weekly Photo Contest</h3>
-              <EditableContent 
-                content="Every week, we select the most beautiful girls from across the Philippines and post them on our site and social media."
-                contentKey="weekly-contest"
-                className="text-sm"
-                isAdmin={isAdmin}
-              />
-            </div>
-            
-            {/* How to Join */}
-            <div className="bg-white/50 p-4 rounded-lg shadow-sm border">
-              <h3 className="text-lg font-semibold mb-2">2. How to Join</h3>
-              <EditableContent 
-                content={`To participate, send us:
-📸 1 full-body photo (no filter, no makeup)
-📸 1 close-up face photo (no makeup)
-
-Submit your entry anytime! If not selected this week, you may be chosen for the next.`}
-                contentKey="how-to-join"
-                className="text-sm whitespace-pre-line"
-                isAdmin={isAdmin}
-              />
-            </div>
-            
-            {/* Selection & Voting */}
-            <div className="bg-white/50 p-4 rounded-lg shadow-sm border">
-              <h3 className="text-lg font-semibold mb-2">3. Selection & Voting</h3>
-              <EditableContent 
-                content={`• Each Monday, we post new contestants.
-• Our audience votes by liking photos ❤️
-• Admins make the final decision to ensure fairness.`}
-                contentKey="selection-voting"
-                className="text-sm whitespace-pre-line"
-                isAdmin={isAdmin}
-              />
-            </div>
-            
-            {/* Prizes */}
-            <div className="bg-white/50 p-4 rounded-lg shadow-sm border">
-              <h3 className="text-lg font-semibold mb-2">4. Prizes</h3>
-              <EditableContent 
-                content={`🏆 Weekly Winner: ₱5,000
-👑 End-of-Year Grand Prize:
-    1st Place – ₱200,000
-    2nd Place – ₱100,000
-    3rd Place – ₱50,000`}
-                contentKey="prizes"
-                className="text-sm whitespace-pre-line"
-                isAdmin={isAdmin}
-              />
-            </div>
-            
-            {/* Rules */}
-            <div className="bg-white/50 p-4 rounded-lg shadow-sm border">
-              <h3 className="text-lg font-semibold mb-2">5. Rules</h3>
-              <EditableContent 
-                content={`• Girls only, aged 18–35
-• No editing, filters, or makeup
-• By sending photos, you agree we can use them for the contest and promotion`}
-                contentKey="rules"
-                className="text-sm whitespace-pre-line"
-                isAdmin={isAdmin}
-              />
-            </div>
-            
-            {/* Questions */}
-            <div className="bg-white/50 p-4 rounded-lg shadow-sm border">
-              <h3 className="text-lg font-semibold mb-2">Questions?</h3>
-              <EditableContent 
-                content="Just message us anytime 💬"
-                contentKey="questions"
-                className="text-sm"
-                isAdmin={isAdmin}
-              />
+              <p className="text-sm">Every week, we select the most beautiful girls from across the Philippines and post them on our site and social media.</p>
             </div>
           </div>
         </div>
