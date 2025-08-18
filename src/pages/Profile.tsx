@@ -805,7 +805,7 @@ const Profile = () => {
         <section className="max-w-4xl mx-auto">
           {/* Profile Header */}
           <div className="flex flex-col gap-6 mb-8">
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-4 relative">
               <Avatar className="w-32 h-32">
                 <AvatarImage 
                   src={profile.avatar_url || ""} 
@@ -816,7 +816,7 @@ const Profile = () => {
                   {(profile.display_name || "U").charAt(0).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
-               <div>
+               <div className="flex-1">
                 <h1 className="text-2xl font-bold">
                   {profile.display_name || 
                     (profile.first_name && profile.last_name 
@@ -836,6 +836,20 @@ const Profile = () => {
                    </p>
                  )}
                 </div>
+                {isOwner && (
+                  <button
+                    onClick={logout}
+                    disabled={logoutLoading}
+                    className="absolute top-0 right-0 p-2 text-muted-foreground hover:text-destructive transition-colors disabled:opacity-50"
+                    title="Выйти"
+                  >
+                    {logoutLoading ? (
+                      <div className="w-[18px] h-[18px] border-2 border-muted-foreground border-t-transparent rounded-full animate-spin" />
+                    ) : (
+                      <LogOut size={18} />
+                    )}
+                  </button>
+                )}
             </div>
             
             <div className="flex items-center gap-2">
@@ -882,20 +896,6 @@ const Profile = () => {
               <TabsTrigger value="photos" className="px-0 mr-2 sm:mr-6 h-auto pb-2 bg-transparent rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary text-muted-foreground hover:text-foreground text-sm sm:text-base">Photos</TabsTrigger>
               <TabsTrigger value="participation" className="px-0 mr-2 sm:mr-6 h-auto pb-2 bg-transparent rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary text-muted-foreground hover:text-foreground text-sm sm:text-base">Participation</TabsTrigger>
               <TabsTrigger value="about" className="px-0 mr-2 sm:mr-6 h-auto pb-2 bg-transparent rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary text-muted-foreground hover:text-foreground text-sm sm:text-base">About</TabsTrigger>
-              {isOwner && (
-                <button
-                  onClick={logout}
-                  disabled={logoutLoading}
-                  className="px-0 h-auto pb-2 bg-transparent rounded-none border-b-2 border-transparent text-muted-foreground hover:text-destructive transition-colors disabled:opacity-50"
-                  title="Выйти"
-                >
-                  {logoutLoading ? (
-                    <div className="w-[18px] h-[18px] border-2 border-muted-foreground border-t-transparent rounded-full animate-spin" />
-                  ) : (
-                    <LogOut size={18} />
-                  )}
-                </button>
-              )}
             </TabsList>
 
 
