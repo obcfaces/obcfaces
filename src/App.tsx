@@ -35,6 +35,8 @@ const App = () => {
               <main className="w-full">
                 <Routes>
                   <Route path="/" element={<Index />} />
+                  <Route path="/auth" element={<Auth />} />
+                  <Route path="/auth/callback" element={<AuthCallbackHandler />} />
                   <Route path="/terms" element={<Terms />} />
                   <Route path="/privacy" element={<Privacy />} />
                   <Route path="*" element={<NotFound />} />
