@@ -2,8 +2,10 @@ import { useState, useEffect, useMemo } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Camera, Eye, EyeOff } from "lucide-react";
+import { Camera, Eye, EyeOff, Phone, Mail, Facebook, Instagram } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import SearchableSelect from "@/components/ui/searchable-select";
@@ -22,6 +24,14 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
   const [submitted, setSubmitted] = useState(false);
   const [authError, setAuthError] = useState<string>("");
   const { toast } = useToast();
+
+  // Contact form state
+  const [selectedContactMethod, setSelectedContactMethod] = useState<string | null>(null);
+  const [contactForm, setContactForm] = useState({
+    name: "",
+    contact: "",
+    message: ""
+  });
 
   // Auth form data
   const [email, setEmail] = useState("");
@@ -878,6 +888,113 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
             >
               {isLoading ? "Submitting..." : "Submit application"}
             </Button>
+            
+            {/* Contact for Prize Transfer Section */}
+            <div className="mt-6 p-4 bg-background border rounded-lg">
+              <h3 className="text-md font-semibold mb-4 text-center">How to contact us for prize transfer</h3>
+              
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-4">
+                <Button
+                  type="button"
+                  variant={selectedContactMethod === "phone" ? "default" : "outline"}
+                  onClick={() => setSelectedContactMethod("phone")}
+                  className="flex items-center gap-1 text-xs"
+                  size="sm"
+                >
+                  <Phone size={14} />
+                  Phone
+                </Button>
+                
+                <Button
+                  type="button"
+                  variant={selectedContactMethod === "email" ? "default" : "outline"}
+                  onClick={() => setSelectedContactMethod("email")}
+                  className="flex items-center gap-1 text-xs"
+                  size="sm"
+                >
+                  <Mail size={14} />
+                  Email
+                </Button>
+                
+                <Button
+                  type="button"
+                  variant={selectedContactMethod === "facebook" ? "default" : "outline"}
+                  onClick={() => setSelectedContactMethod("facebook")}
+                  className="flex items-center gap-1 text-xs"
+                  size="sm"
+                >
+                  <Facebook size={14} />
+                  Facebook
+                </Button>
+                
+                <Button
+                  type="button"
+                  variant={selectedContactMethod === "instagram" ? "default" : "outline"}
+                  onClick={() => setSelectedContactMethod("instagram")}
+                  className="flex items-center gap-1 text-xs"
+                  size="sm"
+                >
+                  <Instagram size={14} />
+                  Instagram
+                </Button>
+              </div>
+
+              {selectedContactMethod && (
+                <div className="space-y-3 border-t pt-3">
+                  <h4 className="font-medium text-sm">Contact Form</h4>
+                  
+                  <div className="space-y-2">
+                    <div>
+                      <Label htmlFor="contact-name" className="text-xs">Your Name</Label>
+                      <Input
+                        id="contact-name"
+                        value={contactForm.name}
+                        onChange={(e) => setContactForm({...contactForm, name: e.target.value})}
+                        placeholder="Enter your full name"
+                        className="text-sm"
+                      />
+                    </div>
+                    
+                    <div>
+                      <Label htmlFor="contact-info" className="text-xs">
+                        {selectedContactMethod === "phone" && "Phone Number"}
+                        {selectedContactMethod === "email" && "Email Address"}
+                        {selectedContactMethod === "facebook" && "Facebook Profile/Username"}
+                        {selectedContactMethod === "instagram" && "Instagram Username"}
+                      </Label>
+                      <Input
+                        id="contact-info"
+                        value={contactForm.contact}
+                        onChange={(e) => setContactForm({...contactForm, contact: e.target.value})}
+                        placeholder={
+                          selectedContactMethod === "phone" ? "Enter your phone number" :
+                          selectedContactMethod === "email" ? "Enter your email address" :
+                          selectedContactMethod === "facebook" ? "Enter your Facebook profile" :
+                          "Enter your Instagram username"
+                        }
+                        className="text-sm"
+                      />
+                    </div>
+                    
+                    <div>
+                      <Label htmlFor="contact-message" className="text-xs">Message</Label>
+                      <Textarea
+                        id="contact-message"
+                        value={contactForm.message}
+                        onChange={(e) => setContactForm({...contactForm, message: e.target.value})}
+                        placeholder="Tell us about your prize transfer inquiry..."
+                        rows={3}
+                        className="text-sm"
+                      />
+                    </div>
+                    
+                    <Button type="button" size="sm" className="w-full">
+                      Submit Contact Request
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </div>
           </form>
         )}
       </DialogContent>
