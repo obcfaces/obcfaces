@@ -9,7 +9,6 @@ import { Camera, Eye, EyeOff, Phone, Mail, Facebook, Instagram } from "lucide-re
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import SearchableSelect from "@/components/ui/searchable-select";
-import StaticHeightScales from "@/components/ui/static-height-scales";
 import { getCitiesForLocation } from '@/lib/location-utils';
 
 interface ContestParticipationModalProps {
@@ -843,39 +842,36 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                 <SelectTrigger className={getFieldClasses('height_cm', "text-sm")}>
                   <SelectValue placeholder="Select height" />
                 </SelectTrigger>
-                <SelectContent className="max-h-80 bg-background z-50">
-                  <div className="text-sm font-medium text-center py-2 border-b">Static Height Scales: cm (left) vs ft/in (right)</div>
-                  <div className="grid grid-cols-2 gap-0 divide-x">
-                    <div className="px-3 py-2">
-                      {Array.from({ length: 71 }, (_, i) => {
-                        const height = 130 + i; // 130cm to 200cm
-                        return (
-                          <SelectItem key={`cm-${height}`} value={height.toString()} className="px-0 py-1">
-                            {height} cm
-                          </SelectItem>
-                        );
-                      })}
+                <SelectContent>
+                  <div className="grid grid-cols-2 gap-4 p-2">
+                    <div>
+                      <div className="text-xs font-medium text-muted-foreground mb-2 text-center">Height (cm)</div>
+                      <div className="space-y-1">
+                        {Array.from({ length: 51 }, (_, i) => {
+                          const height = 140 + i;
+                          return (
+                            <SelectItem key={`cm-${height}`} value={height.toString()}>
+                              {height} cm
+                            </SelectItem>
+                          );
+                        })}
+                      </div>
                     </div>
-                    <div className="px-3 py-2">
-                      {Array.from({ length: 71 }, (_, i) => {
-                        const cmHeight = 130 + i;
-                        const totalInches = Math.round(cmHeight / 2.54);
-                        const feet = Math.floor(totalInches / 12);
-                        const inches = totalInches % 12;
-                        
-                        // Only show ft/in for every few cm values to avoid overcrowding
-                        const shouldShow = i % 3 === 0 || cmHeight % 5 === 0;
-                        
-                        if (!shouldShow) {
-                          return <div key={`spacer-${i}`} className="h-6"></div>;
-                        }
-                        
-                        return (
-                          <SelectItem key={`ft-${cmHeight}`} value={cmHeight.toString()} className="px-0 py-1">
-                            {feet}'{inches}"
-                          </SelectItem>
-                        );
-                      })}
+                    <div>
+                      <div className="text-xs font-medium text-muted-foreground mb-2 text-center">Height (ft'in&quot;)</div>
+                      <div className="space-y-1">
+                        {Array.from({ length: 25 }, (_, i) => {
+                          const totalInches = 52 + i; // от 4'4" до 6'4"
+                          const feet = Math.floor(totalInches / 12);
+                          const inches = totalInches % 12;
+                          const cmEquivalent = Math.round(totalInches * 2.54);
+                          return (
+                            <SelectItem key={`ft-${totalInches}`} value={cmEquivalent.toString()}>
+                              {feet}'{inches}&quot;
+                            </SelectItem>
+                          );
+                        })}
+                      </div>
                     </div>
                   </div>
                 </SelectContent>
@@ -898,11 +894,6 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                   })}
                 </SelectContent>
               </Select>
-            </div>
-
-            {/* Static Height Reference Scales */}
-            <div className="mt-4">
-              <StaticHeightScales />
             </div>
 
             <div className="space-y-4">
