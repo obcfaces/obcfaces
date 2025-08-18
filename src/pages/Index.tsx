@@ -6,7 +6,12 @@ import { NextWeekSection } from "@/components/next-week-section";
 import ContestFilters from "@/components/contest-filters";
 import AiChat from "@/components/ai-chat";
 import { EditableContent } from "@/components/editable-content";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
+import { Phone, Mail, Facebook, Instagram } from "lucide-react";
 import type { Category } from "@/components/contest-filters";
 
 const Index = () => {
@@ -15,6 +20,12 @@ const Index = () => {
   const [viewMode, setViewMode] = useState<'compact' | 'full'>("compact");
   const [activeSection, setActiveSection] = useState("Contest");
   const [isAdmin, setIsAdmin] = useState(false);
+  const [selectedContactMethod, setSelectedContactMethod] = useState<string | null>(null);
+  const [contactForm, setContactForm] = useState({
+    name: "",
+    contact: "",
+    message: ""
+  });
 
   // Check if user is admin
   useEffect(() => {
@@ -208,6 +219,102 @@ Submit your entry anytime! If not selected this week, you may be chosen for the 
                 isAdmin={isAdmin}
               />
             </div>
+          </div>
+          
+          {/* Contact for Prize Transfer Section */}
+          <div className="mt-8 bg-white/50 p-6 rounded-lg shadow-sm border">
+            <h3 className="text-lg font-semibold mb-4 text-center">How to contact us for prize transfer</h3>
+            
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+              <Button
+                variant={selectedContactMethod === "phone" ? "default" : "outline"}
+                onClick={() => setSelectedContactMethod("phone")}
+                className="flex items-center gap-2"
+              >
+                <Phone size={16} />
+                Phone
+              </Button>
+              
+              <Button
+                variant={selectedContactMethod === "email" ? "default" : "outline"}
+                onClick={() => setSelectedContactMethod("email")}
+                className="flex items-center gap-2"
+              >
+                <Mail size={16} />
+                Email
+              </Button>
+              
+              <Button
+                variant={selectedContactMethod === "facebook" ? "default" : "outline"}
+                onClick={() => setSelectedContactMethod("facebook")}
+                className="flex items-center gap-2"
+              >
+                <Facebook size={16} />
+                Facebook
+              </Button>
+              
+              <Button
+                variant={selectedContactMethod === "instagram" ? "default" : "outline"}
+                onClick={() => setSelectedContactMethod("instagram")}
+                className="flex items-center gap-2"
+              >
+                <Instagram size={16} />
+                Instagram
+              </Button>
+            </div>
+
+            {selectedContactMethod && (
+              <div className="space-y-4 border-t pt-4">
+                <h4 className="font-medium">Contact Form</h4>
+                
+                <div className="space-y-3">
+                  <div>
+                    <Label htmlFor="name">Your Name</Label>
+                    <Input
+                      id="name"
+                      value={contactForm.name}
+                      onChange={(e) => setContactForm({...contactForm, name: e.target.value})}
+                      placeholder="Enter your full name"
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="contact">
+                      {selectedContactMethod === "phone" && "Phone Number"}
+                      {selectedContactMethod === "email" && "Email Address"}
+                      {selectedContactMethod === "facebook" && "Facebook Profile/Username"}
+                      {selectedContactMethod === "instagram" && "Instagram Username"}
+                    </Label>
+                    <Input
+                      id="contact"
+                      value={contactForm.contact}
+                      onChange={(e) => setContactForm({...contactForm, contact: e.target.value})}
+                      placeholder={
+                        selectedContactMethod === "phone" ? "Enter your phone number" :
+                        selectedContactMethod === "email" ? "Enter your email address" :
+                        selectedContactMethod === "facebook" ? "Enter your Facebook profile" :
+                        "Enter your Instagram username"
+                      }
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="message">Message</Label>
+                    <Textarea
+                      id="message"
+                      value={contactForm.message}
+                      onChange={(e) => setContactForm({...contactForm, message: e.target.value})}
+                      placeholder="Tell us about your prize transfer inquiry..."
+                      rows={4}
+                    />
+                  </div>
+                  
+                  <Button className="w-full">
+                    Submit Contact Request
+                  </Button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}
