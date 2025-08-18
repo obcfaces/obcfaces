@@ -34,7 +34,7 @@ const App = () => {
               
               <main className="w-full">
                 <Routes>
-                  <Route path="/" element={<div className="p-4 text-black bg-white min-h-screen">Тест работает</div>} />
+                  <Route path="/" element={<Index />} />
                   <Route path="*" element={<div className="p-4">Страница не найдена</div>} />
                 </Routes>
               </main>
