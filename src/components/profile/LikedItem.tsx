@@ -222,7 +222,6 @@ const LikedItem: React.FC<LikedItemProps> = ({
               fullBodyImage={candidateData.fullBodyImage}
               viewMode="compact"
               onRate={() => {}}
-              hideRating={true}
             />
           </div>
 
@@ -342,8 +341,9 @@ const LikedItem: React.FC<LikedItemProps> = ({
         <PhotoModal
           isOpen={photoModalOpen}
           onClose={() => setPhotoModalOpen(false)}
-          imageSrc={imageSrc}
-          authorName={authorName}
+          photos={[imageSrc]}
+          currentIndex={0}
+          contestantName={authorName}
         />
       )}
       

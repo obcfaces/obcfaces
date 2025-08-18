@@ -124,10 +124,9 @@ const Contest = () => {
             <div key={post.id} className="w-full">
               {viewMode === 'full' ? (
                 <AspectRatio ratio={3/4}>
-                  <PostCard
-                    {...post}
-                    className="h-full"
-                  />
+                <div className="h-full">
+                  <PostCard {...post} />
+                </div>
                 </AspectRatio>
               ) : (
                 <PostCard

@@ -972,17 +972,15 @@ const Profile = () => {
                           authorName={item.authorName}
                           authorAvatarUrl={item.authorAvatarUrl}
                           authorProfileId={item.authorProfileId}
-                          time={item.time}
-                          content={item.content}
-                          imageSrc={item.imageSrc}
-                          likes={item.likes}
-                          comments={item.comments}
-                          onUnlike={handleUnlike}
-                          viewMode={likesViewMode}
-                          candidateData={item.candidateData}
-                          participantType={item.participantType}
-                          showStatusBadge={false}
-                        />
+                           time={item.time}
+                           content={item.content}
+                           imageSrc={item.imageSrc}
+                           likes={item.likes}
+                           comments={item.comments}
+                           onUnlike={handleUnlike}
+                           candidateData={item.candidateData}
+                           participantType={item.participantType}
+                         />
                       ))}
                     </div>
                   </div>
@@ -1107,16 +1105,15 @@ const Profile = () => {
                         authorName={item.authorName}
                         authorAvatarUrl={item.authorAvatarUrl}
                         authorProfileId={item.authorProfileId}
-                        time={item.time}
-                        content={item.content}
-                        imageSrc={item.imageSrc}
-                        likes={item.likes}
-                        comments={item.comments}
-                        onUnlike={handleRemoveParticipation}
-                        viewMode={participationViewMode}
-                        candidateData={item.candidateData}
-                        participantType={item.participantType}
-                      />
+                         time={item.time}
+                         content={item.content}
+                         imageSrc={item.imageSrc}
+                         likes={item.likes}
+                         comments={item.comments}
+                         onUnlike={handleRemoveParticipation}
+                         candidateData={item.candidateData}
+                         participantType={item.participantType}
+                       />
                     ))}
                   </div>
                 </div>
