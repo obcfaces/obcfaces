@@ -15,35 +15,36 @@ import Privacy from "./pages/Privacy";
 import Messages from "./pages/Messages";
 import Admin from "./pages/Admin";
 import AuthCallbackHandler from "@/components/auth-callback-handler";
-import MobileSafeTopBar from "@/components/mobile-safe-top-bar";
+import TopBar from "@/components/top-bar";
 
 
 const queryClient = new QueryClient();
 
 const App = () => {
   console.log("App component rendering");
-  console.log("Window dimensions:", typeof window !== 'undefined' ? { width: window.innerWidth, height: window.innerHeight } : 'SSR');
   
   return (
     <div className="min-h-screen w-full">
       <HelmetProvider>
         <QueryClientProvider client={queryClient}>
           <TooltipProvider>
+            <Toaster />
+            <Sonner />
             <BrowserRouter>
-              <MobileSafeTopBar />
-              
+              <AuthCallbackHandler />
+              <TopBar />
               <main className="w-full">
                 <Routes>
                   <Route path="/" element={<Index />} />
-                  <Route path="/auth" element={<Auth />} />
-                  <Route path="/auth/callback" element={<AuthCallbackHandler />} />
-                  <Route path="/account" element={<Account />} />
-                  <Route path="/profile" element={<Profile />} />
                   <Route path="/contest" element={<Contest />} />
+                  <Route path="/auth" element={<Auth />} />
+                  <Route path="/account" element={<Account />} />
+                  <Route path="/u/:id" element={<Profile />} />
                   <Route path="/messages" element={<Messages />} />
                   <Route path="/admin" element={<Admin />} />
                   <Route path="/terms" element={<Terms />} />
                   <Route path="/privacy" element={<Privacy />} />
+                  {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </main>
