@@ -35,14 +35,7 @@ const App = () => {
               <main className="w-full">
                 <Routes>
                   <Route path="/" element={<Index />} />
-                  <Route path="/auth" element={<Auth />} />
-                  <Route path="/auth/callback" element={<AuthCallbackHandler />} />
-                  <Route path="/profile" element={<Profile />} />
-                  <Route path="/contest" element={<Contest />} />
-                  <Route path="/admin" element={<Admin />} />
-                  <Route path="/terms" element={<Terms />} />
-                  <Route path="/privacy" element={<Privacy />} />
-                  <Route path="*" element={<NotFound />} />
+                  <Route path="*" element={<div className="p-4 bg-white text-black">Страница не найдена</div>} />
                 </Routes>
               </main>
             </BrowserRouter>
