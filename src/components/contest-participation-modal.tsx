@@ -854,8 +854,6 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                       {Array.from({ length: 71 }, (_, i) => {
                         const cm = 130 + i;
                         
-                        // Первый на 132 см (i=2), последний на 198 см (i=68)
-                        // Остальные распределены равномерно между ними
                         const ftInValues = [
                           "4'3\"", "4'4\"", "4'5\"", "4'6\"", "4'7\"", "4'8\"", "4'9\"", "4'10\"", "4'11\"",
                           "5'0\"", "5'1\"", "5'2\"", "5'3\"", "5'4\"", "5'5\"", "5'6\"", "5'7\"", "5'8\"", "5'9\"", "5'10\"", "5'11\"",
@@ -864,22 +862,18 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                         
                         let displayValue = '';
                         
-                        // Привязываем первый к 132 см и последний к 198 см
-                        if (i === 2) displayValue = ftInValues[0]; // 4'3" на 132 см
-                        else if (i === 68) displayValue = ftInValues[25]; // 6'5" на 198 см
-                        else {
-                          // Для остальных позиций распределяем равномерно
-                          const middleRange = 68 - 2; // 66 позиций между первой и последней
-                          const middleValues = ftInValues.slice(1, 25); // 24 значения между первым и последним
-                          const step = middleRange / (middleValues.length + 1);
-                          
-                          middleValues.forEach((value, index) => {
-                            const targetPos = Math.round(2 + (index + 1) * step);
-                            if (i === targetPos) {
-                              displayValue = value;
-                            }
-                          });
-                        }
+                        // Равномерное распределение всех 26 значений между позициями 2 (132см) и 68 (198см)
+                        const startPos = 2; // 132 см
+                        const endPos = 68;   // 198 см
+                        const totalPositions = endPos - startPos; // 66 позиций
+                        const step = totalPositions / (ftInValues.length - 1); // шаг между значениями
+                        
+                        ftInValues.forEach((value, valueIndex) => {
+                          const targetPosition = Math.round(startPos + valueIndex * step);
+                          if (i === targetPosition) {
+                            displayValue = value;
+                          }
+                        });
                         
                         return <div key={cm}>{displayValue}</div>;
                       })}
