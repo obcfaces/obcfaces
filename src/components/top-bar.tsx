@@ -5,8 +5,8 @@ import GlobalSearch from "@/components/global-search";
 import { useUnreadMessages } from "@/hooks/useUnreadMessages";
 
 const TopBar = () => {
-  const { unreadCount } = useUnreadMessages();
-  console.log('TopBar: unreadCount =', unreadCount);
+  // Временно отключаем для диагностики
+  const unreadCount = 0;
 
   return (
     <header role="banner" className="w-full bg-background border-b">
