@@ -843,12 +843,12 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                   <SelectValue placeholder="Select height" />
                 </SelectTrigger>
                 <SelectContent>
-                  <div className="grid grid-cols-2 gap-6 p-2">
+                  <div className="grid grid-cols-2 gap-6 p-2 max-h-80 overflow-y-auto">
                     <div>
                       <div className="text-xs font-medium text-muted-foreground mb-2 text-center">Height (cm)</div>
                       <div className="space-y-1">
-                        {Array.from({ length: 51 }, (_, i) => {
-                          const height = 140 + i;
+                        {Array.from({ length: 66 }, (_, i) => {
+                          const height = 130 + i; // от 130 до 195 см
                           return (
                             <SelectItem key={`cm-${height}`} value={height.toString()}>
                               {height} cm
@@ -859,17 +859,23 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                     </div>
                     <div className="pl-4">
                       <div className="text-xs font-medium text-muted-foreground mb-2 text-center">Height (ft'in&quot;)</div>
-                      <div className="space-y-1 mt-6">
-                        {Array.from({ length: 25 }, (_, i) => {
-                          const totalInches = 52 + i; // от 4'4" до 6'4"
+                      <div className="space-y-1">
+                        {Array.from({ length: 66 }, (_, i) => {
+                          const heightCm = 130 + i;
+                          const totalInches = Math.round(heightCm / 2.54);
                           const feet = Math.floor(totalInches / 12);
                           const inches = totalInches % 12;
-                          const cmEquivalent = Math.round(totalInches * 2.54);
-                          return (
-                            <SelectItem key={`ft-${totalInches}`} value={cmEquivalent.toString()}>
-                              {feet}'{inches}&quot;
-                            </SelectItem>
-                          );
+                          
+                          // Показываем только те варианты в футах, которые есть в нашем диапазоне 4'4" - 6'4"
+                          if (totalInches >= 52 && totalInches <= 76) {
+                            return (
+                              <SelectItem key={`ft-${heightCm}`} value={heightCm.toString()}>
+                                {feet}'{inches}&quot;
+                              </SelectItem>
+                            );
+                          } else {
+                            return <div key={`empty-${heightCm}`} className="h-8"></div>;
+                          }
                         })}
                       </div>
                     </div>
