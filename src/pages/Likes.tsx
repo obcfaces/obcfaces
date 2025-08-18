@@ -163,7 +163,7 @@ const Likes = () => {
         <meta name="description" content="Content you liked" />
       </Helmet>
 
-      <div className="max-w-4xl mx-auto px-4 py-8">
+      <div className="max-w-4xl mx-auto px-0 sm:px-6 py-8">
         <Tabs defaultValue="i-liked" className="w-full">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="i-liked">I Liked</TabsTrigger>
