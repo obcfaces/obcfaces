@@ -9,6 +9,7 @@ import { Camera, Eye, EyeOff, Phone, Mail, Facebook, Instagram } from "lucide-re
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import SearchableSelect from "@/components/ui/searchable-select";
+import StaticHeightScales from "@/components/ui/static-height-scales";
 import { getCitiesForLocation } from '@/lib/location-utils';
 
 interface ContestParticipationModalProps {
@@ -897,6 +898,11 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                   })}
                 </SelectContent>
               </Select>
+            </div>
+
+            {/* Static Height Reference Scales */}
+            <div className="mt-4">
+              <StaticHeightScales />
             </div>
 
             <div className="space-y-4">
