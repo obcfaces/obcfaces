@@ -169,11 +169,11 @@ export default function HeightRuler({ value = 170, onChange, className = "" }: H
                       <div
                         className={
                           "bg-foreground " +
-                          (mod10 ? "h-0.5 w-10" : mod5 ? "h-0.5 w-6" : "h-px w-4")
+                          (mod10 ? "h-0.5 w-8" : mod5 ? "h-0.5 w-6" : "h-px w-3")
                         }
                       />
                       <div className="ml-2 text-foreground text-xs tabular-nums">
-                        {mod10 ? v : mod5 ? v : ""}
+                        {v} cm
                       </div>
                     </div>
                   );
@@ -214,16 +214,16 @@ export default function HeightRuler({ value = 170, onChange, className = "" }: H
 
               <div>
                 {inTicks.map((inch) => {
-                  const isFoot = inch % 12 === 0;
-                  const isHalf = inch % 6 === 0 && !isFoot;
                   const { ft, inch: i } = inchesToFeetIn(inch);
-                  const label = isFoot ? `${ft}'` : isHalf ? `${ft}'${i}"` : "";
+                  const isFoot = inch % 12 === 0;
+                  const isInch = inch % 3 === 0; // Show every 3rd inch for better spacing
+                  const label = isFoot ? `${ft}'0"` : isInch ? `${ft}'${i}"` : "";
                   return (
                     <div key={inch} className="flex items-center" style={{ height: PX_PER_IN }}>
                       <div
                         className={
                           "bg-foreground " +
-                          (isFoot ? "h-0.5 w-10" : isHalf ? "h-0.5 w-6" : "h-px w-4")
+                          (isFoot ? "h-0.5 w-8" : isInch ? "h-0.5 w-6" : "h-px w-3")
                         }
                       />
                       <div className="ml-2 text-foreground text-xs tabular-nums">
