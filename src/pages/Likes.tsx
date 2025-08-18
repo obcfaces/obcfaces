@@ -163,7 +163,7 @@ const Likes = () => {
         <meta name="description" content="Content you liked" />
       </Helmet>
 
-      <div className="max-w-4xl mx-auto px-4 py-8">
+      <div className="max-w-4xl mx-auto px-4 py-8 sm:px-6">
         <Tabs defaultValue="i-liked" className="w-full">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="i-liked">I Liked</TabsTrigger>
@@ -172,9 +172,9 @@ const Likes = () => {
 
           <TabsContent value="i-liked" className="mt-6">
             {likedItems.length > 0 ? (
-              <div className="px-0 sm:px-6">
+              <>
                 {/* Country filter and view mode toggle */}
-                <div className="flex justify-between items-center gap-4 mb-4 px-6 sm:px-0">
+                <div className="flex justify-between items-center gap-4 mb-4 px-4 sm:px-0">
                   {/* Country filter */}
                   <div className="flex-1 max-w-48">
                     <SearchableSelect
@@ -226,40 +226,37 @@ const Likes = () => {
                   </div>
                 </div>
                 
-                {/* Liked items grid */}
-                <div className={`grid gap-1 sm:gap-3 ${
-                  likesViewMode === 'compact' 
-                    ? 'grid-cols-1' 
-                    : 'grid-cols-1'
-                }`}>
+                {/* Liked items grid - no padding on mobile like contest page */}
+                <div className="grid gap-1 sm:gap-3 grid-cols-1 -mx-4 sm:mx-0">
                   {likedItems
                     .filter(item => 
                       likesCountryFilter === "all" || 
                       item.candidateData?.country === likesCountryFilter
                     )
                     .map((item) => (
-                    <LikedItem
-                      key={item.likeId}
-                      likeId={item.likeId}
-                      contentType={item.contentType}
-                      contentId={item.contentId}
-                      authorName={item.authorName}
-                      authorAvatarUrl={item.authorAvatarUrl}
-                      authorProfileId={item.authorProfileId}
-                      time={item.time}
-                      content={item.content}
-                      imageSrc={item.imageSrc}
-                      likes={item.likes}
-                      comments={item.comments}
-                      onUnlike={handleUnlike}
-                      viewMode={likesViewMode}
-                      candidateData={item.candidateData}
-                      participantType={item.participantType}
-                      showStatusBadge={false}
-                    />
+                    <div key={item.likeId} className="px-4 sm:px-0">
+                      <LikedItem
+                        likeId={item.likeId}
+                        contentType={item.contentType}
+                        contentId={item.contentId}
+                        authorName={item.authorName}
+                        authorAvatarUrl={item.authorAvatarUrl}
+                        authorProfileId={item.authorProfileId}
+                        time={item.time}
+                        content={item.content}
+                        imageSrc={item.imageSrc}
+                        likes={item.likes}
+                        comments={item.comments}
+                        onUnlike={handleUnlike}
+                        viewMode={likesViewMode}
+                        candidateData={item.candidateData}
+                        participantType={item.participantType}
+                        showStatusBadge={false}
+                      />
+                    </div>
                   ))}
                 </div>
-              </div>
+              </>
             ) : (
               <div className="text-center py-12">
                 <Heart className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
@@ -271,9 +268,9 @@ const Likes = () => {
 
           <TabsContent value="i-was-liked" className="mt-6">
             {whoLikedMe.length > 0 ? (
-              <div className="px-0 sm:px-6">
+              <>
                 {/* Country filter and view mode toggle */}
-                <div className="flex justify-between items-center gap-4 mb-4 px-6 sm:px-0">
+                <div className="flex justify-between items-center gap-4 mb-4 px-4 sm:px-0">
                   {/* Country filter */}
                   <div className="flex-1 max-w-48">
                     <SearchableSelect
@@ -325,40 +322,37 @@ const Likes = () => {
                   </div>
                 </div>
                 
-                {/* Who liked me grid */}
-                <div className={`grid gap-1 sm:gap-3 ${
-                  whoLikedMeViewMode === 'compact' 
-                    ? 'grid-cols-1' 
-                    : 'grid-cols-1'
-                }`}>
+                {/* Who liked me grid - no padding on mobile like contest page */}
+                <div className="grid gap-1 sm:gap-3 grid-cols-1 -mx-4 sm:mx-0">
                   {whoLikedMe
                     .filter(item => 
                       whoLikedMeCountryFilter === "all" || 
                       item.candidateData?.country === whoLikedMeCountryFilter
                     )
                     .map((item) => (
-                    <LikedItem
-                      key={item.likeId}
-                      likeId={item.likeId}
-                      contentType={item.contentType}
-                      contentId={item.contentId}
-                      authorName={item.authorName}
-                      authorAvatarUrl={item.authorAvatarUrl}
-                      authorProfileId={item.authorProfileId}
-                      time={item.time}
-                      content={item.content}
-                      imageSrc={item.imageSrc}
-                      likes={item.likes}
-                      comments={item.comments}
-                      onUnlike={handleRemoveWhoLikedMe}
-                      viewMode={whoLikedMeViewMode}
-                      candidateData={item.candidateData}
-                      participantType={item.participantType}
-                      showStatusBadge={false}
-                    />
+                    <div key={item.likeId} className="px-4 sm:px-0">
+                      <LikedItem
+                        likeId={item.likeId}
+                        contentType={item.contentType}
+                        contentId={item.contentId}
+                        authorName={item.authorName}
+                        authorAvatarUrl={item.authorAvatarUrl}
+                        authorProfileId={item.authorProfileId}
+                        time={item.time}
+                        content={item.content}
+                        imageSrc={item.imageSrc}
+                        likes={item.likes}
+                        comments={item.comments}
+                        onUnlike={handleRemoveWhoLikedMe}
+                        viewMode={whoLikedMeViewMode}
+                        candidateData={item.candidateData}
+                        participantType={item.participantType}
+                        showStatusBadge={false}
+                      />
+                    </div>
                   ))}
                 </div>
-              </div>
+              </>
             ) : (
               <div className="text-center py-12">
                 <Heart className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
