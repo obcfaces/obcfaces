@@ -851,31 +851,18 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                       })}
                     </div>
                     <div className="scale ft">
-                      {Array.from({ length: 71 }, (_, i) => {
-                        const cm = 130 + i;
-                        
-                        // Создаем равномерно распределенные ft/in значения
+                      {Array.from({ length: 26 }, (_, i) => {
                         const ftInValues = [
                           "4'3\"", "4'4\"", "4'5\"", "4'6\"", "4'7\"", "4'8\"", "4'9\"", "4'10\"", "4'11\"",
                           "5'0\"", "5'1\"", "5'2\"", "5'3\"", "5'4\"", "5'5\"", "5'6\"", "5'7\"", "5'8\"", "5'9\"", "5'10\"", "5'11\"",
                           "6'0\"", "6'1\"", "6'2\"", "6'3\"", "6'4\"", "6'5\""
                         ];
                         
-                        // Первый на позиции 132 см (i=2), последний на позиции 198 см (i=68)
-                        const startIndex = 2; // 132 см
-                        const endIndex = 68;   // 198 см
-                        const totalRange = endIndex - startIndex;
-                        const valueStep = totalRange / (ftInValues.length - 1);
-                        
-                        let displayValue = '';
-                        ftInValues.forEach((value, valueIndex) => {
-                          const targetPosition = Math.round(startIndex + valueIndex * valueStep);
-                          if (i === targetPosition) {
-                            displayValue = value;
-                          }
-                        });
-                        
-                        return <div key={cm}>{displayValue}</div>;
+                        return (
+                          <div key={i} className="flex items-center justify-center" style={{ height: `${70/25}rem` }}>
+                            {ftInValues[i]}
+                          </div>
+                        );
                       })}
                     </div>
                   </div>
