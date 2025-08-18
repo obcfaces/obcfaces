@@ -5,12 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import SearchableSelect from "@/components/ui/searchable-select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { LogOut, Eye, EyeOff, UserIcon, MapPin } from "lucide-react";
+import { LogOut } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import PostCard from "@/components/profile/PostCard";
 import LikedItem from "@/components/profile/LikedItem";
@@ -29,8 +24,6 @@ import tableActiveIcon from "@/assets/icons/sdisplay-table-active.png";
 
 interface ProfileRow {
   display_name: string | null;
-  first_name: string | null;
-  last_name: string | null;
   birthdate: string | null;
   height_cm: number | null;
   weight_kg: number | null;
@@ -38,7 +31,6 @@ interface ProfileRow {
   city?: string | null;
   country?: string | null;
   bio?: string | null;
-  gender?: string | null;
 }
 
 const Profile = () => {
@@ -55,31 +47,6 @@ const Profile = () => {
   const [isEditingBio, setIsEditingBio] = useState(false);
   const [bioDraft, setBioDraft] = useState("");
   const [savingBio, setSavingBio] = useState(false);
-  const [isEditingProfile, setIsEditingProfile] = useState(false);
-  const [editForm, setEditForm] = useState({
-    display_name: '',
-    gender: '',
-    country: '',
-    bio: '',
-    email: ''
-  });
-  const [submitted, setSubmitted] = useState(false);
-  const [invalidFields, setInvalidFields] = useState<Set<string>>(new Set());
-  const [savingProfile, setSavingProfile] = useState(false);
-  const [showPasswordModal, setShowPasswordModal] = useState(false);
-  const [passwordForm, setPasswordForm] = useState({
-    currentPassword: '',
-    newPassword: '',
-    confirmPassword: ''
-  });
-  const [passwordSubmitted, setPasswordSubmitted] = useState(false);
-  const [passwordInvalidFields, setPasswordInvalidFields] = useState<Set<string>>(new Set());
-  const [savingPassword, setSavingPassword] = useState(false);
-  const [currentUserEmail, setCurrentUserEmail] = useState('');
-  const [avatarFile, setAvatarFile] = useState<File | null>(null);
-  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
-  const [uploadingAvatar, setUploadingAvatar] = useState(false);
-  const [activeTab, setActiveTab] = useState("Posts");
   const [likedItems, setLikedItems] = useState<any[]>([]);
   const [loadingLikes, setLoadingLikes] = useState(true);
   const [likesViewMode, setLikesViewMode] = useState<'compact' | 'full'>('compact');
@@ -95,8 +62,6 @@ const Profile = () => {
   // Demo profile for fallback
   const demoProfile: ProfileRow = {
     display_name: "Anna Petrova",
-    first_name: "Anna",
-    last_name: "Petrova",
     birthdate: "1999-03-15",
     height_cm: 165,
     weight_kg: 55,
@@ -105,70 +70,6 @@ const Profile = () => {
     country: "Russia",
     bio: "Model and photographer. Love traveling and discovering new places. Always looking for inspiration in everyday moments."
   };
-
-  // Country options
-  const countryOptions = [
-    { value: "Philippines", label: "Philippines" },
-    { value: "Indonesia", label: "Indonesia" },
-    { value: "Malaysia", label: "Malaysia" },
-    { value: "Singapore", label: "Singapore" },
-    { value: "Thailand", label: "Thailand" },
-    { value: "Vietnam", label: "Vietnam" },
-    { value: "Myanmar", label: "Myanmar" },
-    { value: "Cambodia", label: "Cambodia" },
-    { value: "Laos", label: "Laos" },
-    { value: "Brunei", label: "Brunei" },
-    { value: "Russia", label: "Russia" },
-    { value: "Ukraine", label: "Ukraine" },
-    { value: "Belarus", label: "Belarus" },
-    { value: "Kazakhstan", label: "Kazakhstan" },
-    { value: "USA", label: "United States" },
-    { value: "Canada", label: "Canada" },
-    { value: "Mexico", label: "Mexico" },
-    { value: "Brazil", label: "Brazil" },
-    { value: "Argentina", label: "Argentina" },
-    { value: "Colombia", label: "Colombia" },
-    { value: "Venezuela", label: "Venezuela" },
-    { value: "Peru", label: "Peru" },
-    { value: "Chile", label: "Chile" },
-    { value: "Ecuador", label: "Ecuador" },
-    { value: "Bolivia", label: "Bolivia" },
-    { value: "Paraguay", label: "Paraguay" },
-    { value: "Uruguay", label: "Uruguay" },
-    { value: "Germany", label: "Germany" },
-    { value: "France", label: "France" },
-    { value: "Italy", label: "Italy" },
-    { value: "Spain", label: "Spain" },
-    { value: "Poland", label: "Poland" },
-    { value: "Netherlands", label: "Netherlands" },
-    { value: "Belgium", label: "Belgium" },
-    { value: "Switzerland", label: "Switzerland" },
-    { value: "Austria", label: "Austria" },
-    { value: "Czech Republic", label: "Czech Republic" },
-    { value: "Hungary", label: "Hungary" },
-    { value: "Romania", label: "Romania" },
-    { value: "Bulgaria", label: "Bulgaria" },
-    { value: "Greece", label: "Greece" },
-    { value: "Portugal", label: "Portugal" },
-    { value: "Sweden", label: "Sweden" },
-    { value: "Norway", label: "Norway" },
-    { value: "Denmark", label: "Denmark" },
-    { value: "Finland", label: "Finland" },
-    { value: "UK", label: "United Kingdom" },
-    { value: "Ireland", label: "Ireland" },
-    { value: "China", label: "China" },
-    { value: "Japan", label: "Japan" },
-    { value: "South Korea", label: "South Korea" },
-    { value: "India", label: "India" },
-    { value: "Australia", label: "Australia" },
-    { value: "New Zealand", label: "New Zealand" },
-    { value: "South Africa", label: "South Africa" },
-    { value: "Egypt", label: "Egypt" },
-    { value: "Morocco", label: "Morocco" },
-    { value: "Nigeria", label: "Nigeria" },
-    { value: "Kenya", label: "Kenya" },
-    { value: "Other", label: "Other" }
-  ];
 
   const profile = data || demoProfile;
   const isOwner = currentUserId && currentUserId === id;
@@ -181,7 +82,7 @@ const Profile = () => {
       try {
         const { data: profileData } = await supabase
           .from("profiles")
-          .select("display_name, first_name, last_name, birthdate, height_cm, weight_kg, avatar_url, city, country, bio, gender")
+          .select("display_name, birthdate, height_cm, weight_kg, avatar_url, city, country, bio")
           .eq("id", id)
           .maybeSingle();
         
@@ -262,232 +163,6 @@ const Profile = () => {
       toast({ description: "Ошибка при сохранении био" });
     } finally {
       setSavingBio(false);
-    }
-  };
-
-  // Check if a field should have red border
-  const hasRedBorder = (fieldName: string) => {
-    return submitted && invalidFields.has(fieldName);
-  };
-
-  // Get CSS classes for form fields
-  const getFieldClasses = (fieldName: string, baseClasses: string = "") => {
-    if (hasRedBorder(fieldName)) {
-      return `${baseClasses} border border-red-500`.trim();
-    }
-    return baseClasses;
-  };
-
-  // Load current user email
-  useEffect(() => {
-    const loadCurrentUserEmail = async () => {
-      if (currentUserId && currentUserId === id) {
-        const { data: { user } } = await supabase.auth.getUser();
-        setCurrentUserEmail(user?.email || '');
-      }
-    };
-    loadCurrentUserEmail();
-  }, [currentUserId, id]);
-
-  const initEditForm = () => {
-    setEditForm({
-      display_name: profile.display_name || '',
-      gender: data?.gender || '',
-      country: profile.country || '',
-      bio: profile.bio || '',
-      email: currentUserEmail
-    });
-    setIsEditingProfile(true);
-    setSubmitted(false);
-    setInvalidFields(new Set());
-    setAvatarFile(null);
-    setAvatarPreview(null);
-  };
-
-  const handleAvatarChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      setAvatarFile(file);
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setAvatarPreview(e.target?.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const uploadAvatar = async (file: File): Promise<string | null> => {
-    if (!currentUserId) return null;
-    
-    setUploadingAvatar(true);
-    try {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${currentUserId}/avatar.${fileExt}`;
-      
-      const { error: uploadError } = await supabase.storage
-        .from('avatars')
-        .upload(fileName, file, { upsert: true });
-      
-      if (uploadError) throw uploadError;
-      
-      const { data } = supabase.storage
-        .from('avatars')
-        .getPublicUrl(fileName);
-      
-      return data.publicUrl;
-    } catch (error) {
-      console.error('Error uploading avatar:', error);
-      toast({ description: "Ошибка загрузки фото" });
-      return null;
-    } finally {
-      setUploadingAvatar(false);
-    }
-  };
-
-  const handleEditFormChange = (field: string, value: string) => {
-    setEditForm(prev => ({ ...prev, [field]: value }));
-    
-    // Remove field from invalid set when user types
-    if (invalidFields.has(field)) {
-      setInvalidFields(prev => {
-        const newSet = new Set(prev);
-        newSet.delete(field);
-        return newSet;
-      });
-    }
-  };
-
-  const handlePasswordFormChange = (field: string, value: string) => {
-    setPasswordForm(prev => ({ ...prev, [field]: value }));
-    
-    // Remove field from invalid set when user types
-    if (passwordInvalidFields.has(field)) {
-      setPasswordInvalidFields(prev => {
-        const newSet = new Set(prev);
-        newSet.delete(field);
-        return newSet;
-      });
-    }
-  };
-
-  const handleChangePassword = async () => {
-    setPasswordSubmitted(true);
-
-    // Validate password form
-    const newInvalidFields = new Set<string>();
-    if (!passwordForm.currentPassword.trim()) newInvalidFields.add('currentPassword');
-    if (!passwordForm.newPassword.trim()) newInvalidFields.add('newPassword');
-    if (!passwordForm.confirmPassword.trim()) newInvalidFields.add('confirmPassword');
-    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
-      newInvalidFields.add('confirmPassword');
-    }
-
-    setPasswordInvalidFields(newInvalidFields);
-
-    if (newInvalidFields.size > 0) {
-      if (passwordForm.newPassword !== passwordForm.confirmPassword) {
-        toast({ description: "Пароли не совпадают" });
-      }
-      return;
-    }
-
-    setSavingPassword(true);
-    try {
-      const { error } = await supabase.auth.updateUser({
-        password: passwordForm.newPassword
-      });
-      
-      if (error) throw error;
-      
-      setShowPasswordModal(false);
-      setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
-      setPasswordSubmitted(false);
-      setPasswordInvalidFields(new Set());
-      toast({ description: "Пароль изменен" });
-    } catch (error: any) {
-      toast({ description: error.message || "Ошибка при смене пароля" });
-    } finally {
-      setSavingPassword(false);
-    }
-  };
-
-  // Check if a password field should have red border
-  const hasPasswordRedBorder = (fieldName: string) => {
-    return passwordSubmitted && passwordInvalidFields.has(fieldName);
-  };
-
-  // Get CSS classes for password form fields
-  const getPasswordFieldClasses = (fieldName: string, baseClasses: string = "") => {
-    if (hasPasswordRedBorder(fieldName)) {
-      return `${baseClasses} border border-red-500`.trim();
-    }
-    return baseClasses;
-  };
-
-  const handleSaveProfile = async () => {
-    if (!currentUserId || currentUserId !== id) return;
-    
-    setSubmitted(true);
-
-    // Validate required fields
-    const newInvalidFields = new Set<string>();
-    if (!editForm.display_name.trim()) newInvalidFields.add('display_name');
-    if (!editForm.gender) newInvalidFields.add('gender');
-    if (!editForm.country.trim()) newInvalidFields.add('country');
-    if (editForm.email && !editForm.email.trim()) newInvalidFields.add('email');
-
-    setInvalidFields(newInvalidFields);
-
-    if (newInvalidFields.size > 0) {
-      return;
-    }
-    
-    setSavingProfile(true);
-    try {
-      // Upload avatar if a new one was selected
-      let avatarUrl = profile.avatar_url;
-      if (avatarFile) {
-        const uploadedUrl = await uploadAvatar(avatarFile);
-        if (uploadedUrl) {
-          avatarUrl = uploadedUrl;
-        }
-      }
-
-      // Update profile data
-      const updates: any = {
-        display_name: editForm.display_name,
-        gender: editForm.gender,
-        country: editForm.country,
-        bio: editForm.bio
-      };
-
-      // Add avatar URL if we have one
-      if (avatarUrl) {
-        updates.avatar_url = avatarUrl;
-      }
-
-      const { error: profileError } = await supabase
-        .from("profiles")
-        .update(updates)
-        .eq("id", id);
-      
-      if (profileError) throw profileError;
-
-      // Update email if provided and different from current
-      if (editForm.email && editForm.email !== currentUserEmail) {
-        const { error: emailError } = await supabase.auth.updateUser({
-          email: editForm.email
-        });
-        if (emailError) throw emailError;
-      }
-      
-      setData(prev => prev ? { ...prev, ...updates } : null);
-      setIsEditingProfile(false);
-      toast({ description: "Профиль сохранен" });
-    } catch (error: any) {
-      toast({ description: error.message || "Ошибка при сохранении профиля" });
-    } finally {
-      setSavingProfile(false);
     }
   };
 
@@ -731,20 +406,14 @@ const Profile = () => {
                   {(profile.display_name || "U").charAt(0).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
-               <div>
-                <h1 className="text-2xl font-bold">
-                  {profile.display_name || 
-                    (profile.first_name && profile.last_name 
-                      ? `${profile.first_name} ${profile.last_name}` 
-                      : "Пользователь")
-                  }
-                </h1>
-                {profile.country && (
+              <div>
+                <h1 className="text-2xl font-bold">{profile.display_name || "Пользователь"}</h1>
+                {(profile.city || profile.country) && (
                   <p className="text-muted-foreground">
-                    {profile.country}
+                    {[profile.city, profile.country].filter(Boolean).join(", ")}
                   </p>
                 )}
-               </div>
+              </div>
             </div>
             
             <div className="flex items-center gap-2">
@@ -753,10 +422,8 @@ const Profile = () => {
                   🏆 Join Contest
                 </Button>
               </ContestParticipationModal>
-               <Button variant="outline">Add Post</Button>
-               {isOwner && (
-                 <Button variant="outline" onClick={initEditForm}>Edit Profile</Button>
-               )}
+              <Button variant="outline">Add Post</Button>
+              <Button variant="outline">Edit Profile</Button>
             </div>
 
             {!isOwner && (
@@ -775,7 +442,7 @@ const Profile = () => {
           </div>
 
           {/* Tabs */}
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-8">
+          <Tabs defaultValue="likes" className="mt-8">
             <TabsList className="w-full bg-transparent p-0 rounded-none justify-start gap-2 sm:gap-8 border-b border-border overflow-x-auto">
               <TabsTrigger value="likes" className="px-0 mr-2 sm:mr-6 h-auto pb-2 bg-transparent rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary text-muted-foreground hover:text-foreground text-sm sm:text-base whitespace-nowrap">Likes</TabsTrigger>
               <TabsTrigger value="posts" className="px-0 mr-2 sm:mr-6 h-auto pb-2 bg-transparent rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary text-muted-foreground hover:text-foreground text-sm sm:text-base whitespace-nowrap">Posts</TabsTrigger>
@@ -977,176 +644,16 @@ const Profile = () => {
             </TabsContent>
 
             <TabsContent value="about" className="mt-8">
-              {isEditingProfile ? (
-                <div className="max-w-md space-y-3">
-                  {/* Avatar Upload */}
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium">Profile Photo</Label>
-                    <div className="flex items-center gap-4">
-                      <Avatar className="w-16 h-16">
-                        <AvatarImage 
-                          src={avatarPreview || profile.avatar_url || ""} 
-                          alt="Profile preview" 
-                        />
-                        <AvatarFallback className="text-sm">
-                          {(editForm.display_name || profile.display_name || "U").charAt(0).toUpperCase()}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <Input 
-                          type="file"
-                          accept="image/*"
-                          onChange={handleAvatarChange}
-                          className="text-sm"
-                        />
-                        <p className="text-xs text-muted-foreground mt-1">
-                          JPG, PNG up to 5MB
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Input 
-                      placeholder="Display Name" 
-                      className={getFieldClasses('display_name', "text-sm placeholder:text-muted-foreground")}
-                      value={editForm.display_name} 
-                      onChange={(e) => handleEditFormChange('display_name', e.target.value)} 
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Select value={editForm.gender} onValueChange={(value) => handleEditFormChange('gender', value)}>
-                      <SelectTrigger className={getFieldClasses('gender', "text-sm")}>
-                        <SelectValue placeholder="Gender" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="male">Male</SelectItem>
-                        <SelectItem value="female">Female</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <SearchableSelect
-                      value={editForm.country}
-                      onValueChange={(value) => handleEditFormChange('country', value)}
-                      options={countryOptions}
-                      placeholder="Country"
-                      invalid={hasRedBorder('country')}
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Input 
-                      placeholder="About Me" 
-                      className="text-sm placeholder:text-muted-foreground"
-                      value={editForm.bio} 
-                      onChange={(e) => handleEditFormChange('bio', e.target.value)} 
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Input 
-                      type="email"
-                      placeholder="Email" 
-                      className={getFieldClasses('email', "text-sm placeholder:text-muted-foreground")}
-                      value={editForm.email} 
-                      onChange={(e) => handleEditFormChange('email', e.target.value)} 
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Dialog open={showPasswordModal} onOpenChange={setShowPasswordModal}>
-                      <DialogTrigger asChild>
-                        <Button variant="link" className="p-0 h-auto text-sm text-primary">
-                          Change Password
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent className="max-w-md">
-                        <DialogHeader>
-                          <DialogTitle>Change Password</DialogTitle>
-                        </DialogHeader>
-                        <div className="space-y-3">
-                          <div>
-                            <Input 
-                              type="password"
-                              placeholder="Current Password" 
-                              className={getPasswordFieldClasses('currentPassword', "text-sm placeholder:text-muted-foreground")}
-                              value={passwordForm.currentPassword} 
-                              onChange={(e) => handlePasswordFormChange('currentPassword', e.target.value)} 
-                            />
-                          </div>
-                          <div>
-                            <Input 
-                              type="password"
-                              placeholder="New Password" 
-                              className={getPasswordFieldClasses('newPassword', "text-sm placeholder:text-muted-foreground")}
-                              value={passwordForm.newPassword} 
-                              onChange={(e) => handlePasswordFormChange('newPassword', e.target.value)} 
-                            />
-                          </div>
-                          <div>
-                            <Input 
-                              type="password"
-                              placeholder="Confirm New Password" 
-                              className={getPasswordFieldClasses('confirmPassword', "text-sm placeholder:text-muted-foreground")}
-                              value={passwordForm.confirmPassword} 
-                              onChange={(e) => handlePasswordFormChange('confirmPassword', e.target.value)} 
-                            />
-                          </div>
-                          <div className="flex gap-2 pt-2">
-                            <Button 
-                              type="button" 
-                              variant="outline" 
-                              onClick={() => {
-                                setShowPasswordModal(false);
-                                setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
-                                setPasswordSubmitted(false);
-                                setPasswordInvalidFields(new Set());
-                              }}
-                            >
-                              Cancel
-                            </Button>
-                            <Button onClick={handleChangePassword} disabled={savingPassword}>
-                              {savingPassword ? "Saving..." : "Save"}
-                            </Button>
-                          </div>
-                        </div>
-                      </DialogContent>
-                    </Dialog>
-                  </div>
-                  
-                  <div className="flex gap-2">
-                    <Button 
-                      type="button" 
-                      variant="outline" 
-                      onClick={() => setIsEditingProfile(false)}
-                    >
-                      Cancel
-                    </Button>
-                    <Button onClick={handleSaveProfile}>
-                      Save
-                    </Button>
-                  </div>
+              <article className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <p><span className="text-muted-foreground">Имя:</span> {profile.display_name ?? "—"}</p>
+                  <p><span className="text-muted-foreground">Дата рождения:</span> {profile.birthdate ?? "—"}</p>
                 </div>
-              ) : (
-                <div className="space-y-4">
-                  <p className="text-muted-foreground">{profile?.bio || "Информация о себе не указана"}</p>
-                  {profile?.gender && (
-                    <div className="flex items-center gap-2">
-                      <UserIcon className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm">{profile.gender === 'male' ? 'Мужской' : 'Женский'}</span>
-                    </div>
-                  )}
-                  {profile?.country && (
-                    <div className="flex items-center gap-2">
-                      <MapPin className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm">{profile.country}</span>
-                    </div>
-                  )}
+                <div className="space-y-2">
+                  <p><span className="text-muted-foreground">Рост:</span> {profile.height_cm ? `${profile.height_cm} см` : "—"}</p>
+                  <p><span className="text-muted-foreground">Вес:</span> {profile.weight_kg ? `${profile.weight_kg} кг` : "—"}</p>
                 </div>
-              )}
+              </article>
             </TabsContent>
           </Tabs>
         </section>

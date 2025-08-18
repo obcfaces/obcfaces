@@ -267,7 +267,7 @@ export function ContestantCard({
       <>
         <Card className="bg-card border-contest-border relative overflow-hidden">
           {isWinner && (
-            <div className="absolute top-2 left-4 bg-contest-blue text-white px-3 py-1 rounded-full text-sm font-bold flex items-center gap-1 z-20">
+            <div className="absolute top-2 left-4 bg-contest-blue text-white px-3 py-1 rounded-full text-sm font-bold flex items-center gap-1 z-10">
               🏆 WINNER
             </div>
           )}
@@ -471,7 +471,7 @@ export function ContestantCard({
     <>
       <Card className="bg-card border-contest-border relative overflow-hidden flex h-36 sm:h-40 md:h-44">
         {isWinner && (
-          <div className="absolute top-0 left-48 sm:left-56 md:left-64 right-0 bg-blue-100 text-blue-700 pl-2 pr-12 sm:pr-14 md:pr-16 py-1 text-xs font-semibold flex items-center justify-between z-20">
+          <div className="absolute top-0 left-48 sm:left-56 md:left-64 right-0 bg-blue-100 text-blue-700 pl-2 pr-12 sm:pr-14 md:pr-16 py-1 text-xs font-semibold flex items-center justify-between z-10">
             <span>🏆 WINNER</span>
             <span>+ 5000 PHP</span>
           </div>

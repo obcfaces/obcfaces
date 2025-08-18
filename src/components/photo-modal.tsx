@@ -133,7 +133,6 @@ export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantNa
       toast({
         title: "Comment added",
         description: "Your comment was added",
-        duration: 1000,
       });
     }
   };
@@ -296,7 +295,9 @@ export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantNa
                       ) : null}
                     </h3>
                     <div className="text-sm text-contest-blue truncate">
-                      {country}
+                      {(country || "")}
+                      {(country && city) ? " · " : ""}
+                      {(city || "")}
                     </div>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
