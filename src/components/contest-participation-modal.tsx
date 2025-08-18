@@ -9,6 +9,7 @@ import { Camera, Eye, EyeOff, Phone, Mail, Facebook, Instagram } from "lucide-re
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import SearchableSelect from "@/components/ui/searchable-select";
+import HeightRuler from "@/components/ui/height-ruler";
 import { getCitiesForLocation } from '@/lib/location-utils';
 
 interface ContestParticipationModalProps {
@@ -822,7 +823,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
               </Select>
             </div>
 
-            <div className="grid gap-2 grid-cols-3">
+            <div className="grid gap-4">
               <Select 
                 value={formData.measurement_system} 
                 onValueChange={(value) => handleFieldChange('measurement_system', value)}
@@ -835,47 +836,15 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                   <SelectItem value="imperial">Imperial (ft, lbs)</SelectItem>
                 </SelectContent>
               </Select>
-              <Select 
-                value={formData.height_cm} 
-                onValueChange={(value) => handleFieldChange('height_cm', value)}
-              >
-                <SelectTrigger className={getFieldClasses('height_cm', "text-sm")}>
-                  <SelectValue placeholder="Select height" />
-                </SelectTrigger>
-                <SelectContent>
-                  <div className="grid grid-cols-2 gap-6 p-2 max-h-80 overflow-y-auto">
-                    <div>
-                      <div className="text-xs font-medium text-muted-foreground mb-2 text-center">Height (cm)</div>
-                      <div className="space-y-1">
-                        {Array.from({ length: 66 }, (_, i) => {
-                          const height = 130 + i; // от 130 до 195 см
-                          return (
-                            <SelectItem key={`cm-${height}`} value={height.toString()}>
-                              {height} cm
-                            </SelectItem>
-                          );
-                        })}
-                      </div>
-                    </div>
-                    <div className="pl-4">
-                      <div className="text-xs font-medium text-muted-foreground mb-2 text-center">Height (ft'in&quot;)</div>
-                      <div className="space-y-1">
-                        {Array.from({ length: 25 }, (_, i) => {
-                          const totalInches = 52 + i; // от 4'4" до 6'4"
-                          const feet = Math.floor(totalInches / 12);
-                          const inches = totalInches % 12;
-                          const cmEquivalent = Math.round(totalInches * 2.54);
-                          return (
-                            <SelectItem key={`ft-${totalInches}`} value={cmEquivalent.toString()}>
-                              {feet}'{inches}&quot;
-                            </SelectItem>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  </div>
-                </SelectContent>
-              </Select>
+              
+              <div className="space-y-2">
+                <Label>Height</Label>
+                <HeightRuler
+                  value={formData.height_cm ? parseInt(formData.height_cm) : 170}
+                  onChange={(height) => handleFieldChange('height_cm', height.toString())}
+                />
+              </div>
+              
               <Select 
                 value={formData.weight_kg} 
                 onValueChange={(value) => handleFieldChange('weight_kg', value)}
