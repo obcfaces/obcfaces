@@ -843,7 +843,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                   <SelectValue placeholder="Select height" />
                 </SelectTrigger>
                 <SelectContent>
-                  <div className="grid grid-cols-2 gap-4 p-2">
+                  <div className="grid grid-cols-2 gap-6 p-2">
                     <div>
                       <div className="text-xs font-medium text-muted-foreground mb-2 text-center">Height (cm)</div>
                       <div className="space-y-1">
@@ -857,13 +857,9 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                         })}
                       </div>
                     </div>
-                    <div>
+                    <div className="pl-4">
                       <div className="text-xs font-medium text-muted-foreground mb-2 text-center">Height (ft'in&quot;)</div>
-                      <div className="space-y-1">
-                        {/* Добавляем пустые элементы для выравнивания */}
-                        {Array.from({ length: 8 }).map((_, i) => (
-                          <div key={`spacer-${i}`} className="h-8"></div>
-                        ))}
+                      <div className="space-y-1 mt-6">
                         {Array.from({ length: 25 }, (_, i) => {
                           const totalInches = 52 + i; // от 4'4" до 6'4"
                           const feet = Math.floor(totalInches / 12);
