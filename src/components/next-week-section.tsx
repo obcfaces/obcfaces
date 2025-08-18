@@ -6,12 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { supabase } from "@/integrations/supabase/client";
 import LoginModalContent from "@/components/login-modal-content";
 
-import contestant1Face from "@/assets/contestant-1-face.jpg";
-import contestant1Full from "@/assets/contestant-1-full.jpg";
-import contestant2Face from "@/assets/contestant-2-face.jpg";
-import contestant2Full from "@/assets/contestant-2-full.jpg";
-import contestant3Face from "@/assets/contestant-3-face.jpg";
-import contestant3Full from "@/assets/contestant-3-full.jpg";
+// Use direct paths to public images
 
 const candidates = [
   {
@@ -23,9 +18,9 @@ const candidates = [
     weight: 50,
     height: 165,
     rating: 0,
-    faceImage: contestant1Face,
-    fullBodyImage: contestant1Full,
-    additionalPhotos: [contestant2Face, contestant3Face],
+    faceImage: "/lovable-uploads/1147be30-a1d2-466f-a9a8-067f4628cbb2.png",
+    fullBodyImage: "/lovable-uploads/1147be30-a1d2-466f-a9a8-067f4628cbb2.png",
+    additionalPhotos: ["/lovable-uploads/009d20f0-cac7-4c08-9bc9-146617664bc3.png", "/lovable-uploads/c4e9d90c-eeda-44db-94e3-08c6a959f1a5.png"],
     isVoted: true
   },
   {
@@ -37,9 +32,9 @@ const candidates = [
     weight: 53,
     height: 168,
     rating: 0,
-    faceImage: contestant2Face,
-    fullBodyImage: contestant2Full,
-    additionalPhotos: [contestant1Face],
+    faceImage: "/lovable-uploads/009d20f0-cac7-4c08-9bc9-146617664bc3.png",
+    fullBodyImage: "/lovable-uploads/009d20f0-cac7-4c08-9bc9-146617664bc3.png",
+    additionalPhotos: ["/lovable-uploads/1147be30-a1d2-466f-a9a8-067f4628cbb2.png"],
     isVoted: true
   },
   {
@@ -51,9 +46,9 @@ const candidates = [
     weight: 52,
     height: 167,
     rating: 0,
-    faceImage: contestant3Face,
-    fullBodyImage: contestant3Full,
-    additionalPhotos: [contestant1Face, contestant2Face, contestant1Full],
+    faceImage: "/lovable-uploads/c4e9d90c-eeda-44db-94e3-08c6a959f1a5.png",
+    fullBodyImage: "/lovable-uploads/c4e9d90c-eeda-44db-94e3-08c6a959f1a5.png",
+    additionalPhotos: ["/lovable-uploads/1147be30-a1d2-466f-a9a8-067f4628cbb2.png", "/lovable-uploads/009d20f0-cac7-4c08-9bc9-146617664bc3.png", "/lovable-uploads/1147be30-a1d2-466f-a9a8-067f4628cbb2.png"],
     isVoted: true
   },
   {
@@ -65,8 +60,8 @@ const candidates = [
     weight: 55,
     height: 170,
     rating: 0,
-    faceImage: contestant1Face,
-    fullBodyImage: contestant1Full,
+    faceImage: "/lovable-uploads/1147be30-a1d2-466f-a9a8-067f4628cbb2.png",
+    fullBodyImage: "/lovable-uploads/1147be30-a1d2-466f-a9a8-067f4628cbb2.png",
     isVoted: true
   },
   {
@@ -78,9 +73,9 @@ const candidates = [
     weight: 49,
     height: 163,
     rating: 0,
-    faceImage: contestant2Face,
-    fullBodyImage: contestant2Full,
-    additionalPhotos: [contestant3Face, contestant3Full],
+    faceImage: "/lovable-uploads/009d20f0-cac7-4c08-9bc9-146617664bc3.png",
+    fullBodyImage: "/lovable-uploads/009d20f0-cac7-4c08-9bc9-146617664bc3.png",
+    additionalPhotos: ["/lovable-uploads/c4e9d90c-eeda-44db-94e3-08c6a959f1a5.png", "/lovable-uploads/c4e9d90c-eeda-44db-94e3-08c6a959f1a5.png"],
     isVoted: true
   },
   {
@@ -92,9 +87,9 @@ const candidates = [
     weight: 56,
     height: 172,
     rating: 0,
-    faceImage: contestant3Face,
-    fullBodyImage: contestant3Full,
-    additionalPhotos: [contestant1Face],
+    faceImage: "/lovable-uploads/c4e9d90c-eeda-44db-94e3-08c6a959f1a5.png",
+    fullBodyImage: "/lovable-uploads/c4e9d90c-eeda-44db-94e3-08c6a959f1a5.png",
+    additionalPhotos: ["/lovable-uploads/1147be30-a1d2-466f-a9a8-067f4628cbb2.png"],
     isVoted: true
   },
   {
@@ -106,9 +101,9 @@ const candidates = [
     weight: 51,
     height: 166,
     rating: 0,
-    faceImage: contestant1Face,
-    fullBodyImage: contestant1Full,
-    additionalPhotos: [contestant2Face],
+    faceImage: "/lovable-uploads/1147be30-a1d2-466f-a9a8-067f4628cbb2.png",
+    fullBodyImage: "/lovable-uploads/1147be30-a1d2-466f-a9a8-067f4628cbb2.png",
+    additionalPhotos: ["/lovable-uploads/009d20f0-cac7-4c08-9bc9-146617664bc3.png"],
     isVoted: true
   },
   {
@@ -120,9 +115,9 @@ const candidates = [
     weight: 54,
     height: 169,
     rating: 0,
-    faceImage: contestant2Face,
-    fullBodyImage: contestant2Full,
-    additionalPhotos: [contestant3Face],
+    faceImage: "/lovable-uploads/009d20f0-cac7-4c08-9bc9-146617664bc3.png",
+    fullBodyImage: "/lovable-uploads/009d20f0-cac7-4c08-9bc9-146617664bc3.png",
+    additionalPhotos: ["/lovable-uploads/c4e9d90c-eeda-44db-94e3-08c6a959f1a5.png"],
     isVoted: true
   },
   {
@@ -134,9 +129,9 @@ const candidates = [
     weight: 48,
     height: 164,
     rating: 0,
-    faceImage: contestant3Face,
-    fullBodyImage: contestant3Full,
-    additionalPhotos: [contestant1Face, contestant2Face],
+    faceImage: "/lovable-uploads/c4e9d90c-eeda-44db-94e3-08c6a959f1a5.png",
+    fullBodyImage: "/lovable-uploads/c4e9d90c-eeda-44db-94e3-08c6a959f1a5.png",
+    additionalPhotos: ["/lovable-uploads/1147be30-a1d2-466f-a9a8-067f4628cbb2.png", "/lovable-uploads/009d20f0-cac7-4c08-9bc9-146617664bc3.png"],
     isVoted: true
   },
   {
@@ -148,9 +143,9 @@ const candidates = [
     weight: 57,
     height: 171,
     rating: 0,
-    faceImage: contestant1Face,
-    fullBodyImage: contestant1Full,
-    additionalPhotos: [contestant3Face],
+    faceImage: "/lovable-uploads/1147be30-a1d2-466f-a9a8-067f4628cbb2.png",
+    fullBodyImage: "/lovable-uploads/1147be30-a1d2-466f-a9a8-067f4628cbb2.png",
+    additionalPhotos: ["/lovable-uploads/c4e9d90c-eeda-44db-94e3-08c6a959f1a5.png"],
     isVoted: true
   }
 ];

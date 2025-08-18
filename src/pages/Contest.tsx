@@ -1,9 +1,7 @@
 import { useMemo, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import PostCard from "@/components/profile/PostCard";
-import contestant1 from "@/assets/contestant-1.jpg";
-import contestant2 from "@/assets/contestant-2.jpg";
-import contestant3 from "@/assets/contestant-3.jpg";
+// Use direct paths to public images
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { AlignJustify, Grid2X2 } from "lucide-react";
@@ -13,159 +11,141 @@ interface Week {
   label: string;
 }
 
-interface Entry {
-  id: string;
-  authorName: string;
-  imageSrc: string;
-  weekKey: string;
-  createdAt: string; // ISO date
-}
-
-const weeks: Week[] = [
-  { key: "2025-07-24_2025-07-30", label: "July 24–30, 2025" },
-  { key: "2025-07-17_2025-07-23", label: "July 17–23, 2025" },
-];
-
-const allEntries: Entry[] = [
-  {
-    id: "e1",
-    authorName: "Anna P.",
-    imageSrc: contestant1,
-    weekKey: "2025-07-24_2025-07-30",
-    createdAt: "2025-07-25T10:00:00Z",
-  },
-  {
-    id: "e2",
-    authorName: "Bella R.",
-    imageSrc: contestant2,
-    weekKey: "2025-07-24_2025-07-30",
-    createdAt: "2025-07-27T12:30:00Z",
-  },
-  {
-    id: "e3",
-    authorName: "Clara M.",
-    imageSrc: contestant3,
-    weekKey: "2025-07-17_2025-07-23",
-    createdAt: "2025-07-20T14:15:00Z",
-  },
-];
-
-function formatTimeForCard(iso: string, weekLabel: string) {
-  const d = new Date(iso);
-  return `${weekLabel} · ${d.toLocaleDateString(undefined, { month: "short", day: "numeric" })}`;
-}
-
 const Contest = () => {
-  const [viewMode, setViewMode] = useState<'compact' | 'full'>('compact');
-  const [selectedWeek, setSelectedWeek] = useState<string>(weeks[0].key);
-  const week = useMemo(() => weeks.find(w => w.key === selectedWeek)!, [selectedWeek]);
-  const entries = useMemo(() => allEntries.filter(e => e.weekKey === selectedWeek), [selectedWeek]);
+  const [selectedWeek, setSelectedWeek] = useState("current");
+  const [viewMode, setViewMode] = useState<'compact' | 'full'>('full');
+
+  const weeks: Week[] = [
+    { key: "current", label: "This Week (25-31 Aug 2025)" },
+    { key: "week1", label: "1 Week Ago (18-24 Aug 2025)" },
+    { key: "week2", label: "2 Weeks Ago (11-17 Aug 2025)" },
+    { key: "week3", label: "3 Weeks Ago (4-10 Aug 2025)" },
+  ];
+
+  const samplePosts = useMemo(() => [
+    {
+      id: "1",
+      authorName: "Maria Santos",
+      authorAvatarUrl: "/lovable-uploads/1147be30-a1d2-466f-a9a8-067f4628cbb2.png",
+      time: "2 hours ago",
+      content: "Excited to be part of this week's competition! 🌟",
+      imageSrc: "/lovable-uploads/1147be30-a1d2-466f-a9a8-067f4628cbb2.png",
+      likes: 245,
+      comments: 18,
+      hasLiked: false
+    },
+    {
+      id: "2", 
+      authorName: "Anna Cruz",
+      authorAvatarUrl: "/lovable-uploads/009d20f0-cac7-4c08-9bc9-146617664bc3.png",
+      time: "5 hours ago",
+      content: "Thank you everyone for the support! 💖",
+      imageSrc: "/lovable-uploads/009d20f0-cac7-4c08-9bc9-146617664bc3.png",
+      likes: 189,
+      comments: 23,
+      hasLiked: true
+    },
+    {
+      id: "3",
+      authorName: "Sofia Reyes", 
+      authorAvatarUrl: "/lovable-uploads/c4e9d90c-eeda-44db-94e3-08c6a959f1a5.png",
+      time: "1 day ago",
+      content: "Beautiful sunset photoshoot today! What do you think? ✨",
+      imageSrc: "/lovable-uploads/c4e9d90c-eeda-44db-94e3-08c6a959f1a5.png",
+      likes: 156,
+      comments: 31,
+      hasLiked: false
+    }
+  ], []);
 
   return (
-    <>
+    <div className="min-h-screen bg-background">
       <Helmet>
-        <title>Contest – Weekly Entries</title>
-        <meta name="description" content="Browse weekly contest entries and finalists." />
-        <link rel="canonical" href="/contest" />
+        <title>Contest Gallery - OBC Philippines</title>
+        <meta name="description" content="Browse contest entries and participate in the Online Beauty Contest Philippines. Vote for your favorite contestants." />
       </Helmet>
+      
+      <div className="container mx-auto px-4 py-8">
+        <div className="mb-8">
+          <h1 className="text-4xl font-bold text-center mb-4">Contest Gallery</h1>
+          <p className="text-muted-foreground text-center max-w-2xl mx-auto">
+            Explore entries from current and past contests. Vote for your favorites and see who takes home the prizes!
+          </p>
+        </div>
 
-      <main className="min-h-screen bg-background">
-        <section className="container mx-auto px-0 sm:px-6 py-8">
-          {/* View controls moved below, above cards */}
-
-          <header className="mb-6">
-            <h1 className="text-3xl font-bold text-contest-text">THIS WEEK</h1>
-            <p className="text-sm text-muted-foreground">{week.label}</p>
-            <p className="text-muted-foreground">Help us choose the winner of the week.</p>
-          </header>
-
-          <div className="mb-6 max-w-xs">
+        {/* Week Filter and View Toggle */}
+        <div className="flex flex-col sm:flex-row gap-4 items-center justify-between mb-8">
+          <div className="w-full sm:w-80">
             <Select value={selectedWeek} onValueChange={setSelectedWeek}>
-              <SelectTrigger aria-label="Select week">
+              <SelectTrigger>
                 <SelectValue placeholder="Select week" />
               </SelectTrigger>
               <SelectContent>
-                {weeks.map(w => (
-                  <SelectItem key={w.key} value={w.key}>{w.label}</SelectItem>
+                {weeks.map((week) => (
+                  <SelectItem key={week.key} value={week.key}>
+                    {week.label}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
 
-          <div className="mb-4">
-            <div className="relative">
-              <div aria-hidden className="absolute inset-x-0 bottom-0 border-b border-border" />
-              <div className="relative z-10 flex items-end justify-evenly w-full pb-0" role="tablist" aria-label="View mode">
-                <button
-                  type="button"
-                  onClick={() => setViewMode('full')}
-                  aria-pressed={viewMode === 'full'}
-                  aria-label="List view"
-                  className="p-1 rounded-md hover:bg-accent transition-colors"
-                >
-                  <AlignJustify 
-                    size={28} 
-                    strokeWidth={1}
-                    className={viewMode === 'full' ? "text-primary" : "text-muted-foreground"}
-                  />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setViewMode('compact')}
-                  aria-pressed={viewMode === 'compact'}
-                  aria-label="Grid view"
-                  className="p-1 rounded-md hover:bg-accent transition-colors"
-                >
-                  <Grid2X2 
-                    size={28} 
-                    strokeWidth={1}
-                    className={viewMode === 'compact' ? "text-primary" : "text-muted-foreground"}
-                  />
-                </button>
-              </div>
-            </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setViewMode('compact')}
+              className={`p-2 rounded-md transition-colors ${
+                viewMode === 'compact' 
+                  ? 'bg-primary text-primary-foreground' 
+                  : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
+              }`}
+            >
+              <AlignJustify size={20} />
+            </button>
+            <button
+              onClick={() => setViewMode('full')}
+              className={`p-2 rounded-md transition-colors ${
+                viewMode === 'full' 
+                  ? 'bg-primary text-primary-foreground' 
+                  : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
+              }`}
+            >
+              <Grid2X2 size={20} />
+            </button>
           </div>
+        </div>
 
-          {viewMode === 'compact' ? (
-            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-1 sm:gap-2">
-              {entries.map(e => (
-                <article key={e.id} className="relative">
-                  <AspectRatio ratio={1}>
-                    <img
-                      src={e.imageSrc}
-                      alt={`Contest entry by ${e.authorName}`}
-                      loading="lazy"
-                      className="absolute inset-0 w-full h-full object-cover"
-                    />
-                  </AspectRatio>
-                </article>
-              ))}
-              {entries.length === 0 && (
-                <p className="col-span-full text-sm text-muted-foreground">No entries for this week yet.</p>
-              )}
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 gap-4 sm:gap-6">
-              {entries.map(e => (
-                <article key={e.id}>
+        {/* Contest Posts Grid */}
+        <div className={`grid gap-6 ${
+          viewMode === 'full' 
+            ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' 
+            : 'grid-cols-1 max-w-2xl mx-auto'
+        }`}>
+          {samplePosts.map((post) => (
+            <div key={post.id} className="w-full">
+              {viewMode === 'full' ? (
+                <AspectRatio ratio={3/4}>
                   <PostCard
-                    authorName={e.authorName}
-                    time={formatTimeForCard(e.createdAt, week.label)}
-                    content={`Contest entry for ${week.label}`}
-                    imageSrc={e.imageSrc}
-                    likes={0}
-                    comments={0}
+                    {...post}
+                    className="h-full"
                   />
-                </article>
-              ))}
-              {entries.length === 0 && (
-                <p className="text-sm text-muted-foreground">No entries for this week yet.</p>
+                </AspectRatio>
+              ) : (
+                <PostCard
+                  {...post}
+                />
               )}
             </div>
-          )}
-        </section>
-      </main>
-    </>
+          ))}
+        </div>
+
+        {/* Load More Button */}
+        <div className="text-center mt-12">
+          <button className="bg-primary text-primary-foreground px-8 py-3 rounded-lg hover:bg-primary/90 transition-colors">
+            Load More Posts
+          </button>
+        </div>
+      </div>
+    </div>
   );
 };
 

@@ -17,12 +17,7 @@ import LikedItem from "@/components/profile/LikedItem";
 import { PhotoModal } from "@/components/photo-modal";
 import { ContestParticipationModal } from "@/components/contest-participation-modal";
 import CreatePostModal from "@/components/create-post-modal";
-import c1 from "@/assets/contestant-1.jpg";
-import c2 from "@/assets/contestant-2.jpg";
-import c3 from "@/assets/contestant-3.jpg";
-import c1face from "@/assets/contestant-1-face.jpg";
-import c2face from "@/assets/contestant-2-face.jpg";
-import c3face from "@/assets/contestant-3-face.jpg";
+// Use direct paths to public images instead of ES6 imports
 import { AlignJustify, Grid2X2 } from "lucide-react";
 
 interface ProfileRow {
@@ -97,7 +92,7 @@ const Profile = () => {
   const [postsViewMode, setPostsViewMode] = useState<'compact' | 'full'>('full');
 
   // Sample photos for gallery
-  const profilePhotos = [c1, c2, c3, c1, c2, c3];
+  const profilePhotos = ["/lovable-uploads/1147be30-a1d2-466f-a9a8-067f4628cbb2.png", "/lovable-uploads/009d20f0-cac7-4c08-9bc9-146617664bc3.png", "/lovable-uploads/c4e9d90c-eeda-44db-94e3-08c6a959f1a5.png", "/lovable-uploads/1147be30-a1d2-466f-a9a8-067f4628cbb2.png", "/lovable-uploads/009d20f0-cac7-4c08-9bc9-146617664bc3.png", "/lovable-uploads/c4e9d90c-eeda-44db-94e3-08c6a959f1a5.png"];
 
   // Demo profile for fallback
   const demoProfile: ProfileRow = {
@@ -107,7 +102,7 @@ const Profile = () => {
     birthdate: "1999-03-15",
     height_cm: 165,
     weight_kg: 55,
-    avatar_url: c1face,
+    avatar_url: "/lovable-uploads/1147be30-a1d2-466f-a9a8-067f4628cbb2.png",
     city: "Moscow",
     country: "Russia",
     bio: "Model and photographer. Love traveling and discovering new places. Always looking for inspiration in everyday moments."
@@ -578,7 +573,7 @@ const Profile = () => {
             "Fernanda Diaz", "Adriana Castro"
           ];
           const participantTypes = ["candidate", "finalist", "winner"] as const;
-          const mockImages = [c1face, c2face, c3face];
+          const mockImages = ["/lovable-uploads/1147be30-a1d2-466f-a9a8-067f4628cbb2.png", "/lovable-uploads/009d20f0-cac7-4c08-9bc9-146617664bc3.png", "/lovable-uploads/c4e9d90c-eeda-44db-94e3-08c6a959f1a5.png"];
           const randomImageIndex = Math.floor(Math.random() * mockImages.length);
           const randomNameIndex = Math.floor(Math.random() * nextWeekNames.length);
           const randomTypeIndex = Math.floor(Math.random() * participantTypes.length);
@@ -677,7 +672,7 @@ const Profile = () => {
         time: new Date(profileData.created_at).toLocaleString('ru-RU'),
         likes: Math.floor(Math.random() * 200) + 50, // Mock likes
         comments: Math.floor(Math.random() * 40) + 5, // Mock comments
-        imageSrc: profileData.photo_1_url || c1face, // Use first photo as main display
+        imageSrc: profileData.photo_1_url || "/lovable-uploads/1147be30-a1d2-466f-a9a8-067f4628cbb2.png", // Use first photo as main display
         participantType: (profileData.participant_type as 'candidate' | 'finalist' | 'winner') || 'candidate',
         candidateData: {
           name: `${profileData.first_name || ''} ${profileData.last_name || ''}`.trim() || 'Участник',
@@ -686,8 +681,8 @@ const Profile = () => {
           height: profileData.height_cm || 165,
           country: [profileData.country, profileData.state, profileData.city].filter(Boolean).join(', ') || 'Philippines',
           city: profileData.city || 'Manila',
-          faceImage: profileData.photo_1_url || c1face, // Formal photo (first image)
-          fullBodyImage: profileData.photo_2_url || c1, // Casual photo (second image)
+          faceImage: profileData.photo_1_url || "/lovable-uploads/1147be30-a1d2-466f-a9a8-067f4628cbb2.png", // Formal photo (first image)
+          fullBodyImage: profileData.photo_2_url || "/lovable-uploads/1147be30-a1d2-466f-a9a8-067f4628cbb2.png", // Casual photo (second image)
           participantType: (profileData.participant_type as 'candidate' | 'finalist' | 'winner') || 'candidate'
         }
       };
@@ -765,7 +760,7 @@ const Profile = () => {
       authorName: profile.display_name || "User",
       time: "2 часа назад",
       content: "Beautiful day for a photoshoot! 📸",
-      imageSrc: c1,
+      imageSrc: "/lovable-uploads/1147be30-a1d2-466f-a9a8-067f4628cbb2.png",
       likes: 24,
       comments: 3
     },
@@ -774,7 +769,7 @@ const Profile = () => {
       authorName: profile.display_name || "User",
       time: "1 день назад",
       content: "Working on new looks. What do you think?",
-      imageSrc: c2,
+      imageSrc: "/lovable-uploads/009d20f0-cac7-4c08-9bc9-146617664bc3.png",
       likes: 45,
       comments: 8
     }

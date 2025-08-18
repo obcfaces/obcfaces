@@ -1,12 +1,7 @@
 import { useState } from "react";
 import { ContestantCard } from "@/components/contest-card";
 
-import contestant1Face from "@/assets/contestant-1-face.jpg";
-import contestant1Full from "@/assets/contestant-1-full.jpg";
-import contestant2Face from "@/assets/contestant-2-face.jpg";
-import contestant2Full from "@/assets/contestant-2-full.jpg";
-import contestant3Face from "@/assets/contestant-3-face.jpg";
-import contestant3Full from "@/assets/contestant-3-full.jpg";
+// Use direct paths to public images
 
 interface ContestSectionProps {
   title: string;
@@ -49,9 +44,9 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
           weight: 55.5,
           height: 165,
           rating: ratings[1],
-          faceImage: contestant1Face,
-          fullBodyImage: contestant1Full,
-          additionalPhotos: [contestant2Face, contestant3Face],
+          faceImage: "/lovable-uploads/1147be30-a1d2-466f-a9a8-067f4628cbb2.png",
+          fullBodyImage: "/lovable-uploads/1147be30-a1d2-466f-a9a8-067f4628cbb2.png",
+          additionalPhotos: ["/lovable-uploads/009d20f0-cac7-4c08-9bc9-146617664bc3.png", "/lovable-uploads/c4e9d90c-eeda-44db-94e3-08c6a959f1a5.png"],
           isVoted: showWinner ? true : !!votes[1],
           isWinner: showWinner,
           prize: showWinner ? "+ 5000 руб" : undefined
@@ -66,9 +61,9 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
           weight: 60,
           height: 170,
           rating: ratings[2],
-          faceImage: contestant2Face,
-          fullBodyImage: contestant2Full,
-          additionalPhotos: [contestant1Face],
+          faceImage: "/lovable-uploads/009d20f0-cac7-4c08-9bc9-146617664bc3.png",
+          fullBodyImage: "/lovable-uploads/009d20f0-cac7-4c08-9bc9-146617664bc3.png",
+          additionalPhotos: ["/lovable-uploads/1147be30-a1d2-466f-a9a8-067f4628cbb2.png"],
           isVoted: showWinner ? true : !!votes[2]
         },
         {
@@ -81,9 +76,9 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
           weight: 58,
           height: 162,
           rating: ratings[3],
-          faceImage: contestant3Face,
-          fullBodyImage: contestant3Full,
-          additionalPhotos: [contestant1Face, contestant2Face, contestant1Full],
+          faceImage: "/lovable-uploads/c4e9d90c-eeda-44db-94e3-08c6a959f1a5.png",
+          fullBodyImage: "/lovable-uploads/c4e9d90c-eeda-44db-94e3-08c6a959f1a5.png",
+          additionalPhotos: ["/lovable-uploads/1147be30-a1d2-466f-a9a8-067f4628cbb2.png", "/lovable-uploads/009d20f0-cac7-4c08-9bc9-146617664bc3.png", "/lovable-uploads/1147be30-a1d2-466f-a9a8-067f4628cbb2.png"],
           isVoted: showWinner ? true : !!votes[3]
         }
       ];
@@ -100,9 +95,9 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
           weight: 75,
           height: 180,
           rating: ratings[1],
-          faceImage: contestant1Face,
-          fullBodyImage: contestant1Full,
-          additionalPhotos: [contestant2Face],
+          faceImage: "/lovable-uploads/1147be30-a1d2-466f-a9a8-067f4628cbb2.png",
+          fullBodyImage: "/lovable-uploads/1147be30-a1d2-466f-a9a8-067f4628cbb2.png",
+          additionalPhotos: ["/lovable-uploads/009d20f0-cac7-4c08-9bc9-146617664bc3.png"],
           isVoted: showWinner ? true : !!votes[1],
           isWinner: showWinner,
           prize: showWinner ? "+ 3000 руб" : undefined
@@ -117,9 +112,9 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
           weight: 70.5,
           height: 178,
           rating: ratings[2],
-          faceImage: contestant2Face,
-          fullBodyImage: contestant2Full,
-          additionalPhotos: [contestant3Face],
+          faceImage: "/lovable-uploads/009d20f0-cac7-4c08-9bc9-146617664bc3.png",
+          fullBodyImage: "/lovable-uploads/009d20f0-cac7-4c08-9bc9-146617664bc3.png",
+          additionalPhotos: ["/lovable-uploads/c4e9d90c-eeda-44db-94e3-08c6a959f1a5.png"],
           isVoted: showWinner ? true : !!votes[2]
         }
       ];
@@ -136,9 +131,9 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
           weight: 52,
           height: 168,
           rating: ratings[1],
-          faceImage: contestant1Face,
-          fullBodyImage: contestant1Full,
-          additionalPhotos: [contestant2Face, contestant3Face],
+          faceImage: "/lovable-uploads/1147be30-a1d2-466f-a9a8-067f4628cbb2.png",
+          fullBodyImage: "/lovable-uploads/1147be30-a1d2-466f-a9a8-067f4628cbb2.png",
+          additionalPhotos: ["/lovable-uploads/009d20f0-cac7-4c08-9bc9-146617664bc3.png", "/lovable-uploads/c4e9d90c-eeda-44db-94e3-08c6a959f1a5.png"],
           isVoted: showWinner ? true : !!votes[1],
           isWinner: showWinner,
           prize: showWinner ? "+ 5000 PhP" : undefined
@@ -152,9 +147,9 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
           weight: 55,
           height: 165,
           rating: ratings[2],
-          faceImage: contestant2Face,
-          fullBodyImage: contestant2Full,
-          additionalPhotos: [contestant1Face],
+          faceImage: "/lovable-uploads/009d20f0-cac7-4c08-9bc9-146617664bc3.png",
+          fullBodyImage: "/lovable-uploads/009d20f0-cac7-4c08-9bc9-146617664bc3.png",
+          additionalPhotos: ["/lovable-uploads/1147be30-a1d2-466f-a9a8-067f4628cbb2.png"],
           isVoted: showWinner ? true : !!votes[2]
         },
         {
@@ -166,9 +161,9 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
           weight: 51,
           height: 170,
           rating: ratings[3],
-          faceImage: contestant3Face,
-          fullBodyImage: contestant3Full,
-          additionalPhotos: [contestant1Face, contestant2Face, contestant1Full],
+          faceImage: "/lovable-uploads/c4e9d90c-eeda-44db-94e3-08c6a959f1a5.png",
+          fullBodyImage: "/lovable-uploads/c4e9d90c-eeda-44db-94e3-08c6a959f1a5.png",
+          additionalPhotos: ["/lovable-uploads/1147be30-a1d2-466f-a9a8-067f4628cbb2.png", "/lovable-uploads/009d20f0-cac7-4c08-9bc9-146617664bc3.png", "/lovable-uploads/1147be30-a1d2-466f-a9a8-067f4628cbb2.png"],
           isVoted: showWinner ? true : !!votes[3]
         },
         {
@@ -180,8 +175,8 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
           weight: 53,
           height: 167,
           rating: ratings[4],
-          faceImage: contestant1Face,
-          fullBodyImage: contestant1Full,
+          faceImage: "/lovable-uploads/1147be30-a1d2-466f-a9a8-067f4628cbb2.png",
+          fullBodyImage: "/lovable-uploads/1147be30-a1d2-466f-a9a8-067f4628cbb2.png",
           isVoted: showWinner ? true : !!votes[4]
         },
         {
@@ -193,9 +188,9 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
           weight: 49,
           height: 163,
           rating: ratings[5],
-          faceImage: contestant2Face,
-          fullBodyImage: contestant2Full,
-          additionalPhotos: [contestant3Face, contestant3Full],
+          faceImage: "/lovable-uploads/009d20f0-cac7-4c08-9bc9-146617664bc3.png",
+          fullBodyImage: "/lovable-uploads/009d20f0-cac7-4c08-9bc9-146617664bc3.png",
+          additionalPhotos: ["/lovable-uploads/c4e9d90c-eeda-44db-94e3-08c6a959f1a5.png", "/lovable-uploads/c4e9d90c-eeda-44db-94e3-08c6a959f1a5.png"],
           isVoted: showWinner ? true : !!votes[5]
         },
         {
@@ -207,8 +202,8 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
           weight: 56,
           height: 172,
           rating: ratings[6],
-          faceImage: contestant3Face,
-          fullBodyImage: contestant3Full,
+          faceImage: "/lovable-uploads/c4e9d90c-eeda-44db-94e3-08c6a959f1a5.png",
+          fullBodyImage: "/lovable-uploads/c4e9d90c-eeda-44db-94e3-08c6a959f1a5.png",
           isVoted: showWinner ? true : !!votes[6]
         },
         {
@@ -220,9 +215,9 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
           weight: 52,
           height: 166,
           rating: ratings[7] || 3.7,
-          faceImage: contestant1Face,
-          fullBodyImage: contestant1Full,
-          additionalPhotos: [contestant2Face],
+          faceImage: "/lovable-uploads/1147be30-a1d2-466f-a9a8-067f4628cbb2.png",
+          fullBodyImage: "/lovable-uploads/1147be30-a1d2-466f-a9a8-067f4628cbb2.png",
+          additionalPhotos: ["/lovable-uploads/009d20f0-cac7-4c08-9bc9-146617664bc3.png"],
           isVoted: showWinner ? true : !!votes[7]
         },
         {
@@ -234,9 +229,9 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
           weight: 54,
           height: 169,
           rating: ratings[8] || 3.4,
-          faceImage: contestant2Face,
-          fullBodyImage: contestant2Full,
-          additionalPhotos: [contestant3Face],
+          faceImage: "/lovable-uploads/009d20f0-cac7-4c08-9bc9-146617664bc3.png",
+          fullBodyImage: "/lovable-uploads/009d20f0-cac7-4c08-9bc9-146617664bc3.png",
+          additionalPhotos: ["/lovable-uploads/c4e9d90c-eeda-44db-94e3-08c6a959f1a5.png"],
           isVoted: showWinner ? true : !!votes[8]
         },
         {
@@ -248,9 +243,9 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
           weight: 50,
           height: 164,
           rating: ratings[9] || 3.2,
-          faceImage: contestant3Face,
-          fullBodyImage: contestant3Full,
-          additionalPhotos: [contestant1Face, contestant2Face],
+          faceImage: "/lovable-uploads/c4e9d90c-eeda-44db-94e3-08c6a959f1a5.png",
+          fullBodyImage: "/lovable-uploads/c4e9d90c-eeda-44db-94e3-08c6a959f1a5.png",
+          additionalPhotos: ["/lovable-uploads/1147be30-a1d2-466f-a9a8-067f4628cbb2.png", "/lovable-uploads/009d20f0-cac7-4c08-9bc9-146617664bc3.png"],
           isVoted: showWinner ? true : !!votes[9]
         },
         {
@@ -262,9 +257,9 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
           weight: 57,
           height: 171,
           rating: ratings[10] || 3.0,
-          faceImage: contestant1Face,
-          fullBodyImage: contestant1Full,
-          additionalPhotos: [contestant3Face],
+          faceImage: "/lovable-uploads/1147be30-a1d2-466f-a9a8-067f4628cbb2.png",
+          fullBodyImage: "/lovable-uploads/1147be30-a1d2-466f-a9a8-067f4628cbb2.png",
+          additionalPhotos: ["/lovable-uploads/c4e9d90c-eeda-44db-94e3-08c6a959f1a5.png"],
           isVoted: showWinner ? true : !!votes[10]
         }
       ];
