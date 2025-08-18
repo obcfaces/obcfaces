@@ -8,7 +8,6 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import SearchableSelect from "@/components/ui/searchable-select";
 import { Country, State, City } from 'country-state-city';
-import { getCitiesForLocation } from '@/lib/location-utils';
 
 interface ContestParticipationModalProps {
   children: React.ReactNode;
@@ -50,7 +49,6 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
 
   const [photo1File, setPhoto1File] = useState<File | null>(null);
   const [photo2File, setPhoto2File] = useState<File | null>(null);
-  const [showCityInput, setShowCityInput] = useState(false);
 
   // Use country-state-city library for full data
   const countries = useMemo(() => {
@@ -80,52 +78,14 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
   const cities = useMemo(() => {
     if (!countryCode || !stateCode) return [];
     
-    // Helper function to format city names to Title Case
-    const formatCityName = (name: string) => {
-      return name
-        .toLowerCase()
-        .split(' ')
-        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-        .join(' ');
-    };
-    
-    // Debug: log the current codes
-    console.log('Country Code:', countryCode, 'State Code:', stateCode);
-    
-    // Use comprehensive Philippines database for PH
-    if (countryCode === 'PH') {
-      const stateName = states.find(s => s.isoCode === stateCode)?.name;
-      console.log('State Name:', stateName);
-      
-      if (stateName) {
-        const philippinesCities = getCitiesForLocation(countryCode, stateCode, stateName);
-        if (philippinesCities.length > 0) {
-          const cityList = philippinesCities.map(city => ({ 
-            name: formatCityName(city.name) 
-          }));
-          // Add "Other" option at the end
-          cityList.push({ name: "Other (enter manually)" });
-          return cityList;
-        }
-      }
-    }
-    
-    // Get cities from country-state-city library for other countries or fallback
+    // Get cities from country-state-city library - this should provide comprehensive coverage
     const cscCities = City.getCitiesOfState(countryCode, stateCode);
-    console.log('CSC Cities found:', cscCities.length);
     
-    // Sort cities and add "Other" option
-    const cityList = cscCities
-      .map(c => ({ name: formatCityName(c.name) }))
+    // Sort and return cities
+    return cscCities
+      .map(c => ({ name: c.name }))
       .sort((a, b) => a.name.localeCompare(b.name));
-    
-    // Always add "Other" option for manual entry
-    if (cityList.length > 0) {
-      cityList.push({ name: "Other (enter manually)" });
-    }
-    
-    return cityList;
-  }, [countryCode, stateCode, states]);
+  }, [countryCode, stateCode]);
 
   useEffect(() => {
     const checkUser = async () => {
@@ -213,7 +173,6 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
         toast({
           title: "Успешный вход",
           description: "Добро пожаловать!",
-          duration: 1000,
         });
         setCurrentStep('profile');
       } else {
@@ -386,31 +345,6 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
   const invalidPhoto1 = showProfileErrors && !photo1File;
   const invalidPhoto2 = showProfileErrors && !photo2File;
 
-  // Helper function to get field classes based on validation and filled state
-  const getFieldClasses = (isInvalid: boolean, isFilled: boolean) => {
-    let classes = "text-sm placeholder:text-muted-foreground";
-    if (isInvalid) {
-      classes += " border-destructive focus:ring-destructive";
-    } else if (isFilled) {
-      classes += " border-blue-500 focus:ring-blue-500";
-    }
-    return classes;
-  };
-
-  // Check if fields are filled
-  const isFirstNameFilled = formData.first_name.trim() !== "";
-  const isLastNameFilled = formData.last_name.trim() !== "";
-  const isCountryFilled = !!formData.countryCode;
-  const isStateFilled = !!formData.stateCode;
-  const isCityFilled = formData.city.trim() !== "";
-  const isGenderFilled = !!formData.gender;
-  const isBirthDayFilled = !!formData.birth_day;
-  const isBirthMonthFilled = !!formData.birth_month;
-  const isBirthYearFilled = !!formData.birth_year;
-  const isMaritalStatusFilled = !!formData.marital_status;
-  const isHeightFilled = !!formData.height_cm;
-  const isWeightFilled = !!formData.weight_kg;
-
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
@@ -492,7 +426,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
               <Input
                 id="first_name"
                 placeholder="First name"
-                className={getFieldClasses(invalidFirstName, isFirstNameFilled)}
+                className={`text-sm placeholder:text-muted-foreground ${invalidFirstName ? 'border-destructive focus:ring-destructive' : ''}`}
                 value={formData.first_name}
                 onChange={(e) => setFormData({...formData, first_name: e.target.value})}
                 aria-invalid={invalidFirstName}
@@ -501,14 +435,14 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
               <Input
                 id="last_name"
                 placeholder="Last name"
-                className={getFieldClasses(invalidLastName, isLastNameFilled)}
+                className={`text-sm placeholder:text-muted-foreground ${invalidLastName ? 'border-destructive focus:ring-destructive' : ''}`}
                 value={formData.last_name}
                 onChange={(e) => setFormData({...formData, last_name: e.target.value})}
                 aria-invalid={invalidLastName}
                 required
               />
               <Select value={formData.gender} onValueChange={(value) => setFormData({...formData, gender: value})}>
-                <SelectTrigger className={`${invalidGender ? "border-destructive focus:ring-destructive" : isGenderFilled ? "border-blue-500 focus:ring-blue-500" : ""}`}>
+                <SelectTrigger className={`${invalidGender ? "border-destructive focus:ring-destructive" : ""}`}>
                   <SelectValue placeholder="Gender" />
                 </SelectTrigger>
                 <SelectContent>
@@ -553,46 +487,22 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                     state: state?.name || "",
                     city: ""
                   });
-                  setShowCityInput(false); // Reset manual input when state changes
                 }}
               />
               
-              {cities.length === 0 ? (
-                <Input
-                  placeholder="Enter city name"
-                  value={formData.city}
-                  onChange={(e) => setFormData({...formData, city: e.target.value})}
-                  className="text-sm placeholder:text-muted-foreground"
-                />
-              ) : showCityInput ? (
-                <Input
-                  placeholder="Enter city name"
-                  value={formData.city}
-                  onChange={(e) => setFormData({...formData, city: e.target.value})}
-                  className="text-sm placeholder:text-muted-foreground"
-                />
-              ) : (
-                <SearchableSelect
-                  disabled={!stateCode}
-                  placeholder="City"
-                  options={cities.map(ct => ({ value: ct.name, label: ct.name }))}
-                  value={formData.city}
-                  onValueChange={(value) => {
-                    if (value === "Other (enter manually)") {
-                      setShowCityInput(true);
-                      setFormData({...formData, city: ""});
-                    } else {
-                      setFormData({...formData, city: value});
-                    }
-                  }}
-                />
-              )}
+              <SearchableSelect
+                disabled={!stateCode}
+                placeholder="City"
+                options={cities.map(ct => ({ value: ct.name, label: ct.name }))}
+                value={formData.city}
+                onValueChange={(value) => setFormData({...formData, city: value})}
+              />
             </div>
 
             <div className="grid gap-2 sm:grid-cols-2">
               <div className="grid grid-cols-3 gap-1">
                 <Select value={formData.birth_day} onValueChange={(value) => setFormData({...formData, birth_day: value})}>
-                  <SelectTrigger className={`${invalidBirthDay ? "border-destructive focus:ring-destructive" : isBirthDayFilled ? "border-blue-500 focus:ring-blue-500" : ""}`}>
+                  <SelectTrigger className={`${invalidBirthDay ? "border-destructive focus:ring-destructive" : ""}`}>
                     <SelectValue placeholder="Day of birth" />
                   </SelectTrigger>
                   <SelectContent>
@@ -603,7 +513,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                 </Select>
                 
                 <Select value={formData.birth_month} onValueChange={(value) => setFormData({...formData, birth_month: value})}>
-                  <SelectTrigger className={`${invalidBirthMonth ? "border-destructive focus:ring-destructive" : isBirthMonthFilled ? "border-blue-500 focus:ring-blue-500" : ""}`}>
+                  <SelectTrigger className={`${invalidBirthMonth ? "border-destructive focus:ring-destructive" : ""}`}>
                     <SelectValue placeholder="Month of birth" />
                   </SelectTrigger>
                   <SelectContent>
@@ -617,7 +527,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                 </Select>
                 
                 <Select value={formData.birth_year} onValueChange={(value) => setFormData({...formData, birth_year: value})}>
-                  <SelectTrigger className={`${invalidBirthYear ? "border-destructive focus:ring-destructive" : isBirthYearFilled ? "border-blue-500 focus:ring-blue-500" : ""}`}>
+                  <SelectTrigger className={`${invalidBirthYear ? "border-destructive focus:ring-destructive" : ""}`}>
                     <SelectValue placeholder="Year of birth" />
                   </SelectTrigger>
                   <SelectContent>
@@ -631,7 +541,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
 
             <div className="grid gap-2 grid-cols-2">
               <Select value={formData.marital_status} onValueChange={(value) => setFormData({...formData, marital_status: value})}>
-                <SelectTrigger className={`${isMaritalStatusFilled ? "border-blue-500 focus:ring-blue-500" : ""}`}>
+                <SelectTrigger>
                   <SelectValue placeholder="Marital status" />
                 </SelectTrigger>
                 <SelectContent>
@@ -646,7 +556,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                 value={formData.has_children ? formData.has_children.toString() : ""} 
                 onValueChange={(value) => setFormData({...formData, has_children: value === 'true'})}
               >
-                <SelectTrigger className={`${formData.has_children !== undefined ? "border-blue-500 focus:ring-blue-500" : ""}`}>
+                <SelectTrigger>
                   <SelectValue placeholder="Do you have children?" />
                 </SelectTrigger>
                 <SelectContent>
@@ -668,7 +578,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
               </Select>
               
               <Select value={formData.height_cm} onValueChange={(value) => setFormData({...formData, height_cm: value})}>
-                <SelectTrigger className={`${isHeightFilled ? "border-blue-500 focus:ring-blue-500" : ""}`}>
+                <SelectTrigger>
                   <SelectValue placeholder={formData.measurement_system === 'imperial' ? "Height (ft)" : "Height (cm)"} />
                 </SelectTrigger>
                 <SelectContent>
@@ -697,7 +607,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
               </Select>
               
               <Select value={formData.weight_kg} onValueChange={(value) => setFormData({...formData, weight_kg: value})}>
-                <SelectTrigger className={`${isWeightFilled ? "border-blue-500 focus:ring-blue-500" : ""}`}>
+                <SelectTrigger>
                   <SelectValue placeholder={formData.measurement_system === 'imperial' ? "Weight (lbs)" : "Weight (kg)"} />
                 </SelectTrigger>
                 <SelectContent>
