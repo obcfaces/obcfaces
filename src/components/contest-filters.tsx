@@ -1,9 +1,6 @@
 import React, { useMemo } from "react";
 import SearchableSelect, { type Option } from "@/components/ui/searchable-select";
-import listIcon from "@/assets/icons/sdisplay-list.png";
-import listActiveIcon from "@/assets/icons/sdisplay-list-active.png";
-import tableIcon from "@/assets/icons/sdisplay-table.png";
-import tableActiveIcon from "@/assets/icons/sdisplay-table-active.png";
+// Direct paths to avoid mobile loading issues
 
 type Gender = "male" | "female";
 export type Category = "teen" | "miss" | "ms" | "mrs";
@@ -92,7 +89,7 @@ const categoryOptions: Option[] = useMemo(() => [
           className="p-1 rounded-md hover:bg-accent transition-colors"
         >
           <img
-            src={viewMode === "compact" ? listActiveIcon : listIcon}
+            src={viewMode === "compact" ? "/icons/sdisplay-list-active.png" : "/icons/sdisplay-list.png"}
             alt="List view icon"
             width={28}
             height={28}
@@ -107,7 +104,7 @@ const categoryOptions: Option[] = useMemo(() => [
           className="p-1 rounded-md hover:bg-accent transition-colors"
         >
           <img
-            src={viewMode === "full" ? tableActiveIcon : tableIcon}
+            src={viewMode === "full" ? "/icons/sdisplay-table-active.png" : "/icons/sdisplay-table.png"}
             alt="Grid view icon"
             width={28}
             height={28}
