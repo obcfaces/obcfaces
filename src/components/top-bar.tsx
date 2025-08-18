@@ -31,7 +31,7 @@ const TopBar = () => {
             className="relative inline-flex items-center justify-center h-10 w-10 rounded-full hover:bg-accent transition-colors"
             aria-label="Likes"
           >
-            <Heart className="h-5 w-5 text-foreground" />
+            <Heart className="h-5 w-5 text-foreground" strokeWidth={1} />
           </Link>
           
           {/* Messages Icon with Unread Count */}

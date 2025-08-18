@@ -863,7 +863,7 @@ const Profile = () => {
                 </CreatePostModal>
                {!isOwner && (
                  <Button variant="outline" onClick={handleMessage}>
-                   <MessageCircle className="w-4 h-4 mr-1" />
+                   <MessageCircle className="w-4 h-4 mr-1" strokeWidth={1} />
                    Message
                  </Button>
                )}
