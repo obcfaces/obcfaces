@@ -843,37 +843,36 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                   <SelectValue placeholder="Select height" />
                 </SelectTrigger>
                 <SelectContent>
-                  <div className="grid grid-cols-2 gap-4 p-2">
-                    <div>
-                      <div className="text-xs font-medium text-muted-foreground mb-2 text-center">Height (cm)</div>
-                      <div className="space-y-1">
-                        {Array.from({ length: 51 }, (_, i) => {
-                          const height = 140 + i;
-                          return (
-                            <SelectItem key={`cm-${height}`} value={height.toString()}>
-                              {height} cm
-                            </SelectItem>
-                          );
-                        })}
-                      </div>
+                  <div className="height-ruler">
+                    <div className="scale cm">
+                      <div>130 см</div>
+                      <div>140 см</div>
+                      <div>150 см</div>
+                      <div>160 см</div>
+                      <div>170 см</div>
+                      <div>180 см</div>
+                      <div>190 см</div>
+                      <div>200 см</div>
                     </div>
-                    <div>
-                      <div className="text-xs font-medium text-muted-foreground mb-2 text-center">Height (ft'in&quot;)</div>
-                      <div className="space-y-1">
-                        {Array.from({ length: 25 }, (_, i) => {
-                          const totalInches = 52 + i; // от 4'4" до 6'4"
-                          const feet = Math.floor(totalInches / 12);
-                          const inches = totalInches % 12;
-                          const cmEquivalent = Math.round(totalInches * 2.54);
-                          return (
-                            <SelectItem key={`ft-${totalInches}`} value={cmEquivalent.toString()}>
-                              {feet}'{inches}&quot;
-                            </SelectItem>
-                          );
-                        })}
-                      </div>
+                    <div className="scale ft">
+                      <div>4'3"</div>
+                      <div>4'7"</div>
+                      <div>5'0"</div>
+                      <div>5'4"</div>
+                      <div>5'8"</div>
+                      <div>6'0"</div>
+                      <div>6'4"</div>
+                      <div>6'7"</div>
                     </div>
                   </div>
+                  {Array.from({ length: 71 }, (_, i) => {
+                    const height = 130 + i;
+                    return (
+                      <SelectItem key={height} value={height.toString()}>
+                        {height} cm
+                      </SelectItem>
+                    );
+                  })}
                 </SelectContent>
               </Select>
               <Select 

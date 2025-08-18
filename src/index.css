@@ -135,3 +135,32 @@ All colors MUST be HSL.
     @apply bg-background text-foreground;
   }
 }
+
+.height-ruler {
+  display: flex;
+  justify-content: center;
+  gap: 5rem;              /* расстояние между шкалами */
+  font-family: sans-serif;
+  margin: 2.5rem auto;
+}
+
+.scale {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border-left: 2px solid hsl(var(--border)); /* линия, как на линейке */
+  padding-left: 0.938rem;
+}
+
+.scale div {
+  font-size: 1.125rem;
+  margin: 3.75rem 0;         /* большое межстрочное расстояние */
+}
+
+.cm {
+  text-align: right;
+}
+
+.ft {
+  text-align: left;
+}
