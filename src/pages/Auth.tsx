@@ -2,8 +2,7 @@ import { useEffect, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import SearchableSelect from "@/components/ui/searchable-select";
+
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -14,30 +13,7 @@ const Auth = () => {
   const [mode, setMode] = useState<"login" | "signup">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [displayName, setDisplayName] = useState("");
-  const [gender, setGender] = useState("");
-  const [country, setCountry] = useState("");
-  const [bio, setBio] = useState("");
   const [loading, setLoading] = useState(false);
-
-  // Country options for Facebook-style dropdown
-  const countryOptions = [
-    { value: "USA", label: "🇺🇸 United States" },
-    { value: "Canada", label: "🇨🇦 Canada" },
-    { value: "UK", label: "🇬🇧 United Kingdom" },
-    { value: "Germany", label: "🇩🇪 Germany" },
-    { value: "France", label: "🇫🇷 France" },
-    { value: "Spain", label: "🇪🇸 Spain" },
-    { value: "Italy", label: "🇮🇹 Italy" },
-    { value: "Russia", label: "🇷🇺 Russia" },
-    { value: "China", label: "🇨🇳 China" },
-    { value: "Japan", label: "🇯🇵 Japan" },
-    { value: "Australia", label: "🇦🇺 Australia" },
-    { value: "Brazil", label: "🇧🇷 Brazil" },
-    { value: "Mexico", label: "🇲🇽 Mexico" },
-    { value: "India", label: "🇮🇳 India" },
-    { value: "Philippines", label: "🇵🇭 Philippines" },
-  ];
 
   useEffect(() => {
     const m = searchParams.get("mode");
@@ -92,83 +68,20 @@ const Auth = () => {
         <meta name="description" content={description} />
         <link rel="canonical" href={`${window.location.origin}/auth`} />
       </Helmet>
-      <article className="w-full max-w-xs rounded-lg border border-input bg-card p-6 shadow-sm">
+      <article className="w-full max-w-md rounded-lg border border-input bg-card p-6 shadow-sm">
         <header className="mb-6 text-center">
           <h1 className="text-2xl font-semibold">{title}</h1>
           <p className="text-sm text-muted-foreground mt-1">{description}</p>
         </header>
         <form onSubmit={onSubmit} className="space-y-4">
-          <div className="space-y-1">
-            <label htmlFor="email" className="text-sm font-medium text-foreground">Email</label>
-            <Input 
-              id="email" 
-              type="email" 
-              value={email} 
-              onChange={(e) => setEmail(e.target.value)} 
-              required 
-              className="h-12 text-base"
-            />
+          <div className="space-y-2">
+            
+            <Input id="email" type="email" placeholder="email" className="placeholder:italic placeholder:text-muted-foreground" value={email} onChange={(e) => setEmail(e.target.value)} required />
           </div>
-          <div className="space-y-1">
-            <label htmlFor="password" className="text-sm font-medium text-foreground">Password</label>
-            <Input 
-              id="password" 
-              type="password" 
-              value={password} 
-              onChange={(e) => setPassword(e.target.value)} 
-              required 
-              className="h-12 text-base"
-            />
+          <div className="space-y-2">
+            
+            <Input id="password" type="password" placeholder="password" className="placeholder:italic placeholder:text-muted-foreground" value={password} onChange={(e) => setPassword(e.target.value)} required />
           </div>
-
-          {mode === "signup" && (
-            <>
-              <div className="space-y-1">
-                <label htmlFor="displayName" className="text-sm font-medium text-foreground">Display Name</label>
-                <Input 
-                  id="displayName" 
-                  type="text" 
-                  value={displayName} 
-                  onChange={(e) => setDisplayName(e.target.value)} 
-                  className="h-12 text-base"
-                />
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-sm font-medium text-foreground">Gender</label>
-                <Select value={gender} onValueChange={setGender}>
-                  <SelectTrigger className="h-12 text-base">
-                    <SelectValue placeholder="Select gender" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="male">👨 Male</SelectItem>
-                    <SelectItem value="female">👩 Female</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-sm font-medium text-foreground">Country</label>
-                <SearchableSelect
-                  value={country}
-                  onValueChange={setCountry}
-                  options={countryOptions}
-                  placeholder="Select country"
-                />
-              </div>
-
-              <div className="space-y-1">
-                <label htmlFor="bio" className="text-sm font-medium text-foreground">About Me</label>
-                <Input 
-                  id="bio" 
-                  type="text" 
-                  value={bio} 
-                  onChange={(e) => setBio(e.target.value)} 
-                  className="h-12 text-base"
-                />
-              </div>
-            </>
-          )}
           <Button type="submit" className="w-full" disabled={loading}>
             {loading ? "Подождите..." : mode === "login" ? "Войти" : "Зарегистрироваться"}
           </Button>

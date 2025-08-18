@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import SearchableSelect from "@/components/ui/searchable-select";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate, Link } from "react-router-dom";
 // Simplified location data for mobile performance
@@ -81,11 +81,8 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
       if (mode === "login") {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
-        toast({ 
-          description: "Signed in",
-          duration: 1000  // Автоматическое исчезновение через 1 секунду
-        });
-        setOpen(false); // Close modal after successful login
+        toast({ description: "Signed in" });
+        setTimeout(() => setOpen(false), 1000); // Close modal after 1 second
       } else {
         const redirectUrl = window.location.href; // Confirm email back to current page
         const { data, error } = await supabase.auth.signUp({
@@ -125,10 +122,10 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
             );
           if (upsertErr) throw upsertErr;
           toast({ description: "Registration complete" });
-          setOpen(false); // Close modal after successful registration
+          setTimeout(() => setOpen(false), 1000); // Close modal after 1 second
         } else {
           toast({ description: "Check your email to confirm." });
-          setOpen(false); // Close modal after signup (user needs to check email)
+          setTimeout(() => setOpen(false), 1000); // Close modal after 1 second
         }
       }
     } catch (err: any) {
@@ -159,7 +156,7 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
   const invalidTerms = showErrors && !acceptTerms;
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) { setMode("login"); setSubmitted(false); } }}>
       <DialogTrigger asChild>
         <button className="text-sm underline text-primary">Sign in</button>
       </DialogTrigger>

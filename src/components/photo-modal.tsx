@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { X, ChevronLeft, ChevronRight, ThumbsUp, MessageCircle, Send } from "lucide-react";
+import { X, ChevronLeft, ChevronRight, Heart, MessageCircle, Send } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -74,7 +74,15 @@ export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantNa
     return () => subscription.unsubscribe();
   }, []);
 
-  // Login modal removed auto-close
+  // Auto-close login modal after 1 second
+  useEffect(() => {
+    if (showLoginModal) {
+      const timer = setTimeout(() => {
+        setShowLoginModal(false);
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [showLoginModal]);
 
   // Reset activeIndex when currentIndex changes
   useEffect(() => {
@@ -133,7 +141,6 @@ export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantNa
       toast({
         title: "Comment added",
         description: "Your comment was added",
-        duration: 1000,
       });
     }
   };
@@ -296,7 +303,9 @@ export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantNa
                       ) : null}
                     </h3>
                     <div className="text-sm text-contest-blue truncate">
-                      {country}
+                      {(country || "")}
+                      {(country && city) ? " · " : ""}
+                      {(city || "")}
                     </div>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
@@ -307,7 +316,7 @@ export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantNa
                       onClick={handleLike}
                       aria-label="Like"
                     >
-                      <ThumbsUp className={cn("w-4 h-4 mr-1", currentPhotoLikes.isLiked && "fill-current")} />
+                      <Heart className={cn("w-4 h-4 mr-1", currentPhotoLikes.isLiked && "fill-current")} />
                       {currentPhotoLikes.count}
                     </Button>
                     <Button

@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Settings, MessageCircle } from "lucide-react";
+import { Settings } from "lucide-react";
 import LoginModalTrigger from "@/components/login-modal";
 
 // Shows Login button when logged out and a round avatar linking to the user's profile when logged in
@@ -78,23 +78,19 @@ const AuthNav = () => {
         </Link>
       )}
       <Link
-        to={`/u/${session.user.id}?tab=likes`}
+        to={`/u/${session.user.id}`}
         className="inline-flex items-center"
-        aria-label="Open your likes"
+        aria-label="Open your profile"
       >
-        <div className="h-9 w-9 ring-1 ring-border hover:ring-primary transition-colors rounded-full overflow-hidden bg-muted flex items-center justify-center">
+        <Avatar className="h-9 w-9 ring-1 ring-border hover:ring-primary transition-colors">
           {avatarUrl ? (
-            <img 
-              src={avatarUrl} 
-              alt={(displayName || "User") + " avatar"} 
-              className="w-full h-full object-cover"
-            />
+            <AvatarImage src={avatarUrl} alt={(displayName || "User") + " avatar"} />
           ) : (
-            <span className="text-sm font-medium text-muted-foreground">
+            <AvatarFallback className="text-sm font-medium">
               {fallbackInitial}
-            </span>
+            </AvatarFallback>
           )}
-        </div>
+        </Avatar>
       </Link>
     </div>
   );

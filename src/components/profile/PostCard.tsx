@@ -1,7 +1,7 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ThumbsUp, MessageCircle, Share2 } from "lucide-react";
+import { Heart, MessageCircle, Share2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
@@ -21,8 +21,6 @@ interface PostCardProps {
   imageSrc?: string;
   likes?: number;
   comments?: number;
-  mediaUrls?: string[];
-  mediaTypes?: string[];
 }
 
 const getInitials = (name: string) => {
@@ -41,8 +39,6 @@ const PostCard = ({
   imageSrc,
   likes = 0,
   comments = 0,
-  mediaUrls,
-  mediaTypes,
 }: PostCardProps) => {
   const [isLiked, setIsLiked] = useState(false);
   const [currentLikes, setCurrentLikes] = useState(likes);
@@ -122,11 +118,8 @@ const PostCard = ({
     }
   };
 
-  const displayMediaUrls = mediaUrls && mediaUrls.length > 0 ? mediaUrls : (imageSrc ? [imageSrc] : []);
-  const displayMediaTypes = mediaTypes && mediaTypes.length > 0 ? mediaTypes : (imageSrc ? ['image'] : []);
-
   const openModal = () => {
-    if (displayMediaUrls.length > 0) setIsModalOpen(true);
+    if (imageSrc) setIsModalOpen(true);
   };
 
   const handleComment = () => {
@@ -167,54 +160,15 @@ const PostCard = ({
           {content && <p className="text-sm whitespace-pre-line mb-1">{content}</p>}
         </div>
         
-        {/* Media display */}
-        {displayMediaUrls.length > 0 && (
+        {imageSrc && (
           <div className="relative">
-            {displayMediaUrls.length === 1 ? (
-              displayMediaTypes[0] === 'video' ? (
-                <video
-                  src={displayMediaUrls[0]}
-                  controls
-                  className="w-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
-                  onClick={openModal}
-                />
-              ) : (
-                <img
-                  src={displayMediaUrls[0]}
-                  alt={`Post media — ${authorName}`}
-                  loading="lazy"
-                  className="w-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
-                  onClick={openModal}
-                />
-              )
-            ) : (
-              <div className="grid grid-cols-2 gap-1">
-                {displayMediaUrls.slice(0, 4).map((url, index) => (
-                  <div key={index} className="relative aspect-square">
-                    {displayMediaTypes[index] === 'video' ? (
-                      <video
-                        src={url}
-                        className="w-full h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
-                        onClick={openModal}
-                      />
-                    ) : (
-                      <img
-                        src={url}
-                        alt={`Post media ${index + 1} — ${authorName}`}
-                        loading="lazy"
-                        className="w-full h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
-                        onClick={openModal}
-                      />
-                    )}
-                    {index === 3 && displayMediaUrls.length > 4 && (
-                      <div className="absolute inset-0 bg-black/50 flex items-center justify-center text-white font-medium">
-                        +{displayMediaUrls.length - 4}
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
+            <img
+              src={imageSrc}
+              alt={`Post image — ${authorName}`}
+              loading="lazy"
+              className="w-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
+              onClick={openModal}
+            />
           </div>
         )}
 
@@ -230,7 +184,7 @@ const PostCard = ({
             disabled={loading}
             aria-label="Like"
           >
-            <ThumbsUp className="w-4 h-4" />
+            <Heart className="w-4 h-4" />
             <span className="hidden sm:inline">Like</span>
             <span>{currentLikes}</span>
           </button>
@@ -265,11 +219,11 @@ const PostCard = ({
         </div>
       </Card>
 
-      {displayMediaUrls.length > 0 && (
+      {imageSrc && (
         <PhotoModal
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
-          photos={displayMediaUrls}
+          photos={[imageSrc]}
           currentIndex={0}
           contestantName={authorName}
           age={0}
