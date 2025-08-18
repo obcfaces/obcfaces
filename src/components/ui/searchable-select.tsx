@@ -2,7 +2,7 @@ import * as React from "react";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
-import { ChevronDown, Check } from "lucide-react";
+import { ChevronsUpDown, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export type Option = { value: string; label: string; disabled?: boolean; divider?: boolean };
@@ -44,14 +44,14 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
           disabled={disabled}
           aria-invalid={invalid}
           className={cn(
-            "w-full justify-between text-sm",
-            !selected && "text-muted-foreground",
+            "w-full justify-between",
+            !selected && "italic text-muted-foreground",
             invalid && "border-destructive focus:ring-destructive",
             highlightSelected && selected && "border-primary focus:ring-primary"
           )}
         >
           {selected ? selected.label : (placeholder || "Select...")}
-          <ChevronDown className="ml-2 h-4 w-4 opacity-50" />
+          <ChevronsUpDown className="ml-2 size-4 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[calc(var(--radix-popover-trigger-width)*1.3)] p-0 z-50 bg-popover" onWheelCapture={(e) => e.stopPropagation()} onOpenAutoFocus={(e) => e.preventDefault()}>
