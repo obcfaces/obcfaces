@@ -428,7 +428,7 @@ export function ContestantCard({
                 onClick={handleComment}
                 aria-label="Comments"
               >
-                <MessageCircle className={cn("w-4 h-4", hasCommented && "fill-current")} />
+                <MessageCircle className={cn("w-4 h-4", hasCommented && "fill-current")} strokeWidth={1} />
                 <span className="hidden sm:inline">Comment</span>
                 <span>{commentsCount[0] + commentsCount[1]}</span>
               </button>
@@ -648,7 +648,7 @@ export function ContestantCard({
                    onClick={handleComment}
                    aria-label="Comments"
                  >
-                   <MessageCircle className={cn("w-3.5 h-3.5", hasCommented && "fill-current")} />
+                   <MessageCircle className={cn("w-3.5 h-3.5", hasCommented && "fill-current")} strokeWidth={1} />
                    <span className="hidden xl:inline">Comment</span>
                    <span>{commentsCount[0] + commentsCount[1]}</span>
                  </button>

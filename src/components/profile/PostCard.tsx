@@ -240,7 +240,7 @@ const PostCard = ({
             onClick={handleComment}
             aria-label="Comments"
           >
-            <MessageCircle className="w-4 h-4" />
+            <MessageCircle className="w-4 h-4" strokeWidth={1} />
             <span className="hidden sm:inline">Comment</span>
             <span>{comments}</span>
           </button>
