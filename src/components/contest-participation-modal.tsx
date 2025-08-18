@@ -66,6 +66,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
       marital_status: "",
       has_children: undefined as boolean | undefined,
       height_cm: "",
+      height_ft: "",
       weight_kg: "",
       measurement_system: "metric",
     };
@@ -834,24 +835,47 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                   <SelectItem value="imperial">Imperial (ft, lbs)</SelectItem>
                 </SelectContent>
               </Select>
-              <Select 
-                value={formData.height_cm} 
-                onValueChange={(value) => handleFieldChange('height_cm', value)}
-              >
-                <SelectTrigger className={getFieldClasses('height_cm', "text-sm")}>
-                  <SelectValue placeholder="Height (cm)" />
-                </SelectTrigger>
-                <SelectContent>
-                  {Array.from({ length: 51 }, (_, i) => {
-                    const height = 140 + i;
-                    return (
-                      <SelectItem key={height} value={height.toString()}>
-                        {height} cm
-                      </SelectItem>
-                    );
-                  })}
-                </SelectContent>
-              </Select>
+              <div className="grid grid-cols-2 gap-2">
+                <Select 
+                  value={formData.height_cm} 
+                  onValueChange={(value) => handleFieldChange('height_cm', value)}
+                >
+                  <SelectTrigger className={getFieldClasses('height_cm', "text-sm")}>
+                    <SelectValue placeholder="Height (cm)" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Array.from({ length: 51 }, (_, i) => {
+                      const height = 140 + i;
+                      return (
+                        <SelectItem key={height} value={height.toString()}>
+                          {height} cm
+                        </SelectItem>
+                      );
+                    })}
+                  </SelectContent>
+                </Select>
+                
+                <Select 
+                  value={formData.height_ft} 
+                  onValueChange={(value) => handleFieldChange('height_ft', value)}
+                >
+                  <SelectTrigger className="text-sm">
+                    <SelectValue placeholder="Height (ft'in&quot;)" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Array.from({ length: 25 }, (_, i) => {
+                      const totalInches = 52 + i; // от 4'4" до 6'4"
+                      const feet = Math.floor(totalInches / 12);
+                      const inches = totalInches % 12;
+                      return (
+                        <SelectItem key={totalInches} value={totalInches.toString()}>
+                          {feet}'{inches}"
+                        </SelectItem>
+                      );
+                    })}
+                  </SelectContent>
+                </Select>
+              </div>
               <Select 
                 value={formData.weight_kg} 
                 onValueChange={(value) => handleFieldChange('weight_kg', value)}
