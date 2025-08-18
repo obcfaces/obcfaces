@@ -45,11 +45,11 @@ const Auth = () => {
           options: { emailRedirectTo: redirectUrl },
         });
         if (error) throw error;
-        toast({ description: "Проверьте почту для подтверждения аккаунта." });
+        toast({ description: "Проверьте почту для подтверждения аккаунта.", duration: 1000 });
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
-        toast({ description: "Вход выполнен" });
+        toast({ description: "Вход выполнен", duration: 1000 });
       }
     } catch (err: any) {
       toast({ description: err.message ?? "Ошибка авторизации" });
