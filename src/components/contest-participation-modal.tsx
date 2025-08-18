@@ -7,7 +7,6 @@ import { Camera, Eye, EyeOff } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import SearchableSelect from "@/components/ui/searchable-select";
-import { Country, State, City } from 'country-state-city';
 import { getCitiesForLocation } from '@/lib/location-utils';
 
 interface ContestParticipationModalProps {
@@ -156,18 +155,43 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
     }
   };
 
-  // Countries and states data
-  const countries = Country.getAllCountries().map(country => ({
-    value: country.isoCode,
-    label: country.name
-  }));
+  // Countries and states data - lightweight implementation
+  const countries = [
+    { value: "PH", label: "Philippines" },
+    { value: "US", label: "United States" },
+    { value: "CA", label: "Canada" },
+    { value: "GB", label: "United Kingdom" },
+    { value: "AU", label: "Australia" }
+  ];
 
   const states = useMemo(() => {
     if (!formData.countryCode) return [];
-    return State.getStatesOfCountry(formData.countryCode).map(state => ({
-      value: state.isoCode,
-      label: state.name
-    }));
+    
+    // Simple state mapping for Philippines (most common case)
+    if (formData.countryCode === 'PH') {
+      return [
+        { value: "NCR", label: "National Capital Region" },
+        { value: "CAR", label: "Cordillera Administrative Region" },
+        { value: "01", label: "Ilocos Region" },
+        { value: "02", label: "Cagayan Valley" },
+        { value: "03", label: "Central Luzon" },
+        { value: "04A", label: "CALABARZON" },
+        { value: "04B", label: "MIMAROPA" },
+        { value: "05", label: "Bicol Region" },
+        { value: "06", label: "Western Visayas" },
+        { value: "07", label: "Central Visayas" },
+        { value: "08", label: "Eastern Visayas" },
+        { value: "09", label: "Zamboanga Peninsula" },
+        { value: "10", label: "Northern Mindanao" },
+        { value: "11", label: "Davao Region" },
+        { value: "12", label: "SOCCSKSARGEN" },
+        { value: "13", label: "Caraga" },
+        { value: "BARMM", label: "Bangsamoro" }
+      ];
+    }
+    
+    // For other countries, return empty array (cities will be shown directly)
+    return [];
   }, [formData.countryCode]);
 
   const cities = useMemo(() => {
@@ -322,7 +346,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
         photo_1_url: photo1Url,
         photo_2_url: photo2Url,
         birthdate: `${formData.birth_year}-${formData.birth_month.padStart(2, '0')}-${formData.birth_day.padStart(2, '0')}`,
-        country: Country.getAllCountries().find(c => c.isoCode === formData.countryCode)?.name || formData.countryCode,
+        country: countries.find(c => c.value === formData.countryCode)?.label || formData.countryCode,
         state: formData.stateCode,
         city: formData.city
       };
