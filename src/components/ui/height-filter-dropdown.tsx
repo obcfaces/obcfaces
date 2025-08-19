@@ -15,7 +15,6 @@ export default function HeightFilterDropdown({ onSelect, value, className }: Pro
   
   // Масштаб для визуализации (пиксели на см)
   const PX_PER_CM = 8;
-  const PX_PER_INCH = PX_PER_CM * 2.54; // 1 дюйм = 2.54 см
   
   // Высота контейнера с отступами
   const PAD = 24;
@@ -61,60 +60,56 @@ export default function HeightFilterDropdown({ onSelect, value, className }: Pro
 
       {open && (
         <div
-          className="absolute z-50 mt-2 w-[320px] rounded-2xl border bg-popover shadow-lg"
+          className="absolute z-50 mt-2 w-[360px] rounded-2xl border bg-popover shadow-lg"
           onMouseLeave={() => setOpen(false)}
         >
-          <div className="p-3">
-            <div 
-              className="relative h-[400px] overflow-y-auto bg-background rounded-xl"
-              style={{ fontVariantNumeric: "tabular-nums" }}
-            >
-              {/* Контейнер для абсолютного позиционирования */}
+          <div className="flex items-start gap-6 p-3">
+            {/* Левая колонка — см */}
+            <div className="max-h-[440px] overflow-y-auto pr-2 flex-1">
               <div 
                 className="relative"
                 style={{ height: innerHeight, paddingTop: PAD, paddingBottom: PAD }}
               >
-                {/* Сантиметры - левая сторона */}
                 {cmTicks.map((cm) => {
                   const y = (cm - CM_MIN) * PX_PER_CM;
                   return (
                     <div
-                      key={`cm-${cm}`}
-                      className="absolute right-[calc(50%+8px)] pr-2 -translate-y-1/2 cursor-pointer select-none text-[14px] font-medium whitespace-nowrap hover:text-primary"
+                      key={cm}
+                      className="absolute right-2 -translate-y-1/2 whitespace-nowrap text-[18px] text-right cursor-pointer hover:bg-accent rounded px-2 py-1 font-semibold text-foreground [font-variant-numeric:tabular-nums]"
                       style={{ top: y }}
                       onClick={() => handleSelect("cm", `${cm} см`)}
-                      title={`${cm} см`}
                     >
-                      {cm}
+                      {cm} см
                     </div>
                   );
                 })}
+              </div>
+            </div>
 
-                {/* Центральная линия */}
-                <div className="absolute left-1/2 top-0 bottom-0 w-px bg-border -translate-x-1/2" />
+            {/* вертикальная разделительная линия */}
+            <div className="w-px self-stretch bg-border" />
 
-                {/* Дюймы - правая сторона */}
+            {/* Правая колонка — ft/in */}
+            <div className="max-h-[440px] overflow-y-auto pl-2 flex-1">
+              <div 
+                className="relative"
+                style={{ height: innerHeight, paddingTop: PAD, paddingBottom: PAD }}
+              >
                 {inchTicks.map((inch) => {
                   const y = (inch * 2.54 - CM_MIN) * PX_PER_CM; // позиция в см, конвертированная в пиксели
                   const ftIn = toFtIn(inch);
                   return (
                     <div
-                      key={`in-${inch}`}
-                      className="absolute left-[calc(50%+8px)] pl-2 -translate-y-1/2 cursor-pointer select-none text-[14px] font-medium whitespace-nowrap hover:text-primary"
+                      key={inch}
+                      className="absolute left-2 -translate-y-1/2 whitespace-nowrap text-[18px] text-left cursor-pointer hover:bg-accent rounded px-2 py-1 font-semibold text-foreground [font-variant-numeric:tabular-nums]"
                       style={{ top: y }}
                       onClick={() => handleSelect("imperial", ftIn)}
-                      title={ftIn}
                     >
                       {ftIn}
                     </div>
                   );
                 })}
               </div>
-            </div>
-            
-            {/* Подсказка */}
-            <div className="mt-2 text-xs text-muted-foreground text-center">
-              Scale ruler: cm on left, ft/in on right
             </div>
           </div>
         </div>
