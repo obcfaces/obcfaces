@@ -877,7 +877,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                   {/* Portrait Photo */}
                   <div className="flex flex-col items-center gap-1">
                     <p className="text-xs text-muted-foreground">portrait</p>
-                    <div className="relative w-12 xs:w-14 sm:w-20 md:w-36">
+                    <div className="relative w-10 xs:w-12 sm:w-16 md:w-36">
                       <input
                         type="file"
                         accept="image/*"
@@ -891,7 +891,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                             <img
                               src={URL.createObjectURL(photo1File)}
                               alt="Portrait photo preview"
-                              className="w-full h-32 md:h-40 object-contain rounded bg-white"
+                              className="w-full h-16 xs:h-20 sm:h-24 md:h-40 object-contain rounded bg-white"
                             />
                             <button 
                               type="button"
@@ -921,7 +921,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                           </div>
                         ) : (
                           <div className="p-2 text-center">
-                            <div className={`h-32 md:h-40 rounded-lg mb-2 flex items-center justify-center relative overflow-hidden aspect-[4/5] border-2 border-dashed cursor-pointer hover:border-primary transition-colors ${hasRedBorder('photo1') ? 'border-red-500' : 'border-muted-foreground/25'}`}>
+                            <div className={`h-16 xs:h-20 sm:h-24 md:h-40 rounded-lg mb-2 flex items-center justify-center relative overflow-hidden aspect-[4/5] border-2 border-dashed cursor-pointer hover:border-primary transition-colors ${hasRedBorder('photo1') ? 'border-red-500' : 'border-muted-foreground/25'}`}>
                               <img 
                                 src="/lovable-uploads/1147be30-a1d2-466f-a9a8-067f4628cbb2.png" 
                                 alt="Portrait placeholder" 
@@ -948,7 +948,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                   {/* Full Length Photo */}
                   <div className="flex flex-col items-center gap-1">
                     <p className="text-xs text-muted-foreground">full length</p>
-                    <div className="relative w-12 xs:w-14 sm:w-20 md:w-36">
+                    <div className="relative w-10 xs:w-12 sm:w-16 md:w-36">
                       <input
                         type="file"
                         accept="image/*"
@@ -962,7 +962,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                             <img
                               src={URL.createObjectURL(photo2File)}
                               alt="Full length photo preview"
-                              className="w-full h-32 md:h-40 object-contain rounded bg-white"
+                              className="w-full h-16 xs:h-20 sm:h-24 md:h-40 object-contain rounded bg-white"
                             />
                             <button 
                               type="button"
@@ -992,7 +992,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                           </div>
                          ) : (
                           <div className="p-2 text-center">
-                            <div className={`h-32 md:h-40 rounded-lg mb-2 flex items-center justify-center relative overflow-hidden aspect-[4/5] border-2 border-dashed cursor-pointer hover:border-primary transition-colors ${hasRedBorder('photo2') ? 'border-red-500' : 'border-muted-foreground/25'}`}>
+                            <div className={`h-16 xs:h-20 sm:h-24 md:h-40 rounded-lg mb-2 flex items-center justify-center relative overflow-hidden aspect-[4/5] border-2 border-dashed cursor-pointer hover:border-primary transition-colors ${hasRedBorder('photo2') ? 'border-red-500' : 'border-muted-foreground/25'}`}>
                               <img 
                                 src="/lovable-uploads/009d20f0-cac7-4c08-9bc9-146617664bc3.png" 
                                 alt="Full body placeholder" 
