@@ -76,9 +76,9 @@ export default function HeightFilterDropdown({ onSelect, value, className }: Pro
           {/* Футы/дюймы */}
           <div className="relative">
             <div className="text-xs font-medium text-muted-foreground text-center mb-2">FT/IN</div>
-            {inchList.map((inch) => {
-              // Позиция пропорционально см значению (130-200 см = 0-70 индексов)
-              const position = (inch.cm - 130) * 40; // 40px на 1 см
+            {inchList.map((inch, index) => {
+              // Позиция с интервалом 2.54см (1 дюйм = 2.54см)
+              const position = index * 2.54 * 40; // 40px на 1 см, 2.54см между вариантами
               return (
                 <div
                   key={`inch-${inch.display}`}
@@ -90,7 +90,7 @@ export default function HeightFilterDropdown({ onSelect, value, className }: Pro
                 </div>
               );
             })}
-            <div style={{ height: `${(200 - 130) * 32 + 64}px` }} />
+            <div style={{ height: `${inchList.length * 2.54 * 40 + 64}px` }} />
           </div>
         </div>
       </SelectContent>
