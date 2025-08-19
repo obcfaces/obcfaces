@@ -77,14 +77,11 @@ export default function HeightFilterDropdown({ onSelect, value, className }: Pro
           <div className="relative">
             <div className="text-xs font-medium text-muted-foreground text-center mb-2">FT/IN</div>
             {inchList.map((inch, index) => {
-              // Каждый элемент CM имеет высоту примерно 28px (text-sm + padding)
-              const cmItemHeight = 28;
-              // 4'3" должен быть на уровне 130см (индекс 0), 6'7" на уровне 200см (индекс 70)
-              const startCm = 130;
-              const endCm = 200;
-              const targetCm = inch.cm;
-              const cmIndex = targetCm - startCm; // позиция в списке см
-              const position = cmIndex * cmItemHeight;
+              // Находим позицию соответствующего см в массиве cmValues
+              const cmIndex = cmValues.findIndex(cm => cm === inch.cm);
+              // Каждый элемент имеет высоту примерно 32px (включая отступы)
+              const itemHeight = 32;
+              const position = cmIndex * itemHeight;
               
               return (
                 <div
@@ -97,7 +94,7 @@ export default function HeightFilterDropdown({ onSelect, value, className }: Pro
                 </div>
               );
             })}
-            <div style={{ height: `${(200 - 130 + 1) * 28 + 64}px` }} />
+            <div style={{ height: `${cmValues.length * 32 + 64}px` }} />
           </div>
         </div>
       </SelectContent>
