@@ -735,7 +735,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                 options={cities}
                 value={formData.city}
                 onValueChange={(value) => handleFieldChange('city', value)}
-                placeholder="Enter city name"
+                placeholder="City"
                 disabled={!formData.stateCode}
                 invalid={hasRedBorder('city')}
               />
@@ -873,7 +873,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                 </div>
 
                 {/* Right photo upload areas */}
-                <div className="flex flex-row gap-4 items-start">
+                <div className="flex flex-row gap-2 items-start">
                   {/* Portrait Photo */}
                   <div className="relative w-32 md:w-40">
                     <input
