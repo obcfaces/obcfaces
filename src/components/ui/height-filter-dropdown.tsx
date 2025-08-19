@@ -65,7 +65,7 @@ export default function HeightFilterDropdown({ onSelect, value, className }: Pro
             {cmValues.map((cm) => (
               <div
                 key={`cm-${cm}`}
-                className="text-sm cursor-pointer hover:bg-accent rounded px-2 py-1 text-center"
+                className="text-sm cursor-pointer hover:bg-accent rounded px-2 py-1 text-center h-8 flex items-center justify-center"
                 onClick={() => handleValueChange(`${cm} см`)}
               >
                 {cm}
@@ -79,14 +79,14 @@ export default function HeightFilterDropdown({ onSelect, value, className }: Pro
             {inchList.map((inch, index) => {
               // Находим позицию соответствующего см в массиве cmValues
               const cmIndex = cmValues.findIndex(cm => cm === inch.cm);
-              // Каждый элемент имеет высоту примерно 32px (включая отступы)
+              // Используем фиксированную высоту 32px для каждого элемента (h-8 = 32px)
               const itemHeight = 32;
               const position = cmIndex * itemHeight;
               
               return (
                 <div
                   key={`inch-${inch.display}`}
-                  className="text-sm cursor-pointer hover:bg-accent rounded px-2 py-1 text-center absolute w-full"
+                  className="text-sm cursor-pointer hover:bg-accent rounded px-2 py-1 text-center absolute w-full h-8 flex items-center justify-center"
                   style={{ top: `${position + 32}px` }} // +32px для заголовка
                   onClick={() => handleValueChange(inch.display)}
                 >
