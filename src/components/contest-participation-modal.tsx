@@ -873,37 +873,61 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                 </div>
 
                 {/* Right photo upload areas */}
-                <div className="flex flex-row gap-0.5 items-start justify-start max-w-full overflow-hidden">
+                <div className="flex flex-row gap-0.5 items-start justify-start max-w-full overflow-hidden ml-[280px]">
                   {/* Portrait Photo */}
-                  <div className="relative w-24 md:w-36">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handlePhoto1Upload}
-                      className="hidden"
-                      id="photo1-upload"
-                    />
-                    <label htmlFor="photo1-upload" className="cursor-pointer block">
-                      {photo1File ? (
-                        <div className="p-2 relative">
-                          <img
-                            src={URL.createObjectURL(photo1File)}
-                            alt="Portrait photo preview"
-                            className="w-full h-32 md:h-40 object-contain rounded bg-white"
-                          />
-                          <button 
-                            type="button"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              setPhoto1File(null);
-                              handleFieldChange('photo1', null);
-                            }}
-                            className="absolute top-1 right-1 w-6 h-6 bg-gray-500 hover:bg-gray-600 rounded-full flex items-center justify-center text-white text-sm font-bold transition-colors shadow-md"
-                          >
-                            ×
-                          </button>
-                          <div className="mt-2 text-center">
+                  <div className="flex flex-col items-center gap-1">
+                    <p className="text-xs text-muted-foreground">portrait</p>
+                    <div className="relative w-24 md:w-36">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handlePhoto1Upload}
+                        className="hidden"
+                        id="photo1-upload"
+                      />
+                      <label htmlFor="photo1-upload" className="cursor-pointer block">
+                        {photo1File ? (
+                          <div className="p-2 relative">
+                            <img
+                              src={URL.createObjectURL(photo1File)}
+                              alt="Portrait photo preview"
+                              className="w-full h-32 md:h-40 object-contain rounded bg-white"
+                            />
+                            <button 
+                              type="button"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                setPhoto1File(null);
+                                handleFieldChange('photo1', null);
+                              }}
+                              className="absolute top-1 right-1 w-6 h-6 bg-gray-500 hover:bg-gray-600 rounded-full flex items-center justify-center text-white text-sm font-bold transition-colors shadow-md"
+                            >
+                              ×
+                            </button>
+                            <div className="mt-2 text-center">
+                              <button 
+                                type="button" 
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  document.getElementById('photo1-upload')?.click();
+                                }}
+                                className="px-2 py-1 bg-primary text-primary-foreground rounded text-xs hover:bg-primary/90 transition-colors"
+                              >
+                                Change
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="p-2 text-center">
+                            <div className={`h-32 md:h-40 rounded-lg mb-2 flex items-center justify-center relative overflow-hidden aspect-[4/5] border-2 border-dashed cursor-pointer hover:border-primary transition-colors ${hasRedBorder('photo1') ? 'border-red-500' : 'border-muted-foreground/25'}`}>
+                              <img 
+                                src="/lovable-uploads/1147be30-a1d2-466f-a9a8-067f4628cbb2.png" 
+                                alt="Portrait placeholder" 
+                                className="absolute inset-0 w-full h-full object-cover opacity-40 filter grayscale brightness-75"
+                              />
+                            </div>
                             <button 
                               type="button" 
                               onClick={(e) => {
@@ -913,67 +937,68 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                               }}
                               className="px-2 py-1 bg-primary text-primary-foreground rounded text-xs hover:bg-primary/90 transition-colors"
                             >
-                              Change
+                              Upload
                             </button>
                           </div>
-                        </div>
-                      ) : (
-                        <div className="p-2 text-center">
-                          <div className={`h-32 md:h-40 rounded-lg mb-2 flex items-center justify-center relative overflow-hidden aspect-[4/5] border-2 border-dashed cursor-pointer hover:border-primary transition-colors ${hasRedBorder('photo1') ? 'border-red-500' : 'border-muted-foreground/25'}`}>
-                            <img 
-                              src="/lovable-uploads/1147be30-a1d2-466f-a9a8-067f4628cbb2.png" 
-                              alt="Portrait placeholder" 
-                              className="absolute inset-0 w-full h-full object-cover opacity-40 filter grayscale brightness-75"
-                            />
-                          </div>
-                          <p className="text-xs text-muted-foreground mb-2">portrait photo</p>
-                          
-                          <button 
-                            type="button" 
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              document.getElementById('photo1-upload')?.click();
-                            }}
-                            className="px-2 py-1 bg-primary text-primary-foreground rounded text-xs hover:bg-primary/90 transition-colors"
-                          >
-                            Upload
-                          </button>
-                        </div>
-                      )}
-                    </label>
+                        )}
+                      </label>
+                    </div>
                   </div>
 
                   {/* Full Length Photo */}
-                  <div className="relative w-24 md:w-36">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handlePhoto2Upload}
-                      className="hidden"
-                      id="photo2-upload"
-                    />
-                    <label htmlFor="photo2-upload" className="cursor-pointer block">
-                      {photo2File ? (
-                        <div className="p-2 relative">
-                          <img
-                            src={URL.createObjectURL(photo2File)}
-                            alt="Full length photo preview"
-                            className="w-full h-32 md:h-40 object-contain rounded bg-white"
-                          />
-                          <button 
-                            type="button"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              setPhoto2File(null);
-                              handleFieldChange('photo2', null);
-                            }}
-                            className="absolute top-1 right-1 w-6 h-6 bg-gray-500 hover:bg-gray-600 rounded-full flex items-center justify-center text-white text-sm font-bold transition-colors shadow-md"
-                          >
-                            ×
-                          </button>
-                          <div className="mt-2 text-center">
+                  <div className="flex flex-col items-center gap-1">
+                    <p className="text-xs text-muted-foreground">full length</p>
+                    <div className="relative w-24 md:w-36">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handlePhoto2Upload}
+                        className="hidden"
+                        id="photo2-upload"
+                      />
+                      <label htmlFor="photo2-upload" className="cursor-pointer block">
+                        {photo2File ? (
+                          <div className="p-2 relative">
+                            <img
+                              src={URL.createObjectURL(photo2File)}
+                              alt="Full length photo preview"
+                              className="w-full h-32 md:h-40 object-contain rounded bg-white"
+                            />
+                            <button 
+                              type="button"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                setPhoto2File(null);
+                                handleFieldChange('photo2', null);
+                              }}
+                              className="absolute top-1 right-1 w-6 h-6 bg-gray-500 hover:bg-gray-600 rounded-full flex items-center justify-center text-white text-sm font-bold transition-colors shadow-md"
+                            >
+                              ×
+                            </button>
+                            <div className="mt-2 text-center">
+                              <button 
+                                type="button" 
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  document.getElementById('photo2-upload')?.click();
+                                }}
+                                className="px-2 py-1 bg-primary text-primary-foreground rounded text-xs hover:bg-primary/90 transition-colors"
+                              >
+                                Change
+                              </button>
+                            </div>
+                          </div>
+                         ) : (
+                          <div className="p-2 text-center">
+                            <div className={`h-32 md:h-40 rounded-lg mb-2 flex items-center justify-center relative overflow-hidden aspect-[4/5] border-2 border-dashed cursor-pointer hover:border-primary transition-colors ${hasRedBorder('photo2') ? 'border-red-500' : 'border-muted-foreground/25'}`}>
+                              <img 
+                                src="/lovable-uploads/009d20f0-cac7-4c08-9bc9-146617664bc3.png" 
+                                alt="Full body placeholder" 
+                                className="absolute inset-0 w-full h-full object-contain opacity-50 filter grayscale brightness-50"
+                              />
+                            </div>
                             <button 
                               type="button" 
                               onClick={(e) => {
@@ -983,35 +1008,12 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                               }}
                               className="px-2 py-1 bg-primary text-primary-foreground rounded text-xs hover:bg-primary/90 transition-colors"
                             >
-                              Change
+                              Upload
                             </button>
                           </div>
-                        </div>
-                       ) : (
-                        <div className="p-2 text-center">
-                          <div className={`h-32 md:h-40 rounded-lg mb-2 flex items-center justify-center relative overflow-hidden aspect-[4/5] border-2 border-dashed cursor-pointer hover:border-primary transition-colors ${hasRedBorder('photo2') ? 'border-red-500' : 'border-muted-foreground/25'}`}>
-                            <img 
-                              src="/lovable-uploads/009d20f0-cac7-4c08-9bc9-146617664bc3.png" 
-                              alt="Full body placeholder" 
-                              className="absolute inset-0 w-full h-full object-contain opacity-50 filter grayscale brightness-50"
-                            />
-                          </div>
-                          <p className="text-xs text-muted-foreground mb-2">full length photo</p>
-                          
-                          <button 
-                            type="button" 
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              document.getElementById('photo2-upload')?.click();
-                            }}
-                            className="px-2 py-1 bg-primary text-primary-foreground rounded text-xs hover:bg-primary/90 transition-colors"
-                          >
-                            Upload
-                          </button>
-                        </div>
-                      )}
-                    </label>
+                        )}
+                      </label>
+                    </div>
                   </div>
                 </div>
               </div>
