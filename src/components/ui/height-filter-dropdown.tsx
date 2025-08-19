@@ -57,8 +57,8 @@ export default function HeightFilterDropdown({ onSelect, value, className }: Pro
       <SelectTrigger className={`text-sm ${className}`}>
         <SelectValue placeholder="Select height" />
       </SelectTrigger>
-      <SelectContent>
-        <div className="flex justify-center gap-12 p-3">
+      <SelectContent className="w-auto min-w-[320px]">
+        <div className="flex justify-between gap-4 p-3 max-h-[300px] overflow-y-auto">
           {/* Сантиметры */}
           <div className="space-y-2">
             <div className="text-xs font-medium text-muted-foreground text-center mb-2">CM</div>
