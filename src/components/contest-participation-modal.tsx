@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
+import HeightDropdownOneScrollPick from "@/components/ui/height-filter-dropdown";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -835,70 +836,22 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                   <SelectItem value="imperial">Imperial (ft, lbs)</SelectItem>
                 </SelectContent>
               </Select>
-              <Select 
-                value={formData.height_cm} 
-                onValueChange={(value) => handleFieldChange('height_cm', value)}
-              >
-                <SelectTrigger className={getFieldClasses('height_cm', "text-sm")}>
-                  <SelectValue placeholder="Select height" />
-                </SelectTrigger>
-                <SelectContent>
-                  <div className="flex justify-center gap-12">
-                    {/* Сантиметры */}
-                    <div className="h-96 overflow-y-scroll scrollbar-none">
-                      <ul className="space-y-8 text-xl font-medium">
-                        {Array.from({ length: 71 }, (_, i) => {
-                          const height = 130 + i;
-                          const cmValue = `${height} см`;
-                          return (
-                            <li 
-                              key={cmValue}
-                              className="cursor-pointer hover:bg-accent/50 rounded px-2 py-1"
-                              onClick={() => handleFieldChange('height_cm', height.toString())}
-                            >
-                              {cmValue}
-                            </li>
-                          );
-                        })}
-                      </ul>
-                    </div>
-
-                    {/* Футы/дюймы */}
-                    <div className="h-96 overflow-y-scroll scrollbar-none">
-                      <ul className="space-y-8 text-xl font-medium font-mono">
-                        {[
-                          "4'3\"", "4'4\"", "4'5\"", "4'6\"", "4'7\"", "4'8\"", "4'9\"", "4'10\"",
-                          "4'11\"", "5'0\"", "5'1\"", "5'2\"", "5'3\"", "5'4\"", "5'5\"", "5'6\"",
-                          "5'7\"", "5'8\"", "5'9\"", "5'10\"", "5'11\"", "6'0\"", "6'1\"", "6'2\"",
-                          "6'3\"", "6'4\"", "6'5\"", "6'6\"", "6'7\""
-                        ].map((inch) => (
-                          <li 
-                            key={inch}
-                            className="cursor-pointer hover:bg-accent/50 rounded px-2 py-1"
-                            onClick={() => {
-                              // Convert ft'in" to cm
-                              const [feet, inches] = inch.replace('"', '').split("'").map(Number);
-                              const totalInches = feet * 12 + inches;
-                              const cm = Math.round(totalInches * 2.54);
-                              handleFieldChange('height_cm', cm.toString());
-                            }}
-                          >
-                            {inch}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
-                  {Array.from({ length: 71 }, (_, i) => {
-                    const height = 130 + i;
-                    return (
-                      <SelectItem key={height} value={height.toString()}>
-                        {height} cm
-                      </SelectItem>
-                    );
-                  })}
-                </SelectContent>
-              </Select>
+              <HeightDropdownOneScrollPick 
+                onSelect={(value) => {
+                  if (value.system === "cm") {
+                    // Extract number from "XXX см"
+                    const cm = value.label.replace(' см', '');
+                    handleFieldChange('height_cm', cm);
+                  } else {
+                    // Convert ft'in" to cm
+                    const ftIn = value.label; // e.g., "5'10""
+                    const [feet, inches] = ftIn.replace('"', '').split("'").map(Number);
+                    const totalInches = feet * 12 + inches;
+                    const cm = Math.round(totalInches * 2.54);
+                    handleFieldChange('height_cm', cm.toString());
+                  }
+                }}
+              />
               <Select 
                 value={formData.weight_kg} 
                 onValueChange={(value) => handleFieldChange('weight_kg', value)}
