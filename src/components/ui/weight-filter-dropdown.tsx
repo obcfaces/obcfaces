@@ -74,7 +74,7 @@ export default function WeightFilterDropdown({ onSelect, value, className }: Pro
           {/* Шапка с заголовками */}
           <div className="flex gap-4 p-4 pb-2 bg-white border-b sticky top-0 z-20">
             <div className="text-xs font-medium text-muted-foreground text-center min-w-[50px]">KG</div>
-            <div className="text-xs font-medium text-muted-foreground min-w-[60px] pl-2">  LBS</div>
+            <div className="text-xs font-medium text-muted-foreground min-w-[60px] pl-6">    LBS</div>
           </div>
           
           {/* Контент */}
