@@ -61,7 +61,7 @@ export default function WeightFilterDropdown({ onSelect, value, className }: Pro
   ];
 
   const handleValueChange = (selectedValue: string) => {
-    if (selectedValue.includes("кг")) {
+    if (selectedValue.includes("kg")) {
       onSelect?.({ system: "kg", label: selectedValue });
     } else {
       onSelect?.({ system: "lbs", label: selectedValue });
@@ -78,7 +78,7 @@ export default function WeightFilterDropdown({ onSelect, value, className }: Pro
           aria-expanded={open}
           className={`text-sm justify-between ${className}`}
         >
-          {value || "Вес"}
+          {value || "Weight"}
           <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
@@ -99,9 +99,9 @@ export default function WeightFilterDropdown({ onSelect, value, className }: Pro
                 <div
                   key={`kg-${kg}`}
                   className="text-sm cursor-pointer hover:bg-accent rounded px-3 py-1 text-center h-8 flex items-center justify-center whitespace-nowrap"
-                  onClick={() => handleValueChange(`${kg} кг`)}
+                  onClick={() => handleValueChange(`${kg} kg`)}
                 >
-                  {kg} кг
+                  {kg} kg
                 </div>
               ))}
             </div>

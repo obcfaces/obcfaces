@@ -49,7 +49,7 @@ export default function HeightFilterDropdown({ onSelect, value, className }: Pro
   ];
 
   const handleValueChange = (selectedValue: string) => {
-    if (selectedValue.includes("см")) {
+    if (selectedValue.includes("cm")) {
       onSelect?.({ system: "cm", label: selectedValue });
     } else {
       onSelect?.({ system: "imperial", label: selectedValue });
@@ -66,7 +66,7 @@ export default function HeightFilterDropdown({ onSelect, value, className }: Pro
           aria-expanded={open}
           className={`text-sm justify-between ${className}`}
         >
-          {value || "Рост"}
+          {value || "Height"}
           <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
@@ -86,10 +86,10 @@ export default function HeightFilterDropdown({ onSelect, value, className }: Pro
               {cmValues.map((cm) => (
                 <div
                   key={`cm-${cm}`}
-                  className="text-sm cursor-pointer hover:bg-accent rounded px-3 py-1 text-center h-8 flex items-center justify-center"
-                  onClick={() => handleValueChange(`${cm} см`)}
+                  className="text-sm cursor-pointer hover:bg-accent rounded px-3 py-1 text-center h-8 flex items-center justify-center whitespace-nowrap"
+                  onClick={() => handleValueChange(`${cm} cm`)}
                 >
-                  {cm} см
+                  {cm} cm
                 </div>
               ))}
             </div>
