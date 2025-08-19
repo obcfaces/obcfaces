@@ -85,10 +85,10 @@ export default function WeightFilterDropdown({ onSelect, value, className }: Pro
               {kgValues.map((kg) => (
                 <div
                   key={`kg-${kg}`}
-                  className="text-sm cursor-pointer hover:bg-accent rounded px-3 py-1 text-center h-8 flex items-center justify-center min-w-[50px]"
+                  className="text-sm cursor-pointer hover:bg-accent rounded px-3 py-1 text-center h-8 flex items-center justify-center min-w-[50px] whitespace-nowrap"
                   onClick={() => handleValueChange(`${kg} кг`)}
                 >
-                  {kg}
+                  {kg} кг
                 </div>
               ))}
             </div>
@@ -108,7 +108,7 @@ export default function WeightFilterDropdown({ onSelect, value, className }: Pro
                 return (
                   <div
                     key={`lbs-${lbs.display}`}
-                    className="text-sm cursor-pointer hover:bg-accent rounded px-3 py-1 text-center absolute w-full h-8 flex items-center justify-center min-w-[60px]"
+                    className="text-sm cursor-pointer hover:bg-accent rounded px-3 py-1 text-center absolute w-full h-8 flex items-center justify-center min-w-[60px] whitespace-nowrap"
                     style={{ top: `${topOffset}px` }}
                     onClick={() => handleValueChange(lbs.display)}
                   >
