@@ -67,58 +67,23 @@ export default function WeightFilterDropdown({ onSelect, value, className }: Pro
   return (
     <Select value={value} onValueChange={handleValueChange}>
       <SelectTrigger className={`text-sm ${className}`}>
-        <SelectValue placeholder="Select weight" />
+        <SelectValue placeholder="Вес" />
       </SelectTrigger>
-      <SelectContent className="w-auto min-w-[200px]">
+      <SelectContent className="w-auto min-w-[200px] bg-popover">
         <div className="max-h-[400px] overflow-y-auto">
-          {/* Шапка с заголовками */}
-          <div className="flex gap-4 p-4 pb-2 bg-white border-b sticky top-0 z-20">
-            <div className="text-xs font-medium text-muted-foreground text-center min-w-[50px]">KG</div>
-            <div className="text-xs font-medium text-muted-foreground min-w-[60px] pl-6">    LBS</div>
-          </div>
+          {/* KG options */}
+          {kgValues.map((kg) => (
+            <SelectItem key={`kg-${kg}`} value={`${kg} кг`}>
+              {kg} кг
+            </SelectItem>
+          ))}
           
-          {/* Контент */}
-          <div className="flex gap-4 p-4 pt-2">
-          {/* Килограммы */}
-          <div className="flex flex-col">
-            <div className="space-y-0">
-              {kgValues.map((kg) => (
-                <div
-                  key={`kg-${kg}`}
-                  className="text-sm cursor-pointer hover:bg-accent rounded px-3 py-1 text-center h-8 flex items-center justify-center min-w-[50px] whitespace-nowrap"
-                  onClick={() => handleValueChange(`${kg} кг`)}
-                >
-                  {kg} кг
-                </div>
-              ))}
-            </div>
-          </div>
-          
-          {/* Фунты */}
-          <div className="flex flex-col relative">
-            <div className="relative" style={{ height: `${kgValues.length * 32}px` }}>
-              {lbsList.map((lbs, index) => {
-                // Крайние позиции фиксированы: 88 lbs на 40кг, 264 lbs на 120кг
-                // Остальные равномерно распределены между ними
-                const totalLbsItems = lbsList.length - 1; // 40 интервалов между 41 элементом
-                const maxPosition = kgValues.length - 1; // позиция 80 (120кг)
-                const targetPosition = (index / totalLbsItems) * maxPosition;
-                const topOffset = targetPosition * 32;
-                
-                return (
-                  <div
-                    key={`lbs-${lbs.display}`}
-                    className="text-sm cursor-pointer hover:bg-accent rounded px-3 py-1 text-center absolute w-full h-8 flex items-center justify-center min-w-[60px] whitespace-nowrap"
-                    style={{ top: `${topOffset}px` }}
-                    onClick={() => handleValueChange(lbs.display)}
-                  >
-                    {lbs.display}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-          </div>
+          {/* LBS options */}
+          {lbsList.map((lbs) => (
+            <SelectItem key={`lbs-${lbs.display}`} value={lbs.display}>
+              {lbs.display}
+            </SelectItem>
+          ))}
         </div>
       </SelectContent>
     </Select>
