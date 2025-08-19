@@ -843,25 +843,42 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                   <SelectValue placeholder="Select height" />
                 </SelectTrigger>
                 <SelectContent>
-                  <div className="ruler">
-                    <div className="guide"></div>
-                    
-                    <div className="col cm">
-                      <ul>
+                  <div className="flex justify-center gap-12 py-4">
+                    {/* Сантиметры */}
+                    <div className="h-96 overflow-y-scroll scrollbar-thin border-r border-border pr-4">
+                      <ul className="space-y-2">
                         {Array.from({ length: 71 }, (_, i) => {
                           const height = 130 + i;
-                          return <li key={height}>{height} см</li>;
+                          return (
+                            <li 
+                              key={height} 
+                              className="h-10 flex items-center text-lg font-medium cursor-pointer hover:bg-accent/50 rounded px-2"
+                              onClick={() => handleFieldChange('height_cm', height.toString())}
+                            >
+                              {height} см
+                            </li>
+                          );
                         })}
                       </ul>
                     </div>
-                    
-                    <div className="col ft">
-                      <ul>
+
+                    {/* Футы/дюймы */}
+                    <div className="h-96 overflow-y-scroll scrollbar-thin pl-4">
+                      <ul className="space-y-2">
                         {Array.from({ length: 29 }, (_, i) => {
                           const totalInches = 51 + i; // Start from 4'3" (51 inches)
                           const feet = Math.floor(totalInches / 12);
                           const inches = totalInches % 12;
-                          return <li key={totalInches}>{feet}'{inches}"</li>;
+                          const ftValue = `${feet}'${inches}"`;
+                          return (
+                            <li 
+                              key={totalInches} 
+                              className="h-10 flex items-center text-lg font-medium cursor-pointer hover:bg-accent/50 rounded px-2 font-mono"
+                              onClick={() => handleFieldChange('height_cm', (totalInches * 2.54).toFixed(0))}
+                            >
+                              {ftValue}
+                            </li>
+                          );
                         })}
                       </ul>
                     </div>
