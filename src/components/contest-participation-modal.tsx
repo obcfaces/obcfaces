@@ -824,19 +824,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
               </Select>
             </div>
 
-            <div className="grid gap-2 grid-cols-3">
-              <Select 
-                value={formData.measurement_system} 
-                onValueChange={(value) => handleFieldChange('measurement_system', value)}
-              >
-                <SelectTrigger className="text-sm">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="metric">Metric (cm, kg)</SelectItem>
-                  <SelectItem value="imperial">Imperial (ft, lbs)</SelectItem>
-                </SelectContent>
-              </Select>
+            <div className="grid gap-2 grid-cols-2">
               <HeightDropdownOneScrollPick 
                 value={formData.height_cm ? `${formData.height_cm} см` : undefined}
                 className={getFieldClasses('height_cm', "")}
