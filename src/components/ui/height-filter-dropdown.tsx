@@ -12,7 +12,7 @@ export default function HeightFilterDropdown({ onSelect }: Props) {
   const CM_MAX = 200;
   
   // Масштаб для визуализации (пиксели на см)
-  const PX_PER_CM = 8;
+  const PX_PER_CM = 24; // увеличено в 3 раза (было 8)
   const PX_PER_INCH = PX_PER_CM * 2.54; // 1 дюйм = 2.54 см
   
   // Высота контейнера с отступами
