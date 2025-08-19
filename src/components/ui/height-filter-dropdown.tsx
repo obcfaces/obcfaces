@@ -59,9 +59,17 @@ export default function HeightFilterDropdown({ onSelect, value, className }: Pro
       </SelectTrigger>
       <SelectContent className="w-auto min-w-[200px]">
         <div className="flex gap-4 p-4 max-h-[400px] overflow-y-auto">
+          {/* Шапка с заголовками */}
+          <div className="absolute top-0 left-0 right-0 flex gap-4 p-4 bg-white border-b z-20">
+            <div className="text-xs font-medium text-muted-foreground text-center min-w-[50px]">CM</div>
+            <div className="text-xs font-medium text-muted-foreground min-w-[60px] pl-2">  FT/IN</div>
+          </div>
+          
+          {/* Контент с отступом для шапки */}
+          <div className="flex gap-4 pt-8">
           {/* Сантиметры */}
           <div className="flex flex-col">
-            <div className="text-xs font-medium text-muted-foreground text-center mb-2 sticky top-0 z-10 border-b pb-1 bg-white">CM</div>
+            <div className="invisible text-xs mb-2">CM</div>
             <div className="space-y-0">
               {cmValues.map((cm) => (
                 <div
@@ -77,7 +85,7 @@ export default function HeightFilterDropdown({ onSelect, value, className }: Pro
           
           {/* Футы/дюймы */}
           <div className="flex flex-col relative">
-            <div className="text-xs font-medium text-muted-foreground mb-2 sticky top-0 z-10 border-b pb-1 bg-white pl-2">  FT/IN</div>
+            <div className="invisible text-xs mb-2">FT/IN</div>
             <div className="relative" style={{ height: `${cmValues.length * 32}px` }}>
               {inchList.map((inch, index) => {
                 // Крайние позиции фиксированы: 4'3" на 0, 6'7" на 71
@@ -99,6 +107,7 @@ export default function HeightFilterDropdown({ onSelect, value, className }: Pro
                 );
               })}
             </div>
+          </div>
           </div>
         </div>
       </SelectContent>
