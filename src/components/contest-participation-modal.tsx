@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import HeightDropdownOneScrollPick from "@/components/ui/height-filter-dropdown";
+import WeightFilterDropdown from "@/components/ui/weight-filter-dropdown";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -854,24 +855,22 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                   }
                 }}
               />
-              <Select 
-                value={formData.weight_kg} 
-                onValueChange={(value) => handleFieldChange('weight_kg', value)}
-              >
-                <SelectTrigger className={getFieldClasses('weight_kg', "text-sm")}>
-                  <SelectValue placeholder="Weight (kg)" />
-                </SelectTrigger>
-                <SelectContent>
-                  {Array.from({ length: 111 }, (_, i) => {
-                    const weight = 40 + i;
-                    return (
-                      <SelectItem key={weight} value={weight.toString()}>
-                        {weight} kg
-                      </SelectItem>
-                    );
-                  })}
-                </SelectContent>
-              </Select>
+              <WeightFilterDropdown 
+                value={formData.weight_kg ? `${formData.weight_kg} кг` : undefined}
+                className={getFieldClasses('weight_kg', "")}
+                onSelect={(value) => {
+                  if (value.system === "kg") {
+                    // Extract number from "XXX кг"
+                    const kg = value.label.replace(' кг', '');
+                    handleFieldChange('weight_kg', kg);
+                  } else {
+                    // Convert lbs to kg
+                    const lbs = parseFloat(value.label.replace(' lbs', ''));
+                    const kg = Math.round(lbs / 2.205);
+                    handleFieldChange('weight_kg', kg.toString());
+                  }
+                }}
+              />
             </div>
 
             <div className="space-y-4">
