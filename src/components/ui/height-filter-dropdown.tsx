@@ -77,19 +77,19 @@ export default function HeightFilterDropdown({ onSelect, value, className }: Pro
           <div className="relative">
             <div className="text-xs font-medium text-muted-foreground text-center mb-2">FT/IN</div>
             {inchList.map((inch, index) => {
-              // Жестко привязываем: первый элемент к первой позиции, последний к последней
-              const totalCmItems = cmValues.length; // 72 элемента (130-201)
-              const totalInchItems = inchList.length; // 25 элементов
+              // НОВЫЙ РАСЧЕТ: точное выравнивание 4'3" с 130см, 6'7" с 201см
+              // 25 элементов футов/дюймов распределить по 72 позициям см (130-201)
+              const positionRatio = index / (inchList.length - 1); // от 0 до 1
+              const targetCmIndex = Math.round(positionRatio * 71); // от 0 до 71
+              const pixelPosition = targetCmIndex * 32; // каждый см = 32px
               
-              // Прямая пропорция от 0 до 71 позиции
-              const exactPosition = (index / (totalInchItems - 1)) * (totalCmItems - 1);
-              const position = exactPosition * 32;
+              console.log(`${inch.display} -> позиция ${targetCmIndex} (${130 + targetCmIndex}см)`);
               
               return (
                 <div
                   key={`inch-${inch.display}`}
                   className="text-sm cursor-pointer hover:bg-accent rounded px-2 py-1 text-center absolute w-full h-8 flex items-center justify-center"
-                  style={{ top: `${position + 32}px` }} // +32px для заголовка
+                  style={{ top: `${pixelPosition + 32}px` }}
                   onClick={() => handleValueChange(inch.display)}
                 >
                   {inch.display}
