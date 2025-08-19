@@ -77,16 +77,13 @@ export default function HeightFilterDropdown({ onSelect, value, className }: Pro
           <div className="relative">
             <div className="text-xs font-medium text-muted-foreground text-center mb-2">FT/IN</div>
             {inchList.map((inch, index) => {
-              // Прямое выравнивание: 4'3" на индекс 0 (130см), 6'7" на индекс 71 (201см)
-              let cmIndex;
-              if (index === 0) {
-                cmIndex = 0; // 130 см
-              } else if (index === inchList.length - 1) {
-                cmIndex = 71; // 201 см
-              } else {
-                cmIndex = Math.round((index / (inchList.length - 1)) * 71);
-              }
-              const position = cmIndex * 32;
+              // Жестко привязываем: первый элемент к первой позиции, последний к последней
+              const totalCmItems = cmValues.length; // 72 элемента (130-201)
+              const totalInchItems = inchList.length; // 25 элементов
+              
+              // Прямая пропорция от 0 до 71 позиции
+              const exactPosition = (index / (totalInchItems - 1)) * (totalCmItems - 1);
+              const position = exactPosition * 32;
               
               return (
                 <div
