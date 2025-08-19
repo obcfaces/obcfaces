@@ -1,82 +1,140 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 
-export default function HeightFilterDropdown() {
-  const [open, setOpen] = useState(false);
+type Props = {
+  onSelect?: (value: { system: "cm" | "imperial"; label: string }) => void;
+};
 
-  // cm: 130..200
-  const cmValues = Array.from({ length: 71 }, (_, i) => 130 + i);
+export default function HeightDropdownOneScrollPick({
+  onSelect,
+}: Props) {
+  const [open, setOpen] = useState(false); // поставь false в проде
+  const [selected, setSelected] = useState<{system: "cm"|"imperial"; label: string} | null>(null);
 
-  // ft/in: 4'3" .. 6'7" (шаг 1")
-  const inchList: string[] = [];
-  for (let ft = 4, inch = 3; !(ft === 6 && inch === 8); ) {
-    // ВАЖНО: без пробелов вокруг апострофа!
-    inchList.push(`${ft}'${inch}"`); // или `${ft}′${inch}″`
-    inch++;
-    if (inch === 12) { inch = 0; ft++; }
-  }
+  // Диапазоны
+  const CM_MIN = 130;
+  const CM_MAX = 200;
+  const IN_MIN = Math.ceil(CM_MIN / 2.54);   // ≈ 51 (4'3")
+  const IN_MAX = Math.floor(CM_MAX / 2.54);  // ≈ 78–79 (до 6'7")
 
-  // refs для независимого скролла и стартового сдвига
-  const cmRef = useRef<HTMLDivElement>(null);
-  const ftRef = useRef<HTMLDivElement>(null);
+  // Визуальная плотность
+  const PX_PER_CM = 12;                 // 1 см = 12 px
+  const PX_PER_IN = 2.54 * PX_PER_CM;   // 1"  = 30.48 px
+  const PAD = 24;                       // верх/низ внутри скролла
+  const innerHeight = (CM_MAX - CM_MIN) * PX_PER_CM + PAD * 2;
 
-  // параметры «шкалы»
-  const ROW = 84;        // шаг строки (px)
-  const OFFSET = ROW/2;  // смещение правой колонки, чтобы не стояло «напротив»
+  // Данные
+  const cmTicks = useMemo(
+    () => Array.from({ length: (CM_MAX - CM_MIN) + 1 }, (_, i) => CM_MIN + i),
+    []
+  );
+  const inTicks = useMemo(
+    () => Array.from({ length: (IN_MAX - IN_MIN) + 1 }, (_, i) => IN_MIN + i),
+    []
+  );
 
+  const toFtIn = (totalIn: number) => {
+    const ft = Math.floor(totalIn / 12);
+    const inch = totalIn % 12;
+    return `${ft}'${inch}"`; // можно заменить на `${ft}′${inch}″`
+  };
+
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  // центрируем на середину диапазона
   useEffect(() => {
-    // левую оставляем без сдвига
-    if (cmRef.current) cmRef.current.scrollTop = 0;
-    // правую сдвигаем на половину шага — визуально «две линейки», а не таблица
-    if (ftRef.current) ftRef.current.scrollTop = OFFSET;
-  }, [open]);
+    if (!open || !scrollRef.current) return;
+    scrollRef.current.scrollTop = (innerHeight - 360) / 2;
+  }, [open, innerHeight]);
+
+  // обработка выбора
+  const selectCM = (cm: number) => {
+    const payload = { system: "cm" as const, label: `${cm} см` };
+    setSelected(payload);
+    onSelect?.(payload);
+  };
+  const selectIN = (inch: number) => {
+    const payload = { system: "imperial" as const, label: toFtIn(inch) };
+    setSelected(payload);
+    onSelect?.(payload);
+  };
+
+  // подсветка
+  const isSel = (lab: string) => selected?.label === lab;
 
   return (
     <div className="relative inline-block">
       <button
         type="button"
         onClick={() => setOpen(v => !v)}
-        className="px-4 py-2 rounded-xl border bg-background shadow-sm hover:bg-accent"
+        className="px-4 py-2 rounded-xl border bg-white shadow-sm hover:bg-slate-50"
       >
         Select height
       </button>
 
       {open && (
-        <div className="absolute z-50 mt-2 w-[360px] rounded-2xl border bg-popover shadow-lg">
-          {/* центральная направляющая поверх двух колонок */}
-          <div className="relative">
-            <div className="pointer-events-none absolute left-1/2 top-3 bottom-3 w-px bg-border -translate-x-1/2" />
-
-            <div className="flex items-start gap-6 p-3">
-              {/* Сантиметры — левая колонка */}
-              <div ref={cmRef} className="max-h-[440px] overflow-y-auto pr-2">
-                <ul className="m-0 p-0 list-none font-semibold text-foreground [font-variant-numeric:tabular-nums]">
-                  {cmValues.map(cm => (
-                    <li
-                      key={cm}
-                      className="whitespace-nowrap text-[18px] text-right pr-2 cursor-pointer hover:bg-accent rounded"
-                      style={{ height: ROW, lineHeight: `${ROW}px` }}
+        <div className="absolute z-50 mt-2 w-[420px] rounded-2xl border bg-white shadow-lg">
+          <div className="p-3">
+            {/* общий скролл-контейнер */}
+            <div
+              ref={scrollRef}
+              className="relative h-[360px] overflow-y-auto rounded-xl bg-white"
+              style={{ fontVariantNumeric: "tabular-nums" } as React.CSSProperties}
+            >
+              {/* Контентная плоскость для абсолютного позиционирования меток */}
+              <div
+                className="relative"
+                style={{ height: innerHeight, paddingTop: PAD, paddingBottom: PAD }}
+              >
+                {/* Левая колонка — сантиметры */}
+                {cmTicks.map((cm) => {
+                  const y = (cm - CM_MIN) * PX_PER_CM; // точная вертикальная позиция
+                  return (
+                    <div
+                      key={`cm-${cm}`}
+                      className={`absolute right-[calc(50%+0.5cm)] pr-3 
+                                  -translate-y-1/2 cursor-pointer select-none 
+                                  text-[18px] font-semibold whitespace-nowrap
+                                  ${isSel(`${cm} см`) ? "text-sky-700" : "text-slate-800"}`}
+                      style={{ top: y }}
+                      onClick={() => selectCM(cm)}
+                      title={`${cm} см`}
                     >
-                      {cm} см
-                    </li>
-                  ))}
-                </ul>
-              </div>
+                      {cm}
+                    </div>
+                  );
+                })}
 
-              {/* Правая колонка — футы/дюймы */}
-              <div ref={ftRef} className="max-h-[440px] overflow-y-auto pl-2">
-                <ul className="m-0 p-0 list-none font-semibold text-foreground [font-variant-numeric:tabular-nums]">
-                  {inchList.map(v => (
-                    <li
-                      key={v}
-                      className="whitespace-nowrap text-[18px] text-left pl-2 cursor-pointer hover:bg-accent rounded"
-                      style={{ height: ROW, lineHeight: `${ROW}px` }}
+                {/* Правая колонка — футы/дюймы */}
+                {inTicks.map((inch) => {
+                  const y = (inch - IN_MIN) * PX_PER_IN; // точная вертикальная позиция
+                  const lab = toFtIn(inch);
+                  return (
+                    <div
+                      key={`in-${inch}`}
+                      className={`absolute left-[calc(50%+0.5cm)] pl-3 
+                                  -translate-y-1/2 cursor-pointer select-none 
+                                  text-[18px] font-semibold whitespace-nowrap
+                                  ${isSel(lab) ? "text-emerald-700" : "text-slate-800"}`}
+                      style={{ top: y }}
+                      onClick={() => selectIN(inch)}
+                      title={lab}
                     >
-                      {v}
-                    </li>
-                  ))}
-                </ul>
+                      {lab}
+                    </div>
+                  );
+                })}
               </div>
             </div>
+
+            {/* подсказка и выбранное значение */}
+            <div className="mt-2 text-xs text-slate-500 text-center">
+              One shared scroll. Columns spaced by <b>1&nbsp;cm</b>. Click a value on either side to select.
+            </div>
+            {selected && (
+              <div className="mt-1 text-sm text-center">
+                Selected: <span className="font-semibold">{selected.label}</span> ({selected.system})
+              </div>
+            )}
           </div>
         </div>
       )}
