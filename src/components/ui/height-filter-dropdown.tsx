@@ -49,12 +49,13 @@ export default function HeightFilterDropdown({ onSelect, value, className }: Pro
           </div>
           
           {/* Футы/дюймы */}
-          <div className="space-y-2">
+          <div className="space-y-0">
             <div className="text-xs font-medium text-muted-foreground text-center mb-2">FT/IN</div>
-            {inchList.map((inch) => (
+            {inchList.map((inch, index) => (
               <div
                 key={`inch-${inch}`}
                 className="text-sm cursor-pointer hover:bg-accent rounded px-2 py-1 text-center"
+                style={{ marginBottom: index < inchList.length - 1 ? '4.54px' : '0' }}
                 onClick={() => handleValueChange(inch)}
               >
                 {inch}
