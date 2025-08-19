@@ -1,4 +1,5 @@
-import React, { useState, useMemo } from "react";
+import React, { useState } from "react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 type Props = {
   onSelect?: (value: { system: "cm" | "imperial"; label: string }) => void;
@@ -7,113 +8,61 @@ type Props = {
 };
 
 export default function HeightFilterDropdown({ onSelect, value, className }: Props) {
-  const [open, setOpen] = useState(false);
+  // cm: 130..200
+  const cmValues = Array.from({ length: 71 }, (_, i) => 130 + i);
 
-  // Диапазоны
-  const CM_MIN = 130;
-  const CM_MAX = 200;
-  
-  // Масштаб для визуализации (пиксели на см)
-  const PX_PER_CM = 8;
-  
-  // Высота контейнера с отступами
-  const PAD = 24;
-  const innerHeight = (CM_MAX - CM_MIN) * PX_PER_CM + PAD * 2;
+  // ft/in: точные варианты
+  const inchList = [
+    "4'3\"", "4'4\"", "4'5\"", "4'6\"", "4'7\"", "4'8\"", "4'9\"", "4'10\"",
+    "4'11\"", "5'0\"", "5'1\"", "5'2\"", "5'3\"", "5'4\"", "5'5\"", "5'6\"",
+    "5'7\"", "5'8\"", "5'9\"", "5'10\"", "5'11\"", "6'0\"", "6'1\"", "6'2\"",
+    "6'3\"", "6'4\"", "6'5\"", "6'6\"", "6'7\""
+  ];
 
-  // Генерируем данные
-  const cmTicks = useMemo(() => 
-    Array.from({ length: (CM_MAX - CM_MIN) + 1 }, (_, i) => CM_MIN + i), []
-  );
-
-  const inchTicks = useMemo(() => {
-    const inches = [];
-    // Начинаем с дюйма, который соответствует CM_MIN
-    const startInch = Math.floor(CM_MIN / 2.54);
-    const endInch = Math.ceil(CM_MAX / 2.54);
-    
-    for (let inch = startInch; inch <= endInch; inch++) {
-      inches.push(inch);
+  const handleValueChange = (selectedValue: string) => {
+    if (selectedValue.includes("cm")) {
+      onSelect?.({ system: "cm", label: selectedValue });
+    } else {
+      onSelect?.({ system: "imperial", label: selectedValue });
     }
-    return inches;
-  }, []);
-
-  const toFtIn = (totalInches: number) => {
-    const ft = Math.floor(totalInches / 12);
-    const inch = totalInches % 12;
-    return `${ft}'${inch}"`;
-  };
-
-  const handleSelect = (system: "cm" | "imperial", label: string) => {
-    onSelect?.({ system, label });
-    setOpen(false);
   };
 
   return (
-    <div className="relative inline-block">
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        className={`px-4 py-2 rounded-xl border bg-background shadow-sm hover:bg-accent ${className}`}
-      >
-        {value || "Select height"}
-      </button>
-
-      {open && (
-        <div
-          className="absolute z-50 mt-2 w-[360px] rounded-2xl border bg-popover shadow-lg"
-          onMouseLeave={() => setOpen(false)}
-        >
-          <div className="flex items-start gap-6 p-3">
-            {/* Левая колонка — см */}
-            <div className="max-h-[440px] overflow-y-auto pr-2 flex-1">
-              <div 
-                className="relative"
-                style={{ height: innerHeight, paddingTop: PAD, paddingBottom: PAD }}
+    <Select value={value} onValueChange={handleValueChange}>
+      <SelectTrigger className={`text-sm ${className}`}>
+        <SelectValue placeholder="Select height" />
+      </SelectTrigger>
+      <SelectContent>
+        <div className="flex justify-center gap-12 p-3">
+          {/* Сантиметры */}
+          <div className="space-y-2">
+            <div className="text-xs font-medium text-muted-foreground text-center mb-2">CM</div>
+            {cmValues.map((cm) => (
+              <div
+                key={`cm-${cm}`}
+                className="text-sm cursor-pointer hover:bg-accent rounded px-2 py-1 text-center"
+                onClick={() => handleValueChange(`${cm} см`)}
               >
-                {cmTicks.map((cm) => {
-                  const y = (cm - CM_MIN) * PX_PER_CM;
-                  return (
-                    <div
-                      key={cm}
-                      className="absolute right-2 -translate-y-1/2 whitespace-nowrap text-[18px] text-right cursor-pointer hover:bg-accent rounded px-2 py-1 font-semibold text-foreground [font-variant-numeric:tabular-nums]"
-                      style={{ top: y }}
-                      onClick={() => handleSelect("cm", `${cm} см`)}
-                    >
-                      {cm} см
-                    </div>
-                  );
-                })}
+                {cm}
               </div>
-            </div>
-
-            {/* вертикальная разделительная линия */}
-            <div className="w-px self-stretch bg-border" />
-
-            {/* Правая колонка — ft/in */}
-            <div className="max-h-[440px] overflow-y-auto pl-2 flex-1">
-              <div 
-                className="relative"
-                style={{ height: innerHeight, paddingTop: PAD, paddingBottom: PAD }}
+            ))}
+          </div>
+          
+          {/* Футы/дюймы */}
+          <div className="space-y-2">
+            <div className="text-xs font-medium text-muted-foreground text-center mb-2">FT/IN</div>
+            {inchList.map((inch) => (
+              <div
+                key={`inch-${inch}`}
+                className="text-sm cursor-pointer hover:bg-accent rounded px-2 py-1 text-center"
+                onClick={() => handleValueChange(inch)}
               >
-                {inchTicks.map((inch) => {
-                  const y = (inch * 2.54 - CM_MIN) * PX_PER_CM; // позиция в см, конвертированная в пиксели
-                  const ftIn = toFtIn(inch);
-                  return (
-                    <div
-                      key={inch}
-                      className="absolute left-2 -translate-y-1/2 whitespace-nowrap text-[18px] text-left cursor-pointer hover:bg-accent rounded px-2 py-1 font-semibold text-foreground [font-variant-numeric:tabular-nums]"
-                      style={{ top: y }}
-                      onClick={() => handleSelect("imperial", ftIn)}
-                    >
-                      {ftIn}
-                    </div>
-                  );
-                })}
+                {inch}
               </div>
-            </div>
+            ))}
           </div>
         </div>
-      )}
-    </div>
+      </SelectContent>
+    </Select>
   );
 }
