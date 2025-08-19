@@ -75,7 +75,7 @@ export default function HeightFilterDropdown({ onSelect, value, className }: Pro
           {/* Шапка с заголовками */}
           <div className="flex gap-4 p-4 pb-2 bg-popover border-b sticky top-0 z-20">
             <div className="text-xs font-medium text-muted-foreground text-center min-w-[50px]">CM</div>
-            <div className="text-xs font-medium text-muted-foreground min-w-[60px] pl-2">  FT/IN</div>
+            <div className="text-xs font-medium text-muted-foreground text-center min-w-[60px]">FT/IN</div>
           </div>
           
           {/* Контент */}
