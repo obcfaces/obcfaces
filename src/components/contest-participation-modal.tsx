@@ -826,12 +826,12 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
 
             <div className="grid gap-2 grid-cols-2">
               <HeightDropdownOneScrollPick 
-                value={formData.height_cm ? `${formData.height_cm} см` : undefined}
+                value={formData.height_cm ? `${formData.height_cm} cm` : undefined}
                 className={getFieldClasses('height_cm', "")}
                 onSelect={(value) => {
                   if (value.system === "cm") {
                     // Extract number from "XXX см"
-                    const cm = value.label.replace(' см', '');
+                    const cm = value.label.replace(' cm', '');
                     handleFieldChange('height_cm', cm);
                   } else {
                     // Convert ft'in" to cm
@@ -844,12 +844,12 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                 }}
               />
               <WeightFilterDropdown 
-                value={formData.weight_kg ? `${formData.weight_kg} кг` : undefined}
+                value={formData.weight_kg ? `${formData.weight_kg} kg` : undefined}
                 className={getFieldClasses('weight_kg', "")}
                 onSelect={(value) => {
                   if (value.system === "kg") {
                     // Extract number from "XXX кг"
-                    const kg = value.label.replace(' кг', '');
+                    const kg = value.label.replace(' kg', '');
                     handleFieldChange('weight_kg', kg);
                   } else {
                     // Convert lbs to kg
