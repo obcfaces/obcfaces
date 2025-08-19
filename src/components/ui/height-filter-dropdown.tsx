@@ -33,40 +33,41 @@ export default function HeightFilterDropdown({ onSelect }: Props) {
           className="absolute z-50 mt-2 w-[360px] rounded-2xl border bg-popover shadow-lg"
           onMouseLeave={() => setOpen(false)}
         >
-          <div className="flex items-start gap-6 p-3">
-            {/* Левая колонка — см */}
-            <div className="max-h-[440px] overflow-y-auto pr-2">
-              <ul className="m-0 p-0 list-none [font-variant-numeric:tabular-nums] font-semibold text-foreground">
-                {cmValues.map((cm) => (
-                  <li
-                    key={cm}
-                    className="whitespace-nowrap text-[18px] text-right pr-2 cursor-pointer hover:bg-accent rounded"
-                    style={{ height: 160, lineHeight: "160px" }} // увеличено в 5 раз (32px * 5 = 160px)
-                    onClick={() => onSelect?.({ system: "cm", label: `${cm} см` })}
-                  >
-                    {cm} см
-                  </li>
-                ))}
-              </ul>
-            </div>
+          <div className="p-3">
+            <div className="max-h-[440px] overflow-y-auto">
+              <div className="flex justify-center gap-12">
+                {/* Сантиметры */}
+                <div>
+                  <ul className="m-0 p-0 list-none [font-variant-numeric:tabular-nums] font-semibold text-foreground">
+                    {cmValues.map((cm) => (
+                      <li
+                        key={cm}
+                        className="whitespace-nowrap text-[18px] text-right cursor-pointer hover:bg-accent rounded px-2 py-1"
+                        style={{ height: 160, lineHeight: "160px" }}
+                        onClick={() => onSelect?.({ system: "cm", label: `${cm} см` })}
+                      >
+                        {cm} см
+                      </li>
+                    ))}
+                  </ul>
+                </div>
 
-            {/* вертикальная разделительная линия */}
-            <div className="w-px self-stretch bg-border" />
-
-            {/* Правая колонка — ft/in */}
-            <div className="max-h-[440px] overflow-y-auto pl-2">
-              <ul className="m-0 p-0 list-none [font-variant-numeric:tabular-nums] font-semibold text-foreground">
-                {inchList.map((inch) => (
-                  <li
-                    key={inch}
-                    className="whitespace-nowrap text-[18px] text-left pl-2 cursor-pointer hover:bg-accent rounded"
-                    style={{ height: 160, lineHeight: "160px" }} // такое же расстояние
-                    onClick={() => onSelect?.({ system: "imperial", label: inch })}
-                  >
-                    {inch}
-                  </li>
-                ))}
-              </ul>
+                {/* Футы/дюймы */}
+                <div>
+                  <ul className="m-0 p-0 list-none [font-variant-numeric:tabular-nums] font-semibold text-foreground">
+                    {inchList.map((inch) => (
+                      <li
+                        key={inch}
+                        className="whitespace-nowrap text-[18px] text-left cursor-pointer hover:bg-accent rounded px-2 py-1"
+                        style={{ height: 160, lineHeight: "160px" }}
+                        onClick={() => onSelect?.({ system: "imperial", label: inch })}
+                      >
+                        {inch}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
             </div>
           </div>
         </div>
