@@ -9,7 +9,7 @@ type Props = {
 
 export default function HeightFilterDropdown({ onSelect, value, className }: Props) {
   // cm: 130..200
-  const cmValues = Array.from({ length: 71 }, (_, i) => 130 + i);
+  const cmValues = Array.from({ length: 72 }, (_, i) => 130 + i); // 130-201
 
   // ft/in: точные варианты с соответствующими значениями в см
   const inchList = [
@@ -41,7 +41,7 @@ export default function HeightFilterDropdown({ onSelect, value, className }: Pro
     { display: "6'4\"", cm: 193 },
     { display: "6'5\"", cm: 196 },
     { display: "6'6\"", cm: 198 },
-    { display: "6'7\"", cm: 200 }
+    { display: "6'7\"", cm: 201 }
   ];
 
   const handleValueChange = (selectedValue: string) => {
@@ -78,10 +78,10 @@ export default function HeightFilterDropdown({ onSelect, value, className }: Pro
             <div className="text-xs font-medium text-muted-foreground text-center mb-2">FT/IN</div>
             {inchList.map((inch, index) => {
               // 4'3" (index 0) точно напротив 130см (позиция 0)
-              // 6'7" (index 24) точно напротив 200см (позиция 70)
-              // Прямое соотношение: позиция = (index * 70) / 24
+              // 6'7" (index 24) точно напротив 201см (позиция 71)
+              // Прямое соотношение: позиция = (index * 71) / 24
               const maxInchIndex = inchList.length - 1; // 24
-              const maxCmPosition = 70; // позиция 200см относительно 130см
+              const maxCmPosition = 71; // позиция 201см относительно 130см (201-130=71)
               const position = (index * maxCmPosition / maxInchIndex) * 32;
               
               return (
