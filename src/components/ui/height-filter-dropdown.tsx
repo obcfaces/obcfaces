@@ -70,8 +70,8 @@ export default function HeightFilterDropdown({ onSelect, value, className }: Pro
           <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-auto min-w-[200px] p-0">
-        <div className="max-h-[400px] overflow-y-auto">
+      <PopoverContent className="w-auto min-w-[200px] p-0 pointer-events-auto">
+        <div className="max-h-[400px] overflow-y-auto pointer-events-auto">
           {/* Шапка с заголовками */}
           <div className="flex gap-4 p-4 pb-2 bg-popover border-b sticky top-0 z-20">
             <div className="text-xs font-medium text-muted-foreground text-center min-w-[50px]">CM</div>
@@ -89,7 +89,7 @@ export default function HeightFilterDropdown({ onSelect, value, className }: Pro
                   className="text-sm cursor-pointer hover:bg-accent rounded px-3 py-1 text-center h-8 flex items-center justify-center min-w-[50px]"
                   onClick={() => handleValueChange(`${cm} см`)}
                 >
-                  {cm}
+                  {cm} см
                 </div>
               ))}
             </div>
