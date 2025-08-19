@@ -41,7 +41,7 @@ export default function HeightFilterDropdown({ onSelect, value, className }: Pro
     { display: "6'4\"", cm: 193 },
     { display: "6'5\"", cm: 196 },
     { display: "6'6\"", cm: 198 },
-    { display: "6'7\"", cm: 201 }
+    { display: "6'7\"", cm: 200 }
   ];
 
   const handleValueChange = (selectedValue: string) => {
