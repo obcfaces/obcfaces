@@ -33,18 +33,35 @@ export default function HeightFilterDropdown({ onSelect, value, className }: Pro
         <SelectValue placeholder="Select height" />
       </SelectTrigger>
       <SelectContent>
-        {/* Сантиметры */}
-        {cmValues.map((cm) => (
-          <SelectItem key={`cm-${cm}`} value={`${cm} см`}>
-            {cm} cm
-          </SelectItem>
-        ))}
-        {/* Футы/дюймы */}
-        {inchList.map((inch) => (
-          <SelectItem key={`inch-${inch}`} value={inch}>
-            {inch}
-          </SelectItem>
-        ))}
+        <div className="flex justify-center gap-12 p-3">
+          {/* Сантиметры */}
+          <div className="space-y-2">
+            <div className="text-xs font-medium text-muted-foreground text-center mb-2">CM</div>
+            {cmValues.map((cm) => (
+              <div
+                key={`cm-${cm}`}
+                className="text-sm cursor-pointer hover:bg-accent rounded px-2 py-1 text-center"
+                onClick={() => handleValueChange(`${cm} см`)}
+              >
+                {cm}
+              </div>
+            ))}
+          </div>
+          
+          {/* Футы/дюймы */}
+          <div className="space-y-2">
+            <div className="text-xs font-medium text-muted-foreground text-center mb-2">FT/IN</div>
+            {inchList.map((inch) => (
+              <div
+                key={`inch-${inch}`}
+                className="text-sm cursor-pointer hover:bg-accent rounded px-2 py-1 text-center"
+                onClick={() => handleValueChange(inch)}
+              >
+                {inch}
+              </div>
+            ))}
+          </div>
+        </div>
       </SelectContent>
     </Select>
   );
