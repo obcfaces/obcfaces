@@ -873,9 +873,9 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                 </div>
 
                 {/* Right photo upload areas */}
-                <div className="flex flex-row gap-1 items-start justify-end">
+                <div className="flex flex-row gap-1 items-start justify-start ml-8">
                   {/* Portrait Photo */}
-                  <div className="relative w-28 md:w-40">
+                  <div className="relative w-24 md:w-36">
                     <input
                       type="file"
                       accept="image/*"
@@ -945,7 +945,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                   </div>
 
                   {/* Full Length Photo */}
-                  <div className="relative w-28 md:w-40">
+                  <div className="relative w-24 md:w-36">
                     <input
                       type="file"
                       accept="image/*"
