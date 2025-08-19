@@ -1,5 +1,7 @@
-import React from "react";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import React, { useState } from "react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Button } from "@/components/ui/button";
+import { ChevronDown } from "lucide-react";
 
 type Props = {
   onSelect?: (value: { system: "cm" | "imperial"; label: string }) => void;
@@ -8,6 +10,8 @@ type Props = {
 };
 
 export default function HeightFilterDropdown({ onSelect, value, className }: Props) {
+  const [open, setOpen] = useState(false);
+  
   // cm: 130..201 (72 элемента)
   const cmValues = Array.from({ length: 72 }, (_, i) => 130 + i);
 
@@ -45,35 +49,79 @@ export default function HeightFilterDropdown({ onSelect, value, className }: Pro
   ];
 
   const handleValueChange = (selectedValue: string) => {
-    if (selectedValue.includes("cm")) {
+    if (selectedValue.includes("см")) {
       onSelect?.({ system: "cm", label: selectedValue });
     } else {
       onSelect?.({ system: "imperial", label: selectedValue });
     }
+    setOpen(false);
   };
 
   return (
-    <Select value={value} onValueChange={handleValueChange}>
-      <SelectTrigger className={`text-sm ${className}`}>
-        <SelectValue placeholder="Рост" />
-      </SelectTrigger>
-      <SelectContent className="w-auto min-w-[200px] bg-popover">
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          variant="outline"
+          role="combobox"
+          aria-expanded={open}
+          className={`text-sm justify-between ${className}`}
+        >
+          {value || "Рост"}
+          <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-auto min-w-[200px] p-0">
         <div className="max-h-[400px] overflow-y-auto">
-          {/* CM options */}
-          {cmValues.map((cm) => (
-            <SelectItem key={`cm-${cm}`} value={`${cm} см`}>
-              {cm} см
-            </SelectItem>
-          ))}
+          {/* Шапка с заголовками */}
+          <div className="flex gap-4 p-4 pb-2 bg-popover border-b sticky top-0 z-20">
+            <div className="text-xs font-medium text-muted-foreground text-center min-w-[50px]">CM</div>
+            <div className="text-xs font-medium text-muted-foreground min-w-[60px] pl-2">  FT/IN</div>
+          </div>
           
-          {/* Imperial options */}
-          {inchList.map((inch) => (
-            <SelectItem key={`inch-${inch.display}`} value={inch.display}>
-              {inch.display}
-            </SelectItem>
-          ))}
+          {/* Контент */}
+          <div className="flex gap-4 p-4 pt-2">
+          {/* Сантиметры */}
+          <div className="flex flex-col">
+            <div className="space-y-0">
+              {cmValues.map((cm) => (
+                <div
+                  key={`cm-${cm}`}
+                  className="text-sm cursor-pointer hover:bg-accent rounded px-3 py-1 text-center h-8 flex items-center justify-center min-w-[50px]"
+                  onClick={() => handleValueChange(`${cm} см`)}
+                >
+                  {cm}
+                </div>
+              ))}
+            </div>
+          </div>
+          
+          {/* Футы/дюймы */}
+          <div className="flex flex-col relative">
+            <div className="relative" style={{ height: `${cmValues.length * 32}px` }}>
+              {inchList.map((inch, index) => {
+                // Крайние позиции фиксированы: 4'3" на 0, 6'7" на 71
+                // Остальные равномерно распределены между ними
+                const totalInchItems = inchList.length - 1; // 24 интервала между 25 элементами
+                const maxPosition = cmValues.length - 1; // позиция 71 (201см)
+                const targetPosition = (index / totalInchItems) * maxPosition;
+                const topOffset = targetPosition * 32;
+                
+                return (
+                  <div
+                    key={`inch-${inch.display}`}
+                    className="text-sm cursor-pointer hover:bg-accent rounded px-3 py-1 text-center absolute w-full h-8 flex items-center justify-center min-w-[60px]"
+                    style={{ top: `${topOffset}px` }}
+                    onClick={() => handleValueChange(inch.display)}
+                  >
+                    {inch.display}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+          </div>
         </div>
-      </SelectContent>
-    </Select>
+      </PopoverContent>
+    </Popover>
   );
 }
