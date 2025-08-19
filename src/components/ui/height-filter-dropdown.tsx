@@ -80,10 +80,11 @@ export default function HeightFilterDropdown({ onSelect, value, className }: Pro
             <div className="text-xs font-medium text-muted-foreground text-center mb-2 sticky top-0 bg-background">FT/IN</div>
             <div className="relative" style={{ height: `${cmValues.length * 32}px` }}>
               {inchList.map((inch, index) => {
-                // Равномерное распределение от позиции 0 до позиции 71
-                // 4'3" (index 0) -> позиция 0 (130см)
-                // 6'7" (index 24) -> позиция 71 (201см)
-                const targetPosition = Math.round((index / (inchList.length - 1)) * (cmValues.length - 1));
+                // Крайние позиции фиксированы: 4'3" на 0, 6'7" на 71
+                // Остальные равномерно распределены между ними
+                const totalInchItems = inchList.length - 1; // 24 интервала между 25 элементами
+                const maxPosition = cmValues.length - 1; // позиция 71 (201см)
+                const targetPosition = (index / totalInchItems) * maxPosition;
                 const topOffset = targetPosition * 32;
                 
                 return (
