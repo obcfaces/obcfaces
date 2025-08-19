@@ -77,8 +77,8 @@ export default function HeightFilterDropdown({ onSelect, value, className }: Pro
           <div className="relative">
             <div className="text-xs font-medium text-muted-foreground text-center mb-2">FT/IN</div>
             {inchList.map((inch, index) => {
-              // Позиция с интервалом 2.54см (1 дюйм = 2.54см)
-              const position = index * 2.54 * 40; // 40px на 1 см, 2.54см между вариантами
+              // Равномерное распределение: 4'3" напротив 130см, 6'7" напротив 200см
+              const position = index * (70 * 40) / (inchList.length - 1); // Равномерное распределение по всему диапазону
               return (
                 <div
                   key={`inch-${inch.display}`}
