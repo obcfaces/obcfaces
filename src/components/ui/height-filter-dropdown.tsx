@@ -74,22 +74,17 @@ export default function HeightFilterDropdown({ onSelect, value, className }: Pro
           </div>
           
           {/* Футы/дюймы */}
-          <div className="relative">
+          <div className="space-y-2">
             <div className="text-xs font-medium text-muted-foreground text-center mb-2">FT/IN</div>
-            {inchList.map((inch) => {
-              const position = (inch.cm - 130) * 32; // 32px на 1 см (высота каждого пункта в см колонке примерно 32px)
-              return (
-                <div
-                  key={`inch-${inch.display}`}
-                  className="text-sm cursor-pointer hover:bg-accent rounded px-2 py-1 text-center absolute w-full"
-                  style={{ top: `${position + 32}px` }} // +32px для заголовка
-                  onClick={() => handleValueChange(inch.display)}
-                >
-                  {inch.display}
-                </div>
-              );
-            })}
-            <div style={{ height: `${(200 - 130) * 32 + 64}px` }} />
+            {inchList.map((inch, index) => (
+              <div
+                key={`inch-${inch.display}`}
+                className="text-sm cursor-pointer hover:bg-accent rounded px-2 py-1 text-center"
+                onClick={() => handleValueChange(inch.display)}
+              >
+                {inch.display}
+              </div>
+            ))}
           </div>
         </div>
       </SelectContent>
