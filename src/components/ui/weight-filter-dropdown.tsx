@@ -86,14 +86,14 @@ export default function WeightFilterDropdown({ onSelect, value, className }: Pro
         <div className="max-h-[400px] overflow-y-auto pointer-events-auto" style={{ scrollBehavior: 'auto' }}>
           {/* Шапка с заголовками */}
           <div className="flex gap-4 p-4 pb-2 bg-popover border-b sticky top-0 z-20">
-            <div className="text-xs font-medium text-muted-foreground text-center min-w-[70px]">KG</div>
-            <div className="text-xs font-medium text-muted-foreground text-center min-w-[70px]">LBS</div>
+            <div className="text-xs font-medium text-muted-foreground text-center" style={{ width: '70px' }}>KG</div>
+            <div className="text-xs font-medium text-muted-foreground text-center" style={{ width: '70px' }}>LBS</div>
           </div>
           
           {/* Контент */}
-          <div className="flex gap-4 p-4 pt-2">
+          <div className="flex gap-4 px-4 pt-2">
           {/* Килограммы */}
-          <div className="flex flex-col min-w-[70px]">
+          <div className="flex flex-col" style={{ width: '70px' }}>
             <div className="space-y-0">
               {kgValues.map((kg) => (
                 <div
@@ -108,7 +108,7 @@ export default function WeightFilterDropdown({ onSelect, value, className }: Pro
           </div>
           
           {/* Фунты */}
-          <div className="flex flex-col relative min-w-[70px]">
+          <div className="flex flex-col relative" style={{ width: '70px' }}>
             <div className="relative" style={{ height: `${kgValues.length * 32}px` }}>
               {lbsList.map((lbs, index) => {
                 // Крайние позиции фиксированы: 88 lbs на 40кг, 264 lbs на 120кг
