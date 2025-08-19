@@ -67,7 +67,7 @@ export default function WeightFilterDropdown({ onSelect, value, className }: Pro
   return (
     <Select value={value} onValueChange={handleValueChange}>
       <SelectTrigger className={`text-sm ${className}`}>
-        <SelectValue placeholder="Вес" />
+        <SelectValue placeholder="Select weight" />
       </SelectTrigger>
       <SelectContent className="w-auto min-w-[200px]">
         <div className="max-h-[400px] overflow-y-auto">
