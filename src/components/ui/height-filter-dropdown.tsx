@@ -72,14 +72,16 @@ export default function HeightFilterDropdown({ onSelect, value, className }: Pro
       </PopoverTrigger>
       <PopoverContent className="w-auto min-w-[200px] p-0 pointer-events-auto" onWheel={(e) => e.stopPropagation()}>
         <div className="max-h-[400px] overflow-y-auto pointer-events-auto" style={{ scrollBehavior: 'auto' }}>
-          {/* Убираем старую шапку */}
+          {/* Шапка с заголовками */}
+          <div className="flex gap-4 p-4 pb-2 bg-popover border-b sticky top-0 z-20">
+            <div className="text-xs font-medium text-muted-foreground text-center min-w-[70px]">CM</div>
+            <div className="text-xs font-medium text-muted-foreground text-center min-w-[70px]">FT/IN</div>
+          </div>
           
-          {/* Контент с заголовками над столбцами */}
+          {/* Контент */}
           <div className="flex gap-4 p-4 pt-2">
           {/* Сантиметры */}
           <div className="flex flex-col min-w-[70px]">
-            {/* Заголовок CM точно над столбцом */}
-            <div className="text-xs font-medium text-muted-foreground text-center mb-2 sticky top-[60px] bg-popover z-10 py-1">CM</div>
             <div className="space-y-0">
               {cmValues.map((cm) => (
                 <div
@@ -95,8 +97,6 @@ export default function HeightFilterDropdown({ onSelect, value, className }: Pro
           
           {/* Футы/дюймы */}
           <div className="flex flex-col relative min-w-[70px]">
-            {/* Заголовок FT/IN точно над столбцом */}
-            <div className="text-xs font-medium text-muted-foreground text-center mb-2 sticky top-[60px] bg-popover z-10 py-1">FT/IN</div>
             <div className="relative" style={{ height: `${cmValues.length * 32}px` }}>
               {inchList.map((inch, index) => {
                 // Крайние позиции фиксированы: 4'3" на 0, 6'7" на 71
