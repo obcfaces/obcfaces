@@ -84,14 +84,16 @@ export default function WeightFilterDropdown({ onSelect, value, className }: Pro
       </PopoverTrigger>
       <PopoverContent className="w-auto min-w-[200px] p-0 pointer-events-auto" onWheel={(e) => e.stopPropagation()}>
         <div className="max-h-[400px] overflow-y-auto pointer-events-auto" style={{ scrollBehavior: 'auto' }}>
-          {/* Убираем старую шапку */}
+          {/* Шапка с заголовками */}
+          <div className="flex gap-4 p-4 pb-2 bg-popover border-b sticky top-0 z-20">
+            <div className="text-xs font-medium text-muted-foreground text-center min-w-[70px]">KG</div>
+            <div className="text-xs font-medium text-muted-foreground text-center min-w-[70px]">LBS</div>
+          </div>
           
-          {/* Контент с заголовками над столбцами */}
+          {/* Контент */}
           <div className="flex gap-4 p-4 pt-2">
           {/* Килограммы */}
           <div className="flex flex-col min-w-[70px]">
-            {/* Заголовок KG точно над столбцом */}
-            <div className="text-xs font-medium text-muted-foreground text-center mb-2 sticky top-[60px] bg-popover z-10 py-1">KG</div>
             <div className="space-y-0">
               {kgValues.map((kg) => (
                 <div
@@ -107,8 +109,6 @@ export default function WeightFilterDropdown({ onSelect, value, className }: Pro
           
           {/* Фунты */}
           <div className="flex flex-col relative min-w-[70px]">
-            {/* Заголовок LBS точно над столбцом */}
-            <div className="text-xs font-medium text-muted-foreground text-center mb-2 sticky top-[60px] bg-popover z-10 py-1">LBS</div>
             <div className="relative" style={{ height: `${kgValues.length * 32}px` }}>
               {lbsList.map((lbs, index) => {
                 // Крайние позиции фиксированы: 88 lbs на 40кг, 264 lbs на 120кг
