@@ -877,7 +877,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                   {/* Portrait Photo */}
                   <div className="flex flex-col items-center gap-1">
                     <p className="text-xs text-muted-foreground">portrait</p>
-                    <div className="relative w-24 md:w-36">
+                    <div className="relative w-16 sm:w-20 md:w-36">
                       <input
                         type="file"
                         accept="image/*"
@@ -948,7 +948,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                   {/* Full Length Photo */}
                   <div className="flex flex-col items-center gap-1">
                     <p className="text-xs text-muted-foreground">full length</p>
-                    <div className="relative w-24 md:w-36">
+                    <div className="relative w-16 sm:w-20 md:w-36">
                       <input
                         type="file"
                         accept="image/*"
