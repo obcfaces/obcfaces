@@ -11,12 +11,37 @@ export default function HeightFilterDropdown({ onSelect, value, className }: Pro
   // cm: 130..200
   const cmValues = Array.from({ length: 71 }, (_, i) => 130 + i);
 
-  // ft/in: точные варианты
+  // ft/in: точные варианты с соответствующими значениями в см
   const inchList = [
-    "4'3\"", "4'4\"", "4'5\"", "4'6\"", "4'7\"", "4'8\"", "4'9\"", "4'10\"",
-    "4'11\"", "5'0\"", "5'1\"", "5'2\"", "5'3\"", "5'4\"", "5'5\"", "5'6\"",
-    "5'7\"", "5'8\"", "5'9\"", "5'10\"", "5'11\"", "6'0\"", "6'1\"", "6'2\"",
-    "6'3\"", "6'4\"", "6'5\"", "6'6\"", "6'7\""
+    { display: "4'3\"", cm: 130 },
+    { display: "4'4\"", cm: 132 },
+    { display: "4'5\"", cm: 135 },
+    { display: "4'6\"", cm: 137 },
+    { display: "4'7\"", cm: 140 },
+    { display: "4'8\"", cm: 142 },
+    { display: "4'9\"", cm: 145 },
+    { display: "4'10\"", cm: 147 },
+    { display: "4'11\"", cm: 150 },
+    { display: "5'0\"", cm: 152 },
+    { display: "5'1\"", cm: 155 },
+    { display: "5'2\"", cm: 157 },
+    { display: "5'3\"", cm: 160 },
+    { display: "5'4\"", cm: 163 },
+    { display: "5'5\"", cm: 165 },
+    { display: "5'6\"", cm: 168 },
+    { display: "5'7\"", cm: 170 },
+    { display: "5'8\"", cm: 173 },
+    { display: "5'9\"", cm: 175 },
+    { display: "5'10\"", cm: 178 },
+    { display: "5'11\"", cm: 180 },
+    { display: "6'0\"", cm: 183 },
+    { display: "6'1\"", cm: 185 },
+    { display: "6'2\"", cm: 188 },
+    { display: "6'3\"", cm: 191 },
+    { display: "6'4\"", cm: 193 },
+    { display: "6'5\"", cm: 196 },
+    { display: "6'6\"", cm: 198 },
+    { display: "6'7\"", cm: 201 }
   ];
 
   const handleValueChange = (selectedValue: string) => {
@@ -49,17 +74,22 @@ export default function HeightFilterDropdown({ onSelect, value, className }: Pro
           </div>
           
           {/* Футы/дюймы */}
-          <div className="space-y-2">
+          <div className="relative">
             <div className="text-xs font-medium text-muted-foreground text-center mb-2">FT/IN</div>
-            {inchList.map((inch) => (
-              <div
-                key={`inch-${inch}`}
-                className="text-sm cursor-pointer hover:bg-accent rounded px-2 py-1 text-center"
-                onClick={() => handleValueChange(inch)}
-              >
-                {inch}
-              </div>
-            ))}
+            {inchList.map((inch) => {
+              const position = (inch.cm - 130) * 32; // 32px на 1 см (высота каждого пункта в см колонке примерно 32px)
+              return (
+                <div
+                  key={`inch-${inch.display}`}
+                  className="text-sm cursor-pointer hover:bg-accent rounded px-2 py-1 text-center absolute w-full"
+                  style={{ top: `${position + 32}px` }} // +32px для заголовка
+                  onClick={() => handleValueChange(inch.display)}
+                >
+                  {inch.display}
+                </div>
+              );
+            })}
+            <div style={{ height: `${(200 - 130) * 32 + 64}px` }} />
           </div>
         </div>
       </SelectContent>
