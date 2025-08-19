@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 type Props = {
@@ -8,10 +8,10 @@ type Props = {
 };
 
 export default function HeightFilterDropdown({ onSelect, value, className }: Props) {
-  // cm: 130..200
-  const cmValues = Array.from({ length: 72 }, (_, i) => 130 + i); // 130-201
+  // cm: 130..201 (72 элемента)
+  const cmValues = Array.from({ length: 72 }, (_, i) => 130 + i);
 
-  // ft/in: точные варианты с соответствующими значениями в см
+  // ft/in: 25 элементов равномерно распределенных
   const inchList = [
     { display: "4'3\"", cm: 130 },
     { display: "4'4\"", cm: 132 },
@@ -57,46 +57,47 @@ export default function HeightFilterDropdown({ onSelect, value, className }: Pro
       <SelectTrigger className={`text-sm ${className}`}>
         <SelectValue placeholder="Select height" />
       </SelectTrigger>
-      <SelectContent className="w-auto min-w-[320px]">
-        <div className="flex justify-between gap-4 p-3 max-h-[300px] overflow-y-auto">
+      <SelectContent className="w-auto min-w-[350px]">
+        <div className="flex gap-8 p-4 max-h-[400px] overflow-y-auto">
           {/* Сантиметры */}
-          <div className="space-y-2">
-            <div className="text-xs font-medium text-muted-foreground text-center mb-2">CM</div>
-            {cmValues.map((cm) => (
-              <div
-                key={`cm-${cm}`}
-                className="text-sm cursor-pointer hover:bg-accent rounded px-2 py-1 text-center h-8 flex items-center justify-center"
-                onClick={() => handleValueChange(`${cm} см`)}
-              >
-                {cm}
-              </div>
-            ))}
+          <div className="flex flex-col">
+            <div className="text-xs font-medium text-muted-foreground text-center mb-2 sticky top-0 bg-background">CM</div>
+            <div className="space-y-0">
+              {cmValues.map((cm) => (
+                <div
+                  key={`cm-${cm}`}
+                  className="text-sm cursor-pointer hover:bg-accent rounded px-3 py-1 text-center h-8 flex items-center justify-center min-w-[50px]"
+                  onClick={() => handleValueChange(`${cm} см`)}
+                >
+                  {cm}
+                </div>
+              ))}
+            </div>
           </div>
           
           {/* Футы/дюймы */}
-          <div className="relative">
-            <div className="text-xs font-medium text-muted-foreground text-center mb-2">FT/IN</div>
-            {inchList.map((inch, index) => {
-              // НОВЫЙ РАСЧЕТ: точное выравнивание 4'3" с 130см, 6'7" с 201см
-              // 25 элементов футов/дюймов распределить по 72 позициям см (130-201)
-              const positionRatio = index / (inchList.length - 1); // от 0 до 1
-              const targetCmIndex = Math.round(positionRatio * 71); // от 0 до 71
-              const pixelPosition = targetCmIndex * 32; // каждый см = 32px
-              
-              console.log(`${inch.display} -> позиция ${targetCmIndex} (${130 + targetCmIndex}см)`);
-              
-              return (
-                <div
-                  key={`inch-${inch.display}`}
-                  className="text-sm cursor-pointer hover:bg-accent rounded px-2 py-1 text-center absolute w-full h-8 flex items-center justify-center"
-                  style={{ top: `${pixelPosition + 32}px` }}
-                  onClick={() => handleValueChange(inch.display)}
-                >
-                  {inch.display}
-                </div>
-              );
-            })}
-            <div style={{ height: `${cmValues.length * 32 + 64}px` }} />
+          <div className="flex flex-col relative">
+            <div className="text-xs font-medium text-muted-foreground text-center mb-2 sticky top-0 bg-background">FT/IN</div>
+            <div className="relative" style={{ height: `${cmValues.length * 32}px` }}>
+              {inchList.map((inch, index) => {
+                // Равномерное распределение от позиции 0 до позиции 71
+                // 4'3" (index 0) -> позиция 0 (130см)
+                // 6'7" (index 24) -> позиция 71 (201см)
+                const targetPosition = Math.round((index / (inchList.length - 1)) * (cmValues.length - 1));
+                const topOffset = targetPosition * 32;
+                
+                return (
+                  <div
+                    key={`inch-${inch.display}`}
+                    className="text-sm cursor-pointer hover:bg-accent rounded px-3 py-1 text-center absolute w-full h-8 flex items-center justify-center min-w-[60px]"
+                    style={{ top: `${topOffset}px` }}
+                    onClick={() => handleValueChange(inch.display)}
+                  >
+                    {inch.display}
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </div>
       </SelectContent>
