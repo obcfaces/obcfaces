@@ -82,23 +82,21 @@ export default function WeightFilterDropdown({ onSelect, value, className }: Pro
           <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-auto min-w-[200px] p-0 pointer-events-auto">
-        <div className="max-h-[400px] overflow-y-auto pointer-events-auto">
-          {/* Шапка с заголовками */}
-          <div className="flex gap-4 p-4 pb-2 bg-popover border-b sticky top-0 z-20">
-            <div className="text-xs font-medium text-muted-foreground text-center min-w-[50px]">KG</div>
-            <div className="text-xs font-medium text-muted-foreground text-center min-w-[60px]">LBS</div>
-          </div>
+      <PopoverContent className="w-auto min-w-[200px] p-0 pointer-events-auto" onWheel={(e) => e.stopPropagation()}>
+        <div className="max-h-[400px] overflow-y-auto pointer-events-auto" style={{ scrollBehavior: 'auto' }}>
+          {/* Убираем старую шапку */}
           
-          {/* Контент */}
+          {/* Контент с заголовками над столбцами */}
           <div className="flex gap-4 p-4 pt-2">
           {/* Килограммы */}
-          <div className="flex flex-col">
+          <div className="flex flex-col min-w-[70px]">
+            {/* Заголовок KG точно над столбцом */}
+            <div className="text-xs font-medium text-muted-foreground text-center mb-2 sticky top-[60px] bg-popover z-10 py-1">KG</div>
             <div className="space-y-0">
               {kgValues.map((kg) => (
                 <div
                   key={`kg-${kg}`}
-                  className="text-sm cursor-pointer hover:bg-accent rounded px-3 py-1 text-center h-8 flex items-center justify-center min-w-[50px] whitespace-nowrap"
+                  className="text-sm cursor-pointer hover:bg-accent rounded px-3 py-1 text-center h-8 flex items-center justify-center whitespace-nowrap"
                   onClick={() => handleValueChange(`${kg} кг`)}
                 >
                   {kg} кг
@@ -108,7 +106,9 @@ export default function WeightFilterDropdown({ onSelect, value, className }: Pro
           </div>
           
           {/* Фунты */}
-          <div className="flex flex-col relative">
+          <div className="flex flex-col relative min-w-[70px]">
+            {/* Заголовок LBS точно над столбцом */}
+            <div className="text-xs font-medium text-muted-foreground text-center mb-2 sticky top-[60px] bg-popover z-10 py-1">LBS</div>
             <div className="relative" style={{ height: `${kgValues.length * 32}px` }}>
               {lbsList.map((lbs, index) => {
                 // Крайние позиции фиксированы: 88 lbs на 40кг, 264 lbs на 120кг
@@ -121,7 +121,7 @@ export default function WeightFilterDropdown({ onSelect, value, className }: Pro
                 return (
                   <div
                     key={`lbs-${lbs.display}`}
-                    className="text-sm cursor-pointer hover:bg-accent rounded px-3 py-1 text-center absolute w-full h-8 flex items-center justify-center min-w-[60px] whitespace-nowrap"
+                    className="text-sm cursor-pointer hover:bg-accent rounded px-3 py-1 text-center absolute w-full h-8 flex items-center justify-center whitespace-nowrap"
                     style={{ top: `${topOffset}px` }}
                     onClick={() => handleValueChange(lbs.display)}
                   >
