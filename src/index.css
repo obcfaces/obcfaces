@@ -144,7 +144,7 @@ All colors MUST be HSL.
   gap: 32px;                 /* расстояние между шкалами */
   width: 360px;              /* подберите под макет */
   height: 420px;             /* высота окна */
-  padding: 24px 16px;        /* одинаковые верх/низ для обеих колонок */
+  padding: 40px 16px;        /* увеличенный одинаковый padding для симметрии */
   border-radius: 12px;
   background: hsl(var(--background));
   border: 1px solid hsl(var(--border));
@@ -156,8 +156,8 @@ All colors MUST be HSL.
 .ruler .guide {
   position: absolute;
   left: 50%;
-  top: 24px;
-  bottom: 24px;
+  top: 40px;                 /* совпадает с padding контейнера */
+  bottom: 40px;              /* совпадает с padding контейнера */
   width: 1px;
   background: hsl(var(--border));
   transform: translateX(-50%);
@@ -183,11 +183,12 @@ All colors MUST be HSL.
 
 /* Элемент шкалы: фиксированная высота = равномерный шаг */
 .col li {
-  height: 48px;              /* фиксированная высота для равномерности */
-  line-height: 48px;         /* вертикальная центровка */
+  height: 120px;             /* фикс шаг для шкалы */
+  line-height: 120px;        /* текст по центру */
+  font-size: 20px;
+  font-variant-numeric: tabular-nums; /* ровные цифры */
   white-space: nowrap;
   color: hsl(var(--foreground));
-  font-size: 16px;
   cursor: pointer;
   transition: background-color 0.2s ease;
 }
