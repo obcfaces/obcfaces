@@ -836,7 +836,9 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                   <SelectItem value="imperial">Imperial (ft, lbs)</SelectItem>
                 </SelectContent>
               </Select>
-              <HeightDropdownOneScrollPick
+              <HeightDropdownOneScrollPick 
+                value={formData.height_cm ? `${formData.height_cm} см` : undefined}
+                className={getFieldClasses('height_cm', "")}
                 onSelect={(value) => {
                   if (value.system === "cm") {
                     // Extract number from "XXX см"
