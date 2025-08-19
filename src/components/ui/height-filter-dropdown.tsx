@@ -66,10 +66,10 @@ export default function HeightFilterDropdown({ onSelect, value, className }: Pro
           </div>
           
           {/* Контент с отступом для шапки */}
-          <div className="flex gap-4 pt-8">
+          <div className="flex gap-4 pt-8 pointer-events-auto">
           {/* Сантиметры */}
           <div className="flex flex-col">
-            <div className="invisible text-xs mb-2">CM</div>
+            <div className="text-xs mb-2 opacity-0">CM</div>
             <div className="space-y-0">
               {cmValues.map((cm) => (
                 <div
@@ -85,7 +85,7 @@ export default function HeightFilterDropdown({ onSelect, value, className }: Pro
           
           {/* Футы/дюймы */}
           <div className="flex flex-col relative">
-            <div className="invisible text-xs mb-2">FT/IN</div>
+            <div className="text-xs mb-2 opacity-0">FT/IN</div>
             <div className="relative" style={{ height: `${cmValues.length * 32}px` }}>
               {inchList.map((inch, index) => {
                 // Крайние позиции фиксированы: 4'3" на 0, 6'7" на 71
