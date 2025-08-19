@@ -148,6 +148,8 @@ All colors MUST be HSL.
   border-radius: 12px;
   background: hsl(var(--background));
   border: 1px solid hsl(var(--border));
+  overflow: auto;            /* единый скролл для всего контейнера */
+  scrollbar-width: thin;
 }
 
 /* Центральная направляющая — отдельный слой, не бордер колонки */
@@ -164,8 +166,7 @@ All colors MUST be HSL.
 
 /* Колонки */
 .col {
-  overflow: auto;            /* скролл для длинных списков */
-  scrollbar-width: thin;
+  /* убираем overflow: auto - скролл теперь у родителя */
 }
 
 /* Списки — общий стиль */
