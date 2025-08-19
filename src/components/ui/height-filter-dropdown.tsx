@@ -77,11 +77,13 @@ export default function HeightFilterDropdown({ onSelect, value, className }: Pro
           <div className="relative">
             <div className="text-xs font-medium text-muted-foreground text-center mb-2">FT/IN</div>
             {inchList.map((inch, index) => {
-              // 4'3" (index 0) напротив 130см (позиция 0), 6'7" (последний) напротив 200см (позиция 70)
-              // Равномерное распределение: от позиции 0 до позиции 70 (70 шагов по 32px)
-              const totalSteps = 70; // от 130см до 200см = 70 шагов
-              const itemHeight = 32; // высота каждого элемента в пикселях
-              const position = (index / (inchList.length - 1)) * totalSteps * itemHeight;
+              // 4'3" (index 0) должен быть на позиции 130см (index 0)
+              // 6'7" (index 24) должен быть на позиции 200см (index 70)
+              // Формула: позиция = (текущий_индекс / максимальный_индекс) * максимальная_позиция
+              const maxInchIndex = inchList.length - 1; // 24
+              const maxCmIndex = cmValues.length - 1;   // 70
+              const cmPosition = Math.round((index / maxInchIndex) * maxCmIndex);
+              const position = cmPosition * 32; // 32px на элемент
               
               return (
                 <div
