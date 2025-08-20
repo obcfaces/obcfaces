@@ -32,12 +32,25 @@ interface UserRole {
   role: string;
 }
 
+interface ContestApplication {
+  id: string;
+  user_id: string;
+  status: string;
+  application_data: any;
+  submitted_at: string;
+  updated_at: string;
+  reviewed_by: string | null;
+  reviewed_at: string | null;
+  notes: string | null;
+}
+
 const Admin = () => {
   const [user, setUser] = useState<any>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
   const [profiles, setProfiles] = useState<ProfileData[]>([]);
   const [userRoles, setUserRoles] = useState<UserRole[]>([]);
+  const [contestApplications, setContestApplications] = useState<ContestApplication[]>([]);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -76,6 +89,7 @@ const Admin = () => {
       setIsAdmin(true);
       fetchProfiles();
       fetchUserRoles();
+      fetchContestApplications();
     } catch (error) {
       console.error('Error checking admin access:', error);
       navigate('/');
@@ -113,6 +127,65 @@ const Admin = () => {
     }
 
     setUserRoles(data || []);
+  };
+
+  const fetchContestApplications = async () => {
+    const { data, error } = await supabase
+      .from('contest_applications')
+      .select('*')
+      .order('submitted_at', { ascending: false });
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to fetch contest applications",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setContestApplications(data || []);
+  };
+
+  const reviewApplication = async (applicationId: string, status: 'approved' | 'rejected', notes?: string) => {
+    const { error } = await supabase
+      .from('contest_applications')
+      .update({
+        status,
+        notes: notes || null,
+        reviewed_by: user?.id,
+        reviewed_at: new Date().toISOString()
+      })
+      .eq('id', applicationId);
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update application",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    toast({
+      title: "Success",
+      description: `Application ${status}`,
+    });
+
+    fetchContestApplications();
+  };
+
+  const getApplicationStatusBadge = (status: string) => {
+    switch (status) {
+      case 'pending':
+        return <Badge variant="secondary">Pending</Badge>;
+      case 'approved':
+        return <Badge variant="default" className="bg-green-500">Approved</Badge>;
+      case 'rejected':
+        return <Badge variant="destructive">Rejected</Badge>;
+      default:
+        return <Badge variant="outline">{status}</Badge>;
+    }
   };
 
   const moderateProfile = async (profileId: string, isApproved: boolean, notes?: string) => {
@@ -236,8 +309,12 @@ const Admin = () => {
             <p className="text-muted-foreground">Manage user profiles and roles</p>
           </div>
 
-          <Tabs defaultValue="moderation" className="space-y-6">
+          <Tabs defaultValue="applications" className="space-y-6">
             <TabsList>
+              <TabsTrigger value="applications" className="flex items-center gap-2">
+                <FileText className="w-4 h-4" />
+                Contest Applications
+              </TabsTrigger>
               <TabsTrigger value="moderation" className="flex items-center gap-2">
                 <Eye className="w-4 h-4" />
                 Profile Moderation
@@ -247,6 +324,133 @@ const Admin = () => {
                 User Roles
               </TabsTrigger>
             </TabsList>
+
+            <TabsContent value="applications" className="space-y-4">
+              <div className="grid gap-4">
+                {contestApplications.map((application) => {
+                  const appData = application.application_data || {};
+                  const phone = appData.phone;
+                  return (
+                    <Card key={application.id}>
+                      <CardHeader>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-4">
+                            <Avatar className="h-16 w-16">
+                              <AvatarImage src={appData.photo1_url || ''} />
+                              <AvatarFallback>
+                                {appData.first_name?.charAt(0) || 'U'}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div>
+                              <h3 className="text-lg font-semibold">
+                                {appData.first_name} {appData.last_name}
+                              </h3>
+                              <p className="text-sm text-muted-foreground">
+                                {appData.gender} • {new Date().getFullYear() - appData.birth_year} years old
+                              </p>
+                              <p className="text-sm text-muted-foreground">
+                                {appData.city}, {appData.state}, {appData.country}
+                              </p>
+                              <p className="text-sm text-muted-foreground">
+                                Height: {appData.height_cm}cm • Weight: {appData.weight_kg}kg
+                              </p>
+                            </div>
+                          </div>
+                          {getApplicationStatusBadge(application.status)}
+                        </div>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                          <div>
+                            <h4 className="text-sm font-medium mb-2">Personal Info:</h4>
+                            <p className="text-sm text-muted-foreground">
+                              Born: {appData.birth_day}/{appData.birth_month}/{appData.birth_year}
+                            </p>
+                            <p className="text-sm text-muted-foreground">
+                              Marital Status: {appData.marital_status}
+                            </p>
+                            <p className="text-sm text-muted-foreground">
+                              Has Children: {appData.has_children ? 'Yes' : 'No'}
+                            </p>
+                          </div>
+                          
+                          {phone && (
+                            <div>
+                              <h4 className="text-sm font-medium mb-2">Contact Info:</h4>
+                              <p className="text-sm text-muted-foreground">
+                                Phone: {phone.full_number}
+                              </p>
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                          <div>
+                            <h4 className="text-sm font-medium mb-2">Portrait Photo:</h4>
+                            {appData.photo1_url && (
+                              <img 
+                                src={appData.photo1_url} 
+                                alt="Portrait" 
+                                className="w-32 h-40 object-cover rounded border"
+                              />
+                            )}
+                          </div>
+                          <div>
+                            <h4 className="text-sm font-medium mb-2">Full Length Photo:</h4>
+                            {appData.photo2_url && (
+                              <img 
+                                src={appData.photo2_url} 
+                                alt="Full length" 
+                                className="w-32 h-40 object-cover rounded border"
+                              />
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="text-sm text-muted-foreground mb-4">
+                          <p>Submitted: {new Date(application.submitted_at).toLocaleString()}</p>
+                          <p>Updated: {new Date(application.updated_at).toLocaleString()}</p>
+                          {application.reviewed_at && (
+                            <p>Reviewed: {new Date(application.reviewed_at).toLocaleString()}</p>
+                          )}
+                        </div>
+                        
+                        {application.notes && (
+                          <div className="mb-4">
+                            <h4 className="text-sm font-medium mb-2">Review Notes:</h4>
+                            <p className="text-sm text-muted-foreground">{application.notes}</p>
+                          </div>
+                        )}
+
+                        <div className="flex gap-2">
+                          <Button
+                            size="sm"
+                            onClick={() => reviewApplication(application.id, 'approved')}
+                            disabled={application.status === 'approved'}
+                            className="bg-green-600 hover:bg-green-700"
+                          >
+                            <Check className="w-4 h-4 mr-1" />
+                            Approve
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            onClick={() => {
+                              const notes = prompt("Reason for rejection (optional):");
+                              reviewApplication(application.id, 'rejected', notes || undefined);
+                            }}
+                            disabled={application.status === 'rejected'}
+                          >
+                            <X className="w-4 h-4 mr-1" />
+                            Reject
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+            </TabsContent>
 
             <TabsContent value="moderation" className="space-y-4">
               <div className="grid gap-4">
