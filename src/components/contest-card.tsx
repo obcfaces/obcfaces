@@ -156,6 +156,9 @@ export function ContestantCard({
         setCommentsCount([photo0Comments, photo1Comments]);
       }
       
+      // Set total likes count for all users (logged and not logged)
+      setLikesCount([totalLikes, 0]);
+      
       if (user) {
         // Load user's likes for the card
         const { data: userCardLike } = await supabase
@@ -182,9 +185,6 @@ export function ContestantCard({
         
         setIsLiked([hasAnyLike, hasAnyLike]);
         
-        // Set total likes count (photos + card)
-        setLikesCount([totalLikes, 0]);
-        
         // Check if user has commented on this contestant
         const { data: userComments } = await supabase
           .from("photo_comments")
@@ -202,9 +202,6 @@ export function ContestantCard({
           setUserRating(parseFloat(savedRating));
           setIsVoted(true); // Mark as voted if rating exists
         }
-      } else {
-        // For non-logged users, show total likes count (photos + card)
-        setLikesCount([totalLikes, 0]);
       }
     };
     
