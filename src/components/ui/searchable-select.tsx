@@ -51,7 +51,7 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
     !filteredOptions.some(opt => opt.label.toLowerCase() === searchValue.toLowerCase());
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover open={open} onOpenChange={setOpen} modal={true}>
       <PopoverTrigger asChild>
         <Button
           variant="outline"
@@ -77,7 +77,14 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
           <ChevronDown className="ml-2 h-4 w-4 opacity-50 flex-shrink-0" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[calc(var(--radix-popover-trigger-width)*1.3)] p-0 z-50 bg-popover" onWheelCapture={(e) => e.stopPropagation()} onOpenAutoFocus={(e) => e.preventDefault()}>
+      <PopoverContent 
+        className="w-[calc(var(--radix-popover-trigger-width)*1.3)] p-0 z-50 bg-popover border shadow-lg" 
+        onWheelCapture={(e) => e.stopPropagation()} 
+        onOpenAutoFocus={(e) => e.preventDefault()}
+        sideOffset={4}
+        align="start"
+        collisionPadding={8}
+      >
         <Command>
           <CommandInput 
             placeholder="Search.../Type yours" 
@@ -85,7 +92,7 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
             onValueChange={setSearchValue}
           />
           <CommandEmpty>{emptyMessage}</CommandEmpty>
-          <CommandList className="max-h-64 overflow-y-auto">
+          <CommandList className="max-h-64 overflow-y-auto bg-popover">
             <CommandGroup>
               {filteredOptions.map((opt, idx) => (
                 opt.divider ? (
@@ -105,9 +112,16 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
                       setOpen(false);
                       setSearchValue("");
                     }}
+                    onTouchEnd={(e) => {
+                      e.preventDefault();
+                      if (opt.disabled) return;
+                      onValueChange(opt.value);
+                      setOpen(false);
+                      setSearchValue("");
+                    }}
                     aria-disabled={opt.disabled || undefined}
                     className={cn(
-                      "cursor-pointer",
+                      "cursor-pointer select-none rounded-sm px-2 py-1.5 text-sm outline-none aria-selected:bg-accent aria-selected:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 hover:bg-accent hover:text-accent-foreground",
                       opt.disabled && "opacity-60 pointer-events-none"
                     )}
                   >
@@ -136,7 +150,13 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
                     setOpen(false);
                     setSearchValue("");
                   }}
-                  className="cursor-pointer text-primary"
+                  onTouchEnd={(e) => {
+                    e.preventDefault();
+                    onValueChange(searchValue.trim());
+                    setOpen(false);
+                    setSearchValue("");
+                  }}
+                  className="cursor-pointer select-none rounded-sm px-2 py-1.5 text-sm outline-none aria-selected:bg-accent aria-selected:text-accent-foreground hover:bg-accent hover:text-accent-foreground text-primary"
                 >
                   <Plus className="mr-2 size-4" />
                   <span>Add "{searchValue}"</span>
