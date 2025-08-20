@@ -672,10 +672,11 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                             setContactForm({...contactForm, contact: value});
                           }}
                           placeholder="123 456 7890"
-                          className="text-sm border-0 focus-visible:ring-0 focus-visible:ring-offset-0 pl-3 rounded-l-none"
+                          className="text-sm border-0 focus-visible:ring-0 focus-visible:ring-offset-0 pl-3 rounded-l-none h-full"
                           type="tel"
                           inputMode="numeric"
                           maxLength={12}
+                          autoComplete="tel"
                         />
                       </div>
                     </div>
