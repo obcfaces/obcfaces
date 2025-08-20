@@ -330,6 +330,7 @@ const Admin = () => {
                 {contestApplications.map((application) => {
                   const appData = application.application_data || {};
                   const phone = appData.phone;
+                  const submittedDate = new Date(application.submitted_at);
                   return (
                     <Card key={application.id}>
                       <CardHeader>
@@ -356,7 +357,12 @@ const Admin = () => {
                               </p>
                             </div>
                           </div>
-                          {getApplicationStatusBadge(application.status)}
+                          <div className="text-right">
+                            {getApplicationStatusBadge(application.status)}
+                            <p className="text-xs text-muted-foreground mt-2">
+                              Submitted: {submittedDate.toLocaleDateString('ru-RU')} {submittedDate.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}
+                            </p>
+                          </div>
                         </div>
                       </CardHeader>
                       <CardContent>
