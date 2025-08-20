@@ -37,6 +37,7 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
   const [open, setOpen] = React.useState(false);
   const [searchValue, setSearchValue] = React.useState("");
   const selected = options.find((o) => o.value === value);
+  const commandListRef = React.useRef<HTMLDivElement>(null);
 
   // Check if current value is a custom value (not in options)
   const isCustomValue = value && !selected;
@@ -49,6 +50,19 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
   // Show custom option when allowCustom is true and search has value
   const showCustomOption = allowCustom && searchValue.trim() && 
     !filteredOptions.some(opt => opt.label.toLowerCase() === searchValue.toLowerCase());
+
+  // Auto-scroll to selected option when dropdown opens
+  React.useEffect(() => {
+    if (open && value && commandListRef.current) {
+      const selectedElement = commandListRef.current.querySelector(`[data-value="${value}"]`);
+      if (selectedElement) {
+        selectedElement.scrollIntoView({ 
+          block: 'nearest',
+          behavior: 'smooth'
+        });
+      }
+    }
+  }, [open, value]);
 
   return (
     <Popover open={open} onOpenChange={setOpen} modal={true}>
@@ -92,7 +106,7 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
             onValueChange={setSearchValue}
           />
           <CommandEmpty>{emptyMessage}</CommandEmpty>
-          <CommandList className="max-h-64 overflow-y-auto bg-popover">
+          <CommandList ref={commandListRef} className="max-h-64 overflow-y-auto bg-popover">
             <CommandGroup>
               {filteredOptions.map((opt, idx) => (
                 opt.divider ? (
@@ -106,6 +120,7 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
                   <CommandItem
                     key={opt.value}
                     value={opt.label}
+                    data-value={opt.value}
                     onSelect={() => {
                       if (opt.disabled) return;
                       onValueChange(opt.value);

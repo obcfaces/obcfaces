@@ -253,27 +253,6 @@ const PHILIPPINES_CITIES = {
   'GUI': [ // Guimaras
     'Jordan', 'Buenavista', 'Nueva Valencia', 'San Lorenzo', 'Sibunag'
   ],
-  'LEY': [ // Leyte
-    'Tacloban', 'Ormoc', 'Baybay', 'Maasin', 'Abuyog', 'Alangalang', 'Albuera',
-    'Babatngon', 'Barugo', 'Bato', 'Calubian', 'Capoocan', 'Carigara',
-    'Dagami', 'Dulag', 'Hilongos', 'Hindang', 'Inopacan', 'Isabel',
-    'Jaro', 'Javier', 'Julita', 'Kananga', 'La Paz', 'Leyte', 'MacArthur',
-    'Mahaplag', 'Matag-ob', 'Matalom', 'Mayorga', 'Merida', 'Ormoc',
-    'Palo', 'Palompon', 'Pastrana', 'San Isidro', 'San Miguel', 'Santa Fe',
-    'Tabango', 'Tabontabon', 'Tanauan', 'Tolosa', 'Tunga', 'Villaba'
-  ],
-  'EAS': [ // Eastern Samar
-    'Borongan', 'Arteche', 'Balangiga', 'Balangkayan', 'Can-avid', 'Dolores',
-    'General MacArthur', 'Giporlos', 'Guiuan', 'Hernani', 'Jipapad',
-    'Lawaan', 'Llorente', 'Maslog', 'Maydolong', 'Mercedes', 'Oras',
-    'Quinapondan', 'Salcedo', 'San Julian', 'San Policarpo', 'Sulat', 'Taft'
-  ],
-  'NSA': [ // Northern Samar
-    'Catarman', 'Allen', 'Biri', 'Bobon', 'Capul', 'Catubig', 'Gamay',
-    'Laoang', 'Lapinig', 'Las Navas', 'Lavezares', 'Mapanas', 'Mondragon',
-    'Palapag', 'Pambujan', 'Rosario', 'San Antonio', 'San Isidro',
-    'San Jose', 'San Roque', 'San Vicente', 'Silvino Lobos', 'Victoria'
-  ],
   'SAM': [ // Samar (Western Samar)
     'Catbalogan', 'Calbayog', 'Basey', 'Calbiga', 'Daram', 'Gandara',
     'Hinabangan', 'Jiabong', 'Marabut', 'Matuguinao', 'Motiong', 'Pinabacdao',
@@ -529,10 +508,6 @@ const PHILIPPINES_CITIES = {
   // Southern Leyte
   'SLE': ['Maasin', 'Bontoc', 'Hinunangan', 'Hinundayan', 'Libagon', 'Liloan', 'Macrohon', 'Malitbog', 'Padre Burgos', 'Pintuyan', 'Saint Bernard', 'San Francisco', 'San Juan', 'San Ricardo', 'Silago', 'Sogod', 'Tomas Oppus'],
   
-  // Additional provinces using their exact codes from the library
-  'LEY': ['Tacloban', 'Ormoc', 'Baybay', 'Abuyog', 'Alangalang', 'Albuera', 'Babatngon', 'Barugo', 'Bato', 'Calubian', 'Capoocan', 'Carigara', 'Dagami', 'Dulag', 'Hilongos', 'Hindang', 'Inopacan', 'Isabel', 'Jaro', 'Javier', 'Julita', 'Kananga', 'La Paz', 'Leyte', 'MacArthur', 'Mahaplag', 'Matag-ob', 'Matalom', 'Mayorga', 'Merida', 'Palo', 'Palompon', 'Pastrana', 'San Isidro', 'San Miguel', 'Santa Fe', 'Tabango', 'Tabontabon', 'Tanauan', 'Tolosa', 'Tunga', 'Villaba'],
-  'EAS': ['Borongan', 'Arteche', 'Balangiga', 'Balangkayan', 'Can-avid', 'Dolores', 'General MacArthur', 'Giporlos', 'Guiuan', 'Hernani', 'Jipapad', 'Lawaan', 'Llorente', 'Maslog', 'Maydolong', 'Mercedes', 'Oras', 'Quinapondan', 'Salcedo', 'San Julian', 'San Policarpo', 'Sulat', 'Taft'],
-  'NSA': ['Catarman', 'Allen', 'Biri', 'Bobon', 'Capul', 'Catubig', 'Gamay', 'Laoang', 'Lapinig', 'Las Navas', 'Lavezares', 'Mapanas', 'Mondragon', 'Palapag', 'Pambujan', 'Rosario', 'San Antonio', 'San Isidro', 'San Jose', 'San Roque', 'San Vicente', 'Silvino Lobos', 'Victoria'],
 } as Record<string, string[]>;
 
 // Major cities for other countries
