@@ -268,6 +268,8 @@ export function ContestantCard({
   };
 
   const handleRate = async (rating: number) => {
+    console.log('handleRate called with:', { rating, name, userId: user?.id, profileId });
+    
     if (!user) {
       setShowLoginModal(true);
       return;
@@ -277,15 +279,21 @@ export function ContestantCard({
     setIsVoted(true); // Mark as voted
     
     try {
+      const ratingData = {
+        user_id: user.id,
+        contestant_name: name,
+        contestant_user_id: profileId || null,
+        rating: rating
+      };
+      
+      console.log('Saving rating to database:', ratingData);
+      
       // Save rating to database
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('contestant_ratings')
-        .upsert({
-          user_id: user.id,
-          contestant_name: name,
-          contestant_user_id: profileId || null,
-          rating: rating
-        });
+        .upsert(ratingData, { onConflict: 'user_id,contestant_name' });
+      
+      console.log('Rating save result:', { data, error });
       
       if (error) {
         console.error('Error saving rating:', error);
@@ -295,6 +303,8 @@ export function ContestantCard({
       
       // Also keep in localStorage for immediate feedback
       localStorage.setItem(`rating-${name}-${user.id}`, rating.toString());
+      
+      console.log('Rating saved successfully, calling onRate callback');
       
       setShowThanks(true);
       setTimeout(() => {
