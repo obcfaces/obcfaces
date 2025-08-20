@@ -647,13 +647,11 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                         value={contactForm.countryCode || formData.countryCode}
                         onValueChange={(value) => setContactForm({...contactForm, countryCode: value})}
                       >
-                        <SelectTrigger className="w-24 text-sm border-0 [&>svg]:hidden" style={{textOverflow: 'unset', overflow: 'visible', whiteSpace: 'nowrap'}}>
-                          <SelectValue>
-                            <span className="flex items-center gap-1">
-                              {Country.getCountryByCode(contactForm.countryCode || formData.countryCode)?.flag || '🇵🇭'}
-                              <span className="text-sm font-normal text-foreground">+{Country.getCountryByCode(contactForm.countryCode || formData.countryCode)?.phonecode || '63'}</span>
-                            </span>
-                          </SelectValue>
+                        <SelectTrigger className="w-24 text-sm border-0 [&>svg]:hidden">
+                          <div className="flex items-center gap-1 overflow-visible">
+                            {Country.getCountryByCode(contactForm.countryCode || formData.countryCode)?.flag || '🇵🇭'}
+                            <span className="text-sm font-normal text-foreground overflow-visible whitespace-nowrap">+{Country.getCountryByCode(contactForm.countryCode || formData.countryCode)?.phonecode || '63'}</span>
+                          </div>
                         </SelectTrigger>
                         <SelectContent>
                           {Country.getAllCountries().map((country) => (
