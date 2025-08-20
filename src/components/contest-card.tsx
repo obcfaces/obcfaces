@@ -33,7 +33,8 @@ interface ContestantCardProps {
   viewMode?: 'compact' | 'full';
   onRate?: (rating: number) => void;
   profileId?: string;
-  showDislike?: boolean; // Новый пропс для показа дизлайка
+  showDislike?: boolean;
+  isRealContestant?: boolean; // Новый пропс для реальных участников
 }
 
 export function ContestantCard({
@@ -54,7 +55,8 @@ export function ContestantCard({
   viewMode = 'compact',
   onRate,
   profileId,
-  showDislike = false
+  showDislike = false,
+  isRealContestant = false
 }: ContestantCardProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalStartIndex, setModalStartIndex] = useState(0);
@@ -74,15 +76,15 @@ export function ContestantCard({
   const [isDisliked, setIsDisliked] = useState(false);
   const [hasCommented, setHasCommented] = useState(false);
   const [likesCount, setLikesCount] = useState<number[]>([
-    Math.floor(Math.random() * 50) + 5,
-    Math.floor(Math.random() * 50) + 5,
+    isRealContestant ? 0 : Math.floor(Math.random() * 50) + 5,
+    isRealContestant ? 0 : Math.floor(Math.random() * 50) + 5,
   ]);
   const [dislikesCount, setDislikesCount] = useState<number>(
-    Math.floor(Math.random() * 20) + 2
+    isRealContestant ? 0 : Math.floor(Math.random() * 20) + 2
   );
   const [commentsCount] = useState<number[]>([
-    Math.floor(Math.random() * 20) + 1,
-    Math.floor(Math.random() * 20) + 1,
+    isRealContestant ? 0 : Math.floor(Math.random() * 20) + 1,
+    isRealContestant ? 0 : Math.floor(Math.random() * 20) + 1,
   ]);
   const [user, setUser] = useState<any>(null);
   // Initialize isVoted state synchronously by checking localStorage
