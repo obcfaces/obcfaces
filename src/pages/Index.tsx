@@ -78,8 +78,6 @@ const Index = () => {
             />
           </div>
           
-          <NextWeekSection viewMode={viewMode} />
-
           <ContestSection
             title="THIS WEEK"
             subtitle="25-31 august 2025"
