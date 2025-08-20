@@ -873,7 +873,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                 </div>
 
                 {/* Right photo upload areas - use full width from text end to screen edge */}
-                <div className="flex flex-row gap-[5px] items-start justify-start flex-1 ml-3">
+                <div className="flex flex-row gap-[5px] items-start justify-start flex-1 ml-1">
                   {/* Portrait Photo */}
                   <div className="flex flex-col items-center gap-1 flex-1 min-w-0">
                     <p className="text-xs text-muted-foreground">portrait</p>
