@@ -58,7 +58,6 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
     return {
       first_name: "",
       last_name: "",
-      phone: "",
       country: "",
       countryCode: "",
       state: "",
@@ -386,7 +385,6 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
       const applicationData = {
         first_name: formData.first_name,
         last_name: formData.last_name,
-        phone: formData.phone,
         country: formData.countryCode,
         state: formData.stateCode,
         city: formData.city,
@@ -753,17 +751,6 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                   <SelectItem value="female">Female</SelectItem>
                 </SelectContent>
               </Select>
-            </div>
-
-            <div className="grid gap-2 grid-cols-1">
-              <Input
-                id="phone"
-                placeholder="Phone number"
-                className={getFieldClasses('phone', "text-sm placeholder:text-muted-foreground")}
-                value={formData.phone}
-                onChange={(e) => handleFieldChange('phone', e.target.value)}
-                type="tel"
-              />
             </div>
 
             <div className="grid gap-2 grid-cols-3">
