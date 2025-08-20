@@ -171,6 +171,10 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
 
   // Countries and states data - complete international list
   const countries = [
+    // Active countries
+    { value: "PH", label: "Philippines" },
+    { value: "separator", label: "─────────────────────", disabled: true },
+    // All other countries
     { value: "AF", label: "Afghanistan" },
     { value: "AL", label: "Albania" },
     { value: "DZ", label: "Algeria" },
@@ -319,7 +323,6 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
     { value: "PG", label: "Papua New Guinea" },
     { value: "PY", label: "Paraguay" },
     { value: "PE", label: "Peru" },
-    { value: "PH", label: "Philippines" },
     { value: "PL", label: "Poland" },
     { value: "PT", label: "Portugal" },
     { value: "QA", label: "Qatar" },
