@@ -78,14 +78,16 @@ const Index = () => {
             />
           </div>
           
-          <ContestSection
-            title="THIS WEEK"
-            subtitle="25-31 august 2025"
-            description="Choose the winner of the week."
-            isActive={true}
-            noWrapTitle
-            viewMode={viewMode}
-          />
+          <section className="max-w-6xl mx-auto py-8 mb-2 mt-2 bg-background rounded-lg shadow-lg shadow-foreground/15">
+            <ContestSection
+              title="THIS WEEK"
+              subtitle="25-31 august 2025"
+              description="Choose the winner of the week."
+              isActive={true}
+              noWrapTitle
+              viewMode={viewMode}
+            />
+          </section>
 
           <ContestSection
             title="1 WEEK AGO"
