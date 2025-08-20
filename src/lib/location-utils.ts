@@ -534,8 +534,6 @@ const PHILIPPINES_CITIES = {
   'ZAM_REG': ['Dipolog', 'Dapitan', 'Pagadian', 'Zamboanga City', 'Ipil', 'Roxas', 'Sindangan', 'Aurora', 'Bayog', 'Alicia', 'Buug', 'Sergio Osmeña Sr.', 'Katipunan', 'Manukan', 'Jose Dalman', 'Tampilisan'],
   'ZAMBOAN': ['Dipolog', 'Dapitan', 'Pagadian', 'Zamboanga City', 'Ipil', 'Roxas', 'Sindangan', 'Aurora', 'Bayog', 'Alicia', 'Buug', 'Sergio Osmeña Sr.', 'Katipunan', 'Manukan', 'Jose Dalman', 'Tampilisan'],
   'ZPE': ['Dipolog', 'Dapitan', 'Pagadian', 'Zamboanga City', 'Ipil', 'Roxas', 'Sindangan', 'Aurora', 'Bayog', 'Alicia', 'Buug', 'Sergio Osmeña Sr.', 'Katipunan', 'Manukan', 'Jose Dalman', 'Tampilisan'],
-  '09': ['Dipolog', 'Dapitan', 'Pagadian', 'Zamboanga City', 'Ipil', 'Roxas', 'Sindangan', 'Aurora', 'Bayog', 'Alicia', 'Buug', 'Sergio Osmeña Sr.', 'Katipunan', 'Manukan', 'Jose Dalman', 'Tampilisan'],
-  'IX': ['Dipolog', 'Dapitan', 'Pagadian', 'Zamboanga City', 'Ipil', 'Roxas', 'Sindangan', 'Aurora', 'Bayog', 'Alicia', 'Buug', 'Sergio Osmeña Sr.', 'Katipunan', 'Manukan', 'Jose Dalman', 'Tampilisan'],
 
   // Region codes for Philippines - comprehensive mapping with all numeric codes
   'CAR': ['Baguio', 'La Trinidad', 'Tabuk', 'Bontoc', 'Lagawe', 'Bangued', 'Kabugao'],
