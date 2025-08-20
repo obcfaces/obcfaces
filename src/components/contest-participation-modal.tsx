@@ -208,17 +208,13 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
 
   const cities = useMemo(() => {
     if (!formData.countryCode) return [];
-    console.log('Cities calculation:', { countryCode: formData.countryCode, stateCode: formData.stateCode });
     const cityList = getCitiesForLocation(formData.countryCode, formData.stateCode);
-    console.log('Retrieved cities:', cityList);
-    const result = cityList
+    return cityList
       .sort((a, b) => a.localeCompare(b)) // Sort alphabetically
       .map(city => ({
         value: city,
         label: city
       }));
-    console.log('Final cities options:', result);
-    return result;
   }, [formData.countryCode, formData.stateCode]);
 
   // Auth handlers
@@ -736,7 +732,6 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                 options={states}
                 value={formData.stateCode}
                 onValueChange={(value) => {
-                  console.log('State selected:', value);
                   handleFieldChange('state', value);
                   setFormData(prev => ({ ...prev, stateCode: value, city: "" }));
                 }}
@@ -747,10 +742,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
               <SearchableSelect
                 options={cities}
                 value={formData.city}
-                onValueChange={(value) => {
-                  console.log('City selected:', value);
-                  handleFieldChange('city', value);
-                }}
+                onValueChange={(value) => handleFieldChange('city', value)}
                 placeholder="City"
                 disabled={!formData.stateCode}
                 invalid={hasRedBorder('city')}
