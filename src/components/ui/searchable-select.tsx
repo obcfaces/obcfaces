@@ -112,8 +112,28 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
                       setOpen(false);
                       setSearchValue("");
                     }}
+                    onPointerDown={(e) => {
+                      // Prevent default to handle mobile touch
+                      e.preventDefault();
+                    }}
+                    onTouchStart={(e) => {
+                      // Handle touch start for mobile
+                      e.stopPropagation();
+                    }}
                     onTouchEnd={(e) => {
                       e.preventDefault();
+                      e.stopPropagation();
+                      if (opt.disabled) return;
+                      // Small delay to ensure touch registers
+                      setTimeout(() => {
+                        onValueChange(opt.value);
+                        setOpen(false);
+                        setSearchValue("");
+                      }, 50);
+                    }}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
                       if (opt.disabled) return;
                       onValueChange(opt.value);
                       setOpen(false);
@@ -121,7 +141,7 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
                     }}
                     aria-disabled={opt.disabled || undefined}
                     className={cn(
-                      "cursor-pointer select-none rounded-sm px-2 py-1.5 text-sm outline-none aria-selected:bg-accent aria-selected:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 hover:bg-accent hover:text-accent-foreground",
+                      "cursor-pointer select-none rounded-sm px-2 py-1.5 text-sm outline-none aria-selected:bg-accent aria-selected:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 hover:bg-accent hover:text-accent-foreground active:bg-accent active:text-accent-foreground",
                       opt.disabled && "opacity-60 pointer-events-none"
                     )}
                   >

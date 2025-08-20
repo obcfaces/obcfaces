@@ -736,6 +736,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                 options={states}
                 value={formData.stateCode}
                 onValueChange={(value) => {
+                  console.log('State selected:', value);
                   handleFieldChange('state', value);
                   setFormData(prev => ({ ...prev, stateCode: value, city: "" }));
                 }}
@@ -746,7 +747,10 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
               <SearchableSelect
                 options={cities}
                 value={formData.city}
-                onValueChange={(value) => handleFieldChange('city', value)}
+                onValueChange={(value) => {
+                  console.log('City selected:', value);
+                  handleFieldChange('city', value);
+                }}
                 placeholder="City"
                 disabled={!formData.stateCode}
                 invalid={hasRedBorder('city')}
