@@ -642,6 +642,24 @@ export function getCitiesForLocation(countryCode: string | null, stateCode: stri
         '12': 'SOCCSKSARGEN', // Soccsksargen
         '13': 'CARAGA', // Caraga
         '41': 'MIMAROPA', // Mimaropa
+        // Individual province mappings
+        'MDR': 'ORI', // Oriental Mindoro code mapping
+        'MDC': 'OCC', // Occidental Mindoro code mapping  
+        'MAD': 'MAR', // Marinduque code mapping
+        'PLW': 'PAL', // Palawan code mapping
+        'NEC': 'NEG', // Negros Occidental code mapping
+        'NER': 'NER', // Negros Oriental (already correct)
+        'ILI': 'ILO', // Iloilo code mapping
+        'MSR': 'MSO', // Misamis Oriental code mapping
+        'MSC': 'MSC', // Misamis Occidental (already correct)
+        'DAS': 'DAV', // Davao del Sur mapping
+        'DAO': 'DVO', // Davao Oriental mapping
+        'NCO': 'COT', // North Cotabato mapping
+        'SCO': 'SCO', // South Cotabato (already correct)
+        'SUN': 'SUN', // Surigao del Norte (already correct)  
+        'SUR': 'SUR', // Surigao del Sur (already correct)
+        'ZMB': 'ZAM', // Zambales code mapping
+        'NUV': 'NVZ', // Nueva Vizcaya code mapping
       };
       
       if (regionMappings[stateCode]) {
