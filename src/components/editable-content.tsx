@@ -28,14 +28,14 @@ export function EditableContent({ content, contentKey, className, isAdmin }: Edi
       // Here you would save to your content management table
       // For now, we'll just show a success message
       toast({
-        title: "Контент обновлен",
-        description: "Изменения успешно сохранены",
+        title: "Content updated",
+        description: "Changes saved successfully",
       });
       setIsEditing(false);
     } catch (error) {
       toast({
-        title: "Ошибка",
-        description: "Не удалось сохранить изменения",
+        title: "Error",
+        description: "Failed to save changes",
         variant: "destructive",
       });
     } finally {
@@ -60,7 +60,7 @@ export function EditableContent({ content, contentKey, className, isAdmin }: Edi
             value={editedContent}
             onChange={(e) => setEditedContent(e.target.value)}
             className="min-h-[100px] text-sm"
-            placeholder="Введите текст..."
+            placeholder="Enter text..."
           />
           <div className="flex gap-2">
             <Button
@@ -70,7 +70,7 @@ export function EditableContent({ content, contentKey, className, isAdmin }: Edi
               className="bg-contest-blue hover:bg-contest-blue/90"
             >
               <Save className="h-3 w-3 mr-1" />
-              {isSaving ? "Сохранение..." : "Сохранить"}
+              {isSaving ? "Saving..." : "Save"}
             </Button>
             <Button
               size="sm"
@@ -79,7 +79,7 @@ export function EditableContent({ content, contentKey, className, isAdmin }: Edi
               disabled={isSaving}
             >
               <X className="h-3 w-3 mr-1" />
-              Отмена
+              Cancel
             </Button>
           </div>
         </div>

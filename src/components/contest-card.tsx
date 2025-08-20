@@ -34,7 +34,7 @@ interface ContestantCardProps {
   onRate?: (rating: number) => void;
   profileId?: string;
   showDislike?: boolean;
-  isRealContestant?: boolean; // Новый пропс для реальных участников
+  isRealContestant?: boolean; // New prop for real contestants
 }
 
 export function ContestantCard({
@@ -206,7 +206,7 @@ export function ContestantCard({
       });
       
     } catch (error) {
-      toast({ description: "Не удалось выполнить действие" });
+      toast({ description: "Failed to perform action" });
     }
   };
 

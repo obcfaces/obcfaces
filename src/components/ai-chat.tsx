@@ -18,7 +18,7 @@ const AiChat = () => {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
-      text: 'Привет! Я AI помощник конкурса красоты. Задавайте вопросы о конкурсе, участниках или голосовании!',
+      text: 'Hello! I am an AI beauty contest assistant. Ask questions about the contest, participants or voting!',
       isUser: false,
       timestamp: new Date()
     }
@@ -45,7 +45,7 @@ const AiChat = () => {
       const { data, error } = await supabase.functions.invoke('ai-chat', {
         body: { 
           message: inputMessage,
-          context: 'Конкурс красоты "ЭТОТ НЕДЕЛЯ" 25-31 августа 2025'
+          context: 'Beauty Contest "THIS WEEK" August 25-31, 2025'
         }
       });
 
@@ -62,8 +62,8 @@ const AiChat = () => {
     } catch (error) {
       console.error('Error sending message:', error);
       toast({
-        title: "Ошибка",
-        description: "Не удалось отправить сообщение",
+        title: "Error",
+        description: "Failed to send message",
         variant: "destructive",
       });
     } finally {
@@ -83,7 +83,7 @@ const AiChat = () => {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Bot className="h-5 w-5" />
-          AI Помощник Конкурса
+          AI Contest Assistant
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -115,7 +115,7 @@ const AiChat = () => {
                   >
                     <p className="text-sm">{message.text}</p>
                     <p className="text-xs opacity-70 mt-1">
-                      {message.timestamp.toLocaleTimeString('ru-RU', { 
+                      {message.timestamp.toLocaleTimeString('en-US', { 
                         hour: '2-digit', 
                         minute: '2-digit' 
                       })}
@@ -148,7 +148,7 @@ const AiChat = () => {
             value={inputMessage}
             onChange={(e) => setInputMessage(e.target.value)}
             onKeyPress={handleKeyPress}
-            placeholder="Задайте вопрос о конкурсе..."
+            placeholder="Ask a question about the contest..."
             disabled={isLoading}
             className="flex-1"
           />
