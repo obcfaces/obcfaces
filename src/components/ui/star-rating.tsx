@@ -15,8 +15,12 @@ export function StarRating({ rating, isVoted, onRate, readonly, variant = "defau
   const [hoveredRating, setHoveredRating] = useState(0);
 
   const handleClick = (star: number) => {
+    console.log('StarRating handleClick called:', { star, readonly, onRate: !!onRate });
     if (!readonly && onRate) {
+      console.log('Calling onRate with rating:', star);
       onRate(star);
+    } else {
+      console.log('Not calling onRate because:', { readonly, hasOnRate: !!onRate });
     }
   };
 
