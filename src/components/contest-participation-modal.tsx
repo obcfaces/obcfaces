@@ -210,6 +210,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
   const cities = useMemo(() => {
     if (!formData.countryCode) return [];
     console.log('Cities calculation - State Code:', formData.stateCode, 'Country Code:', formData.countryCode);
+    console.log('Selected state name from form data:', states.find(s => s.value === formData.stateCode)?.label);
     const cityList = getCitiesForLocation(formData.countryCode, formData.stateCode);
     console.log('Cities returned:', cityList);
     return cityList
@@ -218,7 +219,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
         value: city,
         label: city
       }));
-  }, [formData.countryCode, formData.stateCode]);
+  }, [formData.countryCode, formData.stateCode, states]);
 
   // Auth handlers
   const handleAuth = async (e: React.FormEvent) => {
