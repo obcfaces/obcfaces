@@ -123,48 +123,56 @@ export function ContestantCard({
   // Load user's likes, counts and ratings on component mount
   useEffect(() => {
     const loadUserData = async () => {
-      // Load total likes count for both photos
-      const { data: totalLikes } = await supabase
+      // Load total likes count for individual photos (for modal)
+      const { data: photoLikes } = await supabase
         .from("likes")
         .select("content_id")
         .eq("content_type", "contest")
-        .in("content_id", [`contestant-${name}-0`, `contestant-${name}-1`]);
+        .in("content_id", [`contestant-photo-${name}-0`, `contestant-photo-${name}-1`]);
       
-      if (totalLikes) {
-        const photo0Likes = totalLikes.filter(like => like.content_id === `contestant-${name}-0`).length;
-        const photo1Likes = totalLikes.filter(like => like.content_id === `contestant-${name}-1`).length;
+      if (photoLikes) {
+        const photo0Likes = photoLikes.filter(like => like.content_id === `contestant-photo-${name}-0`).length;
+        const photo1Likes = photoLikes.filter(like => like.content_id === `contestant-photo-${name}-1`).length;
         setLikesCount([photo0Likes, photo1Likes]);
       }
+
+      // Load total likes count for the card itself
+      const { data: cardLikes } = await supabase
+        .from("likes")
+        .select("id")
+        .eq("content_type", "contest")
+        .eq("content_id", `contestant-card-${name}`);
+      
+      const cardLikesCount = cardLikes?.length || 0;
 
       // Load total comments count for both photos
       const { data: totalComments } = await supabase
         .from("photo_comments")
         .select("content_id")
         .eq("content_type", "contest")
-        .in("content_id", [`contestant-${name}-0`, `contestant-${name}-1`]);
+        .in("content_id", [`contestant-photo-${name}-0`, `contestant-photo-${name}-1`]);
       
       if (totalComments) {
-        const photo0Comments = totalComments.filter(comment => comment.content_id === `contestant-${name}-0`).length;
-        const photo1Comments = totalComments.filter(comment => comment.content_id === `contestant-${name}-1`).length;
+        const photo0Comments = totalComments.filter(comment => comment.content_id === `contestant-photo-${name}-0`).length;
+        const photo1Comments = totalComments.filter(comment => comment.content_id === `contestant-photo-${name}-1`).length;
         setCommentsCount([photo0Comments, photo1Comments]);
       }
       
       if (user) {
-        // Load user's likes for both photos
-        const { data: userLikes } = await supabase
+        // Load user's likes for the card
+        const { data: userCardLike } = await supabase
           .from("likes")
-          .select("content_id")
+          .select("id")
           .eq("user_id", user.id)
           .eq("content_type", "contest")
-          .in("content_id", [`contestant-${name}-0`, `contestant-${name}-1`]);
+          .eq("content_id", `contestant-card-${name}`)
+          .maybeSingle();
         
-        if (userLikes) {
-          const likedState = [
-            userLikes.some(like => like.content_id === `contestant-${name}-0`),
-            userLikes.some(like => like.content_id === `contestant-${name}-1`)
-          ];
-          setIsLiked(likedState);
-        }
+        // Set liked state based on card like, not individual photo likes
+        setIsLiked([!!userCardLike, !!userCardLike]);
+        
+        // Set total likes count as card likes only
+        setLikesCount([cardLikesCount, 0]);
         
         // Check if user has commented on this contestant
         const { data: userComments } = await supabase
@@ -172,7 +180,7 @@ export function ContestantCard({
           .select("id")
           .eq("user_id", user.id)
           .eq("content_type", "contest")
-          .in("content_id", [`contestant-${name}-0`, `contestant-${name}-1`])
+          .in("content_id", [`contestant-photo-${name}-0`, `contestant-photo-${name}-1`])
           .limit(1);
         
         setHasCommented(!!userComments && userComments.length > 0);
@@ -183,6 +191,9 @@ export function ContestantCard({
           setUserRating(parseFloat(savedRating));
           setIsVoted(true); // Mark as voted if rating exists
         }
+      } else {
+        // For non-logged users, show card likes count
+        setLikesCount([cardLikesCount, 0]);
       }
     };
     
@@ -195,8 +206,9 @@ export function ContestantCard({
       return;
     }
     
-    const contentId = `contestant-${name}-${index}`;
-    const wasLiked = isLiked[index];
+    // Use card content_id instead of photo content_id for card likes
+    const contentId = `contestant-card-${name}`;
+    const wasLiked = isLiked[0]; // Card likes are stored in first index
     
     try {
       if (wasLiked) {
@@ -218,15 +230,13 @@ export function ContestantCard({
           });
       }
       
-      setIsLiked((prev) => {
-        const next = [...prev];
-        next[index] = !wasLiked;
-        return next;
-      });
+      // Update both indices to the same value since it's a card like
+      setIsLiked([!wasLiked, !wasLiked]);
       
+      // Update likes count (only first index stores the card likes count)
       setLikesCount((prev) => {
         const next = [...prev];
-        next[index] = wasLiked ? next[index] - 1 : next[index] + 1;
+        next[0] = wasLiked ? next[0] - 1 : next[0] + 1;
         return next;
       });
       
