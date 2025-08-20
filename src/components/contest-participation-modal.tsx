@@ -657,7 +657,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                             />
                           </div>
                           <div className="absolute inset-0 pointer-events-none bg-background border border-input rounded-md px-3 flex items-center justify-between">
-                            <span className="text-sm">
+                            <span className="flex items-center gap-1 text-sm">
                               {(() => {
                                 const country = Country.getCountryByCode(contactForm.countryCode || formData.countryCode);
                                 return `${country?.flag || '🇵🇭'} +${country?.phonecode || '63'}`;
