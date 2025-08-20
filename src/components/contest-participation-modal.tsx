@@ -636,7 +636,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
             {/* Contact for Prize Transfer Section */}
             <div className="p-4 bg-background border rounded-lg">
               <h3 className="text-md font-semibold mb-4 text-center">
-                Provide your contact details for prize transfer coordination in case of victory
+                Add your contact info in case you win.
               </h3>
               
               <div className="space-y-3">
