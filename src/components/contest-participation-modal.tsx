@@ -647,11 +647,11 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                         <select
                           value={contactForm.countryCode || formData.countryCode}
                           onChange={(e) => setContactForm({...contactForm, countryCode: e.target.value})}
-                          className="appearance-none bg-transparent border-0 text-sm px-2 py-2 pr-4 min-w-[80px] focus:outline-none focus:ring-0 cursor-pointer"
+                          className="appearance-none bg-transparent border-0 text-sm px-2 py-2 pr-4 min-w-[80px] focus:outline-none focus:ring-0 cursor-pointer text-transparent"
                         >
                           {Country.getAllCountries().map((country) => (
-                            <option key={country.isoCode} value={country.isoCode}>
-                              {country.flag} +{country.phonecode}
+                            <option key={country.isoCode} value={country.isoCode} className="text-black">
+                              {country.flag} +{country.phonecode} {country.name}
                             </option>
                           ))}
                         </select>
