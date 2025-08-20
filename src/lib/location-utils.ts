@@ -468,7 +468,57 @@ const PHILIPPINES_CITIES = {
   ],
   'BTN': [ // Batanes
     'Basco', 'Itbayat', 'Ivana', 'Mahatao', 'Sabtang', 'Uyugan'
-  ]
+  ],
+
+  // === ALTERNATIVE CODES FOR ALL MAJOR PHILIPPINES PROVINCES ===
+  // Luzon Alternative Codes
+  'MANILA': ['Manila', 'Quezon City', 'Makati', 'Pasig', 'Taguig', 'Marikina', 'Parañaque', 'Las Piñas', 'Muntinlupa', 'Caloocan', 'Malabon', 'Navotas', 'Valenzuela', 'Pasay', 'San Juan', 'Mandaluyong'],
+  'NCR': ['Manila', 'Quezon City', 'Makati', 'Pasig', 'Taguig', 'Marikina', 'Parañaque', 'Las Piñas', 'Muntinlupa', 'Caloocan', 'Malabon', 'Navotas', 'Valenzuela', 'Pasay', 'San Juan', 'Mandaluyong'],
+  'METRO_MANILA': ['Manila', 'Quezon City', 'Makati', 'Pasig', 'Taguig', 'Marikina', 'Parañaque', 'Las Piñas', 'Muntinlupa', 'Caloocan', 'Malabon', 'Navotas', 'Valenzuela', 'Pasay', 'San Juan', 'Mandaluyong'],
+
+  'LAGUNA': ['Santa Rosa', 'Biñan', 'San Pedro', 'Cabuyao', 'Calamba', 'Los Baños', 'Bay', 'Calauan', 'Alaminos', 'San Pablo', 'Sta. Cruz', 'Pagsanjan', 'Lumban', 'Kalayaan', 'Cavinti', 'Famy', 'Siniloan', 'Mabitac', 'Santa Maria', 'Majayjay', 'Liliw', 'Nagcarlan', 'Rizal', 'Pila'],
+  'LGN': ['Santa Rosa', 'Biñan', 'San Pedro', 'Cabuyao', 'Calamba', 'Los Baños', 'Bay', 'Calauan', 'Alaminos', 'San Pablo', 'Sta. Cruz', 'Pagsanjan', 'Lumban', 'Kalayaan', 'Cavinti', 'Famy', 'Siniloan', 'Mabitac', 'Santa Maria', 'Majayjay', 'Liliw', 'Nagcarlan', 'Rizal', 'Pila'],
+
+  'CAVITE': ['Bacoor', 'Imus', 'Dasmariñas', 'General Trias', 'Trece Martires', 'Kawit', 'Noveleta', 'Rosario', 'Tanza', 'Naic', 'Silang', 'Carmona', 'General Emilio Aguinaldo', 'Alfonso', 'Tagaytay', 'Mendez', 'Indang', 'Maragondon', 'Magallanes', 'Amadeo', 'Ternate'],
+  'CVT': ['Bacoor', 'Imus', 'Dasmariñas', 'General Trias', 'Trece Martires', 'Kawit', 'Noveleta', 'Rosario', 'Tanza', 'Naic', 'Silang', 'Carmona', 'General Emilio Aguinaldo', 'Alfonso', 'Tagaytay', 'Mendez', 'Indang', 'Maragondon', 'Magallanes', 'Amadeo', 'Ternate'],
+
+  'RIZAL': ['Antipolo', 'Cainta', 'Taytay', 'Angono', 'Binangonan', 'Teresa', 'Morong', 'Baras', 'Tanay', 'Pililla', 'Jala-Jala', 'Pakil', 'Cardona', 'Rodriguez', 'San Mateo'],
+  'RZL': ['Antipolo', 'Cainta', 'Taytay', 'Angono', 'Binangonan', 'Teresa', 'Morong', 'Baras', 'Tanay', 'Pililla', 'Jala-Jala', 'Pakil', 'Cardona', 'Rodriguez', 'San Mateo'],
+
+  'BATANGAS': ['Batangas City', 'Lipa', 'Tanauan', 'Santo Tomas', 'Calaca', 'Lemery', 'Taal', 'Balayan', 'Nasugbu', 'Laurel', 'Agoncillo', 'Alitagtag', 'Balete', 'Cuenca', 'Ibaan', 'Lobo', 'Mabini', 'Malvar', 'Mataasnakahoy', 'Padre Garcia', 'Rosario', 'San Jose', 'San Juan', 'San Luis', 'San Nicolas', 'San Pascual', 'Santa Teresita', 'Talisay', 'Taysan', 'Tingloy', 'Tuy'],
+  'BTN_BATANGAS': ['Batangas City', 'Lipa', 'Tanauan', 'Santo Tomas', 'Calaca', 'Lemery', 'Taal', 'Balayan', 'Nasugbu', 'Laurel', 'Agoncillo', 'Alitagtag', 'Balete', 'Cuenca', 'Ibaan', 'Lobo', 'Mabini', 'Malvar', 'Mataasnakahoy', 'Padre Garcia', 'Rosario', 'San Jose', 'San Juan', 'San Luis', 'San Nicolas', 'San Pascual', 'Santa Teresita', 'Talisay', 'Taysan', 'Tingloy', 'Tuy'],
+
+  'QUEZON': ['Lucena', 'Tayabas', 'Sariaya', 'Candelaria', 'Tiaong', 'San Antonio', 'Dolores', 'Pagbilao', 'Atimonan', 'Padre Burgos', 'Agdangan', 'Unisan', 'Plaridel', 'Gumaca', 'Lopez', 'Calauag', 'Guinayangan', 'Tagkawayan', 'Buenavista', 'San Narciso', 'Mulanay', 'San Andres', 'San Francisco'],
+  'QZN': ['Lucena', 'Tayabas', 'Sariaya', 'Candelaria', 'Tiaong', 'San Antonio', 'Dolores', 'Pagbilao', 'Atimonan', 'Padre Burgos', 'Agdangan', 'Unisan', 'Plaridel', 'Gumaca', 'Lopez', 'Calauag', 'Guinayangan', 'Tagkawayan', 'Buenavista', 'San Narciso', 'Mulanay', 'San Andres', 'San Francisco'],
+
+  'BULACAN': ['Malolos', 'Meycauayan', 'San Jose del Monte', 'Marilao', 'Bocaue', 'Balagtas', 'Guiguinto', 'Pandi', 'Plaridel', 'Pulilan', 'Calumpit', 'Hagonoy', 'Paombong', 'Bulakan', 'Obando', 'Santa Maria', 'Norzagaray', 'San Miguel', 'San Ildefonso', 'San Rafael', 'Angat', 'Bustos', 'Baliuag'],
+  'BLC': ['Malolos', 'Meycauayan', 'San Jose del Monte', 'Marilao', 'Bocaue', 'Balagtas', 'Guiguinto', 'Pandi', 'Plaridel', 'Pulilan', 'Calumpit', 'Hagonoy', 'Paombong', 'Bulakan', 'Obando', 'Santa Maria', 'Norzagaray', 'San Miguel', 'San Ildefonso', 'San Rafael', 'Angat', 'Bustos', 'Baliuag'],
+
+  'PAMPANGA': ['San Fernando', 'Angeles', 'Mabalacat', 'Apalit', 'Arayat', 'Bacolor', 'Candaba', 'Floridablanca', 'Guagua', 'Lubao', 'Macabebe', 'Magalang', 'Masantol', 'Mexico', 'Porac', 'Sasmuan', 'Santa Ana', 'Santa Rita', 'Santo Tomas', 'Minalin'],
+  'PAM_ALT': ['San Fernando', 'Angeles', 'Mabalacat', 'Apalit', 'Arayat', 'Bacolor', 'Candaba', 'Floridablanca', 'Guagua', 'Lubao', 'Macabebe', 'Magalang', 'Masantol', 'Mexico', 'Porac', 'Sasmuan', 'Santa Ana', 'Santa Rita', 'Santo Tomas', 'Minalin'],
+
+  'TARLAC': ['Tarlac City', 'Concepcion', 'Capas', 'Bamban', 'Camiling', 'Gerona', 'La Paz', 'Mayantoc', 'Moncada', 'Paniqui', 'Pura', 'Ramos', 'San Clemente', 'San Jose', 'San Manuel', 'Santa Ignacia', 'Victoria', 'Anao'],
+  'TAR_ALT': ['Tarlac City', 'Concepcion', 'Capas', 'Bamban', 'Camiling', 'Gerona', 'La Paz', 'Mayantoc', 'Moncada', 'Paniqui', 'Pura', 'Ramos', 'San Clemente', 'San Jose', 'San Manuel', 'Santa Ignacia', 'Victoria', 'Anao'],
+
+  'ZAMBALES': ['Olongapo', 'Subic', 'Castillejos', 'San Marcelino', 'San Antonio', 'San Felipe', 'San Narciso', 'Botolan', 'Cabangan', 'Candelaria', 'Iba', 'Masinloc', 'Palauig', 'Santa Cruz'],
+  'ZMB': ['Olongapo', 'Subic', 'Castillejos', 'San Marcelino', 'San Antonio', 'San Felipe', 'San Narciso', 'Botolan', 'Cabangan', 'Candelaria', 'Iba', 'Masinloc', 'Palauig', 'Santa Cruz'],
+
+  // Visayas Alternative Codes
+  'CEBU': ['Cebu City', 'Mandaue City', 'Lapu-Lapu City', 'Talisay City', 'Toledo City', 'Danao City', 'Carcar City', 'Naga City', 'Bogo City', 'Minglanilla', 'Consolacion', 'Liloan', 'Compostela', 'Cordova', 'Bantayan', 'Madridejos', 'Santa Fe', 'Daanbantayan', 'Medellin', 'Badian', 'Moalboal', 'Alcantara', 'Ronda', 'Dumanjug', 'Barili', 'Aloguinsan', 'Pinamungajan', 'Tabogon', 'Sogod', 'Catmon', 'Carmen', 'San Fernando', 'Sibonga', 'Argao', 'Dalaguete', 'Alcoy', 'Boljoon', 'Oslob', 'Santander', 'Samboan', 'Ginatilan', 'Malabuyoc', 'Alegria', 'Tuburan', 'Asturias', 'Balamban'],
+  'CEB_ALT': ['Cebu City', 'Mandaue City', 'Lapu-Lapu City', 'Talisay City', 'Toledo City', 'Danao City', 'Carcar City', 'Naga City', 'Bogo City', 'Minglanilla', 'Consolacion', 'Liloan', 'Compostela', 'Cordova', 'Bantayan', 'Madridejos', 'Santa Fe', 'Daanbantayan', 'Medellin', 'Badian', 'Moalboal', 'Alcantara', 'Ronda', 'Dumanjug', 'Barili', 'Aloguinsan', 'Pinamungajan', 'Tabogon', 'Sogod', 'Catmon', 'Carmen', 'San Fernando', 'Sibonga', 'Argao', 'Dalaguete', 'Alcoy', 'Boljoon', 'Oslob', 'Santander', 'Samboan', 'Ginatilan', 'Malabuyoc', 'Alegria', 'Tuburan', 'Asturias', 'Balamban'],
+
+  'BOHOL': ['Tagbilaran', 'Tubigon', 'Calape', 'Loon', 'Maribojoc', 'Antequera', 'Baclayon', 'Alburquerque', 'Loboc', 'Sikatuna', 'Carmen', 'Garcia Hernandez', 'Valencia', 'Dimiao', 'Lila', 'Loay', 'Panglao', 'Dauis', 'Cortes', 'Corella', 'Balilihan', 'Catigbian', 'Batuan', 'Sevilla', 'Bilar', 'Sagbayan', 'Sierra Bullones', 'Pilar', 'Dagohoy', 'Danao', 'Trinidad', 'Talibon', 'Bien Unido', 'Ubay', 'San Miguel', 'San Isidro', 'Alicia', 'Mabini', 'Candijay', 'Anda', 'Guindulman', 'Duero', 'Jagna', 'Clarin', 'Inabanga', 'Buenavista', 'Getafe', 'President Carlos P. Garcia'],
+  'BOH_ALT': ['Tagbilaran', 'Tubigon', 'Calape', 'Loon', 'Maribojoc', 'Antequera', 'Baclayon', 'Alburquerque', 'Loboc', 'Sikatuna', 'Carmen', 'Garcia Hernandez', 'Valencia', 'Dimiao', 'Lila', 'Loay', 'Panglao', 'Dauis', 'Cortes', 'Corella', 'Balilihan', 'Catigbian', 'Batuan', 'Sevilla', 'Bilar', 'Sagbayan', 'Sierra Bullones', 'Pilar', 'Dagohoy', 'Danao', 'Trinidad', 'Talibon', 'Bien Unido', 'Ubay', 'San Miguel', 'San Isidro', 'Alicia', 'Mabini', 'Candijay', 'Anda', 'Guindulman', 'Duero', 'Jagna', 'Clarin', 'Inabanga', 'Buenavista', 'Getafe', 'President Carlos P. Garcia'],
+
+  'ILOILO': ['Iloilo City', 'Passi', 'Ajuy', 'Alimodian', 'Anilao', 'Badiangan', 'Balasan', 'Banate', 'Barotac Nuevo', 'Barotac Viejo', 'Batad', 'Bingawan', 'Bocari', 'Bugasong', 'Cabatuan', 'Calinog', 'Carles', 'Concepcion', 'Dingle', 'Duenas', 'Dumangas', 'Estancia', 'Guimbal', 'Igbaras', 'Janiuay', 'Lambunao', 'Leganes', 'Lemery', 'Leon', 'Maasin', 'Miagao', 'Mina', 'New Lucena', 'Oton', 'Pavia', 'Pototan', 'San Dionisio', 'San Enrique', 'San Joaquin', 'San Miguel', 'San Rafael', 'Santa Barbara', 'Sara', 'Tigbauan', 'Tubungan', 'Zarraga'],
+  'ILO_ALT': ['Iloilo City', 'Passi', 'Ajuy', 'Alimodian', 'Anilao', 'Badiangan', 'Balasan', 'Banate', 'Barotac Nuevo', 'Barotac Viejo', 'Batad', 'Bingawan', 'Bocari', 'Bugasong', 'Cabatuan', 'Calinog', 'Carles', 'Concepcion', 'Dingle', 'Duenas', 'Dumangas', 'Estancia', 'Guimbal', 'Igbaras', 'Janiuay', 'Lambunao', 'Leganes', 'Lemery', 'Leon', 'Maasin', 'Miagao', 'Mina', 'New Lucena', 'Oton', 'Pavia', 'Pototan', 'San Dionisio', 'San Enrique', 'San Joaquin', 'San Miguel', 'San Rafael', 'Santa Barbara', 'Sara', 'Tigbauan', 'Tubungan', 'Zarraga'],
+
+  // Mindanao Alternative Codes  
+  'DAVAO': ['Davao City', 'Digos', 'Bansalan', 'Hagonoy', 'Kiblawan', 'Magsaysay', 'Malalag', 'Matanao', 'Padada', 'Santa Cruz', 'Sulop'],
+  'DAV_ALT': ['Davao City', 'Digos', 'Bansalan', 'Hagonoy', 'Kiblawan', 'Magsaysay', 'Malalag', 'Matanao', 'Padada', 'Santa Cruz', 'Sulop'],
+
+  'PALAWAN': ['Puerto Princesa', 'Aborlan', 'Agutaya', 'Araceli', 'Balabac', 'Bataraza', 'Brooke\'s Point', 'Busuanga', 'Cagayancillo', 'Coron', 'Culion', 'Cuyo', 'Dumaran', 'El Nido', 'Linapacan', 'Magsaysay', 'Narra', 'Quezon', 'Rizal', 'Roxas', 'San Vicente', 'Sofronio Española', 'Taytay', 'Kalayaan'],
+  'PLW': ['Puerto Princesa', 'Aborlan', 'Agutaya', 'Araceli', 'Balabac', 'Bataraza', 'Brooke\'s Point', 'Busuanga', 'Cagayancillo', 'Coron', 'Culion', 'Cuyo', 'Dumaran', 'El Nido', 'Linapacan', 'Magsaysay', 'Narra', 'Quezon', 'Rizal', 'Roxas', 'San Vicente', 'Sofronio Española', 'Taytay', 'Kalayaan']
 } as Record<string, string[]>;
 
 // Major cities for other countries
