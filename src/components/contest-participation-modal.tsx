@@ -872,11 +872,11 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                   <span className="text-red-600">no color correction</span>
                 </div>
 
-                {/* Three spaces after text */}
-                <div className="w-6 flex-shrink-0"></div>
+                {/* Closer spacing after text */}
+                <div className="w-3 flex-shrink-0"></div>
 
                 {/* Fixed photo upload areas */}
-                <div className="flex flex-row gap-[5px] items-start">
+                <div className="flex flex-row gap-[2.5px] items-start">
                   {/* Portrait Photo */}
                   <div className="flex flex-col items-center gap-1 flex-1 min-w-0">
                     <p className="text-xs text-muted-foreground">portrait</p>
