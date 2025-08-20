@@ -92,7 +92,7 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
         </Button>
       </PopoverTrigger>
       <PopoverContent 
-        className="w-[calc(var(--radix-popover-trigger-width)*1.3)] p-0 z-50 bg-popover border shadow-lg" 
+        className="w-[calc(var(--radix-popover-trigger-width)*3)] p-0 z-50 bg-popover border shadow-lg" 
         onWheelCapture={(e) => e.stopPropagation()} 
         onOpenAutoFocus={(e) => e.preventDefault()}
         sideOffset={4}
