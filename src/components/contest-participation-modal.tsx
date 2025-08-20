@@ -628,11 +628,6 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
           </form>
         ) : submissionSuccess ? (
           <div className="space-y-4">
-            <div className="text-center">
-              <h3 className="text-lg font-semibold text-green-600 mb-2">Application Successfully Submitted!</h3>
-              <p className="text-sm text-muted-foreground mb-6">Your contest application has been successfully submitted.</p>
-            </div>
-            
             {/* Contact for Prize Transfer Section */}
             <div className="p-4 bg-background border rounded-lg">
               <h3 className="text-md font-semibold mb-4 text-center">
@@ -641,23 +636,11 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
               
               <div className="space-y-3">
                 <div>
-                  <Label htmlFor="contact-name" className="text-xs">Your full name</Label>
-                  <Input
-                    id="contact-name"
-                    value={contactForm.name}
-                    onChange={(e) => setContactForm({...contactForm, name: e.target.value})}
-                    placeholder="Enter your full name"
-                    className="text-sm"
-                  />
-                </div>
-                
-                <div>
-                  <Label htmlFor="contact-phone" className="text-xs">Phone number with country code</Label>
                   <Input
                     id="contact-phone"
                     value={contactForm.contact}
                     onChange={(e) => setContactForm({...contactForm, contact: e.target.value})}
-                    placeholder="+63 912 345 6789"
+                    placeholder={`${Country.getCountryByCode(formData.countryCode)?.flag || '🇵🇭'} ${Country.getCountryByCode(formData.countryCode)?.phonecode ? `+${Country.getCountryByCode(formData.countryCode)?.phonecode}` : '+63'} 912 345 6789`}
                     className="text-sm"
                     type="tel"
                   />
@@ -667,15 +650,15 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                   type="button" 
                   size="sm" 
                   className="w-full"
-                  onClick={() => {
-                    if (!contactForm.name.trim() || !contactForm.contact.trim()) {
-                      toast({
-                        title: "Please fill all fields",
-                        description: "Name and phone number are required.",
-                        variant: "destructive"
-                      });
-                      return;
-                    }
+                   onClick={() => {
+                     if (!contactForm.contact.trim()) {
+                       toast({
+                         title: "Please fill all fields",
+                         description: "Phone number is required.",
+                         variant: "destructive"
+                       });
+                       return;
+                     }
                     
                     toast({
                       title: "Contact information saved",
