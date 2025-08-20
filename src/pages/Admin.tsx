@@ -167,9 +167,29 @@ const Admin = () => {
       return;
     }
 
+    // If approved, make user a contest participant
+    if (status === 'approved') {
+      const application = contestApplications.find(app => app.id === applicationId);
+      if (application) {
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .update({ is_contest_participant: true })
+          .eq('id', application.user_id);
+
+        if (profileError) {
+          toast({
+            title: "Warning",
+            description: "Application approved but failed to add to contest",
+            variant: "destructive"
+          });
+          return;
+        }
+      }
+    }
+
     toast({
       title: "Success",
-      description: `Application ${status}`,
+      description: `Application ${status}${status === 'approved' ? ' and added to contest' : ''}`,
     });
 
     fetchContestApplications();
