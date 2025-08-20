@@ -199,7 +199,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
     
     // Get states from library for the selected country
     const countryStates = State.getStatesOfCountry(formData.countryCode);
-    console.log('All states for country:', countryStates);
+    console.log('All states for Philippines:', countryStates.map(s => `${s.name} (${s.isoCode})`));
     
     return countryStates.map(state => ({
       value: state.isoCode,
