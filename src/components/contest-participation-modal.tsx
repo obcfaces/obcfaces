@@ -77,6 +77,10 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
 
   // Profile form data
   const [formData, setFormData] = useState(loadCachedFormData);
+  
+  // Track selected height and weight display formats
+  const [selectedHeight, setSelectedHeight] = useState<string>("");
+  const [selectedWeight, setSelectedWeight] = useState<string>("");
 
   // Photo files
   const [photo1File, setPhoto1File] = useState<File | null>(null);
@@ -830,11 +834,12 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
 
             <div className="grid gap-2 grid-cols-2">
               <HeightDropdownOneScrollPick 
-                value={formData.height_cm ? `${formData.height_cm} cm` : undefined}
+                value={selectedHeight || undefined}
                 className={getFieldClasses('height_cm', "")}
                 onSelect={(value) => {
+                  setSelectedHeight(value.label);
                   if (value.system === "cm") {
-                    // Extract number from "XXX см"
+                    // Extract number from "XXX cm"
                     const cm = value.label.replace(' cm', '');
                     handleFieldChange('height_cm', cm);
                   } else {
@@ -848,11 +853,12 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                 }}
               />
               <WeightFilterDropdown 
-                value={formData.weight_kg ? `${formData.weight_kg} kg` : undefined}
+                value={selectedWeight || undefined}
                 className={getFieldClasses('weight_kg', "")}
                 onSelect={(value) => {
+                  setSelectedWeight(value.label);
                   if (value.system === "kg") {
-                    // Extract number from "XXX кг"
+                    // Extract number from "XXX kg"
                     const kg = value.label.replace(' kg', '');
                     handleFieldChange('weight_kg', kg);
                   } else {
