@@ -141,38 +141,47 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
   };
 
   // Define contestants based on week type
-  const getContestants = () => {
+  const getContestants = async () => {
     // Use real contestants from weekly contests if available
     if (["THIS WEEK", "1 WEEK AGO", "2 WEEKS AGO", "3 WEEKS AGO"].includes(title) && realContestants.length > 0) {
-      return realContestants.map((contestant) => {
-        // Validate contestant data structure
-        if (!contestant || typeof contestant !== 'object') {
-          console.warn('Invalid contestant data:', contestant);
-          return null;
-        }
-        
-        // Use average_rating from database if available, otherwise default to 0
-        const averageRating = contestant.average_rating || 0;
-        
-        return {
-          rank: contestant.final_rank || 0,
-          name: `${contestant.first_name || 'Unknown'} ${contestant.last_name || ''}`.trim(),
-          profileId: contestant.user_id,
-          country: contestant.country || 'Unknown',
-          city: contestant.city || 'Unknown',
-          age: contestant.age || 0,
-          weight: contestant.weight_kg || 0,
-          height: contestant.height_cm || 0,
-          rating: averageRating,
-          faceImage: contestant.photo1_url || contestant1Face,
-          fullBodyImage: contestant.photo2_url || contestant1Full,
-          additionalPhotos: [],
-          isVoted: showWinner ? true : averageRating > 0,
-          isWinner: showWinner && contestant.final_rank === 1,
-          prize: showWinner && contestant.final_rank === 1 ? "+ 5000 PHP" : undefined,
-          isRealContestant: true // Mark as real contestant to disable fake likes/comments
-        };
-      }).filter(Boolean).sort((a, b) => {
+      const contestantsWithRatings = await Promise.all(
+        realContestants.map(async (contestant) => {
+          // Validate contestant data structure
+          if (!contestant || typeof contestant !== 'object') {
+            console.warn('Invalid contestant data:', contestant);
+            return null;
+          }
+          
+          // Get average rating from database
+          const { data: avgRating } = await supabase.rpc('get_contestant_average_rating', {
+            contestant_name_param: `${contestant.first_name || ''} ${contestant.last_name || ''}`.trim(),
+            contestant_user_id_param: contestant.user_id
+          });
+          
+          const averageRating = avgRating || 0;
+          
+          return {
+            rank: contestant.final_rank || 0,
+            name: `${contestant.first_name || 'Unknown'} ${contestant.last_name || ''}`.trim(),
+            profileId: contestant.user_id,
+            country: contestant.country || 'Unknown',
+            city: contestant.city || 'Unknown',
+            age: contestant.age || 0,
+            weight: contestant.weight_kg || 0,
+            height: contestant.height_cm || 0,
+            rating: averageRating,
+            faceImage: contestant.photo1_url || contestant1Face,
+            fullBodyImage: contestant.photo2_url || contestant1Full,
+            additionalPhotos: [],
+            isVoted: showWinner ? true : averageRating > 0,
+            isWinner: showWinner && contestant.final_rank === 1,
+            prize: showWinner && contestant.final_rank === 1 ? "+ 5000 PHP" : undefined,
+            isRealContestant: true // Mark as real contestant to disable fake likes/comments
+          };
+        })
+      );
+      
+      return contestantsWithRatings.filter(Boolean).sort((a, b) => {
         // Sort by average rating (highest first), then by rank if ratings are equal
         if (b.rating !== a.rating) {
           return b.rating - a.rating;
@@ -416,7 +425,24 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
     }
   };
 
-  const contestants = getContestants();
+  const [contestants, setContestants] = useState<any[]>([]);
+
+  // Load contestants with ratings
+  useEffect(() => {
+    const loadContestantsWithRatings = async () => {
+      const contestantsData = await getContestants();
+      setContestants(contestantsData || []);
+    };
+    
+    if (realContestants.length > 0) {
+      loadContestantsWithRatings();
+    } else {
+      // Fallback contestants for testing - need to resolve the promise
+      getContestants().then((data) => {
+        setContestants(data || []);
+      });
+    }
+  }, [realContestants]);
 
   return (
     <section className="max-w-6xl mx-auto py-8 mb-2 bg-background rounded-lg shadow-lg shadow-foreground/15">

@@ -212,7 +212,7 @@ export function ContestantCard({
     setDislikesCount(prev => isDisliked ? prev - 1 : prev + 1);
   };
 
-  const handleRate = (rating: number) => {
+  const handleRate = async (rating: number) => {
     if (!user) {
       setShowLoginModal(true);
       return;
@@ -220,14 +220,36 @@ export function ContestantCard({
     
     setUserRating(rating);
     setIsVoted(true); // Mark as voted
-    // Save rating to localStorage
-    localStorage.setItem(`rating-${name}-${user.id}`, rating.toString());
     
-    setShowThanks(true);
-    setTimeout(() => {
-      setShowThanks(false);
-      onRate?.(rating);
-    }, 1000);
+    try {
+      // Save rating to database
+      const { error } = await supabase
+        .from('contestant_ratings')
+        .upsert({
+          user_id: user.id,
+          contestant_name: name,
+          contestant_user_id: profileId || null,
+          rating: rating
+        });
+      
+      if (error) {
+        console.error('Error saving rating:', error);
+        toast({ description: "Ошибка при сохранении оценки" });
+        return;
+      }
+      
+      // Also keep in localStorage for immediate feedback
+      localStorage.setItem(`rating-${name}-${user.id}`, rating.toString());
+      
+      setShowThanks(true);
+      setTimeout(() => {
+        setShowThanks(false);
+        onRate?.(rating);
+      }, 1000);
+    } catch (error) {
+      console.error('Error saving rating:', error);
+      toast({ description: "Ошибка при сохранении оценки" });
+    }
   };
 
   const handleComment = () => {
