@@ -612,6 +612,44 @@ export type Database = {
           weight_kg: number
         }[]
       }
+      get_weekly_contest_participants_admin: {
+        Args: { weeks_offset?: number }
+        Returns: {
+          age: number
+          application_data: Json
+          city: string
+          contest_status: string
+          country: string
+          final_rank: number
+          first_name: string
+          height_cm: number
+          id: string
+          last_name: string
+          photo1_url: string
+          photo2_url: string
+          user_id: string
+          week_end_date: string
+          week_start_date: string
+          weight_kg: number
+        }[]
+      }
+      get_weekly_contest_participants_public: {
+        Args: { weeks_offset?: number }
+        Returns: {
+          age: number
+          city: string
+          country: string
+          final_rank: number
+          first_name: string
+          height_cm: number
+          id: string
+          last_name: string
+          photo1_url: string
+          photo2_url: string
+          user_id: string
+          weight_kg: number
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

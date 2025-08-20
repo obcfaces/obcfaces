@@ -218,7 +218,7 @@ const Admin = () => {
     if (!selectedContest) return;
 
     const { data, error } = await supabase
-      .rpc('get_weekly_contest_participants', { weeks_offset: 0 });
+      .rpc('get_weekly_contest_participants_admin', { weeks_offset: 0 });
 
     if (error) {
       toast({
