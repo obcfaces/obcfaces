@@ -721,7 +721,9 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
           </div>
         ) : (
           <form onSubmit={handleProfileSubmit} className="space-y-3">
-            {/* ... keep existing form content ... */}
+            <div className="text-center mb-4">
+              <h2 className="text-lg font-semibold text-foreground">Форма регистрации на участие</h2>
+            </div>
             <div className="grid gap-2 grid-cols-3">
               <Input
                 id="first_name"
