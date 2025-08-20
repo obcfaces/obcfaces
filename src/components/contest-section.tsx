@@ -62,32 +62,43 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
   const [votes, setVotes] = useState<Record<number, number>>({});
   const [realContestants, setRealContestants] = useState<any[]>([]);
 
-  // Load real contestants for THIS WEEK
-  useEffect(() => {
-    if (title === "THIS WEEK") {
-      loadContestParticipants();
-    }
-  }, [title]);
-
-  const loadContestParticipants = async () => {
+  const loadContestParticipants = async (weekOffset: number = 0) => {
     try {
       const { data, error } = await supabase
-        .rpc('get_contest_participants');
+        .rpc('get_weekly_contest_participants', { weeks_offset: weekOffset });
 
-      console.log('Contest participants data:', data);
-      console.log('Contest participants error:', error);
+      console.log('Weekly contest participants data:', data);
+      console.log('Weekly contest participants error:', error);
 
       if (data && !error) {
-        setRealContestants(data);
+        return data;
       } else {
-        console.warn('No contest participants loaded:', error);
-        setRealContestants([]);
+        console.warn('No weekly contest participants loaded:', error);
+        return [];
       }
     } catch (err) {
-      console.error('Error loading contest participants:', err);
-      setRealContestants([]);
+      console.error('Error loading weekly contest participants:', err);
+      return [];
     }
   };
+
+  // Load participants based on title
+  useEffect(() => {
+    const loadParticipants = async () => {
+      let weekOffset = 0;
+      if (title === "THIS WEEK") weekOffset = 0;
+      else if (title === "1 WEEK AGO") weekOffset = -1;
+      else if (title === "2 WEEKS AGO") weekOffset = -2;
+      else if (title === "3 WEEKS AGO") weekOffset = -3;
+      
+      if (["THIS WEEK", "1 WEEK AGO", "2 WEEKS AGO", "3 WEEKS AGO"].includes(title)) {
+        const participants = await loadContestParticipants(weekOffset);
+        setRealContestants(participants);
+      }
+    };
+
+    loadParticipants();
+  }, [title]);
 
   const handleRate = (contestantId: number, rating: number) => {
     setVotes(prev => ({ ...prev, [contestantId]: rating }));
@@ -95,51 +106,49 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
 
   // Определяем участников в зависимости от типа недели
   const getContestants = () => {
-    if (title === "THIS WEEK") {
-      // If we have real contestants from database, use them
-      if (realContestants.length > 0) {
-        // Ensure we have valid data
-        if (!realContestants || realContestants.length === 0) {
-          return [];
+    // Use real contestants from weekly contests if available
+    if (["THIS WEEK", "1 WEEK AGO", "2 WEEKS AGO", "3 WEEKS AGO"].includes(title) && realContestants.length > 0) {
+      return realContestants.map((contestant, index) => {
+        // Validate contestant data structure
+        if (!contestant || typeof contestant !== 'object') {
+          console.warn('Invalid contestant data:', contestant);
+          return null;
         }
         
-        return realContestants.map((contestant, index) => {
-          // Validate contestant data structure
-          if (!contestant || typeof contestant !== 'object') {
-            console.warn('Invalid contestant data:', contestant);
-            return null;
-          }
-          
-          // For real contestants, try to get user's rating from localStorage
-          const currentUserId = localStorage.getItem('currentUserId');
-          let userRating = 0;
-          if (currentUserId && contestant.first_name && contestant.last_name) {
-            const savedRating = localStorage.getItem(`rating-${contestant.first_name} ${contestant.last_name}-${currentUserId}`);
-            userRating = savedRating ? parseFloat(savedRating) : 0;
-          }
-          
-          return {
-            rank: index + 1,
-            name: `${contestant.first_name || 'Unknown'} ${contestant.last_name || ''}`.trim(),
-            profileId: contestant.user_id,
-            country: contestant.country || 'Unknown',
-            city: contestant.city || 'Unknown',
-            age: contestant.age || 0,
-            weight: contestant.weight_kg || 0,
-            height: contestant.height_cm || 0,
-            rating: userRating > 0 ? userRating : ratings[index + 1] || 4.0,
-            faceImage: contestant.photo1_url || contestant1Face,
-            fullBodyImage: contestant.photo2_url || contestant1Full,
-            additionalPhotos: [],
-            isVoted: showWinner ? true : !!votes[index + 1] || userRating > 0,
-            isWinner: showWinner && index === 0,
-            prize: showWinner && index === 0 ? "+ 5000 PHP" : undefined,
-            isRealContestant: true // Mark as real contestant to disable fake likes/comments
-          };
-        }).filter(Boolean); // Remove any null entries
-      }
-      
-      // Fallback to test contestants if no real ones
+        // For real contestants, try to get user's rating from localStorage
+        const currentUserId = localStorage.getItem('currentUserId');
+        let userRating = 0;
+        if (currentUserId && contestant.first_name && contestant.last_name) {
+          const savedRating = localStorage.getItem(`rating-${contestant.first_name} ${contestant.last_name}-${currentUserId}`);
+          userRating = savedRating ? parseFloat(savedRating) : 0;
+        }
+        
+        // Use final_rank from database if available, otherwise use index + 1
+        const rank = contestant.final_rank || (index + 1);
+        
+        return {
+          rank,
+          name: `${contestant.first_name || 'Unknown'} ${contestant.last_name || ''}`.trim(),
+          profileId: contestant.user_id,
+          country: contestant.country || 'Unknown',
+          city: contestant.city || 'Unknown',
+          age: contestant.age || 0,
+          weight: contestant.weight_kg || 0,
+          height: contestant.height_cm || 0,
+          rating: userRating > 0 ? userRating : ratings[rank] || 4.0,
+          faceImage: contestant.photo1_url || contestant1Face,
+          fullBodyImage: contestant.photo2_url || contestant1Full,
+          additionalPhotos: [],
+          isVoted: showWinner ? true : !!votes[rank] || userRating > 0,
+          isWinner: showWinner && rank === 1,
+          prize: showWinner && rank === 1 ? "+ 5000 PHP" : undefined,
+          isRealContestant: true // Mark as real contestant to disable fake likes/comments
+        };
+      }).filter(Boolean).sort((a, b) => a.rank - b.rank); // Sort by rank
+    }
+    
+    // Fallback contestants for testing or when no real data
+    if (title === "THIS WEEK") {
       return [
         {
           rank: 1,
