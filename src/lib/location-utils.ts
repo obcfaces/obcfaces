@@ -433,6 +433,33 @@ const PHILIPPINES_CITIES = {
     'Ampatuan', 'Parang', 'Sultan Kudarat', 'Shariff Aguak', 'Datu Odin Sinsuat',
     'Indanan', 'Siasi', 'Patikul', 'Luuk', 'Pangutaran',
     'Languyan', 'Simunul', 'Sitangkai', 'Turtle Islands', 'South Ubian'
+  ],
+
+  // Additional Philippines provinces for complete coverage
+  'QUI': [ // Quirino
+    'Cabarroguis', 'Aglipay', 'Diffun', 'Maddela', 'Nagtipunan', 'Saguday'
+  ],
+  'ISA': [ // Isabela
+    'Ilagan', 'Cauayan', 'Santiago', 'Tuguegarao', 'Roxas', 'Cabagan', 'Cabatuan',
+    'Cordon', 'Dinapigue', 'Echague', 'Gamu', 'Jones', 'Luna', 'Maconacon',
+    'Mallig', 'Naguilian', 'Palanan', 'Quezon', 'Quirino', 'Ramon', 'Reina Mercedes',
+    'San Agustin', 'San Guillermo', 'San Isidro', 'San Manuel', 'San Mariano',
+    'San Mateo', 'San Pablo', 'Santa Maria', 'Santo Tomas', 'Tumauini'
+  ],
+  'CAG': [ // Cagayan
+    'Tuguegarao', 'Aparri', 'Alcala', 'Allacapan', 'Amulung', 'Anguil', 'Baggao',
+    'Ballesteros', 'Buguey', 'Calayan', 'Camalaniugan', 'Claveria', 'Enrile',
+    'Gattaran', 'Gonzaga', 'Iguig', 'Lal-lo', 'Lasam', 'Pamplona', 'Peñablanca',
+    'Piat', 'Rizal', 'Sanchez-Mira', 'Santa Ana', 'Santa Praxedes', 'Santa Teresita',
+    'Santo Niño', 'Solana', 'Tuao'
+  ],
+  'NVZ': [ // Nueva Vizcaya
+    'Bayombong', 'Solano', 'Ambaguio', 'Aritao', 'Bagabag', 'Bambang', 'Diadi',
+    'Dupax del Norte', 'Dupax del Sur', 'Kasibu', 'Kayapa', 'Quezon', 'Santa Fe',
+    'Villaverde'
+  ],
+  'BTN': [ // Batanes
+    'Basco', 'Itbayat', 'Ivana', 'Mahatao', 'Sabtang', 'Uyugan'
   ]
 } as Record<string, string[]>;
 
