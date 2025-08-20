@@ -62,7 +62,7 @@ export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantNa
     
     const loadPhotoData = async () => {
       // Load comments for current photo
-      const contentId = `contestant-${contestantName}-${activeIndex}`;
+      const contentId = `contestant-photo-${contestantName}-${activeIndex}`;
       const { data: comments } = await supabase
         .from('photo_comments')
         .select(`
@@ -130,19 +130,46 @@ export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantNa
     setActiveIndex((prev) => (prev - 1 + photos.length) % photos.length);
   };
 
-  const handleLike = () => {
+  const handleLike = async () => {
     if (!user) {
       setShowLoginModal(true);
       return;
     }
     
-    setPhotoLikes(prev => ({
-      ...prev,
-      [activeIndex]: {
-        count: prev[activeIndex]?.isLiked ? (prev[activeIndex]?.count || 0) - 1 : (prev[activeIndex]?.count || 0) + 1,
-        isLiked: !prev[activeIndex]?.isLiked
+    const contentId = `contestant-photo-${contestantName}-${activeIndex}`;
+    const wasLiked = photoLikes[activeIndex]?.isLiked || false;
+    
+    try {
+      if (wasLiked) {
+        // Unlike
+        await supabase
+          .from("likes")
+          .delete()
+          .eq("user_id", user.id)
+          .eq("content_type", "contest")
+          .eq("content_id", contentId);
+      } else {
+        // Like
+        await supabase
+          .from("likes")
+          .insert({
+            user_id: user.id,
+            content_type: "contest",
+            content_id: contentId,
+          });
       }
-    }));
+      
+      setPhotoLikes(prev => ({
+        ...prev,
+        [activeIndex]: {
+          count: wasLiked ? (prev[activeIndex]?.count || 0) - 1 : (prev[activeIndex]?.count || 0) + 1,
+          isLiked: !wasLiked
+        }
+      }));
+      
+    } catch (error) {
+      console.error('Error handling like:', error);
+    }
   };
 
   const handleCommentSubmit = async () => {
@@ -152,7 +179,7 @@ export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantNa
     }
     
     if (commentText.trim()) {
-      const contentId = `contestant-${contestantName}-${activeIndex}`;
+      const contentId = `contestant-photo-${contestantName}-${activeIndex}`;
       
       try {
         // Save comment to database
