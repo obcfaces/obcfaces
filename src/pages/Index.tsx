@@ -82,14 +82,16 @@ const Index = () => {
           <NextWeekSection viewMode={viewMode} />
           */}
 
-          <ContestSection
-            title="THIS WEEK"
-            subtitle="25-31 august 2025"
-            description="Choose the winner of the week."
-            isActive={true}
-            noWrapTitle
-            viewMode={viewMode}
-          />
+          <div className="py-8 mb-2 mt-2">
+            <ContestSection
+              title="THIS WEEK"
+              subtitle="25-31 august 2025"
+              description="Choose the winner of the week."
+              isActive={true}
+              noWrapTitle
+              viewMode={viewMode}
+            />
+          </div>
 
           <ContestSection
             title="1 WEEK AGO"
