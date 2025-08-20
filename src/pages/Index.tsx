@@ -78,38 +78,34 @@ const Index = () => {
             />
           </div>
           
-          <div className="mb-8">
-            <ContestSection
-              title="THIS WEEK"
-              subtitle="25-31 august 2025"
-              description="Choose the winner of the week."
-              isActive={true}
-              noWrapTitle
-              viewMode={viewMode}
-            />
-          </div>
+          <NextWeekSection viewMode={viewMode} />
 
-          <div className="mb-8">
-            <ContestSection
-              title="1 WEEK AGO"
-              titleSuffix="(Closed)"
-              subtitle="18-24 August 2025"
-              centerSubtitle
-              showWinner={true}
-              viewMode={viewMode}
-            />
-          </div>
+          <ContestSection
+            title="THIS WEEK"
+            subtitle="25-31 august 2025"
+            description="Choose the winner of the week."
+            isActive={true}
+            noWrapTitle
+            viewMode={viewMode}
+          />
 
-          <div className="mb-8">
-            <ContestSection
-              title="2 WEEKS AGO"
-              titleSuffix="(Closed)"
-              subtitle="11-17 August 2025"
-              centerSubtitle
-              showWinner={true}
-              viewMode={viewMode}
-            />
-          </div>
+          <ContestSection
+            title="1 WEEK AGO"
+            titleSuffix="(Closed)"
+            subtitle="18-24 August 2025"
+            centerSubtitle
+            showWinner={true}
+            viewMode={viewMode}
+          />
+
+          <ContestSection
+            title="2 WEEKS AGO"
+            titleSuffix="(Closed)"
+            subtitle="11-17 August 2025"
+            centerSubtitle
+            showWinner={true}
+            viewMode={viewMode}
+          />
 
           <ContestSection
             title="3 WEEKS AGO"
