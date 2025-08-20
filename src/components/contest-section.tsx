@@ -136,8 +136,14 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
     }
   }, [title]);
 
-  const handleRate = (contestantId: number, rating: number) => {
+  const handleRate = async (contestantId: number, rating: number) => {
     setVotes(prev => ({ ...prev, [contestantId]: rating }));
+    
+    // Refresh contestants data after rating to show updated average
+    setTimeout(async () => {
+      const updatedContestants = await getContestants();
+      setContestants(updatedContestants || []);
+    }, 1000);
   };
 
   // Define contestants based on week type
