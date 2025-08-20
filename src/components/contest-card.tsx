@@ -75,17 +75,9 @@ export function ContestantCard({
   const [isLiked, setIsLiked] = useState<boolean[]>([false, false]);
   const [isDisliked, setIsDisliked] = useState(false);
   const [hasCommented, setHasCommented] = useState(false);
-  const [likesCount, setLikesCount] = useState<number[]>([
-    isRealContestant ? 0 : Math.floor(Math.random() * 50) + 5,
-    isRealContestant ? 0 : Math.floor(Math.random() * 50) + 5,
-  ]);
-  const [dislikesCount, setDislikesCount] = useState<number>(
-    isRealContestant ? 0 : Math.floor(Math.random() * 20) + 2
-  );
-  const [commentsCount] = useState<number[]>([
-    isRealContestant ? 0 : Math.floor(Math.random() * 20) + 1,
-    isRealContestant ? 0 : Math.floor(Math.random() * 20) + 1,
-  ]);
+  const [likesCount, setLikesCount] = useState<number[]>([0, 0]);
+  const [dislikesCount, setDislikesCount] = useState<number>(0);
+  const [commentsCount] = useState<number[]>([0, 0]);
   const [user, setUser] = useState<any>(null);
   // Initialize isVoted state synchronously by checking localStorage
   const [isVoted, setIsVoted] = useState(() => {
