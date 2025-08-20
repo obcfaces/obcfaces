@@ -9,6 +9,28 @@ import { EditableContent } from "@/components/editable-content";
 import { supabase } from "@/integrations/supabase/client";
 import type { Category } from "@/components/contest-filters";
 
+// Helper function to get week range dates (Monday-Sunday)
+const getWeekRange = (weeksOffset: number = 0) => {
+  const today = new Date();
+  const currentDay = today.getDay(); // 0 = Sunday, 1 = Monday, etc.
+  const mondayOffset = currentDay === 0 ? -6 : 1 - currentDay; // Get Monday of current week
+  
+  const monday = new Date(today);
+  monday.setDate(today.getDate() + mondayOffset + (weeksOffset * 7));
+  
+  const sunday = new Date(monday);
+  sunday.setDate(monday.getDate() + 6);
+  
+  const formatDate = (date: Date) => {
+    return date.toLocaleDateString('ru-RU', { 
+      day: '2-digit', 
+      month: '2-digit' 
+    });
+  };
+  
+  return `${formatDate(monday)} - ${formatDate(sunday)}`;
+};
+
 const Index = () => {
   const [country, setCountry] = useState<string>("PH");
   const [gender, setGender] = useState<'male' | 'female'>("female");
@@ -81,7 +103,7 @@ const Index = () => {
           <section className="max-w-6xl mx-auto pt-2 mb-2 mt-2 bg-background rounded-lg shadow-sm shadow-foreground/10">
             <ContestSection
               title="THIS WEEK"
-              subtitle="25-31 august 2025"
+              subtitle={getWeekRange(0)}
               description="Choose the winner of the week."
               isActive={true}
               noWrapTitle
@@ -89,10 +111,12 @@ const Index = () => {
             />
           </section>
 
+          <NextWeekSection viewMode={viewMode} />
+
           <ContestSection
             title="1 WEEK AGO"
             titleSuffix="(Closed)"
-            subtitle="18-24 August 2025"
+            subtitle={getWeekRange(-1)}
             centerSubtitle
             showWinner={true}
             viewMode={viewMode}
@@ -101,7 +125,7 @@ const Index = () => {
           <ContestSection
             title="2 WEEKS AGO"
             titleSuffix="(Closed)"
-            subtitle="11-17 August 2025"
+            subtitle={getWeekRange(-2)}
             centerSubtitle
             showWinner={true}
             viewMode={viewMode}
@@ -110,7 +134,7 @@ const Index = () => {
           <ContestSection
             title="3 WEEKS AGO"
             titleSuffix="(Closed)"
-            subtitle="4-10 August 2025"
+            subtitle={getWeekRange(-3)}
             centerSubtitle
             showWinner={true}
             viewMode={viewMode}

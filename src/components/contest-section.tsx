@@ -22,6 +22,28 @@ interface ContestSectionProps {
   filters?: React.ReactNode; // Add filters prop
 }
 
+// Helper function to get week range dates (Monday-Sunday)
+const getWeekRange = (weeksOffset: number = 0) => {
+  const today = new Date();
+  const currentDay = today.getDay(); // 0 = Sunday, 1 = Monday, etc.
+  const mondayOffset = currentDay === 0 ? -6 : 1 - currentDay; // Get Monday of current week
+  
+  const monday = new Date(today);
+  monday.setDate(today.getDate() + mondayOffset + (weeksOffset * 7));
+  
+  const sunday = new Date(monday);
+  sunday.setDate(monday.getDate() + 6);
+  
+  const formatDate = (date: Date) => {
+    return date.toLocaleDateString('ru-RU', { 
+      day: '2-digit', 
+      month: '2-digit' 
+    });
+  };
+  
+  return `${formatDate(monday)} - ${formatDate(sunday)}`;
+};
+
 export function ContestSection({ title, subtitle, description, isActive, showWinner, centerSubtitle, titleSuffix, noWrapTitle, viewMode: controlledViewMode, filters }: ContestSectionProps) {
   const [localViewMode] = useState<'compact' | 'full'>('compact');
   const viewMode = controlledViewMode ?? localViewMode;

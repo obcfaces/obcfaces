@@ -159,6 +159,28 @@ interface NextWeekSectionProps {
   viewMode?: 'compact' | 'full';
 }
 
+// Helper function to get next week range dates (Monday-Sunday)
+const getNextWeekRange = () => {
+  const today = new Date();
+  const currentDay = today.getDay(); // 0 = Sunday, 1 = Monday, etc.
+  const mondayOffset = currentDay === 0 ? -6 : 1 - currentDay; // Get Monday of current week
+  
+  const nextMonday = new Date(today);
+  nextMonday.setDate(today.getDate() + mondayOffset + 7); // Next week's Monday
+  
+  const nextSunday = new Date(nextMonday);
+  nextSunday.setDate(nextMonday.getDate() + 6);
+  
+  const formatDate = (date: Date) => {
+    return date.toLocaleDateString('ru-RU', { 
+      day: '2-digit', 
+      month: '2-digit' 
+    });
+  };
+  
+  return `${formatDate(nextMonday)} - ${formatDate(nextSunday)}`;
+};
+
 export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [history, setHistory] = useState<number[]>([]);
@@ -315,7 +337,7 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
           <div className="flex items-baseline gap-3 mb-1">
             <div className="inline-flex flex-col w-fit items-start">
               <h2 className="text-3xl font-bold text-contest-text whitespace-nowrap">NEXT WEEK</h2>
-              <p className="text-muted-foreground italic -mt-1">1-8 September 2025</p>
+              <p className="text-muted-foreground italic -mt-1">{getNextWeekRange()}</p>
             </div>
             <span className="text-lg font-normal text-contest-text">
               Choose next week's finalists
