@@ -250,11 +250,11 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
         const aspectRatio = img.width / img.height;
         const targetAspectRatio = 4 / 5; // width:height = 4:5
         
-        // If image is wider than 4:5 ratio, add padding on sides
-        if (aspectRatio > targetAspectRatio) {
-          // Image is too wide, need to add vertical padding (make it taller)
-          const targetWidth = img.width;
-          const targetHeight = img.width / targetAspectRatio; // height = width / (4/5) = width * 5/4
+        // If image is narrower than 4:5 ratio, add padding on sides
+        if (aspectRatio < targetAspectRatio) {
+          // Image is too narrow, need to add horizontal padding (make it wider)
+          const targetHeight = img.height;
+          const targetWidth = img.height * targetAspectRatio; // width = height * (4/5)
           
           canvas.width = targetWidth;
           canvas.height = targetHeight;
@@ -263,11 +263,11 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
           ctx!.fillStyle = '#ffffff';
           ctx!.fillRect(0, 0, targetWidth, targetHeight);
           
-          // Center the original image vertically
-          const offsetY = (targetHeight - img.height) / 2;
-          ctx!.drawImage(img, 0, offsetY, img.width, img.height);
+          // Center the original image horizontally
+          const offsetX = (targetWidth - img.width) / 2;
+          ctx!.drawImage(img, offsetX, 0, img.width, img.height);
         } else {
-          // For images with aspect ratio <= 4:5, keep original
+          // For images with aspect ratio >= 4:5, keep original
           canvas.width = img.width;
           canvas.height = img.height;
           ctx!.drawImage(img, 0, 0);
