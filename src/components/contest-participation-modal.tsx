@@ -353,6 +353,13 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) return;
 
+      // Check if user already has an application
+      const { data: existingApplication } = await supabase
+        .from('contest_applications')
+        .select('id, status')
+        .eq('user_id', session.user.id)
+        .single();
+
       // Upload photos
       let photo1Url = null;
       let photo2Url = null;
@@ -384,14 +391,33 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
         photo2_url: photo2Url,
       };
 
-      // Insert into contest_applications table
-      const { error: dbError } = await supabase
-        .from('contest_applications')
-        .insert({
-          user_id: session.user.id,
-          application_data: applicationData,
-          status: 'pending'
-        });
+      let dbError = null;
+
+      if (existingApplication) {
+        // Update existing application
+        const { error } = await supabase
+          .from('contest_applications')
+          .update({
+            application_data: applicationData,
+            status: 'pending',
+            submitted_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          })
+          .eq('user_id', session.user.id);
+        
+        dbError = error;
+      } else {
+        // Insert new application
+        const { error } = await supabase
+          .from('contest_applications')
+          .insert({
+            user_id: session.user.id,
+            application_data: applicationData,
+            status: 'pending'
+          });
+        
+        dbError = error;
+      }
 
       if (dbError) {
         throw new Error(`Database error: ${dbError.message}`);
