@@ -643,7 +643,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                 <div>
                   <div className="flex gap-2 items-center">
                     <div className="flex border border-input rounded-md bg-background">
-                      <div className="w-24">
+                      <div className="w-28">
                         <div className="relative">
                           <div className="opacity-0 pointer-events-auto">
                             <SearchableSelect
