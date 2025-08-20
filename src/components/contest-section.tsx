@@ -34,14 +34,22 @@ const getWeekRange = (weeksOffset: number = 0) => {
   const sunday = new Date(monday);
   sunday.setDate(monday.getDate() + 6);
   
-  const formatDate = (date: Date) => {
-    return date.toLocaleDateString('ru-RU', { 
-      day: '2-digit', 
-      month: '2-digit' 
-    });
+  const formatDate = (date: Date, includeYear: boolean = false) => {
+    const day = date.getDate();
+    const month = date.toLocaleDateString('en-US', { month: 'long' });
+    const year = date.getFullYear();
+    return includeYear ? `${day} ${month} ${year}` : `${day} ${month}`;
   };
   
-  return `${formatDate(monday)} - ${formatDate(sunday)}`;
+  const mondayFormatted = formatDate(monday);
+  const sundayFormatted = formatDate(sunday, true);
+  
+  // If same month, show "1-7 September 2025", otherwise "31 August - 6 September 2025"
+  if (monday.getMonth() === sunday.getMonth()) {
+    return `${monday.getDate()}-${sunday.getDate()} ${sunday.toLocaleDateString('en-US', { month: 'long' })} ${sunday.getFullYear()}`;
+  } else {
+    return `${mondayFormatted} - ${sundayFormatted}`;
+  }
 };
 
 export function ContestSection({ title, subtitle, description, isActive, showWinner, centerSubtitle, titleSuffix, noWrapTitle, viewMode: controlledViewMode, filters }: ContestSectionProps) {

@@ -171,14 +171,22 @@ const getNextWeekRange = () => {
   const nextSunday = new Date(nextMonday);
   nextSunday.setDate(nextMonday.getDate() + 6);
   
-  const formatDate = (date: Date) => {
-    return date.toLocaleDateString('ru-RU', { 
-      day: '2-digit', 
-      month: '2-digit' 
-    });
+  const formatDate = (date: Date, includeYear: boolean = false) => {
+    const day = date.getDate();
+    const month = date.toLocaleDateString('en-US', { month: 'long' });
+    const year = date.getFullYear();
+    return includeYear ? `${day} ${month} ${year}` : `${day} ${month}`;
   };
   
-  return `${formatDate(nextMonday)} - ${formatDate(nextSunday)}`;
+  const mondayFormatted = formatDate(nextMonday);
+  const sundayFormatted = formatDate(nextSunday, true);
+  
+  // If same month, show "1-7 September 2025", otherwise "31 August - 6 September 2025"
+  if (nextMonday.getMonth() === nextSunday.getMonth()) {
+    return `${nextMonday.getDate()}-${nextSunday.getDate()} ${nextSunday.toLocaleDateString('en-US', { month: 'long' })} ${nextSunday.getFullYear()}`;
+  } else {
+    return `${mondayFormatted} - ${sundayFormatted}`;
+  }
 };
 
 export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
