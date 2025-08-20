@@ -87,20 +87,6 @@ const PHILIPPINES_CITIES = {
     'San Antonio', 'San Isidro', 'San Leonardo', 'Santa Rosa', 'Santo Domingo',
     'Talavera', 'Talugtug', 'Zaragoza'
   ],
-  'AUR': [ // Aurora
-    'Baler', 'Casiguran', 'Dilasag', 'Dinalungan', 'Dingalan', 'Dipaculao',
-    'Maria Aurora', 'San Luis'
-  ],
-  'APA': [ // Apayao
-    'Kabugao', 'Calanasan', 'Conner', 'Flora', 'Luna', 'Pudtol', 'Santa Marcela'
-  ],
-  'ABR': [ // Abra
-    'Bangued', 'Boliney', 'Bucay', 'Bucloc', 'Daguioman', 'Danglas', 'Dolores',
-    'La Paz', 'Lacub', 'Lagangilang', 'Lagayan', 'Langiden', 'Licuan-Baay',
-    'Luba', 'Malibcong', 'Manabo', 'Peñarrubia', 'Pidigan', 'Pilar',
-    'Sallapadan', 'San Isidro', 'San Juan', 'San Quintin', 'Tayum', 'Tineg',
-    'Tubo', 'Villaviciosa'
-  ],
   'KAL': [ // Kalinga
     'Tabuk', 'Balbalan', 'Lubuagan', 'Pasil', 'Pinukpuk', 'Rizal', 'Tanudan', 'Tinglayan'
   ],
@@ -254,11 +240,6 @@ const PHILIPPINES_CITIES = {
     'San Jose', 'Santa Catalina', 'Siaton', 'Sibulan', 'Tayasan',
     'Valencia', 'Vallehermoso', 'Zamboanguita'
   ],
-  'AKL': [ // Aklan
-    'Kalibo', 'Ibajay', 'Nabas', 'Malay', 'Buruanga', 'Makato', 'Numancia',
-    'Lezo', 'Madalag', 'Libacao', 'Jamindan', 'Tapaz', 'New Washington',
-    'Batan', 'Altavas', 'Banga'
-  ],
   'CAP': [ // Capiz
     'Roxas City', 'Panay', 'Panitan', 'Pontevedra', 'President Roxas', 'Pilar',
     'Sigma', 'Sapian', 'Jamindan', 'Tapaz', 'Dumalag', 'Dumarao', 'Dao',
@@ -344,15 +325,6 @@ const PHILIPPINES_CITIES = {
   'SUK': [ // Sultan Kudarat
     'Isulan', 'Bagumbayan', 'Columbio', 'Esperanza', 'Kalamansig', 'Lebak',
     'Lutayan', 'Lambayong', 'Palimbang', 'President Quirino', 'Sen. Ninoy Aquino', 'Tacurong'
-  ],
-  'AGN': [ // Agusan del Norte
-    'Butuan', 'Buenavista', 'Carmen', 'Jabonga', 'Kitcharao', 'Las Nieves',
-    'Magallanes', 'Nasipit', 'Remedios T. Romualdez', 'Santiago', 'Tubay', 'Cabadbaran'
-  ],
-  'AGS': [ // Agusan del Sur
-    'Bayugan', 'Bunawan', 'Esperanza', 'La Paz', 'Loreto', 'Prosperidad',
-    'Rosario', 'San Francisco', 'San Luis', 'Santa Josefa', 'Sibagat',
-    'Talacogon', 'Trento', 'Veruela'
   ],
   'ZAN': [ // Zamboanga del Norte
     'Dipolog', 'Dapitan', 'Roxas', 'Sindangan', 'Sergio Osmeña Sr.', 'Katipunan',
@@ -553,6 +525,14 @@ const PHILIPPINES_CITIES = {
   '13': ['Butuan', 'Bayugan', 'Bislig', 'Surigao', 'Buenavista', 'Carmen', 'Jabonga', 'Kitcharao', 'Las Nieves', 'Magallanes', 'Nasipit', 'Remedios T. Romualdez', 'Santiago', 'Tubay', 'Cabadbaran', 'Bunawan', 'Esperanza', 'La Paz', 'Loreto', 'Prosperidad', 'Rosario', 'San Francisco', 'San Luis', 'Santa Josefa', 'Sibagat', 'Talacogon', 'Trento', 'Veruela', 'Barobo', 'Bayabas', 'Cagwait', 'Cantilan', 'Carmen', 'Carrascal', 'Cortes', 'Hinatuan', 'Lanuza', 'Lianga', 'Lingig', 'Madrid', 'Marihatag', 'San Agustin', 'San Miguel', 'Tagbina', 'Tago', 'Tandag', 'Alegria', 'Bacuag', 'Burgos', 'Claver', 'Dapa', 'Del Carmen', 'General Luna', 'Gigaquit', 'Mainit', 'Malimono', 'Pilar', 'Placer', 'San Benito', 'San Francisco', 'San Isidro', 'Santa Monica', 'Sison', 'Socorro', 'Tubod', 'San Jose', 'Basilisa', 'Cagdianao', 'Libjo', 'Loreto', 'Tubajon'],
   'SUR': ['Tandag', 'Bislig', 'Barobo', 'Bayabas', 'Cagwait', 'Cantilan', 'Carmen', 'Carrascal', 'Cortes', 'Hinatuan', 'Lanuza', 'Lianga', 'Lingig', 'Madrid', 'Marihatag', 'San Agustin', 'San Miguel', 'Tagbina', 'Tago'],
   'SUN': ['Surigao City', 'Alegria', 'Bacuag', 'Burgos', 'Claver', 'Dapa', 'Del Carmen', 'General Luna', 'Gigaquit', 'Mainit', 'Malimono', 'Pilar', 'Placer', 'San Benito', 'San Francisco', 'San Isidro', 'Santa Monica', 'Sison', 'Socorro', 'Tubod'],
+  
+  // Southern Leyte
+  'SLE': ['Maasin', 'Bontoc', 'Hinunangan', 'Hinundayan', 'Libagon', 'Liloan', 'Macrohon', 'Malitbog', 'Padre Burgos', 'Pintuyan', 'Saint Bernard', 'San Francisco', 'San Juan', 'San Ricardo', 'Silago', 'Sogod', 'Tomas Oppus'],
+  
+  // Additional provinces using their exact codes from the library
+  'LEY': ['Tacloban', 'Ormoc', 'Baybay', 'Abuyog', 'Alangalang', 'Albuera', 'Babatngon', 'Barugo', 'Bato', 'Calubian', 'Capoocan', 'Carigara', 'Dagami', 'Dulag', 'Hilongos', 'Hindang', 'Inopacan', 'Isabel', 'Jaro', 'Javier', 'Julita', 'Kananga', 'La Paz', 'Leyte', 'MacArthur', 'Mahaplag', 'Matag-ob', 'Matalom', 'Mayorga', 'Merida', 'Palo', 'Palompon', 'Pastrana', 'San Isidro', 'San Miguel', 'Santa Fe', 'Tabango', 'Tabontabon', 'Tanauan', 'Tolosa', 'Tunga', 'Villaba'],
+  'EAS': ['Borongan', 'Arteche', 'Balangiga', 'Balangkayan', 'Can-avid', 'Dolores', 'General MacArthur', 'Giporlos', 'Guiuan', 'Hernani', 'Jipapad', 'Lawaan', 'Llorente', 'Maslog', 'Maydolong', 'Mercedes', 'Oras', 'Quinapondan', 'Salcedo', 'San Julian', 'San Policarpo', 'Sulat', 'Taft'],
+  'NSA': ['Catarman', 'Allen', 'Biri', 'Bobon', 'Capul', 'Catubig', 'Gamay', 'Laoang', 'Lapinig', 'Las Navas', 'Lavezares', 'Mapanas', 'Mondragon', 'Palapag', 'Pambujan', 'Rosario', 'San Antonio', 'San Isidro', 'San Jose', 'San Roque', 'San Vicente', 'Silvino Lobos', 'Victoria'],
 } as Record<string, string[]>;
 
 // Major cities for other countries
