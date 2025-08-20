@@ -1017,6 +1017,7 @@ const Admin = () => {
               
               {editingApplication && (
                 <div className="space-y-6">
+                  {/* Names Grid */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <Label htmlFor="first_name">First Name</Label>
@@ -1024,6 +1025,7 @@ const Admin = () => {
                         id="first_name"
                         value={editForm.first_name || ''}
                         onChange={(e) => handleEditFormChange('first_name', e.target.value)}
+                        placeholder="First name"
                       />
                     </div>
                     <div>
@@ -1032,46 +1034,70 @@ const Admin = () => {
                         id="last_name"
                         value={editForm.last_name || ''}
                         onChange={(e) => handleEditFormChange('last_name', e.target.value)}
+                        placeholder="Last name"
                       />
                     </div>
                   </div>
 
+                  {/* Birth Date Grid */}
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
                       <Label htmlFor="birth_day">Birth Day</Label>
-                      <Input
+                      <select
                         id="birth_day"
-                        type="number"
-                        min="1"
-                        max="31"
                         value={editForm.birth_day || ''}
                         onChange={(e) => handleEditFormChange('birth_day', parseInt(e.target.value))}
-                      />
+                        className="w-full p-2 border rounded-md bg-background"
+                      >
+                        <option value="">Day of birth</option>
+                        {Array.from({ length: 31 }, (_, i) => (
+                          <option key={i + 1} value={i + 1}>
+                            {i + 1}
+                          </option>
+                        ))}
+                      </select>
                     </div>
                     <div>
                       <Label htmlFor="birth_month">Birth Month</Label>
-                      <Input
+                      <select
                         id="birth_month"
-                        type="number"
-                        min="1"
-                        max="12"
                         value={editForm.birth_month || ''}
                         onChange={(e) => handleEditFormChange('birth_month', parseInt(e.target.value))}
-                      />
+                        className="w-full p-2 border rounded-md bg-background"
+                      >
+                        <option value="">Month of birth</option>
+                        {[
+                          "January", "February", "March", "April", "May", "June",
+                          "July", "August", "September", "October", "November", "December"
+                        ].map((month, index) => (
+                          <option key={index + 1} value={index + 1}>
+                            {month}
+                          </option>
+                        ))}
+                      </select>
                     </div>
                     <div>
                       <Label htmlFor="birth_year">Birth Year</Label>
-                      <Input
+                      <select
                         id="birth_year"
-                        type="number"
-                        min="1950"
-                        max="2010"
                         value={editForm.birth_year || ''}
                         onChange={(e) => handleEditFormChange('birth_year', parseInt(e.target.value))}
-                      />
+                        className="w-full p-2 border rounded-md bg-background"
+                      >
+                        <option value="">Year of birth</option>
+                        {Array.from({ length: 60 }, (_, i) => {
+                          const year = new Date().getFullYear() - 18 - i;
+                          return (
+                            <option key={year} value={year}>
+                              {year}
+                            </option>
+                          );
+                        })}
+                      </select>
                     </div>
                   </div>
 
+                  {/* Location Grid */}
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
                       <Label htmlFor="city">City</Label>
@@ -1079,6 +1105,7 @@ const Admin = () => {
                         id="city"
                         value={editForm.city || ''}
                         onChange={(e) => handleEditFormChange('city', e.target.value)}
+                        placeholder="City"
                       />
                     </div>
                     <div>
@@ -1087,6 +1114,7 @@ const Admin = () => {
                         id="state"
                         value={editForm.state || ''}
                         onChange={(e) => handleEditFormChange('state', e.target.value)}
+                        placeholder="State/Province"
                       />
                     </div>
                     <div>
@@ -1095,10 +1123,12 @@ const Admin = () => {
                         id="country"
                         value={editForm.country || ''}
                         onChange={(e) => handleEditFormChange('country', e.target.value)}
+                        placeholder="Country code (e.g., PH)"
                       />
                     </div>
                   </div>
 
+                  {/* Physical Info Grid */}
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
                       <Label htmlFor="gender">Gender</Label>
@@ -1109,8 +1139,8 @@ const Admin = () => {
                         className="w-full p-2 border rounded-md bg-background"
                       >
                         <option value="">Select Gender</option>
-                        <option value="female">Female</option>
                         <option value="male">Male</option>
+                        <option value="female">Female</option>
                       </select>
                     </div>
                     <div>
@@ -1122,6 +1152,7 @@ const Admin = () => {
                         max="200"
                         value={editForm.height_cm || ''}
                         onChange={(e) => handleEditFormChange('height_cm', parseInt(e.target.value))}
+                        placeholder="Height in cm"
                       />
                     </div>
                     <div>
@@ -1134,10 +1165,12 @@ const Admin = () => {
                         step="0.1"
                         value={editForm.weight_kg || ''}
                         onChange={(e) => handleEditFormChange('weight_kg', parseFloat(e.target.value))}
+                        placeholder="Weight in kg"
                       />
                     </div>
                   </div>
 
+                  {/* Marital Status Grid */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <Label htmlFor="marital_status">Marital Status</Label>
@@ -1147,7 +1180,7 @@ const Admin = () => {
                         onChange={(e) => handleEditFormChange('marital_status', e.target.value)}
                         className="w-full p-2 border rounded-md bg-background"
                       >
-                        <option value="">Select Status</option>
+                        <option value="">Marital status</option>
                         <option value="single">Single</option>
                         <option value="married">Married</option>
                         <option value="divorced">Divorced</option>
@@ -1158,16 +1191,18 @@ const Admin = () => {
                       <Label htmlFor="has_children">Has Children</Label>
                       <select
                         id="has_children"
-                        value={editForm.has_children ? 'true' : 'false'}
+                        value={editForm.has_children !== undefined ? editForm.has_children.toString() : ''}
                         onChange={(e) => handleEditFormChange('has_children', e.target.value === 'true')}
                         className="w-full p-2 border rounded-md bg-background"
                       >
+                        <option value="">Do you have children?</option>
                         <option value="false">No</option>
                         <option value="true">Yes</option>
                       </select>
                     </div>
                   </div>
 
+                  {/* Photos Grid */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <Label htmlFor="photo1_url">Portrait Photo URL</Label>
@@ -1175,6 +1210,7 @@ const Admin = () => {
                         id="photo1_url"
                         value={editForm.photo1_url || ''}
                         onChange={(e) => handleEditFormChange('photo1_url', e.target.value)}
+                        placeholder="Portrait photo URL"
                       />
                       {editForm.photo1_url && (
                         <img 
@@ -1190,6 +1226,7 @@ const Admin = () => {
                         id="photo2_url"
                         value={editForm.photo2_url || ''}
                         onChange={(e) => handleEditFormChange('photo2_url', e.target.value)}
+                        placeholder="Full length photo URL"
                       />
                       {editForm.photo2_url && (
                         <img 
@@ -1201,6 +1238,7 @@ const Admin = () => {
                     </div>
                   </div>
 
+                  {/* Action Buttons */}
                   <div className="flex justify-end gap-2 pt-4 border-t">
                     <Button variant="outline" onClick={cancelEdit}>
                       Cancel
