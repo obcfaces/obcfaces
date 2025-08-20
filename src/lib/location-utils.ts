@@ -89,6 +89,38 @@ const PHILIPPINES_CITIES = {
     'Maasin', 'Miagao', 'Mina', 'New Lucena', 'Oton', 'Pavia',
     'Pototan', 'San Dionisio', 'San Enrique', 'San Joaquin', 'San Miguel',
     'San Rafael', 'Santa Barbara', 'Sara', 'Tigbauan', 'Tubungan', 'Zarraga'
+  ],
+  'BOH': [ // Bohol
+    'Tagbilaran', 'Tubigon', 'Calape', 'Loon', 'Maribojoc', 'Antequera',
+    'Baclayon', 'Alburquerque', 'Loboc', 'Sikatuna', 'Carmen', 'Garcia Hernandez',
+    'Valencia', 'Dimiao', 'Lila', 'Loay', 'Panglao', 'Dauis', 'Cortes',
+    'Corella', 'Balilihan', 'Catigbian', 'Batuan', 'Sevilla', 'Bilar',
+    'Chocolate Hills', 'Sagbayan', 'Sierra Bullones', 'Pilar', 'Dagohoy',
+    'Danao', 'Trinidad', 'Talibon', 'Bien Unido', 'Ubay', 'San Miguel',
+    'San Isidro', 'Alicia', 'Mabini', 'Candijay', 'Anda', 'Guindulman',
+    'Duero', 'Jagna', 'Clarin', 'Inabanga', 'Buenavista', 'Getafe', 'President Carlos P. Garcia'
+  ],
+  'NEG': [ // Negros Occidental
+    'Bacolod', 'Talisay', 'Silay', 'Cadiz', 'Sagay', 'Escalante', 'Manapla',
+    'Victorias', 'Toboso', 'Calatrava', 'Pulupandan', 'Valladolid', 'San Enrique',
+    'Pontevedra', 'Hinigaran', 'La Carlota', 'Bago', 'Murcia', 'Don Salvador Benedicto',
+    'La Castellana', 'Moises Padilla', 'Isabela', 'Binalbagan', 'Himamaylan',
+    'Kabankalan', 'Ilog', 'Cauayan', 'Candoni', 'Hinoba-an', 'Salvador Benedicto'
+  ],
+  'AKL': [ // Aklan
+    'Kalibo', 'Ibajay', 'Nabas', 'Malay', 'Buruanga', 'Caticlan', 'Boracay',
+    'Makato', 'Numancia', 'Lezo', 'Madalag', 'Libacao', 'Jamindan',
+    'Tapaz', 'New Washington', 'Batan', 'Altavas', 'Banga'
+  ],
+  'CAP': [ // Capiz
+    'Roxas City', 'Panay', 'Panitan', 'Pontevedra', 'President Roxas', 'Pilar',
+    'Sigma', 'Sapian', 'Jamindan', 'Tapaz', 'Dumalag', 'Dumarao', 'Dao',
+    'Cuartero', 'Mambusao', 'Ivisan'
+  ],
+  'ANT': [ // Antique
+    'San Jose', 'Sibalom', 'Hamtic', 'Tobias Fornier', 'Anini-y', 'Patnongon',
+    'Bugasong', 'Valderrama', 'Barbaza', 'Laua-an', 'Culasi', 'Sebaste',
+    'Pandan', 'Libertad', 'Caluya', 'San Remigio', 'Belison', 'Tibiao'
   ]
 } as Record<string, string[]>;
 
