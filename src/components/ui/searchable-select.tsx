@@ -88,7 +88,7 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
           ) : (
             <span className="text-muted-foreground">{placeholder || "Select..."}</span>
           )}
-          <ChevronDown className="ml-2 h-4 w-4 opacity-50 flex-shrink-0" />
+          <ChevronDown className="ml-0 h-4 w-4 opacity-50 flex-shrink-0" />
         </Button>
       </PopoverTrigger>
       <PopoverContent 
