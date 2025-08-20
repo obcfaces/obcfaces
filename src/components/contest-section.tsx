@@ -99,6 +99,37 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
     };
 
     loadParticipants();
+
+    // Set up real-time subscription for contest participant updates
+    if (["THIS WEEK", "1 WEEK AGO", "2 WEEKS AGO", "3 WEEKS AGO"].includes(title)) {
+      const subscription = supabase
+        .channel('weekly_contest_participants_changes')
+        .on('postgres_changes', 
+          { 
+            event: '*', 
+            schema: 'public', 
+            table: 'weekly_contest_participants' 
+          }, 
+          () => {
+            // Reload participants when data changes
+            loadParticipants();
+          })
+        .on('postgres_changes', 
+          { 
+            event: '*', 
+            schema: 'public', 
+            table: 'contest_applications' 
+          }, 
+          () => {
+            // Reload participants when applications are updated
+            loadParticipants();
+          })
+        .subscribe();
+
+      return () => {
+        subscription.unsubscribe();
+      };
+    }
   }, [title]);
 
   const handleRate = (contestantId: number, rating: number) => {
