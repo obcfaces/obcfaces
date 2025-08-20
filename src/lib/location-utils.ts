@@ -67,6 +67,14 @@ const PHILIPPINES_CITIES = {
     'Balanga', 'Mariveles', 'Bagac', 'Hermosa', 'Limay', 'Morong',
     'Orani', 'Orion', 'Pilar', 'Samal', 'Abucay', 'Dinalupihan'
   ],
+  'III': [ // Bataan (Region III code)
+    'Balanga', 'Mariveles', 'Bagac', 'Hermosa', 'Limay', 'Morong',
+    'Orani', 'Orion', 'Pilar', 'Samal', 'Abucay', 'Dinalupihan'
+  ],
+  'BTA': [ // Bataan (alternative abbreviation)
+    'Balanga', 'Mariveles', 'Bagac', 'Hermosa', 'Limay', 'Morong',
+    'Orani', 'Orion', 'Pilar', 'Samal', 'Abucay', 'Dinalupihan'
+  ],
   'NUE': [ // Nueva Ecija
     'Cabanatuan', 'Gapan', 'San Jose', 'Palayan', 'Muñoz', 'Aliaga',
     'Bongabon', 'Cabiao', 'Carranglan', 'Cuyapo', 'Gabaldon', 'General Mamerto Natividad',
