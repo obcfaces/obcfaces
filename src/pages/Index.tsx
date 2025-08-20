@@ -78,11 +78,7 @@ const Index = () => {
             />
           </div>
           
-          {/* Temporarily hidden - will be restored later
-          <NextWeekSection viewMode={viewMode} />
-          */}
-
-          <div className="py-8 mb-2 mt-2">
+          <div className="mb-8">
             <ContestSection
               title="THIS WEEK"
               subtitle="25-31 august 2025"
@@ -93,23 +89,27 @@ const Index = () => {
             />
           </div>
 
-          <ContestSection
-            title="1 WEEK AGO"
-            titleSuffix="(Closed)"
-            subtitle="18-24 August 2025"
-            centerSubtitle
-            showWinner={true}
-            viewMode={viewMode}
-          />
+          <div className="mb-8">
+            <ContestSection
+              title="1 WEEK AGO"
+              titleSuffix="(Closed)"
+              subtitle="18-24 August 2025"
+              centerSubtitle
+              showWinner={true}
+              viewMode={viewMode}
+            />
+          </div>
 
-          <ContestSection
-            title="2 WEEKS AGO"
-            titleSuffix="(Closed)"
-            subtitle="11-17 August 2025"
-            centerSubtitle
-            showWinner={true}
-            viewMode={viewMode}
-          />
+          <div className="mb-8">
+            <ContestSection
+              title="2 WEEKS AGO"
+              titleSuffix="(Closed)"
+              subtitle="11-17 August 2025"
+              centerSubtitle
+              showWinner={true}
+              viewMode={viewMode}
+            />
+          </div>
 
           <ContestSection
             title="3 WEEKS AGO"
