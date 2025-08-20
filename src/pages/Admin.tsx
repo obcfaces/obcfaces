@@ -321,7 +321,8 @@ const Admin = () => {
   const saveApplicationEdit = async () => {
     if (!editingApplication) return;
 
-    const { error } = await supabase
+    // Update contest application
+    const { error: appError } = await supabase
       .from('contest_applications')
       .update({
         application_data: editForm,
@@ -329,7 +330,7 @@ const Admin = () => {
       })
       .eq('id', editingApplication.id);
 
-    if (error) {
+    if (appError) {
       toast({
         title: "Error",
         description: "Failed to update application",
@@ -338,9 +339,57 @@ const Admin = () => {
       return;
     }
 
+    // Update user profile with the same data
+    const birthDate = editForm.birth_year && editForm.birth_month && editForm.birth_day
+      ? new Date(editForm.birth_year, editForm.birth_month - 1, editForm.birth_day).toISOString().split('T')[0]
+      : null;
+
+    const age = editForm.birth_year ? new Date().getFullYear() - editForm.birth_year : null;
+
+    const { error: profileError } = await supabase
+      .from('profiles')
+      .update({
+        first_name: editForm.first_name,
+        last_name: editForm.last_name,
+        display_name: `${editForm.first_name || ''} ${editForm.last_name || ''}`.trim(),
+        city: editForm.city,
+        state: editForm.state,
+        country: editForm.country,
+        gender: editForm.gender,
+        height_cm: editForm.height_cm,
+        weight_kg: editForm.weight_kg,
+        marital_status: editForm.marital_status,
+        has_children: editForm.has_children,
+        birthdate: birthDate,
+        age: age,
+        photo_1_url: editForm.photo1_url,
+        photo_2_url: editForm.photo2_url,
+        avatar_url: editForm.photo1_url, // Use portrait photo as avatar
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', editingApplication.user_id);
+
+    if (profileError) {
+      console.error('Error updating profile:', profileError);
+      // Don't fail the operation if profile update fails
+    }
+
+    // Update weekly contest participants data if they're in a contest
+    const { error: participantError } = await supabase
+      .from('weekly_contest_participants')
+      .update({
+        application_data: editForm
+      })
+      .eq('user_id', editingApplication.user_id);
+
+    if (participantError) {
+      console.error('Error updating contest participant:', participantError);
+      // Don't fail the operation if participant update fails
+    }
+
     toast({
       title: "Success",
-      description: "Application updated successfully",
+      description: "Application and profile updated successfully",
     });
 
     setEditingApplication(null);
