@@ -746,6 +746,8 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                 placeholder="City"
                 disabled={!formData.stateCode}
                 invalid={hasRedBorder('city')}
+                allowCustom={true}
+                emptyMessage="No cities found. Type to add custom city."
               />
             </div>
 
