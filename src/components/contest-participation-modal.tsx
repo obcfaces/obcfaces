@@ -621,135 +621,62 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
         ) : submissionSuccess ? (
           <div className="space-y-4">
             <div className="text-center">
-              <h3 className="text-lg font-semibold text-green-600 mb-2">Заявка успешно отправлена!</h3>
-              <p className="text-sm text-muted-foreground mb-6">Ваша заявка на участие в конкурсе была успешно подана.</p>
+              <h3 className="text-lg font-semibold text-green-600 mb-2">Application Successfully Submitted!</h3>
+              <p className="text-sm text-muted-foreground mb-6">Your contest application has been successfully submitted.</p>
             </div>
             
             {/* Contact for Prize Transfer Section */}
             <div className="p-4 bg-background border rounded-lg">
-              <h3 className="text-md font-semibold mb-4 text-center">В случае победы напишите ваш тел для связи</h3>
+              <h3 className="text-md font-semibold mb-4 text-center">
+                Provide your contact details for prize transfer coordination in case of victory
+              </h3>
               
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-4">
-                <Button
-                  type="button"
-                  variant={selectedContactMethod === "phone" ? "default" : "outline"}
-                  onClick={() => setSelectedContactMethod("phone")}
-                  className="flex items-center gap-1 text-xs"
-                  size="sm"
-                >
-                  <Phone size={14} />
-                  Phone
-                </Button>
-                
-                <Button
-                  type="button"
-                  variant={selectedContactMethod === "email" ? "default" : "outline"}
-                  onClick={() => setSelectedContactMethod("email")}
-                  className="flex items-center gap-1 text-xs"
-                  size="sm"
-                >
-                  <Mail size={14} />
-                  Email
-                </Button>
-                
-                <Button
-                  type="button"
-                  variant={selectedContactMethod === "facebook" ? "default" : "outline"}
-                  onClick={() => setSelectedContactMethod("facebook")}
-                  className="flex items-center gap-1 text-xs"
-                  size="sm"
-                >
-                  <Facebook size={14} />
-                  Facebook
-                </Button>
-                
-                <Button
-                  type="button"
-                  variant={selectedContactMethod === "instagram" ? "default" : "outline"}
-                  onClick={() => setSelectedContactMethod("instagram")}
-                  className="flex items-center gap-1 text-xs"
-                  size="sm"
-                >
-                  <Instagram size={14} />
-                  Instagram
-                </Button>
-              </div>
-
-              {selectedContactMethod && (
-                <div className="space-y-3 border-t pt-3">
-                  <h4 className="font-medium text-sm">Контактная форма</h4>
-                  
-                  <div className="space-y-2">
-                    <div>
-                      <Label htmlFor="contact-name" className="text-xs">Ваше имя</Label>
-                      <Input
-                        id="contact-name"
-                        value={contactForm.name}
-                        onChange={(e) => setContactForm({...contactForm, name: e.target.value})}
-                        placeholder="Введите ваше полное имя"
-                        className="text-sm"
-                      />
-                    </div>
-                    
-                    <div>
-                      <Label htmlFor="contact-info" className="text-xs">
-                        {selectedContactMethod === "phone" && "Номер телефона"}
-                        {selectedContactMethod === "email" && "Email адрес"}
-                        {selectedContactMethod === "facebook" && "Facebook профиль/имя пользователя"}
-                        {selectedContactMethod === "instagram" && "Instagram имя пользователя"}
-                      </Label>
-                      <Input
-                        id="contact-info"
-                        value={contactForm.contact}
-                        onChange={(e) => setContactForm({...contactForm, contact: e.target.value})}
-                        placeholder={
-                          selectedContactMethod === "phone" ? "Введите ваш номер телефона" :
-                          selectedContactMethod === "email" ? "Введите ваш email адрес" :
-                          selectedContactMethod === "facebook" ? "Введите ваш Facebook профиль" :
-                          "Введите ваше Instagram имя пользователя"
-                        }
-                        className="text-sm"
-                      />
-                    </div>
-                    
-                    <div>
-                      <Label htmlFor="contact-message" className="text-xs">Сообщение</Label>
-                      <Textarea
-                        id="contact-message"
-                        value={contactForm.message}
-                        onChange={(e) => setContactForm({...contactForm, message: e.target.value})}
-                        placeholder="Расскажите нам о вашем запросе на перевод приза..."
-                        rows={3}
-                        className="text-sm"
-                      />
-                    </div>
-                    
-                    <Button 
-                      type="button" 
-                      size="sm" 
-                      className="w-full"
-                      onClick={() => {
-                        toast({
-                          title: "Контактная информация отправлена",
-                          description: "Мы свяжемся с вами в случае победы."
-                        });
-                        setIsOpen(false);
-                      }}
-                    >
-                      Отправить контактную информацию
-                    </Button>
-                  </div>
+              <div className="space-y-3">
+                <div>
+                  <Label htmlFor="contact-name" className="text-xs">Your full name</Label>
+                  <Input
+                    id="contact-name"
+                    value={contactForm.name}
+                    onChange={(e) => setContactForm({...contactForm, name: e.target.value})}
+                    placeholder="Enter your full name"
+                    className="text-sm"
+                  />
                 </div>
-              )}
-              
-              <div className="mt-4 text-center">
+                
+                <div>
+                  <Label htmlFor="contact-phone" className="text-xs">Phone number with country code</Label>
+                  <Input
+                    id="contact-phone"
+                    value={contactForm.contact}
+                    onChange={(e) => setContactForm({...contactForm, contact: e.target.value})}
+                    placeholder="+63 912 345 6789"
+                    className="text-sm"
+                    type="tel"
+                  />
+                </div>
+                
                 <Button 
                   type="button" 
-                  variant="outline" 
-                  onClick={() => setIsOpen(false)}
-                  size="sm"
+                  size="sm" 
+                  className="w-full"
+                  onClick={() => {
+                    if (!contactForm.name.trim() || !contactForm.contact.trim()) {
+                      toast({
+                        title: "Please fill all fields",
+                        description: "Name and phone number are required.",
+                        variant: "destructive"
+                      });
+                      return;
+                    }
+                    
+                    toast({
+                      title: "Contact information saved",
+                      description: "We will contact you in case of victory."
+                    });
+                    setIsOpen(false);
+                  }}
                 >
-                  Закрыть
+                  Add Contact Information
                 </Button>
               </div>
             </div>
