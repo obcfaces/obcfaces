@@ -876,7 +876,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                 <div className="w-1 flex-shrink-0"></div>
 
                 {/* Fixed photo upload areas */}
-                <div className="flex flex-row gap-[1px] items-start">
+                <div className="flex flex-row gap-[0.5px] items-start">
                   {/* Portrait Photo */}
                   <div className="flex flex-col items-center gap-1 flex-1 min-w-0">
                     <p className="text-xs text-muted-foreground">portrait</p>
