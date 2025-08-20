@@ -435,6 +435,8 @@ export function ContestantCard({
                     variant="white"
                     hideText={true}
                     onRate={(rating) => {
+                      console.log('Edit mode StarRating onRate called with rating:', rating);
+                      console.log('User state:', user);
                       if (!user) {
                         setShowLoginModal(true);
                         return;
@@ -442,7 +444,7 @@ export function ContestantCard({
                       setUserRating(rating);
                       localStorage.setItem(`rating-${name}-${user.id}`, rating.toString());
                       setIsEditing(false);
-                      onRate?.(rating);
+                      handleRate(rating); // ИСПРАВЛЕНО: вызываем handleRate для сохранения в БД
                     }}
                   />
                 </div>
@@ -686,6 +688,8 @@ export function ContestantCard({
                   variant="white"
                   hideText={true}
                   onRate={(rating) => {
+                    console.log('Compact edit mode StarRating onRate called with rating:', rating);
+                    console.log('User state:', user);
                     if (!user) {
                       setShowLoginModal(true);
                       return;
@@ -693,7 +697,7 @@ export function ContestantCard({
                     setUserRating(rating);
                     localStorage.setItem(`rating-${name}-${user.id}`, rating.toString());
                     setIsEditing(false);
-                    onRate?.(rating);
+                    handleRate(rating); // ИСПРАВЛЕНО: вызываем handleRate для сохранения в БД
                   }}
                 />
               </div>
