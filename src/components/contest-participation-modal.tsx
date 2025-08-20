@@ -645,15 +645,17 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                     <div className="flex border border-input rounded-md bg-background">
                       <div className="w-24">
                         <div className="relative">
-                          <SearchableSelect
-                            value={contactForm.countryCode || formData.countryCode}
-                            onValueChange={(value) => setContactForm({...contactForm, countryCode: value})}
-                            options={Country.getAllCountries().map((country) => ({
-                              value: country.isoCode,
-                              label: `${country.flag} +${country.phonecode} ${country.name}`
-                            }))}
-                            placeholder=""
-                          />
+                          <div className="opacity-0 pointer-events-auto">
+                            <SearchableSelect
+                              value={contactForm.countryCode || formData.countryCode}
+                              onValueChange={(value) => setContactForm({...contactForm, countryCode: value})}
+                              options={Country.getAllCountries().map((country) => ({
+                                value: country.isoCode,
+                                label: `${country.flag} +${country.phonecode} ${country.name}`
+                              }))}
+                              placeholder=""
+                            />
+                          </div>
                           <div className="absolute inset-0 pointer-events-none bg-background border border-input rounded-md px-3 flex items-center justify-between">
                             <span className="text-sm">
                               {(() => {
