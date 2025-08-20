@@ -630,8 +630,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
         ) : submissionSuccess ? (
           <div className="space-y-4">
             <div className="text-center">
-              <h3 className="text-lg font-semibold text-green-600 mb-2">Application Successfully Submitted!</h3>
-              <p className="text-sm text-muted-foreground mb-6">Your contest application has been successfully submitted.</p>
+              <h3 className="text-lg font-semibold text-green-600 mb-6">Application Successfully Submitted!</h3>
             </div>
             
             {/* Contact for Prize Transfer Section */}
