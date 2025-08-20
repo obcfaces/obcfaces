@@ -111,7 +111,6 @@ const Index = () => {
             />
           </section>
 
-          <NextWeekSection viewMode={viewMode} />
 
           <ContestSection
             title="1 WEEK AGO"
