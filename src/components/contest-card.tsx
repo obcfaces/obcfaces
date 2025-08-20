@@ -299,7 +299,8 @@ export function ContestantCard({
       if (error) {
         console.error('Insert failed with error:', error);
         console.error('Error details:', JSON.stringify(error, null, 2));
-        toast({ description: `Ошибка при сохранении оценки: ${error.message}` });
+        
+        // If insert fails due to conflict, try upsert
         const { data: upsertData, error: upsertError } = await supabase
           .from('contestant_ratings')
           .upsert(ratingData, { 
