@@ -647,7 +647,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                         <select
                           value={contactForm.countryCode || formData.countryCode}
                           onChange={(e) => setContactForm({...contactForm, countryCode: e.target.value})}
-                          className="appearance-none bg-transparent border-0 text-sm px-2 py-2 pr-4 min-w-[80px] focus:outline-none focus:ring-0 cursor-pointer text-transparent"
+                          className="appearance-none bg-transparent border-0 text-sm px-2 py-2 pr-4 w-[60px] focus:outline-none focus:ring-0 cursor-pointer text-transparent"
                         >
                           {Country.getAllCountries().map((country) => (
                             <option key={country.isoCode} value={country.isoCode} className="text-black">
