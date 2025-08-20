@@ -80,6 +80,7 @@ const Index = () => {
           
           <NextWeekSection viewMode={viewMode} />
 
+          {/* Temporarily hidden - will be restored later
           <ContestSection
             title="THIS WEEK"
             subtitle="25-31 august 2025"
@@ -88,6 +89,7 @@ const Index = () => {
             noWrapTitle
             viewMode={viewMode}
           />
+          */}
 
           <ContestSection
             title="1 WEEK AGO"
