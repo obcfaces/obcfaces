@@ -53,6 +53,36 @@ export type Database = {
         }
         Relationships: []
       }
+      contestant_ratings: {
+        Row: {
+          contestant_name: string
+          contestant_user_id: string | null
+          created_at: string
+          id: string
+          rating: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          contestant_name: string
+          contestant_user_id?: string | null
+          created_at?: string
+          id?: string
+          rating: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          contestant_name?: string
+          contestant_user_id?: string | null
+          created_at?: string
+          id?: string
+          rating?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       conversation_participants: {
         Row: {
           conversation_id: string
@@ -545,6 +575,13 @@ export type Database = {
           user_id: string
           weight_kg: number
         }[]
+      }
+      get_contestant_average_rating: {
+        Args: {
+          contestant_name_param: string
+          contestant_user_id_param?: string
+        }
+        Returns: number
       }
       get_detailed_profile: {
         Args: { profile_user_id: string }
