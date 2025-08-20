@@ -695,7 +695,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                     <Button 
                       type="button" 
                       size="sm" 
-                       onClick={() => {
+                       onClick={async () => {
                          if (!contactForm.contact.trim()) {
                            toast({
                              title: "Please fill all fields",
@@ -704,13 +704,81 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                            });
                            return;
                          }
+
+                         try {
+                           const { data: { session } } = await supabase.auth.getSession();
+                           if (!session) {
+                             toast({
+                               title: "Error",
+                               description: "Authentication required.",
+                               variant: "destructive"
+                             });
+                             return;
+                           }
+
+                           // Get the current application
+                           const { data: application, error: fetchError } = await supabase
+                             .from('contest_applications')
+                             .select('application_data')
+                             .eq('user_id', session.user.id)
+                             .single();
+
+                           if (fetchError) {
+                             toast({
+                               title: "Error",
+                               description: "Failed to load application data.",
+                               variant: "destructive"
+                             });
+                             return;
+                           }
+
+                           // Get the selected country info
+                           const selectedCountry = Country.getCountryByCode(contactForm.countryCode || formData.countryCode);
+                           
+                            // Add phone data to application
+                            const currentData = application.application_data as Record<string, any> || {};
+                            const updatedApplicationData = {
+                              ...currentData,
+                              phone: {
+                                country_code: contactForm.countryCode || formData.countryCode,
+                                phone_code: selectedCountry?.phonecode || '63',
+                                number: contactForm.contact,
+                                full_number: `+${selectedCountry?.phonecode || '63'}${contactForm.contact.replace(/\s/g, '')}`
+                              }
+                            };
+
+                           // Update the application with phone data
+                           const { error: updateError } = await supabase
+                             .from('contest_applications')
+                             .update({
+                               application_data: updatedApplicationData,
+                               updated_at: new Date().toISOString()
+                             })
+                             .eq('user_id', session.user.id);
+
+                           if (updateError) {
+                             toast({
+                               title: "Error",
+                               description: "Failed to save contact information.",
+                               variant: "destructive"
+                             });
+                             return;
+                           }
                         
-                        toast({
-                          title: "Contact information saved",
-                          description: "We will contact you in case of victory."
-                        });
-                        setIsOpen(false);
-                      }}
+                           toast({
+                             title: "Contact information saved",
+                             description: "We will contact you in case of victory."
+                           });
+                           setIsOpen(false);
+                         } catch (error) {
+                           console.error('Contact save error:', error);
+                           toast({
+                             title: "Error",
+                             description: "Failed to save contact information.",
+                             variant: "destructive"
+                           });
+                         }
+                       }}
                     >
                       Add Contact
                     </Button>
