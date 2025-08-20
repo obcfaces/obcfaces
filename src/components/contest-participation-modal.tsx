@@ -670,7 +670,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                           const value = e.target.value.replace(/[^0-9]/g, '');
                           setContactForm({...contactForm, contact: value});
                         }}
-                        placeholder="912 345 6789"
+                        placeholder="123 456 7890"
                         className="text-sm w-32 border-0 focus-visible:ring-0 focus-visible:ring-offset-0"
                         type="tel"
                         inputMode="numeric"
