@@ -294,6 +294,84 @@ const PHILIPPINES_CITIES = {
     'Indanan', 'Siasi', 'Parang', 'Patikul', 'Luuk', 'Pangutaran',
     // Tawi-Tawi
     'Languyan', 'Simunul', 'Sitangkai', 'Turtle Islands', 'South Ubian'
+  ],
+
+  // Additional missing Philippines provinces
+  'ZAN': [ // Zamboanga del Norte
+    'Dipolog', 'Dapitan', 'Roxas', 'Sindangan', 'Sergio Osmeña Sr.', 'Katipunan',
+    'Manukan', 'Jose Dalman', 'Tampilisan', 'Godod', 'Bacungan', 'Baliguian',
+    'Gutalac', 'Kalawit', 'La Libertad', 'Labason', 'Leon B. Postigo',
+    'Liloy', 'Mutia', 'Piñan', 'Polanco', 'Pres. Manuel A. Roxas',
+    'Rizal', 'Salug', 'Siayan', 'Sibuco', 'Sibutad', 'Siocon'
+  ],
+  'ZAS': [ // Zamboanga del Sur
+    'Pagadian', 'Zamboanga City', 'Aurora', 'Bayog', 'Dimataling', 'Dinas',
+    'Dumalinao', 'Dumingag', 'Guipos', 'Josefina', 'Kumalarang', 'Labangan',
+    'Lakewood', 'Lapuyan', 'Mahayag', 'Margosatubig', 'Midsalip', 'Molave',
+    'Pitogo', 'Ramon Magsaysay', 'San Miguel', 'San Pablo', 'Sominot',
+    'Tabina', 'Tambulig', 'Tigbao', 'Tukuran', 'Vincenzo A. Sagun'
+  ],
+  'ZSI': [ // Zamboanga Sibugay
+    'Ipil', 'Alicia', 'Buug', 'Diplahan', 'Imelda', 'Kabasalan', 'Mabuhay',
+    'Malangas', 'Naga', 'Olutanga', 'Payao', 'Roseller Lim', 'Siay',
+    'Talusan', 'Titay', 'Tungawan'
+  ],
+  'LNN': [ // Lanao del Norte
+    'Iligan', 'Tubod', 'Bacolod', 'Baloi', 'Baroy', 'Kapatagan', 'Kauswagan',
+    'Kolambugan', 'Lala', 'Linamon', 'Magsaysay', 'Maigo', 'Matungao',
+    'Munai', 'Nunungan', 'Pantao Ragat', 'Pantar', 'Poona Piagapo',
+    'President Manuel A. Roxas', 'Salvador', 'Sapad', 'Sultan Naga Dimaporo',
+    'Tagoloan', 'Tangcal'
+  ],
+  'MSC': [ // Misamis Occidental
+    'Oroquieta', 'Ozamiz', 'Tangub', 'Aloran', 'Baliangao', 'Bonifacio',
+    'Calamba', 'Clarin', 'Concepcion', 'Don Victoriano Chiongbian',
+    'Jimenez', 'Lopez Jaena', 'Panaon', 'Plaridel', 'Sapang Dalaga',
+    'Sinacaban', 'Tudela'
+  ],
+  'MSR': [ // Misamis Oriental
+    'Cagayan de Oro', 'Gingoog', 'Alubijid', 'Balingasag', 'Balingoan',
+    'Binuangan', 'Claveria', 'El Salvador', 'Gitagum', 'Initao', 'Jasaan',
+    'Kinoguitan', 'Lagonglong', 'Laguindingan', 'Libertad', 'Lugait',
+    'Magsaysay', 'Manticao', 'Medina', 'Naawan', 'Opol', 'Salay',
+    'Sugbongcogon', 'Tagoloan', 'Talisayan', 'Villanueva'
+  ],
+  'BUK': [ // Bukidnon
+    'Malaybalay', 'Valencia', 'Cabanglasan', 'Damulog', 'Dangcagan', 'Don Carlos',
+    'Impasug-ong', 'Kadingilan', 'Kalilangan', 'Kibawe', 'Kitaotao', 'Lantapan',
+    'Libona', 'Malitbog', 'Manolo Fortich', 'Maramag', 'Pangantucan', 'Quezon',
+    'San Fernando', 'Sumilao', 'Talakag'
+  ],
+  'CAM': [ // Camiguin
+    'Mambajao', 'Catarman', 'Guinsiliban', 'Mahinog', 'Sagay'
+  ],
+  'NDV': [ // Davao del Norte
+    'Tagum', 'Panabo', 'Samal', 'Asuncion', 'Braulio E. Dujali', 'Carmen',
+    'Kapalong', 'New Corella', 'San Isidro', 'Santo Tomas', 'Talaingod'
+  ],
+  'DVO': [ // Davao Oriental
+    'Mati', 'Baganga', 'Banaybanay', 'Boston', 'Caraga', 'Cateel', 'Governor Generoso',
+    'Lupon', 'Manay', 'San Isidro', 'Tarragona'
+  ],
+  'COM': [ // Davao de Oro (Compostela Valley)
+    'Nabunturan', 'Pantukan', 'Compostela', 'Laak', 'Mabini', 'Maco',
+    'Maragusan', 'Mawab', 'Monkayo', 'Montevista', 'New Bataan'
+  ],
+  'DAO': [ // Davao Occidental
+    'Malita', 'Don Marcelino', 'Jose Abad Santos', 'Santa Maria', 'Sarangani'
+  ],
+  'SCO': [ // South Cotabato
+    'Koronadal', 'General Santos', 'Banga', 'Lake Sebu', 'Norala', 'Polomolok',
+    'Santo Niño', 'Surallah', 'T\'Boli', 'Tampakan', 'Tantangan', 'Tupi'
+  ],
+  'SAR': [ // Sarangani
+    'Alabel', 'Glan', 'Kiamba', 'Maasim', 'Maitum', 'Malapatan', 'Malungon'
+  ],
+  'COT': [ // Cotabato (North Cotabato)
+    'Kidapawan', 'Alamada', 'Aleosan', 'Antipas', 'Arakan', 'Banisilan',
+    'Carmen', 'Kabacan', 'Libungan', 'M\'lang', 'Magpet', 'Makilala',
+    'Matalam', 'Midsayap', 'Pigcawayan', 'Pikit', 'President Roxas',
+    'Tulunan'
   ]
 } as Record<string, string[]>;
 
