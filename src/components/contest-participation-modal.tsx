@@ -643,25 +643,28 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                 <div>
                   <div className="flex gap-2">
                     <div className="flex border border-input rounded-md bg-background">
-                      <div className="relative">
-                        <select
-                          value={contactForm.countryCode || formData.countryCode}
-                          onChange={(e) => setContactForm({...contactForm, countryCode: e.target.value})}
-                          className="appearance-none bg-transparent border-0 text-sm px-2 py-2 pr-4 w-[75px] focus:outline-none focus:ring-0 cursor-pointer text-transparent"
-                        >
+                      <Select
+                        value={contactForm.countryCode || formData.countryCode}
+                        onValueChange={(value) => setContactForm({...contactForm, countryCode: value})}
+                      >
+                        <SelectTrigger className="w-[75px] text-sm border-0">
+                          <SelectValue>
+                            <span className="flex items-center gap-1">
+                              {Country.getCountryByCode(contactForm.countryCode || formData.countryCode)?.flag || '🇵🇭'}
+                              <span className="text-sm font-normal text-foreground">+{Country.getCountryByCode(contactForm.countryCode || formData.countryCode)?.phonecode || '63'}</span>
+                            </span>
+                          </SelectValue>
+                        </SelectTrigger>
+                        <SelectContent>
                           {Country.getAllCountries().map((country) => (
-                            <option key={country.isoCode} value={country.isoCode} className="text-black">
-                              {country.flag} +{country.phonecode} {country.name}
-                            </option>
+                            <SelectItem key={country.isoCode} value={country.isoCode}>
+                              <span className="flex items-center gap-2">
+                                {country.flag} +{country.phonecode} {country.name}
+                              </span>
+                            </SelectItem>
                           ))}
-                        </select>
-                        <div className="absolute inset-y-0 left-2 flex items-center pointer-events-none">
-                          <span className="flex items-center gap-1">
-                            {Country.getCountryByCode(contactForm.countryCode || formData.countryCode)?.flag || '🇵🇭'}
-                            <span className="text-sm font-normal text-foreground">+{Country.getCountryByCode(contactForm.countryCode || formData.countryCode)?.phonecode || '63'}</span>
-                          </span>
-                        </div>
-                      </div>
+                        </SelectContent>
+                      </Select>
                       <div className="w-px bg-border"></div>
                       <Input
                         id="contact-phone"
