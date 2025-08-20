@@ -662,14 +662,20 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                         id="contact-phone"
                         value={contactForm.contact}
                         onChange={(e) => {
-                          const value = e.target.value.replace(/[^0-9]/g, '');
+                          let value = e.target.value.replace(/[^0-9]/g, '');
+                          if (value.length >= 3) {
+                            value = value.substring(0, 3) + ' ' + value.substring(3);
+                          }
+                          if (value.length >= 7) {
+                            value = value.substring(0, 7) + ' ' + value.substring(7, 11);
+                          }
                           setContactForm({...contactForm, contact: value});
                         }}
                         placeholder="123 456 7890"
                         className="text-sm w-32 border-0 focus-visible:ring-0 focus-visible:ring-offset-0"
                         type="tel"
                         inputMode="numeric"
-                        pattern="[0-9]*"
+                        maxLength={12}
                       />
                     </div>
                     <Button 
