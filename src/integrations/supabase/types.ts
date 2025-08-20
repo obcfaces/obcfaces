@@ -452,6 +452,22 @@ export type Database = {
           id: string
         }[]
       }
+      get_contest_participants: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          age: number
+          city: string
+          country: string
+          first_name: string
+          height_cm: number
+          id: string
+          last_name: string
+          photo1_url: string
+          photo2_url: string
+          user_id: string
+          weight_kg: number
+        }[]
+      }
       get_detailed_profile: {
         Args: { profile_user_id: string }
         Returns: {
