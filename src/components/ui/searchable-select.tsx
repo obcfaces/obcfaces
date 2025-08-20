@@ -74,7 +74,7 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
       <PopoverContent className="w-[calc(var(--radix-popover-trigger-width)*1.3)] p-0 z-50 bg-popover" onWheelCapture={(e) => e.stopPropagation()} onOpenAutoFocus={(e) => e.preventDefault()}>
         <Command>
           <CommandInput 
-            placeholder="Search..." 
+            placeholder="Search.../Type yours" 
             value={searchValue}
             onValueChange={setSearchValue}
           />

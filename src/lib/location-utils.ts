@@ -121,6 +121,16 @@ const PHILIPPINES_CITIES = {
     'San Jose', 'Sibalom', 'Hamtic', 'Tobias Fornier', 'Anini-y', 'Patnongon',
     'Bugasong', 'Valderrama', 'Barbaza', 'Laua-an', 'Culasi', 'Sebaste',
     'Pandan', 'Libertad', 'Caluya', 'San Remigio', 'Belison', 'Tibiao'
+  ],
+  'AGN': [ // Agusan del Norte
+    'Butuan', 'Buenavista', 'Carmen', 'Jabonga', 'Kitcharao', 'Las Nieves',
+    'Magallanes', 'Nasipit', 'Remedios T. Romualdez', 'Santiago', 'Tubay',
+    'Cabadbaran'
+  ],
+  'AGS': [ // Agusan del Sur
+    'Bayugan', 'Bunawan', 'Esperanza', 'La Paz', 'Loreto', 'Prosperidad',
+    'Rosario', 'San Francisco', 'San Luis', 'Santa Josefa', 'Sibagat',
+    'Talacogon', 'Trento', 'Veruela'
   ]
 } as Record<string, string[]>;
 
