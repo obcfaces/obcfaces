@@ -666,10 +666,15 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                       <Input
                         id="contact-phone"
                         value={contactForm.contact}
-                        onChange={(e) => setContactForm({...contactForm, contact: e.target.value})}
+                        onChange={(e) => {
+                          const value = e.target.value.replace(/[^0-9]/g, '');
+                          setContactForm({...contactForm, contact: value});
+                        }}
                         placeholder="912 345 6789"
                         className="text-sm w-32 border-0 focus-visible:ring-0 focus-visible:ring-offset-0"
                         type="tel"
+                        inputMode="numeric"
+                        pattern="[0-9]*"
                       />
                     </div>
                     <Button 
