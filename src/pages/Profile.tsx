@@ -207,9 +207,15 @@ const Profile = () => {
           email: ''
         });
         
-        // Get follower/following counts (mock for now)
-        setFollowersCount(Math.floor(Math.random() * 1000) + 100);
-        setFollowingCount(Math.floor(Math.random() * 500) + 50);
+        // Load real follower/following counts
+        const { data: followStats } = await supabase.rpc('get_follow_stats', { target_user_id: id });
+        if (followStats && followStats.length > 0) {
+          setFollowersCount(followStats[0]?.followers_count || 0);
+          setFollowingCount(followStats[0]?.following_count || 0);
+        } else {
+          setFollowersCount(0);
+          setFollowingCount(0);
+        }
       } catch (error) {
         console.error("Error loading profile:", error);
       } finally {
@@ -240,8 +246,13 @@ const Profile = () => {
   // Check following status
   useEffect(() => {
     if (!currentUserId || !id || currentUserId === id) return;
-    // Mock following status for now
-    setIsFollowing(Math.random() > 0.5);
+    
+    const checkFollowStatus = async () => {
+      const { data: isFollowingData } = await supabase.rpc('is_following', { target_user_id: id });
+      setIsFollowing(isFollowingData || false);
+    };
+    
+    checkFollowStatus();
   }, [currentUserId, id]);
 
   const handleFollowToggle = async () => {
@@ -249,18 +260,33 @@ const Profile = () => {
     
     setLoadingFollow(true);
     try {
-      // Toggle following status (mock for now)
-      const newFollowingStatus = !isFollowing;
-      setIsFollowing(newFollowingStatus);
-      setFollowersCount(prev => newFollowingStatus ? prev + 1 : prev - 1);
-      
-      toast({ 
-        description: newFollowingStatus ? "Подписались" : "Отписались"
-      });
+      if (isFollowing) {
+        // Unfollow
+        const { error } = await supabase
+          .from('follows')
+          .delete()
+          .eq('follower_id', currentUserId)
+          .eq('followee_id', id);
+        
+        if (error) throw error;
+        
+        setIsFollowing(false);
+        setFollowersCount(prev => prev - 1);
+        toast({ description: "Отписались" });
+      } else {
+        // Follow
+        const { error } = await supabase
+          .from('follows')
+          .insert({ follower_id: currentUserId, followee_id: id });
+        
+        if (error) throw error;
+        
+        setIsFollowing(true);
+        setFollowersCount(prev => prev + 1);
+        toast({ description: "Подписались" });
+      }
     } catch (error) {
-      toast({ 
-        description: "Ошибка при изменении подписки" 
-      });
+      toast({ description: "Ошибка при изменении подписки" });
     } finally {
       setLoadingFollow(false);
     }
