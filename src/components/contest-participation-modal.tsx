@@ -641,7 +641,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
               
               <div className="space-y-3">
                 <div>
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 items-center">
                     <div className="flex border border-input rounded-md bg-background">
                       <Select
                         value={contactForm.countryCode || formData.countryCode}
