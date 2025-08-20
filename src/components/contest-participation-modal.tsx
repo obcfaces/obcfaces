@@ -648,7 +648,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                       value={contactForm.countryCode || formData.countryCode}
                       onValueChange={(value) => setContactForm({...contactForm, countryCode: value})}
                     >
-                      <SelectTrigger className="w-24 text-sm">
+                      <SelectTrigger className="w-24 text-sm [&>svg]:hidden">
                         <SelectValue>
                           <span className="flex items-center gap-1">
                             {Country.getCountryByCode(contactForm.countryCode || formData.countryCode)?.flag || '🇵🇭'}
@@ -671,35 +671,33 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                       value={contactForm.contact}
                       onChange={(e) => setContactForm({...contactForm, contact: e.target.value})}
                       placeholder="912 345 6789"
-                      className="text-sm flex-1"
+                      className="text-sm w-32"
                       type="tel"
                     />
+                    <Button 
+                      type="button" 
+                      size="sm" 
+                       onClick={() => {
+                         if (!contactForm.contact.trim()) {
+                           toast({
+                             title: "Please fill all fields",
+                             description: "Phone number is required.",
+                             variant: "destructive"
+                           });
+                           return;
+                         }
+                        
+                        toast({
+                          title: "Contact information saved",
+                          description: "We will contact you in case of victory."
+                        });
+                        setIsOpen(false);
+                      }}
+                    >
+                      Add Contact
+                    </Button>
                   </div>
                 </div>
-                
-                <Button 
-                  type="button" 
-                  size="sm" 
-                  className="w-full"
-                   onClick={() => {
-                     if (!contactForm.contact.trim()) {
-                       toast({
-                         title: "Please fill all fields",
-                         description: "Phone number is required.",
-                         variant: "destructive"
-                       });
-                       return;
-                     }
-                    
-                    toast({
-                      title: "Contact information saved",
-                      description: "We will contact you in case of victory."
-                    });
-                    setIsOpen(false);
-                  }}
-                >
-                  Add Contact Information
-                </Button>
               </div>
             </div>
           </div>
