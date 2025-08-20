@@ -144,26 +144,18 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
   const getContestants = () => {
     // Use real contestants from weekly contests if available
     if (["THIS WEEK", "1 WEEK AGO", "2 WEEKS AGO", "3 WEEKS AGO"].includes(title) && realContestants.length > 0) {
-      return realContestants.map((contestant, index) => {
+      return realContestants.map((contestant) => {
         // Validate contestant data structure
         if (!contestant || typeof contestant !== 'object') {
           console.warn('Invalid contestant data:', contestant);
           return null;
         }
         
-        // For real contestants, try to get user's rating from localStorage
-        const currentUserId = localStorage.getItem('currentUserId');
-        let userRating = 0;
-        if (currentUserId && contestant.first_name && contestant.last_name) {
-          const savedRating = localStorage.getItem(`rating-${contestant.first_name} ${contestant.last_name}-${currentUserId}`);
-          userRating = savedRating ? parseFloat(savedRating) : 0;
-        }
-        
-        // Use final_rank from database if available, otherwise use index + 1
-        const rank = contestant.final_rank || (index + 1);
+        // Use average_rating from database if available, otherwise default to 0
+        const averageRating = contestant.average_rating || 0;
         
         return {
-          rank,
+          rank: contestant.final_rank || 0,
           name: `${contestant.first_name || 'Unknown'} ${contestant.last_name || ''}`.trim(),
           profileId: contestant.user_id,
           country: contestant.country || 'Unknown',
@@ -171,16 +163,22 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
           age: contestant.age || 0,
           weight: contestant.weight_kg || 0,
           height: contestant.height_cm || 0,
-          rating: userRating > 0 ? userRating : ratings[rank] || 4.0,
+          rating: averageRating,
           faceImage: contestant.photo1_url || contestant1Face,
           fullBodyImage: contestant.photo2_url || contestant1Full,
           additionalPhotos: [],
-          isVoted: showWinner ? true : !!votes[rank] || userRating > 0,
-          isWinner: showWinner && rank === 1,
-          prize: showWinner && rank === 1 ? "+ 5000 PHP" : undefined,
+          isVoted: showWinner ? true : averageRating > 0,
+          isWinner: showWinner && contestant.final_rank === 1,
+          prize: showWinner && contestant.final_rank === 1 ? "+ 5000 PHP" : undefined,
           isRealContestant: true // Mark as real contestant to disable fake likes/comments
         };
-      }).filter(Boolean).sort((a, b) => a.rank - b.rank); // Sort by rank
+      }).filter(Boolean).sort((a, b) => {
+        // Sort by average rating (highest first), then by rank if ratings are equal
+        if (b.rating !== a.rating) {
+          return b.rating - a.rating;
+        }
+        return (a.rank || 999) - (b.rank || 999);
+      });
     }
     
     // Fallback contestants for testing or when no real data
