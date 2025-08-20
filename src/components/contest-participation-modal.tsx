@@ -239,7 +239,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
     }
   };
 
-  // Process image to maintain 4:5 aspect ratio with side padding if needed
+  // Process image to maintain 4:5 aspect ratio (width:height) with side padding if needed
   const processImageAspectRatio = (file: File): Promise<File> => {
     return new Promise((resolve) => {
       const img = new Image();
@@ -248,32 +248,24 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
       
       img.onload = () => {
         const aspectRatio = img.width / img.height;
-        const targetAspectRatio = 4 / 5; // 0.8
-        
-        let newWidth = img.width;
-        let newHeight = img.height;
-        let offsetX = 0;
-        let offsetY = 0;
+        const targetAspectRatio = 4 / 5; // width:height = 4:5
         
         // If image is wider than 4:5 ratio, add padding on sides
         if (aspectRatio > targetAspectRatio) {
-          newHeight = img.height;
-          newWidth = newHeight * targetAspectRatio;
-          canvas.width = newWidth;
-          canvas.height = newHeight;
+          // Image is too wide, need to add vertical padding (make it taller)
+          const targetWidth = img.width;
+          const targetHeight = img.width / targetAspectRatio; // height = width / (4/5) = width * 5/4
           
-          // Center the image with padding
-          const scaledWidth = newWidth;
-          const scaledHeight = newHeight;
-          offsetX = (newWidth - scaledWidth) / 2;
-          offsetY = 0;
+          canvas.width = targetWidth;
+          canvas.height = targetHeight;
           
           // Fill with white background (padding)
           ctx!.fillStyle = '#ffffff';
-          ctx!.fillRect(0, 0, newWidth, newHeight);
+          ctx!.fillRect(0, 0, targetWidth, targetHeight);
           
-          // Draw image centered
-          ctx!.drawImage(img, offsetX, offsetY, scaledWidth, scaledHeight);
+          // Center the original image vertically
+          const offsetY = (targetHeight - img.height) / 2;
+          ctx!.drawImage(img, 0, offsetY, img.width, img.height);
         } else {
           // For images with aspect ratio <= 4:5, keep original
           canvas.width = img.width;
