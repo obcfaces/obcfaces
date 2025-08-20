@@ -19,6 +19,7 @@ interface SearchableSelectProps {
   highlightSelected?: boolean;
   allowCustom?: boolean;
   customOptionLabel?: string;
+  customTriggerRenderer?: (value: string, options: Option[]) => React.ReactNode;
 }
 
 const SearchableSelect: React.FC<SearchableSelectProps> = ({
@@ -33,6 +34,7 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
   highlightSelected = false,
   allowCustom = false,
   customOptionLabel = "Add custom option",
+  customTriggerRenderer,
 }) => {
   const [open, setOpen] = React.useState(false);
   const [searchValue, setSearchValue] = React.useState("");
@@ -81,7 +83,9 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
             highlightSelected && (selected || isCustomValue) && "border border-blue-500 focus:ring-blue-500 focus:border-blue-500"
           )}
         >
-          {selected ? (
+          {customTriggerRenderer ? (
+            customTriggerRenderer(value, options)
+          ) : selected ? (
             <span className="text-left leading-tight break-words">{selected.label}</span>
           ) : isCustomValue ? (
             <span className="text-left leading-tight break-words">{value}</span>
