@@ -44,6 +44,7 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
       .from('profiles')
       .select('id, display_name, city, country, age, height_cm, weight_kg, photo_1_url, photo_2_url')
       .eq('is_contest_participant', true)
+      .eq('is_approved', true)
       .limit(10);
 
     if (data && !error) {
