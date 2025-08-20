@@ -63,26 +63,34 @@ export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantNa
     const loadPhotoData = async () => {
       // Load comments for current photo
       const contentId = `contestant-photo-${contestantName}-${activeIndex}`;
-      const { data: comments } = await supabase
+      
+      // Try without join first to see if basic query works
+      const { data: comments, error: commentsError } = await supabase
         .from('photo_comments')
-        .select(`
-          id,
-          comment_text,
-          created_at,
-          user_id,
-          profiles!inner(display_name)
-        `)
+        .select('*')
         .eq('content_type', 'contest')
         .eq('content_id', contentId)
         .order('created_at', { ascending: false });
 
+      console.log('Comments query result:', { comments, commentsError, contentId });
+
       if (comments) {
-        const formattedComments: Comment[] = comments.map(comment => ({
-          id: parseInt(comment.id.slice(-8), 16), // Use last 8 chars of UUID as number
-          author: (comment.profiles as any)?.display_name || 'User',
-          text: comment.comment_text,
-          timestamp: new Date(comment.created_at).toLocaleString()
-        }));
+        // Get user profiles separately
+        const userIds = [...new Set(comments.map(c => c.user_id))];
+        const { data: profiles } = await supabase
+          .from('profiles')
+          .select('id, display_name')
+          .in('id', userIds);
+
+        const formattedComments: Comment[] = comments.map(comment => {
+          const profile = profiles?.find(p => p.id === comment.user_id);
+          return {
+            id: parseInt(comment.id.slice(-8), 16),
+            author: profile?.display_name || 'User',
+            text: comment.comment_text,
+            timestamp: new Date(comment.created_at).toLocaleString()
+          };
+        });
         
         setPhotoComments(prev => ({
           ...prev,
@@ -223,6 +231,42 @@ export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantNa
         
         // Call the callback to mark as commented in parent component
         onCommentSubmit?.();
+        
+        // Reload comments to get fresh data from database
+        setTimeout(() => {
+          const loadCommentsAgain = async () => {
+            const { data: freshComments } = await supabase
+              .from('photo_comments')
+              .select('*')
+              .eq('content_type', 'contest')
+              .eq('content_id', contentId)
+              .order('created_at', { ascending: false });
+            
+            if (freshComments) {
+              const userIds = [...new Set(freshComments.map(c => c.user_id))];
+              const { data: profiles } = await supabase
+                .from('profiles')
+                .select('id, display_name')
+                .in('id', userIds);
+
+              const formattedComments: Comment[] = freshComments.map(comment => {
+                const profile = profiles?.find(p => p.id === comment.user_id);
+                return {
+                  id: parseInt(comment.id.slice(-8), 16),
+                  author: profile?.display_name || 'User',
+                  text: comment.comment_text,
+                  timestamp: new Date(comment.created_at).toLocaleString()
+                };
+              });
+              
+              setPhotoComments(prev => ({
+                ...prev,
+                [activeIndex]: formattedComments
+              }));
+            }
+          };
+          loadCommentsAgain();
+        }, 500);
         
         toast({
           title: "Comment added",
