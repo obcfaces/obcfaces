@@ -173,7 +173,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
   const countries = [
     // Active countries
     { value: "PH", label: "Philippines" },
-    { value: "separator", label: "─────────────────────", disabled: true },
+    { value: "separator", label: "", disabled: true, divider: true },
     // All other countries
     { value: "AF", label: "Afghanistan" },
     { value: "AL", label: "Albania" },
