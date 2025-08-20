@@ -41,9 +41,9 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
 
   const loadContestParticipants = async () => {
     const { data, error } = await supabase
-      .from('profiles')
-      .select('id, display_name, city, country, age, height_cm, weight_kg, photo_1_url, photo_2_url')
-      .eq('is_contest_participant', true)
+      .from('contest_applications')
+      .select('application_data, user_id, status')
+      .eq('status', 'approved')
       .limit(10);
 
     if (data && !error) {
@@ -60,23 +60,27 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
     if (title === "THIS WEEK") {
       // If we have real contestants from database, use them
       if (realContestants.length > 0) {
-        return realContestants.map((contestant, index) => ({
-          rank: index + 1,
-          name: contestant.display_name || 'Unknown',
-          profileId: contestant.id,
-          country: contestant.country || 'Unknown',
-          city: contestant.city || 'Unknown',
-          age: contestant.age || 0,
-          weight: contestant.weight_kg || 0,
-          height: contestant.height_cm || 0,
-          rating: ratings[index + 1] || 4.0,
-          faceImage: contestant.photo_1_url || contestant1Face,
-          fullBodyImage: contestant.photo_2_url || contestant1Full,
-          additionalPhotos: [contestant2Face, contestant3Face],
-          isVoted: showWinner ? true : !!votes[index + 1],
-          isWinner: showWinner && index === 0,
-          prize: showWinner && index === 0 ? "+ 5000 руб" : undefined
-        }));
+        return realContestants.map((contestant, index) => {
+          const appData = contestant.application_data;
+          return {
+            rank: index + 1,
+            name: `${appData.first_name} ${appData.last_name}`,
+            profileId: contestant.user_id,
+            country: appData.country === 'PH' ? 'Philippines' : appData.country,
+            city: appData.city || 'Unknown',
+            age: new Date().getFullYear() - appData.birth_year,
+            weight: appData.weight_kg || 0,
+            height: appData.height_cm || 0,
+            rating: ratings[index + 1] || 4.0,
+            faceImage: appData.photo1_url || contestant1Face,
+            fullBodyImage: appData.photo2_url || contestant1Full,
+            additionalPhotos: [],
+            isVoted: showWinner ? true : !!votes[index + 1],
+            isWinner: showWinner && index === 0,
+            prize: showWinner && index === 0 ? "+ 5000 PHP" : undefined,
+            isRealContestant: true // Mark as real contestant to disable fake likes/comments
+          };
+        });
       }
       
       // Fallback to test contestants if no real ones
