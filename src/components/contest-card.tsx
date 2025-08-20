@@ -120,36 +120,49 @@ export function ContestantCard({
 
   // Login modal removed auto-close
 
-  // Load user's likes and ratings on component mount
+  // Load user's likes, counts and ratings on component mount
   useEffect(() => {
-    if (!user) return;
-    
     const loadUserData = async () => {
-      // Load likes for both photos
-      const { data: likes } = await supabase
+      // Load total likes count for both photos
+      const { data: totalLikes } = await supabase
         .from("likes")
         .select("content_id")
-        .eq("user_id", user.id)
         .eq("content_type", "contest")
         .in("content_id", [`contestant-${name}-0`, `contestant-${name}-1`]);
       
-      if (likes) {
-        const likedState = [
-          likes.some(like => like.content_id === `contestant-${name}-0`),
-          likes.some(like => like.content_id === `contestant-${name}-1`)
-        ];
-        setIsLiked(likedState);
+      if (totalLikes) {
+        const photo0Likes = totalLikes.filter(like => like.content_id === `contestant-${name}-0`).length;
+        const photo1Likes = totalLikes.filter(like => like.content_id === `contestant-${name}-1`).length;
+        setLikesCount([photo0Likes, photo1Likes]);
       }
       
-      // Check if user has commented on this contestant (from localStorage)
-      const hasUserCommented = localStorage.getItem(`commented-${name}-${user.id}`);
-      setHasCommented(!!hasUserCommented);
-      
-      // Load user's rating (if any)
-      const savedRating = localStorage.getItem(`rating-${name}-${user.id}`);
-      if (savedRating) {
-        setUserRating(parseFloat(savedRating));
-        setIsVoted(true); // Mark as voted if rating exists
+      if (user) {
+        // Load user's likes for both photos
+        const { data: userLikes } = await supabase
+          .from("likes")
+          .select("content_id")
+          .eq("user_id", user.id)
+          .eq("content_type", "contest")
+          .in("content_id", [`contestant-${name}-0`, `contestant-${name}-1`]);
+        
+        if (userLikes) {
+          const likedState = [
+            userLikes.some(like => like.content_id === `contestant-${name}-0`),
+            userLikes.some(like => like.content_id === `contestant-${name}-1`)
+          ];
+          setIsLiked(likedState);
+        }
+        
+        // Check if user has commented on this contestant (from localStorage)
+        const hasUserCommented = localStorage.getItem(`commented-${name}-${user.id}`);
+        setHasCommented(!!hasUserCommented);
+        
+        // Load user's rating (if any)
+        const savedRating = localStorage.getItem(`rating-${name}-${user.id}`);
+        if (savedRating) {
+          setUserRating(parseFloat(savedRating));
+          setIsVoted(true); // Mark as voted if rating exists
+        }
       }
     };
     
@@ -664,7 +677,7 @@ export function ContestantCard({
                    onClick={handleComment}
                    aria-label="Comments"
                  >
-                   <MessageCircle className="w-3.5 h-3.5" />
+                   <MessageCircle className={cn("w-3.5 h-3.5", hasCommented && "fill-current")} />
                    <span className="hidden xl:inline">Comment</span>
                    <span>{commentsCount[0] + commentsCount[1]}</span>
                  </button>
