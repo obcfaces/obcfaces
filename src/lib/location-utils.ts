@@ -104,6 +104,40 @@ const PHILIPPINES_CITIES = {
     'La Trinidad', 'Baguio', 'Atok', 'Bakun', 'Bokod', 'Buguias', 'Itogon',
     'Kabayan', 'Kapangan', 'Kibungan', 'Mankayan', 'Sablan', 'Tuba', 'Tublay'
   ],
+  'PAN': [ // Pangasinan
+    'Lingayen', 'Alaminos', 'Dagupan', 'San Carlos', 'Urdaneta', 'Agno',
+    'Aguilar', 'Alcala', 'Anda', 'Asingan', 'Balungao', 'Bani',
+    'Basista', 'Bautista', 'Bayambang', 'Binalonan', 'Binmaley',
+    'Bolinao', 'Bugallon', 'Burgos', 'Calasiao', 'Dasol', 'Infanta',
+    'Labrador', 'Laoac', 'Malasiqui', 'Manaoag', 'Mangaldan',
+    'Mangatarem', 'Mapandan', 'Natividad', 'Pozorrubio', 'Rosales',
+    'San Fabian', 'San Jacinto', 'San Manuel', 'San Nicolas',
+    'San Quintin', 'Santa Barbara', 'Santa Maria', 'Santo Tomas',
+    'Sison', 'Sual', 'Tayug', 'Umingan', 'Urbiztondo', 'Villasis'
+  ],
+  'ILS': [ // Ilocos Sur
+    'Vigan', 'Candon', 'Alilem', 'Banayoyo', 'Bantay', 'Burgos',
+    'Cabugao', 'Caoayan', 'Cervantes', 'Galimuyod', 'Gregorio del Pilar',
+    'Lidlidda', 'Magsingal', 'Nagbukel', 'Narvacan', 'Quirino',
+    'Salcedo', 'San Emilio', 'San Esteban', 'San Ildefonso',
+    'San Juan', 'San Vicente', 'Santa', 'Santa Catalina',
+    'Santa Cruz', 'Santa Lucia', 'Santa Maria', 'Santiago',
+    'Santo Domingo', 'Sigay', 'Sinait', 'Sugpon', 'Suyo', 'Tagudin'
+  ],
+  'ILN': [ // Ilocos Norte
+    'Laoag', 'Batac', 'Adams', 'Bacarra', 'Badoc', 'Bangui', 'Banna',
+    'Burgos', 'Carasi', 'Currimao', 'Dingras', 'Dumalneg', 'Marcos',
+    'Nueva Era', 'Pagudpud', 'Paoay', 'Pasuquin', 'Piddig', 'Pinili',
+    'San Nicolas', 'Sarrat', 'Solsona', 'Vintar'
+  ],
+  'LUN': [ // La Union
+    'San Fernando', 'Agoo', 'Aringay', 'Bacnotan', 'Bagulin', 'Balaoan',
+    'Bangar', 'Bauang', 'Burgos', 'Caba', 'Luna', 'Naguilian',
+    'Pugo', 'Rosario', 'San Gabriel', 'San Juan', 'Santo Tomas',
+    'Santol', 'Sudipen', 'Tubao'
+  ],
+
+  // Bicol Region
   'ALB': [ // Albay
     'Legazpi', 'Ligao', 'Tabaco', 'Tiwi', 'Malinao', 'Bacacay', 'Camalig',
     'Daraga', 'Guinobatan', 'Jovellar', 'Libon', 'Malilipot', 'Manito',
@@ -135,6 +169,32 @@ const PHILIPPINES_CITIES = {
     'Sorsogon City', 'Bacon', 'Barcelona', 'Bulan', 'Bulusan', 'Casiguran',
     'Castilla', 'Donsol', 'Gubat', 'Irosin', 'Juban', 'Magallanes',
     'Matnog', 'Pilar', 'Prieto Diaz', 'Santa Magdalena'
+  ],
+
+  // MIMAROPA Region
+  'MAR': [ // Marinduque
+    'Boac', 'Buenavista', 'Gasan', 'Mogpog', 'Santa Cruz', 'Torrijos'
+  ],
+  'OCC': [ // Occidental Mindoro
+    'Mamburao', 'Abra de Ilog', 'Calintaan', 'Looc', 'Lubang', 'Magsaysay',
+    'Paluan', 'Rizal', 'Sablayan', 'San Jose', 'Santa Cruz'
+  ],
+  'ORI': [ // Oriental Mindoro
+    'Calapan', 'Baco', 'Bansud', 'Bongabong', 'Bulalacao', 'Gloria',
+    'Mansalay', 'Naujan', 'Pinamalayan', 'Pola', 'Puerto Galera',
+    'Roxas', 'San Teodoro', 'Socorro', 'Victoria'
+  ],
+  'PAL': [ // Palawan
+    'Puerto Princesa', 'Aborlan', 'Agutaya', 'Araceli', 'Balabac', 'Bataraza',
+    'Brooke\'s Point', 'Busuanga', 'Cagayancillo', 'Coron', 'Culion',
+    'Cuyo', 'Dumaran', 'El Nido', 'Linapacan', 'Magsaysay', 'Narra',
+    'Quezon', 'Rizal', 'Roxas', 'San Vicente', 'Sofronio Española',
+    'Taytay', 'Kalayaan'
+  ],
+  'ROM': [ // Romblon
+    'Romblon', 'Alcantara', 'Banton', 'Cajidiocan', 'Calatrava', 'Concepcion',
+    'Corcuera', 'Ferrol', 'Looc', 'Magdiwang', 'Odiongan', 'San Agustin',
+    'San Andres', 'San Fernando', 'San Jose', 'Santa Fe', 'Santa Maria'
   ],
 
   // Visayas Regions
@@ -232,122 +292,14 @@ const PHILIPPINES_CITIES = {
     'Naval', 'Almeria', 'Biliran', 'Cabucgayan', 'Caibiran', 'Culaba',
     'Kawayan', 'Maripipi'
   ],
+  'DIN': [ // Dinagat Islands
+    'San Jose', 'Basilisa', 'Cagdianao', 'Libjo', 'Loreto', 'Tubajon'
+  ],
 
   // Mindanao Regions
   'DAV': [ // Davao del Sur
     'Davao City', 'Digos', 'Bansalan', 'Hagonoy', 'Kiblawan', 'Magsaysay',
     'Malalag', 'Matanao', 'Padada', 'Santa Cruz', 'Sulop'
-  ],
-  'AGN': [ // Agusan del Norte
-    'Butuan', 'Buenavista', 'Carmen', 'Jabonga', 'Kitcharao', 'Las Nieves',
-    'Magallanes', 'Nasipit', 'Remedios T. Romualdez', 'Santiago', 'Tubay', 'Cabadbaran'
-  ],
-  'AGS': [ // Agusan del Sur
-    'Bayugan', 'Bunawan', 'Esperanza', 'La Paz', 'Loreto', 'Prosperidad',
-    'Rosario', 'San Francisco', 'San Luis', 'Santa Josefa', 'Sibagat',
-    'Talacogon', 'Trento', 'Veruela'
-  ],
-  'SUK': [ // Sultan Kudarat
-    'Isulan', 'Bagumbayan', 'Columbio', 'Esperanza', 'Kalamansig', 'Lebak',
-    'Lutayan', 'Lambayong', 'Palimbang', 'President Quirino', 'Sen. Ninoy Aquino', 'Tacurong'
-  ],
-  'MSA': [ // Maguindanao
-    'Cotabato City', 'Ampatuan', 'Barira', 'Buldon', 'Datu Abdullah Sangki',
-    'Datu Anggal Midtimbang', 'Datu Blah T. Sinsuat', 'Datu Hoffer Ampatuan',
-    'Datu Montawal', 'Datu Odin Sinsuat', 'Datu Paglas', 'Datu Piang',
-    'Datu Salibo', 'Datu Saudi-Ampatuan', 'Datu Unsay', 'General Salipada K. Pendatun',
-    'Guindulungan', 'Kabuntalan', 'Mamasapano', 'Mangudadatu', 'Matanog',
-    'Northern Kabuntalan', 'Pagalungan', 'Paglat', 'Pandag', 'Parang',
-    'Rajah Buayan', 'Shariff Aguak', 'Shariff Saydona Mustapha', 'South Upi',
-    'Sultan Mastura', 'Sultan sa Barongis', 'Sultan Sumagka', 'Talayan',
-    'Talitay', 'Upi'
-  ],
-  'BAS': [ // Basilan
-    'Isabela City', 'Lamitan', 'Akbar', 'Al-Barka', 'Hadji Mohammad Ajul',
-    'Hadji Muhtamad', 'Lantawan', 'Maluso', 'Sumisip', 'Tabuan-Lasa',
-    'Tipo-Tipo', 'Tuburan', 'Ungkaya Pukan'
-  ],
-  'LAN': [ // Lanao del Sur
-    'Marawi', 'Balabagan', 'Balindong', 'Bayang', 'Binidayan', 'Buadiposo-Buntong',
-    'Bubong', 'Butig', 'Ganassi', 'Kapai', 'Lumba-Bayabao', 'Lumbaca-Unayan',
-    'Lumbatan', 'Lumbayanague', 'Madalum', 'Madamba', 'Maguing', 'Malabang',
-    'Marantao', 'Marogong', 'Masiu', 'Mulondo', 'Pagayawan', 'Piagapo',
-    'Picong', 'Poona Bayabao', 'Pualas', 'Saguiaran', 'Sultan Dumalondong',
-    'Tagoloan II', 'Tamparan', 'Taraka', 'Tubaran', 'Tugaya', 'Wao'
-  ],
-  'SLU': [ // Sulu
-    'Jolo', 'Banguingui', 'Hadji Panglima Tahil', 'Indanan', 'Kalingalan Caluang',
-    'Lugus', 'Luuk', 'Maimbung', 'Old Panamao', 'Omar', 'Pandami', 'Panglima Estino',
-    'Pangutaran', 'Parang', 'Pata', 'Patikul', 'Siasi', 'Talipao', 'Tapul'
-  ],
-  'TAW': [ // Tawi-Tawi
-    'Bongao', 'Languyan', 'Mapun', 'Panglima Sugala', 'Sapa-Sapa', 'Sibutu',
-    'Simunul', 'Sitangkai', 'South Ubian', 'Tandubas', 'Turtle Islands'
-  ],
-  'ARMM': [ // Autonomous Region in Muslim Mindanao (Combined)
-    // Major cities from all ARMM provinces
-    'Cotabato City', 'Marawi', 'Jolo', 'Bongao', 'Isabela City', 'Lamitan',
-    'Digos', 'General Santos', 'Koronadal', 'Tacurong', 'Kidapawan',
-    // Basilan
-    'Akbar', 'Al-Barka', 'Hadji Mohammad Ajul', 'Maluso', 'Sumisip', 'Tipo-Tipo',
-    // Lanao del Sur  
-    'Balabagan', 'Malabang', 'Wao', 'Tubaran', 'Picong', 'Ganassi',
-    // Maguindanao
-    'Ampatuan', 'Parang', 'Sultan Kudarat', 'Shariff Aguak', 'Datu Odin Sinsuat',
-    // Sulu
-    'Indanan', 'Siasi', 'Parang', 'Patikul', 'Luuk', 'Pangutaran',
-    // Tawi-Tawi
-    'Languyan', 'Simunul', 'Sitangkai', 'Turtle Islands', 'South Ubian'
-  ],
-
-  // Additional missing Philippines provinces
-  'ZAN': [ // Zamboanga del Norte
-    'Dipolog', 'Dapitan', 'Roxas', 'Sindangan', 'Sergio Osmeña Sr.', 'Katipunan',
-    'Manukan', 'Jose Dalman', 'Tampilisan', 'Godod', 'Bacungan', 'Baliguian',
-    'Gutalac', 'Kalawit', 'La Libertad', 'Labason', 'Leon B. Postigo',
-    'Liloy', 'Mutia', 'Piñan', 'Polanco', 'Pres. Manuel A. Roxas',
-    'Rizal', 'Salug', 'Siayan', 'Sibuco', 'Sibutad', 'Siocon'
-  ],
-  'ZAS': [ // Zamboanga del Sur
-    'Pagadian', 'Zamboanga City', 'Aurora', 'Bayog', 'Dimataling', 'Dinas',
-    'Dumalinao', 'Dumingag', 'Guipos', 'Josefina', 'Kumalarang', 'Labangan',
-    'Lakewood', 'Lapuyan', 'Mahayag', 'Margosatubig', 'Midsalip', 'Molave',
-    'Pitogo', 'Ramon Magsaysay', 'San Miguel', 'San Pablo', 'Sominot',
-    'Tabina', 'Tambulig', 'Tigbao', 'Tukuran', 'Vincenzo A. Sagun'
-  ],
-  'ZSI': [ // Zamboanga Sibugay
-    'Ipil', 'Alicia', 'Buug', 'Diplahan', 'Imelda', 'Kabasalan', 'Mabuhay',
-    'Malangas', 'Naga', 'Olutanga', 'Payao', 'Roseller Lim', 'Siay',
-    'Talusan', 'Titay', 'Tungawan'
-  ],
-  'LNN': [ // Lanao del Norte
-    'Iligan', 'Tubod', 'Bacolod', 'Baloi', 'Baroy', 'Kapatagan', 'Kauswagan',
-    'Kolambugan', 'Lala', 'Linamon', 'Magsaysay', 'Maigo', 'Matungao',
-    'Munai', 'Nunungan', 'Pantao Ragat', 'Pantar', 'Poona Piagapo',
-    'President Manuel A. Roxas', 'Salvador', 'Sapad', 'Sultan Naga Dimaporo',
-    'Tagoloan', 'Tangcal'
-  ],
-  'MSC': [ // Misamis Occidental
-    'Oroquieta', 'Ozamiz', 'Tangub', 'Aloran', 'Baliangao', 'Bonifacio',
-    'Calamba', 'Clarin', 'Concepcion', 'Don Victoriano Chiongbian',
-    'Jimenez', 'Lopez Jaena', 'Panaon', 'Plaridel', 'Sapang Dalaga',
-    'Sinacaban', 'Tudela'
-  ],
-  'MSR': [ // Misamis Oriental
-    'Cagayan de Oro', 'Gingoog', 'Alubijid', 'Balingasag', 'Balingoan',
-    'Binuangan', 'Claveria', 'El Salvador', 'Gitagum', 'Initao', 'Jasaan',
-    'Kinoguitan', 'Lagonglong', 'Laguindingan', 'Libertad', 'Lugait',
-    'Magsaysay', 'Manticao', 'Medina', 'Naawan', 'Opol', 'Salay',
-    'Sugbongcogon', 'Tagoloan', 'Talisayan', 'Villanueva'
-  ],
-  'BUK': [ // Bukidnon
-    'Malaybalay', 'Valencia', 'Cabanglasan', 'Damulog', 'Dangcagan', 'Don Carlos',
-    'Impasug-ong', 'Kadingilan', 'Kalilangan', 'Kibawe', 'Kitaotao', 'Lantapan',
-    'Libona', 'Malitbog', 'Manolo Fortich', 'Maramag', 'Pangantucan', 'Quezon',
-    'San Fernando', 'Sumilao', 'Talakag'
-  ],
-  'CAM': [ // Camiguin
-    'Mambajao', 'Catarman', 'Guinsiliban', 'Mahinog', 'Sagay'
   ],
   'NDV': [ // Davao del Norte
     'Tagum', 'Panabo', 'Samal', 'Asuncion', 'Braulio E. Dujali', 'Carmen',
@@ -376,6 +328,111 @@ const PHILIPPINES_CITIES = {
     'Carmen', 'Kabacan', 'Libungan', 'M\'lang', 'Magpet', 'Makilala',
     'Matalam', 'Midsayap', 'Pigcawayan', 'Pikit', 'President Roxas',
     'Tulunan'
+  ],
+  'SUK': [ // Sultan Kudarat
+    'Isulan', 'Bagumbayan', 'Columbio', 'Esperanza', 'Kalamansig', 'Lebak',
+    'Lutayan', 'Lambayong', 'Palimbang', 'President Quirino', 'Sen. Ninoy Aquino', 'Tacurong'
+  ],
+  'AGN': [ // Agusan del Norte
+    'Butuan', 'Buenavista', 'Carmen', 'Jabonga', 'Kitcharao', 'Las Nieves',
+    'Magallanes', 'Nasipit', 'Remedios T. Romualdez', 'Santiago', 'Tubay', 'Cabadbaran'
+  ],
+  'AGS': [ // Agusan del Sur
+    'Bayugan', 'Bunawan', 'Esperanza', 'La Paz', 'Loreto', 'Prosperidad',
+    'Rosario', 'San Francisco', 'San Luis', 'Santa Josefa', 'Sibagat',
+    'Talacogon', 'Trento', 'Veruela'
+  ],
+  'ZAN': [ // Zamboanga del Norte
+    'Dipolog', 'Dapitan', 'Roxas', 'Sindangan', 'Sergio Osmeña Sr.', 'Katipunan',
+    'Manukan', 'Jose Dalman', 'Tampilisan', 'Godod', 'Bacungan', 'Baliguian',
+    'Gutalac', 'Kalawit', 'La Libertad', 'Labason', 'Leon B. Postigo',
+    'Liloy', 'Mutia', 'Piñan', 'Polanco', 'Pres. Manuel A. Roxas',
+    'Rizal', 'Salug', 'Siayan', 'Sibuco', 'Sibutad', 'Siocon'
+  ],
+  'ZAS': [ // Zamboanga del Sur
+    'Pagadian', 'Zamboanga City', 'Aurora', 'Bayog', 'Dimataling', 'Dinas',
+    'Dumalinao', 'Dumingag', 'Guipos', 'Josefina', 'Kumalarang', 'Labangan',
+    'Lakewood', 'Lapuyan', 'Mahayag', 'Margosatubig', 'Midsalip', 'Molave',
+    'Pitogo', 'Ramon Magsaysay', 'San Miguel', 'San Pablo', 'Sominot',
+    'Tabina', 'Tambulig', 'Tigbao', 'Tukuran', 'Vincenzo A. Sagun'
+  ],
+  'ZSI': [ // Zamboanga Sibugay
+    'Ipil', 'Alicia', 'Buug', 'Diplahan', 'Imelda', 'Kabasalan', 'Mabuhay',
+    'Malangas', 'Naga', 'Olutanga', 'Payao', 'Roseller Lim', 'Siay',
+    'Talusan', 'Titay', 'Tungawan'
+  ],
+  'LNN': [ // Lanao del Norte
+    'Iligan', 'Tubod', 'Bacolod', 'Baloi', 'Baroy', 'Kapatagan', 'Kauswagan',
+    'Kolambugan', 'Lala', 'Linamon', 'Magsaysay', 'Maigo', 'Matungao',
+    'Munai', 'Nunungan', 'Pantao Ragat', 'Pantar', 'Poona Piagapo',
+    'President Manuel A. Roxas', 'Salvador', 'Sapad', 'Sultan Naga Dimaporo',
+    'Tagoloan', 'Tangcal'
+  ],
+  'LAN': [ // Lanao del Sur
+    'Marawi', 'Balabagan', 'Balindong', 'Bayang', 'Binidayan', 'Buadiposo-Buntong',
+    'Bubong', 'Butig', 'Ganassi', 'Kapai', 'Lumba-Bayabao', 'Lumbaca-Unayan',
+    'Lumbatan', 'Lumbayanague', 'Madalum', 'Madamba', 'Maguing', 'Malabang',
+    'Marantao', 'Marogong', 'Masiu', 'Mulondo', 'Pagayawan', 'Piagapo',
+    'Picong', 'Poona Bayabao', 'Pualas', 'Saguiaran', 'Sultan Dumalondong',
+    'Tagoloan II', 'Tamparan', 'Taraka', 'Tubaran', 'Tugaya', 'Wao'
+  ],
+  'MSC': [ // Misamis Occidental
+    'Oroquieta', 'Ozamiz', 'Tangub', 'Aloran', 'Baliangao', 'Bonifacio',
+    'Calamba', 'Clarin', 'Concepcion', 'Don Victoriano Chiongbian',
+    'Jimenez', 'Lopez Jaena', 'Panaon', 'Plaridel', 'Sapang Dalaga',
+    'Sinacaban', 'Tudela'
+  ],
+  'MSR': [ // Misamis Oriental
+    'Cagayan de Oro', 'Gingoog', 'Alubijid', 'Balingasag', 'Balingoan',
+    'Binuangan', 'Claveria', 'El Salvador', 'Gitagum', 'Initao', 'Jasaan',
+    'Kinoguitan', 'Lagonglong', 'Laguindingan', 'Libertad', 'Lugait',
+    'Magsaysay', 'Manticao', 'Medina', 'Naawan', 'Opol', 'Salay',
+    'Sugbongcogon', 'Tagoloan', 'Talisayan', 'Villanueva'
+  ],
+  'BUK': [ // Bukidnon
+    'Malaybalay', 'Valencia', 'Cabanglasan', 'Damulog', 'Dangcagan', 'Don Carlos',
+    'Impasug-ong', 'Kadingilan', 'Kalilangan', 'Kibawe', 'Kitaotao', 'Lantapan',
+    'Libona', 'Malitbog', 'Manolo Fortich', 'Maramag', 'Pangantucan', 'Quezon',
+    'San Fernando', 'Sumilao', 'Talakag'
+  ],
+  'CAM': [ // Camiguin
+    'Mambajao', 'Catarman', 'Guinsiliban', 'Mahinog', 'Sagay'
+  ],
+
+  // ARMM
+  'MSA': [ // Maguindanao
+    'Cotabato City', 'Ampatuan', 'Barira', 'Buldon', 'Datu Abdullah Sangki',
+    'Datu Anggal Midtimbang', 'Datu Blah T. Sinsuat', 'Datu Hoffer Ampatuan',
+    'Datu Montawal', 'Datu Odin Sinsuat', 'Datu Paglas', 'Datu Piang',
+    'Datu Salibo', 'Datu Saudi-Ampatuan', 'Datu Unsay', 'General Salipada K. Pendatun',
+    'Guindulungan', 'Kabuntalan', 'Mamasapano', 'Mangudadatu', 'Matanog',
+    'Northern Kabuntalan', 'Pagalungan', 'Paglat', 'Pandag', 'Parang',
+    'Rajah Buayan', 'Shariff Aguak', 'Shariff Saydona Mustapha', 'South Upi',
+    'Sultan Mastura', 'Sultan sa Barongis', 'Sultan Sumagka', 'Talayan',
+    'Talitay', 'Upi'
+  ],
+  'BAS': [ // Basilan
+    'Isabela City', 'Lamitan', 'Akbar', 'Al-Barka', 'Hadji Mohammad Ajul',
+    'Hadji Muhtamad', 'Lantawan', 'Maluso', 'Sumisip', 'Tabuan-Lasa',
+    'Tipo-Tipo', 'Tuburan', 'Ungkaya Pukan'
+  ],
+  'SLU': [ // Sulu
+    'Jolo', 'Banguingui', 'Hadji Panglima Tahil', 'Indanan', 'Kalingalan Caluang',
+    'Lugus', 'Luuk', 'Maimbung', 'Old Panamao', 'Omar', 'Pandami', 'Panglima Estino',
+    'Pangutaran', 'Parang', 'Pata', 'Patikul', 'Siasi', 'Talipao', 'Tapul'
+  ],
+  'TAW': [ // Tawi-Tawi
+    'Bongao', 'Languyan', 'Mapun', 'Panglima Sugala', 'Sapa-Sapa', 'Sibutu',
+    'Simunul', 'Sitangkai', 'South Ubian', 'Tandubas', 'Turtle Islands'
+  ],
+  'ARMM': [ // Autonomous Region in Muslim Mindanao (Combined)
+    'Cotabato City', 'Marawi', 'Jolo', 'Bongao', 'Isabela City', 'Lamitan',
+    'Digos', 'General Santos', 'Koronadal', 'Tacurong', 'Kidapawan',
+    'Akbar', 'Al-Barka', 'Hadji Mohammad Ajul', 'Maluso', 'Sumisip', 'Tipo-Tipo',
+    'Balabagan', 'Malabang', 'Wao', 'Tubaran', 'Picong', 'Ganassi',
+    'Ampatuan', 'Parang', 'Sultan Kudarat', 'Shariff Aguak', 'Datu Odin Sinsuat',
+    'Indanan', 'Siasi', 'Patikul', 'Luuk', 'Pangutaran',
+    'Languyan', 'Simunul', 'Sitangkai', 'Turtle Islands', 'South Ubian'
   ]
 } as Record<string, string[]>;
 
@@ -391,7 +448,12 @@ const OTHER_COUNTRIES_CITIES: Record<string, Record<string, string[]>> = {
     'OH': ['Columbus', 'Cleveland', 'Cincinnati', 'Toledo', 'Akron', 'Dayton', 'Parma', 'Canton'],
     'GA': ['Atlanta', 'Augusta', 'Columbus', 'Savannah', 'Athens', 'Sandy Springs', 'Roswell', 'Macon'],
     'NC': ['Charlotte', 'Raleigh', 'Greensboro', 'Durham', 'Winston-Salem', 'Fayetteville', 'Cary', 'Wilmington'],
-    'MI': ['Detroit', 'Grand Rapids', 'Warren', 'Sterling Heights', 'Lansing', 'Ann Arbor', 'Flint', 'Dearborn']
+    'MI': ['Detroit', 'Grand Rapids', 'Warren', 'Sterling Heights', 'Lansing', 'Ann Arbor', 'Flint', 'Dearborn'],
+    'WA': ['Seattle', 'Spokane', 'Tacoma', 'Vancouver', 'Bellevue', 'Kent', 'Everett', 'Renton'],
+    'AZ': ['Phoenix', 'Tucson', 'Mesa', 'Chandler', 'Scottsdale', 'Glendale', 'Gilbert', 'Tempe'],
+    'MA': ['Boston', 'Worcester', 'Springfield', 'Lowell', 'Cambridge', 'New Bedford', 'Brockton', 'Quincy'],
+    'TN': ['Nashville', 'Memphis', 'Knoxville', 'Chattanooga', 'Clarksville', 'Murfreesboro', 'Jackson', 'Johnson City'],
+    'IN': ['Indianapolis', 'Fort Wayne', 'Evansville', 'South Bend', 'Carmel', 'Fishers', 'Bloomington', 'Hammond']
   },
   'CA': {
     'ON': ['Toronto', 'Ottawa', 'Hamilton', 'London', 'Kitchener', 'Windsor', 'Mississauga', 'Brampton'],
@@ -399,7 +461,11 @@ const OTHER_COUNTRIES_CITIES: Record<string, Record<string, string[]>> = {
     'BC': ['Vancouver', 'Surrey', 'Burnaby', 'Richmond', 'Abbotsford', 'Coquitlam', 'Kelowna', 'Saanich'],
     'AB': ['Calgary', 'Edmonton', 'Red Deer', 'Lethbridge', 'St. Albert', 'Medicine Hat', 'Grande Prairie', 'Airdrie'],
     'MB': ['Winnipeg', 'Brandon', 'Steinbach', 'Thompson', 'Portage la Prairie', 'Winkler', 'Selkirk', 'Morden'],
-    'SK': ['Saskatoon', 'Regina', 'Prince Albert', 'Moose Jaw', 'Swift Current', 'Yorkton', 'North Battleford', 'Estevan']
+    'SK': ['Saskatoon', 'Regina', 'Prince Albert', 'Moose Jaw', 'Swift Current', 'Yorkton', 'North Battleford', 'Estevan'],
+    'NB': ['Saint John', 'Moncton', 'Fredericton', 'Dieppe', 'Riverview', 'Edmundston', 'Miramichi', 'Bathurst'],
+    'NS': ['Halifax', 'Cape Breton', 'Kings', 'Truro', 'New Glasgow', 'Glace Bay', 'Sydney', 'Kentville'],
+    'PE': ['Charlottetown', 'Summerside', 'Stratford', 'Cornwall', 'Montague', 'Kensington', 'Souris', 'Alberton'],
+    'NL': ['St. John\'s', 'Mount Pearl', 'Corner Brook', 'Conception Bay South', 'Paradise', 'Grand Falls-Windsor']
   },
   'CN': {
     'BJ': ['Beijing', 'Chaoyang', 'Haidian', 'Fengtai', 'Shijingshan', 'Dongcheng', 'Xicheng', 'Fangshan'],
