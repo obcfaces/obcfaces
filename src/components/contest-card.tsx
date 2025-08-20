@@ -135,6 +135,19 @@ export function ContestantCard({
         const photo1Likes = totalLikes.filter(like => like.content_id === `contestant-${name}-1`).length;
         setLikesCount([photo0Likes, photo1Likes]);
       }
+
+      // Load total comments count for both photos
+      const { data: totalComments } = await supabase
+        .from("photo_comments")
+        .select("content_id")
+        .eq("content_type", "contest")
+        .in("content_id", [`contestant-${name}-0`, `contestant-${name}-1`]);
+      
+      if (totalComments) {
+        const photo0Comments = totalComments.filter(comment => comment.content_id === `contestant-${name}-0`).length;
+        const photo1Comments = totalComments.filter(comment => comment.content_id === `contestant-${name}-1`).length;
+        setCommentsCount([photo0Comments, photo1Comments]);
+      }
       
       if (user) {
         // Load user's likes for both photos
@@ -153,9 +166,16 @@ export function ContestantCard({
           setIsLiked(likedState);
         }
         
-        // Check if user has commented on this contestant (from localStorage)
-        const hasUserCommented = localStorage.getItem(`commented-${name}-${user.id}`);
-        setHasCommented(!!hasUserCommented);
+        // Check if user has commented on this contestant
+        const { data: userComments } = await supabase
+          .from("photo_comments")
+          .select("id")
+          .eq("user_id", user.id)
+          .eq("content_type", "contest")
+          .in("content_id", [`contestant-${name}-0`, `contestant-${name}-1`])
+          .limit(1);
+        
+        setHasCommented(!!userComments && userComments.length > 0);
         
         // Load user's rating (if any)
         const savedRating = localStorage.getItem(`rating-${name}-${user.id}`);

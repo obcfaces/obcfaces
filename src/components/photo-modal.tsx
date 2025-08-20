@@ -33,7 +33,6 @@ export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantNa
   const [activeIndex, setActiveIndex] = useState(currentIndex);
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
-  // Comments are always shown now
   const [commentText, setCommentText] = useState("");
   const [photoComments, setPhotoComments] = useState<Record<number, Comment[]>>({});
   const [photoLikes, setPhotoLikes] = useState<Record<number, { count: number; isLiked: boolean }>>({});
@@ -57,7 +56,66 @@ export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantNa
     return () => subscription.unsubscribe();
   }, []);
 
-  // Login modal removed auto-close
+  // Load comments and likes when modal opens or photo changes
+  useEffect(() => {
+    if (!isOpen) return;
+    
+    const loadPhotoData = async () => {
+      // Load comments for current photo
+      const contentId = `contestant-${contestantName}-${activeIndex}`;
+      const { data: comments } = await supabase
+        .from('photo_comments')
+        .select(`
+          id,
+          comment_text,
+          created_at,
+          user_id,
+          profiles!inner(display_name)
+        `)
+        .eq('content_type', 'contest')
+        .eq('content_id', contentId)
+        .order('created_at', { ascending: false });
+
+      if (comments) {
+        const formattedComments: Comment[] = comments.map(comment => ({
+          id: parseInt(comment.id.slice(-8), 16), // Use last 8 chars of UUID as number
+          author: (comment.profiles as any)?.display_name || 'User',
+          text: comment.comment_text,
+          timestamp: new Date(comment.created_at).toLocaleString()
+        }));
+        
+        setPhotoComments(prev => ({
+          ...prev,
+          [activeIndex]: formattedComments
+        }));
+      }
+
+      // Load likes for current photo
+      const { data: totalLikes } = await supabase
+        .from("likes")
+        .select("user_id")
+        .eq("content_type", "contest")
+        .eq("content_id", contentId);
+      
+      const { data: userLike } = await supabase
+        .from("likes")
+        .select("id")
+        .eq("user_id", user?.id || '')
+        .eq("content_type", "contest")
+        .eq("content_id", contentId)
+        .maybeSingle();
+      
+      setPhotoLikes(prev => ({
+        ...prev,
+        [activeIndex]: {
+          count: totalLikes?.length || 0,
+          isLiked: !!userLike
+        }
+      }));
+    };
+
+    loadPhotoData();
+  }, [isOpen, activeIndex, contestantName, user]);
 
   // Reset activeIndex when currentIndex changes
   useEffect(() => {
@@ -87,37 +145,71 @@ export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantNa
     }));
   };
 
-  const handleCommentSubmit = () => {
+  const handleCommentSubmit = async () => {
     if (!user) {
       setShowLoginModal(true);
       return;
     }
     
     if (commentText.trim()) {
-      const newComment: Comment = {
-        id: Date.now(),
-        author: "You",
-        text: commentText.trim(),
-        timestamp: "just now"
-      };
-      setPhotoComments(prev => ({
-        ...prev,
-        [activeIndex]: [newComment, ...(prev[activeIndex] || [])]
-      }));
-      setCommentText("");
-      // Reset textarea height back to one line after submit
-      if (textareaRef.current) {
-        textareaRef.current.style.height = '44px';
+      const contentId = `contestant-${contestantName}-${activeIndex}`;
+      
+      try {
+        // Save comment to database
+        const { error } = await supabase
+          .from('photo_comments')
+          .insert({
+            user_id: user.id,
+            content_type: 'contest',
+            content_id: contentId,
+            comment_text: commentText.trim()
+          });
+
+        if (error) {
+          console.error('Error saving comment:', error);
+          toast({
+            title: "Error",
+            description: "Failed to save comment",
+            duration: 3000,
+          });
+          return;
+        }
+
+        // Add comment to local state for immediate feedback
+        const newComment: Comment = {
+          id: Date.now(),
+          author: "You",
+          text: commentText.trim(),
+          timestamp: "just now"
+        };
+        setPhotoComments(prev => ({
+          ...prev,
+          [activeIndex]: [newComment, ...(prev[activeIndex] || [])]
+        }));
+        
+        setCommentText("");
+        
+        // Reset textarea height back to one line after submit
+        if (textareaRef.current) {
+          textareaRef.current.style.height = '44px';
+        }
+        
+        // Call the callback to mark as commented in parent component
+        onCommentSubmit?.();
+        
+        toast({
+          title: "Comment added",
+          description: "Your comment was added",
+          duration: 1000,
+        });
+      } catch (error) {
+        console.error('Error saving comment:', error);
+        toast({
+          title: "Error",
+          description: "Failed to save comment",
+          duration: 3000,
+        });
       }
-      
-      // Call the callback to mark as commented in parent component
-      onCommentSubmit?.();
-      
-      toast({
-        title: "Comment added",
-        description: "Your comment was added",
-        duration: 1000,
-      });
     }
   };
 
