@@ -529,6 +529,20 @@ const PHILIPPINES_CITIES = {
   // Apayao
   'APA': ['Calanasan (Bayag)', 'Conner', 'Flora', 'Kabugao', 'Luna', 'Pudtol', 'Santa Marcela'],
   
+  // Calabarzon Region (Region IV-A) - Combined major cities from all 5 provinces
+  'CALABARZON': [
+    // Cavite cities
+    'Bacoor', 'Imus', 'Dasmariñas', 'General Trias', 'Trece Martires', 'Kawit', 'Noveleta', 'Rosario', 'Tanza', 'Naic', 'Silang', 'Carmona', 'Tagaytay', 'Alfonso', 'Amadeo', 'Indang', 'Mendez', 'Maragondon', 'Magallanes', 'General Emilio Aguinaldo', 'Ternate',
+    // Laguna cities
+    'Santa Rosa', 'Biñan', 'San Pedro', 'Cabuyao', 'Calamba', 'Los Baños', 'Bay', 'Calauan', 'Alaminos', 'San Pablo', 'Sta. Cruz', 'Pagsanjan', 'Lumban', 'Kalayaan', 'Cavinti', 'Famy', 'Siniloan', 'Mabitac', 'Santa Maria', 'Majayjay', 'Liliw', 'Nagcarlan', 'Rizal', 'Pila',
+    // Batangas cities  
+    'Batangas City', 'Lipa', 'Tanauan', 'Santo Tomas', 'Calaca', 'Lemery', 'Taal', 'Balayan', 'Nasugbu', 'Laurel', 'Agoncillo', 'Alitagtag', 'Balete', 'Cuenca', 'Ibaan', 'Lobo', 'Mabini', 'Malvar', 'Mataasnakahoy', 'Padre Garcia', 'Rosario', 'San Jose', 'San Juan', 'San Luis', 'San Nicolas', 'San Pascual', 'Santa Teresita', 'Talisay', 'Taysan', 'Tingloy', 'Tuy',
+    // Rizal cities
+    'Antipolo', 'Cainta', 'Taytay', 'Angono', 'Binangonan', 'Teresa', 'Morong', 'Baras', 'Tanay', 'Pililla', 'Jala-Jala', 'Pakil', 'Cardona', 'Rodriguez', 'San Mateo',
+    // Quezon cities
+    'Lucena', 'Tayabas', 'Sariaya', 'Candelaria', 'Tiaong', 'San Antonio', 'Dolores', 'Pagbilao', 'Atimonan', 'Padre Burgos', 'Agdangan', 'Unisan', 'Plaridel', 'Gumaca', 'Lopez', 'Calauag', 'Guinayangan', 'Tagkawayan', 'Buenavista', 'San Narciso', 'Mulanay', 'San Andres', 'San Francisco'
+  ],
+  
 } as Record<string, string[]>;
 
 // Major cities for other countries
@@ -614,6 +628,20 @@ export function getCitiesForLocation(countryCode: string | null, stateCode: stri
         '14': 'ARMM', // Autonomous Region in Muslim Mindanao
         '15': 'ARMM', // Also BARMM region
         'BARMM': 'ARMM',
+        '40': 'CALABARZON', // Calabarzon region
+        '01': 'ILOCOS_REGION', // Ilocos Region
+        '02': 'CAGAYAN_VALLEY', // Cagayan Valley
+        '03': 'CENTRAL_LUZON', // Central Luzon
+        '05': 'BICOL_REGION', // Bicol Region
+        '06': 'WESTERN_VISAYAS', // Western Visayas
+        '07': 'CENTRAL_VISAYAS', // Central Visayas
+        '08': 'EASTERN_VISAYAS', // Eastern Visayas
+        '09': 'ZAMBOANGA_PENINSULA', // Zamboanga Peninsula
+        '10': 'NORTHERN_MINDANAO', // Northern Mindanao
+        '11': 'DAVAO_REGION', // Davao Region
+        '12': 'SOCCSKSARGEN', // Soccsksargen
+        '13': 'CARAGA', // Caraga
+        '41': 'MIMAROPA', // Mimaropa
       };
       
       if (regionMappings[stateCode]) {
