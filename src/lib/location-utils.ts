@@ -511,6 +511,9 @@ const PHILIPPINES_CITIES = {
   // Siquijor
   'SIG': ['Siquijor', 'Enrique Villanueva', 'Larena', 'Lazi', 'Maria', 'San Juan'],
   
+  // Agusan del Sur
+  'AGS': ['Bayugan City', 'Bunawan', 'Esperanza', 'La Paz', 'Loreto', 'Prosperidad', 'Rosario', 'San Francisco', 'San Luis', 'Santa Josefa', 'Sibagat', 'Talacogon', 'Trento', 'Veruela'],
+  
 } as Record<string, string[]>;
 
 // Major cities for other countries
