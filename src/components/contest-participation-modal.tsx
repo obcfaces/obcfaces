@@ -208,13 +208,17 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
 
   const cities = useMemo(() => {
     if (!formData.countryCode) return [];
+    console.log('Cities calculation:', { countryCode: formData.countryCode, stateCode: formData.stateCode });
     const cityList = getCitiesForLocation(formData.countryCode, formData.stateCode);
-    return cityList
+    console.log('Retrieved cities:', cityList);
+    const result = cityList
       .sort((a, b) => a.localeCompare(b)) // Sort alphabetically
       .map(city => ({
         value: city,
         label: city
       }));
+    console.log('Final cities options:', result);
+    return result;
   }, [formData.countryCode, formData.stateCode]);
 
   // Auth handlers
