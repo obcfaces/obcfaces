@@ -34,7 +34,8 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
   const [contactForm, setContactForm] = useState({
     name: "",
     contact: "",
-    message: ""
+    message: "",
+    countryCode: ""
   });
 
   // Auth form data
@@ -550,7 +551,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
         // Reset states when modal closes
         setSubmissionSuccess(false);
         setSelectedContactMethod(null);
-        setContactForm({ name: "", contact: "", message: "" });
+        setContactForm({ name: "", contact: "", message: "", countryCode: "" });
       }
     }}>
       <DialogTrigger asChild>
@@ -628,6 +629,11 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
           </form>
         ) : submissionSuccess ? (
           <div className="space-y-4">
+            <div className="text-center">
+              <h3 className="text-lg font-semibold text-green-600 mb-2">Application Successfully Submitted!</h3>
+              <p className="text-sm text-muted-foreground mb-6">Your contest application has been successfully submitted.</p>
+            </div>
+            
             {/* Contact for Prize Transfer Section */}
             <div className="p-4 bg-background border rounded-lg">
               <h3 className="text-md font-semibold mb-4 text-center">
@@ -636,14 +642,39 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
               
               <div className="space-y-3">
                 <div>
-                  <Input
-                    id="contact-phone"
-                    value={contactForm.contact}
-                    onChange={(e) => setContactForm({...contactForm, contact: e.target.value})}
-                    placeholder={`${Country.getCountryByCode(formData.countryCode)?.flag || '🇵🇭'} ${Country.getCountryByCode(formData.countryCode)?.phonecode ? `+${Country.getCountryByCode(formData.countryCode)?.phonecode}` : '+63'} 912 345 6789`}
-                    className="text-sm"
-                    type="tel"
-                  />
+                  <Label htmlFor="contact-phone" className="text-xs">Phone number</Label>
+                  <div className="flex gap-2">
+                    <Select
+                      value={contactForm.countryCode || formData.countryCode}
+                      onValueChange={(value) => setContactForm({...contactForm, countryCode: value})}
+                    >
+                      <SelectTrigger className="w-24 text-sm">
+                        <SelectValue>
+                          <span className="flex items-center gap-1">
+                            {Country.getCountryByCode(contactForm.countryCode || formData.countryCode)?.flag || '🇵🇭'}
+                            <span className="text-xs">+{Country.getCountryByCode(contactForm.countryCode || formData.countryCode)?.phonecode || '63'}</span>
+                          </span>
+                        </SelectValue>
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Country.getAllCountries().map((country) => (
+                          <SelectItem key={country.isoCode} value={country.isoCode}>
+                            <span className="flex items-center gap-2">
+                              {country.flag} +{country.phonecode} {country.name}
+                            </span>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <Input
+                      id="contact-phone"
+                      value={contactForm.contact}
+                      onChange={(e) => setContactForm({...contactForm, contact: e.target.value})}
+                      placeholder="912 345 6789"
+                      className="text-sm flex-1"
+                      type="tel"
+                    />
+                  </div>
                 </div>
                 
                 <Button 
