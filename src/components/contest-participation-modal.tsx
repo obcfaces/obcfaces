@@ -649,7 +649,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                           onValueChange={(value) => setContactForm({...contactForm, countryCode: value})}
                           options={Country.getAllCountries().map((country) => ({
                             value: country.isoCode,
-                            label: `${country.flag} +${country.phonecode} ${country.name}`
+                            label: `${country.flag} +${country.phonecode}`
                           }))}
                           placeholder={(() => {
                             const country = Country.getCountryByCode(contactForm.countryCode || formData.countryCode);
