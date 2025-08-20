@@ -40,11 +40,22 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
   }, [title]);
 
   const loadContestParticipants = async () => {
-    const { data, error } = await supabase
-      .rpc('get_contest_participants');
+    try {
+      const { data, error } = await supabase
+        .rpc('get_contest_participants');
 
-    if (data && !error) {
-      setRealContestants(data);
+      console.log('Contest participants data:', data);
+      console.log('Contest participants error:', error);
+
+      if (data && !error) {
+        setRealContestants(data);
+      } else {
+        console.warn('No contest participants loaded:', error);
+        setRealContestants([]);
+      }
+    } catch (err) {
+      console.error('Error loading contest participants:', err);
+      setRealContestants([]);
     }
   };
 
@@ -57,18 +68,29 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
     if (title === "THIS WEEK") {
       // If we have real contestants from database, use them
       if (realContestants.length > 0) {
+        // Ensure we have valid data
+        if (!realContestants || realContestants.length === 0) {
+          return [];
+        }
+        
         return realContestants.map((contestant, index) => {
+          // Validate contestant data structure
+          if (!contestant || typeof contestant !== 'object') {
+            console.warn('Invalid contestant data:', contestant);
+            return null;
+          }
+          
           // For real contestants, try to get user's rating from localStorage
           const currentUserId = localStorage.getItem('currentUserId');
           let userRating = 0;
-          if (currentUserId) {
+          if (currentUserId && contestant.first_name && contestant.last_name) {
             const savedRating = localStorage.getItem(`rating-${contestant.first_name} ${contestant.last_name}-${currentUserId}`);
             userRating = savedRating ? parseFloat(savedRating) : 0;
           }
           
           return {
             rank: index + 1,
-            name: `${contestant.first_name} ${contestant.last_name}`,
+            name: `${contestant.first_name || 'Unknown'} ${contestant.last_name || ''}`.trim(),
             profileId: contestant.user_id,
             country: contestant.country || 'Unknown',
             city: contestant.city || 'Unknown',
@@ -84,7 +106,7 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
             prize: showWinner && index === 0 ? "+ 5000 PHP" : undefined,
             isRealContestant: true // Mark as real contestant to disable fake likes/comments
           };
-        });
+        }).filter(Boolean); // Remove any null entries
       }
       
       // Fallback to test contestants if no real ones
