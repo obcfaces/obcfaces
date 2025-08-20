@@ -606,10 +606,26 @@ export function getCitiesForLocation(countryCode: string | null, stateCode: stri
   }
   
   try {
+    // Handle special mappings for region codes
+    let mappedStateCode = stateCode;
+    if (countryCode === 'PH') {
+      // Map region codes to proper state codes
+      const regionMappings: Record<string, string> = {
+        '14': 'ARMM', // Autonomous Region in Muslim Mindanao
+        '15': 'ARMM', // Also BARMM region
+        'BARMM': 'ARMM',
+      };
+      
+      if (regionMappings[stateCode]) {
+        mappedStateCode = regionMappings[stateCode];
+        console.log(`Mapped region code ${stateCode} to ${mappedStateCode}`);
+      }
+    }
+    
     // Use comprehensive Philippines city database
-    if (countryCode === 'PH' && PHILIPPINES_CITIES[stateCode]) {
-      const cities = PHILIPPINES_CITIES[stateCode];
-      console.log(`Using comprehensive database for PH-${stateCode}:`, cities.length, 'cities');
+    if (countryCode === 'PH' && PHILIPPINES_CITIES[mappedStateCode]) {
+      const cities = PHILIPPINES_CITIES[mappedStateCode];
+      console.log(`Using comprehensive database for PH-${mappedStateCode}:`, cities.length, 'cities');
       return cities;
     }
     
