@@ -397,7 +397,10 @@ export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantNa
                     <Button
                       variant="ghost"
                       size="sm"
-                      className={cn(currentPhotoLikes.isLiked && "text-red-400")}
+                      className={cn(
+                        "text-muted-foreground hover:text-foreground transition-colors",
+                        currentPhotoLikes.isLiked && "text-contest-blue"
+                      )}
                       onClick={handleLike}
                       aria-label="Like"
                     >
@@ -407,10 +410,14 @@ export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantNa
                     <Button
                       variant="ghost"
                       size="sm"
+                      className={cn(
+                        "text-muted-foreground hover:text-foreground transition-colors",
+                        currentPhotoComments.length > 0 && "text-contest-blue"
+                      )}
                       onClick={focusCommentInput}
                       aria-label="Open comment field"
                     >
-                      <MessageCircle className="w-4 h-4 mr-1" />
+                      <MessageCircle className={cn("w-4 h-4 mr-1", currentPhotoComments.length > 0 && "fill-current")} />
                       {currentPhotoComments.length}
                     </Button>
                   </div>
