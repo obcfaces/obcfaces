@@ -656,9 +656,9 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                           ))}
                         </select>
                         <div className="absolute inset-y-0 left-2 flex items-center pointer-events-none">
-                          <span className="flex items-center gap-1 text-sm">
+                          <span className="flex items-center gap-1">
                             {Country.getCountryByCode(contactForm.countryCode || formData.countryCode)?.flag || '🇵🇭'}
-                            <span className="text-xs">+{Country.getCountryByCode(contactForm.countryCode || formData.countryCode)?.phonecode || '63'}</span>
+                            <span className="text-sm">+{Country.getCountryByCode(contactForm.countryCode || formData.countryCode)?.phonecode || '63'}</span>
                           </span>
                         </div>
                       </div>
