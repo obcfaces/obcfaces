@@ -78,7 +78,7 @@ const Index = () => {
             />
           </div>
           
-          <section className="max-w-6xl mx-auto pt-8 mb-2 mt-2 bg-background rounded-lg shadow-lg shadow-foreground/15">
+          <section className="max-w-6xl mx-auto pt-8 mb-2 mt-2 bg-background rounded-lg shadow-sm shadow-foreground/10">
             <ContestSection
               title="THIS WEEK"
               subtitle="25-31 august 2025"
