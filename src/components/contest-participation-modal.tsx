@@ -204,10 +204,13 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
 
   const cities = useMemo(() => {
     if (!formData.countryCode) return [];
-    return getCitiesForLocation(formData.countryCode, formData.stateCode).map(city => ({
-      value: city,
-      label: city
-    }));
+    const cityList = getCitiesForLocation(formData.countryCode, formData.stateCode);
+    return cityList
+      .sort((a, b) => a.localeCompare(b)) // Sort alphabetically
+      .map(city => ({
+        value: city,
+        label: city
+      }));
   }, [formData.countryCode, formData.stateCode]);
 
   // Auth handlers
