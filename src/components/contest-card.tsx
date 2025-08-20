@@ -444,7 +444,7 @@ export function ContestantCard({
                 onClick={handleComment}
                 aria-label="Comments"
               >
-                <MessageCircle className="w-4 h-4" />
+                <MessageCircle className={cn("w-4 h-4", hasCommented && "fill-current")} />
                 <span className="hidden sm:inline">Comment</span>
                 <span>{commentsCount[0] + commentsCount[1]}</span>
               </button>
