@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ContestantCard } from "@/components/contest-card";
+import { supabase } from "@/integrations/supabase/client";
 
 import contestant1Face from "@/assets/contestant-1-face.jpg";
 import contestant1Full from "@/assets/contestant-1-full.jpg";
@@ -29,6 +30,27 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
   });
 
   const [votes, setVotes] = useState<Record<number, number>>({});
+  const [realContestants, setRealContestants] = useState<any[]>([]);
+
+  // Load real contestants for THIS WEEK
+  useEffect(() => {
+    if (title === "THIS WEEK") {
+      loadContestParticipants();
+    }
+  }, [title]);
+
+  const loadContestParticipants = async () => {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('id, display_name, city, country, age, height_cm, weight_kg, photo_1_url, photo_2_url')
+      .eq('is_contest_participant', true)
+      .eq('is_approved', true)
+      .limit(10);
+
+    if (data && !error) {
+      setRealContestants(data);
+    }
+  };
 
   const handleRate = (contestantId: number, rating: number) => {
     setVotes(prev => ({ ...prev, [contestantId]: rating }));
@@ -37,7 +59,28 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
   // Определяем участников в зависимости от типа недели
   const getContestants = () => {
     if (title === "THIS WEEK") {
-      // Текущая неделя - 3 финалистки из наших тестовых пользователей
+      // If we have real contestants from database, use them
+      if (realContestants.length > 0) {
+        return realContestants.map((contestant, index) => ({
+          rank: index + 1,
+          name: contestant.display_name || 'Unknown',
+          profileId: contestant.id,
+          country: contestant.country || 'Unknown',
+          city: contestant.city || 'Unknown',
+          age: contestant.age || 0,
+          weight: contestant.weight_kg || 0,
+          height: contestant.height_cm || 0,
+          rating: ratings[index + 1] || 4.0,
+          faceImage: contestant.photo_1_url || contestant1Face,
+          fullBodyImage: contestant.photo_2_url || contestant1Full,
+          additionalPhotos: [contestant2Face, contestant3Face],
+          isVoted: showWinner ? true : !!votes[index + 1],
+          isWinner: showWinner && index === 0,
+          prize: showWinner && index === 0 ? "+ 5000 руб" : undefined
+        }));
+      }
+      
+      // Fallback to test contestants if no real ones
       return [
         {
           rank: 1,
