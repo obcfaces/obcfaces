@@ -62,6 +62,14 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
       if (realContestants.length > 0) {
         return realContestants.map((contestant, index) => {
           const appData = contestant.application_data;
+          // For real contestants, try to get user's rating from localStorage
+          const currentUserId = localStorage.getItem('currentUserId');
+          let userRating = 0;
+          if (currentUserId) {
+            const savedRating = localStorage.getItem(`rating-${appData.first_name} ${appData.last_name}-${currentUserId}`);
+            userRating = savedRating ? parseFloat(savedRating) : 0;
+          }
+          
           return {
             rank: index + 1,
             name: `${appData.first_name} ${appData.last_name}`,
@@ -71,11 +79,11 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
             age: new Date().getFullYear() - appData.birth_year,
             weight: appData.weight_kg || 0,
             height: appData.height_cm || 0,
-            rating: ratings[index + 1] || 4.0,
+            rating: userRating > 0 ? userRating : ratings[index + 1] || 4.0,
             faceImage: appData.photo1_url || contestant1Face,
             fullBodyImage: appData.photo2_url || contestant1Full,
             additionalPhotos: [],
-            isVoted: showWinner ? true : !!votes[index + 1],
+            isVoted: showWinner ? true : !!votes[index + 1] || userRating > 0,
             isWinner: showWinner && index === 0,
             prize: showWinner && index === 0 ? "+ 5000 PHP" : undefined,
             isRealContestant: true // Mark as real contestant to disable fake likes/comments
