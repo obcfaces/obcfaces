@@ -63,6 +63,10 @@ const PHILIPPINES_CITIES = {
     'Balanga', 'Mariveles', 'Bagac', 'Hermosa', 'Limay', 'Morong',
     'Orani', 'Orion', 'Pilar', 'Samal', 'Abucay', 'Dinalupihan'
   ],
+  'BATAAN': [ // Bataan (alternative code)
+    'Balanga', 'Mariveles', 'Bagac', 'Hermosa', 'Limay', 'Morong',
+    'Orani', 'Orion', 'Pilar', 'Samal', 'Abucay', 'Dinalupihan'
+  ],
   'NUE': [ // Nueva Ecija
     'Cabanatuan', 'Gapan', 'San Jose', 'Palayan', 'Muñoz', 'Aliaga',
     'Bongabon', 'Cabiao', 'Carranglan', 'Cuyapo', 'Gabaldon', 'General Mamerto Natividad',
