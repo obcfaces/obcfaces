@@ -644,18 +644,28 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                   <div className="flex gap-2 items-center">
                     <div className="flex border border-input rounded-md bg-background">
                       <div className="w-24">
-                        <SearchableSelect
-                          value={contactForm.countryCode || formData.countryCode}
-                          onValueChange={(value) => setContactForm({...contactForm, countryCode: value})}
-                          options={Country.getAllCountries().map((country) => ({
-                            value: country.isoCode,
-                            label: `${country.flag} +${country.phonecode} ${country.name}`
-                          }))}
-                          placeholder={(() => {
-                            const country = Country.getCountryByCode(contactForm.countryCode || formData.countryCode);
-                            return `${country?.flag || '🇵🇭'} +${country?.phonecode || '63'}`;
-                          })()}
-                        />
+                        <div className="relative">
+                          <SearchableSelect
+                            value={contactForm.countryCode || formData.countryCode}
+                            onValueChange={(value) => setContactForm({...contactForm, countryCode: value})}
+                            options={Country.getAllCountries().map((country) => ({
+                              value: country.isoCode,
+                              label: `${country.flag} +${country.phonecode} ${country.name}`
+                            }))}
+                            placeholder=""
+                          />
+                          <div className="absolute inset-0 pointer-events-none bg-background border border-input rounded-md px-3 flex items-center justify-between">
+                            <span className="text-sm">
+                              {(() => {
+                                const country = Country.getCountryByCode(contactForm.countryCode || formData.countryCode);
+                                return `${country?.flag || '🇵🇭'} +${country?.phonecode || '63'}`;
+                              })()}
+                            </span>
+                            <svg className="h-4 w-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                            </svg>
+                          </div>
+                        </div>
                       </div>
                       <div className="w-px bg-border"></div>
                       <Input
