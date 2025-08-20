@@ -380,14 +380,18 @@ const Admin = () => {
                             </p>
                           </div>
                           
-                          {phone && (
-                            <div>
-                              <h4 className="text-sm font-medium mb-2">Contact Info:</h4>
+                          <div>
+                            <h4 className="text-sm font-medium mb-2">Contact Info:</h4>
+                            {phone ? (
                               <p className="text-sm text-muted-foreground">
                                 Phone: {phone.full_number}
                               </p>
-                            </div>
-                          )}
+                            ) : (
+                              <p className="text-sm text-muted-foreground">
+                                Phone: Not provided
+                              </p>
+                            )}
+                          </div>
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
