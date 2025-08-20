@@ -239,17 +239,79 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
     }
   };
 
+  // Process image to maintain 4:5 aspect ratio with side padding if needed
+  const processImageAspectRatio = (file: File): Promise<File> => {
+    return new Promise((resolve) => {
+      const img = new Image();
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      
+      img.onload = () => {
+        const aspectRatio = img.width / img.height;
+        const targetAspectRatio = 4 / 5; // 0.8
+        
+        let newWidth = img.width;
+        let newHeight = img.height;
+        let offsetX = 0;
+        let offsetY = 0;
+        
+        // If image is wider than 4:5 ratio, add padding on sides
+        if (aspectRatio > targetAspectRatio) {
+          newHeight = img.height;
+          newWidth = newHeight * targetAspectRatio;
+          canvas.width = newWidth;
+          canvas.height = newHeight;
+          
+          // Center the image with padding
+          const scaledWidth = newWidth;
+          const scaledHeight = newHeight;
+          offsetX = (newWidth - scaledWidth) / 2;
+          offsetY = 0;
+          
+          // Fill with white background (padding)
+          ctx!.fillStyle = '#ffffff';
+          ctx!.fillRect(0, 0, newWidth, newHeight);
+          
+          // Draw image centered
+          ctx!.drawImage(img, offsetX, offsetY, scaledWidth, scaledHeight);
+        } else {
+          // For images with aspect ratio <= 4:5, keep original
+          canvas.width = img.width;
+          canvas.height = img.height;
+          ctx!.drawImage(img, 0, 0);
+        }
+        
+        canvas.toBlob((blob) => {
+          if (blob) {
+            const processedFile = new File([blob], file.name, {
+              type: file.type,
+              lastModified: Date.now()
+            });
+            resolve(processedFile);
+          } else {
+            resolve(file);
+          }
+        }, file.type, 0.9);
+      };
+      
+      img.src = URL.createObjectURL(file);
+    });
+  };
+
   // Upload photo to Supabase storage
   const uploadPhoto = async (file: File, photoNumber: number): Promise<string> => {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) throw new Error('Not authenticated');
 
+    // Process image for proper aspect ratio
+    const processedFile = await processImageAspectRatio(file);
+
     // Create file path with user folder structure for RLS to work
-    const fileName = `${session.user.id}/photo${photoNumber}-${Date.now()}.${file.name.split('.').pop()}`;
+    const fileName = `${session.user.id}/photo${photoNumber}-${Date.now()}.${processedFile.name.split('.').pop()}`;
     
     const { error: uploadError } = await supabase.storage
       .from('contest-photos')
-      .upload(fileName, file);
+      .upload(fileName, processedFile);
 
     if (uploadError) throw uploadError;
 
