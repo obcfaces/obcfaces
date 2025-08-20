@@ -67,8 +67,14 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
             highlightSelected && (selected || isCustomValue) && "border border-blue-500 focus:ring-blue-500 focus:border-blue-500"
           )}
         >
-          {selected ? selected.label : isCustomValue ? value : (placeholder || "Select...")}
-          <ChevronDown className="ml-2 h-4 w-4 opacity-50" />
+          {selected ? (
+            <span className="text-left leading-tight break-words">{selected.label}</span>
+          ) : isCustomValue ? (
+            <span className="text-left leading-tight break-words">{value}</span>
+          ) : (
+            <span className="text-muted-foreground">{placeholder || "Select..."}</span>
+          )}
+          <ChevronDown className="ml-2 h-4 w-4 opacity-50 flex-shrink-0" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[calc(var(--radix-popover-trigger-width)*1.3)] p-0 z-50 bg-popover" onWheelCapture={(e) => e.stopPropagation()} onOpenAutoFocus={(e) => e.preventDefault()}>
@@ -112,9 +118,9 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
                       )}
                     />
                     <span className="flex items-center gap-2">
-                      <span>{opt.label}</span>
+                      <span className="text-left leading-tight break-words">{opt.label}</span>
                       {opt.disabled && (
-                        <span className="text-xs italic text-muted-foreground">soon</span>
+                        <span className="text-xs italic text-muted-foreground flex-shrink-0">soon</span>
                       )}
                     </span>
                   </CommandItem>
