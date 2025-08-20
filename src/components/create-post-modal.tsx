@@ -34,8 +34,8 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
 
     if (validFiles.length !== files.length) {
       toast({
-        title: "Неподдерживаемые файлы",
-        description: "Можно загружать только изображения и видео",
+        title: "Unsupported files",
+        description: "Only images and videos can be uploaded",
         variant: "destructive"
       });
     }
@@ -43,8 +43,8 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
     // Limit to 10 files max
     if (selectedFiles.length + validFiles.length > 10) {
       toast({
-        title: "Слишком много файлов",
-        description: "Максимум 10 файлов в одном посте",
+        title: "Too many files",
+        description: "Maximum 10 files per post",
         variant: "destructive"
       });
       return;
@@ -77,8 +77,8 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
   const handleSubmit = async () => {
     if (selectedFiles.length === 0) {
       toast({
-        title: "Добавьте медиа",
-        description: "Выберите хотя бы одно фото или видео",
+        title: "Add media",
+        description: "Select at least one photo or video",
         variant: "destructive"
       });
       return;
@@ -89,7 +89,7 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
       // Get current user
       const { data: { user }, error: userError } = await supabase.auth.getUser();
       if (userError || !user) {
-        throw new Error("Вы должны войти в систему для создания поста");
+        throw new Error("You must be logged in to create a post");
       }
 
       // Upload files to Supabase Storage
@@ -134,8 +134,8 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
       }
 
       toast({
-        title: "Пост создан!",
-        description: "Ваш пост успешно опубликован"
+        title: "Post created!",
+        description: "Your post has been published successfully"
       });
 
       // Reset form
@@ -150,8 +150,8 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
     } catch (error: any) {
       console.error('Error creating post:', error);
       toast({
-        title: "Ошибка",
-        description: error.message || "Не удалось создать пост. Попробуйте снова.",
+        title: "Error",
+        description: error.message || "Failed to create post. Please try again.",
         variant: "destructive"
       });
     } finally {
@@ -170,13 +170,13 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
       </DialogTrigger>
       <DialogContent className="max-w-lg max-h-[90vh] overflow-hidden flex flex-col">
         <DialogHeader>
-          <DialogTitle>Создать пост</DialogTitle>
+          <DialogTitle>Create Post</DialogTitle>
         </DialogHeader>
         
         <div className="flex-1 overflow-y-auto space-y-4">
           {/* Media Upload Section */}
           <div className="space-y-2">
-            <Label>Фото и видео</Label>
+            <Label>Photos and Videos</Label>
             
             <input
               ref={fileInputRef}
@@ -197,10 +197,10 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
               <div className="flex flex-col items-center gap-2">
                 <Upload size={24} />
                 <span className="text-sm">
-                  Выберите фото или видео
+                  Select photos or videos
                 </span>
                 <span className="text-xs text-muted-foreground">
-                  До 10 файлов
+                  Up to 10 files
                 </span>
               </div>
             </Button>
@@ -243,10 +243,10 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
 
           {/* Caption Section */}
           <div className="space-y-2">
-            <Label htmlFor="caption">Описание</Label>
+            <Label htmlFor="caption">Description</Label>
             <Textarea
               id="caption"
-              placeholder="Напишите что-нибудь о вашем посте..."
+              placeholder="Write something about your post..."
               value={caption}
               onChange={(e) => setCaption(e.target.value)}
               rows={4}
@@ -263,7 +263,7 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
             onClick={() => setIsOpen(false)}
             disabled={isUploading}
           >
-            Отмена
+            Cancel
           </Button>
           <Button
             onClick={handleSubmit}
@@ -272,10 +272,10 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
             {isUploading ? (
               <>
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Публикуем...
+                Publishing...
               </>
             ) : (
-              "Опубликовать"
+              "Publish"
             )}
           </Button>
         </div>

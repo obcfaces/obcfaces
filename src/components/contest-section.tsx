@@ -140,7 +140,7 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
     setVotes(prev => ({ ...prev, [contestantId]: rating }));
   };
 
-  // Определяем участников в зависимости от типа недели
+  // Define contestants based on week type
   const getContestants = () => {
     // Use real contestants from weekly contests if available
     if (["THIS WEEK", "1 WEEK AGO", "2 WEEKS AGO", "3 WEEKS AGO"].includes(title) && realContestants.length > 0) {
@@ -188,10 +188,10 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
       return [
         {
           rank: 1,
-          name: "Анна Петрова",
+          name: "Anna Johnson",
           profileId: "11111111-1111-1111-1111-111111111111",
-          country: "Россия", 
-          city: "Москва",
+          country: "Philippines", 
+          city: "Manila",
           age: 25,
           weight: 55.5,
           height: 165,
@@ -201,14 +201,14 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
           additionalPhotos: [contestant2Face, contestant3Face],
           isVoted: showWinner ? true : !!votes[1],
           isWinner: showWinner,
-          prize: showWinner ? "+ 5000 руб" : undefined
+          prize: showWinner ? "+ 5000 PHP" : undefined
         },
         {
           rank: 2,
-          name: "Елена Козлова",
+          name: "Elena Rodriguez",
           profileId: "33333333-3333-3333-3333-333333333333",
-          country: "Россия",
-          city: "Екатеринбург",
+          country: "Philippines",
+          city: "Cebu",
           age: 28,
           weight: 60,
           height: 170,
@@ -220,10 +220,10 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
         },
         {
           rank: 3,
-          name: "Ольга Волкова",
+          name: "Sofia Garcia",
           profileId: "55555555-5555-5555-5555-555555555555",
-          country: "Россия",
-          city: "Казань", 
+          country: "Philippines",
+          city: "Davao", 
           age: 31,
           weight: 58,
           height: 162,
@@ -235,14 +235,14 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
         }
       ];
     } else if (title === "1 WEEK AGO") {
-      // Прошлая неделя - 2 финалистки
+      // Last week - 2 finalists
       return [
         {
           rank: 1,
-          name: "Михаил Иванов",
+          name: "Michael Johnson",
           profileId: "22222222-2222-2222-2222-222222222222",
-          country: "Россия",
-          city: "Санкт-Петербург",
+          country: "Philippines",
+          city: "Quezon City",
           age: 32,
           weight: 75,
           height: 180,
@@ -252,14 +252,14 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
           additionalPhotos: [contestant2Face],
           isVoted: showWinner ? true : !!votes[1],
           isWinner: showWinner,
-          prize: showWinner ? "+ 3000 руб" : undefined
+          prize: showWinner ? "+ 3000 PHP" : undefined
         },
         {
           rank: 2,
-          name: "Дмитрий Смирнов",
+          name: "David Martinez",
           profileId: "44444444-4444-4444-4444-444444444444",
-          country: "Россия",
-          city: "Новосибирск",
+          country: "Philippines",
+          city: "Makati",
           age: 29,
           weight: 70.5,
           height: 178,
@@ -271,7 +271,7 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
         }
       ];
     } else {
-      // Остальные недели - оригинальные участники
+      // Other weeks - original contestants
       return [
         {
           rank: 1,

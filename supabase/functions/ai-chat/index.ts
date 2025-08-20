@@ -27,16 +27,15 @@ serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-5',
+        model: 'gpt-5-mini-2025-08-07',
         messages: [
           { 
             role: 'system', 
-            content: `Вы - AI помощник для конкурса красоты. Помогайте пользователям с вопросами о конкурсе, участниках и голосовании. Отвечайте на русском языке дружелюбно и профессионально.${context ? ` Контекст: ${context}` : ''}` 
+            content: `You are an AI assistant for a beauty contest. Help users with questions about the contest, participants and voting. Respond in English in a friendly and professional manner.${context ? ` Context: ${context}` : ''}` 
           },
           { role: 'user', content: message }
         ],
-        temperature: 0.7,
-        max_tokens: 1000,
+        max_completion_tokens: 1000,
       }),
     });
 
