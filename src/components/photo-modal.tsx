@@ -35,25 +35,8 @@ export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantNa
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
   // Comments are always shown now
   const [commentText, setCommentText] = useState("");
-  const [photoComments, setPhotoComments] = useState<Record<number, Comment[]>>({
-    0: [
-      { id: 1, author: "Maria_K", text: "Stunning portrait! Beautiful eyes.", timestamp: "1 hour ago" },
-      { id: 2, author: "Alex92", text: "Professional shot, great angle.", timestamp: "3 hours ago" },
-    ],
-    1: [
-      { id: 3, author: "Svetlana", text: "Perfect shape! 👍", timestamp: "2 hours ago" },
-      { id: 4, author: "Michael_Fit", text: "You work hard on yourself, respect!", timestamp: "3 hours ago" },
-    ],
-    2: [
-      { id: 5, author: "VictoriaStyle", text: "Love this photo! Very pretty.", timestamp: "1 hour ago" },
-      { id: 6, author: "AndrewArt", text: "Excellent photo! Professional work.", timestamp: "2 hours ago" },
-    ],
-  });
-  const [photoLikes, setPhotoLikes] = useState<Record<number, { count: number; isLiked: boolean }>>({
-    0: { count: 23, isLiked: false },
-    1: { count: 18, isLiked: false },
-    2: { count: 15, isLiked: false }
-  });
+  const [photoComments, setPhotoComments] = useState<Record<number, Comment[]>>({});
+  const [photoLikes, setPhotoLikes] = useState<Record<number, { count: number; isLiked: boolean }>>({});
   const [user, setUser] = useState<any>(null);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const { toast } = useToast();
@@ -181,15 +164,7 @@ export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantNa
   };
 
   const currentPhotoComments = photoComments[activeIndex] || [];
-  const currentPhotoLikes = photoLikes[activeIndex] || { count: Math.floor(Math.random() * 30) + 5, isLiked: false };
-
-  // Ensure all photos have like data
-  if (!photoLikes[activeIndex]) {
-    setPhotoLikes(prev => ({
-      ...prev,
-      [activeIndex]: { count: Math.floor(Math.random() * 30) + 5, isLiked: false }
-    }));
-  }
+  const currentPhotoLikes = photoLikes[activeIndex] || { count: 0, isLiked: false };
 
   return (
     <>
