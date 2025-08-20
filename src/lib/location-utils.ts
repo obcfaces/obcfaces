@@ -522,7 +522,31 @@ const PHILIPPINES_CITIES = {
   'DAV_ALT': ['Davao City', 'Digos', 'Bansalan', 'Hagonoy', 'Kiblawan', 'Magsaysay', 'Malalag', 'Matanao', 'Padada', 'Santa Cruz', 'Sulop'],
 
   'PALAWAN': ['Puerto Princesa', 'Aborlan', 'Agutaya', 'Araceli', 'Balabac', 'Bataraza', 'Brooke\'s Point', 'Busuanga', 'Cagayancillo', 'Coron', 'Culion', 'Cuyo', 'Dumaran', 'El Nido', 'Linapacan', 'Magsaysay', 'Narra', 'Quezon', 'Rizal', 'Roxas', 'San Vicente', 'Sofronio Española', 'Taytay', 'Kalayaan'],
-  'PLW': ['Puerto Princesa', 'Aborlan', 'Agutaya', 'Araceli', 'Balabac', 'Bataraza', 'Brooke\'s Point', 'Busuanga', 'Cagayancillo', 'Coron', 'Culion', 'Cuyo', 'Dumaran', 'El Nido', 'Linapacan', 'Magsaysay', 'Narra', 'Quezon', 'Rizal', 'Roxas', 'San Vicente', 'Sofronio Española', 'Taytay', 'Kalayaan']
+  'PLW': ['Puerto Princesa', 'Aborlan', 'Agutaya', 'Araceli', 'Balabac', 'Bataraza', 'Brooke\'s Point', 'Busuanga', 'Cagayancillo', 'Coron', 'Culion', 'Cuyo', 'Dumaran', 'El Nido', 'Linapacan', 'Magsaysay', 'Narra', 'Quezon', 'Rizal', 'Roxas', 'San Vicente', 'Sofronio Española', 'Taytay', 'Kalayaan'],
+
+  // ZAMBOANGA PENINSULA - All possible codes that could be used
+  'ZAM_PEN': ['Dipolog', 'Dapitan', 'Pagadian', 'Zamboanga City', 'Ipil', 'Roxas', 'Sindangan', 'Aurora', 'Bayog', 'Alicia', 'Buug', 'Sergio Osmeña Sr.', 'Katipunan', 'Manukan', 'Jose Dalman', 'Tampilisan'],
+  'ZAMBOANGA_PENINSULA': ['Dipolog', 'Dapitan', 'Pagadian', 'Zamboanga City', 'Ipil', 'Roxas', 'Sindangan', 'Aurora', 'Bayog', 'Alicia', 'Buug', 'Sergio Osmeña Sr.', 'Katipunan', 'Manukan', 'Jose Dalman', 'Tampilisan'],
+  'ZAM_REG': ['Dipolog', 'Dapitan', 'Pagadian', 'Zamboanga City', 'Ipil', 'Roxas', 'Sindangan', 'Aurora', 'Bayog', 'Alicia', 'Buug', 'Sergio Osmeña Sr.', 'Katipunan', 'Manukan', 'Jose Dalman', 'Tampilisan'],
+  'ZAMBOAN': ['Dipolog', 'Dapitan', 'Pagadian', 'Zamboanga City', 'Ipil', 'Roxas', 'Sindangan', 'Aurora', 'Bayog', 'Alicia', 'Buug', 'Sergio Osmeña Sr.', 'Katipunan', 'Manukan', 'Jose Dalman', 'Tampilisan'],
+  'ZPE': ['Dipolog', 'Dapitan', 'Pagadian', 'Zamboanga City', 'Ipil', 'Roxas', 'Sindangan', 'Aurora', 'Bayog', 'Alicia', 'Buug', 'Sergio Osmeña Sr.', 'Katipunan', 'Manukan', 'Jose Dalman', 'Tampilisan'],
+  '09': ['Dipolog', 'Dapitan', 'Pagadian', 'Zamboanga City', 'Ipil', 'Roxas', 'Sindangan', 'Aurora', 'Bayog', 'Alicia', 'Buug', 'Sergio Osmeña Sr.', 'Katipunan', 'Manukan', 'Jose Dalman', 'Tampilisan'],
+  'IX': ['Dipolog', 'Dapitan', 'Pagadian', 'Zamboanga City', 'Ipil', 'Roxas', 'Sindangan', 'Aurora', 'Bayog', 'Alicia', 'Buug', 'Sergio Osmeña Sr.', 'Katipunan', 'Manukan', 'Jose Dalman', 'Tampilisan'],
+
+  // Region codes for other major regions
+  'CAR': ['Baguio', 'La Trinidad', 'Tabuk', 'Bontoc', 'Lagawe', 'Bangued', 'Kabugao'],
+  'I': ['Laoag', 'Vigan', 'San Fernando'],
+  'II': ['Tuguegarao', 'Ilagan', 'Cauayan', 'Santiago'],
+  'IV-A': ['Santa Rosa', 'Biñan', 'San Pedro', 'Cabuyao', 'Calamba', 'Los Baños'],
+  'IV-B': ['Puerto Princesa', 'Coron', 'El Nido', 'Taytay'],
+  'V': ['Legazpi', 'Naga', 'Iriga', 'Daet'],
+  'VI': ['Iloilo City', 'Bacolod', 'Dumaguete', 'Roxas'],
+  'VII': ['Cebu City', 'Mandaue', 'Lapu-Lapu', 'Talisay', 'Toledo'],
+  'VIII': ['Tacloban', 'Ormoc', 'Calbayog', 'Catbalogan'],
+  'X': ['Cagayan de Oro', 'Butuan', 'Iligan', 'Malaybalay'],
+  'XI': ['Davao City', 'Digos', 'Tagum', 'Panabo'],
+  'XII': ['Koronadal', 'General Santos', 'Kidapawan', 'Cotabato'],
+  'XIII': ['Butuan', 'Bayugan', 'Bislig', 'Surigao'],
 } as Record<string, string[]>;
 
 // Major cities for other countries
