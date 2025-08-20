@@ -644,25 +644,18 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                   <div className="flex gap-2 items-center">
                     <div className="flex border border-input rounded-md bg-background">
                       <div className="w-24">
-                        <div className="relative">
-                          <SearchableSelect
-                            value={contactForm.countryCode || formData.countryCode}
-                            onValueChange={(value) => setContactForm({...contactForm, countryCode: value})}
-                            options={Country.getAllCountries().map((country) => ({
-                              value: country.isoCode,
-                              label: `${country.flag} +${country.phonecode} ${country.name}`
-                            }))}
-                            placeholder=""
-                          />
-                          <div className="absolute inset-0 pointer-events-none flex items-center px-3">
-                            <span className="text-sm">
-                              {(() => {
-                                const country = Country.getCountryByCode(contactForm.countryCode || formData.countryCode);
-                                return `${country?.flag || '🇵🇭'} +${country?.phonecode || '63'}`;
-                              })()}
-                            </span>
-                          </div>
-                        </div>
+                        <SearchableSelect
+                          value={contactForm.countryCode || formData.countryCode}
+                          onValueChange={(value) => setContactForm({...contactForm, countryCode: value})}
+                          options={Country.getAllCountries().map((country) => ({
+                            value: country.isoCode,
+                            label: `${country.flag} +${country.phonecode} ${country.name}`
+                          }))}
+                          placeholder={(() => {
+                            const country = Country.getCountryByCode(contactForm.countryCode || formData.countryCode);
+                            return `${country?.flag || '🇵🇭'} +${country?.phonecode || '63'}`;
+                          })()}
+                        />
                       </div>
                       <div className="w-px bg-border"></div>
                       <Input
