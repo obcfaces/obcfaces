@@ -439,11 +439,89 @@ export type Database = {
         }
         Relationships: []
       }
+      weekly_contest_participants: {
+        Row: {
+          application_data: Json | null
+          average_rating: number | null
+          contest_id: string
+          created_at: string
+          final_rank: number | null
+          id: string
+          total_votes: number | null
+          user_id: string
+        }
+        Insert: {
+          application_data?: Json | null
+          average_rating?: number | null
+          contest_id: string
+          created_at?: string
+          final_rank?: number | null
+          id?: string
+          total_votes?: number | null
+          user_id: string
+        }
+        Update: {
+          application_data?: Json | null
+          average_rating?: number | null
+          contest_id?: string
+          created_at?: string
+          final_rank?: number | null
+          id?: string
+          total_votes?: number | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "weekly_contest_participants_contest_id_fkey"
+            columns: ["contest_id"]
+            isOneToOne: false
+            referencedRelation: "weekly_contests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      weekly_contests: {
+        Row: {
+          created_at: string
+          id: string
+          status: string
+          title: string
+          updated_at: string
+          week_end_date: string
+          week_start_date: string
+          winner_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          status?: string
+          title: string
+          updated_at?: string
+          week_end_date: string
+          week_start_date: string
+          winner_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          status?: string
+          title?: string
+          updated_at?: string
+          week_end_date?: string
+          week_start_date?: string
+          winner_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      create_weekly_contest: {
+        Args: { contest_date?: string }
+        Returns: string
+      }
       get_contest_participant_info: {
         Args: Record<PropertyKey, never> | { participant_id: string }
         Returns: {
@@ -510,6 +588,30 @@ export type Database = {
           id: string
         }[]
       }
+      get_week_monday: {
+        Args: { input_date?: string }
+        Returns: string
+      }
+      get_weekly_contest_participants: {
+        Args: { weeks_offset?: number }
+        Returns: {
+          age: number
+          city: string
+          contest_status: string
+          country: string
+          final_rank: number
+          first_name: string
+          height_cm: number
+          id: string
+          last_name: string
+          photo1_url: string
+          photo2_url: string
+          user_id: string
+          week_end_date: string
+          week_start_date: string
+          weight_kg: number
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -520,6 +622,10 @@ export type Database = {
       is_following: {
         Args: { target_user_id: string }
         Returns: boolean
+      }
+      rotate_weekly_contests: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
       }
       user_in_conversation: {
         Args: { conversation_id: string; user_id: string }
