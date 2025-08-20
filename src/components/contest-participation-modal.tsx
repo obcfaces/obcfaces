@@ -717,21 +717,30 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                              return;
                            }
 
-                           // Get the current application
-                           const { data: application, error: fetchError } = await supabase
-                             .from('contest_applications')
-                             .select('application_data')
-                             .eq('user_id', session.user.id)
-                             .single();
+                            // Get the current application
+                            const { data: application, error: fetchError } = await supabase
+                              .from('contest_applications')
+                              .select('application_data')
+                              .eq('user_id', session.user.id)
+                              .maybeSingle();
 
-                           if (fetchError) {
-                             toast({
-                               title: "Error",
-                               description: "Failed to load application data.",
-                               variant: "destructive"
-                             });
-                             return;
-                           }
+                            if (fetchError) {
+                              toast({
+                                title: "Error",
+                                description: "Failed to load application data.",
+                                variant: "destructive"
+                              });
+                              return;
+                            }
+
+                            if (!application) {
+                              toast({
+                                title: "Error",
+                                description: "Application not found.",
+                                variant: "destructive"
+                              });
+                              return;
+                            }
 
                            // Get the selected country info
                            const selectedCountry = Country.getCountryByCode(contactForm.countryCode || formData.countryCode);
