@@ -77,7 +77,7 @@ export function ContestantCard({
   const [hasCommented, setHasCommented] = useState(false);
   const [likesCount, setLikesCount] = useState<number[]>([0, 0]);
   const [dislikesCount, setDislikesCount] = useState<number>(0);
-  const [commentsCount] = useState<number[]>([0, 0]);
+  const [commentsCount, setCommentsCount] = useState<number[]>([0, 0]);
   const [user, setUser] = useState<any>(null);
   // Initialize isVoted state synchronously by checking localStorage
   const [isVoted, setIsVoted] = useState(() => {
