@@ -41,10 +41,7 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
 
   const loadContestParticipants = async () => {
     const { data, error } = await supabase
-      .from('contest_applications')
-      .select('application_data, user_id, status')
-      .eq('status', 'approved')
-      .limit(10);
+      .rpc('get_contest_participants');
 
     if (data && !error) {
       setRealContestants(data);
@@ -61,27 +58,26 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
       // If we have real contestants from database, use them
       if (realContestants.length > 0) {
         return realContestants.map((contestant, index) => {
-          const appData = contestant.application_data;
           // For real contestants, try to get user's rating from localStorage
           const currentUserId = localStorage.getItem('currentUserId');
           let userRating = 0;
           if (currentUserId) {
-            const savedRating = localStorage.getItem(`rating-${appData.first_name} ${appData.last_name}-${currentUserId}`);
+            const savedRating = localStorage.getItem(`rating-${contestant.first_name} ${contestant.last_name}-${currentUserId}`);
             userRating = savedRating ? parseFloat(savedRating) : 0;
           }
           
           return {
             rank: index + 1,
-            name: `${appData.first_name} ${appData.last_name}`,
+            name: `${contestant.first_name} ${contestant.last_name}`,
             profileId: contestant.user_id,
-            country: appData.country === 'PH' ? 'Philippines' : appData.country,
-            city: appData.city || 'Unknown',
-            age: new Date().getFullYear() - appData.birth_year,
-            weight: appData.weight_kg || 0,
-            height: appData.height_cm || 0,
+            country: contestant.country || 'Unknown',
+            city: contestant.city || 'Unknown',
+            age: contestant.age || 0,
+            weight: contestant.weight_kg || 0,
+            height: contestant.height_cm || 0,
             rating: userRating > 0 ? userRating : ratings[index + 1] || 4.0,
-            faceImage: appData.photo1_url || contestant1Face,
-            fullBodyImage: appData.photo2_url || contestant1Full,
+            faceImage: contestant.photo1_url || contestant1Face,
+            fullBodyImage: contestant.photo2_url || contestant1Full,
             additionalPhotos: [],
             isVoted: showWinner ? true : !!votes[index + 1] || userRating > 0,
             isWinner: showWinner && index === 0,
