@@ -279,6 +279,21 @@ const PHILIPPINES_CITIES = {
   'TAW': [ // Tawi-Tawi
     'Bongao', 'Languyan', 'Mapun', 'Panglima Sugala', 'Sapa-Sapa', 'Sibutu',
     'Simunul', 'Sitangkai', 'South Ubian', 'Tandubas', 'Turtle Islands'
+  ],
+  'ARMM': [ // Autonomous Region in Muslim Mindanao (Combined)
+    // Major cities from all ARMM provinces
+    'Cotabato City', 'Marawi', 'Jolo', 'Bongao', 'Isabela City', 'Lamitan',
+    'Digos', 'General Santos', 'Koronadal', 'Tacurong', 'Kidapawan',
+    // Basilan
+    'Akbar', 'Al-Barka', 'Hadji Mohammad Ajul', 'Maluso', 'Sumisip', 'Tipo-Tipo',
+    // Lanao del Sur  
+    'Balabagan', 'Malabang', 'Wao', 'Tubaran', 'Picong', 'Ganassi',
+    // Maguindanao
+    'Ampatuan', 'Parang', 'Sultan Kudarat', 'Shariff Aguak', 'Datu Odin Sinsuat',
+    // Sulu
+    'Indanan', 'Siasi', 'Parang', 'Patikul', 'Luuk', 'Pangutaran',
+    // Tawi-Tawi
+    'Languyan', 'Simunul', 'Sitangkai', 'Turtle Islands', 'South Ubian'
   ]
 } as Record<string, string[]>;
 
