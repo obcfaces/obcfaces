@@ -123,19 +123,13 @@ export function ContestantCard({
   // Load user's likes, counts and ratings on component mount
   useEffect(() => {
     const loadUserData = async () => {
-      // Load total likes count for individual photos (for modal)
+      // Load total likes count for individual photos
       const { data: photoLikes } = await supabase
         .from("likes")
         .select("content_id")
         .eq("content_type", "contest")
         .in("content_id", [`contestant-photo-${name}-0`, `contestant-photo-${name}-1`]);
       
-      if (photoLikes) {
-        const photo0Likes = photoLikes.filter(like => like.content_id === `contestant-photo-${name}-0`).length;
-        const photo1Likes = photoLikes.filter(like => like.content_id === `contestant-photo-${name}-1`).length;
-        setLikesCount([photo0Likes, photo1Likes]);
-      }
-
       // Load total likes count for the card itself
       const { data: cardLikes } = await supabase
         .from("likes")
@@ -143,7 +137,11 @@ export function ContestantCard({
         .eq("content_type", "contest")
         .eq("content_id", `contestant-card-${name}`);
       
+      // Calculate total likes: photo likes + card likes
+      const photo0Likes = photoLikes?.filter(like => like.content_id === `contestant-photo-${name}-0`).length || 0;
+      const photo1Likes = photoLikes?.filter(like => like.content_id === `contestant-photo-${name}-1`).length || 0;
       const cardLikesCount = cardLikes?.length || 0;
+      const totalLikes = photo0Likes + photo1Likes + cardLikesCount;
 
       // Load total comments count for both photos
       const { data: totalComments } = await supabase
@@ -168,11 +166,24 @@ export function ContestantCard({
           .eq("content_id", `contestant-card-${name}`)
           .maybeSingle();
         
-        // Set liked state based on card like, not individual photo likes
-        setIsLiked([!!userCardLike, !!userCardLike]);
+        // Load user's likes for individual photos
+        const { data: userPhotoLikes } = await supabase
+          .from("likes")
+          .select("content_id")
+          .eq("user_id", user.id)
+          .eq("content_type", "contest")
+          .in("content_id", [`contestant-photo-${name}-0`, `contestant-photo-${name}-1`]);
         
-        // Set total likes count as card likes only
-        setLikesCount([cardLikesCount, 0]);
+        // User has liked if they liked the card OR any photo
+        const hasLikedPhoto0 = userPhotoLikes?.some(like => like.content_id === `contestant-photo-${name}-0`) || false;
+        const hasLikedPhoto1 = userPhotoLikes?.some(like => like.content_id === `contestant-photo-${name}-1`) || false;
+        const hasLikedCard = !!userCardLike;
+        const hasAnyLike = hasLikedCard || hasLikedPhoto0 || hasLikedPhoto1;
+        
+        setIsLiked([hasAnyLike, hasAnyLike]);
+        
+        // Set total likes count (photos + card)
+        setLikesCount([totalLikes, 0]);
         
         // Check if user has commented on this contestant
         const { data: userComments } = await supabase
@@ -192,8 +203,8 @@ export function ContestantCard({
           setIsVoted(true); // Mark as voted if rating exists
         }
       } else {
-        // For non-logged users, show card likes count
-        setLikesCount([cardLikesCount, 0]);
+        // For non-logged users, show total likes count (photos + card)
+        setLikesCount([totalLikes, 0]);
       }
     };
     
@@ -233,10 +244,11 @@ export function ContestantCard({
       // Update both indices to the same value since it's a card like
       setIsLiked([!wasLiked, !wasLiked]);
       
-      // Update likes count (only first index stores the card likes count)
+      // Update likes count by recalculating total
+      const currentCardLikes = wasLiked ? -1 : 1; // Change in card likes
       setLikesCount((prev) => {
         const next = [...prev];
-        next[0] = wasLiked ? next[0] - 1 : next[0] + 1;
+        next[0] = prev[0] + currentCardLikes; // Update total count
         return next;
       });
       
