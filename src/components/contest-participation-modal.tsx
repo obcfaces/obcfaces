@@ -642,38 +642,40 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
               
               <div className="space-y-3">
                 <div>
-                  <Label htmlFor="contact-phone" className="text-xs">Phone number</Label>
                   <div className="flex gap-2">
-                    <Select
-                      value={contactForm.countryCode || formData.countryCode}
-                      onValueChange={(value) => setContactForm({...contactForm, countryCode: value})}
-                    >
-                      <SelectTrigger className="w-24 text-sm [&>svg]:hidden">
-                        <SelectValue>
-                          <span className="flex items-center gap-1">
-                            {Country.getCountryByCode(contactForm.countryCode || formData.countryCode)?.flag || '🇵🇭'}
-                            <span className="text-xs">+{Country.getCountryByCode(contactForm.countryCode || formData.countryCode)?.phonecode || '63'}</span>
-                          </span>
-                        </SelectValue>
-                      </SelectTrigger>
-                      <SelectContent>
-                        {Country.getAllCountries().map((country) => (
-                          <SelectItem key={country.isoCode} value={country.isoCode}>
-                            <span className="flex items-center gap-2">
-                              {country.flag} +{country.phonecode} {country.name}
+                    <div className="flex border border-input rounded-md bg-background">
+                      <Select
+                        value={contactForm.countryCode || formData.countryCode}
+                        onValueChange={(value) => setContactForm({...contactForm, countryCode: value})}
+                      >
+                        <SelectTrigger className="w-24 text-sm border-0 [&>svg]:hidden">
+                          <SelectValue>
+                            <span className="flex items-center gap-1">
+                              {Country.getCountryByCode(contactForm.countryCode || formData.countryCode)?.flag || '🇵🇭'}
+                              <span className="text-xs">+{Country.getCountryByCode(contactForm.countryCode || formData.countryCode)?.phonecode || '63'}</span>
                             </span>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <Input
-                      id="contact-phone"
-                      value={contactForm.contact}
-                      onChange={(e) => setContactForm({...contactForm, contact: e.target.value})}
-                      placeholder="912 345 6789"
-                      className="text-sm w-32"
-                      type="tel"
-                    />
+                          </SelectValue>
+                        </SelectTrigger>
+                        <SelectContent>
+                          {Country.getAllCountries().map((country) => (
+                            <SelectItem key={country.isoCode} value={country.isoCode}>
+                              <span className="flex items-center gap-2">
+                                {country.flag} +{country.phonecode} {country.name}
+                              </span>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <div className="w-px bg-border"></div>
+                      <Input
+                        id="contact-phone"
+                        value={contactForm.contact}
+                        onChange={(e) => setContactForm({...contactForm, contact: e.target.value})}
+                        placeholder="912 345 6789"
+                        className="text-sm w-32 border-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+                        type="tel"
+                      />
+                    </div>
                     <Button 
                       type="button" 
                       size="sm" 
