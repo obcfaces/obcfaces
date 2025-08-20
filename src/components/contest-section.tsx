@@ -102,32 +102,36 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
 
     // Set up real-time subscription for contest participant updates
     if (["THIS WEEK", "1 WEEK AGO", "2 WEEKS AGO", "3 WEEKS AGO"].includes(title)) {
-      const subscription = supabase
-        .channel('weekly_contest_participants_changes')
-        .on('postgres_changes', 
-          { 
-            event: '*', 
-            schema: 'public', 
-            table: 'weekly_contest_participants' 
-          }, 
-          () => {
-            // Reload participants when data changes
+      const channel = supabase
+        .channel('contest_participant_updates')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'weekly_contest_participants'
+          },
+          (payload) => {
+            console.log('Weekly contest participants changed:', payload);
             loadParticipants();
-          })
-        .on('postgres_changes', 
-          { 
-            event: '*', 
-            schema: 'public', 
-            table: 'contest_applications' 
-          }, 
-          () => {
-            // Reload participants when applications are updated
+          }
+        )
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'contest_applications'
+          },
+          (payload) => {
+            console.log('Contest applications changed:', payload);
             loadParticipants();
-          })
+          }
+        )
         .subscribe();
 
       return () => {
-        subscription.unsubscribe();
+        supabase.removeChannel(channel);
       };
     }
   }, [title]);
