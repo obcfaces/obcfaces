@@ -560,7 +560,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
       <DialogContent className="w-full max-w-none max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
-            {currentStep === 'auth' ? 'Sign in' : 'Contest participation form'}
+            {currentStep === 'auth' ? 'Sign in' : submissionSuccess ? 'Application Successfully Submitted!' : ''}
           </DialogTitle>
         </DialogHeader>
 
