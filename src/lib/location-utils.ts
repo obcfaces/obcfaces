@@ -257,6 +257,28 @@ const PHILIPPINES_CITIES = {
     'Rajah Buayan', 'Shariff Aguak', 'Shariff Saydona Mustapha', 'South Upi',
     'Sultan Mastura', 'Sultan sa Barongis', 'Sultan Sumagka', 'Talayan',
     'Talitay', 'Upi'
+  ],
+  'BAS': [ // Basilan
+    'Isabela City', 'Lamitan', 'Akbar', 'Al-Barka', 'Hadji Mohammad Ajul',
+    'Hadji Muhtamad', 'Lantawan', 'Maluso', 'Sumisip', 'Tabuan-Lasa',
+    'Tipo-Tipo', 'Tuburan', 'Ungkaya Pukan'
+  ],
+  'LAN': [ // Lanao del Sur
+    'Marawi', 'Balabagan', 'Balindong', 'Bayang', 'Binidayan', 'Buadiposo-Buntong',
+    'Bubong', 'Butig', 'Ganassi', 'Kapai', 'Lumba-Bayabao', 'Lumbaca-Unayan',
+    'Lumbatan', 'Lumbayanague', 'Madalum', 'Madamba', 'Maguing', 'Malabang',
+    'Marantao', 'Marogong', 'Masiu', 'Mulondo', 'Pagayawan', 'Piagapo',
+    'Picong', 'Poona Bayabao', 'Pualas', 'Saguiaran', 'Sultan Dumalondong',
+    'Tagoloan II', 'Tamparan', 'Taraka', 'Tubaran', 'Tugaya', 'Wao'
+  ],
+  'SLU': [ // Sulu
+    'Jolo', 'Banguingui', 'Hadji Panglima Tahil', 'Indanan', 'Kalingalan Caluang',
+    'Lugus', 'Luuk', 'Maimbung', 'Old Panamao', 'Omar', 'Pandami', 'Panglima Estino',
+    'Pangutaran', 'Parang', 'Pata', 'Patikul', 'Siasi', 'Talipao', 'Tapul'
+  ],
+  'TAW': [ // Tawi-Tawi
+    'Bongao', 'Languyan', 'Mapun', 'Panglima Sugala', 'Sapa-Sapa', 'Sibutu',
+    'Simunul', 'Sitangkai', 'South Ubian', 'Tandubas', 'Turtle Islands'
   ]
 } as Record<string, string[]>;
 
