@@ -647,7 +647,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                         value={contactForm.countryCode || formData.countryCode}
                         onValueChange={(value) => setContactForm({...contactForm, countryCode: value})}
                       >
-                        <SelectTrigger className="w-24 text-sm border-0 [&>svg]:hidden [&>span]:text-ellipsis-none [&>span]:truncate-none [&>span]:overflow-visible">
+                        <SelectTrigger className="w-20 text-sm border-0 [&>svg]:hidden">
                           <SelectValue>
                             <span className="flex items-center gap-1">
                               {Country.getCountryByCode(contactForm.countryCode || formData.countryCode)?.flag || '🇵🇭'}
