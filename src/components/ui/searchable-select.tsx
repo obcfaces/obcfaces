@@ -121,8 +121,8 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
                     }}
                     aria-disabled={opt.disabled || undefined}
                     className={cn(
-                      "cursor-pointer select-none rounded-sm px-2 py-1.5 text-sm outline-none aria-selected:bg-accent aria-selected:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 hover:bg-accent hover:text-accent-foreground",
-                      opt.disabled && "opacity-60 pointer-events-none"
+                      "cursor-pointer select-none rounded-sm px-2 py-1.5 text-sm outline-none aria-selected:bg-accent aria-selected:text-accent-foreground hover:bg-accent hover:text-accent-foreground",
+                      opt.disabled && "opacity-60"
                     )}
                   >
                     <Check
