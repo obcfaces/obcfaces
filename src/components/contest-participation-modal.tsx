@@ -652,7 +652,10 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                             value: country.isoCode,
                             label: `${country.flag} +${country.phonecode} ${country.name}`
                           }))}
-                          placeholder=""
+                          placeholder={(() => {
+                            const country = Country.getCountryByCode(contactForm.countryCode || formData.countryCode);
+                            return `${country?.flag || '🇵🇭'} +${country?.phonecode || '63'}`;
+                          })()}
                         />
                       </div>
                       
