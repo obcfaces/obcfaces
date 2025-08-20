@@ -655,11 +655,11 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
                           placeholder=""
                           customTriggerRenderer={(value, options) => {
                             const selectedCountry = Country.getCountryByCode(value);
-                            return selectedCountry ? (
-                              <span className="whitespace-normal break-words leading-tight">
-                                {selectedCountry.flag} +{selectedCountry.phonecode}
-                              </span>
-                            ) : '';
+                             return selectedCountry ? (
+                               <div className="flex-1 text-left whitespace-normal break-words leading-tight pr-2">
+                                 {selectedCountry.flag} +{selectedCountry.phonecode}
+                               </div>
+                             ) : '';
                           }}
                         />
                       </div>
