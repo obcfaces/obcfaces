@@ -6,9 +6,12 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "@/components/ui/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Check, X, Eye, UserCog, FileText, Calendar, Trophy, RotateCcw } from "lucide-react";
+import { Check, X, Eye, UserCog, FileText, Calendar, Trophy, RotateCcw, Edit } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 interface ProfileData {
@@ -88,6 +91,8 @@ const Admin = () => {
   const [weeklyContests, setWeeklyContests] = useState<WeeklyContest[]>([]);
   const [weeklyParticipants, setWeeklyParticipants] = useState<WeeklyContestParticipant[]>([]);
   const [selectedContest, setSelectedContest] = useState<string | null>(null);
+  const [editingApplication, setEditingApplication] = useState<ContestApplication | null>(null);
+  const [editForm, setEditForm] = useState<any>({});
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -299,6 +304,53 @@ const Admin = () => {
     });
 
     fetchWeeklyContests();
+  };
+
+  const startEditingApplication = (application: ContestApplication) => {
+    setEditingApplication(application);
+    setEditForm(application.application_data || {});
+  };
+
+  const handleEditFormChange = (field: string, value: any) => {
+    setEditForm(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const saveApplicationEdit = async () => {
+    if (!editingApplication) return;
+
+    const { error } = await supabase
+      .from('contest_applications')
+      .update({
+        application_data: editForm,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', editingApplication.id);
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update application",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    toast({
+      title: "Success",
+      description: "Application updated successfully",
+    });
+
+    setEditingApplication(null);
+    setEditForm({});
+    fetchContestApplications();
+  };
+
+  const cancelEdit = () => {
+    setEditingApplication(null);
+    setEditForm({});
   };
 
   const reviewApplication = async (applicationId: string, status: 'approved' | 'rejected', notes?: string) => {
@@ -762,6 +814,15 @@ const Admin = () => {
                         <div className="flex gap-2">
                           <Button
                             size="sm"
+                            variant="outline"
+                            onClick={() => startEditingApplication(application)}
+                            className="flex items-center gap-1"
+                          >
+                            <Edit className="w-4 h-4" />
+                            Edit
+                          </Button>
+                          <Button
+                            size="sm"
                             onClick={() => reviewApplication(application.id, 'approved')}
                             disabled={application.status === 'approved'}
                             className="bg-green-600 hover:bg-green-700"
@@ -946,6 +1007,212 @@ const Admin = () => {
               </div>
             </TabsContent>
           </Tabs>
+
+          {/* Edit Application Modal */}
+          <Dialog open={!!editingApplication} onOpenChange={() => !editingApplication ? null : cancelEdit()}>
+            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>Edit Application</DialogTitle>
+              </DialogHeader>
+              
+              {editingApplication && (
+                <div className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="first_name">First Name</Label>
+                      <Input
+                        id="first_name"
+                        value={editForm.first_name || ''}
+                        onChange={(e) => handleEditFormChange('first_name', e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="last_name">Last Name</Label>
+                      <Input
+                        id="last_name"
+                        value={editForm.last_name || ''}
+                        onChange={(e) => handleEditFormChange('last_name', e.target.value)}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <Label htmlFor="birth_day">Birth Day</Label>
+                      <Input
+                        id="birth_day"
+                        type="number"
+                        min="1"
+                        max="31"
+                        value={editForm.birth_day || ''}
+                        onChange={(e) => handleEditFormChange('birth_day', parseInt(e.target.value))}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="birth_month">Birth Month</Label>
+                      <Input
+                        id="birth_month"
+                        type="number"
+                        min="1"
+                        max="12"
+                        value={editForm.birth_month || ''}
+                        onChange={(e) => handleEditFormChange('birth_month', parseInt(e.target.value))}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="birth_year">Birth Year</Label>
+                      <Input
+                        id="birth_year"
+                        type="number"
+                        min="1950"
+                        max="2010"
+                        value={editForm.birth_year || ''}
+                        onChange={(e) => handleEditFormChange('birth_year', parseInt(e.target.value))}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <Label htmlFor="city">City</Label>
+                      <Input
+                        id="city"
+                        value={editForm.city || ''}
+                        onChange={(e) => handleEditFormChange('city', e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="state">State/Province</Label>
+                      <Input
+                        id="state"
+                        value={editForm.state || ''}
+                        onChange={(e) => handleEditFormChange('state', e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="country">Country</Label>
+                      <Input
+                        id="country"
+                        value={editForm.country || ''}
+                        onChange={(e) => handleEditFormChange('country', e.target.value)}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <Label htmlFor="gender">Gender</Label>
+                      <select
+                        id="gender"
+                        value={editForm.gender || ''}
+                        onChange={(e) => handleEditFormChange('gender', e.target.value)}
+                        className="w-full p-2 border rounded-md bg-background"
+                      >
+                        <option value="">Select Gender</option>
+                        <option value="female">Female</option>
+                        <option value="male">Male</option>
+                      </select>
+                    </div>
+                    <div>
+                      <Label htmlFor="height_cm">Height (cm)</Label>
+                      <Input
+                        id="height_cm"
+                        type="number"
+                        min="140"
+                        max="200"
+                        value={editForm.height_cm || ''}
+                        onChange={(e) => handleEditFormChange('height_cm', parseInt(e.target.value))}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="weight_kg">Weight (kg)</Label>
+                      <Input
+                        id="weight_kg"
+                        type="number"
+                        min="35"
+                        max="120"
+                        step="0.1"
+                        value={editForm.weight_kg || ''}
+                        onChange={(e) => handleEditFormChange('weight_kg', parseFloat(e.target.value))}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="marital_status">Marital Status</Label>
+                      <select
+                        id="marital_status"
+                        value={editForm.marital_status || ''}
+                        onChange={(e) => handleEditFormChange('marital_status', e.target.value)}
+                        className="w-full p-2 border rounded-md bg-background"
+                      >
+                        <option value="">Select Status</option>
+                        <option value="single">Single</option>
+                        <option value="married">Married</option>
+                        <option value="divorced">Divorced</option>
+                        <option value="widowed">Widowed</option>
+                      </select>
+                    </div>
+                    <div>
+                      <Label htmlFor="has_children">Has Children</Label>
+                      <select
+                        id="has_children"
+                        value={editForm.has_children ? 'true' : 'false'}
+                        onChange={(e) => handleEditFormChange('has_children', e.target.value === 'true')}
+                        className="w-full p-2 border rounded-md bg-background"
+                      >
+                        <option value="false">No</option>
+                        <option value="true">Yes</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="photo1_url">Portrait Photo URL</Label>
+                      <Input
+                        id="photo1_url"
+                        value={editForm.photo1_url || ''}
+                        onChange={(e) => handleEditFormChange('photo1_url', e.target.value)}
+                      />
+                      {editForm.photo1_url && (
+                        <img 
+                          src={editForm.photo1_url} 
+                          alt="Portrait preview" 
+                          className="w-24 h-32 object-cover rounded border mt-2"
+                        />
+                      )}
+                    </div>
+                    <div>
+                      <Label htmlFor="photo2_url">Full Length Photo URL</Label>
+                      <Input
+                        id="photo2_url"
+                        value={editForm.photo2_url || ''}
+                        onChange={(e) => handleEditFormChange('photo2_url', e.target.value)}
+                      />
+                      {editForm.photo2_url && (
+                        <img 
+                          src={editForm.photo2_url} 
+                          alt="Full length preview" 
+                          className="w-24 h-32 object-cover rounded border mt-2"
+                        />
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex justify-end gap-2 pt-4 border-t">
+                    <Button variant="outline" onClick={cancelEdit}>
+                      Cancel
+                    </Button>
+                    <Button onClick={saveApplicationEdit} className="bg-blue-600 hover:bg-blue-700">
+                      Save Changes
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
     </>
