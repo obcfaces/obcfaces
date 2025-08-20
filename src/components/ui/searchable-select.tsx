@@ -77,7 +77,7 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
           disabled={disabled}
           aria-invalid={invalid}
           className={cn(
-            "w-full justify-between text-sm min-h-[40px] flex items-start",
+            "w-full justify-between text-sm",
             !selected && !isCustomValue && "text-muted-foreground",
             invalid && "border border-red-500 focus:ring-red-500 focus:border-red-500",
             highlightSelected && (selected || isCustomValue) && "border border-blue-500 focus:ring-blue-500 focus:border-blue-500"
