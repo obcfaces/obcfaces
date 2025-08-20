@@ -404,7 +404,11 @@ export function ContestantCard({
                     isVoted={false}
                     variant="white"
                     hideText={true}
-                    onRate={handleRate}
+                    onRate={(rating) => {
+                      console.log('StarRating onRate called with rating:', rating);
+                      console.log('User state:', user);
+                      handleRate(rating);
+                    }}
                   />
                 </div>
               </div>
@@ -650,7 +654,11 @@ export function ContestantCard({
                   isVoted={false}
                   variant="white"
                   hideText={true}
-                  onRate={handleRate}
+                  onRate={(rating) => {
+                    console.log('Compact StarRating onRate called with rating:', rating);
+                    console.log('User state:', user);
+                    handleRate(rating);
+                  }}
                 />
               </div>
             </div>
