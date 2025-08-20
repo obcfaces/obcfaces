@@ -642,55 +642,42 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
               <div className="space-y-3">
                 <div>
                   <div className="flex gap-2 items-center">
-                    <div className="flex border border-input rounded-md bg-background">
-                      <div className="w-24">
-                        <div className="relative">
-                          <div className="opacity-0 pointer-events-auto">
-                            <SearchableSelect
-                              value={contactForm.countryCode || formData.countryCode}
-                              onValueChange={(value) => setContactForm({...contactForm, countryCode: value})}
-                              options={Country.getAllCountries().map((country) => ({
-                                value: country.isoCode,
-                                label: `${country.flag} +${country.phonecode} ${country.name}`
-                              }))}
-                              placeholder=""
-                            />
-                          </div>
-                          <div className="absolute inset-0 pointer-events-none bg-background border border-input rounded-md px-3 flex items-center justify-between">
-                            <span className="flex items-center gap-1 text-sm">
-                              {(() => {
-                                const country = Country.getCountryByCode(contactForm.countryCode || formData.countryCode);
-                                return `${country?.flag || '🇵🇭'} +${country?.phonecode || '63'}`;
-                              })()}
-                            </span>
-                            <div className="absolute right-0 top-1/2 transform -translate-y-1/2">
-                              <svg className="h-4 w-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                              </svg>
-                            </div>
-                          </div>
-                        </div>
+                    <div className="flex border border-input rounded-md bg-background overflow-hidden">
+                      {/* Country Code Selector */}
+                      <div className="w-24 border-r border-border">
+                        <SearchableSelect
+                          value={contactForm.countryCode || formData.countryCode}
+                          onValueChange={(value) => setContactForm({...contactForm, countryCode: value})}
+                          options={Country.getAllCountries().map((country) => ({
+                            value: country.isoCode,
+                            label: `${country.flag} +${country.phonecode} ${country.name}`
+                          }))}
+                          placeholder=""
+                        />
                       </div>
-                      <div className="w-px bg-border"></div>
-                      <Input
-                        id="contact-phone"
-                        value={contactForm.contact}
-                        onChange={(e) => {
-                          let value = e.target.value.replace(/[^0-9]/g, '');
-                          if (value.length >= 3) {
-                            value = value.substring(0, 3) + ' ' + value.substring(3);
-                          }
-                          if (value.length >= 7) {
-                            value = value.substring(0, 7) + ' ' + value.substring(7, 11);
-                          }
-                          setContactForm({...contactForm, contact: value});
-                        }}
-                        placeholder="123 456 7890"
-                        className="text-sm w-32 border-0 focus-visible:ring-0 focus-visible:ring-offset-0"
-                        type="tel"
-                        inputMode="numeric"
-                        maxLength={12}
-                      />
+                      
+                      {/* Phone Number Input */}
+                      <div className="flex-1">
+                        <Input
+                          id="contact-phone"
+                          value={contactForm.contact}
+                          onChange={(e) => {
+                            let value = e.target.value.replace(/[^0-9]/g, '');
+                            if (value.length >= 3) {
+                              value = value.substring(0, 3) + ' ' + value.substring(3);
+                            }
+                            if (value.length >= 7) {
+                              value = value.substring(0, 7) + ' ' + value.substring(7, 11);
+                            }
+                            setContactForm({...contactForm, contact: value});
+                          }}
+                          placeholder="123 456 7890"
+                          className="text-sm border-0 focus-visible:ring-0 focus-visible:ring-offset-0 pl-3 rounded-l-none"
+                          type="tel"
+                          inputMode="numeric"
+                          maxLength={12}
+                        />
+                      </div>
                     </div>
                     <Button 
                       type="button" 
