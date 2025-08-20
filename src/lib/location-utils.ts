@@ -508,6 +508,9 @@ const PHILIPPINES_CITIES = {
   // Southern Leyte
   'SLE': ['Maasin', 'Bontoc', 'Hinunangan', 'Hinundayan', 'Libagon', 'Liloan', 'Macrohon', 'Malitbog', 'Padre Burgos', 'Pintuyan', 'Saint Bernard', 'San Francisco', 'San Juan', 'San Ricardo', 'Silago', 'Sogod', 'Tomas Oppus'],
   
+  // Siquijor
+  'SIG': ['Siquijor', 'Enrique Villanueva', 'Larena', 'Lazi', 'Maria', 'San Juan'],
+  
 } as Record<string, string[]>;
 
 // Major cities for other countries
