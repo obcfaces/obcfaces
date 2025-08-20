@@ -75,6 +75,31 @@ const PHILIPPINES_CITIES = {
     'Baler', 'Casiguran', 'Dilasag', 'Dinalungan', 'Dingalan', 'Dipaculao',
     'Maria Aurora', 'San Luis'
   ],
+  'APA': [ // Apayao
+    'Kabugao', 'Calanasan', 'Conner', 'Flora', 'Luna', 'Pudtol', 'Santa Marcela'
+  ],
+  'ABR': [ // Abra
+    'Bangued', 'Boliney', 'Bucay', 'Bucloc', 'Daguioman', 'Danglas', 'Dolores',
+    'La Paz', 'Lacub', 'Lagangilang', 'Lagayan', 'Langiden', 'Licuan-Baay',
+    'Luba', 'Malibcong', 'Manabo', 'Peñarrubia', 'Pidigan', 'Pilar',
+    'Sallapadan', 'San Isidro', 'San Juan', 'San Quintin', 'Tayum', 'Tineg',
+    'Tubo', 'Villaviciosa'
+  ],
+  'KAL': [ // Kalinga
+    'Tabuk', 'Balbalan', 'Lubuagan', 'Pasil', 'Pinukpuk', 'Rizal', 'Tanudan', 'Tinglayan'
+  ],
+  'MOU': [ // Mountain Province
+    'Bontoc', 'Barlig', 'Bauko', 'Besao', 'Natonin', 'Paracelis', 'Sabangan',
+    'Sadanga', 'Sagada', 'Tadian'
+  ],
+  'IFU': [ // Ifugao
+    'Lagawe', 'Aguinaldo', 'Alfonso Lista', 'Asipulo', 'Banaue', 'Hingyon',
+    'Hungduan', 'Kiangan', 'Lamut', 'Mayoyao', 'Tinoc'
+  ],
+  'BEN': [ // Benguet
+    'La Trinidad', 'Baguio', 'Atok', 'Bakun', 'Bokod', 'Buguias', 'Itogon',
+    'Kabayan', 'Kapangan', 'Kibungan', 'Mankayan', 'Sablan', 'Tuba', 'Tublay'
+  ],
   'ALB': [ // Albay
     'Legazpi', 'Ligao', 'Tabaco', 'Tiwi', 'Malinao', 'Bacacay', 'Camalig',
     'Daraga', 'Guinobatan', 'Jovellar', 'Libon', 'Malilipot', 'Manito',
