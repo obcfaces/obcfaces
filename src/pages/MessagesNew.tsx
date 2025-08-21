@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Helmet } from "react-helmet-async";
 import { Navigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -76,7 +76,7 @@ const Messages = () => {
     }
   }, [user]);
 
-  // Function to create or open conversation
+  // Function to create or open conversation (defined after other functions to avoid dependency issues)
   const createOrOpenConversation = async (recipientId: string) => {
     try {
       console.log('Creating or opening conversation with recipient:', recipientId);
@@ -87,21 +87,55 @@ const Messages = () => {
         user2_id: recipientId
       });
 
-      if (error) throw error;
-      
-      console.log('Got conversation ID:', conversationId);
-      setSelectedConversation(conversationId);
-      
-      // Load messages and mark as read
-      if (conversationId) {
-        await loadMessages(conversationId);
-        await markConversationAsRead(conversationId);
+      if (error) {
+        console.error('Database function error:', error);
+        throw error;
       }
       
-      // Refresh conversations list to show it in sidebar
-      setTimeout(() => {
-        loadConversations();
-      }, 200);
+      console.log('Got conversation ID:', conversationId);
+      
+      if (conversationId) {
+        setSelectedConversation(conversationId);
+        
+        // Load messages and mark as read using function calls
+        const loadMessagesPromise = (async () => {
+          setLoadingMessages(true);
+          try {
+            const { data, error } = await supabase
+              .from('messages')
+              .select('*')
+              .eq('conversation_id', conversationId)
+              .eq('is_deleted', false)
+              .order('created_at', { ascending: true });
+
+            if (error) throw error;
+            setMessages(data || []);
+          } catch (error) {
+            console.error('Error loading messages:', error);
+          } finally {
+            setLoadingMessages(false);
+          }
+        })();
+
+        const markAsReadPromise = (async () => {
+          try {
+            await supabase.rpc('mark_conversation_as_read', {
+              conversation_id_param: conversationId,
+              user_id_param: user.id
+            });
+            markAsRead(conversationId);
+          } catch (error) {
+            console.error('Error marking conversation as read:', error);
+          }
+        })();
+
+        await Promise.all([loadMessagesPromise, markAsReadPromise]);
+        
+        // Refresh conversations list to show it in sidebar
+        setTimeout(() => {
+          loadConversations();
+        }, 300);
+      }
     } catch (error) {
       console.error('Error creating conversation:', error);
       toast({
@@ -115,12 +149,11 @@ const Messages = () => {
   // Handle recipient parameter immediately when user is available
   useEffect(() => {
     const recipientId = searchParams.get('recipient');
-    if (recipientId && user) {
+    if (recipientId && user && !selectedConversation) {
       console.log('Recipient parameter detected:', recipientId);
-      // Immediately create or open conversation when recipient is specified
       createOrOpenConversation(recipientId);
     }
-  }, [searchParams, user]);
+  }, [searchParams, user, selectedConversation]);
 
   // Handle recipient parameter for direct messaging AFTER conversations are loaded (fallback)
   useEffect(() => {
