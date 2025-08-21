@@ -144,11 +144,11 @@ const Messages = () => {
           console.error('Error marking conversation as read:', error);
         }
         
-        // Force refresh conversations list after a short delay
+        // Force refresh conversations list after a longer delay to ensure DB consistency
         setTimeout(() => {
           console.log('Refreshing conversations after creating conversation');
           loadConversations();
-        }, 500);
+        }, 1000);
       }
     } catch (error) {
       console.error('Error creating conversation:', error);
