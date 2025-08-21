@@ -1389,62 +1389,64 @@ const Profile = () => {
                   {/* Basic Information */}
                   <div className="space-y-4">
                     <div className="space-y-3">
-                      {/* Display Name */}
-                      <div className="flex items-center py-3 border-b border-border">
-                        <div className="flex-1">
-                          {editingField === 'display_name' ? (
-                            <div className="space-y-2">
-                              <Input 
-                                placeholder="Display Name" 
-                                className="text-sm placeholder:text-muted-foreground"
-                                value={editForm.display_name} 
-                                onChange={(e) => handleEditFormChange('display_name', e.target.value)} 
-                                autoFocus
-                              />
-                              <div className="flex gap-2">
-                                <Button 
-                                  size="sm"
-                                  onClick={() => {
-                                    setEditingField(null);
-                                    setEditForm(prev => ({ ...prev, display_name: profile.display_name || '' }));
-                                  }}
-                                  variant="outline"
-                                >
-                                  Cancel
-                                </Button>
-                                <Button 
-                                  size="sm"
-                                  onClick={async () => {
-                                    await handleSaveProfile();
-                                    setEditingField(null);
-                                  }}
-                                >
-                                  Save
-                                </Button>
+                      {/* Display Name - only show to owner */}
+                      {isOwner && (
+                        <div className="flex items-center py-3 border-b border-border">
+                          <div className="flex-1">
+                            {editingField === 'display_name' ? (
+                              <div className="space-y-2">
+                                <Input 
+                                  placeholder="Display Name" 
+                                  className="text-sm placeholder:text-muted-foreground"
+                                  value={editForm.display_name} 
+                                  onChange={(e) => handleEditFormChange('display_name', e.target.value)} 
+                                  autoFocus
+                                />
+                                <div className="flex gap-2">
+                                  <Button 
+                                    size="sm"
+                                    onClick={() => {
+                                      setEditingField(null);
+                                      setEditForm(prev => ({ ...prev, display_name: profile.display_name || '' }));
+                                    }}
+                                    variant="outline"
+                                  >
+                                    Cancel
+                                  </Button>
+                                  <Button 
+                                    size="sm"
+                                    onClick={async () => {
+                                      await handleSaveProfile();
+                                      setEditingField(null);
+                                    }}
+                                  >
+                                    Save
+                                  </Button>
+                                </div>
                               </div>
-                            </div>
-                          ) : (
-                            <div>
-                              <div className="text-sm text-muted-foreground">Display Name</div>
-                              <div className="text-sm font-medium text-foreground">
-                                {profile?.display_name || "Add display name"}
+                            ) : (
+                              <div>
+                                <div className="text-sm text-muted-foreground">Display Name</div>
+                                <div className="text-sm font-medium text-foreground">
+                                  {profile?.display_name || "Add display name"}
+                                </div>
                               </div>
-                            </div>
+                            )}
+                          </div>
+                          {editingField !== 'display_name' && (
+                            <button
+                              onClick={() => {
+                                setEditingField('display_name');
+                                setEditForm(prev => ({ ...prev, display_name: profile.display_name || '' }));
+                              }}
+                              className="p-1 hover:bg-accent rounded-md transition-colors ml-3"
+                              aria-label="Edit display name"
+                            >
+                              <Pencil className="h-4 w-4 text-muted-foreground" />
+                            </button>
                           )}
                         </div>
-                        {isOwner && editingField !== 'display_name' && (
-                          <button
-                            onClick={() => {
-                              setEditingField('display_name');
-                              setEditForm(prev => ({ ...prev, display_name: profile.display_name || '' }));
-                            }}
-                            className="p-1 hover:bg-accent rounded-md transition-colors ml-3"
-                            aria-label="Edit display name"
-                          >
-                            <Pencil className="h-4 w-4 text-muted-foreground" />
-                          </button>
-                        )}
-                      </div>
+                      )}
 
                       {/* Email */}
                       {isOwner && (
@@ -1511,275 +1513,299 @@ const Profile = () => {
                       )}
 
 
-                      {/* Gender */}
-                      <div className="flex items-center py-3 border-b border-border">
-                        <div className="flex-1">
-                           {editingField === 'gender' ? (
-                             <div className="space-y-2">
-                               <Select value={editForm.gender} onValueChange={(value) => handleEditFormChange('gender', value)}>
-                                 <SelectTrigger className="text-sm">
-                                   <SelectValue placeholder="Gender" />
-                                 </SelectTrigger>
-                                 <SelectContent>
-                                   <SelectItem value="male">Male</SelectItem>
-                                   <SelectItem value="female">Female</SelectItem>
-                                 </SelectContent>
-                               </Select>
-                               <Select value={editForm.gender_privacy} onValueChange={(value) => handleEditFormChange('gender_privacy', value)}>
-                                 <SelectTrigger className="text-sm">
-                                   <SelectValue placeholder="Privacy" />
-                                 </SelectTrigger>
-                                 <SelectContent>
-                                   <SelectItem value="public">🌐 Public</SelectItem>
-                                   <SelectItem value="friends">👥 Friends</SelectItem>
-                                   <SelectItem value="only_me">🔒 Only me</SelectItem>
-                                 </SelectContent>
-                               </Select>
-                               <div className="flex gap-2">
-                                 <Button 
-                                   size="sm"
-                                   onClick={() => {
-                                     setEditingField(null);
-                                     setEditForm(prev => ({ ...prev, gender: data?.gender || '', gender_privacy: 'public' }));
-                                   }}
-                                   variant="outline"
-                                 >
-                                   Cancel
-                                 </Button>
-                                 <Button 
-                                   size="sm"
-                                   onClick={async () => {
-                                     await handleSaveProfile();
-                                     setEditingField(null);
-                                   }}
-                                 >
-                                   Save
-                                 </Button>
+                      {/* Gender - only show if not "only_me" or if owner */}
+                      {(isOwner || editForm.gender_privacy !== 'only_me') && (
+                        <div className="flex items-center py-3 border-b border-border">
+                          <div className="flex-1">
+                             {editingField === 'gender' && isOwner ? (
+                               <div className="space-y-2">
+                                 <Select value={editForm.gender} onValueChange={(value) => handleEditFormChange('gender', value)}>
+                                   <SelectTrigger className="text-sm">
+                                     <SelectValue placeholder="Gender" />
+                                   </SelectTrigger>
+                                   <SelectContent>
+                                     <SelectItem value="male">Male</SelectItem>
+                                     <SelectItem value="female">Female</SelectItem>
+                                   </SelectContent>
+                                 </Select>
+                                 <Select value={editForm.gender_privacy} onValueChange={(value) => handleEditFormChange('gender_privacy', value)}>
+                                   <SelectTrigger className="text-sm">
+                                     <SelectValue placeholder="Privacy" />
+                                   </SelectTrigger>
+                                   <SelectContent>
+                                     <SelectItem value="public">🌐 Public</SelectItem>
+                                     <SelectItem value="friends">👥 Friends</SelectItem>
+                                     <SelectItem value="only_me">🔒 Only me</SelectItem>
+                                   </SelectContent>
+                                 </Select>
+                                 <div className="flex gap-2">
+                                   <Button 
+                                     size="sm"
+                                     onClick={() => {
+                                       setEditingField(null);
+                                       setEditForm(prev => ({ ...prev, gender: data?.gender || '', gender_privacy: 'public' }));
+                                     }}
+                                     variant="outline"
+                                   >
+                                     Cancel
+                                   </Button>
+                                   <Button 
+                                     size="sm"
+                                     onClick={async () => {
+                                       await handleSaveProfile();
+                                       setEditingField(null);
+                                     }}
+                                   >
+                                     Save
+                                   </Button>
+                                 </div>
                                </div>
-                             </div>
-                           ) : (
-                             <div>
-                               <div className="text-sm text-muted-foreground">Gender</div>
-                               <div className="text-sm font-medium text-foreground">
-                                 {profile?.gender ? (profile.gender === 'male' ? 'Male' : 'Female') : "Add gender"}
+                             ) : (
+                               <div>
+                                 <div className="text-sm text-muted-foreground">Gender</div>
+                                 <div className="text-sm font-medium text-foreground">
+                                   {profile?.gender ? (profile.gender === 'male' ? 'Male' : 'Female') : "Add gender"}
+                                 </div>
+                                 {/* Hide privacy settings for non-owners */}
+                                 {isOwner && (
+                                   <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
+                                     <Lock className="h-3 w-3" />
+                                     <span>
+                                       {editForm.gender_privacy === 'public' ? 'Public' : 
+                                        editForm.gender_privacy === 'friends' ? 'Friends' : 'Only me'}
+                                     </span>
+                                   </div>
+                                 )}
                                </div>
-                               <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
-                                 <Lock className="h-3 w-3" />
-                                 <span>
-                                   {editForm.gender_privacy === 'public' ? 'Public' : 
-                                    editForm.gender_privacy === 'friends' ? 'Friends' : 'Only me'}
-                                 </span>
-                               </div>
-                             </div>
+                            )}
+                          </div>
+                           {isOwner && editingField !== 'gender' && (
+                             <button
+                               onClick={() => {
+                                 setEditingField('gender');
+                                 setEditForm(prev => ({ ...prev, gender: data?.gender || '', gender_privacy: 'public' }));
+                               }}
+                              className="p-1 hover:bg-accent rounded-md transition-colors ml-3"
+                              aria-label="Edit gender"
+                            >
+                              <Pencil className="h-4 w-4 text-muted-foreground" />
+                            </button>
                           )}
                         </div>
-                         {isOwner && editingField !== 'gender' && (
-                           <button
-                             onClick={() => {
-                               setEditingField('gender');
-                               setEditForm(prev => ({ ...prev, gender: data?.gender || '', gender_privacy: 'public' }));
-                             }}
-                            className="p-1 hover:bg-accent rounded-md transition-colors ml-3"
-                            aria-label="Edit gender"
-                          >
-                            <Pencil className="h-4 w-4 text-muted-foreground" />
-                          </button>
-                        )}
-                      </div>
+                      )}
 
-                       {/* Date of birth */}
-                       <div className="flex items-center py-3 border-b border-border">
-                         <div className="flex-1">
-                           {editingField === 'birthdate' ? (
-                             <div className="space-y-2">
-                               <Input 
-                                 type="date"
-                                 className="text-sm"
-                                 value={data?.birthdate || ''} 
-                                 onChange={(e) => {
-                                   // This would need to be handled differently since we're not storing birthdate in editForm
-                                   // For now, just show the interface
-                                 }}
-                                 autoFocus
-                               />
-                               <Select value={editForm.birthdate_privacy} onValueChange={(value) => handleEditFormChange('birthdate_privacy', value)}>
-                                 <SelectTrigger className="text-sm">
-                                   <SelectValue placeholder="Privacy" />
-                                 </SelectTrigger>
-                                 <SelectContent>
-                                   <SelectItem value="public">🌐 Public</SelectItem>
-                                   <SelectItem value="friends">👥 Friends</SelectItem>
-                                   <SelectItem value="only_me">🔒 Only me</SelectItem>
-                                 </SelectContent>
-                               </Select>
-                               <div className="flex gap-2">
-                                 <Button 
-                                   size="sm"
-                                   onClick={() => {
-                                     setEditingField(null);
-                                     setEditForm(prev => ({ ...prev, birthdate_privacy: 'only_me' }));
+                       {/* Date of birth - only show if not "only_me" or if owner */}
+                       {(isOwner || editForm.birthdate_privacy !== 'only_me') && (
+                         <div className="flex items-center py-3 border-b border-border">
+                           <div className="flex-1">
+                             {editingField === 'birthdate' && isOwner ? (
+                               <div className="space-y-2">
+                                 <Input 
+                                   type="date"
+                                   className="text-sm"
+                                   value={data?.birthdate || ''} 
+                                   onChange={(e) => {
+                                     // This would need to be handled differently since we're not storing birthdate in editForm
+                                     // For now, just show the interface
                                    }}
-                                   variant="outline"
-                                 >
-                                   Cancel
-                                 </Button>
-                                 <Button 
-                                   size="sm"
-                                   onClick={async () => {
-                                     await handleSaveProfile();
-                                     setEditingField(null);
-                                   }}
-                                 >
-                                   Save
-                                 </Button>
+                                   autoFocus
+                                 />
+                                 <Select value={editForm.birthdate_privacy} onValueChange={(value) => handleEditFormChange('birthdate_privacy', value)}>
+                                   <SelectTrigger className="text-sm">
+                                     <SelectValue placeholder="Privacy" />
+                                   </SelectTrigger>
+                                   <SelectContent>
+                                     <SelectItem value="public">🌐 Public</SelectItem>
+                                     <SelectItem value="friends">👥 Friends</SelectItem>
+                                     <SelectItem value="only_me">🔒 Only me</SelectItem>
+                                   </SelectContent>
+                                 </Select>
+                                 <div className="flex gap-2">
+                                   <Button 
+                                     size="sm"
+                                     onClick={() => {
+                                       setEditingField(null);
+                                       setEditForm(prev => ({ ...prev, birthdate_privacy: 'only_me' }));
+                                     }}
+                                     variant="outline"
+                                   >
+                                     Cancel
+                                   </Button>
+                                   <Button 
+                                     size="sm"
+                                     onClick={async () => {
+                                       await handleSaveProfile();
+                                       setEditingField(null);
+                                     }}
+                                   >
+                                     Save
+                                   </Button>
+                                 </div>
                                </div>
-                             </div>
-                           ) : (
-                             <div>
-                               <div className="text-sm text-muted-foreground">Date of birth</div>
-                               <div className="text-sm font-medium text-foreground">
-                                 {profile?.birthdate ? new Date(profile.birthdate).toLocaleDateString('en-GB', {
-                                   day: 'numeric',
-                                   month: 'long',
-                                   year: 'numeric'
-                                 }) : "Add date of birth"}
+                             ) : (
+                               <div>
+                                 <div className="text-sm text-muted-foreground">Date of birth</div>
+                                 <div className="text-sm font-medium text-foreground">
+                                   {profile?.birthdate ? new Date(profile.birthdate).toLocaleDateString('en-GB', {
+                                     day: 'numeric',
+                                     month: 'long',
+                                     year: 'numeric'
+                                   }) : "Add date of birth"}
+                                 </div>
+                                 {/* Hide privacy settings for non-owners */}
+                                 {isOwner && (
+                                   <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
+                                     <Lock className="h-3 w-3" />
+                                     <span>
+                                       {editForm.birthdate_privacy === 'public' ? 'Public' : 
+                                        editForm.birthdate_privacy === 'friends' ? 'Friends' : 'Only me'}
+                                     </span>
+                                   </div>
+                                 )}
                                </div>
-                               <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
-                                 <Lock className="h-3 w-3" />
-                                 <span>
-                                   {editForm.birthdate_privacy === 'public' ? 'Public' : 
-                                    editForm.birthdate_privacy === 'friends' ? 'Friends' : 'Only me'}
-                                 </span>
-                               </div>
-                             </div>
+                             )}
+                           </div>
+                           {isOwner && editingField !== 'birthdate' && (
+                             <button
+                               onClick={() => {
+                                 setEditingField('birthdate');
+                                 setEditForm(prev => ({ ...prev, birthdate_privacy: 'only_me' }));
+                               }}
+                               className="p-1 hover:bg-accent rounded-md transition-colors ml-3"
+                               aria-label="Edit date of birth"
+                             >
+                               <Pencil className="h-4 w-4 text-muted-foreground" />
+                             </button>
                            )}
                          </div>
-                         {isOwner && editingField !== 'birthdate' && (
-                           <button
-                             onClick={() => {
-                               setEditingField('birthdate');
-                               setEditForm(prev => ({ ...prev, birthdate_privacy: 'only_me' }));
-                             }}
-                             className="p-1 hover:bg-accent rounded-md transition-colors ml-3"
-                             aria-label="Edit date of birth"
-                           >
-                             <Pencil className="h-4 w-4 text-muted-foreground" />
-                           </button>
-                         )}
-                       </div>
+                       )}
                       
-                      {/* Country */}
-                      <div className="flex items-center py-3 border-b border-border">
-                        <div className="flex-1">
-                          {editingField === 'country' ? (
-                            <div className="space-y-2">
-                              <SearchableSelect
-                                value={editForm.country}
-                                onValueChange={(value) => handleEditFormChange('country', value)}
-                                options={countryOptions}
-                                placeholder="Country"
-                              />
-                              <div className="flex gap-2">
-                                <Button 
-                                  size="sm"
-                                  onClick={() => {
-                                    setEditingField(null);
-                                    setEditForm(prev => ({ ...prev, country: profile.country || '' }));
-                                  }}
-                                  variant="outline"
-                                >
-                                  Cancel
-                                </Button>
-                                <Button 
-                                  size="sm"
-                                  onClick={async () => {
-                                    await handleSaveProfile();
-                                    setEditingField(null);
-                                  }}
-                                >
-                                  Save
-                                </Button>
+                      {/* Country - only show if not "only_me" or if owner */}
+                      {(isOwner || editForm.country_privacy !== 'only_me') && (
+                        <div className="flex items-center py-3 border-b border-border">
+                          <div className="flex-1">
+                            {editingField === 'country' && isOwner ? (
+                              <div className="space-y-2">
+                                <SearchableSelect
+                                  value={editForm.country}
+                                  onValueChange={(value) => handleEditFormChange('country', value)}
+                                  options={countryOptions}
+                                  placeholder="Country"
+                                />
+                                <div className="flex gap-2">
+                                  <Button 
+                                    size="sm"
+                                    onClick={() => {
+                                      setEditingField(null);
+                                      setEditForm(prev => ({ ...prev, country: profile.country || '' }));
+                                    }}
+                                    variant="outline"
+                                  >
+                                    Cancel
+                                  </Button>
+                                  <Button 
+                                    size="sm"
+                                    onClick={async () => {
+                                      await handleSaveProfile();
+                                      setEditingField(null);
+                                    }}
+                                  >
+                                    Save
+                                  </Button>
+                                </div>
                               </div>
-                            </div>
-                          ) : (
-                            <div>
-                              <div className="text-sm text-muted-foreground">Country</div>
-                              <div className="text-sm font-medium text-foreground">
-                                {profile?.country || "Add country"}
+                            ) : (
+                              <div>
+                                <div className="text-sm text-muted-foreground">Country</div>
+                                <div className="text-sm font-medium text-foreground">
+                                  {profile?.country || "Add country"}
+                                </div>
+                                {/* Hide privacy settings for non-owners */}
+                                {isOwner && (
+                                  <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
+                                    <Lock className="h-3 w-3" />
+                                    <span>
+                                      {editForm.country_privacy === 'public' ? 'Public' : 
+                                       editForm.country_privacy === 'friends' ? 'Friends' : 'Only me'}
+                                    </span>
+                                  </div>
+                                )}
                               </div>
-                            </div>
+                            )}
+                          </div>
+                          {isOwner && editingField !== 'country' && (
+                            <button
+                              onClick={() => {
+                                setEditingField('country');
+                                setEditForm(prev => ({ ...prev, country: profile.country || '' }));
+                              }}
+                              className="p-1 hover:bg-accent rounded-md transition-colors ml-3"
+                              aria-label="Edit country"
+                            >
+                              <Pencil className="h-4 w-4 text-muted-foreground" />
+                            </button>
                           )}
                         </div>
-                        {isOwner && editingField !== 'country' && (
-                          <button
-                            onClick={() => {
-                              setEditingField('country');
-                              setEditForm(prev => ({ ...prev, country: profile.country || '' }));
-                            }}
-                            className="p-1 hover:bg-accent rounded-md transition-colors ml-3"
-                            aria-label="Edit country"
-                          >
-                            <Pencil className="h-4 w-4 text-muted-foreground" />
-                          </button>
-                        )}
-                      </div>
+                      )}
                       
-                      {/* Bio */}
-                      <div className="flex items-center py-3">
-                        <div className="flex-1">
-                          {editingField === 'bio' ? (
-                            <div className="space-y-2">
-                              <Input 
-                                placeholder="About Me" 
-                                className="text-sm placeholder:text-muted-foreground"
-                                value={editForm.bio} 
-                                onChange={(e) => handleEditFormChange('bio', e.target.value)} 
-                                autoFocus
-                              />
-                              <div className="flex gap-2">
-                                 <Button 
-                                   size="sm"
-                                   onClick={() => {
-                                     setEditingField(null);
-                                     setEditForm(prev => ({ ...prev, bio: data?.bio || '' }));
-                                  }}
-                                  variant="outline"
-                                >
-                                  Cancel
-                                </Button>
-                                <Button 
-                                  size="sm"
-                                  onClick={async () => {
-                                    await handleSaveProfile();
-                                    setEditingField(null);
-                                  }}
-                                >
-                                  Save
-                                </Button>
+                      {/* Bio - only show to owner */}
+                      {isOwner && (
+                        <div className="flex items-center py-3">
+                          <div className="flex-1">
+                            {editingField === 'bio' ? (
+                              <div className="space-y-2">
+                                <Input 
+                                  placeholder="About Me" 
+                                  className="text-sm placeholder:text-muted-foreground"
+                                  value={editForm.bio} 
+                                  onChange={(e) => handleEditFormChange('bio', e.target.value)} 
+                                  autoFocus
+                                />
+                                <div className="flex gap-2">
+                                   <Button 
+                                     size="sm"
+                                     onClick={() => {
+                                       setEditingField(null);
+                                       setEditForm(prev => ({ ...prev, bio: data?.bio || '' }));
+                                    }}
+                                    variant="outline"
+                                  >
+                                    Cancel
+                                  </Button>
+                                  <Button 
+                                    size="sm"
+                                    onClick={async () => {
+                                      await handleSaveProfile();
+                                      setEditingField(null);
+                                    }}
+                                  >
+                                    Save
+                                  </Button>
+                                </div>
                               </div>
-                            </div>
-                          ) : (
-                            <div>
-                              <div className="text-sm text-muted-foreground">About Me</div>
-                              <div className="text-sm font-medium text-foreground">
-                                {profile?.bio || "Add bio"}
+                            ) : (
+                              <div>
+                                <div className="text-sm text-muted-foreground">About Me</div>
+                                <div className="text-sm font-medium text-foreground">
+                                  {profile?.bio || "Add bio"}
+                                </div>
                               </div>
-                            </div>
+                            )}
+                          </div>
+                          {editingField !== 'bio' && (
+                             <button
+                               onClick={() => {
+                                 setEditingField('bio');
+                                 setEditForm(prev => ({ ...prev, bio: data?.bio || '' }));
+                              }}
+                              className="p-1 hover:bg-accent rounded-md transition-colors ml-3"
+                              aria-label="Edit bio"
+                            >
+                              <Pencil className="h-4 w-4 text-muted-foreground" />
+                            </button>
                           )}
                         </div>
-                        {isOwner && editingField !== 'bio' && (
-                           <button
-                             onClick={() => {
-                               setEditingField('bio');
-                               setEditForm(prev => ({ ...prev, bio: data?.bio || '' }));
-                            }}
-                            className="p-1 hover:bg-accent rounded-md transition-colors ml-3"
-                            aria-label="Edit bio"
-                          >
-                            <Pencil className="h-4 w-4 text-muted-foreground" />
-                          </button>
-                        )}
-                      </div>
+                      )}
 
                       {!profile?.display_name && !profile?.gender && !profile?.country && !profile?.bio && !isOwner && (
                         <p className="text-muted-foreground text-center py-8">Нет информации для отображения</p>
