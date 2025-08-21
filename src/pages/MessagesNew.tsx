@@ -103,26 +103,76 @@ const Messages = () => {
   const createOrOpenConversation = async (recipientId: string) => {
     try {
       console.log('Creating or opening conversation with recipient:', recipientId);
-      const { data: convId, error } = await supabase.rpc('get_or_create_conversation', {
-        user1_id: user.id,
-        user2_id: recipientId
-      });
+      
+      // First try to find existing conversation
+      const { data: existingConv, error: findError } = await supabase
+        .from('conversation_participants')
+        .select(`
+          conversation_id,
+          conversations!inner(id)
+        `)
+        .eq('user_id', user.id);
 
-      if (error) throw error;
+      if (findError) throw findError;
+
+      // Check if any of these conversations have the recipient as participant
+      let existingConversationId = null;
+      if (existingConv) {
+        for (const conv of existingConv) {
+          const { data: otherParticipant } = await supabase
+            .from('conversation_participants')
+            .select('user_id')
+            .eq('conversation_id', conv.conversation_id)
+            .eq('user_id', recipientId)
+            .single();
+          
+          if (otherParticipant) {
+            existingConversationId = conv.conversation_id;
+            break;
+          }
+        }
+      }
+
+      let conversationId = existingConversationId;
+
+      // If no existing conversation, create new one
+      if (!conversationId) {
+        console.log('Creating new conversation');
+        
+        // Create conversation
+        const { data: newConv, error: createError } = await supabase
+          .from('conversations')
+          .insert({})
+          .select('id')
+          .single();
+
+        if (createError) throw createError;
+        conversationId = newConv.id;
+
+        // Add both participants
+        const { error: participantsError } = await supabase
+          .from('conversation_participants')
+          .insert([
+            { conversation_id: conversationId, user_id: user.id },
+            { conversation_id: conversationId, user_id: recipientId }
+          ]);
+
+        if (participantsError) throw participantsError;
+      }
       
-      console.log('Got conversation ID:', convId);
-      setSelectedConversation(convId);
+      console.log('Using conversation ID:', conversationId);
+      setSelectedConversation(conversationId);
       
-      // Load messages for this conversation immediately
-      if (convId) {
-        await loadMessages(convId);
-        await markConversationAsRead(convId);
+      // Load messages and mark as read
+      if (conversationId) {
+        await loadMessages(conversationId);
+        await markConversationAsRead(conversationId);
       }
       
       // Refresh conversations list to show it in sidebar
       setTimeout(() => {
         loadConversations();
-      }, 100);
+      }, 200);
     } catch (error) {
       console.error('Error creating conversation:', error);
       toast({
