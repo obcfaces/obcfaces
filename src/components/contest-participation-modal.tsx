@@ -401,6 +401,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
       };
 
       let dbError = null;
+      const currentDate = new Date().toISOString();
 
       if (existingApplication) {
         // Update existing application
@@ -409,8 +410,9 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
           .update({
             application_data: applicationData,
             status: 'pending',
-            submitted_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
+            submitted_at: currentDate,
+            last_participation_date: currentDate,
+            updated_at: currentDate
           })
           .eq('user_id', session.user.id);
         
@@ -422,7 +424,8 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
           .insert({
             user_id: session.user.id,
             application_data: applicationData,
-            status: 'pending'
+            status: 'pending',
+            last_participation_date: currentDate
           });
         
         dbError = error;
