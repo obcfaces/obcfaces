@@ -76,11 +76,21 @@ const Messages = () => {
     }
   }, [user]);
 
-  // Handle recipient parameter for direct messaging
+  // Handle recipient parameter for direct messaging AFTER conversations are loaded
   useEffect(() => {
     const recipientId = searchParams.get('recipient');
     if (recipientId && user && conversations.length > 0) {
-      createOrOpenConversation(recipientId);
+      // Check if conversation already exists in loaded conversations
+      const existingConv = conversations.find(conv => conv.other_user.id === recipientId);
+      if (existingConv) {
+        console.log('Found existing conversation:', existingConv.id);
+        setSelectedConversation(existingConv.id);
+        loadMessages(existingConv.id);
+        markConversationAsRead(existingConv.id);
+      } else {
+        // Create new conversation
+        createOrOpenConversation(recipientId);
+      }
     }
   }, [searchParams, user, conversations]);
 
