@@ -849,18 +849,29 @@ const Profile = () => {
                       ? `${profile.first_name} ${profile.last_name}` 
                       : "Пользователь")
                   }
-                </h1>
-                 {profile.country && (
-                   <div className="flex items-center gap-1 text-primary font-medium">
-                     <MapPin className="h-3 w-3" />
-                     <span className="text-sm">{profile.country}</span>
+                 </h1>
+                 
+                 {/* Instagram-style stats */}
+                 <div className="flex items-center gap-6 mt-2">
+                   <div className="text-center">
+                     <div className="font-semibold text-sm">{userPosts.length}</div>
+                     <div className="text-xs text-muted-foreground">posts</div>
                    </div>
-                 )}
-                 {profile.bio && (
-                   <p className="text-sm text-muted-foreground mt-2 italic leading-relaxed">
-                     {profile.bio}
-                   </p>
-                 )}
+                   <div className="text-center">
+                     <div className="font-semibold text-sm">{followersCount}</div>
+                     <div className="text-xs text-muted-foreground">followers</div>
+                   </div>
+                   <div className="text-center">
+                     <div className="font-semibold text-sm">{followingCount}</div>
+                     <div className="text-xs text-muted-foreground">following</div>
+                   </div>
+                 </div>
+
+                  {profile.bio && (
+                    <p className="text-sm text-muted-foreground mt-2 italic leading-relaxed">
+                      {profile.bio}
+                    </p>
+                  )}
                 </div>
                 {isOwner && (
                   <button
@@ -878,7 +889,7 @@ const Profile = () => {
                 )}
             </div>
             
-            <div className="flex items-center gap-1 mt-2">
+            <div className="flex items-center gap-2 mt-4">
               {isOwner && (
                 <ContestParticipationModal>
                    <Button className="bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200">
@@ -892,10 +903,20 @@ const Profile = () => {
                   </CreatePostModal>
                 )}
                {!isOwner && (
-                 <Button variant="outline" onClick={handleMessage}>
-                   <MessageCircle className="w-4 h-4 mr-1" strokeWidth={1} />
-                   Message
-                 </Button>
+                 <>
+                   <Button 
+                     variant={isFollowing ? "secondary" : "default"} 
+                     onClick={handleFollowToggle}
+                     disabled={loadingFollow}
+                     className="flex-1"
+                   >
+                     {loadingFollow ? "..." : isFollowing ? "Unfollow" : "Follow"}
+                   </Button>
+                   <Button variant="outline" onClick={handleMessage}>
+                     <MessageCircle className="w-4 h-4 mr-1" strokeWidth={1} />
+                     Message
+                   </Button>
+                 </>
                )}
             </div>
 
