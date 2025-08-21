@@ -67,15 +67,31 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
   const loadContestParticipants = async (weekOffset: number = 0) => {
     try {
       console.log('Loading contest participants with weekOffset:', weekOffset);
-      // Use the secure public function that doesn't expose sensitive data
-      const { data, error } = await supabase
-        .rpc('get_weekly_contest_participants_public', { weeks_offset: weekOffset });
+      console.log('Supabase client available:', !!supabase);
+      console.log('About to call RPC function...');
+      
+      // Direct RPC call without timeout for now
+      const { data, error } = await supabase.rpc('get_weekly_contest_participants_public', { 
+        weeks_offset: weekOffset 
+      });
 
+      console.log('RPC call completed successfully');
       console.log('Weekly contest participants data:', data);
       console.log('Weekly contest participants error:', error);
+      console.log('Data type:', typeof data);
       console.log('Data length:', data?.length);
+      
+      if (error) {
+        console.error('Error details:', {
+          message: error.message,
+          code: error.code,
+          details: error.details,
+          hint: error.hint
+        });
+      }
 
       if (data && !error) {
+        console.log('Returning data:', data);
         return data;
       } else {
         console.warn('No weekly contest participants loaded:', error);
@@ -83,6 +99,9 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
       }
     } catch (err) {
       console.error('Error loading weekly contest participants:', err);
+      console.error('Error name:', err.name);
+      console.error('Error message:', err.message);
+      console.error('Error stack:', err.stack);
       return [];
     }
   };
