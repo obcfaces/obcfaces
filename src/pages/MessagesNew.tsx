@@ -79,13 +79,14 @@ const Messages = () => {
   // Handle recipient parameter for direct messaging
   useEffect(() => {
     const recipientId = searchParams.get('recipient');
-    if (recipientId && user) {
+    if (recipientId && user && conversations.length > 0) {
       createOrOpenConversation(recipientId);
     }
-  }, [searchParams, user]);
+  }, [searchParams, user, conversations]);
 
   const createOrOpenConversation = async (recipientId: string) => {
     try {
+      console.log('Creating or opening conversation with recipient:', recipientId);
       const { data: convId, error } = await supabase.rpc('get_or_create_conversation', {
         user1_id: user.id,
         user2_id: recipientId
@@ -93,8 +94,16 @@ const Messages = () => {
 
       if (error) throw error;
       
+      console.log('Got conversation ID:', convId);
       setSelectedConversation(convId);
-      await loadConversations(); // Refresh conversations list
+      
+      // Load messages for this conversation immediately
+      if (convId) {
+        await loadMessages(convId);
+        await markConversationAsRead(convId);
+      }
+      
+      await loadConversations(); // Refresh conversations list to show it in sidebar
     } catch (error) {
       console.error('Error creating conversation:', error);
       toast({
