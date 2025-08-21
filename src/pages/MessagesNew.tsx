@@ -9,6 +9,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { Send, User, Search, ArrowLeft } from "lucide-react";
+import { useUnreadMessages } from "@/hooks/useUnreadMessages";
 
 interface Conversation {
   id: string;
@@ -48,6 +49,7 @@ const Messages = () => {
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const { markAsRead } = useUnreadMessages();
 
   useEffect(() => {
     const getUser = async () => {
@@ -154,12 +156,11 @@ const Messages = () => {
             .limit(1)
             .single();
 
-          // Get unread count
-          const { count: unreadCount } = await supabase
-            .from('messages')
-            .select('*', { count: 'exact', head: true })
-            .eq('conversation_id', conv.conversation_id)
-            .neq('sender_id', user.id);
+          // Get unread count using the new database function
+          const { data: unreadCount } = await supabase.rpc('get_conversation_unread_count', {
+            conversation_id_param: conv.conversation_id,
+            user_id_param: user.id
+          });
 
           return {
             id: conv.conversation_id,
@@ -182,6 +183,25 @@ const Messages = () => {
     }
   };
 
+  // Mark conversation as read when user selects it
+  const markConversationAsRead = async (conversationId: string) => {
+    if (!user) return;
+    
+    try {
+      await supabase.rpc('mark_conversation_as_read', {
+        conversation_id_param: conversationId,
+        user_id_param: user.id
+      });
+      
+      // Update unread count in top-bar
+      markAsRead(conversationId);
+      
+      // Refresh conversations to update unread count
+      loadConversations();
+    } catch (error) {
+      console.error('Error marking conversation as read:', error);
+    }
+  };
   const loadMessages = async (conversationId: string) => {
     setLoadingMessages(true);
     try {
@@ -317,6 +337,7 @@ const Messages = () => {
   useEffect(() => {
     if (selectedConversation) {
       loadMessages(selectedConversation);
+      markConversationAsRead(selectedConversation);
     }
   }, [selectedConversation]);
 
@@ -373,7 +394,10 @@ const Messages = () => {
               filteredConversations.map((conversation) => (
                 <div
                   key={conversation.id}
-                  onClick={() => setSelectedConversation(conversation.id)}
+                  onClick={() => {
+                    setSelectedConversation(conversation.id);
+                    markConversationAsRead(conversation.id);
+                  }}
                   className={`p-4 cursor-pointer hover:bg-accent transition-colors ${
                     selectedConversation === conversation.id ? 'bg-accent' : ''
                   }`}
