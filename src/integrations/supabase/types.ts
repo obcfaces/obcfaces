@@ -19,6 +19,7 @@ export type Database = {
           application_data: Json | null
           created_at: string
           id: string
+          last_participation_date: string | null
           notes: string | null
           reviewed_at: string | null
           reviewed_by: string | null
@@ -31,6 +32,7 @@ export type Database = {
           application_data?: Json | null
           created_at?: string
           id?: string
+          last_participation_date?: string | null
           notes?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
@@ -43,6 +45,7 @@ export type Database = {
           application_data?: Json | null
           created_at?: string
           id?: string
+          last_participation_date?: string | null
           notes?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
@@ -88,18 +91,21 @@ export type Database = {
           conversation_id: string
           id: string
           joined_at: string
+          last_read_at: string | null
           user_id: string
         }
         Insert: {
           conversation_id: string
           id?: string
           joined_at?: string
+          last_read_at?: string | null
           user_id: string
         }
         Update: {
           conversation_id?: string
           id?: string
           joined_at?: string
+          last_read_at?: string | null
           user_id?: string
         }
         Relationships: [
@@ -613,6 +619,10 @@ export type Database = {
         }
         Returns: number
       }
+      get_conversation_unread_count: {
+        Args: { conversation_id_param: string; user_id_param: string }
+        Returns: number
+      }
       get_detailed_profile: {
         Args: { profile_user_id: string }
         Returns: {
@@ -654,6 +664,10 @@ export type Database = {
           display_name: string
           id: string
         }[]
+      }
+      get_unread_messages_count: {
+        Args: { user_id_param: string }
+        Returns: number
       }
       get_week_monday: {
         Args: { input_date?: string }
@@ -727,6 +741,10 @@ export type Database = {
       is_following: {
         Args: { target_user_id: string }
         Returns: boolean
+      }
+      mark_conversation_as_read: {
+        Args: { conversation_id_param: string; user_id_param: string }
+        Returns: undefined
       }
       rotate_weekly_contests: {
         Args: Record<PropertyKey, never>
