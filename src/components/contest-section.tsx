@@ -67,41 +67,28 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
   const loadContestParticipants = async (weekOffset: number = 0) => {
     try {
       console.log('Loading contest participants with weekOffset:', weekOffset);
-      console.log('Supabase client available:', !!supabase);
-      console.log('About to call RPC function...');
       
-      // Direct RPC call without timeout for now
-      const { data, error } = await supabase.rpc('get_weekly_contest_participants_public', { 
+      // Add timeout to prevent hanging
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('RPC timeout')), 5000)
+      );
+      
+      const rpcPromise = supabase.rpc('get_weekly_contest_participants_public', { 
         weeks_offset: weekOffset 
       });
 
-      console.log('RPC call completed successfully');
-      console.log('Weekly contest participants data:', data);
-      console.log('Weekly contest participants error:', error);
-      console.log('Data type:', typeof data);
-      console.log('Data length:', data?.length);
+      const { data, error } = await Promise.race([rpcPromise, timeoutPromise]) as any;
       
-      if (error) {
-        console.error('Error details:', {
-          message: error.message,
-          code: error.code,
-          details: error.details,
-          hint: error.hint
-        });
-      }
-
+      console.log('RPC completed:', { data: !!data, error: !!error, length: data?.length });
+      
       if (data && !error) {
-        console.log('Returning data:', data);
         return data;
       } else {
-        console.warn('No weekly contest participants loaded:', error);
+        console.warn('No participants or error:', error);
         return [];
       }
     } catch (err) {
-      console.error('Error loading weekly contest participants:', err);
-      console.error('Error name:', err.name);
-      console.error('Error message:', err.message);
-      console.error('Error stack:', err.stack);
+      console.error('RPC failed:', err.message);
       return [];
     }
   };
@@ -110,41 +97,33 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
   useEffect(() => {
     const loadParticipants = async () => {
       console.log('Starting loadParticipants for title:', title);
-      setIsLoading(true);
       
-      try {
-        let weekOffset = 0;
-        if (title === "THIS WEEK") weekOffset = 0;
-        else if (title === "1 WEEK AGO") weekOffset = -1;
-        else if (title === "2 WEEKS AGO") weekOffset = -2;
-        else if (title === "3 WEEKS AGO") weekOffset = -3;
-        
-        console.log('Calculated weekOffset:', weekOffset);
-        
-        if (["THIS WEEK", "1 WEEK AGO", "2 WEEKS AGO", "3 WEEKS AGO"].includes(title)) {
-          console.log('Loading real participants for:', title);
+      // Show fallback data immediately, then try to load real data
+      const fallbackData = await getContestantsSync([]);
+      setContestants(fallbackData || []);
+      setIsLoading(false); // Show fallback data immediately
+      
+      // Calculate week offset
+      let weekOffset = 0;
+      if (title === "THIS WEEK") weekOffset = 0;
+      else if (title === "1 WEEK AGO") weekOffset = -1;
+      else if (title === "2 WEEKS AGO") weekOffset = -2;
+      else if (title === "3 WEEKS AGO") weekOffset = -3;
+      
+      // Try to load real data in background for current week sections
+      if (["THIS WEEK", "1 WEEK AGO", "2 WEEKS AGO", "3 WEEKS AGO"].includes(title)) {
+        try {
           const participants = await loadContestParticipants(weekOffset);
-          console.log('Got participants:', participants);
-          setRealContestants(participants);
-          
-          // Process contestants data
-          const contestantsData = await getContestantsSync(participants);
-          console.log('Final contestants data:', contestantsData);
-          setContestants(contestantsData || []);
-        } else {
-          console.log('Loading fallback data for:', title);
-          // For other weeks, load fallback data immediately
-          const contestantsData = await getContestantsSync([]);
-          setContestants(contestantsData || []);
+          if (participants && participants.length > 0) {
+            console.log('Got real participants:', participants.length);
+            setRealContestants(participants);
+            const contestantsData = await getContestantsSync(participants);
+            setContestants(contestantsData || fallbackData);
+          }
+        } catch (err) {
+          console.error('Failed to load real participants:', err);
+          // Keep fallback data
         }
-      } catch (err) {
-        console.error('Error in loadParticipants:', err);
-        // Load fallback data on error
-        const fallbackData = await getContestantsSync([]);
-        setContestants(fallbackData || []);
-      } finally {
-        console.log('Setting loading to false');
-        setIsLoading(false);
       }
     };
 
