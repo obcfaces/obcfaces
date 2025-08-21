@@ -66,12 +66,14 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
 
   const loadContestParticipants = async (weekOffset: number = 0) => {
     try {
+      console.log('Loading contest participants with weekOffset:', weekOffset);
       // Use the secure public function that doesn't expose sensitive data
       const { data, error } = await supabase
         .rpc('get_weekly_contest_participants_public', { weeks_offset: weekOffset });
 
       console.log('Weekly contest participants data:', data);
       console.log('Weekly contest participants error:', error);
+      console.log('Data length:', data?.length);
 
       if (data && !error) {
         return data;
