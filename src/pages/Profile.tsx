@@ -1515,7 +1515,7 @@ const Profile = () => {
 
                       {/* Gender - only show if not "only_me" or if owner */}
                       {(isOwner || editForm.gender_privacy !== 'only_me') && (
-                        <div className="flex items-center py-3 border-b border-border">
+                        <div className="flex items-center py-2 border-b border-border">
                           <div className="flex-1">
                              {editingField === 'gender' && isOwner ? (
                                <div className="space-y-2">
@@ -1562,9 +1562,11 @@ const Profile = () => {
                                </div>
                              ) : (
                                <div>
-                                 <div className="text-sm text-muted-foreground">Gender</div>
-                                 <div className="text-sm font-medium text-foreground">
-                                   {profile?.gender ? (profile.gender === 'male' ? 'Male' : 'Female') : "Add gender"}
+                                 <div className="flex justify-between items-center">
+                                   <span className="text-sm text-muted-foreground">Gender</span>
+                                   <span className="text-sm font-medium text-foreground">
+                                     {profile?.gender ? (profile.gender === 'male' ? 'Male' : 'Female') : "Add gender"}
+                                   </span>
                                  </div>
                                  {/* Hide privacy settings for non-owners */}
                                  {isOwner && (
@@ -1596,7 +1598,7 @@ const Profile = () => {
 
                        {/* Date of birth - only show if not "only_me" or if owner */}
                        {(isOwner || editForm.birthdate_privacy !== 'only_me') && (
-                         <div className="flex items-center py-3 border-b border-border">
+                         <div className="flex items-center py-2 border-b border-border">
                            <div className="flex-1">
                              {editingField === 'birthdate' && isOwner ? (
                                <div className="space-y-2">
@@ -1644,13 +1646,15 @@ const Profile = () => {
                                </div>
                              ) : (
                                <div>
-                                 <div className="text-sm text-muted-foreground">Date of birth</div>
-                                 <div className="text-sm font-medium text-foreground">
-                                   {profile?.birthdate ? new Date(profile.birthdate).toLocaleDateString('en-GB', {
-                                     day: 'numeric',
-                                     month: 'long',
-                                     year: 'numeric'
-                                   }) : "Add date of birth"}
+                                 <div className="flex justify-between items-center">
+                                   <span className="text-sm text-muted-foreground">Date of birth</span>
+                                   <span className="text-sm font-medium text-foreground">
+                                     {profile?.birthdate ? new Date(profile.birthdate).toLocaleDateString('en-GB', {
+                                       day: 'numeric',
+                                       month: 'long',
+                                       year: 'numeric'
+                                     }) : "Add date of birth"}
+                                   </span>
                                  </div>
                                  {/* Hide privacy settings for non-owners */}
                                  {isOwner && (
@@ -1682,7 +1686,7 @@ const Profile = () => {
                       
                       {/* Country - only show if not "only_me" or if owner */}
                       {(isOwner || editForm.country_privacy !== 'only_me') && (
-                        <div className="flex items-center py-3 border-b border-border">
+                        <div className="flex items-center py-2 border-b border-border">
                           <div className="flex-1">
                             {editingField === 'country' && isOwner ? (
                               <div className="space-y-2">
@@ -1716,9 +1720,11 @@ const Profile = () => {
                               </div>
                             ) : (
                               <div>
-                                <div className="text-sm text-muted-foreground">Country</div>
-                                <div className="text-sm font-medium text-foreground">
-                                  {profile?.country || "Add country"}
+                                <div className="flex justify-between items-center">
+                                  <span className="text-sm text-muted-foreground">Country</span>
+                                  <span className="text-sm font-medium text-foreground">
+                                    {profile?.country || "Add country"}
+                                  </span>
                                 </div>
                                 {/* Hide privacy settings for non-owners */}
                                 {isOwner && (
