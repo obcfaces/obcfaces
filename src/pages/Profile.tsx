@@ -884,9 +884,11 @@ const Profile = () => {
                    🏆 Join & Win 5,000 PHP
                  </Button>
                </ContestParticipationModal>
-                <CreatePostModal onPostCreated={handlePostCreated}>
-                  <Button variant="outline">Add Post</Button>
-                </CreatePostModal>
+                {isOwner && (
+                  <CreatePostModal onPostCreated={handlePostCreated}>
+                    <Button variant="outline">Add Post</Button>
+                  </CreatePostModal>
+                )}
                {!isOwner && (
                  <Button variant="outline" onClick={handleMessage}>
                    <MessageCircle className="w-4 h-4 mr-1" strokeWidth={1} />
@@ -900,18 +902,6 @@ const Profile = () => {
                )}
             </div>
 
-            {!isOwner && (
-              <div className="flex items-center gap-6">
-                <div className="text-center">
-                  <div className="text-xl font-semibold">{followersCount}</div>
-                  <div className="text-sm text-muted-foreground">Подписчики</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-xl font-semibold">{followingCount}</div>
-                  <div className="text-sm text-muted-foreground">Подписки</div>
-                </div>
-              </div>
-            )}
 
           </div>
 
