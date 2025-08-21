@@ -897,11 +897,6 @@ const Profile = () => {
                    Message
                  </Button>
                )}
-               {!isOwner && (
-                 <div className="text-xs text-muted-foreground">
-                   Debug: isOwner={String(isOwner)}, currentUserId={currentUserId}, id={id}
-                 </div>
-               )}
             </div>
 
 
