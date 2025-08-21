@@ -19,6 +19,7 @@ export type Database = {
           application_data: Json | null
           created_at: string
           id: string
+          last_participation_date: string | null
           notes: string | null
           reviewed_at: string | null
           reviewed_by: string | null
@@ -31,6 +32,7 @@ export type Database = {
           application_data?: Json | null
           created_at?: string
           id?: string
+          last_participation_date?: string | null
           notes?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
@@ -43,6 +45,7 @@ export type Database = {
           application_data?: Json | null
           created_at?: string
           id?: string
+          last_participation_date?: string | null
           notes?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
