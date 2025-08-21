@@ -109,41 +109,46 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
   // Load participants based on title
   useEffect(() => {
     const loadParticipants = async () => {
-      console.log('=== Starting loadParticipants for title:', title);
+      console.log('Starting loadParticipants for title:', title);
       setIsLoading(true);
-      let weekOffset = 0;
-      if (title === "THIS WEEK") weekOffset = 0;
-      else if (title === "1 WEEK AGO") weekOffset = -1;
-      else if (title === "2 WEEKS AGO") weekOffset = -2;
-      else if (title === "3 WEEKS AGO") weekOffset = -3;
       
-      console.log('=== Calculated weekOffset:', weekOffset);
-      
-      if (["THIS WEEK", "1 WEEK AGO", "2 WEEKS AGO", "3 WEEKS AGO"].includes(title)) {
-        console.log('=== Loading real participants for:', title);
-        const participants = await loadContestParticipants(weekOffset);
-        console.log('=== Got participants:', participants);
-        setRealContestants(participants);
+      try {
+        let weekOffset = 0;
+        if (title === "THIS WEEK") weekOffset = 0;
+        else if (title === "1 WEEK AGO") weekOffset = -1;
+        else if (title === "2 WEEKS AGO") weekOffset = -2;
+        else if (title === "3 WEEKS AGO") weekOffset = -3;
         
-        // Load contestants immediately after getting real data
-        console.log('=== Processing contestants data...');
-        const contestantsData = await getContestantsSync(participants);
-        console.log('=== Final contestants data:', contestantsData);
-        setContestants(contestantsData || []);
-      } else {
-        console.log('=== Loading fallback data for:', title);
-        // For other weeks, load fallback data immediately
-        const contestantsData = await getContestantsSync([]);
-        setContestants(contestantsData || []);
+        console.log('Calculated weekOffset:', weekOffset);
+        
+        if (["THIS WEEK", "1 WEEK AGO", "2 WEEKS AGO", "3 WEEKS AGO"].includes(title)) {
+          console.log('Loading real participants for:', title);
+          const participants = await loadContestParticipants(weekOffset);
+          console.log('Got participants:', participants);
+          setRealContestants(participants);
+          
+          // Process contestants data
+          const contestantsData = await getContestantsSync(participants);
+          console.log('Final contestants data:', contestantsData);
+          setContestants(contestantsData || []);
+        } else {
+          console.log('Loading fallback data for:', title);
+          // For other weeks, load fallback data immediately
+          const contestantsData = await getContestantsSync([]);
+          setContestants(contestantsData || []);
+        }
+      } catch (err) {
+        console.error('Error in loadParticipants:', err);
+        // Load fallback data on error
+        const fallbackData = await getContestantsSync([]);
+        setContestants(fallbackData || []);
+      } finally {
+        console.log('Setting loading to false');
+        setIsLoading(false);
       }
-      console.log('=== Setting loading to false');
-      setIsLoading(false);
     };
 
-    loadParticipants().catch(err => {
-      console.error('=== Error in loadParticipants:', err);
-      setIsLoading(false);
-    });
+    loadParticipants();
 
     // Set up real-time subscription for contest participant updates
     if (["THIS WEEK", "1 WEEK AGO", "2 WEEKS AGO", "3 WEEKS AGO"].includes(title)) {
