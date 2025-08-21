@@ -83,8 +83,13 @@ export function ContestantCard({
   const [isVoted, setIsVoted] = useState(() => {
     if (propIsVoted) return true;
     try {
-      const savedRating = localStorage.getItem(`rating-${name}-${localStorage.getItem('currentUserId') || 'anonymous'}`);
-      return !!savedRating;
+      // Check for current user ID first
+      const currentUserId = localStorage.getItem('currentUserId');
+      if (!currentUserId) return false;
+      
+      // Check for saved rating
+      const savedRating = localStorage.getItem(`rating-${name}-${currentUserId}`);
+      return !!savedRating && parseFloat(savedRating) > 0;
     } catch {
       return false;
     }
@@ -198,8 +203,9 @@ export function ContestantCard({
         
         // Load user's rating (if any)
         const savedRating = localStorage.getItem(`rating-${name}-${user.id}`);
-        if (savedRating) {
-          setUserRating(parseFloat(savedRating));
+        if (savedRating && parseFloat(savedRating) > 0) {
+          const ratingValue = parseFloat(savedRating);
+          setUserRating(ratingValue);
           setIsVoted(true); // Mark as voted if rating exists
         }
       }
