@@ -17,7 +17,6 @@ import LikedItem from "@/components/profile/LikedItem";
 import { PhotoModal } from "@/components/photo-modal";
 import { ContestParticipationModal } from "@/components/contest-participation-modal";
 import CreatePostModal from "@/components/create-post-modal";
-import { ChatModal } from "@/components/chat-modal";
 import c1 from "@/assets/contestant-1.jpg";
 import c2 from "@/assets/contestant-2.jpg";
 import c3 from "@/assets/contestant-3.jpg";
@@ -96,7 +95,6 @@ const Profile = () => {
   const [userPosts, setUserPosts] = useState<any[]>([]);
   const [loadingPosts, setLoadingPosts] = useState(true);
   const [postsViewMode, setPostsViewMode] = useState<'compact' | 'full'>('full');
-  const [chatModalOpen, setChatModalOpen] = useState(false);
 
   // Sample photos for gallery
   const profilePhotos = [c1, c2, c3, c1, c2, c3];
@@ -299,7 +297,8 @@ const Profile = () => {
       toast({ description: "Войдите в систему для отправки сообщений" });
       return;
     }
-    setChatModalOpen(true);
+    // Navigate to messages page with recipient parameter
+    window.location.href = `/messages?recipient=${id}`;
   };
 
   const handleBioSave = async () => {
@@ -1867,14 +1866,6 @@ const Profile = () => {
         city={profile.city || undefined}
       />
 
-      {/* Chat Modal */}
-      <ChatModal
-        open={chatModalOpen}
-        onOpenChange={setChatModalOpen}
-        recipientId={id || ''}
-        recipientName={profile.display_name || profile.first_name || 'Пользователь'}
-        recipientAvatar={profile.avatar_url || undefined}
-      />
     </div>
   );
 };
