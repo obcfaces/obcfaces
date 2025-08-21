@@ -160,296 +160,79 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
 
   // Define contestants based on week type (synchronous version)
   const getContestantsSync = async (participantsData: any[] = realContestants) => {
-    // Use real contestants from weekly contests if available
-    if (["THIS WEEK", "1 WEEK AGO", "2 WEEKS AGO", "3 WEEKS AGO"].includes(title) && participantsData.length > 0) {
-      const contestantsWithRatings = await Promise.all(
-        participantsData.map(async (contestant) => {
-          // Validate contestant data structure
-          if (!contestant || typeof contestant !== 'object') {
-            console.warn('Invalid contestant data:', contestant);
-            return null;
-          }
-          
-          // Get average rating from database
-          const { data: avgRating } = await supabase.rpc('get_contestant_average_rating', {
-            contestant_name_param: `${contestant.first_name || ''} ${contestant.last_name || ''}`.trim(),
-            contestant_user_id_param: contestant.user_id
-          });
-          
-          const averageRating = avgRating || 0;
-          
-          return {
-            rank: contestant.final_rank || 0,
-            name: `${contestant.first_name || 'Unknown'} ${contestant.last_name || ''}`.trim(),
-            profileId: contestant.user_id,
-            country: contestant.country || 'Unknown',
-            city: contestant.city || 'Unknown',
-            age: contestant.age || 0,
-            weight: contestant.weight_kg || 0,
-            height: contestant.height_cm || 0,
-            rating: averageRating,
-            faceImage: contestant.photo1_url || contestant1Face,
-            fullBodyImage: contestant.photo2_url || contestant1Full,
-            additionalPhotos: [],
-            isVoted: showWinner ? true : averageRating > 0,
-            isWinner: showWinner && contestant.final_rank === 1,
-            prize: showWinner && contestant.final_rank === 1 ? "+ 5000 PHP" : undefined,
-            isRealContestant: true // Mark as real contestant to disable fake likes/comments
-          };
-        })
-      );
+    // Always try to use real contestants from weekly contests first
+    if (["THIS WEEK", "1 WEEK AGO", "2 WEEKS AGO", "3 WEEKS AGO"].includes(title)) {
+      console.log('Checking participants data:', participantsData);
       
-      return contestantsWithRatings.filter(Boolean).sort((a, b) => {
-        // Sort by average rating (highest first), then by rank if ratings are equal
-        if (b.rating !== a.rating) {
-          return b.rating - a.rating;
+      if (participantsData && participantsData.length > 0) {
+        const contestantsWithRatings = await Promise.all(
+          participantsData.map(async (contestant) => {
+            // Validate contestant data structure
+            if (!contestant || typeof contestant !== 'object') {
+              console.warn('Invalid contestant data:', contestant);
+              return null;
+            }
+            
+            // Get average rating from database
+            const { data: avgRating } = await supabase.rpc('get_contestant_average_rating', {
+              contestant_name_param: `${contestant.first_name || ''} ${contestant.last_name || ''}`.trim(),
+              contestant_user_id_param: contestant.user_id
+            });
+            
+            const averageRating = avgRating || 0;
+            
+            // Use photos from application_data if available
+            const faceImage = contestant.photo_1_url || 
+                              (contestant.application_data?.photo1_url) || 
+                              contestant1Face;
+            const fullBodyImage = contestant.photo_2_url || 
+                                  (contestant.application_data?.photo2_url) || 
+                                  contestant1Full;
+            
+            return {
+              rank: contestant.final_rank || 0,
+              name: `${contestant.first_name || 'Unknown'} ${contestant.last_name || ''}`.trim(),
+              profileId: contestant.user_id,
+              country: contestant.country || 'Unknown',
+              city: contestant.city || 'Unknown',
+              age: contestant.age || 0,
+              weight: contestant.weight_kg || (contestant.application_data?.weight_kg) || 0,
+              height: contestant.height_cm || (contestant.application_data?.height_cm) || 0,
+              rating: averageRating,
+              faceImage,
+              fullBodyImage,
+              additionalPhotos: [],
+              isVoted: showWinner ? true : averageRating > 0,
+              isWinner: showWinner && contestant.final_rank === 1,
+              prize: showWinner && contestant.final_rank === 1 ? "+ 5000 PHP" : undefined,
+              isRealContestant: true // Mark as real contestant to disable fake likes/comments
+            };
+          })
+        );
+        
+        const validContestants = contestantsWithRatings.filter(Boolean);
+        console.log('Valid contestants found:', validContestants.length);
+        
+        if (validContestants.length > 0) {
+          return validContestants.sort((a, b) => {
+            // Sort by average rating (highest first), then by rank if ratings are equal
+            if (b.rating !== a.rating) {
+              return b.rating - a.rating;
+            }
+            return (a.rank || 999) - (b.rank || 999);
+          });
         }
-        return (a.rank || 999) - (b.rank || 999);
-      });
+      }
     }
     
-    // Fallback contestants for testing or when no real data
+    // Only show fallback message for THIS WEEK when no real contestants
     if (title === "THIS WEEK") {
-      return [
-        {
-          rank: 1,
-          name: "Anna Johnson",
-          profileId: "11111111-1111-1111-1111-111111111111",
-          country: "Philippines", 
-          city: "Manila",
-          age: 25,
-          weight: 55.5,
-          height: 165,
-          rating: ratings[1],
-          faceImage: contestant1Face,
-          fullBodyImage: contestant1Full,
-          additionalPhotos: [contestant2Face, contestant3Face],
-          isVoted: showWinner ? true : !!votes[1],
-          isWinner: showWinner,
-          prize: showWinner ? "+ 5000 PHP" : undefined
-        },
-        {
-          rank: 2,
-          name: "Elena Rodriguez",
-          profileId: "33333333-3333-3333-3333-333333333333",
-          country: "Philippines",
-          city: "Cebu",
-          age: 28,
-          weight: 60,
-          height: 170,
-          rating: ratings[2],
-          faceImage: contestant2Face,
-          fullBodyImage: contestant2Full,
-          additionalPhotos: [contestant1Face],
-          isVoted: showWinner ? true : !!votes[2]
-        },
-        {
-          rank: 3,
-          name: "Sofia Garcia",
-          profileId: "55555555-5555-5555-5555-555555555555",
-          country: "Philippines",
-          city: "Davao", 
-          age: 31,
-          weight: 58,
-          height: 162,
-          rating: ratings[3],
-          faceImage: contestant3Face,
-          fullBodyImage: contestant3Full,
-          additionalPhotos: [contestant1Face, contestant2Face, contestant1Full],
-          isVoted: showWinner ? true : !!votes[3]
-        }
-      ];
-    } else if (title === "1 WEEK AGO") {
-      // Last week - 2 finalists
-      return [
-        {
-          rank: 1,
-          name: "Michael Johnson",
-          profileId: "22222222-2222-2222-2222-222222222222",
-          country: "Philippines",
-          city: "Quezon City",
-          age: 32,
-          weight: 75,
-          height: 180,
-          rating: ratings[1],
-          faceImage: contestant1Face,
-          fullBodyImage: contestant1Full,
-          additionalPhotos: [contestant2Face],
-          isVoted: showWinner ? true : !!votes[1],
-          isWinner: showWinner,
-          prize: showWinner ? "+ 3000 PHP" : undefined
-        },
-        {
-          rank: 2,
-          name: "David Martinez",
-          profileId: "44444444-4444-4444-4444-444444444444",
-          country: "Philippines",
-          city: "Makati",
-          age: 29,
-          weight: 70.5,
-          height: 178,
-          rating: ratings[2],
-          faceImage: contestant2Face,
-          fullBodyImage: contestant2Full,
-          additionalPhotos: [contestant3Face],
-          isVoted: showWinner ? true : !!votes[2]
-        }
-      ];
-    } else {
-      // Other weeks - original contestants
-      return [
-        {
-          rank: 1,
-          name: "Maria Santos",
-          profileId: "1b5c2751-a820-4767-87e6-d06080219942",
-          country: "Philippines", 
-          city: "Cebu",
-          age: 23,
-          weight: 52,
-          height: 168,
-          rating: ratings[1],
-          faceImage: contestant1Face,
-          fullBodyImage: contestant1Full,
-          additionalPhotos: [contestant2Face, contestant3Face],
-          isVoted: showWinner ? true : !!votes[1],
-          isWinner: showWinner,
-          prize: showWinner ? "+ 5000 PhP" : undefined
-        },
-        {
-          rank: 2,
-          name: "Anna Cruz",
-          profileId: "66666666-6666-6666-6666-666666666666",
-          country: "Philippines",
-          city: "Manila",
-          age: 24,
-          weight: 55,
-          height: 165,
-          rating: ratings[2],
-          faceImage: contestant2Face,
-          fullBodyImage: contestant2Full,
-          additionalPhotos: [contestant1Face],
-          isVoted: showWinner ? true : !!votes[2]
-        },
-        {
-          rank: 3,
-          name: "Sofia Reyes",
-          profileId: "77777777-7777-7777-7777-777777777777",
-          country: "Philippines",
-          city: "Davao", 
-          age: 22,
-          weight: 51,
-          height: 170,
-          rating: ratings[3],
-          faceImage: contestant3Face,
-          fullBodyImage: contestant3Full,
-          additionalPhotos: [contestant1Face, contestant2Face, contestant1Full],
-          isVoted: showWinner ? true : !!votes[3]
-        },
-        {
-          rank: 4,
-          name: "Isabella Garcia",
-          profileId: "88888888-8888-8888-8888-888888888888",
-          country: "Philippines",
-          city: "Quezon City",
-          age: 25,
-          weight: 53,
-          height: 167,
-          rating: ratings[4],
-          faceImage: contestant1Face,
-          fullBodyImage: contestant1Full,
-          isVoted: showWinner ? true : !!votes[4]
-        },
-        {
-          rank: 5,
-          name: "Camila Torres",
-          profileId: "99999999-9999-9999-9999-999999999999",
-          country: "Philippines",
-          city: "Makati",
-          age: 21,
-          weight: 49,
-          height: 163,
-          rating: ratings[5],
-          faceImage: contestant2Face,
-          fullBodyImage: contestant2Full,
-          additionalPhotos: [contestant3Face, contestant3Full],
-          isVoted: showWinner ? true : !!votes[5]
-        },
-        {
-          rank: 6,
-          name: "Valentina Lopez",
-          profileId: "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
-          country: "Philippines",
-          city: "Pasig",
-          age: 26,
-          weight: 56,
-          height: 172,
-          rating: ratings[6],
-          faceImage: contestant3Face,
-          fullBodyImage: contestant3Full,
-          isVoted: showWinner ? true : !!votes[6]
-        },
-        {
-          rank: 7,
-          name: "Emma Rodriguez",
-          profileId: "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
-          country: "Philippines",
-          city: "Taguig",
-          age: 23,
-          weight: 52,
-          height: 166,
-          rating: ratings[7] || 3.7,
-          faceImage: contestant1Face,
-          fullBodyImage: contestant1Full,
-          additionalPhotos: [contestant2Face],
-          isVoted: showWinner ? true : !!votes[7]
-        },
-        {
-          rank: 8,
-          name: "Mia Hernandez",
-          profileId: "cccccccc-cccc-cccc-cccc-cccccccccccc",
-          country: "Philippines",
-          city: "Antipolo",
-          age: 24,
-          weight: 54,
-          height: 169,
-          rating: ratings[8] || 3.4,
-          faceImage: contestant2Face,
-          fullBodyImage: contestant2Full,
-          additionalPhotos: [contestant3Face],
-          isVoted: showWinner ? true : !!votes[8]
-        },
-        {
-          rank: 9,
-          name: "Gabriela Martinez",
-          profileId: "dddddddd-dddd-dddd-dddd-dddddddddddd",
-          country: "Philippines",
-          city: "Zamboanga",
-          age: 22,
-          weight: 50,
-          height: 164,
-          rating: ratings[9] || 3.2,
-          faceImage: contestant3Face,
-          fullBodyImage: contestant3Full,
-          additionalPhotos: [contestant1Face, contestant2Face],
-          isVoted: showWinner ? true : !!votes[9]
-        },
-        {
-          rank: 10,
-          name: "Lucia Gonzalez",
-          profileId: "eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee",
-          country: "Philippines",
-          city: "Cagayan de Oro",
-          age: 25,
-          weight: 57,
-          height: 171,
-          rating: ratings[10] || 3.0,
-          faceImage: contestant1Face,
-          fullBodyImage: contestant1Full,
-          additionalPhotos: [contestant3Face],
-          isVoted: showWinner ? true : !!votes[10]
-        }
-      ];
+      console.log('No real contestants found for THIS WEEK, showing empty state');
+      return [];
     }
+    
+    // For other weeks when no real data, return empty
+    return [];
   };
 
   // Keep this for backward compatibility but it's now mainly unused
@@ -498,6 +281,14 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
               </div>
             </div>
           ))}
+        </div>
+      ) : contestants.length === 0 ? (
+        <div className="px-6 text-center py-12">
+          <p className="text-muted-foreground text-lg">
+            {title === "THIS WEEK" 
+              ? "No contestants have been selected for this week yet. Check back soon!" 
+              : "No contestants available for this period."}
+          </p>
         </div>
       ) : (
         <div className="px-0 sm:px-6 grid grid-cols-1 lg:grid-cols-2 gap-1 sm:gap-3 max-w-full overflow-hidden">
