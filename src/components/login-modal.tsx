@@ -163,7 +163,7 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
       <DialogTrigger asChild>
         <button className="text-sm underline text-primary">Sign in</button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-lg data-[state=open]:translate-y-[-40%] sm:data-[state=open]:translate-y-[-50%]">
+      <DialogContent className="sm:max-w-lg data-[state=open]:translate-y-[-20%] sm:data-[state=open]:translate-y-[-25%]">
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>{description}</DialogDescription>
