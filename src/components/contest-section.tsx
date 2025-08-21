@@ -66,29 +66,21 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
 
   const loadContestParticipants = async (weekOffset: number = 0) => {
     try {
-      console.log('Loading contest participants with weekOffset:', weekOffset);
-      
-      // Add timeout to prevent hanging
-      const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('RPC timeout')), 5000)
-      );
-      
-      const rpcPromise = supabase.rpc('get_weekly_contest_participants_public', { 
-        weeks_offset: weekOffset 
-      });
+      // Use the secure public function that doesn't expose sensitive data
+      const { data, error } = await supabase
+        .rpc('get_weekly_contest_participants_public', { weeks_offset: weekOffset });
 
-      const { data, error } = await Promise.race([rpcPromise, timeoutPromise]) as any;
-      
-      console.log('RPC completed:', { data: !!data, error: !!error, length: data?.length });
-      
+      console.log('Weekly contest participants data:', data);
+      console.log('Weekly contest participants error:', error);
+
       if (data && !error) {
         return data;
       } else {
-        console.warn('No participants or error:', error);
+        console.warn('No weekly contest participants loaded:', error);
         return [];
       }
     } catch (err) {
-      console.error('RPC failed:', err.message);
+      console.error('Error loading weekly contest participants:', err);
       return [];
     }
   };
@@ -96,40 +88,25 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
   // Load participants based on title
   useEffect(() => {
     const loadParticipants = async () => {
-      console.log('Starting loadParticipants for title:', title);
       setIsLoading(true);
-      
-      // Calculate week offset
       let weekOffset = 0;
       if (title === "THIS WEEK") weekOffset = 0;
       else if (title === "1 WEEK AGO") weekOffset = -1;
       else if (title === "2 WEEKS AGO") weekOffset = -2;
       else if (title === "3 WEEKS AGO") weekOffset = -3;
       
-      // Try to load real data first for current week sections
       if (["THIS WEEK", "1 WEEK AGO", "2 WEEKS AGO", "3 WEEKS AGO"].includes(title)) {
-        try {
-          console.log('Loading real participants for:', title, 'weekOffset:', weekOffset);
-          const participants = await loadContestParticipants(weekOffset);
-          
-          if (participants && participants.length > 0) {
-            console.log('Got real participants:', participants.length, 'participants');
-            setRealContestants(participants);
-            const contestantsData = await getContestantsSync(participants);
-            console.log('Processed real contestants:', contestantsData?.length);
-            setContestants(contestantsData || []);
-            setIsLoading(false);
-            return; // Exit early if we have real data
-          }
-        } catch (err) {
-          console.error('Failed to load real participants:', err);
-        }
+        const participants = await loadContestParticipants(weekOffset);
+        setRealContestants(participants);
+        
+        // Load contestants immediately after getting real data
+        const contestantsData = await getContestantsSync(participants);
+        setContestants(contestantsData || []);
+      } else {
+        // For other weeks, load fallback data immediately
+        const contestantsData = await getContestantsSync([]);
+        setContestants(contestantsData || []);
       }
-      
-      // Fall back to test data only if no real data
-      console.log('Loading fallback data for:', title);
-      const fallbackData = await getContestantsSync([]);
-      setContestants(fallbackData || []);
       setIsLoading(false);
     };
 
