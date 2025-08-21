@@ -32,7 +32,7 @@ export function ContestHeader({ activeSection, onSectionChange }: ContestHeaderP
         <div className="mt-6 space-y-1 text-sm text-contest-text">
           <div className="flex items-center gap-2">
             <span>🌐</span>
-            <span>Entirely online — no need to travel</span>
+            <span>All online — no need to travel</span>
           </div>
           <div className="flex items-center gap-2">
             <span>🌍</span>
