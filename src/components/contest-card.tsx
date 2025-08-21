@@ -781,36 +781,6 @@ export function ContestantCard({
             </div>
           )}
           
-          {/* Like/Comment buttons for logged users who haven't voted yet */}
-          {user && !isVoted && (
-            <div className="absolute bottom-1 right-1 sm:bottom-2 sm:right-2 flex items-center gap-2 bg-white/90 backdrop-blur-sm rounded px-2 py-1">
-               <button
-                 type="button"
-                 className={cn(
-                   "inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors",
-                   (isLiked[0] || isLiked[1]) && "text-contest-blue"
-                 )}
-                 onClick={() => handleLike(0)}
-                 aria-label="Like"
-               >
-                 <ThumbsUp className={cn("w-3 h-3", (isLiked[0] || isLiked[1]) && "fill-current")} />
-                 <span>{likesCount[0] + likesCount[1]}</span>
-               </button>
-               <button
-                 type="button"
-                 className={cn(
-                   "inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors",
-                   hasCommented && "text-contest-blue"
-                 )}
-                 onClick={handleComment}
-                 aria-label="Comments"
-               >
-                 <MessageCircle className={cn("w-3 h-3", hasCommented && "fill-current")} />
-                 <span>{commentsCount[0] + commentsCount[1]}</span>
-               </button>
-            </div>
-          )}
-          
           {/* Normal content - completely hidden, not used anymore */}
           <div className="hidden"></div>
         </div>
