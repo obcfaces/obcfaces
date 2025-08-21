@@ -507,9 +507,9 @@ export function ContestantCard({
                 onClick={() => handleLike(0)}
                 aria-label="Like"
               >
-                <ThumbsUp className={cn("w-4 h-4", (isLiked[0] || isLiked[1]) && "stroke-2 text-primary")} />
-                <span className="hidden sm:inline">Like</span>
-                <span>{likesCount[0] + likesCount[1]}</span>
+                 <ThumbsUp className={cn("w-4 h-4", (isLiked[0] || isLiked[1]) ? "fill-current" : "")} strokeWidth={1} />
+                 <span className="hidden sm:inline">Like</span>
+                 {(likesCount[0] + likesCount[1] > 0) && <span>{likesCount[0] + likesCount[1]}</span>}
               </button>
               {showDislike && (
                 <button
@@ -535,9 +535,9 @@ export function ContestantCard({
                 onClick={handleComment}
                 aria-label="Comments"
               >
-                <MessageCircle className={cn("w-4 h-4", hasCommented && "stroke-2 text-primary")} />
+                <MessageCircle className={cn("w-4 h-4", hasCommented ? "fill-current" : "")} strokeWidth={1} />
                 <span className="hidden sm:inline">Comment</span>
-                <span>{commentsCount[0] + commentsCount[1]}</span>
+                {(commentsCount[0] + commentsCount[1] > 0) && <span>{commentsCount[0] + commentsCount[1]}</span>}
               </button>
               <button
                 type="button"
@@ -733,9 +733,9 @@ export function ContestantCard({
                    onClick={() => handleLike(0)}
                    aria-label="Like"
                  >
-                   <ThumbsUp className={cn("w-3.5 h-3.5", (isLiked[0] || isLiked[1]) && "stroke-2 text-primary")} />
-                   <span className="hidden xl:inline">Like</span>
-                   <span>{likesCount[0] + likesCount[1]}</span>
+                    <ThumbsUp className={cn("w-3.5 h-3.5", (isLiked[0] || isLiked[1]) ? "fill-current" : "")} strokeWidth={1} />
+                    <span className="hidden xl:inline">Like</span>
+                    {(likesCount[0] + likesCount[1] > 0) && <span>{likesCount[0] + likesCount[1]}</span>}
                  </button>
                 {showDislike && (
                   <button
@@ -761,9 +761,9 @@ export function ContestantCard({
                    onClick={handleComment}
                    aria-label="Comments"
                  >
-                   <MessageCircle className={cn("w-3.5 h-3.5", hasCommented && "stroke-2 text-primary")} />
-                   <span className="hidden xl:inline">Comment</span>
-                   <span>{commentsCount[0] + commentsCount[1]}</span>
+                    <MessageCircle className={cn("w-3.5 h-3.5", hasCommented ? "fill-current" : "")} strokeWidth={1} />
+                    <span className="hidden xl:inline">Comment</span>
+                    {(commentsCount[0] + commentsCount[1] > 0) && <span>{commentsCount[0] + commentsCount[1]}</span>}
                  </button>
                  <button
                    type="button"
