@@ -297,8 +297,8 @@ const Profile = () => {
       toast({ description: "Войдите в систему для отправки сообщений" });
       return;
     }
-    // Navigate to messages page with recipient parameter
-    window.location.href = `/messages?recipient=${id}`;
+    // Navigate to messages page with recipient parameter using React Router
+    navigate(`/messages?recipient=${id}`);
   };
 
   const handleBioSave = async () => {

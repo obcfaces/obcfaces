@@ -76,23 +76,29 @@ const Messages = () => {
     }
   }, [user]);
 
-  // Handle recipient parameter for direct messaging AFTER conversations are loaded
+  // Handle recipient parameter immediately when user is available
   useEffect(() => {
     const recipientId = searchParams.get('recipient');
-    if (recipientId && user && conversations.length > 0) {
+    if (recipientId && user) {
+      console.log('Recipient parameter detected:', recipientId);
+      createOrOpenConversation(recipientId);
+    }
+  }, [searchParams, user]);
+
+  // Handle recipient parameter for direct messaging AFTER conversations are loaded (fallback)
+  useEffect(() => {
+    const recipientId = searchParams.get('recipient');
+    if (recipientId && user && conversations.length > 0 && !selectedConversation) {
       // Check if conversation already exists in loaded conversations
       const existingConv = conversations.find(conv => conv.other_user.id === recipientId);
       if (existingConv) {
-        console.log('Found existing conversation:', existingConv.id);
+        console.log('Found existing conversation after load:', existingConv.id);
         setSelectedConversation(existingConv.id);
         loadMessages(existingConv.id);
         markConversationAsRead(existingConv.id);
-      } else {
-        // Create new conversation
-        createOrOpenConversation(recipientId);
       }
     }
-  }, [searchParams, user, conversations]);
+  }, [conversations, selectedConversation]);
 
   const createOrOpenConversation = async (recipientId: string) => {
     try {
@@ -113,7 +119,10 @@ const Messages = () => {
         await markConversationAsRead(convId);
       }
       
-      await loadConversations(); // Refresh conversations list to show it in sidebar
+      // Refresh conversations list to show it in sidebar
+      setTimeout(() => {
+        loadConversations();
+      }, 100);
     } catch (error) {
       console.error('Error creating conversation:', error);
       toast({
