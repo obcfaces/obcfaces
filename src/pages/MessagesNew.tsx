@@ -81,6 +81,7 @@ const Messages = () => {
     const recipientId = searchParams.get('recipient');
     if (recipientId && user) {
       console.log('Recipient parameter detected:', recipientId);
+      // Immediately create or open conversation when recipient is specified
       createOrOpenConversation(recipientId);
     }
   }, [searchParams, user]);
