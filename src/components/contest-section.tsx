@@ -318,6 +318,7 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
         {
           rank: 2,
           name: "Anna Cruz",
+          profileId: "66666666-6666-6666-6666-666666666666",
           country: "Philippines",
           city: "Manila",
           age: 24,
@@ -332,6 +333,7 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
         {
           rank: 3,
           name: "Sofia Reyes",
+          profileId: "77777777-7777-7777-7777-777777777777",
           country: "Philippines",
           city: "Davao", 
           age: 22,
@@ -346,6 +348,7 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
         {
           rank: 4,
           name: "Isabella Garcia",
+          profileId: "88888888-8888-8888-8888-888888888888",
           country: "Philippines",
           city: "Quezon City",
           age: 25,
@@ -359,6 +362,7 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
         {
           rank: 5,
           name: "Camila Torres",
+          profileId: "99999999-9999-9999-9999-999999999999",
           country: "Philippines",
           city: "Makati",
           age: 21,
@@ -373,6 +377,7 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
         {
           rank: 6,
           name: "Valentina Lopez",
+          profileId: "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
           country: "Philippines",
           city: "Pasig",
           age: 26,
@@ -386,6 +391,7 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
         {
           rank: 7,
           name: "Emma Rodriguez",
+          profileId: "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
           country: "Philippines",
           city: "Taguig",
           age: 23,
@@ -400,6 +406,7 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
         {
           rank: 8,
           name: "Mia Hernandez",
+          profileId: "cccccccc-cccc-cccc-cccc-cccccccccccc",
           country: "Philippines",
           city: "Antipolo",
           age: 24,
@@ -414,6 +421,7 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
         {
           rank: 9,
           name: "Gabriela Martinez",
+          profileId: "dddddddd-dddd-dddd-dddd-dddddddddddd",
           country: "Philippines",
           city: "Zamboanga",
           age: 22,
@@ -428,6 +436,7 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
         {
           rank: 10,
           name: "Lucia Gonzalez",
+          profileId: "eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee",
           country: "Philippines",
           city: "Cagayan de Oro",
           age: 25,

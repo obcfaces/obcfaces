@@ -17,6 +17,7 @@ const candidates = [
   {
     rank: 0,
     name: "Victoria Morales",
+    profileId: "fffffff1-ffff-ffff-ffff-ffffffffffff",
     country: "Philippines",
     city: "Manila",
     age: 22,
@@ -31,6 +32,7 @@ const candidates = [
   {
     rank: 0,
     name: "Alejandra Silva",
+    profileId: "fffffff2-ffff-ffff-ffff-ffffffffffff",
     country: "Philippines", 
     city: "Cebu",
     age: 24,
@@ -45,6 +47,7 @@ const candidates = [
   {
     rank: 0,
     name: "Andrea Vargas",
+    profileId: "fffffff3-ffff-ffff-ffff-ffffffffffff",
     country: "Philippines",
     city: "Davao",
     age: 23,
@@ -59,6 +62,7 @@ const candidates = [
   {
     rank: 0,
     name: "Natalia Castillo",
+    profileId: "fffffff4-ffff-ffff-ffff-ffffffffffff",
     country: "Philippines",
     city: "Quezon City",
     age: 25,
@@ -72,6 +76,7 @@ const candidates = [
   {
     rank: 0,
     name: "Daniela Ruiz",
+    profileId: "fffffff5-ffff-ffff-ffff-ffffffffffff",
     country: "Philippines",
     city: "Makati",
     age: 21,
@@ -86,6 +91,7 @@ const candidates = [
   {
     rank: 0,
     name: "Paula Jimenez",
+    profileId: "fffffff6-ffff-ffff-ffff-ffffffffffff",
     country: "Philippines",
     city: "Pasig",
     age: 26,
@@ -100,6 +106,7 @@ const candidates = [
   {
     rank: 0,
     name: "Carolina Perez",
+    profileId: "fffffff7-ffff-ffff-ffff-ffffffffffff",
     country: "Philippines",
     city: "Taguig",
     age: 23,
@@ -114,6 +121,7 @@ const candidates = [
   {
     rank: 0,
     name: "Mariana Santos",
+    profileId: "fffffff8-ffff-ffff-ffff-ffffffffffff",
     country: "Philippines",
     city: "Antipolo",
     age: 24,
@@ -128,6 +136,7 @@ const candidates = [
   {
     rank: 0,
     name: "Fernanda Diaz",
+    profileId: "fffffff9-ffff-ffff-ffff-ffffffffffff",
     country: "Philippines",
     city: "Zamboanga",
     age: 22,
@@ -142,6 +151,7 @@ const candidates = [
   {
     rank: 0,
     name: "Adriana Castro",
+    profileId: "fffffffa-ffff-ffff-ffff-ffffffffffff",
     country: "Philippines",
     city: "Cagayan de Oro",
     age: 25,
