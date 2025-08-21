@@ -348,7 +348,7 @@ const Messages = () => {
         <link rel="canonical" href="/messages" />
       </Helmet>
 
-      <div className="flex h-[100vh]">
+      <div className="flex h-screen fixed inset-0 top-16">
         {/* Conversations List */}
         <div className={`w-full md:w-80 border-r ${selectedConversation ? 'hidden md:block' : 'block'}`}>
           <div className="p-4 border-b">
@@ -443,8 +443,8 @@ const Messages = () => {
               </div>
 
               {/* Messages */}
-              <div className="flex-1 flex flex-col overflow-hidden">
-                <ScrollArea className="flex-1 p-4">
+              <div className="flex flex-col h-full">
+                <ScrollArea className="flex-1 p-4 pb-0">
                   {loadingMessages ? (
                     <div className="flex justify-center items-center h-32">
                       <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
@@ -454,7 +454,7 @@ const Messages = () => {
                       Начните разговор
                     </div>
                   ) : (
-                    <div className="space-y-4">
+                    <div className="space-y-4 pb-4">
                       {messages.map((message) => {
                         const isOwn = message.sender_id === user.id;
                         return (
@@ -476,14 +476,14 @@ const Messages = () => {
                             </div>
                           </div>
                         );
-                       })}
-                     </div>
-                   )}
-                   <div ref={messagesEndRef} />
-                 </ScrollArea>
+                      })}
+                      <div ref={messagesEndRef} />
+                    </div>
+                  )}
+                </ScrollArea>
 
-                {/* Message Input - Fixed at bottom */}
-                <div className="p-4 border-t bg-background">
+                {/* Message Input - Fixed at bottom of viewport */}
+                <div className="sticky bottom-0 p-4 border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
                   <div className="flex gap-2">
                     <Input
                       value={newMessage}
