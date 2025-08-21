@@ -76,13 +76,6 @@ const Messages = () => {
     }
   }, [user]);
 
-  // Load conversations when user is set
-  useEffect(() => {
-    if (user) {
-      loadConversations();
-    }
-  }, [user]);
-
   // Handle recipient parameter for direct messaging AFTER conversations are loaded (fallback)
   useEffect(() => {
     const recipientId = searchParams.get('recipient');
@@ -117,6 +110,9 @@ const Messages = () => {
       console.log('Got conversation ID:', conversationId);
       
       if (conversationId) {
+        // Wait a moment for the database to be consistent
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
         setSelectedConversation(conversationId);
         
         // Load messages directly
@@ -148,15 +144,16 @@ const Messages = () => {
           console.error('Error marking conversation as read:', error);
         }
         
-        // Refresh conversations list to show it in sidebar
+        // Force refresh conversations list after a short delay
         setTimeout(() => {
+          console.log('Refreshing conversations after creating conversation');
           loadConversations();
-        }, 300);
+        }, 500);
       }
     } catch (error) {
       console.error('Error creating conversation:', error);
       toast({
-        title: "Ошибка",
+        title: "Ошибка", 
         description: "Не удалось создать разговор",
         variant: "destructive"
       });
