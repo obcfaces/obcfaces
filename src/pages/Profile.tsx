@@ -908,11 +908,11 @@ const Profile = () => {
                      variant={isFollowing ? "secondary" : "default"} 
                      onClick={handleFollowToggle}
                      disabled={loadingFollow}
-                     className="flex-1"
+                     className="min-w-[100px]"
                    >
                      {loadingFollow ? "..." : isFollowing ? "Unfollow" : "Follow"}
                    </Button>
-                   <Button variant="outline" onClick={handleMessage}>
+                   <Button variant="outline" onClick={handleMessage} className="min-w-[100px]">
                      <MessageCircle className="w-4 h-4 mr-1" strokeWidth={1} />
                      Message
                    </Button>
