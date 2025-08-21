@@ -76,7 +76,29 @@ const Messages = () => {
     }
   }, [user]);
 
-  // Function to create or open conversation (defined after other functions to avoid dependency issues)
+  // Load conversations when user is set
+  useEffect(() => {
+    if (user) {
+      loadConversations();
+    }
+  }, [user]);
+
+  // Handle recipient parameter for direct messaging AFTER conversations are loaded (fallback)
+  useEffect(() => {
+    const recipientId = searchParams.get('recipient');
+    if (recipientId && user && conversations.length > 0 && !selectedConversation) {
+      // Check if conversation already exists in loaded conversations
+      const existingConv = conversations.find(conv => conv.other_user.id === recipientId);
+      if (existingConv) {
+        console.log('Found existing conversation after load:', existingConv.id);
+        setSelectedConversation(existingConv.id);
+        loadMessages(existingConv.id);
+        markConversationAsRead(existingConv.id);
+      }
+    }
+  }, [conversations, selectedConversation]);
+
+  // Function to create or open conversation - defined AFTER all other functions
   const createOrOpenConversation = async (recipientId: string) => {
     try {
       console.log('Creating or opening conversation with recipient:', recipientId);
@@ -97,39 +119,34 @@ const Messages = () => {
       if (conversationId) {
         setSelectedConversation(conversationId);
         
-        // Load messages and mark as read using function calls
-        const loadMessagesPromise = (async () => {
-          setLoadingMessages(true);
-          try {
-            const { data, error } = await supabase
-              .from('messages')
-              .select('*')
-              .eq('conversation_id', conversationId)
-              .eq('is_deleted', false)
-              .order('created_at', { ascending: true });
+        // Load messages directly
+        setLoadingMessages(true);
+        try {
+          const { data, error } = await supabase
+            .from('messages')
+            .select('*')
+            .eq('conversation_id', conversationId)
+            .eq('is_deleted', false)
+            .order('created_at', { ascending: true });
 
-            if (error) throw error;
-            setMessages(data || []);
-          } catch (error) {
-            console.error('Error loading messages:', error);
-          } finally {
-            setLoadingMessages(false);
-          }
-        })();
+          if (error) throw error;
+          setMessages(data || []);
+        } catch (error) {
+          console.error('Error loading messages:', error);
+        } finally {
+          setLoadingMessages(false);
+        }
 
-        const markAsReadPromise = (async () => {
-          try {
-            await supabase.rpc('mark_conversation_as_read', {
-              conversation_id_param: conversationId,
-              user_id_param: user.id
-            });
-            markAsRead(conversationId);
-          } catch (error) {
-            console.error('Error marking conversation as read:', error);
-          }
-        })();
-
-        await Promise.all([loadMessagesPromise, markAsReadPromise]);
+        // Mark as read
+        try {
+          await supabase.rpc('mark_conversation_as_read', {
+            conversation_id_param: conversationId,
+            user_id_param: user.id
+          });
+          markAsRead(conversationId);
+        } catch (error) {
+          console.error('Error marking conversation as read:', error);
+        }
         
         // Refresh conversations list to show it in sidebar
         setTimeout(() => {
@@ -146,7 +163,7 @@ const Messages = () => {
     }
   };
 
-  // Handle recipient parameter immediately when user is available
+  // Handle recipient parameter immediately when user is available - defined AFTER the function
   useEffect(() => {
     const recipientId = searchParams.get('recipient');
     if (recipientId && user && !selectedConversation) {
