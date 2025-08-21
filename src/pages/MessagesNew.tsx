@@ -348,7 +348,7 @@ const Messages = () => {
         <link rel="canonical" href="/messages" />
       </Helmet>
 
-      <div className="flex h-screen fixed inset-0 top-16">
+      <div className="flex h-screen">
         {/* Conversations List */}
         <div className={`w-full md:w-80 border-r ${selectedConversation ? 'hidden md:block' : 'block'}`}>
           <div className="p-4 border-b">
@@ -444,7 +444,7 @@ const Messages = () => {
 
               {/* Messages */}
               <div className="flex flex-col h-full">
-                <ScrollArea className="flex-1 p-4 pb-0">
+                <ScrollArea className="flex-1 p-4 pb-20">
                   {loadingMessages ? (
                     <div className="flex justify-center items-center h-32">
                       <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
@@ -454,7 +454,7 @@ const Messages = () => {
                       Начните разговор
                     </div>
                   ) : (
-                    <div className="space-y-4 pb-4">
+                    <div className="space-y-4">
                       {messages.map((message) => {
                         const isOwn = message.sender_id === user.id;
                         return (
@@ -481,26 +481,26 @@ const Messages = () => {
                     </div>
                   )}
                 </ScrollArea>
+              </div>
 
-                {/* Message Input - Fixed at bottom of viewport */}
-                <div className="sticky bottom-0 p-4 border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
-                  <div className="flex gap-2">
-                    <Input
-                      value={newMessage}
-                      onChange={(e) => setNewMessage(e.target.value)}
-                      onKeyPress={handleKeyPress}
-                      placeholder="Написать сообщение..."
-                      disabled={sending}
-                      className="flex-1"
-                    />
-                    <Button 
-                      onClick={sendMessage} 
-                      disabled={!newMessage.trim() || sending}
-                      size="icon"
-                    >
-                      <Send className="h-4 w-4" />
-                    </Button>
-                  </div>
+              {/* Message Input - Fixed at bottom of screen */}
+              <div className="fixed bottom-0 left-0 right-0 md:left-80 p-4 border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 z-50">
+                <div className="flex gap-2 max-w-4xl mx-auto">
+                  <Input
+                    value={newMessage}
+                    onChange={(e) => setNewMessage(e.target.value)}
+                    onKeyPress={handleKeyPress}
+                    placeholder="Написать сообщение..."
+                    disabled={sending}
+                    className="flex-1"
+                  />
+                  <Button 
+                    onClick={sendMessage} 
+                    disabled={!newMessage.trim() || sending}
+                    size="icon"
+                  >
+                    <Send className="h-4 w-4" />
+                  </Button>
                 </div>
               </div>
             </>
