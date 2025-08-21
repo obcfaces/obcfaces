@@ -76,31 +76,7 @@ const Messages = () => {
     }
   }, [user]);
 
-  // Handle recipient parameter immediately when user is available
-  useEffect(() => {
-    const recipientId = searchParams.get('recipient');
-    if (recipientId && user) {
-      console.log('Recipient parameter detected:', recipientId);
-      // Immediately create or open conversation when recipient is specified
-      createOrOpenConversation(recipientId);
-    }
-  }, [searchParams, user]);
-
-  // Handle recipient parameter for direct messaging AFTER conversations are loaded (fallback)
-  useEffect(() => {
-    const recipientId = searchParams.get('recipient');
-    if (recipientId && user && conversations.length > 0 && !selectedConversation) {
-      // Check if conversation already exists in loaded conversations
-      const existingConv = conversations.find(conv => conv.other_user.id === recipientId);
-      if (existingConv) {
-        console.log('Found existing conversation after load:', existingConv.id);
-        setSelectedConversation(existingConv.id);
-        loadMessages(existingConv.id);
-        markConversationAsRead(existingConv.id);
-      }
-    }
-  }, [conversations, selectedConversation]);
-
+  // Function to create or open conversation
   const createOrOpenConversation = async (recipientId: string) => {
     try {
       console.log('Creating or opening conversation with recipient:', recipientId);
@@ -135,6 +111,32 @@ const Messages = () => {
       });
     }
   };
+
+  // Handle recipient parameter immediately when user is available
+  useEffect(() => {
+    const recipientId = searchParams.get('recipient');
+    if (recipientId && user) {
+      console.log('Recipient parameter detected:', recipientId);
+      // Immediately create or open conversation when recipient is specified
+      createOrOpenConversation(recipientId);
+    }
+  }, [searchParams, user]);
+
+  // Handle recipient parameter for direct messaging AFTER conversations are loaded (fallback)
+  useEffect(() => {
+    const recipientId = searchParams.get('recipient');
+    if (recipientId && user && conversations.length > 0 && !selectedConversation) {
+      // Check if conversation already exists in loaded conversations
+      const existingConv = conversations.find(conv => conv.other_user.id === recipientId);
+      if (existingConv) {
+        console.log('Found existing conversation after load:', existingConv.id);
+        setSelectedConversation(existingConv.id);
+        loadMessages(existingConv.id);
+        markConversationAsRead(existingConv.id);
+      }
+    }
+  }, [conversations, selectedConversation]);
+
 
   const loadConversations = async () => {
     if (!user) return;
