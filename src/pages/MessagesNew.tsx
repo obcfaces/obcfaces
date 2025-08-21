@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Helmet } from "react-helmet-async";
 import { Navigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { Send, User, Search, ArrowLeft } from "lucide-react";
 
 interface Conversation {
@@ -47,6 +47,7 @@ const Messages = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const getUser = async () => {
@@ -226,22 +227,45 @@ const Messages = () => {
     if (!newMessage.trim() || !selectedConversation || sending) return;
 
     setSending(true);
+    
+    // Optimistically add message to UI
+    const optimisticMessage: Message = {
+      id: `temp-${Date.now()}`,
+      content: newMessage.trim(),
+      sender_id: user.id,
+      created_at: new Date().toISOString(),
+      is_deleted: false
+    };
+    
+    setMessages(prev => [...prev, optimisticMessage]);
+    const messageToSend = newMessage.trim();
+    setNewMessage("");
+    
     try {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('messages')
         .insert({
           conversation_id: selectedConversation,
           sender_id: user.id,
-          content: newMessage.trim(),
+          content: messageToSend,
           message_type: 'text'
-        });
+        })
+        .select()
+        .single();
 
       if (error) throw error;
       
-      setNewMessage("");
+      // Replace optimistic message with real one
+      setMessages(prev => prev.map(msg => 
+        msg.id === optimisticMessage.id ? data : msg
+      ));
+      
       loadConversations(); // Refresh to update last message
     } catch (error) {
       console.error('Error sending message:', error);
+      // Remove optimistic message on error
+      setMessages(prev => prev.filter(msg => msg.id !== optimisticMessage.id));
+      setNewMessage(messageToSend); // Restore message in input
       toast({
         title: "Ошибка",
         description: "Не удалось отправить сообщение",
@@ -296,6 +320,11 @@ const Messages = () => {
     }
   }, [selectedConversation]);
 
+  // Auto scroll to bottom when messages change
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -319,7 +348,7 @@ const Messages = () => {
         <link rel="canonical" href="/messages" />
       </Helmet>
 
-      <div className="flex h-screen">
+      <div className="flex h-[100vh]">
         {/* Conversations List */}
         <div className={`w-full md:w-80 border-r ${selectedConversation ? 'hidden md:block' : 'block'}`}>
           <div className="p-4 border-b">
@@ -335,7 +364,7 @@ const Messages = () => {
             </div>
           </div>
           
-          <ScrollArea className="h-[calc(100vh-120px)]">
+          <ScrollArea className="h-[calc(100vh-140px)]">
             {filteredConversations.length === 0 ? (
               <div className="p-4 text-center text-muted-foreground">
                 {conversations.length === 0 ? "Нет сообщений" : "Нет результатов"}
@@ -414,61 +443,64 @@ const Messages = () => {
               </div>
 
               {/* Messages */}
-              <ScrollArea className="flex-1 p-4">
-                {loadingMessages ? (
-                  <div className="flex justify-center items-center h-32">
-                    <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
-                  </div>
-                ) : messages.length === 0 ? (
-                  <div className="text-center text-muted-foreground py-8">
-                    Начните разговор
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {messages.map((message) => {
-                      const isOwn = message.sender_id === user.id;
-                      return (
-                        <div
-                          key={message.id}
-                          className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}
-                        >
+              <div className="flex-1 flex flex-col overflow-hidden">
+                <ScrollArea className="flex-1 p-4">
+                  {loadingMessages ? (
+                    <div className="flex justify-center items-center h-32">
+                      <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+                    </div>
+                  ) : messages.length === 0 ? (
+                    <div className="text-center text-muted-foreground py-8">
+                      Начните разговор
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {messages.map((message) => {
+                        const isOwn = message.sender_id === user.id;
+                        return (
                           <div
-                            className={`max-w-[70%] rounded-lg px-3 py-2 ${
-                              isOwn
-                                ? 'bg-primary text-primary-foreground'
-                                : 'bg-muted text-muted-foreground'
-                            }`}
+                            key={message.id}
+                            className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}
                           >
-                            <p className="text-sm">{message.content}</p>
-                            <p className="text-xs opacity-70 mt-1">
-                              {formatTime(message.created_at)}
-                            </p>
+                            <div
+                              className={`max-w-[70%] rounded-lg px-3 py-2 ${
+                                isOwn
+                                  ? 'bg-primary text-primary-foreground'
+                                  : 'bg-muted text-muted-foreground'
+                              }`}
+                            >
+                              <p className="text-sm">{message.content}</p>
+                              <p className="text-xs opacity-70 mt-1">
+                                {formatTime(message.created_at)}
+                              </p>
+                            </div>
                           </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-              </ScrollArea>
+                        );
+                       })}
+                     </div>
+                   )}
+                   <div ref={messagesEndRef} />
+                 </ScrollArea>
 
-              {/* Message Input */}
-              <div className="p-4 border-t">
-                <div className="flex gap-2">
-                  <Input
-                    value={newMessage}
-                    onChange={(e) => setNewMessage(e.target.value)}
-                    onKeyPress={handleKeyPress}
-                    placeholder="Написать сообщение..."
-                    disabled={sending}
-                    className="flex-1"
-                  />
-                  <Button 
-                    onClick={sendMessage} 
-                    disabled={!newMessage.trim() || sending}
-                    size="icon"
-                  >
-                    <Send className="h-4 w-4" />
-                  </Button>
+                {/* Message Input - Fixed at bottom */}
+                <div className="p-4 border-t bg-background">
+                  <div className="flex gap-2">
+                    <Input
+                      value={newMessage}
+                      onChange={(e) => setNewMessage(e.target.value)}
+                      onKeyPress={handleKeyPress}
+                      placeholder="Написать сообщение..."
+                      disabled={sending}
+                      className="flex-1"
+                    />
+                    <Button 
+                      onClick={sendMessage} 
+                      disabled={!newMessage.trim() || sending}
+                      size="icon"
+                    >
+                      <Send className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
               </div>
             </>
