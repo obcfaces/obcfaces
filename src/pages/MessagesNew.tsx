@@ -104,63 +104,15 @@ const Messages = () => {
     try {
       console.log('Creating or opening conversation with recipient:', recipientId);
       
-      // First try to find existing conversation
-      const { data: existingConv, error: findError } = await supabase
-        .from('conversation_participants')
-        .select(`
-          conversation_id,
-          conversations!inner(id)
-        `)
-        .eq('user_id', user.id);
+      // Use the existing get_or_create_conversation function
+      const { data: conversationId, error } = await supabase.rpc('get_or_create_conversation', {
+        user1_id: user.id,
+        user2_id: recipientId
+      });
 
-      if (findError) throw findError;
-
-      // Check if any of these conversations have the recipient as participant
-      let existingConversationId = null;
-      if (existingConv) {
-        for (const conv of existingConv) {
-          const { data: otherParticipant } = await supabase
-            .from('conversation_participants')
-            .select('user_id')
-            .eq('conversation_id', conv.conversation_id)
-            .eq('user_id', recipientId)
-            .single();
-          
-          if (otherParticipant) {
-            existingConversationId = conv.conversation_id;
-            break;
-          }
-        }
-      }
-
-      let conversationId = existingConversationId;
-
-      // If no existing conversation, create new one
-      if (!conversationId) {
-        console.log('Creating new conversation');
-        
-        // Create conversation
-        const { data: newConv, error: createError } = await supabase
-          .from('conversations')
-          .insert({})
-          .select('id')
-          .single();
-
-        if (createError) throw createError;
-        conversationId = newConv.id;
-
-        // Add both participants
-        const { error: participantsError } = await supabase
-          .from('conversation_participants')
-          .insert([
-            { conversation_id: conversationId, user_id: user.id },
-            { conversation_id: conversationId, user_id: recipientId }
-          ]);
-
-        if (participantsError) throw participantsError;
-      }
+      if (error) throw error;
       
-      console.log('Using conversation ID:', conversationId);
+      console.log('Got conversation ID:', conversationId);
       setSelectedConversation(conversationId);
       
       // Load messages and mark as read
