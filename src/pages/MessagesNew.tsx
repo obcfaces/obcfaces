@@ -108,6 +108,7 @@ const Messages = () => {
   const loadConversations = async () => {
     if (!user) return;
 
+    console.log('Loading conversations for user:', user.id);
     try {
       // Get user's conversations with participant info
       const { data: userConversations, error } = await supabase
@@ -122,10 +123,17 @@ const Messages = () => {
         `)
         .eq('user_id', user.id);
 
-      if (error) throw error;
+      console.log('User conversations query result:', { userConversations, error });
+
+      if (error) {
+        console.error('Error loading conversations:', error);
+        throw error;
+      }
 
       const conversationsWithDetails = await Promise.all(
         (userConversations || []).map(async (conv) => {
+          console.log('Processing conversation:', conv.conversation_id);
+          
           // Get other participant
           const { data: otherParticipants } = await supabase
             .from('conversation_participants')
@@ -133,7 +141,10 @@ const Messages = () => {
             .eq('conversation_id', conv.conversation_id)
             .neq('user_id', user.id);
 
+          console.log('Other participants for conversation', conv.conversation_id, ':', otherParticipants);
+
           if (!otherParticipants || otherParticipants.length === 0) {
+            console.log('No other participants found for conversation:', conv.conversation_id);
             return null;
           }
 
@@ -146,6 +157,8 @@ const Messages = () => {
             .eq('id', otherUserId)
             .single();
 
+          console.log('Other user profile for', otherUserId, ':', otherUserProfile);
+
           // Get last message
           const { data: lastMessage } = await supabase
             .from('messages')
@@ -156,13 +169,17 @@ const Messages = () => {
             .limit(1)
             .single();
 
+          console.log('Last message for conversation', conv.conversation_id, ':', lastMessage);
+
           // Get unread count using the new database function
           const { data: unreadCount } = await supabase.rpc('get_conversation_unread_count', {
             conversation_id_param: conv.conversation_id,
             user_id_param: user.id
           });
 
-          return {
+          console.log('Unread count for conversation', conv.conversation_id, ':', unreadCount);
+
+          const conversationData = {
             id: conv.conversation_id,
             other_user: {
               id: otherUserProfile?.id || '',
@@ -174,10 +191,17 @@ const Messages = () => {
             last_message: lastMessage,
             unread_count: unreadCount || 0
           };
+
+          console.log('Final conversation data:', conversationData);
+          return conversationData;
         })
       );
 
-      setConversations(conversationsWithDetails.filter(conv => conv !== null && conv.other_user.id));
+      console.log('All conversation promises resolved, filtering...');
+      const filteredConversations = conversationsWithDetails.filter(conv => conv !== null && conv.other_user.id);
+      console.log('Filtered conversations:', filteredConversations);
+      
+      setConversations(filteredConversations);
     } catch (error) {
       console.error('Error loading conversations:', error);
     }
