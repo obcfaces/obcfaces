@@ -448,7 +448,7 @@ export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantNa
                       onClick={handleLike}
                       aria-label="Like"
                     >
-                      <ThumbsUp className={cn("w-4 h-4 mr-1", currentPhotoLikes.isLiked && "fill-current")} />
+                      <ThumbsUp className={cn("w-4 h-4 mr-1", currentPhotoLikes.isLiked && "stroke-2 text-primary")} />
                       {currentPhotoLikes.count}
                     </Button>
                     <Button
