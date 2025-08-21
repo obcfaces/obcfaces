@@ -28,48 +28,21 @@ export const useUnreadMessages = () => {
     try {
       console.log('useUnreadMessages: Loading unread count for user:', userId);
       
-      // Get all conversations for the user
-      const { data: conversations, error: convError } = await supabase
-        .from('conversation_participants')
-        .select('conversation_id')
-        .eq('user_id', userId);
+      // Use the new database function to get accurate unread count
+      const { data, error } = await supabase.rpc('get_unread_messages_count', {
+        user_id_param: userId
+      });
 
-      console.log('useUnreadMessages: Conversations query result:', { conversations, convError });
+      console.log('useUnreadMessages: Unread count result:', { data, error });
 
-      if (convError) {
-        console.error('useUnreadMessages: Error fetching conversations:', convError);
+      if (error) {
+        console.error('useUnreadMessages: Error fetching unread count:', error);
         return;
       }
 
-      if (!conversations || conversations.length === 0) {
-        console.log('useUnreadMessages: No conversations found');
-        setUnreadCount(0);
-        return;
-      }
-
-      let totalUnread = 0;
-
-      // For each conversation, count unread messages
-      // For now, we'll use a simple approach since we don't have last_read_at yet
-      for (const conv of conversations) {
-        const { count, error: msgError } = await supabase
-          .from('messages')
-          .select('*', { count: 'exact', head: true })
-          .eq('conversation_id', conv.conversation_id)
-          .neq('sender_id', userId);
-
-        console.log('useUnreadMessages: Messages count for conversation', conv.conversation_id, ':', { count, msgError });
-        
-        if (msgError) {
-          console.error('useUnreadMessages: Error counting messages:', msgError);
-          continue;
-        }
-
-        totalUnread += count || 0;
-      }
-
-      console.log('useUnreadMessages: Total unread count:', totalUnread);
-      setUnreadCount(totalUnread);
+      const count = data || 0;
+      console.log('useUnreadMessages: Setting unread count to:', count);
+      setUnreadCount(count);
     } catch (error) {
       console.error('useUnreadMessages: Error loading unread count:', error);
     }
@@ -102,10 +75,20 @@ export const useUnreadMessages = () => {
     };
   }, [currentUserId]);
 
-  const markAsRead = (conversationId: string) => {
-    // This would update the last_read_at timestamp for the conversation
-    // For now, just decrement the count for demo purposes
-    setUnreadCount(prev => Math.max(0, prev - 1));
+  const markAsRead = async (conversationId: string) => {
+    if (!currentUserId) return;
+    
+    try {
+      await supabase.rpc('mark_conversation_as_read', {
+        conversation_id_param: conversationId,
+        user_id_param: currentUserId
+      });
+      
+      // Refresh unread count after marking as read
+      await loadUnreadCount(currentUserId);
+    } catch (error) {
+      console.error('Error marking conversation as read:', error);
+    }
   };
 
   return { unreadCount, markAsRead };
