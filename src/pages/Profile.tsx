@@ -14,9 +14,6 @@ import { LogOut, Eye, EyeOff, UserIcon, MapPin, Pencil, Lock, MessageCircle } fr
 import { toast } from "@/components/ui/use-toast";
 import PostCard from "@/components/profile/PostCard";
 import LikedItem from "@/components/profile/LikedItem";
-import { UserPosts } from "@/components/profile/UserPosts";
-import { UserFollowers } from "@/components/profile/UserFollowers";
-import { UserFollowing } from "@/components/profile/UserFollowing";
 import { PhotoModal } from "@/components/photo-modal";
 import { ContestParticipationWrapper } from "@/components/contest-participation-wrapper";
 import CreatePostModal from "@/components/create-post-modal";
@@ -241,7 +238,7 @@ const Profile = () => {
   // Handle tab parameter from URL
   useEffect(() => {
     const tabParam = searchParams.get('tab');
-    if (tabParam && ['posts', 'followers', 'following', 'photos', 'participation', 'about'].includes(tabParam)) {
+    if (tabParam && ['posts', 'photos', 'participation', 'about'].includes(tabParam)) {
       setActiveTab(tabParam);
     }
   }, [searchParams]);
@@ -925,37 +922,52 @@ const Profile = () => {
           {/* Tabs */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-8">
             <TabsList className="w-full bg-transparent p-0 rounded-none justify-start gap-2 sm:gap-8 border-b border-border flex-wrap">
-              <TabsTrigger value="posts" className="px-0 mr-2 sm:mr-6 h-auto pb-2 bg-transparent rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary text-muted-foreground hover:text-foreground text-sm sm:text-base">
-                Посты
-              </TabsTrigger>
-              <TabsTrigger value="followers" className="px-0 mr-2 sm:mr-6 h-auto pb-2 bg-transparent rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary text-muted-foreground hover:text-foreground text-sm sm:text-base">
-                Подписчики {followersCount > 0 && <span className="ml-1 text-xs">({followersCount})</span>}
-              </TabsTrigger>
-              <TabsTrigger value="following" className="px-0 mr-2 sm:mr-6 h-auto pb-2 bg-transparent rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary text-muted-foreground hover:text-foreground text-sm sm:text-base">
-                Подписки {followingCount > 0 && <span className="ml-1 text-xs">({followingCount})</span>}
-              </TabsTrigger>
-              <TabsTrigger value="photos" className="px-0 mr-2 sm:mr-6 h-auto pb-2 bg-transparent rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary text-muted-foreground hover:text-foreground text-sm sm:text-base">Фото</TabsTrigger>
-              <TabsTrigger value="participation" className="px-0 mr-2 sm:mr-6 h-auto pb-2 bg-transparent rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary text-muted-foreground hover:text-foreground text-sm sm:text-base">Участие</TabsTrigger>
-              <TabsTrigger value="about" className="px-0 mr-2 sm:mr-6 h-auto pb-2 bg-transparent rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary text-muted-foreground hover:text-foreground text-sm sm:text-base">О себе</TabsTrigger>
+              <TabsTrigger value="posts" className="px-0 mr-2 sm:mr-6 h-auto pb-2 bg-transparent rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary text-muted-foreground hover:text-foreground text-sm sm:text-base">Posts</TabsTrigger>
+              <TabsTrigger value="photos" className="px-0 mr-2 sm:mr-6 h-auto pb-2 bg-transparent rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary text-muted-foreground hover:text-foreground text-sm sm:text-base">Photos</TabsTrigger>
+              <TabsTrigger value="participation" className="px-0 mr-2 sm:mr-6 h-auto pb-2 bg-transparent rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary text-muted-foreground hover:text-foreground text-sm sm:text-base">Participation</TabsTrigger>
+              <TabsTrigger value="about" className="px-0 mr-2 sm:mr-6 h-auto pb-2 bg-transparent rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary text-muted-foreground hover:text-foreground text-sm sm:text-base">About</TabsTrigger>
             </TabsList>
 
 
             <TabsContent value="posts" className="space-y-4 mt-8 -mx-6">
-              <div className="px-6">
-                <UserPosts userId={id!} isOwner={isOwner} />
-              </div>
-            </TabsContent>
-
-            <TabsContent value="followers" className="space-y-4 mt-8 -mx-6">
-              <div className="px-6">
-                <UserFollowers userId={id!} currentUserId={currentUserId} />
-              </div>
-            </TabsContent>
-
-            <TabsContent value="following" className="space-y-4 mt-8 -mx-6">
-              <div className="px-6">
-                <UserFollowing userId={id!} currentUserId={currentUserId} />
-              </div>
+              {loadingPosts ? (
+                <div className="text-center py-8 px-6">
+                  <p className="text-muted-foreground">Загрузка постов...</p>
+                </div>
+              ) : userPosts.length > 0 ? (
+                <div className="px-0 sm:px-6 space-y-4">
+                  {userPosts.map((post) => (
+                    <PostCard 
+                      key={post.id} 
+                      id={post.id}
+                      authorName={post.profiles?.display_name || "Пользователь"}
+                      time={new Date(post.created_at).toLocaleDateString('ru-RU', {
+                        day: 'numeric',
+                        month: 'long',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      })}
+                      content={post.caption || ""}
+                      imageSrc={post.media_urls?.[0] || ""}
+                      likes={post.likes_count || 0}
+                      comments={post.comments_count || 0}
+                      mediaUrls={post.media_urls || []}
+                      mediaTypes={post.media_types || []}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8 px-6">
+                  <p className="text-muted-foreground">
+                    {isOwner ? "У вас пока нет постов" : "У пользователя пока нет постов"}
+                  </p>
+                  {isOwner && (
+                    <p className="text-sm text-muted-foreground mt-2">
+                      Создайте свой первый пост, нажав "Add Post"
+                    </p>
+                  )}
+                </div>
+              )}
             </TabsContent>
 
             <TabsContent value="photos" className="mt-8">
