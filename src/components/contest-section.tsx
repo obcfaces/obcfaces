@@ -97,11 +97,7 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
   useEffect(() => {
     const loadParticipants = async () => {
       console.log('Starting loadParticipants for title:', title);
-      
-      // Show fallback data immediately, then try to load real data
-      const fallbackData = await getContestantsSync([]);
-      setContestants(fallbackData || []);
-      setIsLoading(false); // Show fallback data immediately
+      setIsLoading(true);
       
       // Calculate week offset
       let weekOffset = 0;
@@ -110,21 +106,31 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
       else if (title === "2 WEEKS AGO") weekOffset = -2;
       else if (title === "3 WEEKS AGO") weekOffset = -3;
       
-      // Try to load real data in background for current week sections
+      // Try to load real data first for current week sections
       if (["THIS WEEK", "1 WEEK AGO", "2 WEEKS AGO", "3 WEEKS AGO"].includes(title)) {
         try {
+          console.log('Loading real participants for:', title, 'weekOffset:', weekOffset);
           const participants = await loadContestParticipants(weekOffset);
+          
           if (participants && participants.length > 0) {
-            console.log('Got real participants:', participants.length);
+            console.log('Got real participants:', participants.length, 'participants');
             setRealContestants(participants);
             const contestantsData = await getContestantsSync(participants);
-            setContestants(contestantsData || fallbackData);
+            console.log('Processed real contestants:', contestantsData?.length);
+            setContestants(contestantsData || []);
+            setIsLoading(false);
+            return; // Exit early if we have real data
           }
         } catch (err) {
           console.error('Failed to load real participants:', err);
-          // Keep fallback data
         }
       }
+      
+      // Fall back to test data only if no real data
+      console.log('Loading fallback data for:', title);
+      const fallbackData = await getContestantsSync([]);
+      setContestants(fallbackData || []);
+      setIsLoading(false);
     };
 
     loadParticipants();
