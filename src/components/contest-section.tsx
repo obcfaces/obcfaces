@@ -61,6 +61,8 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
 
   const [votes, setVotes] = useState<Record<number, number>>({});
   const [realContestants, setRealContestants] = useState<any[]>([]);
+  const [contestants, setContestants] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   const loadContestParticipants = async (weekOffset: number = 0) => {
     try {
@@ -86,6 +88,7 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
   // Load participants based on title
   useEffect(() => {
     const loadParticipants = async () => {
+      setIsLoading(true);
       let weekOffset = 0;
       if (title === "THIS WEEK") weekOffset = 0;
       else if (title === "1 WEEK AGO") weekOffset = -1;
@@ -95,7 +98,16 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
       if (["THIS WEEK", "1 WEEK AGO", "2 WEEKS AGO", "3 WEEKS AGO"].includes(title)) {
         const participants = await loadContestParticipants(weekOffset);
         setRealContestants(participants);
+        
+        // Load contestants immediately after getting real data
+        const contestantsData = await getContestantsSync(participants);
+        setContestants(contestantsData || []);
+      } else {
+        // For other weeks, load fallback data immediately
+        const contestantsData = await getContestantsSync([]);
+        setContestants(contestantsData || []);
       }
+      setIsLoading(false);
     };
 
     loadParticipants();
@@ -141,17 +153,17 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
     
     // Refresh contestants data after rating to show updated average
     setTimeout(async () => {
-      const updatedContestants = await getContestants();
+      const updatedContestants = await getContestantsSync();
       setContestants(updatedContestants || []);
     }, 1000);
   };
 
-  // Define contestants based on week type
-  const getContestants = async () => {
+  // Define contestants based on week type (synchronous version)
+  const getContestantsSync = async (participantsData: any[] = realContestants) => {
     // Use real contestants from weekly contests if available
-    if (["THIS WEEK", "1 WEEK AGO", "2 WEEKS AGO", "3 WEEKS AGO"].includes(title) && realContestants.length > 0) {
+    if (["THIS WEEK", "1 WEEK AGO", "2 WEEKS AGO", "3 WEEKS AGO"].includes(title) && participantsData.length > 0) {
       const contestantsWithRatings = await Promise.all(
-        realContestants.map(async (contestant) => {
+        participantsData.map(async (contestant) => {
           // Validate contestant data structure
           if (!contestant || typeof contestant !== 'object') {
             console.warn('Invalid contestant data:', contestant);
@@ -431,24 +443,8 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
     }
   };
 
-  const [contestants, setContestants] = useState<any[]>([]);
-
-  // Load contestants with ratings
-  useEffect(() => {
-    const loadContestantsWithRatings = async () => {
-      const contestantsData = await getContestants();
-      setContestants(contestantsData || []);
-    };
-    
-    if (realContestants.length > 0) {
-      loadContestantsWithRatings();
-    } else {
-      // Fallback contestants for testing - need to resolve the promise
-      getContestants().then((data) => {
-        setContestants(data || []);
-      });
-    }
-  }, [realContestants]);
+  // Keep this for backward compatibility but it's now mainly unused
+  const getContestants = () => getContestantsSync();
 
   return (
     <section className="max-w-6xl mx-auto py-8 mb-2 bg-background rounded-lg shadow-lg shadow-foreground/15">
@@ -480,16 +476,32 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
         </div>
       )}
 
-      <div className="px-0 sm:px-6 grid grid-cols-1 lg:grid-cols-2 gap-1 sm:gap-3 max-w-full overflow-hidden">
-        {contestants.map((contestant) => (
-          <ContestantCard
-            key={contestant.rank}
-            {...contestant}
-            viewMode={viewMode}
-            onRate={(rating) => handleRate(contestant.rank, rating)}
-          />
-        ))}
-      </div>
+      {isLoading ? (
+        <div className="px-0 sm:px-6 grid grid-cols-1 lg:grid-cols-2 gap-1 sm:gap-3 max-w-full overflow-hidden">
+          {/* Loading skeleton */}
+          {[1, 2].map((i) => (
+            <div key={i} className="bg-card border-contest-border relative overflow-hidden flex h-36 sm:h-40 md:h-44 animate-pulse">
+              <div className="w-32 sm:w-36 md:w-40 bg-gray-300"></div>
+              <div className="flex-1 p-3 sm:p-4 space-y-2">
+                <div className="h-4 bg-gray-300 rounded w-3/4"></div>
+                <div className="h-3 bg-gray-300 rounded w-1/2"></div>
+                <div className="h-3 bg-gray-300 rounded w-2/3"></div>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="px-0 sm:px-6 grid grid-cols-1 lg:grid-cols-2 gap-1 sm:gap-3 max-w-full overflow-hidden">
+          {contestants.map((contestant) => (
+            <ContestantCard
+              key={contestant.rank}
+              {...contestant}
+              viewMode={viewMode}
+              onRate={(rating) => handleRate(contestant.rank, rating)}
+            />
+          ))}
+        </div>
+      )}
 
     </section>
   );
