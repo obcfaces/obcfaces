@@ -284,19 +284,12 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
   const getSwitchText = () => {
     if (mode === "login") {
       return (
-        <div className="flex flex-col space-y-2">
-          <span className="text-sm text-muted-foreground">No account?{" "}
-            <button type="button" className="text-primary underline" onClick={() => {
-              setMode("signup");
-              setAuthError("");
-            }}>Sign up</button>
-          </span>
-          <button type="button" className="text-sm text-primary underline hover:no-underline" onClick={() => {
-            setMode("forgot");
+        <span className="text-sm text-muted-foreground">No account?{" "}
+          <button type="button" className="text-primary underline" onClick={() => {
+            setMode("signup");
             setAuthError("");
-            setForgotEmailSent(false);
-          }}>Forgot password?</button>
-        </div>
+          }}>Sign up</button>
+        </span>
       );
     } else if (mode === "signup") {
       return (
@@ -444,11 +437,9 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
             </div>
           </>
         )}
-        <div className="flex items-start justify-between">
-          <div className="flex-1">
-            {getSwitchText()}
-          </div>
-          <div className="flex">
+        <div className="flex items-center justify-between">
+          {getSwitchText()}
+          <div className="flex flex-col space-y-2 items-end">
             <Button type="submit" disabled={loading || forgotEmailSent}>
               {loading ? "Please wait…" : 
                forgotEmailSent ? "Email sent" :
@@ -456,6 +447,19 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
                mode === "signup" ? "Sign up" : 
                "Send reset email"}
             </Button>
+            {mode === "login" && (
+              <button 
+                type="button" 
+                className="text-sm text-primary underline hover:no-underline" 
+                onClick={() => {
+                  setMode("forgot");
+                  setAuthError("");
+                  setForgotEmailSent(false);
+                }}
+              >
+                Forgot password?
+              </button>
+            )}
           </div>
         </div>
       </form>
