@@ -14,7 +14,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { getCitiesForLocation } from '@/lib/location-utils';
 const LoginModalTrigger = () => {
   const [open, setOpen] = useState(false);
-  const [mode, setMode] = useState<"login" | "signup">("login");
+  const [mode, setMode] = useState<"login" | "signup" | "forgot">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -27,6 +27,7 @@ const LoginModalTrigger = () => {
   const [age, setAge] = useState<string>("");
   const [gender, setGender] = useState<string>("");
   const [acceptTerms, setAcceptTerms] = useState(false);
+  const [forgotEmailSent, setForgotEmailSent] = useState(false);
   
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -86,7 +87,18 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
       }
     }
     try {
-      if (mode === "login") {
+      if (mode === "forgot") {
+        // Обработка восстановления пароля
+        const redirectUrl = `${window.location.origin}/`;
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: redirectUrl,
+        });
+        
+        if (error) throw error;
+        
+        setForgotEmailSent(true);
+        toast({ description: "Письмо для восстановления пароля отправлено" });
+      } else if (mode === "login") {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
         toast({ 
@@ -146,18 +158,50 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
     }
   };
 
-  const title = mode === "login" ? "Sign in" : "Sign up";
-  const description = mode === "login" ? "Enter your email and password to continue." : "Create an account for your profile.";
+  const getTitle = () => {
+    switch (mode) {
+      case "login": return "Sign in";
+      case "signup": return "Sign up";
+      case "forgot": return "Reset password";
+      default: return "Sign in";
+    }
+  };
 
-  const switchText = mode === "login" ? (
-    <span className="text-sm text-muted-foreground">No account?{" "}
-      <button type="button" className="text-primary underline" onClick={() => setMode("signup")}>Sign up</button>
-    </span>
-  ) : (
-    <span className="text-sm text-muted-foreground">Already have an account?{" "}
-      <button type="button" className="text-primary underline" onClick={() => setMode("login")}>Sign in</button>
-    </span>
-  );
+  const getDescription = () => {
+    switch (mode) {
+      case "login": return "Enter your email and password to continue.";
+      case "signup": return "Create an account for your profile.";
+      case "forgot": return forgotEmailSent 
+        ? "Check your email for password reset instructions." 
+        : "Enter your email address to receive password reset instructions.";
+      default: return "Enter your email and password to continue.";
+    }
+  };
+
+  const getSwitchText = () => {
+    if (mode === "login") {
+      return (
+        <span className="text-sm text-muted-foreground">No account?{" "}
+          <button type="button" className="text-primary underline" onClick={() => setMode("signup")}>Sign up</button>
+        </span>
+      );
+    } else if (mode === "signup") {
+      return (
+        <span className="text-sm text-muted-foreground">Already have an account?{" "}
+          <button type="button" className="text-primary underline" onClick={() => setMode("login")}>Sign in</button>
+        </span>
+      );
+    } else {
+      return (
+        <span className="text-sm text-muted-foreground">Remember your password?{" "}
+          <button type="button" className="text-primary underline" onClick={() => {
+            setMode("login");
+            setForgotEmailSent(false);
+          }}>Sign in</button>
+        </span>
+      );
+    }
+  };
 
   const showErrors = submitted && mode === "signup";
   const invalidName = showErrors && !name.trim();
@@ -172,23 +216,24 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
       </DialogTrigger>
       <DialogContent className="sm:max-w-lg data-[state=open]:translate-y-[5%] sm:data-[state=open]:translate-y-[2%]">
         <DialogHeader>
-          <DialogTitle>{title}</DialogTitle>
-          <DialogDescription>{description}</DialogDescription>
+          <DialogTitle>{getTitle()}</DialogTitle>
+          <DialogDescription>{getDescription()}</DialogDescription>
         </DialogHeader>
         <form onSubmit={onSubmit} className="space-y-3">
           <div className="space-y-2">
             
             <Input id="auth-email" type="email" placeholder="Email" className="placeholder:italic placeholder:text-muted-foreground" value={email} onChange={(e) => setEmail(e.target.value)} required />
           </div>
-          <div className="space-y-2">
-            
-            <div className="relative">
-              <Input id="auth-password" type={showPassword ? "text" : "password"} placeholder="Password" className="pr-10 placeholder:italic placeholder:text-muted-foreground" value={password} onChange={(e) => setPassword(e.target.value)} required />
-              <button type="button" aria-label={showPassword ? "Hide password" : "Show password"} onClick={() => setShowPassword((v) => !v)} className="absolute inset-y-0 right-2 inline-flex items-center text-muted-foreground hover:text-foreground">
-                {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
-              </button>
+          {mode !== "forgot" && (
+            <div className="space-y-2">
+              <div className="relative">
+                <Input id="auth-password" type={showPassword ? "text" : "password"} placeholder="Password" className="pr-10 placeholder:italic placeholder:text-muted-foreground" value={password} onChange={(e) => setPassword(e.target.value)} required />
+                <button type="button" aria-label={showPassword ? "Hide password" : "Show password"} onClick={() => setShowPassword((v) => !v)} className="absolute inset-y-0 right-2 inline-flex items-center text-muted-foreground hover:text-foreground">
+                  {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                </button>
+              </div>
             </div>
-          </div>
+          )}
           {mode === "signup" && (
             <>
               {/* Separator between email/password and profile fields */}
@@ -283,9 +328,27 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
             </>
           )}
             <div className="flex items-center justify-between">
-            {switchText}
-            <div className="flex">
-              <Button type="submit" disabled={loading}>{loading ? "Please wait…" : mode === "login" ? "Sign in" : "Sign up"}</Button>
+            {getSwitchText()}
+            <div className="flex flex-col space-y-2 items-end">
+              <Button type="submit" disabled={loading || forgotEmailSent}>
+                {loading ? "Please wait…" : 
+                 forgotEmailSent ? "Email sent" :
+                 mode === "login" ? "Sign in" : 
+                 mode === "signup" ? "Sign up" : 
+                 "Send reset email"}
+              </Button>
+              {mode === "login" && (
+                <button 
+                  type="button" 
+                  className="text-sm text-primary underline hover:no-underline" 
+                  onClick={() => {
+                    setMode("forgot");
+                    setForgotEmailSent(false);
+                  }}
+                >
+                  Forgot password?
+                </button>
+              )}
             </div>
           </div>
         </form>
