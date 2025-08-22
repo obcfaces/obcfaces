@@ -225,6 +225,7 @@ const Messages = () => {
     const recipientId = searchParams.get('recipient');
     if (recipientId) {
       console.log('Processing recipient:', recipientId);
+      alert(`Начинаем создание разговора с ${recipientId}`);
       
       const initConversation = async () => {
         console.log('Creating/finding conversation...');
@@ -232,6 +233,7 @@ const Messages = () => {
         console.log('Got conversation ID:', conversationId);
         
         if (conversationId) {
+          alert(`Разговор создан: ${conversationId}`);
           console.log('Setting selected conversation:', conversationId);
           setSelectedConversation(conversationId);
           
@@ -242,6 +244,9 @@ const Messages = () => {
           await loadConversations();
           
           console.log('Process completed');
+          alert('Процесс завершен, разговор должен открыться');
+        } else {
+          alert('Ошибка: не удалось создать разговор');
         }
         
         // Очищаем URL
