@@ -7,35 +7,53 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
-  console.log(`${new Date().toISOString()}: ${req.method} request received`);
+  console.log(`[${new Date().toISOString()}] ${req.method} request to ai-chat`);
   
   if (req.method === 'OPTIONS') {
-    console.log('Handling OPTIONS request');
+    console.log('[CORS] Handling OPTIONS request');
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    console.log('Processing request...');
+    console.log('[REQUEST] Processing POST request...');
     
     const body = await req.json();
-    console.log('Request body:', JSON.stringify(body));
+    console.log('[REQUEST] Body received:', JSON.stringify(body, null, 2));
     
-    const { message, context } = body;
+    const { message } = body;
 
     if (!message) {
-      console.error('No message provided');
+      console.error('[ERROR] No message provided');
       throw new Error('Message is required');
     }
 
-    console.log('Checking OpenAI API key...');
+    console.log('[ENV] Checking environment variables...');
     const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
     
     if (!openAIApiKey) {
-      console.error('OPENAI_API_KEY not found in environment');
-      throw new Error('OpenAI API key not configured');
+      console.error('[ERROR] OPENAI_API_KEY not found');
+      throw new Error('OpenAI API key not configured. Please check your secrets.');
     }
 
-    console.log('API key found, making OpenAI request...');
+    console.log('[ENV] OpenAI API key found, length:', openAIApiKey.length);
+
+    // Test OpenAI API call
+    console.log('[OPENAI] Making request to OpenAI API...');
+    
+    const requestBody = {
+      model: 'gpt-4o-mini',
+      messages: [
+        { 
+          role: 'system', 
+          content: 'You are a helpful AI assistant for a beauty contest website. Respond briefly and friendly.' 
+        },
+        { role: 'user', content: message }
+      ],
+      max_tokens: 500,
+      temperature: 0.7
+    };
+
+    console.log('[OPENAI] Request body:', JSON.stringify(requestBody, null, 2));
 
     const openAIResponse = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -43,32 +61,36 @@ serve(async (req) => {
         'Authorization': `Bearer ${openAIApiKey}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages: [
-          { 
-            role: 'system', 
-            content: `You are an AI assistant for a beauty contest website. Help users with questions about the contest, participants, voting, and general information. Respond in a friendly and professional manner. Context: ${context || 'Beauty Contest Platform'}` 
-          },
-          { role: 'user', content: message }
-        ],
-        max_tokens: 1000,
-        temperature: 0.7
-      }),
+      body: JSON.stringify(requestBody),
     });
 
-    console.log('OpenAI response status:', openAIResponse.status);
+    console.log('[OPENAI] Response status:', openAIResponse.status);
+    console.log('[OPENAI] Response headers:', Object.fromEntries(openAIResponse.headers.entries()));
 
     if (!openAIResponse.ok) {
       const errorText = await openAIResponse.text();
-      console.error('OpenAI API error:', errorText);
-      throw new Error(`OpenAI API error: ${openAIResponse.status}`);
+      console.error('[OPENAI] API error response:', errorText);
+      
+      if (openAIResponse.status === 401) {
+        throw new Error('Invalid OpenAI API key. Please check your API key.');
+      } else if (openAIResponse.status === 429) {
+        throw new Error('OpenAI API rate limit exceeded or insufficient credits.');
+      } else {
+        throw new Error(`OpenAI API error (${openAIResponse.status}): ${errorText}`);
+      }
     }
 
     const openAIData = await openAIResponse.json();
-    const aiResponse = openAIData.choices[0].message.content;
+    console.log('[OPENAI] Response received:', JSON.stringify(openAIData, null, 2));
+    
+    const aiResponse = openAIData.choices?.[0]?.message?.content;
+    
+    if (!aiResponse) {
+      console.error('[ERROR] No response content from OpenAI');
+      throw new Error('No response received from OpenAI');
+    }
 
-    console.log('Sending successful response');
+    console.log('[SUCCESS] Sending response to client');
     
     return new Response(
       JSON.stringify({ response: aiResponse }), 
@@ -79,13 +101,14 @@ serve(async (req) => {
     );
 
   } catch (error) {
-    console.error('Function error:', error);
-    console.error('Error stack:', error.stack);
+    console.error('[ERROR] Function error:', error.message);
+    console.error('[ERROR] Stack trace:', error.stack);
     
     return new Response(
       JSON.stringify({ 
         error: error.message,
-        details: 'Check logs for more information'
+        timestamp: new Date().toISOString(),
+        details: 'Check function logs for detailed error information'
       }), 
       {
         status: 500,
