@@ -251,13 +251,12 @@ const Messages = () => {
         loadMessages(conversationId);
         
         // Refresh conversations in background to get accurate data
-        setTimeout(() => {
+        setTimeout(async () => {
           const currentSelectedId = conversationId; // Preserve the selected conversation
-          loadConversations().then(() => {
-            // Ensure the conversation remains selected after refresh
-            setSelectedConversation(currentSelectedId);
-          });
-        }, 500);
+          await loadConversations();
+          // Ensure the conversation remains selected after refresh
+          setSelectedConversation(currentSelectedId);
+        }, 1000); // Увеличиваем задержку, чтобы дать время базе данных обновиться
       }
     } catch (error) {
       console.error('Error creating conversation:', error);
@@ -323,7 +322,7 @@ const Messages = () => {
       });
       
       markAsRead(conversationId);
-      loadConversations();
+      // Убираем loadConversations() здесь, чтобы не сбрасывать состояние
     } catch (error) {
       console.error('Error marking conversation as read:', error);
     }
