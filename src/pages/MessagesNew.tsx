@@ -64,7 +64,12 @@ const Messages = () => {
 
   // Загрузка разговоров
   const loadConversations = async () => {
-    if (!user) return;
+    if (!user) {
+      console.log('loadConversations: No user');
+      return;
+    }
+
+    console.log('loadConversations: Starting for user', user.id);
 
     try {
       const { data: participantData, error } = await supabase
@@ -72,9 +77,13 @@ const Messages = () => {
         .select('conversation_id')
         .eq('user_id', user.id);
 
+      console.log('loadConversations: participantData:', participantData);
+      console.log('loadConversations: error:', error);
+
       if (error) throw error;
 
       if (!participantData || participantData.length === 0) {
+        console.log('loadConversations: No participant data, setting empty conversations');
         setConversations([]);
         return;
       }
