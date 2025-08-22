@@ -79,11 +79,16 @@ const Messages = () => {
 
       console.log('loadConversations: participantData:', participantData);
       console.log('loadConversations: error:', error);
+      alert(`loadConversations результат: ${participantData?.length || 0} разговоров найдено`);
 
-      if (error) throw error;
+      if (error) {
+        alert(`Ошибка в loadConversations: ${error.message}`);
+        throw error;
+      }
 
       if (!participantData || participantData.length === 0) {
         console.log('loadConversations: No participant data, setting empty conversations');
+        alert('loadConversations: Никаких данных не найдено');
         setConversations([]);
         return;
       }
