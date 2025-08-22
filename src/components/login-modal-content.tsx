@@ -47,26 +47,21 @@ const LoginModalContent = ({ onClose }: LoginModalContentProps) => {
 // Get all countries from library and format them
 const countries = useMemo(() => {
   const allCountries = Country.getAllCountries().map(country => ({
-    name: country.name,
-    isoCode: country.isoCode
+    value: country.isoCode,
+    label: country.name
   }));
   
-  console.log('Total countries loaded:', allCountries.length); // Debug log
-  
   // Sort alphabetically but put Philippines first
-  const philippines = allCountries.find(c => c.isoCode === 'PH');
-  const otherCountries = allCountries.filter(c => c.isoCode !== 'PH').sort((a, b) => a.name.localeCompare(b.name));
+  const philippines = allCountries.find(c => c.value === 'PH');
+  const otherCountries = allCountries.filter(c => c.value !== 'PH').sort((a, b) => a.label.localeCompare(b.label));
   
-  const finalList = [
-    // Philippines first
+  return [
+    // Active countries
     ...(philippines ? [philippines] : []),
-    // All other countries alphabetically
+    { value: "separator", label: "", disabled: true, divider: true },
+    // All other countries
     ...otherCountries
   ];
-  
-  console.log('Final country list:', finalList.length, finalList.slice(0, 10)); // Debug log
-  
-  return finalList;
 }, []);
 
 const states = useMemo(() => {
@@ -300,8 +295,8 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
                   value={countryCode ?? ""}
                   onValueChange={(code) => {
                     setCountryCode(code);
-                    const c = countries.find((c) => c.isoCode === code);
-                    setCountry(c?.name || "");
+                    const c = countries.find((c) => c.value === code);
+                    setCountry(c?.label || "");
                     setStateName("");
                     setStateCode(null);
                     setCity("");
@@ -309,7 +304,7 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
                   placeholder="Country"
                   ariaLabel="Select country"
                   invalid={invalidCountry}
-                  options={countries.map((c) => ({ value: c.isoCode, label: c.name }))}
+                  options={countries}
                 />
               </div>
               <div className="space-y-2">
