@@ -400,6 +400,11 @@ const Messages = () => {
   });
 
   const selectedConv = conversations.find(conv => conv.id === selectedConversation);
+  
+  // Debug logging
+  console.log('selectedConversation ID:', selectedConversation);
+  console.log('conversations count:', conversations.length);
+  console.log('selectedConv found:', !!selectedConv);
 
   // Auto scroll to bottom when messages change
   useEffect(() => {
