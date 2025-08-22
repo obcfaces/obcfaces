@@ -24,17 +24,34 @@ const AuthCallbackHandler = () => {
         // Save current scroll position
         const scrollY = window.scrollY;
         
+        console.log('Auth callback handler processing URL:', href);
+        
         const { data, error } = await supabase.auth.exchangeCodeForSession(href);
         if (cancelled) return;
-        if (error) return; // Fail silently to avoid flashing forms
+        
+        if (error) {
+          console.error('Auth callback error:', error);
+          // For critical errors, show a message but don't block the user
+          if (error.message.includes('Invalid') || error.message.includes('expired')) {
+            toast({ 
+              description: "Ссылка подтверждения недействительна или истекла. Попробуйте войти снова.",
+              variant: "destructive"
+            });
+          }
+          return;
+        }
 
         handledRef.current = href;
+        
+        console.log('Auth callback successful:', data);
 
         // Clean URL from auth params
         const url = new URL(window.location.href);
         ["code", "type", "redirect_to", "next"].forEach((k) => url.searchParams.delete(k));
-        // Some links may put params after hash, normalize by dropping hash entirely
-        window.history.replaceState({}, "", url.pathname + url.search);
+        
+        // Always redirect to home page instead of localhost URLs
+        const cleanPath = url.pathname === '/account' ? '/account' : '/';
+        window.history.replaceState({}, "", cleanPath);
 
         // Restore scroll position after URL cleanup
         setTimeout(() => {
@@ -42,8 +59,16 @@ const AuthCallbackHandler = () => {
         }, 0);
 
         toast({ description: "Email confirmed. Welcome!" });
-      } catch (_) {
-        // ignore
+        
+        // Force navigation to account page if we're on the callback
+        if (data.session?.user) {
+          setTimeout(() => {
+            navigate('/account');
+          }, 1000);
+        }
+      } catch (err) {
+        console.error('Auth callback exception:', err);
+        // Don't show errors to user unless it's critical
       }
     })();
 
