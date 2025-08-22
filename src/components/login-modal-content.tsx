@@ -284,14 +284,14 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
   const getSwitchText = () => {
     if (mode === "login") {
       return (
-        <div className="flex flex-col space-y-1">
+        <div className="flex flex-col space-y-2">
           <span className="text-sm text-muted-foreground">No account?{" "}
             <button type="button" className="text-primary underline" onClick={() => {
               setMode("signup");
               setAuthError("");
             }}>Sign up</button>
           </span>
-          <button type="button" className="text-sm text-muted-foreground text-primary underline" onClick={() => {
+          <button type="button" className="text-sm text-primary underline hover:no-underline" onClick={() => {
             setMode("forgot");
             setAuthError("");
             setForgotEmailSent(false);
@@ -444,8 +444,10 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
             </div>
           </>
         )}
-        <div className="flex items-center justify-between">
-          {getSwitchText()}
+        <div className="flex items-start justify-between">
+          <div className="flex-1">
+            {getSwitchText()}
+          </div>
           <div className="flex">
             <Button type="submit" disabled={loading || forgotEmailSent}>
               {loading ? "Please wait…" : 
