@@ -52,14 +52,17 @@ const Messages = () => {
     const initUser = async () => {
       console.log('=== initUser called ===');
       const { data: { session } } = await supabase.auth.getSession();
-      console.log('=== Session data ===', session?.user?.email || 'No user');
+      console.log('=== Session data ===', session?.user?.email || 'No user', 'ID:', session?.user?.id || 'No ID');
       setUser(session?.user || null);
       setLoading(false);
       
       // Загружаем разговоры сразу после получения пользователя
       if (session?.user) {
         console.log('User loaded, calling loadConversations immediately for:', session.user.email);
-        loadConversations();
+        // Небольшая задержка для стабильности
+        setTimeout(() => {
+          loadConversations();
+        }, 100);
       }
     };
     initUser();
@@ -88,17 +91,26 @@ const Messages = () => {
     console.log('loadConversations: Starting for user', user.id, 'Email:', user.email);
 
     try {
-      // Получаем разговоры используя RPC функцию для лучшей совместимости с RLS
+      console.log('=== STEP 1: Fetching conversation_participants ===');
+      // Получаем разговоры используя прямой запрос с дополнительной информацией для отладки
       const { data: participantData, error } = await supabase
         .from('conversation_participants')
-        .select('conversation_id')
+        .select('conversation_id, user_id, last_read_at')
         .eq('user_id', user.id);
 
+      console.log('=== STEP 2: Response received ===');
       console.log('loadConversations: participantData:', participantData);
       console.log('loadConversations: error:', error);
+      console.log('loadConversations: participantData length:', participantData?.length || 0);
 
       if (error) {
-        console.error('Error in loadConversations:', error.message);
+        console.error('=== ERROR in loadConversations ===', error);
+        console.error('Error details:', {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code
+        });
         toast({
           title: "Ошибка",
           description: "Не удалось загрузить разговоры: " + error.message,
@@ -108,10 +120,13 @@ const Messages = () => {
       }
 
       if (!participantData || participantData.length === 0) {
+        console.log('=== STEP 3: No conversations found for user ===');
         console.log('loadConversations: No participant data, setting empty conversations');
         setConversations([]);
         return;
       }
+
+      console.log('=== STEP 4: Processing conversations ===');
 
       const conversationIds = participantData.map(p => p.conversation_id);
       
