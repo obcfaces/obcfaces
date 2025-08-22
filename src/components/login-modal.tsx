@@ -194,7 +194,7 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
               {/* Separator between email/password and profile fields */}
               <div className="border-t pt-4">
                 <div className="space-y-3">
-                  <div className="space-y-2">
+                  <div className="grid gap-3 grid-cols-2">
                     <Input 
                       id="auth-name" 
                       placeholder="Name" 
@@ -203,6 +203,18 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
                       value={name} 
                       onChange={(e) => setName(e.target.value)} 
                     />
+                    
+                    <Select value={gender} onValueChange={setGender}>
+                      <SelectTrigger aria-label="Gender">
+                        <SelectValue placeholder="Gender" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="male">Male</SelectItem>
+                        <SelectItem value="female">Female</SelectItem>
+                        <SelectItem value="other">Other</SelectItem>
+                        <SelectItem value="na">Prefer not to say</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                   
                   <div className="grid gap-3 grid-cols-2">
@@ -234,22 +246,6 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
                         ))}
                       </SelectContent>
                     </Select>
-                  </div>
-                  
-                  <div className="grid gap-3 grid-cols-2">
-                    <Select value={gender} onValueChange={setGender}>
-                      <SelectTrigger aria-label="Gender">
-                        <SelectValue placeholder="Gender" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="male">Male</SelectItem>
-                        <SelectItem value="female">Female</SelectItem>
-                        <SelectItem value="other">Other</SelectItem>
-                        <SelectItem value="na">Prefer not to say</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    
-                    <div></div> {/* Empty div for spacing */}
                   </div>
                 </div>
               </div>
