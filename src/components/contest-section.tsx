@@ -70,13 +70,19 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
       const { data, error } = await supabase
         .rpc('get_weekly_contest_participants_public', { weeks_offset: weekOffset });
 
-      console.log('Weekly contest participants data:', data);
+      console.log(`Loading participants for week offset ${weekOffset}:`, data);
       console.log('Weekly contest participants error:', error);
 
-      if (data && !error) {
+      if (error) {
+        console.error('Database error loading participants:', error);
+        return [];
+      }
+
+      if (data && Array.isArray(data)) {
+        console.log(`Found ${data.length} real participants for week offset ${weekOffset}`);
         return data;
       } else {
-        console.warn('No weekly contest participants loaded:', error);
+        console.warn('No weekly contest participants found for week offset:', weekOffset);
         return [];
       }
     } catch (err) {
@@ -160,8 +166,15 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
 
   // Define contestants based on week type (synchronous version)
   const getContestantsSync = async (participantsData: any[] = realContestants) => {
+    console.log(`getContestantsSync called for ${title}:`, { 
+      participantsDataLength: participantsData.length, 
+      realContestantsLength: realContestants.length,
+      participantsData: participantsData.slice(0, 2) // Log first 2 for debugging
+    });
+    
     // Use real contestants from weekly contests if available
     if (["THIS WEEK", "1 WEEK AGO", "2 WEEKS AGO", "3 WEEKS AGO"].includes(title) && participantsData.length > 0) {
+      console.log(`Using real contestants for ${title}:`, participantsData.length);
       const contestantsWithRatings = await Promise.all(
         participantsData.map(async (contestant) => {
           // Validate contestant data structure
@@ -209,6 +222,7 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
     }
     
     // Fallback contestants for testing or when no real data
+    console.log(`No real contestants found for ${title}, using fallback test data`);
     if (title === "THIS WEEK") {
       return [
         {
