@@ -547,7 +547,7 @@ export function ContestantCard({
                 className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
                 onClick={() => openShareModal({
                   title: `${name} - Beauty Contest`,
-                  url: window.location.href,
+                  url: profileId ? `${window.location.origin}/u/${profileId}` : window.location.href,
                   description: `Check out ${name}, ${age} from ${city}, ${country} in this beauty contest!`
                 })}
                 aria-label="Share"
@@ -777,7 +777,7 @@ export function ContestantCard({
                    className="inline-flex items-center gap-1 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors"
                    onClick={() => openShareModal({
                      title: `${name} - Beauty Contest`,
-                     url: window.location.href,
+                     url: profileId ? `${window.location.origin}/u/${profileId}` : window.location.href,
                      description: `Check out ${name}, ${age} from ${city}, ${country} in this beauty contest!`
                    })}
                    aria-label="Share"
