@@ -1,15 +1,22 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Helmet } from "react-helmet-async";
-import { Navigate, useSearchParams } from "react-router-dom";
+import { Navigate, useSearchParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { Send, User, Search, ArrowLeft } from "lucide-react";
 import { useUnreadMessages } from "@/hooks/useUnreadMessages";
+
+interface Message {
+  id: string;
+  content: string;
+  sender_id: string;
+  created_at: string;
+  is_deleted: boolean;
+}
 
 interface Conversation {
   id: string;
@@ -28,14 +35,6 @@ interface Conversation {
   unread_count: number;
 }
 
-interface Message {
-  id: string;
-  content: string;
-  sender_id: string;
-  created_at: string;
-  is_deleted: boolean;
-}
-
 const Messages = () => {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -48,264 +47,166 @@ const Messages = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { markAsRead } = useUnreadMessages();
 
+  // Initialize user
   useEffect(() => {
     const getUser = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       setUser(session?.user || null);
       setLoading(false);
     };
-
     getUser();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        setUser(session?.user || null);
-      }
+      (event, session) => setUser(session?.user || null)
     );
 
     return () => subscription.unsubscribe();
   }, []);
 
-  // Load conversations when user is set
+  // Load conversations when user is available
   useEffect(() => {
     if (user) {
       loadConversations();
     }
   }, [user]);
 
-  // Handle recipient parameter for direct messaging AFTER conversations are loaded (fallback)
+  // Handle recipient parameter for creating new conversation
   useEffect(() => {
     const recipientId = searchParams.get('recipient');
-    if (recipientId && user && conversations.length > 0 && !selectedConversation) {
-      // Check if conversation already exists in loaded conversations
+    if (recipientId && user) {
+      createOrOpenConversation(recipientId);
+    }
+  }, [searchParams, user]);
+
+  const loadConversations = async () => {
+    if (!user) return;
+
+    try {
+      // Get conversations with full details in one query
+      const { data: conversationData, error } = await supabase
+        .from('conversation_participants')
+        .select(`
+          conversation_id,
+          conversations!inner(id),
+          user_id
+        `)
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+
+      if (!conversationData || conversationData.length === 0) {
+        setConversations([]);
+        return;
+      }
+
+      // Process each conversation
+      const processedConversations = await Promise.all(
+        conversationData.map(async (conv) => {
+          try {
+            // Get other participant
+            const { data: otherParticipant } = await supabase
+              .from('conversation_participants')
+              .select('user_id')
+              .eq('conversation_id', conv.conversation_id)
+              .neq('user_id', user.id)
+              .single();
+
+            if (!otherParticipant) return null;
+
+            // Get other user profile
+            const { data: profile } = await supabase
+              .from('profiles')
+              .select('id, display_name, avatar_url, first_name, last_name')
+              .eq('id', otherParticipant.user_id)
+              .single();
+
+            if (!profile) return null;
+
+            // Get last message
+            const { data: lastMessage } = await supabase
+              .from('messages')
+              .select('content, created_at, sender_id')
+              .eq('conversation_id', conv.conversation_id)
+              .eq('is_deleted', false)
+              .order('created_at', { ascending: false })
+              .limit(1)
+              .maybeSingle();
+
+            // Get unread count
+            const { data: unreadCount } = await supabase.rpc('get_conversation_unread_count', {
+              conversation_id_param: conv.conversation_id,
+              user_id_param: user.id
+            });
+
+            return {
+              id: conv.conversation_id,
+              other_user: {
+                id: profile.id,
+                display_name: profile.display_name || '',
+                avatar_url: profile.avatar_url,
+                first_name: profile.first_name,
+                last_name: profile.last_name
+              },
+              last_message: lastMessage,
+              unread_count: unreadCount || 0
+            };
+          } catch (error) {
+            console.error('Error processing conversation:', error);
+            return null;
+          }
+        })
+      );
+
+      const validConversations = processedConversations.filter(Boolean) as Conversation[];
+      setConversations(validConversations);
+    } catch (error) {
+      console.error('Error loading conversations:', error);
+    }
+  };
+
+  const createOrOpenConversation = async (recipientId: string) => {
+    if (!user || recipientId === user.id) return;
+
+    try {
+      // First check if conversation already exists
       const existingConv = conversations.find(conv => conv.other_user.id === recipientId);
       if (existingConv) {
-        console.log('Found existing conversation after load:', existingConv.id);
         setSelectedConversation(existingConv.id);
         loadMessages(existingConv.id);
-        markConversationAsRead(existingConv.id);
+        return;
       }
-    }
-  }, [conversations, selectedConversation]);
 
-  // Function to create or open conversation - defined AFTER all other functions
-  const createOrOpenConversation = async (recipientId: string) => {
-    try {
-      console.log('Creating or opening conversation with recipient:', recipientId);
-      
-      // Use the existing get_or_create_conversation function
+      // Create new conversation
       const { data: conversationId, error } = await supabase.rpc('get_or_create_conversation', {
         user1_id: user.id,
         user2_id: recipientId
       });
 
-      if (error) {
-        console.error('Database function error:', error);
-        throw error;
-      }
-      
-      console.log('Got conversation ID:', conversationId);
-      
+      if (error) throw error;
+
       if (conversationId) {
-        // Wait a moment for the database to be consistent
-        await new Promise(resolve => setTimeout(resolve, 100));
-        
         setSelectedConversation(conversationId);
+        loadMessages(conversationId);
         
-        // Load messages directly
-        setLoadingMessages(true);
-        try {
-          const { data, error } = await supabase
-            .from('messages')
-            .select('*')
-            .eq('conversation_id', conversationId)
-            .eq('is_deleted', false)
-            .order('created_at', { ascending: true });
-
-          if (error) throw error;
-          setMessages(data || []);
-        } catch (error) {
-          console.error('Error loading messages:', error);
-        } finally {
-          setLoadingMessages(false);
-        }
-
-        // Mark as read
-        try {
-          await supabase.rpc('mark_conversation_as_read', {
-            conversation_id_param: conversationId,
-            user_id_param: user.id
-          });
-          markAsRead(conversationId);
-        } catch (error) {
-          console.error('Error marking conversation as read:', error);
-        }
-        
-        // Force refresh conversations list after a longer delay to ensure DB consistency
+        // Refresh conversations after a short delay
         setTimeout(() => {
-          console.log('Refreshing conversations after creating conversation');
           loadConversations();
-        }, 1000);
+        }, 500);
       }
     } catch (error) {
       console.error('Error creating conversation:', error);
       toast({
-        title: "Ошибка", 
+        title: "Ошибка",
         description: "Не удалось создать разговор",
         variant: "destructive"
       });
     }
   };
 
-  // Handle recipient parameter immediately when user is available - defined AFTER the function
-  useEffect(() => {
-    const recipientId = searchParams.get('recipient');
-    if (recipientId && user && !selectedConversation) {
-      console.log('Recipient parameter detected:', recipientId);
-      createOrOpenConversation(recipientId);
-    }
-  }, [searchParams, user, selectedConversation]);
-
-  // Handle recipient parameter for direct messaging AFTER conversations are loaded (fallback)
-  useEffect(() => {
-    const recipientId = searchParams.get('recipient');
-    if (recipientId && user && conversations.length > 0 && !selectedConversation) {
-      // Check if conversation already exists in loaded conversations
-      const existingConv = conversations.find(conv => conv.other_user.id === recipientId);
-      if (existingConv) {
-        console.log('Found existing conversation after load:', existingConv.id);
-        setSelectedConversation(existingConv.id);
-        loadMessages(existingConv.id);
-        markConversationAsRead(existingConv.id);
-      }
-    }
-  }, [conversations, selectedConversation]);
-
-
-  const loadConversations = async () => {
-    if (!user) return;
-
-    console.log('Loading conversations for user:', user.id);
-    try {
-      // Get user's conversations with participant info
-      const { data: userConversations, error } = await supabase
-        .from('conversation_participants')
-        .select(`
-          conversation_id,
-          conversations!inner(
-            id,
-            created_at,
-            updated_at
-          )
-        `)
-        .eq('user_id', user.id);
-
-      console.log('User conversations query result:', { userConversations, error });
-
-      if (error) {
-        console.error('Error loading conversations:', error);
-        throw error;
-      }
-
-      const conversationsWithDetails = await Promise.all(
-        (userConversations || []).map(async (conv) => {
-          console.log('Processing conversation:', conv.conversation_id);
-          
-          // Get other participant
-          const { data: otherParticipants } = await supabase
-            .from('conversation_participants')
-            .select('user_id')
-            .eq('conversation_id', conv.conversation_id)
-            .neq('user_id', user.id);
-
-          console.log('Other participants for conversation', conv.conversation_id, ':', otherParticipants);
-
-          if (!otherParticipants || otherParticipants.length === 0) {
-            console.log('No other participants found for conversation:', conv.conversation_id);
-            return null;
-          }
-
-          const otherUserId = otherParticipants[0].user_id;
-
-          // Get other user's profile
-          const { data: otherUserProfile } = await supabase
-            .from('profiles')
-            .select('id, display_name, avatar_url, first_name, last_name')
-            .eq('id', otherUserId)
-            .single();
-
-          console.log('Other user profile for', otherUserId, ':', otherUserProfile);
-
-          // Get last message
-          const { data: lastMessage } = await supabase
-            .from('messages')
-            .select('content, created_at, sender_id')
-            .eq('conversation_id', conv.conversation_id)
-            .eq('is_deleted', false)
-            .order('created_at', { ascending: false })
-            .limit(1)
-            .single();
-
-          console.log('Last message for conversation', conv.conversation_id, ':', lastMessage);
-
-          // Get unread count using the new database function
-          const { data: unreadCount } = await supabase.rpc('get_conversation_unread_count', {
-            conversation_id_param: conv.conversation_id,
-            user_id_param: user.id
-          });
-
-          console.log('Unread count for conversation', conv.conversation_id, ':', unreadCount);
-
-          const conversationData = {
-            id: conv.conversation_id,
-            other_user: {
-              id: otherUserProfile?.id || '',
-              display_name: otherUserProfile?.display_name || '',
-              avatar_url: otherUserProfile?.avatar_url,
-              first_name: otherUserProfile?.first_name,
-              last_name: otherUserProfile?.last_name
-            },
-            last_message: lastMessage,
-            unread_count: unreadCount || 0
-          };
-
-          console.log('Final conversation data:', conversationData);
-          return conversationData;
-        })
-      );
-
-      console.log('All conversation promises resolved, filtering...');
-      const filteredConversations = conversationsWithDetails.filter(conv => conv !== null && conv.other_user.id);
-      console.log('Filtered conversations:', filteredConversations);
-      
-      setConversations(filteredConversations);
-    } catch (error) {
-      console.error('Error loading conversations:', error);
-    }
-  };
-
-  // Mark conversation as read when user selects it
-  const markConversationAsRead = async (conversationId: string) => {
-    if (!user) return;
-    
-    try {
-      await supabase.rpc('mark_conversation_as_read', {
-        conversation_id_param: conversationId,
-        user_id_param: user.id
-      });
-      
-      // Update unread count in top-bar
-      markAsRead(conversationId);
-      
-      // Refresh conversations to update unread count
-      loadConversations();
-    } catch (error) {
-      console.error('Error marking conversation as read:', error);
-    }
-  };
   const loadMessages = async (conversationId: string) => {
     setLoadingMessages(true);
     try {
@@ -318,6 +219,9 @@ const Messages = () => {
 
       if (error) throw error;
       setMessages(data || []);
+
+      // Mark as read
+      markConversationAsRead(conversationId);
 
       // Set up realtime listener
       const channel = supabase
@@ -347,49 +251,46 @@ const Messages = () => {
     }
   };
 
+  const markConversationAsRead = async (conversationId: string) => {
+    if (!user) return;
+    
+    try {
+      await supabase.rpc('mark_conversation_as_read', {
+        conversation_id_param: conversationId,
+        user_id_param: user.id
+      });
+      
+      markAsRead(conversationId);
+      loadConversations();
+    } catch (error) {
+      console.error('Error marking conversation as read:', error);
+    }
+  };
+
   const sendMessage = async () => {
     if (!newMessage.trim() || !selectedConversation || sending) return;
 
     setSending(true);
-    
-    // Optimistically add message to UI
-    const optimisticMessage: Message = {
-      id: `temp-${Date.now()}`,
-      content: newMessage.trim(),
-      sender_id: user.id,
-      created_at: new Date().toISOString(),
-      is_deleted: false
-    };
-    
-    setMessages(prev => [...prev, optimisticMessage]);
-    const messageToSend = newMessage.trim();
+    const messageContent = newMessage.trim();
     setNewMessage("");
     
     try {
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('messages')
         .insert({
           conversation_id: selectedConversation,
           sender_id: user.id,
-          content: messageToSend,
+          content: messageContent,
           message_type: 'text'
-        })
-        .select()
-        .single();
+        });
 
       if (error) throw error;
       
-      // Replace optimistic message with real one
-      setMessages(prev => prev.map(msg => 
-        msg.id === optimisticMessage.id ? data : msg
-      ));
-      
-      loadConversations(); // Refresh to update last message
+      // Refresh conversations to update last message
+      loadConversations();
     } catch (error) {
       console.error('Error sending message:', error);
-      // Remove optimistic message on error
-      setMessages(prev => prev.filter(msg => msg.id !== optimisticMessage.id));
-      setNewMessage(messageToSend); // Restore message in input
+      setNewMessage(messageContent);
       toast({
         title: "Ошибка",
         description: "Не удалось отправить сообщение",
@@ -437,13 +338,6 @@ const Messages = () => {
   });
 
   const selectedConv = conversations.find(conv => conv.id === selectedConversation);
-
-  useEffect(() => {
-    if (selectedConversation) {
-      loadMessages(selectedConversation);
-      markConversationAsRead(selectedConversation);
-    }
-  }, [selectedConversation]);
 
   // Auto scroll to bottom when messages change
   useEffect(() => {
@@ -500,10 +394,10 @@ const Messages = () => {
                   key={conversation.id}
                   onClick={() => {
                     setSelectedConversation(conversation.id);
-                    markConversationAsRead(conversation.id);
+                    loadMessages(conversation.id);
                   }}
-                  className={`p-4 cursor-pointer hover:bg-accent transition-colors ${
-                    selectedConversation === conversation.id ? 'bg-accent' : ''
+                  className={`p-3 cursor-pointer hover:bg-muted/50 border-b transition-colors ${
+                    selectedConversation === conversation.id ? 'bg-muted' : ''
                   }`}
                 >
                   <div className="flex items-center gap-3">
@@ -513,9 +407,10 @@ const Messages = () => {
                         <User className="h-6 w-6" />
                       </AvatarFallback>
                     </Avatar>
+                    
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between">
-                        <p className="font-medium truncate">
+                        <p className="font-medium text-sm truncate">
                           {getDisplayName(conversation.other_user)}
                         </p>
                         {conversation.last_message && (
@@ -524,18 +419,18 @@ const Messages = () => {
                           </span>
                         )}
                       </div>
-                      {conversation.last_message && (
+                      
+                      <div className="flex items-center justify-between">
                         <p className="text-sm text-muted-foreground truncate">
-                          {conversation.last_message.sender_id === user.id && "Вы: "}
-                          {conversation.last_message.content}
+                          {conversation.last_message?.content || "Начните разговор"}
                         </p>
-                      )}
-                    </div>
-                    {conversation.unread_count > 0 && (
-                      <div className="bg-primary text-primary-foreground rounded-full w-5 h-5 flex items-center justify-center text-xs">
-                        {conversation.unread_count > 9 ? '9+' : conversation.unread_count}
+                        {conversation.unread_count > 0 && (
+                          <span className="bg-primary text-primary-foreground text-xs rounded-full px-2 py-1 min-w-[20px] text-center">
+                            {conversation.unread_count}
+                          </span>
+                        )}
                       </div>
-                    )}
+                    </div>
                   </div>
                 </div>
               ))
@@ -551,38 +446,40 @@ const Messages = () => {
               <div className="p-4 border-b flex items-center gap-3">
                 <Button
                   variant="ghost"
-                  size="icon"
-                  className="md:hidden"
+                  size="sm"
                   onClick={() => setSelectedConversation(null)}
+                  className="md:hidden"
                 >
                   <ArrowLeft className="h-4 w-4" />
                 </Button>
+                
                 <Avatar className="h-10 w-10">
                   <AvatarImage src={selectedConv.other_user.avatar_url} />
                   <AvatarFallback>
                     <User className="h-5 w-5" />
                   </AvatarFallback>
                 </Avatar>
+                
                 <div>
-                  <p className="font-medium">
+                  <h2 className="font-semibold text-sm">
                     {getDisplayName(selectedConv.other_user)}
-                  </p>
+                  </h2>
                 </div>
               </div>
 
               {/* Messages */}
-              <div className="flex flex-col h-full">
-                <ScrollArea className="flex-1 p-4 pb-20">
+              <ScrollArea className="flex-1 p-4">
+                <div className="space-y-4">
                   {loadingMessages ? (
-                    <div className="flex justify-center items-center h-32">
-                      <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+                    <div className="text-center py-8">
+                      <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
                     </div>
                   ) : messages.length === 0 ? (
-                    <div className="text-center text-muted-foreground py-8">
-                      Начните разговор
+                    <div className="text-center py-8 text-muted-foreground">
+                      <p>Начните разговор!</p>
                     </div>
                   ) : (
-                    <div className="space-y-4">
+                    <>
                       {messages.map((message) => {
                         const isOwn = message.sender_id === user.id;
                         return (
@@ -591,10 +488,10 @@ const Messages = () => {
                             className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}
                           >
                             <div
-                              className={`max-w-[70%] rounded-lg px-3 py-2 ${
+                              className={`max-w-[70%] px-4 py-2 rounded-lg ${
                                 isOwn
                                   ? 'bg-primary text-primary-foreground'
-                                  : 'bg-muted text-muted-foreground'
+                                  : 'bg-muted'
                               }`}
                             >
                               <p className="text-sm">{message.content}</p>
@@ -606,26 +503,26 @@ const Messages = () => {
                         );
                       })}
                       <div ref={messagesEndRef} />
-                    </div>
+                    </>
                   )}
-                </ScrollArea>
-              </div>
+                </div>
+              </ScrollArea>
 
-              {/* Message Input - Fixed at bottom of screen */}
-              <div className="fixed bottom-0 left-0 right-0 md:left-80 p-4 border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 z-50">
-                <div className="flex gap-2 max-w-4xl mx-auto">
+              {/* Message Input */}
+              <div className="p-4 border-t">
+                <div className="flex gap-2">
                   <Input
                     value={newMessage}
                     onChange={(e) => setNewMessage(e.target.value)}
                     onKeyPress={handleKeyPress}
-                    placeholder="Написать сообщение..."
+                    placeholder="Введите сообщение..."
                     disabled={sending}
                     className="flex-1"
                   />
                   <Button 
                     onClick={sendMessage} 
                     disabled={!newMessage.trim() || sending}
-                    size="icon"
+                    size="sm"
                   >
                     <Send className="h-4 w-4" />
                   </Button>
@@ -633,10 +530,15 @@ const Messages = () => {
               </div>
             </>
           ) : (
-            <div className="flex-1 flex items-center justify-center text-muted-foreground">
-              <div className="text-center">
-                <h2 className="text-xl font-semibold mb-2">Выберите разговор</h2>
-                <p>Выберите разговор из списка слева для начала общения</p>
+            <div className="flex-1 flex items-center justify-center text-center">
+              <div>
+                <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Send className="h-8 w-8 text-muted-foreground" />
+                </div>
+                <h3 className="text-lg font-semibold mb-2">Выберите разговор</h3>
+                <p className="text-muted-foreground">
+                  Выберите разговор из списка слева, чтобы начать общение
+                </p>
               </div>
             </div>
           )}
