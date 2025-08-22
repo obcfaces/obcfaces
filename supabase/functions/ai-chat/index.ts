@@ -9,20 +9,50 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
+  console.log(`${req.method} request received`);
+  
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
+    console.log('Handling OPTIONS request');
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { message, context } = await req.json();
+    console.log('Processing POST request');
+    
+    const body = await req.json();
+    console.log('Request body:', body);
+    
+    const { message, context } = body;
+
+    if (!message) {
+      throw new Error('Message is required');
+    }
 
     console.log('Received message:', message);
     console.log('Context:', context);
 
     if (!openAIApiKey) {
+      console.error('OPENAI_API_KEY is not set');
       throw new Error('OPENAI_API_KEY is not set');
     }
+
+    console.log('Making request to OpenAI API');
+
+    const requestBody = {
+      model: 'gpt-4o-mini',
+      messages: [
+        { 
+          role: 'system', 
+          content: `You are an AI assistant for a beauty contest. Help users with questions about the contest, participants and voting. Respond in English in a friendly and professional manner.${context ? ` Context: ${context}` : ''}` 
+        },
+        { role: 'user', content: message }
+      ],
+      max_tokens: 1000,
+      temperature: 0.7
+    };
+
+    console.log('Request body for OpenAI:', JSON.stringify(requestBody, null, 2));
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -30,28 +60,21 @@ serve(async (req) => {
         'Authorization': `Bearer ${openAIApiKey}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        model: 'gpt-5-mini-2025-08-07',
-        messages: [
-          { 
-            role: 'system', 
-            content: `You are an AI assistant for a beauty contest. Help users with questions about the contest, participants and voting. Respond in English in a friendly and professional manner.${context ? ` Context: ${context}` : ''}` 
-          },
-          { role: 'user', content: message }
-        ],
-        max_completion_tokens: 1000
-      }),
+      body: JSON.stringify(requestBody),
     });
 
     console.log('OpenAI API response status:', response.status);
+    console.log('OpenAI API response headers:', Object.fromEntries(response.headers.entries()));
     
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('OpenAI API error:', errorText);
+      console.error('OpenAI API error response:', errorText);
       throw new Error(`OpenAI API error: ${response.status} - ${errorText}`);
     }
 
     const data = await response.json();
+    console.log('OpenAI API response data:', data);
+    
     const aiResponse = data.choices[0].message.content;
 
     console.log('AI response:', aiResponse);
@@ -61,6 +84,7 @@ serve(async (req) => {
     });
   } catch (error) {
     console.error('Error in ai-chat function:', error);
+    console.error('Error stack:', error.stack);
     return new Response(JSON.stringify({ error: error.message }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
