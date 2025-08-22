@@ -51,16 +51,22 @@ const countries = useMemo(() => {
     isoCode: country.isoCode
   }));
   
+  console.log('Total countries loaded:', allCountries.length); // Debug log
+  
   // Sort alphabetically but put Philippines first
   const philippines = allCountries.find(c => c.isoCode === 'PH');
   const otherCountries = allCountries.filter(c => c.isoCode !== 'PH').sort((a, b) => a.name.localeCompare(b.name));
   
-  return [
-    // Active countries
+  const finalList = [
+    // Philippines first
     ...(philippines ? [philippines] : []),
-    // All other countries
+    // All other countries alphabetically
     ...otherCountries
   ];
+  
+  console.log('Final country list:', finalList.length, finalList.slice(0, 10)); // Debug log
+  
+  return finalList;
 }, []);
 
 const states = useMemo(() => {
