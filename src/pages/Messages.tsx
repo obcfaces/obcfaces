@@ -21,6 +21,7 @@ interface Message {
   id: string;
   content: string;
   sender_id: string;
+  conversation_id: string;
   created_at: string;
 }
 
@@ -126,7 +127,7 @@ const Messages = () => {
           // Получаем последнее сообщение
           const { data: lastMessage } = await supabase
             .from('messages')
-            .select('id, content, sender_id, created_at')
+            .select('id, content, sender_id, conversation_id, created_at')
             .eq('conversation_id', convId)
             .eq('is_deleted', false)
             .order('created_at', { ascending: false })
@@ -183,7 +184,7 @@ const Messages = () => {
     try {
       const { data, error } = await supabase
         .from('messages')
-        .select('id, content, sender_id, created_at')
+        .select('id, content, sender_id, conversation_id, created_at')
         .eq('conversation_id', conversationId)
         .eq('is_deleted', false)
         .order('created_at', { ascending: true });
@@ -215,8 +216,7 @@ const Messages = () => {
       if (error) throw error;
       
       setNewMessage('');
-      loadMessages(selectedConversation);
-      loadConversations(); // Обновляем список для показа нового последнего сообщения
+      // Real-time подписка автоматически добавит сообщение и обновит разговоры
     } catch (error) {
       console.error('Error sending message:', error);
       toast({
@@ -262,7 +262,44 @@ const Messages = () => {
     } else if (!recipientId && conversations.length === 0) {
       loadConversations();
     }
-  }, [user, searchParams.get('recipient')]); // Используем только значение recipient вместо всего searchParams
+  }, [user, searchParams.get('recipient')]);
+
+  // Real-time подписка на новые сообщения
+  useEffect(() => {
+    if (!user) return;
+
+    const channel = supabase
+      .channel('messages-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'messages'
+        },
+        (payload) => {
+          const newMessage = payload.new as Message;
+          
+          // Обновляем сообщения если это текущий разговор
+          if (selectedConversation === newMessage.conversation_id) {
+            setMessages(prev => [...prev, newMessage]);
+            
+            // Отмечаем как прочитанное если сообщение от другого пользователя
+            if (newMessage.sender_id !== user.id) {
+              markAsRead(newMessage.conversation_id);
+            }
+          }
+          
+          // Обновляем список разговоров для показа нового последнего сообщения
+          loadConversations();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user, selectedConversation, markAsRead]);
 
   // Автоскролл к низу при новых сообщениях
   useEffect(() => {
