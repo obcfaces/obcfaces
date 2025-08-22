@@ -32,7 +32,7 @@ interface Conversation {
 }
 
 const Messages = () => {
-  console.log('=== MessagesNew component loaded ===');
+  console.log('=== Messages component loaded ===');
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [conversations, setConversations] = useState<Conversation[]>([]);
@@ -50,13 +50,15 @@ const Messages = () => {
   // Инициализация пользователя
   useEffect(() => {
     const initUser = async () => {
+      console.log('=== initUser called ===');
       const { data: { session } } = await supabase.auth.getSession();
+      console.log('=== Session data ===', session?.user?.email || 'No user');
       setUser(session?.user || null);
       setLoading(false);
       
       // Загружаем разговоры сразу после получения пользователя
       if (session?.user) {
-        console.log('User loaded, calling loadConversations immediately');
+        console.log('User loaded, calling loadConversations immediately for:', session.user.email);
         loadConversations();
       }
     };
