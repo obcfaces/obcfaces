@@ -166,17 +166,21 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
 
   // Define contestants based on week type (synchronous version)
   const getContestantsSync = async (participantsData: any[] = realContestants) => {
+    // Use the actual participants data passed to the function
+    const actualParticipants = participantsData.length > 0 ? participantsData : realContestants;
+    
     console.log(`getContestantsSync called for ${title}:`, { 
       participantsDataLength: participantsData.length, 
       realContestantsLength: realContestants.length,
+      actualParticipantsLength: actualParticipants.length,
       participantsData: participantsData.slice(0, 2) // Log first 2 for debugging
     });
     
     // Use real contestants from weekly contests if available
-    if (["THIS WEEK", "1 WEEK AGO", "2 WEEKS AGO", "3 WEEKS AGO"].includes(title) && participantsData.length > 0) {
-      console.log(`Using real contestants for ${title}:`, participantsData.length);
+    if (["THIS WEEK", "1 WEEK AGO", "2 WEEKS AGO", "3 WEEKS AGO"].includes(title) && actualParticipants.length > 0) {
+      console.log(`Using real contestants for ${title}:`, actualParticipants.length);
       const contestantsWithRatings = await Promise.all(
-        participantsData.map(async (contestant) => {
+        actualParticipants.map(async (contestant) => {
           // Validate contestant data structure
           if (!contestant || typeof contestant !== 'object') {
             console.warn('Invalid contestant data:', contestant);
