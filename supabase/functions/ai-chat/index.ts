@@ -31,9 +31,11 @@ serve(async (req) => {
     }
 
     if (!openAIApiKey) {
-      console.error('OPENAI_API_KEY is not set');
-      throw new Error('OpenAI API key is not configured');
+      console.error('OPENAI_API_KEY is not set in environment variables');
+      throw new Error('OpenAI API key is not configured. Please add OPENAI_API_KEY secret.');
     }
+
+    console.log('OpenAI API key is available, length:', openAIApiKey.length);
 
     console.log('Making request to OpenAI API...');
 
