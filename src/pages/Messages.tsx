@@ -32,7 +32,6 @@ interface Conversation {
 }
 
 const Messages = () => {
-  console.log('=== Messages component loaded ===');
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [conversations, setConversations] = useState<Conversation[]>([]);
@@ -50,19 +49,13 @@ const Messages = () => {
   // Инициализация пользователя
   useEffect(() => {
     const initUser = async () => {
-      console.log('=== initUser called ===');
       const { data: { session } } = await supabase.auth.getSession();
-      console.log('=== Session data ===', session?.user?.email || 'No user', 'ID:', session?.user?.id || 'No ID');
       setUser(session?.user || null);
       setLoading(false);
       
       // Загружаем разговоры сразу после получения пользователя
       if (session?.user) {
-        console.log('User loaded, calling loadConversations immediately for:', session.user.email);
-        // Небольшая задержка для стабильности
-        setTimeout(() => {
-          loadConversations();
-        }, 100);
+        loadConversations();
       }
     };
     initUser();
@@ -70,11 +63,6 @@ const Messages = () => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         setUser(session?.user || null);
-        // Загружаем разговоры при изменении авторизации
-        if (session?.user) {
-          console.log('Auth changed, calling loadConversations');
-          loadConversations();
-        }
       }
     );
 
@@ -84,33 +72,17 @@ const Messages = () => {
   // Загрузка разговоров
   const loadConversations = async () => {
     if (!user) {
-      console.log('loadConversations: No user, current user:', user);
       return;
     }
 
-    console.log('loadConversations: Starting for user', user.id, 'Email:', user.email);
-
     try {
-      console.log('=== STEP 1: Fetching conversation_participants ===');
-      // Получаем разговоры используя прямой запрос с дополнительной информацией для отладки
       const { data: participantData, error } = await supabase
         .from('conversation_participants')
-        .select('conversation_id, user_id, last_read_at')
+        .select('conversation_id')
         .eq('user_id', user.id);
 
-      console.log('=== STEP 2: Response received ===');
-      console.log('loadConversations: participantData:', participantData);
-      console.log('loadConversations: error:', error);
-      console.log('loadConversations: participantData length:', participantData?.length || 0);
-
       if (error) {
-        console.error('=== ERROR in loadConversations ===', error);
-        console.error('Error details:', {
-          message: error.message,
-          details: error.details,
-          hint: error.hint,
-          code: error.code
-        });
+        console.error('Error in loadConversations:', error.message);
         toast({
           title: "Ошибка",
           description: "Не удалось загрузить разговоры: " + error.message,
@@ -120,20 +92,14 @@ const Messages = () => {
       }
 
       if (!participantData || participantData.length === 0) {
-        console.log('=== STEP 3: No conversations found for user ===');
-        console.log('loadConversations: No participant data, setting empty conversations');
         setConversations([]);
         return;
       }
-
-      console.log('=== STEP 4: Processing conversations ===');
 
       const conversationIds = participantData.map(p => p.conversation_id);
       
       const conversationsWithDetails = await Promise.all(
         conversationIds.map(async (convId) => {
-          console.log(`loadConversations: Processing conversation ${convId}`);
-          
           // Получаем другого участника
           const { data: otherParticipant, error: participantError } = await supabase
             .from('conversation_participants')
@@ -142,10 +108,7 @@ const Messages = () => {
             .neq('user_id', user.id)
             .single();
 
-          console.log(`loadConversations: Other participant for ${convId}:`, otherParticipant, 'error:', participantError);
-
           if (!otherParticipant) {
-            console.log(`loadConversations: No other participant found for ${convId}`);
             return null;
           }
 
@@ -156,10 +119,7 @@ const Messages = () => {
             .eq('id', otherParticipant.user_id)
             .single();
 
-          console.log(`loadConversations: Profile for ${otherParticipant.user_id}:`, profile, 'error:', profileError);
-
           if (!profile) {
-            console.log(`loadConversations: No profile found for ${otherParticipant.user_id}`);
             return null;
           }
 
@@ -173,32 +133,23 @@ const Messages = () => {
             .limit(1)
             .maybeSingle();
 
-          console.log(`loadConversations: Last message for ${convId}:`, lastMessage);
-
           // Получаем количество непрочитанных
           const { data: unreadCount } = await supabase.rpc('get_conversation_unread_count', {
             conversation_id_param: convId,
             user_id_param: user.id
           });
 
-          console.log(`loadConversations: Unread count for ${convId}:`, unreadCount);
-
-          const conversation = {
+          return {
             id: convId,
             other_user: profile,
             last_message: lastMessage,
             unread_count: unreadCount || 0
           };
-
-          console.log(`loadConversations: Built conversation object:`, conversation);
-          return conversation;
         })
       );
 
       const validConversations = conversationsWithDetails.filter(Boolean) as Conversation[];
-      console.log('loadConversations: Final conversations to set:', validConversations);
       setConversations(validConversations);
-      console.log('loadConversations: Conversations set, current state should update');
     } catch (error) {
       console.error('Error loading conversations:', error);
     }
@@ -288,33 +239,20 @@ const Messages = () => {
 
   // Обработка recipient из URL
   useEffect(() => {
-    console.log('Effect triggered - user:', !!user, 'recipient:', searchParams.get('recipient'));
-    
     if (!user) return;
 
     const recipientId = searchParams.get('recipient');
-    if (recipientId && !selectedConversation) { // Добавляем проверку что разговор еще не выбран
-      console.log('Processing recipient:', recipientId);
-      
+    if (recipientId && !selectedConversation) {
       const initConversation = async () => {
-        console.log('Creating/finding conversation...');
         const conversationId = await createOrFindConversation(recipientId);
-        console.log('Got conversation ID:', conversationId);
         
         if (conversationId) {
-          console.log('Setting selected conversation:', conversationId);
           setSelectedConversation(conversationId);
-          
-          console.log('Loading messages...');
           await loadMessages(conversationId);
-          
-          console.log('Loading conversations...');
           await loadConversations();
-          
-          console.log('Process completed');
         }
         
-        // Очищаем URL только один раз
+        // Очищаем URL
         const newSearchParams = new URLSearchParams(searchParams);
         newSearchParams.delete('recipient');
         navigate(`/messages?${newSearchParams.toString()}`, { replace: true });
@@ -322,7 +260,6 @@ const Messages = () => {
       
       initConversation();
     } else if (!recipientId && conversations.length === 0) {
-      console.log('No recipient, loading conversations normally');
       loadConversations();
     }
   }, [user, searchParams.get('recipient')]); // Используем только значение recipient вместо всего searchParams
@@ -355,13 +292,6 @@ const Messages = () => {
 
   // Получение выбранного разговора
   const selectedConv = conversations.find(conv => conv.id === selectedConversation);
-  
-  // Debug logging
-  console.log('Current state:');
-  console.log('- selectedConversation:', selectedConversation);
-  console.log('- conversations:', conversations.length);
-  console.log('- selectedConv:', !!selectedConv);
-  console.log('- user:', !!user);
 
   if (loading) {
     return (
