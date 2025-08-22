@@ -191,7 +191,7 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
           
           const averageRating = avgRating || 0;
           
-          return {
+          const contestantData = {
             rank: contestant.final_rank || 0,
             name: `${contestant.first_name || 'Unknown'} ${contestant.last_name || ''}`.trim(),
             profileId: contestant.user_id,
@@ -209,6 +209,14 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
             prize: showWinner && contestant.final_rank === 1 ? "+ 5000 PHP" : undefined,
             isRealContestant: true // Mark as real contestant to disable fake likes/comments
           };
+          
+          console.log(`Real contestant data for ${contestantData.name}:`, {
+            profileId: contestantData.profileId,
+            user_id: contestant.user_id,
+            hasProfileId: !!contestantData.profileId
+          });
+          
+          return contestantData;
         })
       );
       
