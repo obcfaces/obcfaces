@@ -52,11 +52,24 @@ const Messages = () => {
       const { data: { session } } = await supabase.auth.getSession();
       setUser(session?.user || null);
       setLoading(false);
+      
+      // Загружаем разговоры сразу после получения пользователя
+      if (session?.user) {
+        console.log('User loaded, calling loadConversations immediately');
+        loadConversations();
+      }
     };
     initUser();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => setUser(session?.user || null)
+      (event, session) => {
+        setUser(session?.user || null);
+        // Загружаем разговоры при изменении авторизации
+        if (session?.user) {
+          console.log('Auth changed, calling loadConversations');
+          loadConversations();
+        }
+      }
     );
 
     return () => subscription.unsubscribe();
