@@ -244,7 +244,11 @@ const Messages = () => {
         
         // Refresh conversations in background to get accurate data
         setTimeout(() => {
-          loadConversations();
+          const currentSelectedId = conversationId; // Preserve the selected conversation
+          loadConversations().then(() => {
+            // Ensure the conversation remains selected after refresh
+            setSelectedConversation(currentSelectedId);
+          });
         }, 500);
       }
     } catch (error) {
