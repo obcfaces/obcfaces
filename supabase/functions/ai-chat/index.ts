@@ -1,45 +1,43 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
-const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
-
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
 serve(async (req) => {
-  console.log('Request received:', req.method);
+  console.log(`${new Date().toISOString()}: ${req.method} request received`);
   
   if (req.method === 'OPTIONS') {
-    console.log('Returning CORS headers for OPTIONS');
+    console.log('Handling OPTIONS request');
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    console.log('Processing POST request...');
+    console.log('Processing request...');
     
     const body = await req.json();
-    console.log('Request body received:', body);
+    console.log('Request body:', JSON.stringify(body));
     
     const { message, context } = body;
-    console.log('Message:', message);
-    console.log('Context:', context);
 
     if (!message) {
+      console.error('No message provided');
       throw new Error('Message is required');
     }
 
+    console.log('Checking OpenAI API key...');
+    const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
+    
     if (!openAIApiKey) {
-      console.error('OPENAI_API_KEY is not set in environment variables');
-      throw new Error('OpenAI API key is not configured. Please add OPENAI_API_KEY secret.');
+      console.error('OPENAI_API_KEY not found in environment');
+      throw new Error('OpenAI API key not configured');
     }
 
-    console.log('OpenAI API key is available, length:', openAIApiKey.length);
+    console.log('API key found, making OpenAI request...');
 
-    console.log('Making request to OpenAI API...');
-
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    const openAIResponse = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${openAIApiKey}`,
@@ -50,7 +48,7 @@ serve(async (req) => {
         messages: [
           { 
             role: 'system', 
-            content: `You are an AI assistant for a beauty contest website. Help users with questions about the contest, participants, voting process, and general information. Always respond in a friendly and professional manner. Context: ${context || 'Beauty Contest Platform'}` 
+            content: `You are an AI assistant for a beauty contest website. Help users with questions about the contest, participants, voting, and general information. Respond in a friendly and professional manner. Context: ${context || 'Beauty Contest Platform'}` 
           },
           { role: 'user', content: message }
         ],
@@ -59,36 +57,40 @@ serve(async (req) => {
       }),
     });
 
-    console.log('OpenAI API response status:', response.status);
+    console.log('OpenAI response status:', openAIResponse.status);
 
-    if (!response.ok) {
-      const errorText = await response.text();
+    if (!openAIResponse.ok) {
+      const errorText = await openAIResponse.text();
       console.error('OpenAI API error:', errorText);
-      throw new Error(`OpenAI API error: ${response.status} - ${errorText}`);
+      throw new Error(`OpenAI API error: ${openAIResponse.status}`);
     }
 
-    const data = await response.json();
-    console.log('OpenAI API response received');
+    const openAIData = await openAIResponse.json();
+    const aiResponse = openAIData.choices[0].message.content;
 
-    const aiResponse = data.choices[0].message.content;
-    console.log('AI response:', aiResponse);
-
-    return new Response(JSON.stringify({ response: aiResponse }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      status: 200
-    });
+    console.log('Sending successful response');
     
+    return new Response(
+      JSON.stringify({ response: aiResponse }), 
+      {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 200
+      }
+    );
+
   } catch (error) {
-    console.error('Error occurred:', error);
-    console.error('Error message:', error.message);
+    console.error('Function error:', error);
     console.error('Error stack:', error.stack);
     
-    return new Response(JSON.stringify({ 
-      error: error.message,
-      details: 'Check function logs for more details'
-    }), {
-      status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+    return new Response(
+      JSON.stringify({ 
+        error: error.message,
+        details: 'Check logs for more information'
+      }), 
+      {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      }
+    );
   }
 });
