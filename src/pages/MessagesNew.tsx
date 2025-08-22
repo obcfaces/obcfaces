@@ -95,24 +95,36 @@ const Messages = () => {
       
       const conversationsWithDetails = await Promise.all(
         conversationIds.map(async (convId) => {
+          console.log(`loadConversations: Processing conversation ${convId}`);
+          
           // Получаем другого участника
-          const { data: otherParticipant } = await supabase
+          const { data: otherParticipant, error: participantError } = await supabase
             .from('conversation_participants')
             .select('user_id')
             .eq('conversation_id', convId)
             .neq('user_id', user.id)
             .single();
 
-          if (!otherParticipant) return null;
+          console.log(`loadConversations: Other participant for ${convId}:`, otherParticipant, 'error:', participantError);
+
+          if (!otherParticipant) {
+            console.log(`loadConversations: No other participant found for ${convId}`);
+            return null;
+          }
 
           // Получаем профиль другого пользователя
-          const { data: profile } = await supabase
+          const { data: profile, error: profileError } = await supabase
             .from('profiles')
             .select('id, display_name, avatar_url, first_name, last_name')
             .eq('id', otherParticipant.user_id)
             .single();
 
-          if (!profile) return null;
+          console.log(`loadConversations: Profile for ${otherParticipant.user_id}:`, profile, 'error:', profileError);
+
+          if (!profile) {
+            console.log(`loadConversations: No profile found for ${otherParticipant.user_id}`);
+            return null;
+          }
 
           // Получаем последнее сообщение
           const { data: lastMessage } = await supabase
@@ -124,18 +136,25 @@ const Messages = () => {
             .limit(1)
             .maybeSingle();
 
+          console.log(`loadConversations: Last message for ${convId}:`, lastMessage);
+
           // Получаем количество непрочитанных
           const { data: unreadCount } = await supabase.rpc('get_conversation_unread_count', {
             conversation_id_param: convId,
             user_id_param: user.id
           });
 
-          return {
+          console.log(`loadConversations: Unread count for ${convId}:`, unreadCount);
+
+          const conversation = {
             id: convId,
             other_user: profile,
             last_message: lastMessage,
             unread_count: unreadCount || 0
           };
+
+          console.log(`loadConversations: Built conversation object:`, conversation);
+          return conversation;
         })
       );
 
