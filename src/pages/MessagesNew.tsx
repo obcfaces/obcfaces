@@ -32,6 +32,7 @@ interface Conversation {
 }
 
 const Messages = () => {
+  console.log('=== MessagesNew component loaded ===');
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [conversations, setConversations] = useState<Conversation[]>([]);
