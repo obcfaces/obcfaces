@@ -754,6 +754,10 @@ export type Database = {
         Args: { conversation_id: string; user_id: string }
         Returns: boolean
       }
+      user_is_in_conversation: {
+        Args: { conversation_id_param: string; user_id_param: string }
+        Returns: boolean
+      }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
