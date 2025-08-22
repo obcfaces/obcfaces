@@ -14,6 +14,8 @@ import { cn } from "@/lib/utils";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import LoginModalContent from "@/components/login-modal-content";
+import { ShareModal } from "@/components/share-modal";
+import { useShare } from "@/hooks/useShare";
 
 interface ContestantCardProps {
   rank: number;
@@ -95,6 +97,7 @@ export function ContestantCard({
     }
   });
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const { isShareModalOpen, shareData, openShareModal, closeShareModal } = useShare();
   const { toast } = useToast();
 
   useEffect(() => {
@@ -542,7 +545,11 @@ export function ContestantCard({
               <button
                 type="button"
                 className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
-                onClick={async () => { try { if ((navigator as any).share) { await (navigator as any).share({ title: name, url: window.location.href }); } else if (navigator.clipboard) { await navigator.clipboard.writeText(window.location.href); toast({ title: "Link copied" }); } } catch {} }}
+                onClick={() => openShareModal({
+                  title: `${name} - Beauty Contest`,
+                  url: window.location.href,
+                  description: `Check out ${name}, ${age} from ${city}, ${country} in this beauty contest!`
+                })}
                 aria-label="Share"
               >
                  <Share2 className="w-4 h-4" />
@@ -768,16 +775,11 @@ export function ContestantCard({
                  <button
                    type="button"
                    className="inline-flex items-center gap-1 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors"
-                   onClick={async () => {
-                     try {
-                       if ((navigator as any).share) {
-                         await (navigator as any).share({ title: name, url: window.location.href });
-                       } else if (navigator.clipboard) {
-                         await navigator.clipboard.writeText(window.location.href);
-                         toast({ title: "Link copied" });
-                       }
-                     } catch {}
-                   }}
+                   onClick={() => openShareModal({
+                     title: `${name} - Beauty Contest`,
+                     url: window.location.href,
+                     description: `Check out ${name}, ${age} from ${city}, ${country} in this beauty contest!`
+                   })}
                    aria-label="Share"
                  >
                    <Share2 className="w-3.5 h-3.5" />
@@ -812,6 +814,15 @@ export function ContestantCard({
           <LoginModalContent onClose={() => setShowLoginModal(false)} />
         </DialogContent>
       </Dialog>
+      
+      {/* Share Modal */}
+      <ShareModal
+        isOpen={isShareModalOpen}
+        onClose={closeShareModal}
+        title={shareData.title}
+        url={shareData.url}
+        description={shareData.description}
+      />
     </>
   );
 }
