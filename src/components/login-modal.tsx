@@ -18,8 +18,7 @@ const LoginModalTrigger = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
+  const [name, setName] = useState("");
   const [country, setCountry] = useState("");
   const [countryCode, setCountryCode] = useState<string | null>(null);
   const [stateName, setStateName] = useState("");
@@ -81,7 +80,7 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
     if (mode === "signup") {
       setSubmitted(true);
       // Check validation for signup
-      if (!firstName.trim() || !lastName.trim() || !countryCode || !age || !acceptTerms) {
+      if (!name.trim() || !countryCode || !age || !acceptTerms) {
         setLoading(false);
         return;
       }
@@ -103,8 +102,8 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
           options: {
             emailRedirectTo: redirectUrl,
             data: {
-              first_name: firstName || null,
-              last_name: lastName || null,
+              first_name: name || null,
+              last_name: null,
               country: country || null,
               state: stateName || null,
               city: city || null,
@@ -122,8 +121,8 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
             .upsert(
               {
                 id: userId,
-                first_name: firstName || null,
-                last_name: lastName || null,
+                first_name: name || null,
+                last_name: null,
                 country: country || null,
                 state: stateName || null,
                 city: city || null,
@@ -161,8 +160,7 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
   );
 
   const showErrors = submitted && mode === "signup";
-  const invalidFirstName = showErrors && !firstName.trim();
-  const invalidLastName = showErrors && !lastName.trim();
+  const invalidName = showErrors && !name.trim();
   const invalidCountry = showErrors && !countryCode;
   const invalidAge = showErrors && !age;
   const invalidTerms = showErrors && !acceptTerms;
@@ -172,7 +170,7 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
       <DialogTrigger asChild>
         <button className="text-sm underline text-primary">Sign in</button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-lg data-[state=open]:translate-y-[10%] sm:data-[state=open]:translate-y-[5%]">
+      <DialogContent className="sm:max-w-lg data-[state=open]:translate-y-[5%] sm:data-[state=open]:translate-y-[2%]">
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>{description}</DialogDescription>
@@ -193,61 +191,66 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
           </div>
           {mode === "signup" && (
             <>
-              <div className="grid gap-2 sm:grid-cols-2">
-                <div className="space-y-2">
+              {/* Separator between email/password and profile fields */}
+              <div className="border-t pt-4">
+                <div className="space-y-3">
+                  <div className="space-y-2">
+                    <Input 
+                      id="auth-name" 
+                      placeholder="Name" 
+                      aria-invalid={invalidName} 
+                      className={`placeholder:italic placeholder:text-muted-foreground ${invalidName ? 'border-destructive focus:ring-destructive' : ''}`} 
+                      value={name} 
+                      onChange={(e) => setName(e.target.value)} 
+                    />
+                  </div>
                   
-                  <Input id="auth-firstname" placeholder="First name" aria-invalid={invalidFirstName} className={`placeholder:italic placeholder:text-muted-foreground ${invalidFirstName ? 'border-destructive focus:ring-destructive' : ''}`} value={firstName} onChange={(e) => setFirstName(e.target.value)} />
-                </div>
-                <div className="space-y-2">
+                  <div className="grid gap-3 grid-cols-2">
+                    <SearchableSelect
+                      value={countryCode ?? ""}
+                      onValueChange={(code) => {
+                        setCountryCode(code);
+                        const c = countries.find((c) => c.value === code);
+                        setCountry(c?.label || "");
+                        setStateName("");
+                        setStateCode(null);
+                        setCity("");
+                      }}
+                      placeholder="Country"
+                      ariaLabel="Select country"
+                      invalid={invalidCountry}
+                      options={countries}
+                    />
+                    
+                    <Select value={age} onValueChange={setAge}>
+                      <SelectTrigger aria-label="Age" className={invalidAge ? "border-destructive focus:ring-destructive" : undefined}>
+                        <SelectValue placeholder="Age" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {ageOptions.map((a) => (
+                          <SelectItem key={a} value={String(a)}>
+                            {a}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                   
-                  <Input id="auth-lastname" placeholder="Last name" aria-invalid={invalidLastName} className={`placeholder:italic placeholder:text-muted-foreground ${invalidLastName ? 'border-destructive focus:ring-destructive' : ''}`} value={lastName} onChange={(e) => setLastName(e.target.value)} />
-                </div>
-                <div className="space-y-2">
-                  
-                  <SearchableSelect
-                    value={countryCode ?? ""}
-                    onValueChange={(code) => {
-                      setCountryCode(code);
-                      const c = countries.find((c) => c.value === code);
-                      setCountry(c?.label || "");
-                      setStateName("");
-                      setStateCode(null);
-                      setCity("");
-                    }}
-                    placeholder="Country"
-                    ariaLabel="Select country"
-                    invalid={invalidCountry}
-                    options={countries}
-                  />
-                </div>
-                <div className="space-y-2">
-                  
-                  <Select value={age} onValueChange={setAge}>
-                    <SelectTrigger aria-label="Age" className={invalidAge ? "border-destructive focus:ring-destructive" : undefined}>
-                      <SelectValue placeholder="Age" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {ageOptions.map((a) => (
-                        <SelectItem key={a} value={String(a)}>
-                          {a}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  
-                  <Select value={gender} onValueChange={setGender}>
-                    <SelectTrigger aria-label="Gender">
-                      <SelectValue placeholder="Gender" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="male">Male</SelectItem>
-                      <SelectItem value="female">Female</SelectItem>
-                      <SelectItem value="other">Other</SelectItem>
-                      <SelectItem value="na">Prefer not to say</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <div className="grid gap-3 grid-cols-2">
+                    <Select value={gender} onValueChange={setGender}>
+                      <SelectTrigger aria-label="Gender">
+                        <SelectValue placeholder="Gender" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="male">Male</SelectItem>
+                        <SelectItem value="female">Female</SelectItem>
+                        <SelectItem value="other">Other</SelectItem>
+                        <SelectItem value="na">Prefer not to say</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    
+                    <div></div> {/* Empty div for spacing */}
+                  </div>
                 </div>
               </div>
               
