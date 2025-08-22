@@ -66,6 +66,9 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
     }
   }, [open, value]);
 
+  const [touchStartY, setTouchStartY] = React.useState<number | null>(null);
+  const [isTouchScrolling, setIsTouchScrolling] = React.useState(false);
+
   return (
     <Popover open={open} onOpenChange={setOpen} modal={true}>
       <PopoverTrigger asChild>
@@ -110,7 +113,29 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
             onValueChange={setSearchValue}
           />
           <CommandEmpty>{emptyMessage}</CommandEmpty>
-          <CommandList ref={commandListRef} className="max-h-64 overflow-y-auto bg-popover">
+          <CommandList 
+            ref={commandListRef} 
+            className="max-h-64 overflow-y-auto bg-popover"
+            onTouchStart={(e) => {
+              setTouchStartY(e.touches[0].clientY);
+              setIsTouchScrolling(false);
+            }}
+            onTouchMove={(e) => {
+              if (touchStartY !== null) {
+                const touchY = e.touches[0].clientY;
+                const deltaY = Math.abs(touchY - touchStartY);
+                if (deltaY > 10) {
+                  setIsTouchScrolling(true);
+                }
+              }
+            }}
+            onTouchEnd={() => {
+              setTimeout(() => {
+                setIsTouchScrolling(false);
+                setTouchStartY(null);
+              }, 100);
+            }}
+          >
             <CommandGroup>
               {filteredOptions.map((opt, idx) => (
                 opt.divider ? (
@@ -126,14 +151,14 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
                     value={opt.label}
                     data-value={opt.value}
                     onSelect={() => {
-                      if (opt.disabled) return;
+                      if (opt.disabled || isTouchScrolling) return;
                       onValueChange(opt.value);
                       setOpen(false);
                       setSearchValue("");
                     }}
                     onTouchEnd={(e) => {
                       e.preventDefault();
-                      if (opt.disabled) return;
+                      if (opt.disabled || isTouchScrolling) return;
                       onValueChange(opt.value);
                       setOpen(false);
                       setSearchValue("");
@@ -165,12 +190,14 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
                 <CommandItem
                   value={searchValue}
                   onSelect={() => {
+                    if (isTouchScrolling) return;
                     onValueChange(searchValue.trim());
                     setOpen(false);
                     setSearchValue("");
                   }}
                   onTouchEnd={(e) => {
                     e.preventDefault();
+                    if (isTouchScrolling) return;
                     onValueChange(searchValue.trim());
                     setOpen(false);
                     setSearchValue("");
