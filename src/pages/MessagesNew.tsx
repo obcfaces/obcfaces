@@ -79,16 +79,14 @@ const Messages = () => {
 
       console.log('loadConversations: participantData:', participantData);
       console.log('loadConversations: error:', error);
-      alert(`loadConversations результат: ${participantData?.length || 0} разговоров найдено`);
 
       if (error) {
-        alert(`Ошибка в loadConversations: ${error.message}`);
+        console.error('Error in loadConversations:', error.message);
         throw error;
       }
 
       if (!participantData || participantData.length === 0) {
         console.log('loadConversations: No participant data, setting empty conversations');
-        alert('loadConversations: Никаких данных не найдено');
         setConversations([]);
         return;
       }
@@ -237,9 +235,8 @@ const Messages = () => {
     if (!user) return;
 
     const recipientId = searchParams.get('recipient');
-    if (recipientId) {
+    if (recipientId && !selectedConversation) { // Добавляем проверку что разговор еще не выбран
       console.log('Processing recipient:', recipientId);
-      alert(`Начинаем создание разговора с ${recipientId}`);
       
       const initConversation = async () => {
         console.log('Creating/finding conversation...');
@@ -247,7 +244,6 @@ const Messages = () => {
         console.log('Got conversation ID:', conversationId);
         
         if (conversationId) {
-          alert(`Разговор создан: ${conversationId}`);
           console.log('Setting selected conversation:', conversationId);
           setSelectedConversation(conversationId);
           
@@ -258,23 +254,20 @@ const Messages = () => {
           await loadConversations();
           
           console.log('Process completed');
-          alert('Процесс завершен, разговор должен открыться');
-        } else {
-          alert('Ошибка: не удалось создать разговор');
         }
         
-        // Очищаем URL
+        // Очищаем URL только один раз
         const newSearchParams = new URLSearchParams(searchParams);
         newSearchParams.delete('recipient');
         navigate(`/messages?${newSearchParams.toString()}`, { replace: true });
       };
       
       initConversation();
-    } else {
+    } else if (!recipientId && conversations.length === 0) {
       console.log('No recipient, loading conversations normally');
       loadConversations();
     }
-  }, [user, searchParams]);
+  }, [user, searchParams.get('recipient')]); // Используем только значение recipient вместо всего searchParams
 
   // Автоскролл к низу при новых сообщениях
   useEffect(() => {
