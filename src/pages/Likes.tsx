@@ -134,9 +134,10 @@ const Likes = () => {
   // Load liked items
   useEffect(() => {
     if (currentUserId) {
-      // For now, using mock data
-      setLikedItems(mockLikedItems);
-      setWhoLikedMe(mockWhoLikedMe);
+      // Load actual user data from database
+      // For now, initialize with empty arrays until real data is implemented
+      setLikedItems([]);
+      setWhoLikedMe([]);
     }
   }, [currentUserId]);
 

@@ -15,9 +15,7 @@ export const useUnreadMessages = () => {
         setCurrentUserId(session.user.id);
         await loadUnreadCount(session.user.id);
       } else {
-        // Demo data for preview
-        console.log('useUnreadMessages: Setting demo count to 3');
-        setUnreadCount(3);
+        setUnreadCount(0);
       }
     };
 
