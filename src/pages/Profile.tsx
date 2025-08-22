@@ -62,6 +62,7 @@ const Profile = () => {
     gender_privacy: 'public',
     country: '',
     country_privacy: 'public',
+    birthdate: '',
     birthdate_privacy: 'only_me',
     bio: '',
     email: ''
@@ -202,6 +203,7 @@ const Profile = () => {
           gender_privacy: 'public',
           country: profileData?.country || '',
           country_privacy: 'public',
+          birthdate: profileData?.birthdate || '',
           birthdate_privacy: 'only_me',
           bio: profileData?.bio || '',
           email: ''
@@ -358,6 +360,7 @@ const Profile = () => {
       gender_privacy: 'public',
       country: data?.country || '',
       country_privacy: 'public',
+      birthdate: data?.birthdate || '',
       birthdate_privacy: 'only_me',
       bio: data?.bio || '',
       email: currentUserEmail
@@ -525,6 +528,11 @@ const Profile = () => {
         country: editForm.country,
         bio: editForm.bio
       };
+
+      // Add birthdate if provided
+      if (editForm.birthdate) {
+        updates.birthdate = editForm.birthdate;
+      }
 
       // Add avatar URL if we have one
       if (avatarUrl) {
@@ -1627,17 +1635,14 @@ const Profile = () => {
                          <div className="flex items-center py-2 border-b border-border">
                            <div className="flex-1">
                              {editingField === 'birthdate' && isOwner ? (
-                               <div className="space-y-2">
-                                 <Input 
-                                   type="date"
-                                   className="text-sm"
-                                   value={data?.birthdate || ''} 
-                                   onChange={(e) => {
-                                     // This would need to be handled differently since we're not storing birthdate in editForm
-                                     // For now, just show the interface
-                                   }}
-                                   autoFocus
-                                 />
+                                <div className="space-y-2">
+                                  <Input 
+                                    type="date"
+                                    className="text-sm"
+                                    value={editForm.birthdate || ''} 
+                                    onChange={(e) => handleEditFormChange('birthdate', e.target.value)}
+                                    autoFocus
+                                  />
                                  <Select value={editForm.birthdate_privacy} onValueChange={(value) => handleEditFormChange('birthdate_privacy', value)}>
                                    <SelectTrigger className="text-sm">
                                      <SelectValue placeholder="Privacy" />
@@ -1649,15 +1654,15 @@ const Profile = () => {
                                    </SelectContent>
                                  </Select>
                                  <div className="flex gap-2">
-                                   <Button 
-                                     size="sm"
-                                     onClick={() => {
-                                       setEditingField(null);
-                                       setEditForm(prev => ({ ...prev, birthdate_privacy: 'only_me' }));
-                                     }}
-                                     variant="outline"
-                                   >
-                                     Cancel
+                                    <Button 
+                                      size="sm"
+                                      onClick={() => {
+                                        setEditingField(null);
+                                        setEditForm(prev => ({ ...prev, birthdate: data?.birthdate || '', birthdate_privacy: 'only_me' }));
+                                      }}
+                                      variant="outline"
+                                    >
+                                      Cancel
                                    </Button>
                                    <Button 
                                      size="sm"
@@ -1696,14 +1701,14 @@ const Profile = () => {
                              )}
                            </div>
                            {isOwner && editingField !== 'birthdate' && (
-                             <button
-                               onClick={() => {
-                                 setEditingField('birthdate');
-                                 setEditForm(prev => ({ ...prev, birthdate_privacy: 'only_me' }));
-                               }}
-                               className="p-1 hover:bg-accent rounded-md transition-colors ml-3"
-                               aria-label="Edit date of birth"
-                             >
+                              <button
+                                onClick={() => {
+                                  setEditingField('birthdate');
+                                  setEditForm(prev => ({ ...prev, birthdate: data?.birthdate || '', birthdate_privacy: 'only_me' }));
+                                }}
+                                className="p-1 hover:bg-accent rounded-md transition-colors ml-3"
+                                aria-label="Edit date of birth"
+                              >
                                <Pencil className="h-4 w-4 text-muted-foreground" />
                              </button>
                            )}
