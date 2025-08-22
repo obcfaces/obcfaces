@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
 import { Eye, EyeOff } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Country, State } from 'country-state-city';
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -10,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate, Link } from "react-router-dom";
-// Simplified location data for mobile performance
+import { getCitiesForLocation } from '@/lib/location-utils';
 const LoginModalTrigger = () => {
   const [open, setOpen] = useState(false);
   const [mode, setMode] = useState<"login" | "signup">("login");
@@ -31,39 +32,47 @@ const LoginModalTrigger = () => {
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const navigate = useNavigate();
-// Simplified location data for mobile performance
-const countries = useMemo(() => [
-  { name: "Philippines", isoCode: "PH" },
-  { name: "United States", isoCode: "US" },
-  { name: "Canada", isoCode: "CA" },
-  { name: "United Kingdom", isoCode: "GB" },
-], []);
+// Get all countries from library and format them
+const countries = useMemo(() => {
+  const allCountries = Country.getAllCountries().map(country => ({
+    value: country.isoCode,
+    label: country.name
+  }));
+  
+  // Sort alphabetically but put Philippines first
+  const philippines = allCountries.find(c => c.value === 'PH');
+  const otherCountries = allCountries.filter(c => c.value !== 'PH').sort((a, b) => a.label.localeCompare(b.label));
+  
+  return [
+    // Active countries
+    ...(philippines ? [philippines] : []),
+    { value: "separator", label: "", disabled: true, divider: true },
+    // All other countries
+    ...otherCountries
+  ];
+}, []);
 
 const states = useMemo(() => {
-  if (countryCode === "PH") {
-    return [
-      { name: "Metro Manila", isoCode: "MM" },
-      { name: "Cebu", isoCode: "CE" },
-      { name: "Davao", isoCode: "DA" },
-    ];
-  }
-  return [];
+  if (!countryCode) return [];
+  
+  // Get states from library for the selected country
+  const countryStates = State.getStatesOfCountry(countryCode);
+  
+  return countryStates.map(state => ({
+    name: state.name,
+    isoCode: state.isoCode
+  }));
 }, [countryCode]);
 
 const cities = useMemo(() => {
-  if (!stateCode) return [];
-  const stateData = states.find(s => s.isoCode === stateCode);
-  if (stateData?.name === "Metro Manila") {
-    return [{ name: "Manila" }, { name: "Quezon City" }, { name: "Makati" }];
-  }
-  if (stateData?.name === "Cebu") {
-    return [{ name: "Cebu City" }, { name: "Lapu-Lapu" }];
-  }
-  if (stateData?.name === "Davao") {
-    return [{ name: "Davao City" }];
-  }
-  return [];
-}, [stateCode, states]);
+  if (!countryCode) return [];
+  const cityList = getCitiesForLocation(countryCode, stateCode);
+  return cityList
+    .sort((a, b) => a.localeCompare(b)) // Sort alphabetically
+    .map(city => ({
+      name: city
+    }));
+}, [countryCode, stateCode]);
 const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), []);
 
   const onSubmit = async (e: React.FormEvent) => {
@@ -199,8 +208,8 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
                     value={countryCode ?? ""}
                     onValueChange={(code) => {
                       setCountryCode(code);
-                      const c = countries.find((c) => c.isoCode === code);
-                      setCountry(c?.name || "");
+                      const c = countries.find((c) => c.value === code);
+                      setCountry(c?.label || "");
                       setStateName("");
                       setStateCode(null);
                       setCity("");
@@ -208,7 +217,7 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
                     placeholder="Country"
                     ariaLabel="Select country"
                     invalid={invalidCountry}
-                    options={countries.map((c) => ({ value: c.isoCode, label: c.name }))}
+                    options={countries}
                   />
                 </div>
                 <div className="space-y-2">
