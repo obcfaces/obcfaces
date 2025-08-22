@@ -218,16 +218,30 @@ const Messages = () => {
 
   // Обработка recipient из URL
   useEffect(() => {
+    console.log('Effect triggered - user:', !!user, 'recipient:', searchParams.get('recipient'));
+    
     if (!user) return;
 
     const recipientId = searchParams.get('recipient');
     if (recipientId) {
+      console.log('Processing recipient:', recipientId);
+      
       const initConversation = async () => {
+        console.log('Creating/finding conversation...');
         const conversationId = await createOrFindConversation(recipientId);
+        console.log('Got conversation ID:', conversationId);
+        
         if (conversationId) {
+          console.log('Setting selected conversation:', conversationId);
           setSelectedConversation(conversationId);
+          
+          console.log('Loading messages...');
           await loadMessages(conversationId);
+          
+          console.log('Loading conversations...');
           await loadConversations();
+          
+          console.log('Process completed');
         }
         
         // Очищаем URL
@@ -238,6 +252,7 @@ const Messages = () => {
       
       initConversation();
     } else {
+      console.log('No recipient, loading conversations normally');
       loadConversations();
     }
   }, [user, searchParams]);
@@ -270,6 +285,13 @@ const Messages = () => {
 
   // Получение выбранного разговора
   const selectedConv = conversations.find(conv => conv.id === selectedConversation);
+  
+  // Debug logging
+  console.log('Current state:');
+  console.log('- selectedConversation:', selectedConversation);
+  console.log('- conversations:', conversations.length);
+  console.log('- selectedConv:', !!selectedConv);
+  console.log('- user:', !!user);
 
   if (loading) {
     return (
