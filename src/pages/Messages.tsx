@@ -88,6 +88,7 @@ const Messages = () => {
     console.log('loadConversations: Starting for user', user.id, 'Email:', user.email);
 
     try {
+      // Получаем разговоры используя RPC функцию для лучшей совместимости с RLS
       const { data: participantData, error } = await supabase
         .from('conversation_participants')
         .select('conversation_id')
@@ -98,7 +99,12 @@ const Messages = () => {
 
       if (error) {
         console.error('Error in loadConversations:', error.message);
-        throw error;
+        toast({
+          title: "Ошибка",
+          description: "Не удалось загрузить разговоры: " + error.message,
+          variant: "destructive"
+        });
+        return;
       }
 
       if (!participantData || participantData.length === 0) {
