@@ -189,6 +189,18 @@ const Messages = () => {
         return;
       }
 
+      // Get recipient profile data first
+      const { data: recipientProfile, error: profileError } = await supabase
+        .from('profiles')
+        .select('id, display_name, avatar_url, first_name, last_name')
+        .eq('id', recipientId)
+        .single();
+
+      if (profileError) {
+        console.error('Error fetching recipient profile:', profileError);
+        throw profileError;
+      }
+
       // Create new conversation using the RPC function
       const { data: conversationId, error } = await supabase.rpc('get_or_create_conversation', {
         user1_id: user.id,
@@ -200,21 +212,40 @@ const Messages = () => {
         throw error;
       }
 
-      if (conversationId) {
+      if (conversationId && recipientProfile) {
         console.log('Created/found conversation:', conversationId);
+        
+        // Create a temporary conversation object to show immediately
+        const tempConversation: Conversation = {
+          id: conversationId,
+          other_user: {
+            id: recipientProfile.id,
+            display_name: recipientProfile.display_name || '',
+            avatar_url: recipientProfile.avatar_url,
+            first_name: recipientProfile.first_name,
+            last_name: recipientProfile.last_name
+          },
+          last_message: undefined,
+          unread_count: 0
+        };
+
+        // Add to conversations list immediately
+        setConversations(prev => {
+          const exists = prev.find(conv => conv.id === conversationId);
+          if (exists) {
+            return prev;
+          }
+          return [tempConversation, ...prev];
+        });
         
         // Immediately set as selected and load messages
         setSelectedConversation(conversationId);
         loadMessages(conversationId);
         
-        // Refresh conversations to include the new one
+        // Refresh conversations in background to get accurate data
         setTimeout(() => {
           loadConversations();
-        }, 1000);
-        
-        toast({
-          description: "Разговор создан"
-        });
+        }, 500);
       }
     } catch (error) {
       console.error('Error creating conversation:', error);
