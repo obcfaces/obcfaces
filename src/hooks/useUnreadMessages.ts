@@ -60,9 +60,11 @@ export const useUnreadMessages = () => {
           table: 'messages'
         },
         (payload) => {
-          // If it's not our message, increment unread count
+          console.log('New message received:', payload.new);
+          // Only increment if it's not our message AND we're a participant in this conversation
           if (payload.new.sender_id !== currentUserId) {
-            setUnreadCount(prev => prev + 1);
+            // Reload the actual count instead of incrementing to avoid false positives
+            loadUnreadCount(currentUserId);
           }
         }
       )
