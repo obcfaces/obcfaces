@@ -20,6 +20,10 @@ serve(async (req) => {
     console.log('Received message:', message);
     console.log('Context:', context);
 
+    if (!openAIApiKey) {
+      throw new Error('OPENAI_API_KEY is not set');
+    }
+
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -35,13 +39,16 @@ serve(async (req) => {
           },
           { role: 'user', content: message }
         ],
-        max_completion_tokens: 1000,
+        max_completion_tokens: 1000
       }),
     });
 
+    console.log('OpenAI API response status:', response.status);
+    
     if (!response.ok) {
-      console.error('OpenAI API error:', await response.text());
-      throw new Error('Failed to get AI response');
+      const errorText = await response.text();
+      console.error('OpenAI API error:', errorText);
+      throw new Error(`OpenAI API error: ${response.status} - ${errorText}`);
     }
 
     const data = await response.json();
