@@ -168,7 +168,15 @@ const Messages = () => {
       );
 
       const validConversations = processedConversations.filter(Boolean) as Conversation[];
+      
+      // Preserve selected conversation when updating the list
+      const currentSelectedId = selectedConversation;
       setConversations(validConversations);
+      
+      // If we had a selected conversation, ensure it stays selected after the update
+      if (currentSelectedId && validConversations.some(conv => conv.id === currentSelectedId)) {
+        setTimeout(() => setSelectedConversation(currentSelectedId), 0);
+      }
     } catch (error) {
       console.error('Error loading conversations:', error);
     }
