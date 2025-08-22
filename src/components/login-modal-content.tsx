@@ -18,12 +18,13 @@ interface LoginModalContentProps {
 }
 
 const LoginModalContent = ({ onClose }: LoginModalContentProps) => {
-  const [mode, setMode] = useState<"login" | "signup">("login");
+  const [mode, setMode] = useState<"login" | "signup" | "forgot">("login");
   
   // Reset to login mode when modal opens
   useEffect(() => {
     setMode("login");
     setAuthError("");
+    setForgotEmailSent(false);
   }, []);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -39,6 +40,7 @@ const LoginModalContent = ({ onClose }: LoginModalContentProps) => {
   const [gender, setGender] = useState<string>("");
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [authError, setAuthError] = useState<string>("");
+  const [forgotEmailSent, setForgotEmailSent] = useState(false);
   
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -100,7 +102,37 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
       }
     }
     try {
-      if (mode === "login") {
+      if (mode === "forgot") {
+        // Обработка восстановления пароля
+        const redirectUrl = `${window.location.origin}/`;
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: redirectUrl,
+        });
+        
+        if (error) {
+          let errorMessage = "Ошибка при отправке письма для восстановления";
+          
+          switch (error.message) {
+            case "Invalid email":
+              errorMessage = "Неправильный формат email";
+              break;
+            case "For security purposes, you can only request this once every 60 seconds":
+              errorMessage = "Слишком частые запросы. Подождите 60 секунд";
+              break;
+            default:
+              if (error.message.toLowerCase().includes("rate limit")) {
+                errorMessage = "Слишком много запросов. Попробуйте позже";
+              } else {
+                errorMessage = error.message;
+              }
+          }
+          
+          throw new Error(errorMessage);
+        }
+        
+        setForgotEmailSent(true);
+        toast({ description: "Письмо для восстановления пароля отправлено на ваш email" });
+      } else if (mode === "login") {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) {
           // Более конкретные сообщения об ошибках
@@ -229,24 +261,64 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
     }
   };
 
-  const title = mode === "login" ? "Sign in" : "Sign up";
-  const description = mode === "login" ? "Enter your email and password to continue." : "Create an account for your profile.";
+  const getTitle = () => {
+    switch (mode) {
+      case "login": return "Sign in";
+      case "signup": return "Sign up";
+      case "forgot": return "Reset password";
+      default: return "Sign in";
+    }
+  };
 
-  const switchText = mode === "login" ? (
-    <span className="text-sm text-muted-foreground">No account?{" "}
-      <button type="button" className="text-primary underline" onClick={() => {
-        setMode("signup");
-        setAuthError("");
-      }}>Sign up</button>
-    </span>
-  ) : (
-    <span className="text-sm text-muted-foreground">Already have an account?{" "}
-      <button type="button" className="text-primary underline" onClick={() => {
-        setMode("login");
-        setAuthError("");
-      }}>Sign in</button>
-    </span>
-  );
+  const getDescription = () => {
+    switch (mode) {
+      case "login": return "Enter your email and password to continue.";
+      case "signup": return "Create an account for your profile.";
+      case "forgot": return forgotEmailSent 
+        ? "Check your email for password reset instructions." 
+        : "Enter your email address to receive password reset instructions.";
+      default: return "Enter your email and password to continue.";
+    }
+  };
+
+  const getSwitchText = () => {
+    if (mode === "login") {
+      return (
+        <div className="flex flex-col space-y-1">
+          <span className="text-sm text-muted-foreground">No account?{" "}
+            <button type="button" className="text-primary underline" onClick={() => {
+              setMode("signup");
+              setAuthError("");
+            }}>Sign up</button>
+          </span>
+          <button type="button" className="text-sm text-muted-foreground text-primary underline" onClick={() => {
+            setMode("forgot");
+            setAuthError("");
+            setForgotEmailSent(false);
+          }}>Forgot password?</button>
+        </div>
+      );
+    } else if (mode === "signup") {
+      return (
+        <span className="text-sm text-muted-foreground">Already have an account?{" "}
+          <button type="button" className="text-primary underline" onClick={() => {
+            setMode("login");
+            setAuthError("");
+          }}>Sign in</button>
+        </span>
+      );
+    } else {
+      return (
+        <span className="text-sm text-muted-foreground">Remember your password?{" "}
+          <button type="button" className="text-primary underline" onClick={() => {
+            setMode("login");
+            setAuthError("");
+            setForgotEmailSent(false);
+          }}>Sign in</button>
+        </span>
+      );
+    }
+  };
 
   const showErrors = submitted && mode === "signup";
   const invalidFirstName = showErrors && !firstName.trim();
@@ -258,7 +330,8 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
   return (
     <>
       <DialogHeader>
-        <DialogTitle>{title}</DialogTitle>
+        <DialogTitle>{getTitle()}</DialogTitle>
+        <DialogDescription>{getDescription()}</DialogDescription>
       </DialogHeader>
       <form onSubmit={onSubmit} className="space-y-3">
         {authError && (
@@ -269,15 +342,16 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
         <div className="space-y-2">
           <Input id="auth-email" type="email" placeholder="Email" className="placeholder:italic placeholder:text-muted-foreground" value={email} onChange={(e) => setEmail(e.target.value)} required />
         </div>
-        <div className="space-y-2">
-          
-          <div className="relative">
-            <Input id="auth-password" type={showPassword ? "text" : "password"} placeholder="Password" className="pr-10 placeholder:italic placeholder:text-muted-foreground" value={password} onChange={(e) => setPassword(e.target.value)} required />
-            <button type="button" aria-label={showPassword ? "Hide password" : "Show password"} onClick={() => setShowPassword((v) => !v)} className="absolute inset-y-0 right-2 inline-flex items-center text-muted-foreground hover:text-foreground">
-              {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
-            </button>
+        {mode !== "forgot" && (
+          <div className="space-y-2">
+            <div className="relative">
+              <Input id="auth-password" type={showPassword ? "text" : "password"} placeholder="Password" className="pr-10 placeholder:italic placeholder:text-muted-foreground" value={password} onChange={(e) => setPassword(e.target.value)} required />
+              <button type="button" aria-label={showPassword ? "Hide password" : "Show password"} onClick={() => setShowPassword((v) => !v)} className="absolute inset-y-0 right-2 inline-flex items-center text-muted-foreground hover:text-foreground">
+                {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+              </button>
+            </div>
           </div>
-        </div>
+        )}
         {mode === "signup" && (
           <>
             <div className="grid gap-2 sm:grid-cols-2">
@@ -371,9 +445,15 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
           </>
         )}
         <div className="flex items-center justify-between">
-          {switchText}
+          {getSwitchText()}
           <div className="flex">
-            <Button type="submit" disabled={loading}>{loading ? "Please wait…" : mode === "login" ? "Sign in" : "Sign up"}</Button>
+            <Button type="submit" disabled={loading || forgotEmailSent}>
+              {loading ? "Please wait…" : 
+               forgotEmailSent ? "Email sent" :
+               mode === "login" ? "Sign in" : 
+               mode === "signup" ? "Sign up" : 
+               "Send reset email"}
+            </Button>
           </div>
         </div>
       </form>
