@@ -79,11 +79,11 @@ const Messages = () => {
   // Загрузка разговоров
   const loadConversations = async () => {
     if (!user) {
-      console.log('loadConversations: No user');
+      console.log('loadConversations: No user, current user:', user);
       return;
     }
 
-    console.log('loadConversations: Starting for user', user.id);
+    console.log('loadConversations: Starting for user', user.id, 'Email:', user.email);
 
     try {
       const { data: participantData, error } = await supabase
