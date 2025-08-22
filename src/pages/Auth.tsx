@@ -62,11 +62,24 @@ const Auth = () => {
     setLoading(true);
     try {
       if (mode === "signup") {
-        const redirectUrl = `${window.location.origin}/account`;
+        // Use the current site URL for redirect - works in all environments
+        const currentUrl = window.location.origin;
+        const redirectUrl = `${currentUrl}/account`;
+        
+        console.log('Signup redirect URL:', redirectUrl);
+        
         const { error } = await supabase.auth.signUp({
           email,
           password,
-          options: { emailRedirectTo: redirectUrl },
+          options: { 
+            emailRedirectTo: redirectUrl,
+            data: {
+              display_name: displayName,
+              gender: gender,
+              country: country,
+              bio: bio
+            }
+          },
         });
         if (error) throw error;
         toast({ description: "Проверьте почту для подтверждения аккаунта." });
