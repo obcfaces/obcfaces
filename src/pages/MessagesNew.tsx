@@ -77,10 +77,16 @@ const Messages = () => {
   // Handle recipient parameter for creating new conversation
   useEffect(() => {
     const recipientId = searchParams.get('recipient');
-    if (recipientId && user) {
+    if (recipientId && user && conversations.length >= 0) { // Allow even with 0 conversations
+      console.log('Auto-creating/opening conversation with recipient:', recipientId);
       createOrOpenConversation(recipientId);
+      
+      // Clear the recipient parameter from URL after processing
+      const newSearchParams = new URLSearchParams(searchParams);
+      newSearchParams.delete('recipient');
+      navigate(`/messages?${newSearchParams.toString()}`, { replace: true });
     }
-  }, [searchParams, user]);
+  }, [searchParams, user, conversations]);
 
   const loadConversations = async () => {
     if (!user) return;
@@ -171,37 +177,50 @@ const Messages = () => {
   const createOrOpenConversation = async (recipientId: string) => {
     if (!user || recipientId === user.id) return;
 
+    console.log('Creating/opening conversation with:', recipientId);
+
     try {
-      // First check if conversation already exists
+      // First check if conversation already exists in loaded conversations
       const existingConv = conversations.find(conv => conv.other_user.id === recipientId);
       if (existingConv) {
+        console.log('Found existing conversation:', existingConv.id);
         setSelectedConversation(existingConv.id);
         loadMessages(existingConv.id);
         return;
       }
 
-      // Create new conversation
+      // Create new conversation using the RPC function
       const { data: conversationId, error } = await supabase.rpc('get_or_create_conversation', {
         user1_id: user.id,
         user2_id: recipientId
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error creating conversation:', error);
+        throw error;
+      }
 
       if (conversationId) {
+        console.log('Created/found conversation:', conversationId);
+        
+        // Immediately set as selected and load messages
         setSelectedConversation(conversationId);
         loadMessages(conversationId);
         
-        // Refresh conversations after a short delay
+        // Refresh conversations to include the new one
         setTimeout(() => {
           loadConversations();
-        }, 500);
+        }, 1000);
+        
+        toast({
+          description: "Разговор создан"
+        });
       }
     } catch (error) {
       console.error('Error creating conversation:', error);
       toast({
         title: "Ошибка",
-        description: "Не удалось создать разговор",
+        description: "Не удалось создать разговор. Попробуйте еще раз.",
         variant: "destructive"
       });
     }
