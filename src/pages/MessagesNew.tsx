@@ -77,7 +77,7 @@ const Messages = () => {
   // Handle recipient parameter for creating new conversation
   useEffect(() => {
     const recipientId = searchParams.get('recipient');
-    if (recipientId && user && conversations.length >= 0) { // Allow even with 0 conversations
+    if (recipientId && user && !selectedConversation) { // Only run if no conversation is selected
       console.log('Auto-creating/opening conversation with recipient:', recipientId);
       createOrOpenConversation(recipientId);
       
@@ -86,7 +86,7 @@ const Messages = () => {
       newSearchParams.delete('recipient');
       navigate(`/messages?${newSearchParams.toString()}`, { replace: true });
     }
-  }, [searchParams, user, conversations]);
+  }, [searchParams, user]); // Removed conversations dependency
 
   const loadConversations = async () => {
     if (!user) return;
