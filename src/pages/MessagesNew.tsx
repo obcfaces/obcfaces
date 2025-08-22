@@ -159,7 +159,9 @@ const Messages = () => {
       );
 
       const validConversations = conversationsWithDetails.filter(Boolean) as Conversation[];
+      console.log('loadConversations: Final conversations to set:', validConversations);
       setConversations(validConversations);
+      console.log('loadConversations: Conversations set, current state should update');
     } catch (error) {
       console.error('Error loading conversations:', error);
     }
