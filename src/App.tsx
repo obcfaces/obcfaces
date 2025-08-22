@@ -12,7 +12,7 @@ import Profile from "./pages/Profile";
 import Contest from "./pages/Contest";
 import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
-import Messages from "./pages/MessagesNew";
+import Messages from "./pages/Messages";
 import Likes from "./pages/Likes";
 import Admin from "./pages/Admin";
 import AuthCallbackHandler from "@/components/auth-callback-handler";
