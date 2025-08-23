@@ -62,35 +62,55 @@ export function ProfilePhotoModal({
     if (!isOpen) return;
     
     const loadPhotoData = async () => {
-      // Instead of using profile-photo-specific content_id, 
-      // we'll load stats from the user's posts that contain this photo
+      console.log('Loading photo data for:', { activeIndex, photoUrl: photos[activeIndex], profileId });
       
       // Load all posts from this user to find which post contains this photo
       const { data: userPosts } = await supabase
         .from('posts')
-        .select('id, media_urls')
+        .select('id, media_urls, created_at')
         .eq('user_id', profileId)
         .order('created_at', { ascending: false });
 
-      // Find the post that contains the current photo
+      console.log('User posts:', userPosts);
+
+      // Find the post that contains the current photo - more precise matching
       let matchingPostId = null;
+      const currentPhotoUrl = photos[activeIndex];
+      
       if (userPosts) {
         for (const post of userPosts) {
-          if (post.media_urls && post.media_urls.includes(photos[activeIndex])) {
-            matchingPostId = post.id;
-            break;
+          if (post.media_urls && Array.isArray(post.media_urls)) {
+            // Check if this specific photo URL exists in this post's media URLs
+            const foundInPost = post.media_urls.some(url => {
+              // More flexible URL matching - handle different URL formats
+              const normalizedPostUrl = url.trim();
+              const normalizedCurrentUrl = currentPhotoUrl.trim();
+              return normalizedPostUrl === normalizedCurrentUrl || 
+                     normalizedPostUrl.endsWith(normalizedCurrentUrl.split('/').pop()) ||
+                     normalizedCurrentUrl.endsWith(normalizedPostUrl.split('/').pop());
+            });
+            
+            if (foundInPost) {
+              matchingPostId = post.id;
+              console.log('Found matching post:', { postId: post.id, photoUrl: currentPhotoUrl, postMediaUrls: post.media_urls });
+              break;
+            }
           }
         }
       }
 
+      console.log('Matching post ID:', matchingPostId);
+
       if (matchingPostId) {
-        // Load comments for the post
+        // Load comments for the specific post
         const { data: comments } = await supabase
           .from('photo_comments')
           .select('*')
           .eq('content_type', 'post')
           .eq('content_id', matchingPostId)
           .order('created_at', { ascending: false });
+
+        console.log('Comments for post:', { postId: matchingPostId, comments });
 
         if (comments) {
           // Get user profiles separately
@@ -109,6 +129,8 @@ export function ProfilePhotoModal({
               timestamp: new Date(comment.created_at).toLocaleString()
             };
           });
+          
+          console.log('Setting comments for activeIndex:', { activeIndex, comments: formattedComments });
           
           setPhotoComments(prev => ({
             ...prev,
@@ -137,6 +159,7 @@ export function ProfilePhotoModal({
           }
         }));
       } else {
+        console.log('No matching post found, setting empty state for activeIndex:', activeIndex);
         // If no matching post found, show empty state
         setPhotoComments(prev => ({
           ...prev,
@@ -171,18 +194,30 @@ export function ProfilePhotoModal({
       return;
     }
     
-    // Find the post that contains this photo
+    // Find the post that contains this photo using improved matching logic
     const { data: userPosts } = await supabase
       .from('posts')
       .select('id, media_urls')
       .eq('user_id', profileId);
 
     let matchingPostId = null;
+    const currentPhotoUrl = photos[activeIndex];
+    
     if (userPosts) {
       for (const post of userPosts) {
-        if (post.media_urls && post.media_urls.includes(photos[activeIndex])) {
-          matchingPostId = post.id;
-          break;
+        if (post.media_urls && Array.isArray(post.media_urls)) {
+          const foundInPost = post.media_urls.some(url => {
+            const normalizedPostUrl = url.trim();
+            const normalizedCurrentUrl = currentPhotoUrl.trim();
+            return normalizedPostUrl === normalizedCurrentUrl || 
+                   normalizedPostUrl.endsWith(normalizedCurrentUrl.split('/').pop()) ||
+                   normalizedCurrentUrl.endsWith(normalizedPostUrl.split('/').pop());
+          });
+          
+          if (foundInPost) {
+            matchingPostId = post.id;
+            break;
+          }
         }
       }
     }
@@ -190,6 +225,15 @@ export function ProfilePhotoModal({
     if (!matchingPostId) return;
     
     const wasLiked = photoLikes[activeIndex]?.isLiked || false;
+    
+    // Optimistic update first
+    setPhotoLikes(prev => ({
+      ...prev,
+      [activeIndex]: {
+        count: wasLiked ? (prev[activeIndex]?.count || 0) - 1 : (prev[activeIndex]?.count || 0) + 1,
+        isLiked: !wasLiked
+      }
+    }));
     
     try {
       if (wasLiked) {
@@ -209,16 +253,16 @@ export function ProfilePhotoModal({
           });
       }
       
+    } catch (error) {
+      console.error('Error handling like:', error);
+      // Revert optimistic update on error
       setPhotoLikes(prev => ({
         ...prev,
         [activeIndex]: {
-          count: wasLiked ? (prev[activeIndex]?.count || 0) - 1 : (prev[activeIndex]?.count || 0) + 1,
-          isLiked: !wasLiked
+          count: wasLiked ? (prev[activeIndex]?.count || 0) + 1 : (prev[activeIndex]?.count || 0) - 1,
+          isLiked: wasLiked
         }
       }));
-      
-    } catch (error) {
-      console.error('Error handling like:', error);
     }
   };
 
@@ -229,18 +273,30 @@ export function ProfilePhotoModal({
     }
     
     if (commentText.trim()) {
-      // Find the post that contains this photo
+      // Find the post that contains this photo using improved matching logic
       const { data: userPosts } = await supabase
         .from('posts')
         .select('id, media_urls')
         .eq('user_id', profileId);
 
       let matchingPostId = null;
+      const currentPhotoUrl = photos[activeIndex];
+      
       if (userPosts) {
         for (const post of userPosts) {
-          if (post.media_urls && post.media_urls.includes(photos[activeIndex])) {
-            matchingPostId = post.id;
-            break;
+          if (post.media_urls && Array.isArray(post.media_urls)) {
+            const foundInPost = post.media_urls.some(url => {
+              const normalizedPostUrl = url.trim();
+              const normalizedCurrentUrl = currentPhotoUrl.trim();
+              return normalizedPostUrl === normalizedCurrentUrl || 
+                     normalizedPostUrl.endsWith(normalizedCurrentUrl.split('/').pop()) ||
+                     normalizedCurrentUrl.endsWith(normalizedPostUrl.split('/').pop());
+            });
+            
+            if (foundInPost) {
+              matchingPostId = post.id;
+              break;
+            }
           }
         }
       }
