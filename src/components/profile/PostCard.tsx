@@ -260,7 +260,7 @@ const PostCard = ({
             }}
             aria-label="Share"
           >
-            <Share2 className="w-4 h-4" />
+            <Share2 className="w-4 h-4" strokeWidth={1} />
             <span className="hidden sm:inline">Share</span>
           </button>
         </div>
