@@ -3,10 +3,13 @@ import { MessageCircle, Heart } from "lucide-react";
 import AuthNav from "@/components/auth-nav";
 import GlobalSearch from "@/components/global-search";
 import { useUnreadMessages } from "@/hooks/useUnreadMessages";
+import { useUnreadLikes } from "@/hooks/useUnreadLikes";
 
 const TopBar = () => {
   const { unreadCount } = useUnreadMessages();
+  const { unreadLikesCount } = useUnreadLikes();
   console.log('TopBar: unreadCount =', unreadCount);
+  console.log('TopBar: unreadLikesCount =', unreadLikesCount);
 
   return (
     <header role="banner" className="w-full bg-background border-b">
@@ -25,13 +28,18 @@ const TopBar = () => {
         </div>
         
         <div className="flex items-center gap-1">
-          {/* Likes Icon */}
+          {/* Likes Icon with Unread Count */}
           <Link
             to="/likes"
             className="relative inline-flex items-center justify-center h-10 w-10 rounded-full hover:bg-accent transition-colors"
-            aria-label="Likes"
+            aria-label={`Likes${unreadLikesCount > 0 ? ` (${unreadLikesCount} new)` : ''}`}
           >
-            <Heart className="h-5 w-5 text-primary" strokeWidth={1} />
+            <Heart className="h-5 w-5 text-muted-foreground" strokeWidth={1} />
+            {unreadLikesCount > 0 && (
+              <span className="absolute -top-1 -right-1 h-5 w-5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center min-w-[20px] border-2 border-background shadow-md">
+                {unreadLikesCount > 99 ? '99+' : unreadLikesCount}
+              </span>
+            )}
           </Link>
           
           {/* Messages Icon with Unread Count */}
@@ -40,7 +48,7 @@ const TopBar = () => {
             className="relative inline-flex items-center justify-center h-10 w-10 rounded-full hover:bg-accent transition-colors"
             aria-label={`Messages${unreadCount > 0 ? ` (${unreadCount} unread)` : ''}`}
           >
-            <MessageCircle className="h-5 w-5 text-primary" strokeWidth={1} />
+            <MessageCircle className="h-5 w-5 text-muted-foreground" strokeWidth={1} />
             {unreadCount > 0 && (
               <span className="absolute -top-1 -right-1 h-5 w-5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center min-w-[20px] border-2 border-background shadow-md">
                 {unreadCount > 99 ? '99+' : unreadCount}
