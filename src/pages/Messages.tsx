@@ -349,7 +349,7 @@ const Messages = () => {
   }
 
   return (
-    <div className="flex h-screen bg-background">
+    <div className="flex h-screen bg-background fixed inset-0 z-50">
       {/* Список разговоров */}
       <div className={`w-full md:w-80 flex-shrink-0 border-r ${selectedConversation ? 'hidden md:flex' : 'flex'} flex-col`}>
         {/* Заголовок */}
