@@ -512,7 +512,7 @@ export function PhotoModal({
             {/* Photo section */}
             <div className={cn(
               "relative flex items-center justify-center transition-all duration-300 pt-2 md:pt-4",
-              "w-full h-[60dvh] overflow-hidden"
+              "w-full h-[65dvh] md:h-[70dvh] overflow-hidden"
             )}>
 
             {photos.length > 1 && (
@@ -540,9 +540,9 @@ export function PhotoModal({
               className="max-w-full max-h-full object-contain touch-manipulation select-none"
               style={{ 
                 width: 'auto', 
-                height: 'auto',
+                height: '100%',
                 maxWidth: '100%',
-                maxHeight: '100%'
+                objectFit: 'contain'
               }}
               onTouchStart={onTouchStart}
               onTouchMove={onTouchMove}
@@ -578,7 +578,7 @@ export function PhotoModal({
           </div>
 
           {/* Contest info section */}
-          <div className="bg-background flex flex-col flex-shrink-0 w-full h-[40dvh] min-h-0">
+          <div className="bg-background flex flex-col flex-shrink-0 w-full h-[35dvh] md:h-[30dvh] min-h-0">
             {/* Winner Badge */}
             {isWinner && (
               <div className="bg-blue-100 text-blue-700 px-4 py-2 text-sm font-semibold flex justify-start items-center border-b">
