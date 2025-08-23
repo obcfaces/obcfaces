@@ -131,24 +131,33 @@ export function ContestantCard({
   // Load user's likes, counts and ratings on component mount
   useEffect(() => {
     const loadUserData = async () => {
-      // Load total likes count for individual photos
-      const { data: photoLikes } = await supabase
+      // Load total likes count for all photos and card - search for all possible name variations
+      const { data: allLikes } = await supabase
         .from("likes")
         .select("content_id")
         .eq("content_type", "contest")
-        .in("content_id", [`contestant-photo-${name}-0`, `contestant-photo-${name}-1`]);
+        .or(`content_id.ilike.contestant-photo-%${name}%,content_id.ilike.contestant-card-%${name}%`);
       
-      // Load total likes count for the card itself
-      const { data: cardLikes } = await supabase
-        .from("likes")
-        .select("id")
-        .eq("content_type", "contest")
-        .eq("content_id", `contestant-card-${name}`);
+      // Filter and count likes for different content types
+      const photo0Likes = allLikes?.filter(like => 
+        like.content_id.includes(`contestant-photo-`) && 
+        like.content_id.includes(name) && 
+        like.content_id.endsWith('-0')
+      ).length || 0;
       
-      // Calculate total likes: photo likes + card likes
-      const photo0Likes = photoLikes?.filter(like => like.content_id === `contestant-photo-${name}-0`).length || 0;
-      const photo1Likes = photoLikes?.filter(like => like.content_id === `contestant-photo-${name}-1`).length || 0;
-      const cardLikesCount = cardLikes?.length || 0;
+      const photo1Likes = allLikes?.filter(like => 
+        like.content_id.includes(`contestant-photo-`) && 
+        like.content_id.includes(name) && 
+        like.content_id.endsWith('-1')
+      ).length || 0;
+      
+      const cardLikesCount = allLikes?.filter(like => 
+        like.content_id.includes(`contestant-card-`) && 
+        like.content_id.includes(name) &&
+        !like.content_id.includes('-0') &&
+        !like.content_id.includes('-1')
+      ).length || 0;
+      
       const totalLikes = photo0Likes + photo1Likes + cardLikesCount;
 
       // Load total comments count for both photos
