@@ -59,9 +59,13 @@ const Likes = () => {
 
     const loadLikedItems = async () => {
       try {
+        console.log('Loading likes for user:', currentUserId);
+        
         // Get users the current user has liked using the database function
         const { data: usersILiked, error: likedError } = await supabase
           .rpc('get_users_i_liked', { target_user_id: currentUserId });
+
+        console.log('Users I liked result:', { data: usersILiked, error: likedError });
 
         if (likedError) throw likedError;
 
