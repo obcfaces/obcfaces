@@ -415,7 +415,7 @@ export function ProfilePhotoModal({
   return (
     <>
       {isOpen && (
-        <div className="fixed inset-0 z-50 bg-black/90 overflow-hidden">
+        <div className="fixed inset-0 z-50 bg-black overflow-hidden">
           {/* Close button */}
           <button
             onClick={onClose}
@@ -425,159 +425,84 @@ export function ProfilePhotoModal({
             <X className="h-5 w-5 md:h-6 md:w-6 text-white" />
           </button>
 
-          {/* Main content */}
-          <div className="h-full w-full flex flex-col max-w-full">
-            {/* Photo section */}
-            <div className="relative flex items-center justify-center transition-all duration-300 pt-2 md:pt-4 w-full h-[70dvh] overflow-hidden">
+          {/* Photo container */}
+          <div className="relative h-full w-full flex items-center justify-center"
+               onTouchStart={onTouchStart}
+               onTouchMove={onTouchMove}
+               onTouchEnd={onTouchEnd}>
+            
+            <img
+              src={photos[activeIndex]}
+              alt={`${profileName} photo ${activeIndex + 1}`}
+              className="w-full h-full object-cover"
+              draggable={false}
+            />
 
-              {photos.length > 1 && (
-                <>
+            {photos.length > 1 && (
+              <>
+                <button
+                  onClick={prevPhoto}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 z-50 text-white hover:text-white/90 transition-colors w-12 h-12 rounded-full bg-black/50 hover:bg-black/70 backdrop-blur flex items-center justify-center"
+                  aria-label="Previous photo"
+                >
+                  <ChevronLeft className="w-7 h-7" />
+                </button>
+                <button
+                  onClick={nextPhoto}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 z-50 text-white hover:text-white/90 transition-colors w-12 h-12 rounded-full bg-black/50 hover:bg-black/70 backdrop-blur flex items-center justify-center"
+                  aria-label="Next photo"
+                >
+                  <ChevronRight className="w-7 h-7" />
+                </button>
+              </>
+            )}
+
+            {photos.length > 1 && (
+              <div className="absolute bottom-4 left-4 flex items-center gap-2">
+                {photos.map((src, index) => (
                   <button
-                    onClick={prevPhoto}
-                    className="absolute left-4 top-1/2 -translate-y-1/2 z-50 text-white hover:text-white/90 transition-colors w-12 h-12 rounded-full bg-black/50 hover:bg-black/70 backdrop-blur flex items-center justify-center"
-                    aria-label="Previous photo"
+                    key={index}
+                    onClick={() => setActiveIndex(index)}
+                    aria-label={`Go to photo ${index + 1}`}
+                    className={cn(
+                      "relative w-8 h-8 sm:w-10 sm:h-10 rounded-full overflow-hidden ring-1 ring-white/40 border border-white/20 transition-all",
+                      index === activeIndex ? "ring-2 ring-white opacity-100" : "opacity-70 hover:opacity-100"
+                    )}
                   >
-                    <ChevronLeft className="w-7 h-7" />
+                    <img
+                      src={src}
+                      alt={`Thumbnail ${index + 1}`}
+                      className="w-full h-full object-cover"
+                      loading="lazy"
+                    />
                   </button>
-                  <button
-                    onClick={nextPhoto}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 z-50 text-white hover:text-white/90 transition-colors w-12 h-12 rounded-full bg-black/50 hover:bg-black/70 backdrop-blur flex items-center justify-center"
-                    aria-label="Next photo"
-                  >
-                    <ChevronRight className="w-7 h-7" />
-                  </button>
-                </>
-              )}
+                ))}
+              </div>
+            )}
 
-              <img
-                src={photos[activeIndex]}
-                alt={`${profileName} photo ${activeIndex + 1}`}
-                className="max-w-full max-h-full object-contain touch-manipulation select-none"
-                style={{ 
-                  width: 'auto', 
-                  height: 'auto',
-                  maxWidth: '100%',
-                  maxHeight: '100%'
-                }}
-                onTouchStart={onTouchStart}
-                onTouchMove={onTouchMove}
-                onTouchEnd={onTouchEnd}
-                draggable={false}
-              />
-
-              {/* Thumbnail navigation */}
-              {photos.length > 1 && (
-                <div className="absolute bottom-4 right-4 flex items-center gap-2">
-                  {photos.map((src, index) => (
-                    <button
-                      key={index}
-                      onClick={() => setActiveIndex(index)}
-                      aria-label={`Go to photo ${index + 1}`}
-                      className={cn(
-                        "relative w-8 h-8 sm:w-10 sm:h-10 rounded-full overflow-hidden ring-1 ring-white/40 border border-white/20 transition-all",
-                        index === activeIndex ? "ring-2 ring-white opacity-100" : "opacity-70 hover:opacity-100"
-                      )}
-                    >
-                      <img
-                        src={src}
-                        alt={`Thumbnail ${index + 1}`}
-                        className="w-full h-full object-cover"
-                        loading="lazy"
-                      />
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Profile info section */}
-            <div className="bg-background flex flex-col flex-shrink-0 w-full h-[30dvh] min-h-0">
-              {/* Header with name and action icons */}
-              <div className="p-4 border-b">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0 flex-1">
-                    <h3 className="font-semibold text-lg truncate">
+            {/* Info overlay at bottom */}
+            <div className="absolute bottom-0 left-0 right-0 bg-white max-h-[50vh] flex flex-col">
+              {/* Header with name and icons */}
+              <div className="p-4 border-b flex-shrink-0">
+                <div className="flex items-center justify-between">
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-lg text-black">
                       {profileName}
                     </h3>
-                    <div className="text-sm text-muted-foreground">
+                    <div className="text-sm text-gray-600">
                       Фото {activeIndex + 1} из {photos.length}
                     </div>
                   </div>
                   
-                  {/* Action icons in header like in contests */}
+                  {/* Action buttons */}
                   <div className="flex items-center gap-4">
                     <button
                       type="button"
                       className={cn(
-                        "inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors",
-                        currentPhotoLikes.isLiked && "text-red-500"
+                        "inline-flex items-center gap-2 text-sm",
+                        currentPhotoLikes.isLiked ? "text-red-500" : "text-gray-600"
                       )}
                       onClick={handleLike}
-                      aria-label="Like"
-                    >
-                      <ThumbsUp className={cn(
-                        "w-4 h-4",
-                        currentPhotoLikes.isLiked && "fill-current"
-                      )} strokeWidth={1} />
-                      {currentPhotoLikes.count > 0 && <span>{currentPhotoLikes.count}</span>}
-                    </button>
-                    
-                    <button
-                      type="button"
-                      className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
-                      onClick={focusCommentInput}
-                      aria-label="Comments"
-                    >
-                      <MessageCircle className="w-4 h-4" strokeWidth={1} />
-                      {currentPhotoComments.length > 0 && <span>{currentPhotoComments.length}</span>}
-                    </button>
-                    
-                    <button
-                      type="button"
-                      className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
-                      onClick={handleShare}
-                      aria-label="Share"
-                    >
-                      <Share2 className="w-4 h-4" strokeWidth={1} />
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              {/* Comments section */}
-              <div className="flex-1 overflow-y-auto" ref={commentsListRef}>
-                <div className="p-4 space-y-3">
-                  {currentPhotoComments.map((comment) => (
-                    <div key={comment.id} className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <span className="font-medium text-sm">{comment.author}</span>
-                        <span className="text-xs text-muted-foreground">{comment.timestamp}</span>
-                      </div>
-                      <p className="text-sm">{comment.text}</p>
-                    </div>
-                  ))}
-                  {currentPhotoComments.length === 0 && (
-                    <div className="p-4 text-center">
-                      <p className="text-muted-foreground text-sm">
-                        Пока нет комментариев. Будьте первым!
-                      </p>
-                    </div>
-                  )}
-                </div>
-              </div>
-              
-              {/* Action buttons and comment input */}
-              <div className="border-t">
-                <div className="px-4 py-3 flex items-center justify-between">
-                  <div className="flex items-center gap-6">
-                    <button
-                      type="button"
-                      className={cn(
-                        "inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors",
-                        currentPhotoLikes.isLiked && "text-red-500"
-                      )}
-                      onClick={handleLike}
-                      aria-label="Like"
                     >
                       <ThumbsUp className={cn(
                         "w-5 h-5",
@@ -585,53 +510,72 @@ export function ProfilePhotoModal({
                       )} strokeWidth={1} />
                       <span>{currentPhotoLikes.count}</span>
                     </button>
-                    
                     <button
                       type="button"
-                      className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                      className={cn(
+                        "inline-flex items-center gap-2 text-sm",
+                        currentPhotoComments.length > 0 ? "text-blue-600" : "text-gray-600"
+                      )}
                       onClick={focusCommentInput}
-                      aria-label="Comments"
                     >
                       <MessageCircle className="w-5 h-5" strokeWidth={1} />
                       <span>{currentPhotoComments.length}</span>
                     </button>
-                    
                     <button
                       type="button"
-                      className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                      className="inline-flex items-center gap-2 text-sm text-gray-600"
                       onClick={handleShare}
-                      aria-label="Share"
                     >
                       <Share2 className="w-5 h-5" strokeWidth={1} />
                     </button>
                   </div>
                 </div>
+              </div>
+              
+              {/* Comments section */}
+              <div className="flex-1 overflow-y-auto min-h-0 px-4" ref={commentsListRef}>
+                <div className="space-y-3 py-3">
+                  {currentPhotoComments.map((comment) => (
+                    <div key={comment.id} className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium text-sm">{comment.author}</span>
+                        <span className="text-xs text-gray-500">{comment.timestamp}</span>
+                      </div>
+                      <p className="text-sm text-gray-800">{comment.text}</p>
+                    </div>
+                  ))}
+                  {currentPhotoComments.length === 0 && (
+                    <p className="text-gray-500 text-center py-4 text-sm">
+                      Пока нет комментариев. Будьте первым!
+                    </p>
+                  )}
+                </div>
+              </div>
 
-                {/* Comment input */}
-                <div className="border-t p-4">
-                  <div className="flex gap-2">
-                    <Textarea
-                      ref={textareaRef}
-                      value={commentText}
-                      onChange={(e) => setCommentText(e.target.value)}
-                      placeholder="Write a comment for this photo..."
-                      className="flex-1 resize-none min-h-[44px] max-h-32 text-sm"
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter' && !e.shiftKey) {
-                          e.preventDefault();
-                          handleCommentSubmit();
-                        }
-                      }}
-                    />
-                    <Button
-                      onClick={handleCommentSubmit}
-                      disabled={!commentText.trim()}
-                      size="icon"
-                      className="self-end"
-                    >
-                      <Send className="h-4 w-4" />
-                    </Button>
-                  </div>
+              {/* Comment input */}
+              <div className="border-t p-4 flex-shrink-0">
+                <div className="flex gap-2">
+                  <Textarea
+                    ref={textareaRef}
+                    value={commentText}
+                    onChange={(e) => setCommentText(e.target.value)}
+                    placeholder="Write a comment for this photo..."
+                    className="flex-1 resize-none min-h-[44px] max-h-32 text-sm"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        handleCommentSubmit();
+                      }
+                    }}
+                  />
+                  <Button
+                    onClick={handleCommentSubmit}
+                    disabled={!commentText.trim()}
+                    size="icon"
+                    className="self-end"
+                  >
+                    <Send className="h-4 w-4" />
+                  </Button>
                 </div>
               </div>
             </div>
