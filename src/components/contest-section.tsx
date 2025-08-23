@@ -205,6 +205,8 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
             weight: contestant.weight_kg || 0,
             height: contestant.height_cm || 0,
             rating: averageRating,
+            averageRating: contestant.average_rating || 0, // Add average rating from DB
+            totalVotes: contestant.total_votes || 0, // Add total votes from DB
             faceImage: contestant.photo_1_url || contestant1Face,
             fullBodyImage: contestant.photo_2_url || contestant1Full,
             additionalPhotos: [],
