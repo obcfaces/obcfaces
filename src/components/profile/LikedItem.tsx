@@ -338,7 +338,7 @@ const LikedItem = ({
                   }}
                   aria-label="Share"
                 >
-                  <Share2 className="w-3.5 h-3.5" />
+                  <Share2 className="w-3.5 h-3.5" strokeWidth={1} />
                   <span className="hidden xl:inline">Share</span>
                 </button>
               </div>
@@ -454,7 +454,7 @@ const LikedItem = ({
             }}
             aria-label="Share"
           >
-            <Share2 className="w-4 h-4" />
+            <Share2 className="w-4 h-4" strokeWidth={1} />
             <span className="hidden sm:inline">Share</span>
           </button>
         </div>
