@@ -8,8 +8,7 @@ import { useUnreadLikes } from "@/hooks/useUnreadLikes";
 const TopBar = () => {
   const { unreadCount } = useUnreadMessages();
   const { unreadLikesCount } = useUnreadLikes();
-  console.log('TopBar: unreadCount =', unreadCount);
-  console.log('TopBar: unreadLikesCount =', unreadLikesCount);
+  console.log('TopBar: unreadCount =', unreadCount, 'unreadLikesCount =', unreadLikesCount);
 
   return (
     <header role="banner" className="w-full bg-background border-b">
