@@ -108,8 +108,11 @@ const LikedItem = ({
   const { data: cardData, loading: cardDataLoading } = useCardData(authorName, user?.id);
   
   // Get real participant data from database
-  const { getParticipantByName } = useParticipantData();
+  const { data: participantsList, loading: participantsLoading, getParticipantByName } = useParticipantData();
   const realParticipantData = getParticipantByName(authorName);
+  
+  // Don't render until all data is loaded
+  const isDataLoading = cardDataLoading || participantsLoading;
 
   // Get current user
   useEffect(() => {
@@ -201,6 +204,50 @@ const LikedItem = ({
   const displayFaceImage = candidateFaceImage || images[randomIndex];
   const displayFullImage = candidateFullImage || fullImages[randomIndex];
   const allPhotos = [displayFaceImage, displayFullImage, ...candidateAdditionalPhotos].filter(Boolean);
+  
+  // Show loading skeleton while data is loading
+  if (isDataLoading) {
+    return (
+      <Card className="bg-card border-contest-border relative overflow-hidden animate-pulse">
+        {viewMode === 'compact' ? (
+          <div className="flex h-32 sm:h-36 md:h-40">
+            <div className="flex-shrink-0 flex h-full relative gap-px">
+              <div className="bg-muted w-24 sm:w-28 md:w-32 h-full" />
+              <div className="bg-muted w-24 sm:w-28 md:w-32 h-full" />
+            </div>
+            <div className="flex-1 p-3 flex flex-col justify-between">
+              <div className="space-y-2">
+                <div className="h-4 bg-muted rounded w-3/4" />
+                <div className="h-3 bg-muted rounded w-1/2" />
+                <div className="h-3 bg-muted rounded w-2/3" />
+              </div>
+              <div className="flex gap-4 justify-end">
+                <div className="h-6 bg-muted rounded w-12" />
+                <div className="h-6 bg-muted rounded w-12" />
+                <div className="h-6 bg-muted rounded w-8" />
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div>
+            <div className="h-[72px] border-b border-contest-border p-4">
+              <div className="h-4 bg-muted rounded w-1/3" />
+              <div className="h-3 bg-muted rounded w-1/4 mt-2" />
+            </div>
+            <div className="grid grid-cols-2 gap-px">
+              <div className="bg-muted aspect-[4/5]" />
+              <div className="bg-muted aspect-[4/5]" />
+            </div>
+            <div className="border-t border-contest-border px-4 py-2 flex justify-evenly gap-4">
+              <div className="h-6 bg-muted rounded w-12" />
+              <div className="h-6 bg-muted rounded w-12" />
+              <div className="h-6 bg-muted rounded w-8" />
+            </div>
+          </div>
+        )}
+      </Card>
+    );
+  }
   
   // Compact view (same as contest compact mode) 
   if (viewMode === 'compact') {
