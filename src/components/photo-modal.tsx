@@ -713,15 +713,15 @@ export function PhotoModal({
                   <MessageCircle className="w-5 h-5 text-primary" strokeWidth={1} />
                   <span>{currentPhotoComments.length}</span>
                 </button>
+                <button
+                  type="button"
+                  className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                  onClick={handleShare}
+                  aria-label="Share"
+                >
+                  <Share2 className="w-5 h-5" strokeWidth={1} />
+                </button>
               </div>
-              <button
-                type="button"
-                className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
-                onClick={handleShare}
-                aria-label="Share"
-              >
-                <Share2 className="w-5 h-5" strokeWidth={1} />
-              </button>
             </div>
             
             {/* Comments section */}
