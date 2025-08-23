@@ -14,6 +14,7 @@ import { cn } from "@/lib/utils";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useCardData } from "@/hooks/useCardData";
+import { useParticipantData } from "@/hooks/useParticipantData";
 import LoginModalContent from "@/components/login-modal-content";
 import { ShareModal } from "@/components/share-modal";
 import { useShare } from "@/hooks/useShare";

@@ -83,9 +83,15 @@ const Likes = () => {
           likes: 0, // Will be loaded by useCardData in LikedItem component
           comments: 0, // Will be loaded by useCardData in LikedItem component
           candidateData: {
-            country: user.country || 'Unknown',
-            age: user.age || 0,
-            height: 0
+            age: user.age || 25,
+            weight: user.weight_kg || 52,
+            height: user.height_cm || 168,
+            country: user.country || 'Philippines',
+            city: user.city || 'Unknown',
+            state: user.state || '',
+            faceImage: user.photo_1_url,
+            fullBodyImage: user.photo_2_url,
+            additionalPhotos: []
           },
           participantType: (user.participant_type as 'candidate' | 'finalist' | 'winner') || 'candidate'
         }));
@@ -112,9 +118,15 @@ const Likes = () => {
           likes: 0,
           comments: 0,
           candidateData: {
-            country: user.country || 'Unknown',
-            age: user.age || 0,
-            height: 0
+            age: user.age || 25,
+            weight: user.weight_kg || 52,
+            height: user.height_cm || 168,
+            country: user.country || 'Philippines',
+            city: user.city || 'Unknown',
+            state: user.state || '',
+            faceImage: user.photo_1_url,
+            fullBodyImage: user.photo_2_url,
+            additionalPhotos: []
           },
           participantType: (user.participant_type as 'candidate' | 'finalist' | 'winner') || 'candidate'
         }));

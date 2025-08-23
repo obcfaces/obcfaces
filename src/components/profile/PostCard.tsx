@@ -9,6 +9,7 @@ import { toast } from "@/components/ui/use-toast";
 import { Link } from "react-router-dom";
 import { PhotoModal } from "@/components/photo-modal";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { useCardData } from "@/hooks/useCardData";
 import LoginModalContent from "@/components/login-modal-content";
 
 interface PostCardProps {
@@ -45,11 +46,13 @@ const PostCard = ({
   mediaTypes,
 }: PostCardProps) => {
   const [isLiked, setIsLiked] = useState(false);
-  const [currentLikes, setCurrentLikes] = useState(likes);
   const [loading, setLoading] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
+  
+  // Use unified card data hook for consistent like/comment counts
+  const { data: cardData } = useCardData(authorName, currentUserId);
 
   // Get current user
   useEffect(() => {
@@ -97,7 +100,6 @@ const PostCard = ({
         if (error) throw error;
         
         setIsLiked(false);
-        setCurrentLikes(prev => Math.max(0, prev - 1));
         toast({ description: "Лайк убран" });
       } else {
         // Like
@@ -112,7 +114,6 @@ const PostCard = ({
         if (error) throw error;
         
         setIsLiked(true);
-        setCurrentLikes(prev => prev + 1);
         toast({ description: "Пост понравился!" });
       }
     } catch (error) {
@@ -232,7 +233,7 @@ const PostCard = ({
           >
             <ThumbsUp className="w-4 h-4 text-primary" strokeWidth={1} />
             <span className="hidden sm:inline">Like</span>
-            <span>{currentLikes}</span>
+            <span>{cardData.likes}</span>
           </button>
           <button
             type="button"
@@ -242,7 +243,7 @@ const PostCard = ({
           >
             <MessageCircle className="w-4 h-4 text-primary" strokeWidth={1} />
             <span className="hidden sm:inline">Comment</span>
-            <span>{comments}</span>
+            <span>{cardData.comments}</span>
           </button>
           <button
             type="button"
