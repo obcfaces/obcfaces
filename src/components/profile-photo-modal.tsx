@@ -440,8 +440,8 @@ export function ProfilePhotoModal({
               </div>
 
               {/* Comments section */}
-              <div className="flex-1 overflow-y-auto p-4" ref={commentsListRef}>
-                <div className="space-y-3">
+              <div className="flex-1 overflow-y-auto" ref={commentsListRef}>
+                <div className="p-4 space-y-3">
                   {currentPhotoComments.map((comment) => (
                     <div key={comment.id} className="space-y-1">
                       <div className="flex items-center gap-2">
@@ -452,14 +452,16 @@ export function ProfilePhotoModal({
                     </div>
                   ))}
                   {currentPhotoComments.length === 0 && (
-                    <p className="text-muted-foreground text-center py-4">
-                      Пока нет комментариев. Будьте первым!
-                    </p>
+                    <div className="p-4 text-center">
+                      <p className="text-muted-foreground text-sm">
+                        Пока нет комментариев. Будьте первым!
+                      </p>
+                    </div>
                   )}
                 </div>
               </div>
               
-              {/* Action buttons */}
+              {/* Action buttons - под фото как в конкурсах */}
               <div className="border-t px-4 py-2 flex items-center justify-evenly gap-4">
                 <button
                   type="button"
