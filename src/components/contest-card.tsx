@@ -347,7 +347,7 @@ export function ContestantCard({
           
           {/* Rank and rating in top right corner */}
           {rank > 0 && isVoted && (
-            <div className="absolute top-0 right-0 z-20 flex items-center gap-1">
+            <div className="absolute top-0 right-0 z-20 flex items-center">
               <div className="text-xl font-bold text-contest-blue bg-white px-2 py-1.5 rounded-bl-lg shadow-sm">
                 #{rank}
               </div>
