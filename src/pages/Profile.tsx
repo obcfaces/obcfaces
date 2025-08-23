@@ -1444,21 +1444,24 @@ const Profile = () => {
 
                                     if (uploadError) throw uploadError;
 
-                                    // Get public URL
+                                    // Get public URL with cache busting timestamp
                                     const { data: { publicUrl } } = supabase.storage
                                       .from('avatars')
                                       .getPublicUrl(filePath);
+                                    
+                                    // Add cache-busting timestamp to force browser to reload image
+                                    const timestampedUrl = `${publicUrl}?t=${Date.now()}`;
 
                                     // Update profile
                                     const { error: updateError } = await supabase
                                       .from('profiles')
-                                      .update({ avatar_url: publicUrl })
+                                      .update({ avatar_url: timestampedUrl })
                                       .eq('id', currentUserId);
 
                                     if (updateError) throw updateError;
 
                                     // Update local state
-                                    setData(prev => prev ? { ...prev, avatar_url: publicUrl } : null);
+                                    setData(prev => prev ? { ...prev, avatar_url: timestampedUrl } : null);
                                     setEditingField(null);
                                     setAvatarPreview(null);
                                     setAvatarFile(null);
