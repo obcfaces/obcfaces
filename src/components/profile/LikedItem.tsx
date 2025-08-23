@@ -4,11 +4,12 @@ import { Button } from "@/components/ui/button";
 import { ThumbsUp, MessageCircle, Share2, ThumbsDown } from "lucide-react";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "@/components/ui/use-toast";
+import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { PhotoModal } from "@/components/photo-modal";
 import { Link } from "react-router-dom";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { useCardData } from "@/hooks/useCardData";
 import LoginModalContent from "@/components/login-modal-content";
 
 // Import contest images for mock display
@@ -102,6 +103,9 @@ const LikedItem = ({
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [currentParticipantType, setCurrentParticipantType] = useState<'candidate' | 'finalist' | 'winner' | null>(participantType || null);
 
+  // Use unified card data hook
+  const { data: cardData, loading: cardDataLoading } = useCardData(authorName, user?.id);
+
   // Get current user
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
@@ -114,8 +118,6 @@ const LikedItem = ({
 
     return () => subscription.unsubscribe();
   }, []);
-
-  // Login modal removed auto-close
 
   // Fetch current participant type from database
   useEffect(() => {
@@ -255,8 +257,8 @@ const LikedItem = ({
                   disabled={isUnliking}
                 >
                   <ThumbsUp className="w-3.5 h-3.5 text-primary" strokeWidth={1} />
-                  <span className="hidden xl:inline">Unlike</span>
-                  <span>{likes}</span>
+                   <span className="hidden xl:inline">Unlike</span>
+                   <span>{cardData.likes}</span>
                 </button>
                 <button
                   type="button"
@@ -266,7 +268,7 @@ const LikedItem = ({
                 >
                   <MessageCircle className="w-3.5 h-3.5 text-primary" strokeWidth={1} />
                   <span className="hidden xl:inline">Comment</span>
-                  <span>{comments}</span>
+                   <span>{cardData.comments}</span>
                 </button>
                 <button
                   type="button"
@@ -371,8 +373,8 @@ const LikedItem = ({
             disabled={isUnliking}
           >
             <ThumbsUp className="w-4 h-4 text-primary" strokeWidth={1} />
-            <span className="hidden sm:inline">Unlike</span>
-            <span>{likes}</span>
+             <span className="hidden sm:inline">Unlike</span>
+             <span>{cardData.likes}</span>
           </button>
           <button
             type="button"
@@ -382,7 +384,7 @@ const LikedItem = ({
           >
             <MessageCircle className="w-4 h-4 text-primary" strokeWidth={1} />
             <span className="hidden sm:inline">Comment</span>
-            <span>{comments}</span>
+            <span>{cardData.comments}</span>
           </button>
           <button
             type="button"

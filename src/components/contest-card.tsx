@@ -9,10 +9,11 @@ import { MiniStars } from "@/components/mini-stars";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { useCardData } from "@/hooks/useCardData";
 import LoginModalContent from "@/components/login-modal-content";
 import { ShareModal } from "@/components/share-modal";
 import { useShare } from "@/hooks/useShare";
@@ -77,10 +78,11 @@ export function ContestantCard({
   const [isLiked, setIsLiked] = useState<boolean[]>([false, false]);
   const [isDisliked, setIsDisliked] = useState(false);
   const [hasCommented, setHasCommented] = useState(false);
-  const [likesCount, setLikesCount] = useState<number[]>([0, 0]);
-  const [dislikesCount, setDislikesCount] = useState<number>(0);
-  const [commentsCount, setCommentsCount] = useState<number[]>([0, 0]);
   const [user, setUser] = useState<any>(null);
+  const [dislikesCount, setDislikesCount] = useState<number>(0);
+  
+  // Use unified card data hook
+  const { data: cardData, loading: cardDataLoading } = useCardData(name, user?.id);
   // Initialize isVoted state synchronously by checking localStorage
   const [isVoted, setIsVoted] = useState(() => {
     if (propIsVoted) return true;
@@ -98,7 +100,6 @@ export function ContestantCard({
   });
   const [showLoginModal, setShowLoginModal] = useState(false);
   const { isShareModalOpen, shareData, openShareModal, closeShareModal } = useShare();
-  const { toast } = useToast();
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
@@ -128,103 +129,64 @@ export function ContestantCard({
 
   // Login modal removed auto-close
 
-  // Load user's likes, counts and ratings on component mount
+  // Load user voting status and setup dislikes
   useEffect(() => {
-    const loadUserData = async () => {
-      // Load total likes count for all photos and card - search for all possible name variations
-      const { data: allLikes } = await supabase
+    const loadUserVotingData = async () => {
+      if (!user) return;
+
+      // Load user's likes status for photos
+      const { data: userLikes } = await supabase
         .from("likes")
         .select("content_id")
         .eq("content_type", "contest")
-        .or(`content_id.ilike.contestant-photo-%${name}%,content_id.ilike.contestant-card-%${name}%`);
+        .eq("user_id", user.id)
+        .in("content_id", [`contestant-photo-${name}-0`, `contestant-photo-${name}-1`]);
       
-      // Filter and count likes for different content types
-      const photo0Likes = allLikes?.filter(like => 
-        like.content_id.includes(`contestant-photo-`) && 
-        like.content_id.includes(name) && 
-        like.content_id.endsWith('-0')
-      ).length || 0;
-      
-      const photo1Likes = allLikes?.filter(like => 
-        like.content_id.includes(`contestant-photo-`) && 
-        like.content_id.includes(name) && 
-        like.content_id.endsWith('-1')
-      ).length || 0;
-      
-      const cardLikesCount = allLikes?.filter(like => 
-        like.content_id.includes(`contestant-card-`) && 
-        like.content_id.includes(name) &&
-        !like.content_id.includes('-0') &&
-        !like.content_id.includes('-1')
-      ).length || 0;
-      
-      const totalLikes = photo0Likes + photo1Likes + cardLikesCount;
+      if (userLikes) {
+        setIsLiked([
+          userLikes.some(like => like.content_id === `contestant-photo-${name}-0`),
+          userLikes.some(like => like.content_id === `contestant-photo-${name}-1`)
+        ]);
+      }
 
-      // Load total comments count for both photos
-      const { data: totalComments } = await supabase
+      // Load user's comments status
+      const { data: userComments } = await supabase
         .from("photo_comments")
         .select("content_id")
         .eq("content_type", "contest")
+        .eq("user_id", user.id)
         .in("content_id", [`contestant-photo-${name}-0`, `contestant-photo-${name}-1`]);
       
-      if (totalComments) {
-        const photo0Comments = totalComments.filter(comment => comment.content_id === `contestant-photo-${name}-0`).length;
-        const photo1Comments = totalComments.filter(comment => comment.content_id === `contestant-photo-${name}-1`).length;
-        setCommentsCount([photo0Comments, photo1Comments]);
+      if (userComments && userComments.length > 0) {
+        setHasCommented(true);
       }
+
+      // Load dislike votes for next week
+      const { data: dislikeVotes } = await supabase
+        .from("next_week_votes")
+        .select("vote_type")
+        .eq("candidate_name", name)
+        .eq("vote_type", "dislike");
       
-      // Set total likes count for all users (logged and not logged)
-      setLikesCount([totalLikes, 0]);
+      if (dislikeVotes) {
+        setDislikesCount(dislikeVotes.length);
+      }
+
+      // Check if current user disliked
+      const { data: userDislike } = await supabase
+        .from("next_week_votes")
+        .select("vote_type")
+        .eq("candidate_name", name)
+        .eq("user_id", user.id)
+        .eq("vote_type", "dislike");
       
-      if (user) {
-        // Load user's likes for the card
-        const { data: userCardLike } = await supabase
-          .from("likes")
-          .select("id")
-          .eq("user_id", user.id)
-          .eq("content_type", "contest")
-          .eq("content_id", `contestant-card-${name}`)
-          .maybeSingle();
-        
-        // Load user's likes for individual photos
-        const { data: userPhotoLikes } = await supabase
-          .from("likes")
-          .select("content_id")
-          .eq("user_id", user.id)
-          .eq("content_type", "contest")
-          .in("content_id", [`contestant-photo-${name}-0`, `contestant-photo-${name}-1`]);
-        
-        // User has liked if they liked the card OR any photo
-        const hasLikedPhoto0 = userPhotoLikes?.some(like => like.content_id === `contestant-photo-${name}-0`) || false;
-        const hasLikedPhoto1 = userPhotoLikes?.some(like => like.content_id === `contestant-photo-${name}-1`) || false;
-        const hasLikedCard = !!userCardLike;
-        const hasAnyLike = hasLikedCard || hasLikedPhoto0 || hasLikedPhoto1;
-        
-        setIsLiked([hasAnyLike, hasAnyLike]);
-        
-        // Check if user has commented on this contestant
-        const { data: userComments } = await supabase
-          .from("photo_comments")
-          .select("id")
-          .eq("user_id", user.id)
-          .eq("content_type", "contest")
-          .in("content_id", [`contestant-photo-${name}-0`, `contestant-photo-${name}-1`])
-          .limit(1);
-        
-        setHasCommented(!!userComments && userComments.length > 0);
-        
-        // Load user's rating (if any)
-        const savedRating = localStorage.getItem(`rating-${name}-${user.id}`);
-        if (savedRating && parseFloat(savedRating) > 0) {
-          const ratingValue = parseFloat(savedRating);
-          setUserRating(ratingValue);
-          setIsVoted(true); // Mark as voted if rating exists
-        }
+      if (userDislike && userDislike.length > 0) {
+        setIsDisliked(true);
       }
     };
-    
-    loadUserData();
-  }, [user, name]);
+
+    loadUserVotingData();
+  }, [name, user]);
 
   const handleLike = async (index: number) => {
     if (!user) {
@@ -258,14 +220,6 @@ export function ContestantCard({
       
       // Update both indices to the same value since it's a card like
       setIsLiked([!wasLiked, !wasLiked]);
-      
-      // Update likes count by recalculating total
-      const currentCardLikes = wasLiked ? -1 : 1; // Change in card likes
-      setLikesCount((prev) => {
-        const next = [...prev];
-        next[0] = prev[0] + currentCardLikes; // Update total count
-        return next;
-      });
       
     } catch (error) {
       toast({ description: "Failed to perform action" });
@@ -521,7 +475,7 @@ export function ContestantCard({
               >
                  <ThumbsUp className="w-4 h-4 text-primary" strokeWidth={1} />
                  <span className="hidden sm:inline">Like</span>
-                 {(likesCount[0] + likesCount[1] > 0) && <span>{likesCount[0] + likesCount[1]}</span>}
+                  {cardData.likes > 0 && <span>{cardData.likes}</span>}
               </button>
               {showDislike && (
                 <button
@@ -549,7 +503,7 @@ export function ContestantCard({
               >
                 <MessageCircle className="w-4 h-4 text-primary" strokeWidth={1} />
                 <span className="hidden sm:inline">Comment</span>
-                {(commentsCount[0] + commentsCount[1] > 0) && <span>{commentsCount[0] + commentsCount[1]}</span>}
+                 <span>{cardData.comments}</span>
               </button>
               <button
                 type="button"
@@ -751,7 +705,7 @@ export function ContestantCard({
                  >
                     <ThumbsUp className="w-3.5 h-3.5 text-primary" strokeWidth={1} />
                     <span className="hidden xl:inline">Like</span>
-                    {(likesCount[0] + likesCount[1] > 0) && <span>{likesCount[0] + likesCount[1]}</span>}
+                     {cardData.likes > 0 && <span>{cardData.likes}</span>}
                  </button>
                 {showDislike && (
                   <button
@@ -779,7 +733,7 @@ export function ContestantCard({
                  >
                     <MessageCircle className="w-3.5 h-3.5 text-primary" strokeWidth={1} />
                     <span className="hidden xl:inline">Comment</span>
-                    {(commentsCount[0] + commentsCount[1] > 0) && <span>{commentsCount[0] + commentsCount[1]}</span>}
+                    <span>{cardData.comments}</span>
                  </button>
                  <button
                    type="button"
