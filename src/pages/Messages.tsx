@@ -404,8 +404,11 @@ const Messages = () => {
                 }`}
               >
                 <div className="flex items-center gap-3">
-                  <Avatar className="h-12 w-12">
-                    <AvatarImage src={conversation.other_user.avatar_url || ''} />
+                  <Avatar className="h-12 w-12 flex-shrink-0">
+                    <AvatarImage 
+                      src={conversation.other_user.avatar_url || ''} 
+                      className="object-cover w-full h-full"
+                    />
                     <AvatarFallback>
                       <User className="h-6 w-6" />
                     </AvatarFallback>
@@ -456,8 +459,11 @@ const Messages = () => {
                 <ArrowLeft className="h-4 w-4" />
               </Button>
               
-              <Avatar className="h-10 w-10">
-                <AvatarImage src={selectedConv.other_user.avatar_url || ''} />
+              <Avatar className="h-10 w-10 flex-shrink-0">
+                <AvatarImage 
+                  src={selectedConv.other_user.avatar_url || ''} 
+                  className="object-cover w-full h-full"
+                />
                 <AvatarFallback>
                   <User className="h-5 w-5" />
                 </AvatarFallback>
