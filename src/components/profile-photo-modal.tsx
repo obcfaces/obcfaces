@@ -560,7 +560,8 @@ export function ProfilePhotoModal({
                     value={commentText}
                     onChange={(e) => setCommentText(e.target.value)}
                     placeholder="Write a comment for this photo..."
-                    className="flex-1 resize-none min-h-[44px] max-h-32 text-sm"
+                    className="flex-1 resize-none min-h-[44px] max-h-[44px] text-sm overflow-hidden"
+                    rows={1}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter' && !e.shiftKey) {
                         e.preventDefault();
