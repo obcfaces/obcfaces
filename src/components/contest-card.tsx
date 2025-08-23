@@ -219,6 +219,9 @@ export function ContestantCard({
     const contentId = `contestant-card-${name}`;
     const wasLiked = isLiked[0]; // Card likes are stored in first index
     
+    // Optimistic UI update
+    setIsLiked([!wasLiked, !wasLiked]);
+    
     try {
       if (wasLiked) {
         // Unlike
@@ -239,10 +242,9 @@ export function ContestantCard({
           });
       }
       
-      // Update both indices to the same value since it's a card like
-      setIsLiked([!wasLiked, !wasLiked]);
-      
     } catch (error) {
+      // Revert optimistic update on error
+      setIsLiked([wasLiked, wasLiked]);
       toast({ description: "Failed to perform action" });
     }
   };
@@ -468,7 +470,7 @@ export function ContestantCard({
                 onClick={() => handleLike(0)}
                 aria-label="Like"
               >
-                 <ThumbsUp className="w-4 h-4 text-primary" strokeWidth={1} />
+                 <ThumbsUp className={cn("w-4 h-4 text-primary", (isLiked[0] || isLiked[1]) && "fill-blue-500 text-blue-500")} strokeWidth={1} />
                  <span className="hidden sm:inline">Like</span>
                   {cardData.likes > 0 && <span>{cardData.likes}</span>}
               </button>
@@ -709,7 +711,7 @@ export function ContestantCard({
                    onClick={() => handleLike(0)}
                    aria-label="Like"
                  >
-                    <ThumbsUp className="w-3.5 h-3.5 text-primary" strokeWidth={1} />
+                    <ThumbsUp className={cn("w-3.5 h-3.5 text-primary", (isLiked[0] || isLiked[1]) && "fill-blue-500 text-blue-500")} strokeWidth={1} />
                     <span className="hidden xl:inline">Like</span>
                      {cardData.likes > 0 && <span>{cardData.likes}</span>}
                  </button>
