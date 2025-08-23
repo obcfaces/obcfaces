@@ -667,17 +667,17 @@ const Profile = () => {
   };
 
   const loadParticipationItems = async () => {
-    if (!currentUserId) return;
+    if (!id) return;
     
     setLoadingParticipation(true);
     try {
-      console.log('Loading participation for user:', currentUserId);
+      console.log('Loading participation for user:', id);
       
       // Сначала получаем профиль пользователя
       const { data: profileData, error } = await supabase
         .from('profiles')
         .select('*')
-        .eq('id', currentUserId)
+        .eq('id', id)
         .maybeSingle();
 
       console.log('Profile data:', profileData);
@@ -824,7 +824,7 @@ const Profile = () => {
 
   useEffect(() => {
     loadParticipationItems();
-  }, [currentUserId, id]);
+  }, [id]);
 
   useEffect(() => {
     loadUserPosts();
