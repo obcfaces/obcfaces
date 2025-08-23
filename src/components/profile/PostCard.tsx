@@ -1,8 +1,9 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ThumbsUp, MessageCircle, Share2, MoreHorizontal } from "lucide-react";
+import { ThumbsUp, MessageCircle, Share2, MoreHorizontal, Pin, Edit3, Check, X } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Textarea } from "@/components/ui/textarea";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
@@ -25,6 +26,10 @@ interface PostCardProps {
   comments?: number;
   mediaUrls?: string[];
   mediaTypes?: string[];
+  isPinned?: boolean;
+  onPin?: (postId: string) => void;
+  onEdit?: (postId: string) => void;
+  isOwnPost?: boolean;
 }
 
 const getInitials = (name: string) => {
@@ -45,12 +50,18 @@ const PostCard = ({
   comments = 0,
   mediaUrls,
   mediaTypes,
+  isPinned = false,
+  onPin,
+  onEdit,
+  isOwnPost = false,
 }: PostCardProps) => {
   const [isLiked, setIsLiked] = useState(false);
   const [loading, setLoading] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedContent, setEditedContent] = useState(content);
   
   // Use unified card data hook for consistent like/comment counts
   const { data: cardData } = useCardData(authorName, currentUserId);
@@ -124,6 +135,47 @@ const PostCard = ({
     }
   };
 
+  const handlePin = () => {
+    if (onPin) {
+      onPin(id);
+      toast({ description: isPinned ? "Post unpinned" : "Post pinned" });
+    }
+  };
+
+  const handleEditStart = () => {
+    setIsEditing(true);
+    setEditedContent(content);
+  };
+
+  const handleEditSave = async () => {
+    if (editedContent.trim() === content) {
+      setIsEditing(false);
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('posts')
+        .update({ caption: editedContent.trim() })
+        .eq('id', id);
+
+      if (error) throw error;
+
+      setIsEditing(false);
+      if (onEdit) {
+        onEdit(id);
+      }
+      toast({ description: "Post updated successfully" });
+    } catch (error) {
+      toast({ description: "Failed to update post" });
+    }
+  };
+
+  const handleEditCancel = () => {
+    setIsEditing(false);
+    setEditedContent(content);
+  };
+
   const displayMediaUrls = mediaUrls && mediaUrls.length > 0 ? mediaUrls : (imageSrc ? [imageSrc] : []);
   const displayMediaTypes = mediaTypes && mediaTypes.length > 0 ? mediaTypes : (imageSrc ? ['image'] : []);
 
@@ -161,29 +213,55 @@ const PostCard = ({
               <span className="font-medium leading-none">{authorName}</span>
             )}
             <span className="text-xs text-muted-foreground">{time}</span>
+            {isPinned && <Pin className="h-4 w-4 text-primary" />}
           </div>
           
-          {/* Three dots menu */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                <MoreHorizontal className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem>
-                Pin post
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                Edit
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          {/* Three dots menu - only show for own posts */}
+          {isOwnPost && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={handlePin}>
+                  <Pin className="h-4 w-4 mr-2" />
+                  {isPinned ? "Unpin post" : "Pin post"}
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleEditStart}>
+                  <Edit3 className="h-4 w-4 mr-2" />
+                  Edit
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
         </div>
 
         {/* Content */}
         <div className="px-3 pt-0 pb-1">
-          {content && <p className="text-sm whitespace-pre-line mb-1">{content}</p>}
+          {isEditing ? (
+            <div className="space-y-2">
+              <Textarea
+                value={editedContent}
+                onChange={(e) => setEditedContent(e.target.value)}
+                className="min-h-20 resize-none"
+                placeholder="Write something..."
+              />
+              <div className="flex gap-2 justify-end">
+                <Button size="sm" variant="outline" onClick={handleEditCancel}>
+                  <X className="h-4 w-4 mr-1" />
+                  Cancel
+                </Button>
+                <Button size="sm" onClick={handleEditSave}>
+                  <Check className="h-4 w-4 mr-1" />
+                  Save
+                </Button>
+              </div>
+            </div>
+          ) : (
+            content && <p className="text-sm whitespace-pre-line mb-1">{content}</p>
+          )}
         </div>
         
         {/* Media display */}
