@@ -345,16 +345,12 @@ export function ContestantCard({
         <Card className="bg-card border-contest-border relative overflow-hidden">
           
           
-          {/* Rank, rating and location in top right corner - show rank always if rank > 0 and user has voted */}
+          {/* Rank in top right corner - show rank always if rank > 0 and user has voted */}
           {rank > 0 && isVoted && (
             <div className="absolute top-0 right-0 z-20 flex flex-col items-end">
               <div className="flex items-center gap-1">
-                <div className="text-xl font-bold text-contest-blue">#{rank}</div>
-                <div 
-                  className="bg-contest-blue text-white px-2 py-1.5 rounded-bl-lg text-lg font-bold shadow-sm cursor-pointer hover:bg-contest-blue/90 transition-colors"
-                  onClick={() => setIsEditing(true)}
-                >
-                  {rating.toFixed(1)}
+                <div className="text-xl font-bold text-contest-blue bg-white px-2 py-1.5 rounded-bl-lg shadow-sm">
+                  #{rank}
                 </div>
               </div>
               <div className="text-right pr-2 pt-1">
