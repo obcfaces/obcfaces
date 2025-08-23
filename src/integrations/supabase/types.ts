@@ -698,19 +698,31 @@ export type Database = {
         Returns: {
           age: number
           application_data: Json
+          avatar_url: string
+          average_rating: number
           city: string
+          contest_end_date: string
+          contest_id: string
+          contest_start_date: string
           contest_status: string
+          contest_title: string
           country: string
+          display_name: string
           final_rank: number
           first_name: string
+          gender: string
+          has_children: boolean
           height_cm: number
-          id: string
           last_name: string
-          photo1_url: string
-          photo2_url: string
+          marital_status: string
+          participant_id: string
+          participant_type: string
+          phone_data: Json
+          photo_1_url: string
+          photo_2_url: string
+          state: string
+          total_votes: number
           user_id: string
-          week_end_date: string
-          week_start_date: string
           weight_kg: number
         }[]
       }
@@ -718,15 +730,29 @@ export type Database = {
         Args: { weeks_offset?: number }
         Returns: {
           age: number
+          avatar_url: string
+          average_rating: number
           city: string
+          contest_end_date: string
+          contest_id: string
+          contest_start_date: string
+          contest_status: string
+          contest_title: string
           country: string
+          display_name: string
           final_rank: number
           first_name: string
+          gender: string
+          has_children: boolean
           height_cm: number
-          id: string
           last_name: string
-          photo1_url: string
-          photo2_url: string
+          marital_status: string
+          participant_id: string
+          participant_type: string
+          photo_1_url: string
+          photo_2_url: string
+          state: string
+          total_votes: number
           user_id: string
           weight_kg: number
         }[]
