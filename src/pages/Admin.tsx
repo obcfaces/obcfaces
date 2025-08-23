@@ -243,6 +243,8 @@ const Admin = () => {
       height_cm: participant.height_cm,
       weight_kg: participant.weight_kg,
       final_rank: participant.final_rank,
+      average_rating: participant.average_rating,
+      total_votes: participant.total_votes,
       contest_status: participant.contest_status,
       week_start_date: participant.contest_start_date,
       week_end_date: participant.contest_end_date,
@@ -277,29 +279,6 @@ const Admin = () => {
     });
 
     fetchWeeklyContests();
-    fetchWeeklyParticipants();
-  };
-
-  const setParticipantRank = async (participantId: string, rank: number) => {
-    const { error } = await supabase
-      .from('weekly_contest_participants')
-      .update({ final_rank: rank })
-      .eq('id', participantId);
-
-    if (error) {
-      toast({
-        title: "Error",
-        description: "Failed to set participant rank",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    toast({
-      title: "Success",
-      description: "Participant rank updated",
-    });
-
     fetchWeeklyParticipants();
   };
 
@@ -697,16 +676,22 @@ const Admin = () => {
                             </p>
                           </div>
                         </div>
-                        <div className="text-right space-y-2">
-                          {participant.final_rank ? (
-                            <Badge variant="default" className="bg-yellow-500">
-                              <Trophy className="w-3 h-3 mr-1" />
-                              Rank #{participant.final_rank}
-                            </Badge>
+                      <div className="text-right space-y-2">
+                        <div className="flex flex-col items-end gap-1">
+                          {participant.average_rating && participant.average_rating > 0 ? (
+                            <>
+                              <Badge variant="default" className="bg-contest-blue">
+                                Rating: {participant.average_rating.toFixed(1)}
+                              </Badge>
+                              <Badge variant="secondary">
+                                Votes: {participant.total_votes || 0}
+                              </Badge>
+                            </>
                           ) : (
-                            <Badge variant="secondary">No Rank Set</Badge>
+                            <Badge variant="secondary">No Rating Yet</Badge>
                           )}
                         </div>
+                      </div>
                       </div>
                     </CardHeader>
                     <CardContent>
@@ -733,28 +718,10 @@ const Admin = () => {
                         </div>
                       </div>
 
-                      <div className="flex gap-2 flex-wrap">
-                        {[1, 2, 3, 4, 5].map((rank) => (
-                          <Button
-                            key={rank}
-                            size="sm"
-                            variant={participant.final_rank === rank ? "default" : "outline"}
-                            onClick={() => setParticipantRank(participant.id, rank)}
-                            className={participant.final_rank === rank ? "bg-yellow-500 hover:bg-yellow-600" : ""}
-                          >
-                            #{rank}
-                          </Button>
-                        ))}
-                        {selectedContest && participant.final_rank === 1 && (
-                          <Button
-                            size="sm"
-                            className="bg-green-600 hover:bg-green-700 ml-2"
-                            onClick={() => setContestWinner(selectedContest, participant.user_id)}
-                          >
-                            <Trophy className="w-4 h-4 mr-1" />
-                            Set as Winner
-                          </Button>
-                        )}
+                      <div className="text-center text-muted-foreground">
+                        <p className="text-sm">
+                          Места определяются автоматически по рейтингу участниц
+                        </p>
                       </div>
                     </CardContent>
                   </Card>
