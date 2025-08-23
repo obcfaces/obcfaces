@@ -926,7 +926,7 @@ const Profile = () => {
                      {loadingFollow ? "..." : isFollowing ? "Unfollow" : "Follow"}
                    </Button>
                    <Button variant="outline" onClick={handleMessage} className="min-w-[120px]">
-                     <MessageCircle className="w-4 h-4 mr-1" strokeWidth={1} />
+                     <MessageCircle className="w-4 h-4 mr-1 text-primary" strokeWidth={1} />
                      Message
                    </Button>
                  </>

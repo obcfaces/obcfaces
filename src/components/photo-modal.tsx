@@ -448,7 +448,7 @@ export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantNa
                       onClick={handleLike}
                       aria-label="Like"
                     >
-                      <ThumbsUp className={cn("w-4 h-4 mr-1", currentPhotoLikes.isLiked && "stroke-2 text-primary")} />
+                      <ThumbsUp className="w-4 h-4 mr-1 text-primary" strokeWidth={1} />
                       {currentPhotoLikes.count}
                     </Button>
                     <Button
@@ -461,7 +461,7 @@ export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantNa
                       onClick={focusCommentInput}
                       aria-label="Open comment field"
                     >
-                      <MessageCircle className={cn("w-4 h-4 mr-1", currentPhotoComments.length > 0 && "fill-current")} />
+                      <MessageCircle className="w-4 h-4 mr-1 text-primary" strokeWidth={1} />
                       {currentPhotoComments.length}
                     </Button>
                   </div>
