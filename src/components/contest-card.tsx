@@ -70,16 +70,7 @@ export function ContestantCard({
   const [modalStartIndex, setModalStartIndex] = useState(0);
   const [isEditing, setIsEditing] = useState(false);
   const [showThanks, setShowThanks] = useState(false);
-  const [userRating, setUserRating] = useState(() => {
-    try {
-      const currentUserId = localStorage.getItem('currentUserId');
-      if (!currentUserId) return 0;
-      const savedRating = localStorage.getItem(`rating-${name}-${currentUserId}`);
-      return savedRating ? parseFloat(savedRating) : 0;
-    } catch {
-      return 0;
-    }
-  });
+  const [userRating, setUserRating] = useState(0);
   const [isLiked, setIsLiked] = useState<boolean[]>([false, false]);
   const [isDisliked, setIsDisliked] = useState(false);
   const [hasCommented, setHasCommented] = useState(false);
@@ -88,6 +79,31 @@ export function ContestantCard({
   
   // Use unified card data hook
   const { data: cardData, loading: cardDataLoading } = useCardData(name, user?.id);
+
+  // Load user's current rating
+  useEffect(() => {
+    const loadUserRating = async () => {
+      if (!user?.id) return;
+
+      try {
+        const { data: userRatingData } = await supabase
+          .from('contestant_ratings')
+          .select('rating')
+          .eq('user_id', user.id)
+          .eq('contestant_name', name)
+          .single();
+
+        if (userRatingData) {
+          setUserRating(userRatingData.rating);
+          setIsVoted(true);
+        }
+      } catch (error) {
+        console.log('No existing rating found');
+      }
+    };
+
+    loadUserRating();
+  }, [user?.id, name]);
   // Initialize isVoted state synchronously by checking localStorage
   const [isVoted, setIsVoted] = useState(() => {
     if (propIsVoted) return true;
@@ -284,6 +300,8 @@ export function ContestantCard({
       
       console.log('Rating saved successfully, calling onRate callback');
       
+      setUserRating(rating);
+      setIsVoted(true);
       setShowThanks(true);
       setTimeout(() => {
         setShowThanks(false);
