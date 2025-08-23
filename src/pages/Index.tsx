@@ -4,7 +4,7 @@ import { ContestHeader } from "@/components/contest-header";
 import { ContestSection } from "@/components/contest-section";
 import { NextWeekSection } from "@/components/next-week-section";
 import ContestFilters from "@/components/contest-filters";
-import AiChat from "@/components/ai-chat";
+
 import { EditableContent } from "@/components/editable-content";
 import { supabase } from "@/integrations/supabase/client";
 import type { Category } from "@/components/contest-filters";
@@ -147,9 +147,6 @@ const Index = () => {
             viewMode={viewMode}
           />
 
-          <section className="max-w-6xl mx-auto px-6 mb-8">
-            <AiChat />
-          </section>
         </>
       )}
 

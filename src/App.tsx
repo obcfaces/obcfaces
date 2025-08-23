@@ -17,6 +17,7 @@ import Likes from "./pages/Likes";
 import Admin from "./pages/Admin";
 import AuthCallbackHandler from "@/components/auth-callback-handler";
 import TopBar from "@/components/top-bar";
+import { Footer } from "@/components/footer";
 
 
 const queryClient = new QueryClient();
@@ -25,7 +26,7 @@ const App = () => {
   console.log("App component rendering");
   
   return (
-    <div className="min-h-screen w-full">
+    <div className="min-h-screen w-full flex flex-col">
       <HelmetProvider>
         <QueryClientProvider client={queryClient}>
           <TooltipProvider>
@@ -34,7 +35,7 @@ const App = () => {
             <BrowserRouter>
               <AuthCallbackHandler />
               <TopBar />
-              <main className="w-full">
+              <main className="w-full flex-1">
                 <Routes>
                   <Route path="/" element={<Index />} />
                   <Route path="/contest" element={<Contest />} />
@@ -50,6 +51,7 @@ const App = () => {
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </main>
+              <Footer />
             </BrowserRouter>
           </TooltipProvider>
         </QueryClientProvider>
