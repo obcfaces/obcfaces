@@ -76,10 +76,36 @@ export function PhotoModal({
   const [userRating, setUserRating] = useState(0);
   const [dislikesCount, setDislikesCount] = useState(0);
   const [isDisliked, setIsDisliked] = useState(false);
+  const [isUserVoted, setIsUserVoted] = useState(isVoted);
   const { toast } = useToast();
   
   // Use card data hook for contestant data
   const cardData = useCardData(contestantName, user?.id);
+
+  // Load user's current rating
+  useEffect(() => {
+    const loadUserRating = async () => {
+      if (!user?.id) return;
+
+      try {
+        const { data: userRatingData } = await supabase
+          .from('contestant_ratings')
+          .select('rating')
+          .eq('user_id', user.id)
+          .eq('contestant_name', contestantName)
+          .single();
+
+        if (userRatingData) {
+          setUserRating(userRatingData.rating);
+          setIsUserVoted(true);
+        }
+      } catch (error) {
+        console.log('No existing rating found');
+      }
+    };
+
+    loadUserRating();
+  }, [user?.id, contestantName]);
 
   // Refs for focusing comment input and scrolling
   const commentsListRef = useRef<HTMLDivElement>(null);
@@ -403,6 +429,7 @@ export function PhotoModal({
       }
 
       setUserRating(newRating);
+      setIsUserVoted(true);
       setShowThanks(true);
       
       setTimeout(() => {
@@ -582,7 +609,7 @@ export function PhotoModal({
                 </div>
                 
                 {/* Rating badge */}
-                {isVoted && !isEditing && !showThanks && rank > 0 && (
+                {isUserVoted && !isEditing && !showThanks && rank > 0 && (
                   <Popover>
                     <PopoverTrigger asChild>
                       <div className="bg-contest-blue text-white px-2 py-1.5 rounded-bl-lg text-base sm:text-lg font-bold shadow-sm cursor-pointer hover:bg-contest-blue/90 transition-colors">
@@ -606,7 +633,7 @@ export function PhotoModal({
 
             {/* Voting section */}
             <div className="relative flex-1 bg-card">
-              {!isVoted && !showThanks && (
+              {!isUserVoted && !showThanks && (
                 <div className="h-full bg-gray-100 flex items-center justify-center">
                   <div className="flex items-center gap-6">
                     <span className="text-2xl font-medium text-gray-800">Vote</span>
@@ -633,7 +660,7 @@ export function PhotoModal({
               )}
               
               {/* Re-voting overlay */}
-              {isVoted && isEditing && !showThanks && (
+              {isUserVoted && isEditing && !showThanks && (
                 <div className="h-full bg-gray-300 flex items-center justify-center">
                   <div className="-translate-x-2 flex items-center gap-6">
                     <span className="text-2xl font-medium text-gray-800 mr-8">Vote</span>
@@ -655,7 +682,7 @@ export function PhotoModal({
               )}
               
               {/* Empty space after voting */}
-              {isVoted && !isEditing && !showThanks && (
+              {isUserVoted && !isEditing && !showThanks && (
                 <div className="h-full"></div>
               )}
             </div>
