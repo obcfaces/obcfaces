@@ -182,6 +182,7 @@ const Messages = () => {
   // Загрузка сообщений
   const loadMessages = async (conversationId: string) => {
     try {
+      console.log('Loading messages for conversation:', conversationId);
       const { data, error } = await supabase
         .from('messages')
         .select('id, content, sender_id, conversation_id, created_at')
@@ -190,6 +191,7 @@ const Messages = () => {
         .order('created_at', { ascending: true });
 
       if (error) throw error;
+      console.log('Loaded messages:', data);
       setMessages(data || []);
       
       // Отмечаем как прочитанное
@@ -421,11 +423,11 @@ const Messages = () => {
       </div>
 
       {/* Область чата */}
-      <div className={`flex-1 flex flex-col ${selectedConversation ? 'flex' : 'hidden md:flex'}`}>
+      <div className={`flex-1 ${selectedConversation ? 'flex' : 'hidden md:flex'} flex-col h-screen`}>
         {selectedConversation && selectedConv ? (
           <>
             {/* Заголовок чата */}
-            <div className="p-4 border-b flex items-center gap-3">
+            <div className="p-4 border-b flex items-center gap-3 flex-shrink-0">
               <Button
                 variant="ghost"
                 size="sm"
@@ -450,36 +452,44 @@ const Messages = () => {
             </div>
 
             {/* Сообщения */}
-            <ScrollArea className="flex-1 p-4">
-              <div className="space-y-4">
-                {messages.map((message) => {
-                  const isOwn = message.sender_id === user.id;
-                  return (
-                    <div
-                      key={message.id}
-                      className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}
-                    >
-                      <div
-                        className={`max-w-[70%] px-4 py-2 rounded-lg ${
-                          isOwn
-                            ? 'bg-primary text-primary-foreground'
-                            : 'bg-muted'
-                        }`}
-                      >
-                        <p className="text-sm">{message.content}</p>
-                        <p className="text-xs opacity-70 mt-1">
-                          {formatTime(message.created_at)}
-                        </p>
-                      </div>
+            <div className="flex-1 min-h-0 overflow-hidden">
+              <ScrollArea className="h-full p-4">
+                <div className="space-y-4">
+                  {messages.length === 0 ? (
+                    <div className="text-center text-muted-foreground py-8">
+                      Нет сообщений. Начните разговор!
                     </div>
-                  );
-                })}
-                <div ref={messagesEndRef} />
-              </div>
-            </ScrollArea>
+                  ) : (
+                    messages.map((message) => {
+                      const isOwn = message.sender_id === user.id;
+                      return (
+                        <div
+                          key={message.id}
+                          className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}
+                        >
+                          <div
+                            className={`max-w-[70%] px-4 py-2 rounded-lg ${
+                              isOwn
+                                ? 'bg-primary text-primary-foreground'
+                                : 'bg-muted'
+                            }`}
+                          >
+                            <p className="text-sm">{message.content}</p>
+                            <p className="text-xs opacity-70 mt-1">
+                              {formatTime(message.created_at)}
+                            </p>
+                          </div>
+                        </div>
+                      );
+                    })
+                  )}
+                  <div ref={messagesEndRef} />
+                </div>
+              </ScrollArea>
+            </div>
 
-            {/* Поле ввода */}
-            <div className="p-4 border-t">
+            {/* Поле ввода - зафиксировано внизу */}
+            <div className="p-4 border-t flex-shrink-0 bg-background sticky bottom-0">
               <div className="flex gap-2">
                 <Input
                   value={newMessage}
@@ -500,15 +510,10 @@ const Messages = () => {
             </div>
           </>
         ) : (
-          <div className="flex-1 flex items-center justify-center text-center">
-            <div>
-              <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
-                <Send className="h-8 w-8 text-muted-foreground" />
-              </div>
-              <h3 className="text-lg font-semibold mb-2">Выберите разговор</h3>
-              <p className="text-muted-foreground">
-                Выберите разговор из списка слева, чтобы начать общение
-              </p>
+          <div className="flex-1 flex items-center justify-center">
+            <div className="text-center text-muted-foreground">
+              <div className="text-lg font-medium mb-2">Выберите разговор</div>
+              <p>Выберите разговор из списка слева, чтобы начать общение</p>
             </div>
           </div>
         )}
