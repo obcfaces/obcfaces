@@ -367,81 +367,6 @@ export function PhotoModal({
     }
   };
 
-  const handleDislike = async () => {
-    if (!user) {
-      setShowLoginModal(true);
-      return;
-    }
-    
-    const contentId = `contestant-${contestantName}`;
-    
-    try {
-      if (isDisliked) {
-        // Remove dislike - for now use likes table with negative indicator
-        await supabase
-          .from("likes")
-          .delete()
-          .eq("user_id", user.id)
-          .eq("content_type", "contest-dislike")
-          .eq("content_id", contentId);
-        
-        setDislikesCount(prev => prev - 1);
-        setIsDisliked(false);
-      } else {
-        // Add dislike - for now use likes table with negative indicator
-        await supabase
-          .from("likes")
-          .insert({
-            user_id: user.id,
-            content_type: "contest-dislike",
-            content_id: contentId,
-          });
-        
-        setDislikesCount(prev => prev + 1);
-        setIsDisliked(true);
-      }
-    } catch (error) {
-      console.error('Error handling dislike:', error);
-    }
-  };
-
-  const handleRate = async (newRating: number) => {
-    if (!user) {
-      setShowLoginModal(true);
-      return;
-    }
-
-    try {
-      const { error } = await supabase
-        .from("contestant_ratings")
-        .upsert({
-          user_id: user.id,
-          contestant_name: contestantName,
-          contestant_user_id: profileId, // Use profileId if available
-          rating: newRating,
-        }, {
-          onConflict: 'user_id,contestant_user_id'
-        });
-
-      if (error) {
-        console.error('Error saving rating:', error);
-        return;
-      }
-
-      setUserRating(newRating);
-      setIsUserVoted(true);
-      setShowThanks(true);
-      
-      setTimeout(() => {
-        setShowThanks(false);
-      }, 1000);
-
-      onRate?.(newRating);
-    } catch (error) {
-      console.error('Error saving rating:', error);
-    }
-  };
-
   const handleShare = async () => {
     if (shareContext) {
       try {
@@ -464,7 +389,6 @@ export function PhotoModal({
       }
     }
   };
-
 
   // Touch handlers for swipe functionality
   const onTouchStart = (e: React.TouchEvent) => {
@@ -497,7 +421,7 @@ export function PhotoModal({
   return (
     <>
       {isOpen && (
-        <div className="fixed inset-0 z-50 bg-black/90 overflow-hidden">
+        <div className="fixed inset-0 z-50 bg-black overflow-hidden">
           {/* Close button */}
           <button
             onClick={onClose}
@@ -507,13 +431,18 @@ export function PhotoModal({
             <X className="h-5 w-5 md:h-6 md:w-6 text-white" />
           </button>
 
-          {/* Main content */}
-          <div className="h-full w-full flex flex-col max-w-full">
-            {/* Photo section */}
-            <div className={cn(
-              "relative flex items-center justify-center transition-all duration-300 pt-2 md:pt-4",
-              "w-full h-[70dvh] overflow-hidden"
-            )}>
+          {/* Photo container */}
+          <div className="relative h-full w-full flex items-center justify-center"
+               onTouchStart={onTouchStart}
+               onTouchMove={onTouchMove}
+               onTouchEnd={onTouchEnd}>
+            
+            <img
+              src={photos[activeIndex]}
+              alt={`${contestantName} photo ${activeIndex + 1}`}
+              className="w-full h-full object-cover"
+              draggable={false}
+            />
 
             {photos.length > 1 && (
               <>
@@ -534,27 +463,8 @@ export function PhotoModal({
               </>
             )}
 
-            <img
-              src={photos[activeIndex]}
-              alt={`${contestantName} photo ${activeIndex + 1}`}
-              className="max-w-full max-h-full object-contain touch-manipulation select-none"
-              style={{ 
-                width: 'auto', 
-                height: '100%',
-                maxWidth: '100%',
-                objectFit: 'contain'
-              }}
-              onTouchStart={onTouchStart}
-              onTouchMove={onTouchMove}
-              onTouchEnd={onTouchEnd}
-              draggable={false}
-            />
-
-            {/* actions moved to header */}
-
-
             {photos.length > 1 && (
-              <div className="absolute bottom-4 right-4 flex items-center gap-2">
+              <div className="absolute bottom-4 left-4 flex items-center gap-2">
                 {photos.map((src, index) => (
                   <button
                     key={index}
@@ -575,202 +485,120 @@ export function PhotoModal({
                 ))}
               </div>
             )}
-          </div>
 
-          {/* Contest info section */}
-          <div className="bg-background flex flex-col flex-shrink-0 w-full h-[30dvh] min-h-0">
-            {/* Winner Badge */}
-            {isWinner && (
-              <div className="bg-blue-100 text-blue-700 px-4 py-2 text-sm font-semibold flex justify-start items-center border-b">
-                <span>🏆 WINNER   + 5000 PHP</span>
-              </div>
-            )}
-            
-            {/* Header with name and country */}
-            <div className="p-4 border-b">
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <h3 className="font-semibold text-contest-text truncate">
-                    {contestantName}
-                    {age ? `, ${age}` : ""}
-                    {(weight || height) ? (
-                      <span className="ml-1 text-xs sm:text-sm text-muted-foreground font-normal">
-                        (
-                        {weight ? `${weight} kg` : ""}
-                        {(weight && height) ? " · " : ""}
-                        {height ? `${height} cm` : ""}
-                        )
-                      </span>
-                    ) : null}
-                  </h3>
-                  <div className="text-sm text-contest-blue truncate">
-                    {country}
+            {/* Info overlay at bottom */}
+            <div className="absolute bottom-0 left-0 right-0 bg-white max-h-[50vh] flex flex-col">
+              {/* Winner Badge */}
+              {isWinner && (
+                <div className="bg-blue-100 text-blue-700 px-4 py-2 text-sm font-semibold flex justify-start items-center border-b">
+                  <span>🏆 WINNER   + 5000 PHP</span>
+                </div>
+              )}
+              
+              {/* Header with name and icons */}
+              <div className="p-4 border-b flex-shrink-0">
+                <div className="flex items-center justify-between">
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-lg text-black">
+                      {contestantName}
+                      {age ? `, ${age}` : ""}
+                      {(weight || height) ? (
+                        <span className="ml-1 text-sm text-gray-600 font-normal">
+                          (
+                          {weight ? `${weight} kg` : ""}
+                          {(weight && height) ? " · " : ""}
+                          {height ? `${height} cm` : ""}
+                          )
+                        </span>
+                      ) : null}
+                    </h3>
+                    <div className="text-sm text-blue-600">
+                      {country}
+                    </div>
+                  </div>
+                  
+                  {/* Action buttons */}
+                  <div className="flex items-center gap-4">
+                    <button
+                      type="button"
+                      className={cn(
+                        "inline-flex items-center gap-2 text-sm",
+                        currentPhotoLikes.isLiked ? "text-blue-600" : "text-gray-600"
+                      )}
+                      onClick={handleLike}
+                    >
+                      <ThumbsUp className="w-5 h-5" strokeWidth={1} />
+                      <span>{currentPhotoLikes.count}</span>
+                    </button>
+                    <button
+                      type="button"
+                      className={cn(
+                        "inline-flex items-center gap-2 text-sm",
+                        currentPhotoComments.length > 0 ? "text-blue-600" : "text-gray-600"
+                      )}
+                      onClick={focusCommentInput}
+                    >
+                      <MessageCircle className="w-5 h-5" strokeWidth={1} />
+                      <span>{currentPhotoComments.length}</span>
+                    </button>
+                    <button
+                      type="button"
+                      className="inline-flex items-center gap-2 text-sm text-gray-600"
+                      onClick={handleShare}
+                    >
+                      <Share2 className="w-5 h-5" strokeWidth={1} />
+                    </button>
                   </div>
                 </div>
-                
-                {/* Rating badge */}
-                {isUserVoted && !isEditing && !showThanks && rank > 0 && (
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <div className="bg-contest-blue text-white px-2 py-1.5 rounded-bl-lg text-base sm:text-lg font-bold shadow-sm cursor-pointer hover:bg-contest-blue/90 transition-colors">
-                        {rating.toFixed(1)}
+              </div>
+              
+              {/* Comments section */}
+              <div className="flex-1 overflow-y-auto min-h-0 px-4" ref={commentsListRef}>
+                <div className="space-y-3 py-3">
+                  {currentPhotoComments.map((comment) => (
+                    <div key={comment.id} className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium text-sm">{comment.author}</span>
+                        <span className="text-xs text-gray-500">{comment.timestamp}</span>
                       </div>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-3">
-                      <div className="text-sm">
-                        You rated {userRating.toFixed(0)} — <button 
-                          className="text-contest-blue hover:underline" 
-                          onClick={() => setIsEditing(true)}
-                        >
-                          change
-                        </button>
-                      </div>
-                    </PopoverContent>
-                  </Popover>
-                )}
-              </div>
-            </div>
-
-            {/* Voting section */}
-            <div className="relative flex-1 bg-card">
-              {!isUserVoted && !showThanks && (
-                <div className="h-full bg-gray-100 flex items-center justify-center">
-                  <div className="flex items-center gap-6">
-                    <span className="text-2xl font-medium text-gray-800">Vote</span>
-                    <div className="scale-[2]">
-                      <StarRating 
-                        rating={0}
-                        isVoted={false}
-                        readonly={false}
-                        hideText={true}
-                        onRate={(newRating) => {
-                          handleRate(newRating);
-                        }}
-                      />
+                      <p className="text-sm text-gray-800">{comment.text}</p>
                     </div>
-                  </div>
-                </div>
-              )}
-              
-              {/* Thank you message */}
-              {showThanks && (
-                <div className="h-full bg-gray-200 flex items-center justify-center">
-                  <span className="text-lg font-medium text-gray-800">Thank you! Rated {userRating.toFixed(0)}</span>
-                </div>
-              )}
-              
-              {/* Re-voting overlay */}
-              {isUserVoted && isEditing && !showThanks && (
-                <div className="h-full bg-gray-300 flex items-center justify-center">
-                  <div className="-translate-x-2 flex items-center gap-6">
-                    <span className="text-2xl font-medium text-gray-800 mr-8">Vote</span>
-                    <div className="scale-[2]">
-                      <StarRating 
-                        rating={rating}
-                        isVoted={false}
-                        variant="white"
-                        hideText={true}
-                        onRate={(newRating) => {
-                          setUserRating(newRating);
-                          setIsEditing(false);
-                          handleRate(newRating);
-                        }}
-                      />
-                    </div>
-                  </div>
-                </div>
-              )}
-              
-              {/* Empty space after voting */}
-              {isUserVoted && !isEditing && !showThanks && (
-                <div className="h-full"></div>
-              )}
-            </div>
-            {/* Action buttons */}
-            <div className="border-t border-contest-border px-4 py-3 flex items-center justify-between">
-              <div className="flex items-center gap-6">
-                <button
-                  type="button"
-                  className={cn(
-                    "inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors",
-                    currentPhotoLikes.isLiked && "text-contest-blue"
+                  ))}
+                  {currentPhotoComments.length === 0 && (
+                    <p className="text-gray-500 text-center py-4 text-sm">
+                      Пока нет комментариев. Будьте первым!
+                    </p>
                   )}
-                  onClick={handleLike}
-                  aria-label="Like"
-                >
-                  <ThumbsUp className="w-5 h-5 text-primary" strokeWidth={1} />
-                  <span>{currentPhotoLikes.count}</span>
-                </button>
-                <button
-                  type="button"
-                  className={cn(
-                    "inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors",
-                    currentPhotoComments.length > 0 && "text-contest-blue"
-                  )}
-                  onClick={focusCommentInput}
-                  aria-label="Comments"
-                >
-                  <MessageCircle className="w-5 h-5 text-primary" strokeWidth={1} />
-                  <span>{currentPhotoComments.length}</span>
-                </button>
-                <button
-                  type="button"
-                  className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
-                  onClick={handleShare}
-                  aria-label="Share"
-                >
-                  <Share2 className="w-5 h-5" strokeWidth={1} />
-                </button>
+                </div>
               </div>
-            </div>
-            
-            {/* Comments section */}
-            <div className="flex-1 overflow-y-auto px-4" ref={commentsListRef}>
-              <div className="space-y-3 py-3">
-                {currentPhotoComments.map((comment) => (
-                  <div key={comment.id} className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium text-sm">{comment.author}</span>
-                      <span className="text-xs text-muted-foreground">{comment.timestamp}</span>
-                    </div>
-                    <p className="text-sm">{comment.text}</p>
-                  </div>
-                ))}
-                {currentPhotoComments.length === 0 && (
-                  <p className="text-muted-foreground text-center py-4 text-sm">
-                    Пока нет комментариев. Будьте первым!
-                  </p>
-                )}
-              </div>
-            </div>
 
-            {/* Comment input */}
-            <div className="border-t p-4">
-              <div className="flex gap-2">
-                <Textarea
-                  ref={textareaRef}
-                  value={commentText}
-                  onChange={(e) => setCommentText(e.target.value)}
-                  placeholder="Write a comment for this photo..."
-                  className="flex-1 resize-none min-h-[44px] max-h-32 text-sm"
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' && !e.shiftKey) {
-                      e.preventDefault();
-                      handleCommentSubmit();
-                    }
-                  }}
-                />
-                <Button
-                  onClick={handleCommentSubmit}
-                  disabled={!commentText.trim()}
-                  size="icon"
-                  className="self-end"
-                >
-                  <Send className="h-4 w-4" />
-                </Button>
+              {/* Comment input */}
+              <div className="border-t p-4 flex-shrink-0">
+                <div className="flex gap-2">
+                  <Textarea
+                    ref={textareaRef}
+                    value={commentText}
+                    onChange={(e) => setCommentText(e.target.value)}
+                    placeholder="Write a comment for this photo..."
+                    className="flex-1 resize-none min-h-[44px] max-h-32 text-sm"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        handleCommentSubmit();
+                      }
+                    }}
+                  />
+                  <Button
+                    onClick={handleCommentSubmit}
+                    disabled={!commentText.trim()}
+                    size="icon"
+                    className="self-end"
+                  >
+                    <Send className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
             </div>
-          </div>
           </div>
         </div>
       )}
