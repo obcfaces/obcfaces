@@ -49,9 +49,9 @@ const Likes = () => {
 
   // Mark likes as viewed when user visits this page
   useEffect(() => {
+    console.log('Likes page: Calling markLikesAsViewed');
     markLikesAsViewed();
-    console.log('Likes page: Marked all likes as viewed');
-  }, [markLikesAsViewed]);
+  }, []); // Remove dependency to prevent infinite loop
 
   // Get current user
   useEffect(() => {
