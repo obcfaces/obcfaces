@@ -345,16 +345,14 @@ export function ContestantCard({
         <Card className="bg-card border-contest-border relative overflow-hidden">
           
           
-          {/* Rank in top right corner - show rank always if rank > 0 and user has voted */}
+          {/* Rank and rating in top right corner */}
           {rank > 0 && isVoted && (
-            <div className="absolute top-0 right-0 z-20 flex flex-col items-end">
-              <div className="flex items-center gap-1">
-                <div className="text-xl font-bold text-contest-blue bg-white px-2 py-1.5 rounded-bl-lg shadow-sm">
-                  #{rank}
-                </div>
+            <div className="absolute top-0 right-0 z-20 flex items-center gap-1">
+              <div className="text-xl font-bold text-contest-blue bg-white px-2 py-1.5 rounded-bl-lg shadow-sm">
+                #{rank}
               </div>
-              <div className="text-right pr-2 pt-1">
-                
+              <div className="bg-contest-blue text-white px-2 py-1.5 rounded-bl-lg text-lg font-bold">
+                {averageRating > 0 ? averageRating.toFixed(1) : userRating.toFixed(1)}
               </div>
             </div>
           )}
@@ -378,38 +376,7 @@ export function ContestantCard({
                   </h3>
                   <div className="text-contest-blue text-sm">{country} · {city}</div>
                 </div>
-                <div className="flex items-center gap-2">
-                  {/* Show average rating if participant has votes, otherwise show voting stars */}
-                  {(averageRating > 0 && totalVotes > 0) ? (
-                    <div className="flex items-center gap-2">
-                      <div className="bg-contest-blue text-white px-2 py-1 rounded text-sm font-bold">
-                        {averageRating.toFixed(1)}
-                      </div>
-                      {isVoted && (
-                        <button
-                          onClick={() => setIsEditing(true)}
-                          className="text-contest-blue hover:text-contest-blue/80 transition-colors"
-                          title="Edit your rating"
-                        >
-                          <Pencil className="w-4 h-4" />
-                        </button>
-                      )}
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-2">
-                      <StarRating 
-                        rating={0}
-                        isVoted={false}
-                        readonly={false}
-                        hideText={true}
-                        onRate={(newRating) => {
-                          console.log('StarRating onRate called:', { newRating, name, isVoted, userRating });
-                          handleRate(newRating);
-                        }}
-                      />
-                    </div>
-                  )}
-                </div>
+                {/* Remove rating display from header since it's now in corner */}
               </div>
             )}
             
