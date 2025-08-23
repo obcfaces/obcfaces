@@ -67,7 +67,7 @@ export const Footer = () => {
           </div>
           
           <div className="text-muted-foreground text-sm">
-            Made with ❤️ in the Philippines
+            Made with ❤️
           </div>
         </div>
       </div>
