@@ -39,6 +39,8 @@ interface ContestantCardProps {
   profileId?: string;
   showDislike?: boolean;
   isRealContestant?: boolean; // New prop for real contestants
+  averageRating?: number; // Add average rating prop
+  totalVotes?: number; // Add total votes prop
 }
 
 export function ContestantCard({
@@ -60,7 +62,9 @@ export function ContestantCard({
   onRate,
   profileId,
   showDislike = false,
-  isRealContestant = false
+  isRealContestant = false,
+  averageRating = 0,
+  totalVotes = 0
 }: ContestantCardProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalStartIndex, setModalStartIndex] = useState(0);
@@ -381,16 +385,21 @@ export function ContestantCard({
                   <div className="text-contest-blue text-sm">{country} · {city}</div>
                 </div>
                 <div className="flex items-center gap-2">
-                  {isVoted ? (
+                  {/* Show average rating if participant has votes, otherwise show voting stars */}
+                  {(averageRating > 0 && totalVotes > 0) ? (
                     <div className="flex items-center gap-2">
-                      <MiniStars rating={userRating} />
-                      <button
-                        onClick={() => setIsEditing(true)}
-                        className="text-contest-blue hover:text-contest-blue/80 transition-colors"
-                        title="Edit your rating"
-                      >
-                        <Pencil className="w-4 h-4" />
-                      </button>
+                      <div className="bg-contest-blue text-white px-2 py-1 rounded text-sm font-bold">
+                        {averageRating.toFixed(1)}
+                      </div>
+                      {isVoted && (
+                        <button
+                          onClick={() => setIsEditing(true)}
+                          className="text-contest-blue hover:text-contest-blue/80 transition-colors"
+                          title="Edit your rating"
+                        >
+                          <Pencil className="w-4 h-4" />
+                        </button>
+                      )}
                     </div>
                   ) : (
                     <div className="flex items-center gap-2">
