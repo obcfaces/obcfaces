@@ -669,6 +669,42 @@ export type Database = {
         Args: { user_id_param: string }
         Returns: number
       }
+      get_users_i_liked: {
+        Args: { target_user_id: string }
+        Returns: {
+          age: number
+          avatar_url: string
+          city: string
+          content_id: string
+          content_type: string
+          country: string
+          created_at: string
+          display_name: string
+          like_id: string
+          liked_user_id: string
+          participant_type: string
+          photo_1_url: string
+          photo_2_url: string
+        }[]
+      }
+      get_users_who_liked_me: {
+        Args: { target_user_id: string }
+        Returns: {
+          age: number
+          avatar_url: string
+          city: string
+          content_id: string
+          content_type: string
+          country: string
+          created_at: string
+          display_name: string
+          like_id: string
+          liker_user_id: string
+          participant_type: string
+          photo_1_url: string
+          photo_2_url: string
+        }[]
+      }
       get_week_monday: {
         Args: { input_date?: string }
         Returns: string
