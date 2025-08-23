@@ -399,7 +399,10 @@ export function ContestantCard({
                         isVoted={false}
                         readonly={false}
                         hideText={true}
-                        onRate={handleRate}
+                        onRate={(newRating) => {
+                          console.log('StarRating onRate called:', { newRating, name, isVoted, userRating });
+                          handleRate(newRating);
+                        }}
                       />
                     </div>
                   )}
