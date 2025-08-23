@@ -349,82 +349,97 @@ export function ProfilePhotoModal({
     <>
       {isOpen && (
         <div className="fixed inset-0 z-50 bg-black/90 overflow-hidden">
-          <div className="absolute top-4 right-4 z-60">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={onClose}
-              className="text-white hover:bg-white/20 rounded-full"
-            >
-              <X className="h-6 w-6" />
-            </Button>
-          </div>
+          {/* Close button */}
+          <button
+            onClick={onClose}
+            className="absolute right-4 top-4 z-[60] w-10 h-10 md:w-12 md:h-12 rounded-full bg-black/50 hover:bg-black/70 flex items-center justify-center text-white focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+            aria-label="Close"
+          >
+            <X className="h-5 w-5 md:h-6 md:w-6 text-white" />
+          </button>
 
-          <div className="flex h-full">
-            {/* Left side - Photo */}
-            <div className="flex-1 flex items-center justify-center relative">
+          {/* Main content */}
+          <div className="h-full w-full flex flex-col max-w-full">
+            {/* Photo section */}
+            <div className="relative flex items-center justify-center transition-all duration-300 pt-2 md:pt-4 w-full h-[60dvh] overflow-hidden">
+
               {photos.length > 1 && (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={prevPhoto}
-                  className="absolute left-4 top-1/2 transform -translate-y-1/2 text-white hover:bg-white/20 rounded-full z-40"
-                >
-                  <ChevronLeft className="h-8 w-8" />
-                </Button>
+                <>
+                  <button
+                    onClick={prevPhoto}
+                    className="absolute left-4 top-1/2 -translate-y-1/2 z-50 text-white hover:text-white/90 transition-colors w-12 h-12 rounded-full bg-black/50 hover:bg-black/70 backdrop-blur flex items-center justify-center"
+                    aria-label="Previous photo"
+                  >
+                    <ChevronLeft className="w-7 h-7" />
+                  </button>
+                  <button
+                    onClick={nextPhoto}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 z-50 text-white hover:text-white/90 transition-colors w-12 h-12 rounded-full bg-black/50 hover:bg-black/70 backdrop-blur flex items-center justify-center"
+                    aria-label="Next photo"
+                  >
+                    <ChevronRight className="w-7 h-7" />
+                  </button>
+                </>
               )}
 
-              <div 
-                className="max-w-full max-h-full flex items-center justify-center"
+              <img
+                src={photos[activeIndex]}
+                alt={`${profileName} photo ${activeIndex + 1}`}
+                className="max-w-full max-h-full object-contain touch-manipulation select-none"
+                style={{ 
+                  width: 'auto', 
+                  height: 'auto',
+                  maxWidth: '100%',
+                  maxHeight: '100%'
+                }}
                 onTouchStart={onTouchStart}
                 onTouchMove={onTouchMove}
                 onTouchEnd={onTouchEnd}
-              >
-                <img
-                  src={photos[activeIndex]}
-                  alt={`Фото ${activeIndex + 1} — ${profileName}`}
-                  className="max-w-full max-h-full object-contain"
-                />
-              </div>
+                draggable={false}
+              />
 
+              {/* Thumbnail navigation */}
               {photos.length > 1 && (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={nextPhoto}
-                  className="absolute right-4 top-1/2 transform -translate-y-1/2 text-white hover:bg-white/20 rounded-full z-40"
-                >
-                  <ChevronRight className="h-8 w-8" />
-                </Button>
-              )}
-
-              {/* Photo indicators */}
-              {photos.length > 1 && (
-                <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
-                  {photos.map((_, idx) => (
-                    <div
-                      key={idx}
+                <div className="absolute bottom-4 right-4 flex items-center gap-2">
+                  {photos.map((src, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setActiveIndex(index)}
+                      aria-label={`Go to photo ${index + 1}`}
                       className={cn(
-                        "w-2 h-2 rounded-full",
-                        idx === activeIndex ? "bg-white" : "bg-white/50"
+                        "relative w-8 h-8 sm:w-10 sm:h-10 rounded-full overflow-hidden ring-1 ring-white/40 border border-white/20 transition-all",
+                        index === activeIndex ? "ring-2 ring-white opacity-100" : "opacity-70 hover:opacity-100"
                       )}
-                    />
+                    >
+                      <img
+                        src={src}
+                        alt={`Thumbnail ${index + 1}`}
+                        className="w-full h-full object-cover"
+                        loading="lazy"
+                      />
+                    </button>
                   ))}
                 </div>
               )}
             </div>
 
-            {/* Right side - Comments and interactions */}
-            <div className="w-80 bg-background flex flex-col">
-              {/* User info */}
-              <div className="p-4 border-b border-border">
-                <h3 className="font-semibold text-lg">{profileName}</h3>
-                <p className="text-sm text-muted-foreground">
-                  Фото {activeIndex + 1} из {photos.length}
-                </p>
+            {/* Profile info section */}
+            <div className="bg-background flex flex-col flex-shrink-0 w-full h-[40dvh] min-h-0">
+              {/* Header with name */}
+              <div className="p-4 border-b">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <h3 className="font-semibold text-lg truncate">
+                      {profileName}
+                    </h3>
+                    <div className="text-sm text-muted-foreground">
+                      Фото {activeIndex + 1} из {photos.length}
+                    </div>
+                  </div>
+                </div>
               </div>
 
-              {/* Comments */}
+              {/* Comments section */}
               <div className="flex-1 overflow-y-auto p-4" ref={commentsListRef}>
                 <div className="space-y-3">
                   {currentPhotoComments.map((comment) => (
@@ -437,56 +452,56 @@ export function ProfilePhotoModal({
                     </div>
                   ))}
                   {currentPhotoComments.length === 0 && (
-                    <p className="text-muted-foreground text-center">
+                    <p className="text-muted-foreground text-center py-4">
                       Пока нет комментариев. Будьте первым!
                     </p>
                   )}
                 </div>
               </div>
-
+              
               {/* Action buttons */}
-              <div className="p-4 border-t border-border space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={handleLike}
-                      className={cn(
-                        "flex items-center gap-2",
-                        currentPhotoLikes.isLiked && "text-red-500"
-                      )}
-                    >
-                      <ThumbsUp 
-                        className={cn(
-                          "h-5 w-5",
-                          currentPhotoLikes.isLiked && "fill-current"
-                        )}
-                      />
-                      {currentPhotoLikes.count}
-                    </Button>
-                    
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={focusCommentInput}
-                      className="flex items-center gap-2"
-                    >
-                      <MessageCircle className="h-5 w-5" />
-                      {currentPhotoComments.length}
-                    </Button>
-                  </div>
+              <div className="border-t px-4 py-2 flex items-center justify-evenly gap-4">
+                <button
+                  type="button"
+                  className={cn(
+                    "inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors",
+                    currentPhotoLikes.isLiked && "text-red-500"
+                  )}
+                  onClick={handleLike}
+                  aria-label="Like"
+                >
+                  <ThumbsUp className={cn(
+                    "w-4 h-4",
+                    currentPhotoLikes.isLiked && "fill-current"
+                  )} strokeWidth={1} />
+                  <span className="hidden sm:inline">Like</span>
+                  {currentPhotoLikes.count > 0 && <span>{currentPhotoLikes.count}</span>}
+                </button>
+                
+                <button
+                  type="button"
+                  className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                  onClick={focusCommentInput}
+                  aria-label="Comments"
+                >
+                  <MessageCircle className="w-4 h-4" strokeWidth={1} />
+                  <span className="hidden sm:inline">Comment</span>
+                  <span>{currentPhotoComments.length}</span>
+                </button>
+                
+                <button
+                  type="button"
+                  className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                  onClick={handleShare}
+                  aria-label="Share"
+                >
+                  <Share2 className="w-4 h-4" strokeWidth={1} />
+                  <span className="hidden sm:inline">Share</span>
+                </button>
+              </div>
 
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={handleShare}
-                  >
-                    <Share2 className="h-5 w-5" />
-                  </Button>
-                </div>
-
-                {/* Comment input */}
+              {/* Comment input */}
+              <div className="border-t p-4">
                 <div className="flex gap-2">
                   <Textarea
                     ref={textareaRef}
