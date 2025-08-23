@@ -62,66 +62,95 @@ export function ProfilePhotoModal({
     if (!isOpen) return;
     
     const loadPhotoData = async () => {
-      const contentId = `profile-photo-${profileId}-${activeIndex}`;
+      // Instead of using profile-photo-specific content_id, 
+      // we'll load stats from the user's posts that contain this photo
       
-      // Load comments for current photo
-      const { data: comments } = await supabase
-        .from('photo_comments')
-        .select('*')
-        .eq('content_type', 'profile')
-        .eq('content_id', contentId)
+      // Load all posts from this user to find which post contains this photo
+      const { data: userPosts } = await supabase
+        .from('posts')
+        .select('id, media_urls')
+        .eq('user_id', profileId)
         .order('created_at', { ascending: false });
 
-      if (comments) {
-        // Get user profiles separately
-        const userIds = [...new Set(comments.map(c => c.user_id))];
-        const { data: profiles } = await supabase
-          .from('profiles')
-          .select('id, display_name')
-          .in('id', userIds);
-
-        const formattedComments: Comment[] = comments.map(comment => {
-          const profile = profiles?.find(p => p.id === comment.user_id);
-          return {
-            id: comment.id,
-            author: profile?.display_name || 'User',
-            text: comment.comment_text,
-            timestamp: new Date(comment.created_at).toLocaleString()
-          };
-        });
-        
-        setPhotoComments(prev => ({
-          ...prev,
-          [activeIndex]: formattedComments
-        }));
+      // Find the post that contains the current photo
+      let matchingPostId = null;
+      if (userPosts) {
+        for (const post of userPosts) {
+          if (post.media_urls && post.media_urls.includes(photos[activeIndex])) {
+            matchingPostId = post.id;
+            break;
+          }
+        }
       }
 
-      // Load likes for current photo
-      const { data: totalLikes } = await supabase
-        .from("likes")
-        .select("user_id")
-        .eq("content_type", "profile")
-        .eq("content_id", contentId);
-      
-      const { data: userLike } = await supabase
-        .from("likes")
-        .select("id")
-        .eq("user_id", user?.id || '')
-        .eq("content_type", "profile")
-        .eq("content_id", contentId)
-        .maybeSingle();
-      
-      setPhotoLikes(prev => ({
-        ...prev,
-        [activeIndex]: {
-          count: totalLikes?.length || 0,
-          isLiked: !!userLike
+      if (matchingPostId) {
+        // Load comments for the post
+        const { data: comments } = await supabase
+          .from('photo_comments')
+          .select('*')
+          .eq('content_type', 'post')
+          .eq('content_id', matchingPostId)
+          .order('created_at', { ascending: false });
+
+        if (comments) {
+          // Get user profiles separately
+          const userIds = [...new Set(comments.map(c => c.user_id))];
+          const { data: profiles } = await supabase
+            .from('profiles')
+            .select('id, display_name')
+            .in('id', userIds);
+
+          const formattedComments: Comment[] = comments.map(comment => {
+            const profile = profiles?.find(p => p.id === comment.user_id);
+            return {
+              id: comment.id,
+              author: profile?.display_name || 'User',
+              text: comment.comment_text,
+              timestamp: new Date(comment.created_at).toLocaleString()
+            };
+          });
+          
+          setPhotoComments(prev => ({
+            ...prev,
+            [activeIndex]: formattedComments
+          }));
         }
-      }));
+
+        // Load likes for the post
+        const { data: totalLikes } = await supabase
+          .from("post_likes")
+          .select("user_id")
+          .eq("post_id", matchingPostId);
+        
+        const { data: userLike } = await supabase
+          .from("post_likes")
+          .select("id")
+          .eq("user_id", user?.id || '')
+          .eq("post_id", matchingPostId)
+          .maybeSingle();
+        
+        setPhotoLikes(prev => ({
+          ...prev,
+          [activeIndex]: {
+            count: totalLikes?.length || 0,
+            isLiked: !!userLike
+          }
+        }));
+      } else {
+        // If no matching post found, show empty state
+        setPhotoComments(prev => ({
+          ...prev,
+          [activeIndex]: []
+        }));
+        setPhotoLikes(prev => ({
+          ...prev,
+          [activeIndex]: { count: 0, isLiked: false }
+        }));
+      }
     };
 
     loadPhotoData();
-  }, [isOpen, activeIndex, profileId, user]);
+  }, [isOpen, activeIndex, profileId, user, photos]);
 
   // Reset activeIndex when currentIndex changes
   useEffect(() => {
@@ -142,26 +171,41 @@ export function ProfilePhotoModal({
       return;
     }
     
-    const contentId = `profile-photo-${profileId}-${activeIndex}`;
+    // Find the post that contains this photo
+    const { data: userPosts } = await supabase
+      .from('posts')
+      .select('id, media_urls')
+      .eq('user_id', profileId);
+
+    let matchingPostId = null;
+    if (userPosts) {
+      for (const post of userPosts) {
+        if (post.media_urls && post.media_urls.includes(photos[activeIndex])) {
+          matchingPostId = post.id;
+          break;
+        }
+      }
+    }
+
+    if (!matchingPostId) return;
+    
     const wasLiked = photoLikes[activeIndex]?.isLiked || false;
     
     try {
       if (wasLiked) {
         // Unlike
         await supabase
-          .from("likes")
+          .from("post_likes")
           .delete()
           .eq("user_id", user.id)
-          .eq("content_type", "profile")
-          .eq("content_id", contentId);
+          .eq("post_id", matchingPostId);
       } else {
         // Like
         await supabase
-          .from("likes")
+          .from("post_likes")
           .insert({
             user_id: user.id,
-            content_type: "profile",
-            content_id: contentId,
+            post_id: matchingPostId,
           });
       }
       
@@ -185,7 +229,30 @@ export function ProfilePhotoModal({
     }
     
     if (commentText.trim()) {
-      const contentId = `profile-photo-${profileId}-${activeIndex}`;
+      // Find the post that contains this photo
+      const { data: userPosts } = await supabase
+        .from('posts')
+        .select('id, media_urls')
+        .eq('user_id', profileId);
+
+      let matchingPostId = null;
+      if (userPosts) {
+        for (const post of userPosts) {
+          if (post.media_urls && post.media_urls.includes(photos[activeIndex])) {
+            matchingPostId = post.id;
+            break;
+          }
+        }
+      }
+
+      if (!matchingPostId) {
+        toast({
+          title: "Ошибка",
+          description: "Не удалось найти пост с этим фото",
+          duration: 3000,
+        });
+        return;
+      }
       
       try {
         // Save comment to database
@@ -193,8 +260,8 @@ export function ProfilePhotoModal({
           .from('photo_comments')
           .insert({
             user_id: user.id,
-            content_type: 'profile',
-            content_id: contentId,
+            content_type: 'post',
+            content_id: matchingPostId,
             comment_text: commentText.trim()
           });
 
@@ -233,8 +300,8 @@ export function ProfilePhotoModal({
             const { data: freshComments } = await supabase
               .from('photo_comments')
               .select('*')
-              .eq('content_type', 'profile')
-              .eq('content_id', contentId)
+              .eq('content_type', 'post')
+              .eq('content_id', matchingPostId)
               .order('created_at', { ascending: false });
             
             if (freshComments) {
@@ -425,16 +492,54 @@ export function ProfilePhotoModal({
 
             {/* Profile info section */}
             <div className="bg-background flex flex-col flex-shrink-0 w-full h-[40dvh] min-h-0">
-              {/* Header with name */}
+              {/* Header with name and action icons */}
               <div className="p-4 border-b">
                 <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0">
+                  <div className="min-w-0 flex-1">
                     <h3 className="font-semibold text-lg truncate">
                       {profileName}
                     </h3>
                     <div className="text-sm text-muted-foreground">
                       Фото {activeIndex + 1} из {photos.length}
                     </div>
+                  </div>
+                  
+                  {/* Action icons in header like in contests */}
+                  <div className="flex items-center gap-4">
+                    <button
+                      type="button"
+                      className={cn(
+                        "inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors",
+                        currentPhotoLikes.isLiked && "text-red-500"
+                      )}
+                      onClick={handleLike}
+                      aria-label="Like"
+                    >
+                      <ThumbsUp className={cn(
+                        "w-4 h-4",
+                        currentPhotoLikes.isLiked && "fill-current"
+                      )} strokeWidth={1} />
+                      {currentPhotoLikes.count > 0 && <span>{currentPhotoLikes.count}</span>}
+                    </button>
+                    
+                    <button
+                      type="button"
+                      className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                      onClick={focusCommentInput}
+                      aria-label="Comments"
+                    >
+                      <MessageCircle className="w-4 h-4" strokeWidth={1} />
+                      {currentPhotoComments.length > 0 && <span>{currentPhotoComments.length}</span>}
+                    </button>
+                    
+                    <button
+                      type="button"
+                      className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                      onClick={handleShare}
+                      aria-label="Share"
+                    >
+                      <Share2 className="w-4 h-4" strokeWidth={1} />
+                    </button>
                   </div>
                 </div>
               </div>
@@ -459,47 +564,6 @@ export function ProfilePhotoModal({
                     </div>
                   )}
                 </div>
-              </div>
-              
-              {/* Action buttons - под фото как в конкурсах */}
-              <div className="border-t px-4 py-2 flex items-center justify-evenly gap-4">
-                <button
-                  type="button"
-                  className={cn(
-                    "inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors",
-                    currentPhotoLikes.isLiked && "text-red-500"
-                  )}
-                  onClick={handleLike}
-                  aria-label="Like"
-                >
-                  <ThumbsUp className={cn(
-                    "w-4 h-4",
-                    currentPhotoLikes.isLiked && "fill-current"
-                  )} strokeWidth={1} />
-                  <span className="hidden sm:inline">Like</span>
-                  {currentPhotoLikes.count > 0 && <span>{currentPhotoLikes.count}</span>}
-                </button>
-                
-                <button
-                  type="button"
-                  className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
-                  onClick={focusCommentInput}
-                  aria-label="Comments"
-                >
-                  <MessageCircle className="w-4 h-4" strokeWidth={1} />
-                  <span className="hidden sm:inline">Comment</span>
-                  <span>{currentPhotoComments.length}</span>
-                </button>
-                
-                <button
-                  type="button"
-                  className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
-                  onClick={handleShare}
-                  aria-label="Share"
-                >
-                  <Share2 className="w-4 h-4" strokeWidth={1} />
-                  <span className="hidden sm:inline">Share</span>
-                </button>
               </div>
 
               {/* Comment input */}
