@@ -543,9 +543,9 @@ export function PhotoModal({
                     >
                        <ThumbsUp className={cn(
                          "w-5 h-5",
-                         photoLikes[activeIndex]?.isLiked && "fill-blue-500 text-blue-500"
+                         photoLikes[activeIndex]?.isLiked ? "text-blue-500 fill-blue-500" : "text-gray-500"
                        )} strokeWidth={1} />
-                      <span>{currentPhotoLikes.count}</span>
+                      <span className={cn(photoLikes[activeIndex]?.isLiked ? "text-blue-500" : "text-gray-500")}>{currentPhotoLikes.count}</span>
                     </button>
                     <button
                       type="button"
