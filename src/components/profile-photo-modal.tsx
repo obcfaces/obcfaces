@@ -428,7 +428,7 @@ export function ProfilePhotoModal({
           {/* Main content */}
           <div className="h-full w-full flex flex-col max-w-full">
             {/* Photo section */}
-            <div className="relative flex items-center justify-center transition-all duration-300 pt-2 md:pt-4 w-full h-[60dvh] overflow-hidden">
+            <div className="relative flex items-center justify-center transition-all duration-300 pt-2 md:pt-4 w-full h-[70dvh] overflow-hidden">
 
               {photos.length > 1 && (
                 <>
@@ -491,7 +491,7 @@ export function ProfilePhotoModal({
             </div>
 
             {/* Profile info section */}
-            <div className="bg-background flex flex-col flex-shrink-0 w-full h-[40dvh] min-h-0">
+            <div className="bg-background flex flex-col flex-shrink-0 w-full h-[30dvh] min-h-0">
               {/* Header with name and action icons */}
               <div className="p-4 border-b">
                 <div className="flex items-start justify-between gap-3">
@@ -565,31 +565,73 @@ export function ProfilePhotoModal({
                   )}
                 </div>
               </div>
-
-              {/* Comment input */}
-              <div className="border-t p-4">
-                <div className="flex gap-2">
-                  <Textarea
-                    ref={textareaRef}
-                    value={commentText}
-                    onChange={(e) => setCommentText(e.target.value)}
-                    placeholder="Добавить комментарий..."
-                    className="flex-1 resize-none min-h-[44px] max-h-32"
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' && !e.shiftKey) {
-                        e.preventDefault();
-                        handleCommentSubmit();
-                      }
-                    }}
-                  />
-                  <Button
-                    onClick={handleCommentSubmit}
-                    disabled={!commentText.trim()}
-                    size="icon"
-                    className="self-end"
+              
+              {/* Action buttons and comment input */}
+              <div className="border-t">
+                <div className="px-4 py-3 flex items-center justify-between">
+                  <div className="flex items-center gap-6">
+                    <button
+                      type="button"
+                      className={cn(
+                        "inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors",
+                        currentPhotoLikes.isLiked && "text-red-500"
+                      )}
+                      onClick={handleLike}
+                      aria-label="Like"
+                    >
+                      <ThumbsUp className={cn(
+                        "w-5 h-5",
+                        currentPhotoLikes.isLiked && "fill-current"
+                      )} strokeWidth={1} />
+                      <span>{currentPhotoLikes.count}</span>
+                    </button>
+                    
+                    <button
+                      type="button"
+                      className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                      onClick={focusCommentInput}
+                      aria-label="Comments"
+                    >
+                      <MessageCircle className="w-5 h-5" strokeWidth={1} />
+                      <span>{currentPhotoComments.length}</span>
+                    </button>
+                  </div>
+                  
+                  <button
+                    type="button"
+                    className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                    onClick={handleShare}
+                    aria-label="Share"
                   >
-                    <Send className="h-4 w-4" />
-                  </Button>
+                    <Share2 className="w-5 h-5" strokeWidth={1} />
+                  </button>
+                </div>
+
+                {/* Comment input */}
+                <div className="border-t p-4">
+                  <div className="flex gap-2">
+                    <Textarea
+                      ref={textareaRef}
+                      value={commentText}
+                      onChange={(e) => setCommentText(e.target.value)}
+                      placeholder="Write a comment for this photo..."
+                      className="flex-1 resize-none min-h-[44px] max-h-32 text-sm"
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' && !e.shiftKey) {
+                          e.preventDefault();
+                          handleCommentSubmit();
+                        }
+                      }}
+                    />
+                    <Button
+                      onClick={handleCommentSubmit}
+                      disabled={!commentText.trim()}
+                      size="icon"
+                      className="self-end"
+                    >
+                      <Send className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
               </div>
             </div>
