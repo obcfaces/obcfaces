@@ -10,6 +10,7 @@ import { PhotoModal } from "@/components/photo-modal";
 import { Link } from "react-router-dom";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useCardData } from "@/hooks/useCardData";
+import { useParticipantData } from "@/hooks/useParticipantData";
 import LoginModalContent from "@/components/login-modal-content";
 
 // Import contest images for mock display
@@ -105,6 +106,10 @@ const LikedItem = ({
 
   // Use unified card data hook
   const { data: cardData, loading: cardDataLoading } = useCardData(authorName, user?.id);
+  
+  // Get real participant data from database
+  const { getParticipantByName } = useParticipantData();
+  const realParticipantData = getParticipantByName(authorName);
 
   // Get current user
   useEffect(() => {
@@ -176,17 +181,18 @@ const LikedItem = ({
     openModal(0);
   };
 
-  // Use candidate data if available, otherwise fallback to mock images
-  const candidateAge = candidateData?.age || 25;
-  const candidateWeight = candidateData?.weight || 52;
-  const candidateHeight = candidateData?.height || 168;
-  const candidateCountry = candidateData?.country || "Philippines";
-  const candidateCity = candidateData?.city || "Unknown";
-  const candidateFaceImage = candidateData?.faceImage || imageSrc;
-  const candidateFullImage = candidateData?.fullBodyImage || imageSrc;
+  // Use real participant data from database if available, otherwise fallback
+  const candidateAge = realParticipantData?.age || candidateData?.age || 25;
+  const candidateWeight = realParticipantData?.weight_kg || candidateData?.weight || 52;
+  const candidateHeight = realParticipantData?.height_cm || candidateData?.height || 168;
+  const candidateCountry = realParticipantData?.country || candidateData?.country || "Philippines";
+  const candidateCity = realParticipantData?.city || candidateData?.city || "Unknown";
+  const candidateState = realParticipantData?.state || candidateData?.state || "";
+  const candidateFaceImage = realParticipantData?.photo_1_url || candidateData?.faceImage || imageSrc;
+  const candidateFullImage = realParticipantData?.photo_2_url || candidateData?.fullBodyImage || imageSrc;
   const candidateAdditionalPhotos = candidateData?.additionalPhotos || [];
   
-  // All cards use the exact same contest card structure
+  // Fallback mock images if no real data available
   const images = [contestant1Face, contestant2Face, contestant3Face];
   const fullImages = [contestant1Full, contestant2Full, contestant3Full];
   const randomIndex = Math.floor(Math.random() * images.length);
@@ -237,10 +243,10 @@ const LikedItem = ({
                       authorName
                     )}, {candidateAge}
                   </h3>
-                  <div className="text-xs sm:text-sm text-muted-foreground font-normal">{candidateWeight} kg · {candidateHeight} cm</div>
-                  <div className="text-sm sm:text-base text-contest-blue truncate">
-                    {candidateCountry}
-                  </div>
+                   <div className="text-xs sm:text-sm text-muted-foreground font-normal">{candidateWeight} kg · {candidateHeight} cm</div>
+                   <div className="text-sm sm:text-base text-contest-blue truncate">
+                     {candidateCountry}{candidateCity !== "Unknown" && candidateCity !== candidateCountry ? ` · ${candidateCity}` : ''}
+                   </div>
                 </div>
                 
                 <div className="text-right flex-shrink-0">
@@ -331,7 +337,7 @@ const LikedItem = ({
               authorName
             )}, {candidateAge} <span className="text-sm text-muted-foreground font-normal">({candidateWeight} kg · {candidateHeight} cm)</span>
           </h3>
-          <div className="text-contest-blue text-sm">{candidateCountry}</div>
+          <div className="text-contest-blue text-sm">{candidateCountry}{candidateCity !== "Unknown" && candidateCity !== candidateCountry ? ` · ${candidateCity}` : ''}</div>
         </div>
         
         {/* Header - пустой как в проголосованных карточках конкурса */}

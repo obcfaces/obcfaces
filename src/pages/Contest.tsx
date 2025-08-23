@@ -1,9 +1,7 @@
 import { useMemo, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import PostCard from "@/components/profile/PostCard";
-import contestant1 from "@/assets/contestant-1.jpg";
-import contestant2 from "@/assets/contestant-2.jpg";
-import contestant3 from "@/assets/contestant-3.jpg";
+import { useParticipantData } from "@/hooks/useParticipantData";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { AlignJustify, Grid2X2 } from "lucide-react";
@@ -18,36 +16,13 @@ interface Entry {
   authorName: string;
   imageSrc: string;
   weekKey: string;
-  createdAt: string; // ISO date
+  createdAt: string;
+  participantData?: any;
 }
 
 const weeks: Week[] = [
-  { key: "2025-07-24_2025-07-30", label: "July 24–30, 2025" },
-  { key: "2025-07-17_2025-07-23", label: "July 17–23, 2025" },
-];
-
-const allEntries: Entry[] = [
-  {
-    id: "e1",
-    authorName: "Anna P.",
-    imageSrc: contestant1,
-    weekKey: "2025-07-24_2025-07-30",
-    createdAt: "2025-07-25T10:00:00Z",
-  },
-  {
-    id: "e2",
-    authorName: "Bella R.",
-    imageSrc: contestant2,
-    weekKey: "2025-07-24_2025-07-30",
-    createdAt: "2025-07-27T12:30:00Z",
-  },
-  {
-    id: "e3",
-    authorName: "Clara M.",
-    imageSrc: contestant3,
-    weekKey: "2025-07-17_2025-07-23",
-    createdAt: "2025-07-20T14:15:00Z",
-  },
+  { key: "current", label: "Current Week" },
+  { key: "previous", label: "Previous Week" },
 ];
 
 function formatTimeForCard(iso: string, weekLabel: string) {
@@ -59,7 +34,21 @@ const Contest = () => {
   const [viewMode, setViewMode] = useState<'compact' | 'full'>('compact');
   const [selectedWeek, setSelectedWeek] = useState<string>(weeks[0].key);
   const week = useMemo(() => weeks.find(w => w.key === selectedWeek)!, [selectedWeek]);
-  const entries = useMemo(() => allEntries.filter(e => e.weekKey === selectedWeek), [selectedWeek]);
+  
+  // Get real participant data from database
+  const { data: participants, loading } = useParticipantData();
+  
+  // Convert participant data to entry format for display
+  const entries = useMemo(() => {
+    return participants.map(p => ({
+      id: p.participant_id,
+      authorName: `${p.first_name} ${p.last_name}`,
+      imageSrc: p.photo_1_url || "/placeholder.svg",
+      weekKey: selectedWeek, // All current participants are for current week
+      createdAt: new Date().toISOString(),
+      participantData: p
+    }));
+  }, [participants, selectedWeek]);
 
   return (
     <>
@@ -151,10 +140,11 @@ const Contest = () => {
                   <PostCard
                     authorName={e.authorName}
                     time={formatTimeForCard(e.createdAt, week.label)}
-                    content={`Contest entry for ${week.label}`}
+                    content={`${e.participantData?.age} years old · ${e.participantData?.weight_kg} kg · ${e.participantData?.height_cm} cm · ${e.participantData?.country}`}
                     imageSrc={e.imageSrc}
                     likes={0}
                     comments={0}
+                    authorProfileId={e.participantData?.user_id}
                   />
                 </article>
               ))}
