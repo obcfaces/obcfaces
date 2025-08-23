@@ -229,7 +229,27 @@ const Admin = () => {
       return;
     }
 
-    setWeeklyParticipants(data || []);
+    // Transform the data to match expected interface
+    const transformedData = (data || []).map((participant: any) => ({
+      id: participant.participant_id,
+      user_id: participant.user_id,
+      first_name: participant.first_name,
+      last_name: participant.last_name,
+      age: participant.age,
+      city: participant.city,
+      country: participant.country,
+      photo1_url: participant.photo_1_url,
+      photo2_url: participant.photo_2_url,
+      height_cm: participant.height_cm,
+      weight_kg: participant.weight_kg,
+      final_rank: participant.final_rank,
+      contest_status: participant.contest_status,
+      week_start_date: participant.contest_start_date,
+      week_end_date: participant.contest_end_date,
+      application_data: participant.application_data
+    }));
+
+    setWeeklyParticipants(transformedData);
   };
 
   // Load participants when selected contest changes
