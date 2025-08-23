@@ -615,6 +615,10 @@ const Admin = () => {
                 <FileText className="w-4 h-4" />
                 Contest Applications
               </TabsTrigger>
+              <TabsTrigger value="registrations" className="flex items-center gap-2">
+                <UserCog className="w-4 h-4" />
+                Регистрации
+              </TabsTrigger>
               <TabsTrigger value="moderation" className="flex items-center gap-2">
                 <Eye className="w-4 h-4" />
                 Profile Moderation
@@ -883,6 +887,100 @@ const Admin = () => {
                     </Card>
                   );
                 })}
+              </div>
+            </TabsContent>
+
+            <TabsContent value="registrations" className="space-y-4">
+              <div className="mb-6">
+                <h2 className="text-xl font-semibold">Все регистрации пользователей</h2>
+                <p className="text-muted-foreground">Полный список всех зарегистрированных пользователей</p>
+              </div>
+              
+              <div className="grid gap-4">
+                {profiles.map((profile) => (
+                  <Card key={profile.id}>
+                    <CardHeader>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                          <Avatar className="h-16 w-16">
+                            <AvatarImage src={profile.avatar_url || ''} />
+                            <AvatarFallback>
+                              {profile.display_name?.charAt(0) || profile.first_name?.charAt(0) || 'U'}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <h3 className="text-lg font-semibold">
+                              {profile.display_name || `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 'No Name'}
+                            </h3>
+                            <p className="text-sm text-muted-foreground">
+                              {profile.age && `${profile.age} лет`} {profile.gender && `• ${profile.gender}`}
+                            </p>
+                            <p className="text-sm text-muted-foreground">
+                              {profile.city && profile.country && `${profile.city}, ${profile.country}`}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              Дата регистрации: {new Date(profile.created_at).toLocaleDateString('ru-RU')}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex flex-col gap-2">
+                          {getStatusBadge(profile.is_approved)}
+                          {getUserRoles(profile.id).map(role => (
+                            <Badge key={role} variant="outline" className="text-xs">
+                              {role}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      {profile.bio && (
+                        <div className="mb-4">
+                          <h4 className="text-sm font-medium mb-2">О себе:</h4>
+                          <p className="text-sm text-muted-foreground">{profile.bio}</p>
+                        </div>
+                      )}
+                      {profile.moderation_notes && (
+                        <div className="mb-4">
+                          <h4 className="text-sm font-medium mb-2">Заметки модерации:</h4>
+                          <p className="text-sm text-muted-foreground bg-muted/50 p-2 rounded">
+                            {profile.moderation_notes}
+                          </p>
+                        </div>
+                      )}
+                      <div className="flex gap-2">
+                        <Button 
+                          size="sm"
+                          variant="outline"
+                          onClick={() => window.open(`/profile/${profile.id}`, '_blank')}
+                        >
+                          <Eye className="w-4 h-4 mr-2" />
+                          Просмотр профиля
+                        </Button>
+                        {profile.is_approved === null && (
+                          <>
+                            <Button 
+                              size="sm" 
+                              onClick={() => moderateProfile(profile.id, true)}
+                              className="bg-green-500 hover:bg-green-600"
+                            >
+                              <Check className="w-4 h-4 mr-2" />
+                              Одобрить
+                            </Button>
+                            <Button 
+                              size="sm" 
+                              variant="destructive" 
+                              onClick={() => moderateProfile(profile.id, false)}
+                            >
+                              <X className="w-4 h-4 mr-2" />
+                              Отклонить
+                            </Button>
+                          </>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
               </div>
             </TabsContent>
 
