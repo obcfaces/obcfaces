@@ -5,6 +5,20 @@ export const useUnreadLikes = () => {
   const [unreadLikesCount, setUnreadLikesCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
 
+  const getLastViewedKey = (userId: string) => `likes_last_viewed_${userId}`;
+
+  const markLikesAsViewed = () => {
+    const session = supabase.auth.getSession();
+    session.then(({ data: { session } }) => {
+      if (session?.user) {
+        const timestamp = new Date().toISOString();
+        localStorage.setItem(getLastViewedKey(session.user.id), timestamp);
+        console.log('useUnreadLikes: Marked likes as viewed at', timestamp);
+        setUnreadLikesCount(0);
+      }
+    });
+  };
+
   useEffect(() => {
     const loadUnreadLikes = async () => {
       try {
@@ -21,6 +35,12 @@ export const useUnreadLikes = () => {
         console.log('useUnreadLikes: Session:', session.user.id);
         console.log('useUnreadLikes: Loading unread likes count for user:', session.user.id);
 
+        // Get the last time user viewed likes page
+        const lastViewedTimestamp = localStorage.getItem(getLastViewedKey(session.user.id));
+        const lastViewed = lastViewedTimestamp ? new Date(lastViewedTimestamp) : new Date(0);
+        
+        console.log('useUnreadLikes: Last viewed likes at:', lastViewed);
+
         // Get users who liked me (recent likes)
         const { data: likedMeData, error: likedMeError } = await supabase
           .rpc('get_users_who_liked_me', { target_user_id: session.user.id });
@@ -32,22 +52,18 @@ export const useUnreadLikes = () => {
           return;
         }
 
-        // Count likes from the last 1 hour as "unread" (changed from 24 hours to reduce test notifications)
-        const oneHourAgo = new Date();
-        oneHourAgo.setHours(oneHourAgo.getHours() - 1);
-
-        const recentLikes = (likedMeData || []).filter((like: any) => 
-          new Date(like.created_at) > oneHourAgo
+        // Count likes that are newer than last viewed time
+        const unviewedLikes = (likedMeData || []).filter((like: any) => 
+          new Date(like.created_at) > lastViewed
         );
 
-        console.log('useUnreadLikes: Recent likes found (last hour):', recentLikes.length);
-        console.log('useUnreadLikes: Likes data:', recentLikes.map(like => ({
+        console.log('useUnreadLikes: Unviewed likes found:', unviewedLikes.length);
+        console.log('useUnreadLikes: Likes data:', unviewedLikes.map(like => ({
           created_at: like.created_at,
           liker_name: like.display_name
         })));
         
-        // Only show notifications for very recent likes to avoid test data
-        setUnreadLikesCount(recentLikes.length);
+        setUnreadLikesCount(unviewedLikes.length);
         setIsLoading(false);
       } catch (error) {
         console.error('useUnreadLikes: Unexpected error:', error);
@@ -88,5 +104,5 @@ export const useUnreadLikes = () => {
     };
   }, []);
 
-  return { unreadLikesCount, isLoading };
+  return { unreadLikesCount, isLoading, markLikesAsViewed };
 };

@@ -6,6 +6,7 @@ import SearchableSelect from "@/components/ui/searchable-select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Heart, AlignJustify, Grid2X2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useUnreadLikes } from "@/hooks/useUnreadLikes";
 
 // Interface for liked item data
 interface LikedItemData {
@@ -36,6 +37,7 @@ interface LikedItemData {
 
 const Likes = () => {
   const navigate = useNavigate();
+  const { markLikesAsViewed } = useUnreadLikes();
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [likedItems, setLikedItems] = useState<LikedItemData[]>([]);
@@ -44,6 +46,12 @@ const Likes = () => {
   const [likesCountryFilter, setLikesCountryFilter] = useState<string>("all");
   const [whoLikedMeViewMode, setWhoLikedMeViewMode] = useState<'compact' | 'full'>('compact');
   const [whoLikedMeCountryFilter, setWhoLikedMeCountryFilter] = useState<string>("all");
+
+  // Mark likes as viewed when user visits this page
+  useEffect(() => {
+    markLikesAsViewed();
+    console.log('Likes page: Marked all likes as viewed');
+  }, [markLikesAsViewed]);
 
   // Get current user
   useEffect(() => {
