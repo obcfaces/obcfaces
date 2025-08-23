@@ -18,19 +18,39 @@ serve(async (req) => {
     console.log('[REQUEST] Processing request...');
     
     const body = await req.json();
-    const { message } = body;
+    console.log('[REQUEST] Body:', JSON.stringify(body));
+    
+    const { message, context } = body;
 
     if (!message) {
+      console.error('[ERROR] No message provided');
       throw new Error('Message is required');
     }
 
     const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
     
     if (!openAIApiKey) {
+      console.error('[ERROR] OpenAI API key not found');
       throw new Error('OpenAI API key not configured');
     }
 
     console.log('[OPENAI] Making API request...');
+    
+    // Use GPT-4o-mini for better stability
+    const requestBody = {
+      model: 'gpt-4o-mini',
+      messages: [
+        { 
+          role: 'system', 
+          content: `You are a helpful AI assistant for a beauty contest website. ${context ? `Context: ${context}.` : ''} Respond briefly and friendly in Russian if the user writes in Russian, otherwise in English.` 
+        },
+        { role: 'user', content: message }
+      ],
+      max_tokens: 500,
+      temperature: 0.7
+    };
+
+    console.log('[OPENAI] Request body:', JSON.stringify(requestBody));
     
     const openAIResponse = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -38,29 +58,24 @@ serve(async (req) => {
         'Authorization': `Bearer ${openAIApiKey}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        model: 'gpt-5-mini-2025-08-07',
-        messages: [
-          { 
-            role: 'system', 
-            content: 'You are a helpful AI assistant for a beauty contest website. Respond briefly and friendly in Russian if the user writes in Russian, otherwise in English.' 
-          },
-          { role: 'user', content: message }
-        ],
-        max_completion_tokens: 500
-      }),
+      body: JSON.stringify(requestBody),
     });
+
+    console.log('[OPENAI] Response status:', openAIResponse.status);
 
     if (!openAIResponse.ok) {
       const errorText = await openAIResponse.text();
-      console.error('[OPENAI] Error:', errorText);
-      throw new Error(`OpenAI API error: ${errorText}`);
+      console.error('[OPENAI] Error response:', errorText);
+      throw new Error(`OpenAI API error (${openAIResponse.status}): ${errorText}`);
     }
 
     const openAIData = await openAIResponse.json();
+    console.log('[OPENAI] Response received');
+    
     const aiResponse = openAIData.choices?.[0]?.message?.content;
     
     if (!aiResponse) {
+      console.error('[ERROR] No response content from OpenAI');
       throw new Error('No response from OpenAI');
     }
 
@@ -75,11 +90,13 @@ serve(async (req) => {
     );
 
   } catch (error) {
-    console.error('[ERROR]:', error.message);
+    console.error('[ERROR] Function error:', error.message);
+    console.error('[ERROR] Stack:', error.stack);
     
     return new Response(
       JSON.stringify({ 
-        error: error.message
+        error: error.message,
+        timestamp: new Date().toISOString()
       }), 
       {
         status: 500,
