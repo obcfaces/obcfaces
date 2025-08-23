@@ -98,9 +98,13 @@ const PostCard = ({
       return;
     }
 
+    // Optimistic UI update
+    const wasLiked = isLiked;
+    setIsLiked(!wasLiked);
+    
     setLoading(true);
     try {
-      if (isLiked) {
+      if (wasLiked) {
         // Unlike
         const { error } = await supabase
           .from("likes")
@@ -111,7 +115,6 @@ const PostCard = ({
         
         if (error) throw error;
         
-        setIsLiked(false);
         toast({ description: "Лайк убран" });
       } else {
         // Like
@@ -125,10 +128,11 @@ const PostCard = ({
         
         if (error) throw error;
         
-        setIsLiked(true);
         toast({ description: "Пост понравился!" });
       }
     } catch (error) {
+      // Revert optimistic update on error
+      setIsLiked(wasLiked);
       toast({ description: "Не удалось выполнить действие" });
     } finally {
       setLoading(false);
@@ -327,7 +331,7 @@ const PostCard = ({
             disabled={loading}
             aria-label="Like"
           >
-            <ThumbsUp className="w-4 h-4 text-primary" strokeWidth={1} />
+            <ThumbsUp className={cn("w-4 h-4 text-primary", isLiked && "fill-blue-500 text-blue-500")} strokeWidth={1} />
             <span className="hidden sm:inline">Like</span>
             <span>{cardData.likes}</span>
           </button>

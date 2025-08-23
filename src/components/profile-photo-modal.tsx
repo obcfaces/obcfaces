@@ -565,10 +565,10 @@ export function ProfilePhotoModal({
                       )}
                       onClick={handleLike}
                     >
-                      <ThumbsUp className={cn(
-                        "w-5 h-5",
-                        currentPhotoLikes.isLiked && "fill-current"
-                      )} strokeWidth={1} />
+                       <ThumbsUp className={cn(
+                         "w-5 h-5",
+                         photoLikes[activeIndex]?.isLiked && "fill-blue-500 text-blue-500"
+                       )} strokeWidth={1} />
                       <span>{currentPhotoLikes.count}</span>
                     </button>
                     <button
