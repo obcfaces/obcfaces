@@ -205,22 +205,41 @@ const Messages = () => {
   const sendMessage = async () => {
     if (!selectedConversation || !newMessage.trim() || sending) return;
 
+    const messageContent = newMessage.trim();
+    const tempId = `temp-${Date.now()}`;
+    
+    // Оптимистичное обновление - сразу добавляем сообщение
+    const optimisticMessage: Message = {
+      id: tempId,
+      content: messageContent,
+      sender_id: user.id,
+      conversation_id: selectedConversation,
+      created_at: new Date().toISOString()
+    };
+    
+    setMessages(prev => [...prev, optimisticMessage]);
+    setNewMessage('');
     setSending(true);
+
     try {
       const { error } = await supabase
         .from('messages')
         .insert({
           conversation_id: selectedConversation,
           sender_id: user.id,
-          content: newMessage.trim()
+          content: messageContent
         });
 
       if (error) throw error;
       
-      setNewMessage('');
-      // Real-time подписка автоматически добавит сообщение и обновит разговоры
+      // Real-time подписка заменит временное сообщение на реальное
     } catch (error) {
       console.error('Error sending message:', error);
+      
+      // Убираем временное сообщение при ошибке
+      setMessages(prev => prev.filter(msg => msg.id !== tempId));
+      setNewMessage(messageContent); // Возвращаем текст обратно
+      
       toast({
         title: "Ошибка",
         description: "Не удалось отправить сообщение",
