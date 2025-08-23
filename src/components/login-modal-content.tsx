@@ -110,7 +110,7 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
         });
         
         if (error) {
-          let errorMessage = "Ошибка при отправке письма для восстановления";
+          let errorMessage = "Error sending password recovery email";
           
           switch (error.message) {
             case "Invalid email":
@@ -136,11 +136,11 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) {
           // Более конкретные сообщения об ошибках
-          let errorMessage = "Ошибка входа";
+          let errorMessage = "Login error";
           
           switch (error.message) {
             case "Invalid login credentials":
-              errorMessage = "Неправильный email или пароль";
+              errorMessage = "Incorrect email or password";
               break;
             case "Email not confirmed":
               errorMessage = "Email не подтвержден. Проверьте почту";
@@ -149,13 +149,13 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
               errorMessage = "Слишком много попыток. Попробуйте позже";
               break;
             case "User not found":
-              errorMessage = "Пользователь не найден";
+              errorMessage = "User not found";
               break;
             case "Invalid email":
               errorMessage = "Неправильный формат email";
               break;
             case "Weak password":
-              errorMessage = "Слишком слабый пароль";
+              errorMessage = "Password too weak";
               break;
             default:
               // Проверяем, содержит ли сообщение ключевые слова
@@ -172,7 +172,7 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
           
           throw new Error(errorMessage);
         }
-        toast({ description: "Вход выполнен успешно" });
+        toast({ description: "Login successful" });
         onClose?.(); // Close modal after successful login
       } else {
         const redirectUrl = window.location.href; // Confirm email back to current page
@@ -195,24 +195,24 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
         
         if (error) {
           // Более конкретные сообщения об ошибках регистрации
-          let errorMessage = "Ошибка регистрации";
+          let errorMessage = "Registration error";
           
           switch (error.message) {
             case "User already registered":
-              errorMessage = "Пользователь с таким email уже существует";
+              errorMessage = "User with this email already exists";
               break;
             case "Password should be at least 6 characters":
-              errorMessage = "Пароль должен содержать минимум 6 символов";
+              errorMessage = "Password must contain at least 6 characters";
               break;
             case "Invalid email":
               errorMessage = "Неправильный формат email";
               break;
             case "Weak password":
-              errorMessage = "Пароль слишком простой. Используйте буквы, цифры и символы";
+              errorMessage = "Password too simple. Use letters, numbers and symbols";
               break;
             default:
               if (error.message.toLowerCase().includes("already registered") || error.message.toLowerCase().includes("already exists")) {
-                errorMessage = "Пользователь с таким email уже зарегистрирован";
+                errorMessage = "User with this email is already registered";
               } else if (error.message.toLowerCase().includes("password")) {
                 errorMessage = "Проблема с паролем: " + error.message;
               } else {
@@ -246,16 +246,16 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
         
         if (data.session?.user) {
           // User is immediately logged in
-          toast({ description: "Регистрация завершена успешно" });
+          toast({ description: "Registration completed successfully" });
           onClose?.(); // Close modal after successful registration
         } else {
           // User needs to confirm email but registration was successful
-          toast({ description: "Регистрация завершена. Проверьте почту для подтверждения" });
+          toast({ description: "Registration completed. Check your email for confirmation" });
           onClose?.(); // Close modal after signup (user needs to check email)
         }
       }
     } catch (err: any) {
-      setAuthError(err.message ?? (mode === "login" ? "Ошибка входа" : "Ошибка регистрации"));
+      setAuthError(err.message ?? (mode === "login" ? "Login error" : "Registration error"));
     } finally {
       setLoading(false);
     }

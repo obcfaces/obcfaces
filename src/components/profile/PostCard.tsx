@@ -133,7 +133,7 @@ const PostCard = ({
     } catch (error) {
       // Revert optimistic update on error
       setIsLiked(wasLiked);
-      toast({ description: "Не удалось выполнить действие" });
+      toast({ description: "Failed to perform action" });
     } finally {
       setLoading(false);
     }

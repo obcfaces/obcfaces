@@ -82,26 +82,26 @@ const Auth = () => {
           },
         });
         if (error) throw error;
-        toast({ description: "Проверьте почту для подтверждения аккаунта." });
+        toast({ description: "Check your email to confirm your account." });
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
-        toast({ description: "Вход выполнен" });
+        toast({ description: "Login successful" });
       }
     } catch (err: any) {
-      toast({ description: err.message ?? "Ошибка авторизации" });
+      toast({ description: err.message ?? "Authorization error" });
     } finally {
       setLoading(false);
     }
   };
 
-  const title = mode === "login" ? "Вход в аккаунт" : "Регистрация";
-  const description = mode === "login" ? "Войдите, чтобы управлять профилем" : "Создайте аккаунт для личной страницы";
+  const title = mode === "login" ? "Sign In" : "Sign Up";
+  const description = mode === "login" ? "Sign in to manage your profile" : "Create an account for your personal page";
 
   return (
     <main className="min-h-screen flex items-center justify-center bg-background px-4">
       <Helmet>
-        <title>{`${title} — Профили`}</title>
+        <title>{`${title} — Profiles`}</title>
         <meta name="description" content={description} />
         <link rel="canonical" href={`${window.location.origin}/auth`} />
       </Helmet>
@@ -187,24 +187,24 @@ const Auth = () => {
             </>
           )}
           <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? "Подождите..." : mode === "login" ? "Войти" : "Зарегистрироваться"}
+            {loading ? "Please wait..." : mode === "login" ? "Sign In" : "Sign Up"}
           </Button>
         </form>
         <aside className="mt-4 text-center text-sm text-muted-foreground">
           {mode === "login" ? (
             <span>
-              Нет аккаунта?{" "}
-              <button className="text-primary underline" onClick={() => { setMode("signup"); setSearchParams({ mode: "signup" }); }}>Зарегистрироваться</button>
+              Don't have an account?{" "}
+              <button className="text-primary underline" onClick={() => { setMode("signup"); setSearchParams({ mode: "signup" }); }}>Sign Up</button>
             </span>
           ) : (
             <span>
-              Уже есть аккаунт?{" "}
-              <button className="text-primary underline" onClick={() => { setMode("login"); setSearchParams({ mode: "login" }); }}>Войти</button>
+              Already have an account?{" "}
+              <button className="text-primary underline" onClick={() => { setMode("login"); setSearchParams({ mode: "login" }); }}>Sign In</button>
             </span>
           )}
         </aside>
         <nav className="mt-4 text-center">
-          <Link to="/" className="text-sm text-primary underline">На главную</Link>
+          <Link to="/" className="text-sm text-primary underline">Home</Link>
         </nav>
       </article>
     </main>

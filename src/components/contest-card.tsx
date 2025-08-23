@@ -293,7 +293,7 @@ export function ContestantCard({
       
       if (error) {
         console.error('Upsert failed with error:', error);
-        toast({ description: "Ошибка при сохранении оценки: " + error.message });
+        toast({ description: "Error saving rating: " + error.message });
         return;
       }
       
@@ -311,7 +311,7 @@ export function ContestantCard({
       }, 1000);
     } catch (error) {
       console.error('Error saving rating:', error);
-      toast({ description: "Ошибка при сохранении оценки" });
+      toast({ description: "Error saving rating" });
     }
   };
 

@@ -916,8 +916,8 @@ const Admin = () => {
 
             <TabsContent value="registrations" className="space-y-4">
               <div className="mb-6">
-                <h2 className="text-xl font-semibold">Все регистрации пользователей</h2>
-                <p className="text-muted-foreground">Полный список всех зарегистрированных пользователей</p>
+                <h2 className="text-xl font-semibold">All User Registrations</h2>
+                <p className="text-muted-foreground">Complete list of all registered users</p>
               </div>
               
               <div className="grid gap-4">
@@ -997,7 +997,7 @@ const Admin = () => {
                               onClick={() => moderateProfile(profile.id, false)}
                             >
                               <X className="w-4 h-4 mr-2" />
-                              Отклонить
+                              Reject
                             </Button>
                           </>
                         )}
