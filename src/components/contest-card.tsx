@@ -362,28 +362,49 @@ export function ContestantCard({
           )}
           
           
-          {/* Header with voting overlay logic */}
+          {/* Header with content or voting overlay */}
           <div className="relative p-4 border-b border-contest-border h-[72px]">
-            {/* Voting overlay - shown by default when not voted and not editing */}
-            {!isVoted && !isEditing && !showThanks && (
-            <div className="absolute inset-0 bg-gray-300 flex items-center justify-center h-full">
-              <div className="-translate-x-2 flex items-center gap-6">
-                <span className="text-2xl font-medium text-gray-800 mr-8">Vote</span>
-                <div className="scale-[2]">
-                  <StarRating 
-                    rating={rating}
-                    isVoted={false}
-                    variant="white"
-                    hideText={true}
-                    onRate={(rating) => {
-                      console.log('StarRating onRate called with rating:', rating);
-                      console.log('User state:', user);
-                      handleRate(rating);
-                    }}
-                  />
+            {/* Default content - name and rating info */}
+            {!isEditing && !showThanks && (
+              <div className="flex items-center justify-between h-full">
+                <div>
+                  <h3 className="text-xl font-semibold text-contest-text">
+                    {profileId ? (
+                      <Link to={`/u/${profileId}`} className="hover:text-primary underline-offset-2 hover:underline">
+                        {name}
+                      </Link>
+                    ) : name}, {age}
+                    <span className="text-sm text-muted-foreground font-normal ml-2">
+                      ({weight} kg · {height} cm)
+                    </span>
+                  </h3>
+                  <div className="text-contest-blue text-sm">{country} · {city}</div>
+                </div>
+                <div className="flex items-center gap-2">
+                  {isVoted ? (
+                    <div className="flex items-center gap-2">
+                      <MiniStars rating={userRating} />
+                      <button
+                        onClick={() => setIsEditing(true)}
+                        className="text-contest-blue hover:text-contest-blue/80 transition-colors"
+                        title="Edit your rating"
+                      >
+                        <Pencil className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <StarRating 
+                        rating={0}
+                        isVoted={false}
+                        readonly={false}
+                        hideText={true}
+                        onRate={handleRate}
+                      />
+                    </div>
+                  )}
                 </div>
               </div>
-            </div>
             )}
             
             {/* Thank you message - shown for 1 second after voting */}
