@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { X, ChevronLeft, ChevronRight, ThumbsUp, MessageCircle, Send } from "lucide-react";
+import { X, ChevronLeft, ChevronRight, ThumbsUp, MessageCircle, Send, Share2, ThumbsDown } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -7,6 +7,9 @@ import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import LoginModalContent from "@/components/login-modal-content";
+import { useCardData } from "@/hooks/useCardData";
+import { StarRating } from "@/components/ui/star-rating";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 interface Comment {
   id: number;
@@ -27,9 +30,39 @@ interface PhotoModalProps {
   country?: string;
   city?: string;
   onCommentSubmit?: () => void;
+  shareContext?: {
+    title: string;
+    url: string;
+    description: string;
+  };
+  rating?: number;
+  isVoted?: boolean;
+  rank?: number;
+  profileId?: string;
+  isWinner?: boolean;
+  onRate?: (rating: number) => void;
 }
 
-export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantName, age, weight, height, country, city, onCommentSubmit }: PhotoModalProps) {
+export function PhotoModal({ 
+  isOpen, 
+  onClose, 
+  photos, 
+  currentIndex, 
+  contestantName, 
+  age, 
+  weight, 
+  height, 
+  country, 
+  city, 
+  onCommentSubmit,
+  shareContext,
+  rating = 0,
+  isVoted = false,
+  rank = 0,
+  profileId,
+  isWinner = false,
+  onRate
+}: PhotoModalProps) {
   const [activeIndex, setActiveIndex] = useState(currentIndex);
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
@@ -38,7 +71,15 @@ export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantNa
   const [photoLikes, setPhotoLikes] = useState<Record<number, { count: number; isLiked: boolean }>>({});
   const [user, setUser] = useState<any>(null);
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [showThanks, setShowThanks] = useState(false);
+  const [userRating, setUserRating] = useState(0);
+  const [dislikesCount, setDislikesCount] = useState(0);
+  const [isDisliked, setIsDisliked] = useState(false);
   const { toast } = useToast();
+  
+  // Use card data hook for contestant data
+  const cardData = useCardData(contestantName, user?.id);
 
   // Refs for focusing comment input and scrolling
   const commentsListRef = useRef<HTMLDivElement>(null);
@@ -300,6 +341,100 @@ export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantNa
     }
   };
 
+  const handleDislike = async () => {
+    if (!user) {
+      setShowLoginModal(true);
+      return;
+    }
+    
+    const contentId = `contestant-${contestantName}`;
+    
+    try {
+      if (isDisliked) {
+        // Remove dislike - for now use likes table with negative indicator
+        await supabase
+          .from("likes")
+          .delete()
+          .eq("user_id", user.id)
+          .eq("content_type", "contest-dislike")
+          .eq("content_id", contentId);
+        
+        setDislikesCount(prev => prev - 1);
+        setIsDisliked(false);
+      } else {
+        // Add dislike - for now use likes table with negative indicator
+        await supabase
+          .from("likes")
+          .insert({
+            user_id: user.id,
+            content_type: "contest-dislike",
+            content_id: contentId,
+          });
+        
+        setDislikesCount(prev => prev + 1);
+        setIsDisliked(true);
+      }
+    } catch (error) {
+      console.error('Error handling dislike:', error);
+    }
+  };
+
+  const handleRate = async (newRating: number) => {
+    if (!user) {
+      setShowLoginModal(true);
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from("contestant_ratings")
+        .upsert({
+          user_id: user.id,
+          contestant_name: contestantName,
+          rating: newRating,
+        });
+
+      if (error) {
+        console.error('Error saving rating:', error);
+        return;
+      }
+
+      setUserRating(newRating);
+      setShowThanks(true);
+      
+      setTimeout(() => {
+        setShowThanks(false);
+      }, 1000);
+
+      onRate?.(newRating);
+    } catch (error) {
+      console.error('Error saving rating:', error);
+    }
+  };
+
+  const handleShare = async () => {
+    if (shareContext) {
+      try {
+        if (navigator.share) {
+          await navigator.share({
+            title: shareContext.title,
+            text: shareContext.description,
+            url: shareContext.url,
+          });
+        } else {
+          await navigator.clipboard.writeText(shareContext.url);
+          toast({
+            title: "Link copied",
+            description: "The link has been copied to your clipboard",
+            duration: 2000,
+          });
+        }
+      } catch (error) {
+        console.error('Error sharing:', error);
+      }
+    }
+  };
+
 
   // Touch handlers for swipe functionality
   const onTouchStart = (e: React.TouchEvent) => {
@@ -412,114 +547,168 @@ export function PhotoModal({ isOpen, onClose, photos, currentIndex, contestantNa
             )}
           </div>
 
-          {/* Comments section - Desktop: sidebar, Mobile: bottom panel */}
-          <div className={cn(
-            "bg-background relative flex flex-col flex-shrink-0 w-full",
-            "h-[40dvh] min-h-0"
-          )}>
-              <div className="p-4 border-b">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <h3 className="font-semibold text-contest-text truncate">
-                      {contestantName}
-                      {age ? `, ${age}` : ""}
-                      {(weight || height) ? (
-                        <span className="ml-1 text-xs sm:text-sm text-muted-foreground font-normal">
-                          (
-                          {weight ? `${weight} kg` : ""}
-                          {(weight && height) ? " · " : ""}
-                          {height ? `${height} cm` : ""}
-                          )
-                        </span>
-                      ) : null}
-                    </h3>
-                    <div className="text-sm text-contest-blue truncate">
-                      {country}
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2 shrink-0">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className={cn(
-                        "text-muted-foreground hover:text-foreground transition-colors",
-                        currentPhotoLikes.isLiked && "text-contest-blue"
-                      )}
-                      onClick={handleLike}
-                      aria-label="Like"
-                    >
-                      <ThumbsUp className="w-4 h-4 mr-1 text-primary" strokeWidth={1} />
-                      {currentPhotoLikes.count}
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className={cn(
-                        "text-muted-foreground hover:text-foreground transition-colors",
-                        currentPhotoComments.length > 0 && "text-contest-blue"
-                      )}
-                      onClick={focusCommentInput}
-                      aria-label="Open comment field"
-                    >
-                      <MessageCircle className="w-4 h-4 mr-1 text-primary" strokeWidth={1} />
-                      {currentPhotoComments.length}
-                    </Button>
+          {/* Contest info section */}
+          <div className="bg-background flex flex-col flex-shrink-0 w-full h-[40dvh] min-h-0">
+            {/* Winner Badge */}
+            {isWinner && (
+              <div className="bg-blue-100 text-blue-700 px-4 py-2 text-sm font-semibold flex justify-start items-center border-b">
+                <span>🏆 WINNER   + 5000 PHP</span>
+              </div>
+            )}
+            
+            {/* Header with name and country */}
+            <div className="p-4 border-b">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <h3 className="font-semibold text-contest-text truncate">
+                    {contestantName}
+                    {age ? `, ${age}` : ""}
+                    {(weight || height) ? (
+                      <span className="ml-1 text-xs sm:text-sm text-muted-foreground font-normal">
+                        (
+                        {weight ? `${weight} kg` : ""}
+                        {(weight && height) ? " · " : ""}
+                        {height ? `${height} cm` : ""}
+                        )
+                      </span>
+                    ) : null}
+                  </h3>
+                  <div className="text-sm text-contest-blue truncate">
+                    {country}
                   </div>
                 </div>
-              </div>
-
-              <div ref={commentsListRef} className="flex-1 overflow-y-auto p-4 pb-24 md:pb-28 space-y-3 min-h-0">
-                {currentPhotoComments.length === 0 ? (
-                  <p className="text-center text-muted-foreground text-sm">
-                    No comments yet for this photo
-                  </p>
-                ) : (
-                  currentPhotoComments.map((comment) => (
-                    <div key={comment.id} className="space-y-1">
-                      <div className="flex justify-between items-start">
-                        <span className="font-medium text-sm">{comment.author}</span>
-                        <span className="text-xs text-muted-foreground">{comment.timestamp}</span>
+                
+                {/* Rating badge */}
+                {isVoted && !isEditing && !showThanks && rank > 0 && (
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <div className="bg-contest-blue text-white px-2 py-1.5 rounded-bl-lg text-base sm:text-lg font-bold shadow-sm cursor-pointer hover:bg-contest-blue/90 transition-colors">
+                        {rating.toFixed(1)}
                       </div>
-                      <p className="text-sm">{comment.text}</p>
-                    </div>
-                  ))
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-3">
+                      <div className="text-sm">
+                        You rated {userRating.toFixed(0)} — <button 
+                          className="text-contest-blue hover:underline" 
+                          onClick={() => setIsEditing(true)}
+                        >
+                          change
+                        </button>
+                      </div>
+                    </PopoverContent>
+                  </Popover>
                 )}
               </div>
-
-              <div className="sticky bottom-0 left-0 right-0 p-3 md:p-4 border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 pb-2 md:pb-3 flex items-end gap-2 md:gap-3">
-                <Textarea
-                  ref={textareaRef}
-                  placeholder="Write a comment for this photo..."
-                  value={commentText}
-                  rows={1}
-                  onChange={(e) => {
-                    setCommentText(e.target.value);
-                    const el = e.currentTarget;
-                    el.style.height = 'auto';
-                    // Limit height to prevent layout shifts and photo enlargement
-                    const maxH = Math.min(120, Math.floor(window.innerHeight * 0.15));
-                    el.style.height = Math.min(el.scrollHeight, maxH) + 'px';
-                  }}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' && !e.shiftKey) {
-                      e.preventDefault();
-                      handleCommentSubmit();
-                    }
-                  }}
-                  className="flex-1 resize-none overflow-y-auto text-base md:text-sm min-h-[44px] max-h-[120px]"
-                  aria-label="Comment for current photo"
-                />
-                <Button
-                  onClick={handleCommentSubmit}
-                  disabled={!commentText.trim()}
-                  size="icon"
-                  className="shrink-0 rounded-full h-10 w-10 bg-contest-blue text-white hover:bg-contest-blue/90"
-                  aria-label="Send comment"
-                >
-                  <Send className="w-4 h-4" />
-                </Button>
-              </div>
             </div>
+
+            {/* Voting section */}
+            <div className="relative flex-1 bg-card">
+              {!isVoted && !showThanks && (
+                <div className="h-full bg-gray-100 flex items-center justify-center">
+                  <div className="flex items-center gap-6">
+                    <span className="text-2xl font-medium text-gray-800">Vote</span>
+                    <div className="scale-[2]">
+                      <StarRating 
+                        rating={0}
+                        isVoted={false}
+                        readonly={false}
+                        hideText={true}
+                        onRate={(newRating) => {
+                          handleRate(newRating);
+                        }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+              
+              {/* Thank you message */}
+              {showThanks && (
+                <div className="h-full bg-gray-200 flex items-center justify-center">
+                  <span className="text-lg font-medium text-gray-800">Thank you! Rated {userRating.toFixed(0)}</span>
+                </div>
+              )}
+              
+              {/* Re-voting overlay */}
+              {isVoted && isEditing && !showThanks && (
+                <div className="h-full bg-gray-300 flex items-center justify-center">
+                  <div className="-translate-x-2 flex items-center gap-6">
+                    <span className="text-2xl font-medium text-gray-800 mr-8">Vote</span>
+                    <div className="scale-[2]">
+                      <StarRating 
+                        rating={rating}
+                        isVoted={false}
+                        variant="white"
+                        hideText={true}
+                        onRate={(newRating) => {
+                          setUserRating(newRating);
+                          setIsEditing(false);
+                          handleRate(newRating);
+                        }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+              
+              {/* Empty space after voting */}
+              {isVoted && !isEditing && !showThanks && (
+                <div className="h-full"></div>
+              )}
+            </div>
+            
+            {/* Action buttons */}
+            <div className="border-t border-contest-border px-4 py-2 flex items-center justify-evenly gap-4">
+              <button
+                type="button"
+                className={cn(
+                  "inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors",
+                  currentPhotoLikes.isLiked && "text-contest-blue"
+                )}
+                onClick={handleLike}
+                aria-label="Like"
+              >
+                <ThumbsUp className="w-4 h-4 text-primary" strokeWidth={1} />
+                <span className="hidden sm:inline">Like</span>
+                {currentPhotoLikes.count > 0 && <span>{currentPhotoLikes.count}</span>}
+              </button>
+              <button
+                type="button"
+                className={cn(
+                  "inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors",
+                  isDisliked && "text-red-500"
+                )}
+                onClick={handleDislike}
+                aria-label="Dislike"
+              >
+                <ThumbsDown className="w-4 h-4" strokeWidth={1} />
+                <span className="hidden sm:inline">Dislike</span>
+                <span>{dislikesCount}</span>
+              </button>
+              <button
+                type="button"
+                className={cn(
+                  "inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors",
+                  currentPhotoComments.length > 0 && "text-contest-blue"
+                )}
+                onClick={focusCommentInput}
+                aria-label="Comments"
+              >
+                <MessageCircle className="w-4 h-4 text-primary" strokeWidth={1} />
+                <span className="hidden sm:inline">Comment</span>
+                <span>{currentPhotoComments.length}</span>
+              </button>
+              <button
+                type="button"
+                className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                onClick={handleShare}
+                aria-label="Share"
+              >
+                <Share2 className="w-4 h-4" strokeWidth={1} />
+                <span className="hidden sm:inline">Share</span>
+              </button>
+            </div>
+          </div>
           </div>
         </div>
       )}

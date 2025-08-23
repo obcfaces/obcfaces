@@ -560,6 +560,17 @@ export function ContestantCard({
           country={country}
           city={city}
           onCommentSubmit={markAsCommented}
+          shareContext={{
+            title: `${name} - Beauty Contest`,
+            url: profileId ? `https://obcface.com/u/${profileId}` : `https://obcface.com`,
+            description: `Check out ${name}, ${age} from ${city}, ${country} in this beauty contest!`
+          }}
+          rating={rating}
+          isVoted={isVoted}
+          rank={rank}
+          profileId={profileId}
+          isWinner={isWinner}
+          onRate={handleRate}
         />
 
         {/* Login Modal */}
@@ -796,6 +807,17 @@ export function ContestantCard({
         country={country}
         city={city}
         onCommentSubmit={markAsCommented}
+        shareContext={{
+          title: `${name} - Beauty Contest`,
+          url: profileId ? `https://obcface.com/u/${profileId}` : `https://obcface.com`,
+          description: `Check out ${name}, ${age} from ${city}, ${country} in this beauty contest!`
+        }}
+        rating={rating}
+        isVoted={isVoted}
+        rank={rank}
+        profileId={profileId}
+        isWinner={isWinner}
+        onRate={handleRate}
       />
 
       {/* Login Modal */}
