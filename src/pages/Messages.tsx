@@ -85,8 +85,8 @@ const Messages = () => {
       if (error) {
         console.error('Error in loadConversations:', error.message);
         toast({
-          title: "Ошибка",
-          description: "Не удалось загрузить разговоры: " + error.message,
+          title: "Error",
+          description: "Failed to load conversations: " + error.message,
           variant: "destructive"
         });
         return;
@@ -171,8 +171,8 @@ const Messages = () => {
     } catch (error) {
       console.error('Error creating/finding conversation:', error);
       toast({
-        title: "Ошибка",
-        description: "Не удалось создать разговор",
+        title: "Error",
+        description: "Failed to create conversation",
         variant: "destructive"
       });
       return null;
@@ -241,8 +241,8 @@ const Messages = () => {
       setNewMessage(messageContent); // Возвращаем текст обратно
       
       toast({
-        title: "Ошибка",
-        description: "Не удалось отправить сообщение",
+        title: "Error",
+        description: "Failed to send message",
         variant: "destructive"
       });
     } finally {
@@ -339,7 +339,7 @@ const Messages = () => {
   const getDisplayName = (user: UserProfile) => {
     return user.display_name || 
            `${user.first_name || ''} ${user.last_name || ''}`.trim() || 
-           'Пользователь';
+           'User';
   };
 
   // Фильтрация разговоров
@@ -354,7 +354,7 @@ const Messages = () => {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-lg">Загрузка...</div>
+        <div className="text-lg">Loading...</div>
       </div>
     );
   }
@@ -362,7 +362,7 @@ const Messages = () => {
   if (!user) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-lg">Необходима авторизация</div>
+        <div className="text-lg">Authorization required</div>
       </div>
     );
   }
@@ -376,7 +376,7 @@ const Messages = () => {
           <div className="mt-2 relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Поиск разговоров..."
+              placeholder="Search conversations..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10"
@@ -388,7 +388,7 @@ const Messages = () => {
         <ScrollArea className="flex-1">
           {filteredConversations.length === 0 ? (
             <div className="p-4 text-center text-muted-foreground">
-              {searchQuery ? 'Разговоры не найдены' : 'Нет разговоров'}
+              {searchQuery ? 'No conversations found' : 'No conversations'}
             </div>
           ) : (
             filteredConversations.map((conversation) => (
@@ -427,7 +427,7 @@ const Messages = () => {
                     
                     <div className="flex items-center justify-between mt-1">
                       <p className="text-sm text-muted-foreground truncate">
-                        {conversation.last_message?.content || "Начните разговор"}
+                        {conversation.last_message?.content || "Start conversation"}
                       </p>
                       {conversation.unread_count > 0 && (
                         <span className="bg-primary text-primary-foreground text-xs rounded-full px-2 py-1 min-w-[20px] text-center">
@@ -481,7 +481,7 @@ const Messages = () => {
                 <div className="space-y-4">
                   {messages.length === 0 ? (
                     <div className="text-center text-muted-foreground py-8">
-                      Нет сообщений. Начните разговор!
+                      No messages. Start a conversation!
                     </div>
                   ) : (
                     messages.map((message) => {
@@ -519,7 +519,7 @@ const Messages = () => {
                   value={newMessage}
                   onChange={(e) => setNewMessage(e.target.value)}
                   onKeyPress={handleKeyPress}
-                  placeholder="Введите сообщение..."
+                  placeholder="Type a message..."
                   disabled={sending}
                   className="flex-1"
                 />
@@ -536,8 +536,8 @@ const Messages = () => {
         ) : (
           <div className="flex-1 flex items-center justify-center">
             <div className="text-center text-muted-foreground">
-              <div className="text-lg font-medium mb-2">Выберите разговор</div>
-              <p>Выберите разговор из списка слева, чтобы начать общение</p>
+              <div className="text-lg font-medium mb-2">Select a conversation</div>
+              <p>Choose a conversation from the left to start chatting</p>
             </div>
           </div>
         )}

@@ -34,7 +34,7 @@ const AuthCallbackHandler = () => {
           // For critical errors, show a message but don't block the user
           if (error.message.includes('Invalid') || error.message.includes('expired')) {
             toast({ 
-              description: "Ссылка подтверждения недействительна или истекла. Попробуйте войти снова.",
+              description: "Confirmation link is invalid or expired. Please try logging in again.",
               variant: "destructive"
             });
           }

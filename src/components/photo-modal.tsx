@@ -585,7 +585,7 @@ export function PhotoModal({
                   ))}
                   {currentPhotoComments.length === 0 && (
                     <p className="text-gray-500 text-center py-4 text-sm">
-                      Пока нет комментариев. Будьте первым!
+                      No comments yet. Be the first!
                     </p>
                   )}
                 </div>

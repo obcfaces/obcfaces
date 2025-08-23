@@ -289,7 +289,7 @@ const Profile = () => {
         toast({ description: "Подписались" });
       }
     } catch (error) {
-      toast({ description: "Ошибка при изменении подписки" });
+      toast({ description: "Error changing subscription" });
     } finally {
       setLoadingFollow(false);
     }
@@ -318,9 +318,9 @@ const Profile = () => {
       
       setData(prev => prev ? { ...prev, bio: bioDraft } : null);
       setIsEditingBio(false);
-      toast({ description: "Био сохранено" });
+      toast({ description: "Bio saved" });
     } catch (error) {
-      toast({ description: "Ошибка при сохранении био" });
+      toast({ description: "Error saving bio" });
     } finally {
       setSavingBio(false);
     }
@@ -406,7 +406,7 @@ const Profile = () => {
       return data.publicUrl;
     } catch (error) {
       console.error('Error uploading avatar:', error);
-      toast({ description: "Ошибка загрузки фото" });
+      toast({ description: "Error uploading photo" });
       return null;
     } finally {
       setUploadingAvatar(false);
@@ -472,9 +472,9 @@ const Profile = () => {
       setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
       setPasswordSubmitted(false);
       setPasswordInvalidFields(new Set());
-      toast({ description: "Пароль изменен" });
+      toast({ description: "Password changed" });
     } catch (error: any) {
-      toast({ description: error.message || "Ошибка при смене пароля" });
+      toast({ description: error.message || "Error changing password" });
     } finally {
       setSavingPassword(false);
     }
@@ -557,9 +557,9 @@ const Profile = () => {
       
       setData(prev => prev ? { ...prev, ...updates } : null);
       setIsEditingProfile(false);
-      toast({ description: "Профиль сохранен" });
+      toast({ description: "Profile saved" });
     } catch (error: any) {
-      toast({ description: error.message || "Ошибка при сохранении профиля" });
+      toast({ description: error.message || "Error saving profile" });
     } finally {
       setSavingProfile(false);
     }
@@ -571,7 +571,7 @@ const Profile = () => {
       await supabase.auth.signOut();
       navigate("/", { replace: true });
     } catch (error) {
-      toast({ description: "Ошибка при выходе" });
+      toast({ description: "Error signing out" });
     } finally {
       setLogoutLoading(false);
     }
@@ -862,7 +862,7 @@ const Profile = () => {
     return (
       <div className="min-h-screen bg-background">
         <main className="container mx-auto px-6 py-8">
-          <p>Загрузка...</p>
+          <p>Loading...</p>
         </main>
       </div>
     );
@@ -871,10 +871,10 @@ const Profile = () => {
   return (
     <div className="min-h-screen bg-background">
       <Helmet>
-        <title>{profile.display_name || "Профиль пользователя"} | OBC</title>
+        <title>{profile.display_name || "User Profile"} | OBC</title>
         <meta 
           name="description" 
-          content={`Профиль ${profile.display_name || "пользователя"} на OBC. ${profile.bio || ""}`} 
+          content={`Profile of ${profile.display_name || "user"} on OBC. ${profile.bio || ""}`} 
         />
         <link rel="canonical" href={`/u/${id}`} />
       </Helmet>
@@ -899,7 +899,7 @@ const Profile = () => {
                   {profile.display_name || 
                     (profile.first_name && profile.last_name 
                       ? `${profile.first_name} ${profile.last_name}` 
-                      : "Пользователь")
+                      : "User")
                   }
                  </h1>
                  
@@ -930,7 +930,7 @@ const Profile = () => {
                     onClick={logout}
                     disabled={logoutLoading}
                     className="absolute top-0 right-0 p-2 text-muted-foreground hover:text-destructive transition-colors disabled:opacity-50"
-                    title="Выйти"
+                    title="Sign Out"
                   >
                     {logoutLoading ? (
                       <div className="w-[18px] h-[18px] border-2 border-muted-foreground border-t-transparent rounded-full animate-spin" />
@@ -988,7 +988,7 @@ const Profile = () => {
             <TabsContent value="posts" className="space-y-4 mt-8 -mx-6">
               {loadingPosts ? (
                 <div className="text-center py-8 px-6">
-                  <p className="text-muted-foreground">Загрузка постов...</p>
+                  <p className="text-muted-foreground">Loading posts...</p>
                 </div>
               ) : userPosts.length > 0 ? (
                 <div className="px-0 sm:px-6 space-y-4">

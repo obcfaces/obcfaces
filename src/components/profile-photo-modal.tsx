@@ -306,8 +306,8 @@ export function ProfilePhotoModal({
 
       if (!matchingPostId) {
         toast({
-          title: "Ошибка",
-          description: "Не удалось найти пост с этим фото",
+          title: "Error",
+          description: "Failed to find post with this photo",
           duration: 3000,
         });
         return;
@@ -327,8 +327,8 @@ export function ProfilePhotoModal({
         if (error) {
           console.error('Error saving comment:', error);
           toast({
-            title: "Ошибка",
-            description: "Не удалось сохранить комментарий",
+            title: "Error",
+            description: "Failed to save comment",
             duration: 3000,
           });
           return;
@@ -337,10 +337,10 @@ export function ProfilePhotoModal({
         // Add comment to local state for immediate feedback
         const newComment: Comment = {
           id: `temp-${Date.now()}`,
-          author: "Вы",
+          author: "You",
           authorId: user.id,
           text: commentText.trim(),
-          timestamp: "только что"
+          timestamp: "just now"
         };
         setPhotoComments(prev => ({
           ...prev,
@@ -392,15 +392,15 @@ export function ProfilePhotoModal({
         }, 500);
         
         toast({
-          title: "Комментарий добавлен",
-          description: "Ваш комментарий был добавлен",
+          title: "Comment added",
+          description: "Your comment has been added",
           duration: 1000,
         });
       } catch (error) {
         console.error('Error saving comment:', error);
         toast({
-          title: "Ошибка",
-          description: "Не удалось сохранить комментарий",
+          title: "Error",
+          description: "Failed to save comment",
           duration: 3000,
         });
       }
@@ -424,8 +424,8 @@ export function ProfilePhotoModal({
 
   const handleShare = async () => {
     const shareUrl = `${window.location.origin}/u/${profileId}`;
-    const shareTitle = `Фото ${profileName}`;
-    const shareDescription = `Посмотрите фото ${profileName}`;
+    const shareTitle = `Photo of ${profileName}`;
+    const shareDescription = `Check out ${profileName}'s photo`;
     
     try {
       if (navigator.share) {
@@ -437,8 +437,8 @@ export function ProfilePhotoModal({
       } else {
         await navigator.clipboard.writeText(shareUrl);
         toast({
-          title: "Ссылка скопирована",
-          description: "Ссылка была скопирована в буфер обмена",
+          title: "Link copied",
+          description: "Link has been copied to clipboard",
           duration: 2000,
         });
       }
@@ -551,7 +551,7 @@ export function ProfilePhotoModal({
                       {profileName}
                     </h3>
                     <div className="text-sm text-gray-600">
-                      Фото {activeIndex + 1} из {photos.length}
+                      Photo {activeIndex + 1} of {photos.length}
                     </div>
                   </div>
                   
@@ -609,7 +609,7 @@ export function ProfilePhotoModal({
                   ))}
                   {currentPhotoComments.length === 0 && (
                     <p className="text-gray-500 text-center py-4 text-sm">
-                      Пока нет комментариев. Будьте первым!
+                      No comments yet. Be the first!
                     </p>
                   )}
                 </div>
