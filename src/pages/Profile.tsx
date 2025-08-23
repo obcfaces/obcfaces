@@ -96,9 +96,8 @@ const Profile = () => {
   const [userPosts, setUserPosts] = useState<any[]>([]);
   const [loadingPosts, setLoadingPosts] = useState(true);
   const [postsViewMode, setPostsViewMode] = useState<'compact' | 'full'>('full');
-
-  // Sample photos for gallery
-  const profilePhotos = [c1, c2, c3, c1, c2, c3];
+  const [profilePhotos, setProfilePhotos] = useState<string[]>([]);
+  const [loadingPhotos, setLoadingPhotos] = useState(true);
 
   // Demo profile for fallback
   const demoProfile: ProfileRow = {
@@ -779,9 +778,46 @@ const Profile = () => {
     }
   };
 
+  // Load photos from user posts
+  const loadProfilePhotos = async () => {
+    if (!id) return;
+    
+    setLoadingPhotos(true);
+    try {
+      const { data: posts, error } = await supabase
+        .from('posts')
+        .select('media_urls, media_types')
+        .eq('user_id', id)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      // Extract all image URLs from posts
+      const allPhotos: string[] = [];
+      posts?.forEach(post => {
+        if (post.media_urls && post.media_types) {
+          post.media_urls.forEach((url: string, index: number) => {
+            // Only include images, not videos
+            if (post.media_types[index] === 'image') {
+              allPhotos.push(url);
+            }
+          });
+        }
+      });
+
+      setProfilePhotos(allPhotos);
+    } catch (error) {
+      console.error('Error loading profile photos:', error);
+      setProfilePhotos([]);
+    } finally {
+      setLoadingPhotos(false);
+    }
+  };
+
   const handlePostCreated = () => {
-    // Reload posts after creating a new one
+    // Reload posts and photos after creating a new one
     loadUserPosts();
+    loadProfilePhotos();
   };
 
   useEffect(() => {
@@ -790,6 +826,7 @@ const Profile = () => {
 
   useEffect(() => {
     loadUserPosts();
+    loadProfilePhotos();
   }, [id]);
 
   const handleRemoveParticipation = (participationId: string) => {
@@ -988,25 +1025,42 @@ const Profile = () => {
             </TabsContent>
 
             <TabsContent value="photos" className="mt-8">
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-1">
-                {profilePhotos.map((src, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => {
-                      setSelectedPhotoIndex(idx);
-                      setPhotoModalOpen(true);
-                    }}
-                    className="relative group cursor-pointer"
-                  >
-                    <img
-                      src={src}
-                      loading="lazy"
-                      alt={`Фото ${idx + 1} — ${profile.display_name ?? "пользователь"}`}
-                      className="w-full h-32 sm:h-36 object-cover rounded-md group-hover:opacity-90 transition-opacity"
-                    />
-                  </button>
-                ))}
-              </div>
+              {loadingPhotos ? (
+                <div className="text-center py-8">
+                  <p className="text-muted-foreground">Загрузка фотографий...</p>
+                </div>
+              ) : profilePhotos.length > 0 ? (
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-1">
+                  {profilePhotos.map((src, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => {
+                        setSelectedPhotoIndex(idx);
+                        setPhotoModalOpen(true);
+                      }}
+                      className="relative group cursor-pointer"
+                    >
+                      <img
+                        src={src}
+                        loading="lazy"
+                        alt={`Фото ${idx + 1} — ${profile.display_name ?? "пользователь"}`}
+                        className="w-full h-32 sm:h-36 object-cover rounded-md group-hover:opacity-90 transition-opacity"
+                      />
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <p className="text-muted-foreground">
+                    {isOwner ? "У вас пока нет фотографий в постах" : "У пользователя пока нет фотографий"}
+                  </p>
+                  {isOwner && (
+                    <p className="text-sm text-muted-foreground mt-2">
+                      Фотографии будут появляться здесь, когда вы добавите их в посты
+                    </p>
+                  )}
+                </div>
+              )}
             </TabsContent>
 
             <TabsContent value="participation" className="mt-8 -mx-6">
