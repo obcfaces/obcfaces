@@ -427,8 +427,8 @@ export function ProfilePhotoModal({
 
           {/* Main content */}
           <div className="h-full w-full flex flex-col max-w-full">
-            {/* Photo section */}
-            <div className="relative flex items-center justify-center transition-all duration-300 pt-2 md:pt-4 w-full h-[70dvh] overflow-hidden">
+            {/* Full screen photo with overlay */}
+            <div className="relative flex items-center justify-center w-full h-full overflow-hidden">
 
               {photos.length > 1 && (
                 <>
@@ -452,13 +452,7 @@ export function ProfilePhotoModal({
               <img
                 src={photos[activeIndex]}
                 alt={`${profileName} photo ${activeIndex + 1}`}
-                className="max-w-full max-h-full object-contain touch-manipulation select-none"
-                style={{ 
-                  width: 'auto', 
-                  height: 'auto',
-                  maxWidth: '100%',
-                  maxHeight: '100%'
-                }}
+                className="w-full h-full object-cover touch-manipulation select-none"
                 onTouchStart={onTouchStart}
                 onTouchMove={onTouchMove}
                 onTouchEnd={onTouchEnd}
@@ -467,7 +461,7 @@ export function ProfilePhotoModal({
 
               {/* Thumbnail navigation */}
               {photos.length > 1 && (
-                <div className="absolute bottom-4 right-4 flex items-center gap-2">
+                <div className="absolute bottom-32 right-4 flex items-center gap-2 z-40">
                   {photos.map((src, index) => (
                     <button
                       key={index}
@@ -488,150 +482,58 @@ export function ProfilePhotoModal({
                   ))}
                 </div>
               )}
-            </div>
 
-            {/* Profile info section */}
-            <div className="bg-background flex flex-col flex-shrink-0 w-full h-[30dvh] min-h-0">
-              {/* Header with name and action icons */}
-              <div className="p-4 border-b">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0 flex-1">
-                    <h3 className="font-semibold text-lg truncate">
+              {/* Overlay info panel */}
+              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent p-4 text-white z-40">
+                
+                {/* Profile info */}
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold text-lg truncate text-white">
                       {profileName}
                     </h3>
-                    <div className="text-sm text-muted-foreground">
+                    <div className="text-sm text-white/90">
                       Фото {activeIndex + 1} из {photos.length}
                     </div>
                   </div>
+                </div>
+
+                {/* Action buttons */}
+                <div className="flex items-center gap-6">
+                  <button
+                    type="button"
+                    className={cn(
+                      "inline-flex items-center gap-2 text-sm text-white/90 hover:text-white transition-colors",
+                      currentPhotoLikes.isLiked && "text-red-400"
+                    )}
+                    onClick={handleLike}
+                    aria-label="Like"
+                  >
+                    <ThumbsUp className={cn(
+                      "w-5 h-5",
+                      currentPhotoLikes.isLiked && "fill-current"
+                    )} strokeWidth={1} />
+                    <span>{currentPhotoLikes.count}</span>
+                  </button>
                   
-                  {/* Action icons in header like in contests */}
-                  <div className="flex items-center gap-4">
-                    <button
-                      type="button"
-                      className={cn(
-                        "inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors",
-                        currentPhotoLikes.isLiked && "text-red-500"
-                      )}
-                      onClick={handleLike}
-                      aria-label="Like"
-                    >
-                      <ThumbsUp className={cn(
-                        "w-4 h-4",
-                        currentPhotoLikes.isLiked && "fill-current"
-                      )} strokeWidth={1} />
-                      {currentPhotoLikes.count > 0 && <span>{currentPhotoLikes.count}</span>}
-                    </button>
-                    
-                    <button
-                      type="button"
-                      className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
-                      onClick={focusCommentInput}
-                      aria-label="Comments"
-                    >
-                      <MessageCircle className="w-4 h-4" strokeWidth={1} />
-                      {currentPhotoComments.length > 0 && <span>{currentPhotoComments.length}</span>}
-                    </button>
-                    
-                    <button
-                      type="button"
-                      className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
-                      onClick={handleShare}
-                      aria-label="Share"
-                    >
-                      <Share2 className="w-4 h-4" strokeWidth={1} />
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              {/* Comments section */}
-              <div className="flex-1 overflow-y-auto" ref={commentsListRef}>
-                <div className="p-4 space-y-3">
-                  {currentPhotoComments.map((comment) => (
-                    <div key={comment.id} className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <span className="font-medium text-sm">{comment.author}</span>
-                        <span className="text-xs text-muted-foreground">{comment.timestamp}</span>
-                      </div>
-                      <p className="text-sm">{comment.text}</p>
-                    </div>
-                  ))}
-                  {currentPhotoComments.length === 0 && (
-                    <div className="p-4 text-center">
-                      <p className="text-muted-foreground text-sm">
-                        Пока нет комментариев. Будьте первым!
-                      </p>
-                    </div>
-                  )}
-                </div>
-              </div>
-              
-              {/* Action buttons and comment input */}
-              <div className="border-t">
-                <div className="px-4 py-3 flex items-center justify-between">
-                  <div className="flex items-center gap-6">
-                    <button
-                      type="button"
-                      className={cn(
-                        "inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors",
-                        currentPhotoLikes.isLiked && "text-red-500"
-                      )}
-                      onClick={handleLike}
-                      aria-label="Like"
-                    >
-                      <ThumbsUp className={cn(
-                        "w-5 h-5",
-                        currentPhotoLikes.isLiked && "fill-current"
-                      )} strokeWidth={1} />
-                      <span>{currentPhotoLikes.count}</span>
-                    </button>
-                    
-                    <button
-                      type="button"
-                      className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
-                      onClick={focusCommentInput}
-                      aria-label="Comments"
-                    >
-                      <MessageCircle className="w-5 h-5" strokeWidth={1} />
-                      <span>{currentPhotoComments.length}</span>
-                    </button>
-                    
-                    <button
-                      type="button"
-                      className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
-                      onClick={handleShare}
-                      aria-label="Share"
-                    >
-                      <Share2 className="w-5 h-5" strokeWidth={1} />
-                    </button>
-                  </div>
-                </div>
-
-                {/* Comment input */}
-                <div className="border-t p-4">
-                  <div className="flex gap-2">
-                    <Textarea
-                      ref={textareaRef}
-                      value={commentText}
-                      onChange={(e) => setCommentText(e.target.value)}
-                      placeholder="Write a comment for this photo..."
-                      className="flex-1 resize-none min-h-[44px] max-h-32 text-sm"
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter' && !e.shiftKey) {
-                          e.preventDefault();
-                          handleCommentSubmit();
-                        }
-                      }}
-                    />
-                    <Button
-                      onClick={handleCommentSubmit}
-                      disabled={!commentText.trim()}
-                      size="icon"
-                      className="self-end"
-                    >
-                      <Send className="h-4 w-4" />
-                    </Button>
-                  </div>
+                  <button
+                    type="button"
+                    className="inline-flex items-center gap-2 text-sm text-white/90 hover:text-white transition-colors"
+                    onClick={focusCommentInput}
+                    aria-label="Comments"
+                  >
+                    <MessageCircle className="w-5 h-5" strokeWidth={1} />
+                    <span>{currentPhotoComments.length}</span>
+                  </button>
+                  
+                  <button
+                    type="button"
+                    className="inline-flex items-center gap-2 text-sm text-white/90 hover:text-white transition-colors"
+                    onClick={handleShare}
+                    aria-label="Share"
+                  >
+                    <Share2 className="w-5 h-5" strokeWidth={1} />
+                  </button>
                 </div>
               </div>
             </div>

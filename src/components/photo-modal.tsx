@@ -107,9 +107,8 @@ export function PhotoModal({
     loadUserRating();
   }, [user?.id, contestantName]);
 
-  // Refs for focusing comment input and scrolling
+  // Refs for scrolling
   const commentsListRef = useRef<HTMLDivElement>(null);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
@@ -291,49 +290,8 @@ export function PhotoModal({
         
         setCommentText("");
         
-        // Reset textarea height back to one line after submit
-        if (textareaRef.current) {
-          textareaRef.current.style.height = '44px';
-        }
-        
         // Call the callback to mark as commented in parent component
         onCommentSubmit?.();
-        
-        // Reload comments to get fresh data from database
-        setTimeout(() => {
-          const loadCommentsAgain = async () => {
-            const { data: freshComments } = await supabase
-              .from('photo_comments')
-              .select('*')
-              .eq('content_type', 'contest')
-              .eq('content_id', contentId)
-              .order('created_at', { ascending: false });
-            
-            if (freshComments) {
-              const userIds = [...new Set(freshComments.map(c => c.user_id))];
-              const { data: profiles } = await supabase
-                .from('profiles')
-                .select('id, display_name')
-                .in('id', userIds);
-
-              const formattedComments: Comment[] = freshComments.map(comment => {
-                const profile = profiles?.find(p => p.id === comment.user_id);
-                return {
-                  id: parseInt(comment.id.slice(-8), 16),
-                  author: profile?.display_name || 'User',
-                  text: comment.comment_text,
-                  timestamp: new Date(comment.created_at).toLocaleString()
-                };
-              });
-              
-              setPhotoComments(prev => ({
-                ...prev,
-                [activeIndex]: formattedComments
-              }));
-            }
-          };
-          loadCommentsAgain();
-        }, 500);
         
         toast({
           title: "Comment added",
@@ -342,11 +300,6 @@ export function PhotoModal({
         });
       } catch (error) {
         console.error('Error saving comment:', error);
-        toast({
-          title: "Error",
-          description: "Failed to save comment",
-          duration: 3000,
-        });
       }
     }
   };
@@ -357,52 +310,12 @@ export function PhotoModal({
       return;
     }
     
-    textareaRef.current?.focus();
-    // Ensure comments panel is scrolled to the latest position
-    if (commentsListRef.current) {
-      commentsListRef.current.scrollTo({
-        top: commentsListRef.current.scrollHeight,
-        behavior: "smooth",
-      });
-    }
-  };
-
-  const handleDislike = async () => {
-    if (!user) {
-      setShowLoginModal(true);
-      return;
-    }
-    
-    const contentId = `contestant-${contestantName}`;
-    
-    try {
-      if (isDisliked) {
-        // Remove dislike - for now use likes table with negative indicator
-        await supabase
-          .from("likes")
-          .delete()
-          .eq("user_id", user.id)
-          .eq("content_type", "contest-dislike")
-          .eq("content_id", contentId);
-        
-        setDislikesCount(prev => prev - 1);
-        setIsDisliked(false);
-      } else {
-        // Add dislike - for now use likes table with negative indicator
-        await supabase
-          .from("likes")
-          .insert({
-            user_id: user.id,
-            content_type: "contest-dislike",
-            content_id: contentId,
-          });
-        
-        setDislikesCount(prev => prev + 1);
-        setIsDisliked(true);
-      }
-    } catch (error) {
-      console.error('Error handling dislike:', error);
-    }
+    // Show toast or could open a comments modal
+    toast({
+      title: "Comments",
+      description: "Comments feature coming soon",
+      duration: 2000,
+    });
   };
 
   const handleRate = async (newRating: number) => {
@@ -417,7 +330,7 @@ export function PhotoModal({
         .upsert({
           user_id: user.id,
           contestant_name: contestantName,
-          contestant_user_id: profileId, // Use profileId if available
+          contestant_user_id: profileId,
           rating: newRating,
         }, {
           onConflict: 'user_id,contestant_user_id'
@@ -465,7 +378,6 @@ export function PhotoModal({
     }
   };
 
-
   // Touch handlers for swipe functionality
   const onTouchStart = (e: React.TouchEvent) => {
     setTouchEnd(null);
@@ -483,10 +395,8 @@ export function PhotoModal({
     const minSwipeDistance = 50;
 
     if (distance > minSwipeDistance) {
-      // Swipe left - next photo
       nextPhoto();
     } else if (distance < -minSwipeDistance) {
-      // Swipe right - previous photo  
       prevPhoto();
     }
   };
@@ -507,270 +417,198 @@ export function PhotoModal({
             <X className="h-5 w-5 md:h-6 md:w-6 text-white" />
           </button>
 
-          {/* Main content */}
-          <div className="h-full w-full flex flex-col max-w-full">
-            {/* Photo section */}
-            <div className={cn(
-              "relative flex items-center justify-center transition-all duration-300 pt-2 md:pt-4",
-              "w-full h-[70dvh] overflow-hidden"
-            )}>
+          {/* Main content - Full screen photo with overlay */}
+          <div className="h-full w-full relative max-w-full">
+            <div className="relative flex items-center justify-center w-full h-full overflow-hidden">
 
-            {photos.length > 1 && (
-              <>
-                <button
-                  onClick={prevPhoto}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 z-50 text-white hover:text-white/90 transition-colors w-12 h-12 rounded-full bg-black/50 hover:bg-black/70 backdrop-blur flex items-center justify-center"
-                  aria-label="Previous photo"
-                >
-                  <ChevronLeft className="w-7 h-7" />
-                </button>
-                <button
-                  onClick={nextPhoto}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 z-50 text-white hover:text-white/90 transition-colors w-12 h-12 rounded-full bg-black/50 hover:bg-black/70 backdrop-blur flex items-center justify-center"
-                  aria-label="Next photo"
-                >
-                  <ChevronRight className="w-7 h-7" />
-                </button>
-              </>
-            )}
-
-            <img
-              src={photos[activeIndex]}
-              alt={`${contestantName} photo ${activeIndex + 1}`}
-              className="max-w-full max-h-full object-contain touch-manipulation select-none"
-              style={{ 
-                width: 'auto', 
-                height: '100%',
-                maxWidth: '100%',
-                objectFit: 'contain'
-              }}
-              onTouchStart={onTouchStart}
-              onTouchMove={onTouchMove}
-              onTouchEnd={onTouchEnd}
-              draggable={false}
-            />
-
-            {/* actions moved to header */}
-
-
-            {photos.length > 1 && (
-              <div className="absolute bottom-4 right-4 flex items-center gap-2">
-                {photos.map((src, index) => (
+              {photos.length > 1 && (
+                <>
                   <button
-                    key={index}
-                    onClick={() => setActiveIndex(index)}
-                    aria-label={`Go to photo ${index + 1}`}
-                    className={cn(
-                      "relative w-8 h-8 sm:w-10 sm:h-10 rounded-full overflow-hidden ring-1 ring-white/40 border border-white/20 transition-all",
-                      index === activeIndex ? "ring-2 ring-white opacity-100" : "opacity-70 hover:opacity-100"
-                    )}
+                    onClick={prevPhoto}
+                    className="absolute left-4 top-1/2 -translate-y-1/2 z-50 text-white hover:text-white/90 transition-colors w-12 h-12 rounded-full bg-black/50 hover:bg-black/70 backdrop-blur flex items-center justify-center"
+                    aria-label="Previous photo"
                   >
-                    <img
-                      src={src}
-                      alt={`Thumbnail ${index + 1}`}
-                      className="w-full h-full object-cover"
-                      loading="lazy"
-                    />
+                    <ChevronLeft className="w-7 h-7" />
                   </button>
-                ))}
-              </div>
-            )}
-          </div>
+                  <button
+                    onClick={nextPhoto}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 z-50 text-white hover:text-white/90 transition-colors w-12 h-12 rounded-full bg-black/50 hover:bg-black/70 backdrop-blur flex items-center justify-center"
+                    aria-label="Next photo"
+                  >
+                    <ChevronRight className="w-7 h-7" />
+                  </button>
+                </>
+              )}
 
-          {/* Contest info section */}
-          <div className="bg-background flex flex-col flex-shrink-0 w-full h-[30dvh] min-h-0">
-            {/* Winner Badge */}
-            {isWinner && (
-              <div className="bg-blue-100 text-blue-700 px-4 py-2 text-sm font-semibold flex justify-start items-center border-b">
-                <span>🏆 WINNER   + 5000 PHP</span>
-              </div>
-            )}
-            
-            {/* Header with name and country */}
-            <div className="p-4 border-b">
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <h3 className="font-semibold text-contest-text truncate">
-                    {contestantName}
-                    {age ? `, ${age}` : ""}
-                    {(weight || height) ? (
-                      <span className="ml-1 text-xs sm:text-sm text-muted-foreground font-normal">
-                        (
-                        {weight ? `${weight} kg` : ""}
-                        {(weight && height) ? " · " : ""}
-                        {height ? `${height} cm` : ""}
-                        )
-                      </span>
-                    ) : null}
-                  </h3>
-                  <div className="text-sm text-contest-blue truncate">
-                    {country}
-                  </div>
+              <img
+                src={photos[activeIndex]}
+                alt={`${contestantName} photo ${activeIndex + 1}`}
+                className="w-full h-full object-cover touch-manipulation select-none"
+                onTouchStart={onTouchStart}
+                onTouchMove={onTouchMove}
+                onTouchEnd={onTouchEnd}
+                draggable={false}
+              />
+
+              {/* Thumbnail navigation */}
+              {photos.length > 1 && (
+                <div className="absolute bottom-32 right-4 flex items-center gap-2 z-40">
+                  {photos.map((src, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setActiveIndex(index)}
+                      aria-label={`Go to photo ${index + 1}`}
+                      className={cn(
+                        "relative w-8 h-8 sm:w-10 sm:h-10 rounded-full overflow-hidden ring-1 ring-white/40 border border-white/20 transition-all",
+                        index === activeIndex ? "ring-2 ring-white opacity-100" : "opacity-70 hover:opacity-100"
+                      )}
+                    >
+                      <img
+                        src={src}
+                        alt={`Thumbnail ${index + 1}`}
+                        className="w-full h-full object-cover"
+                        loading="lazy"
+                      />
+                    </button>
+                  ))}
                 </div>
+              )}
+
+              {/* Overlay info panel */}
+              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent p-4 text-white z-40">
                 
-                {/* Rating badge */}
-                {isUserVoted && !isEditing && !showThanks && rank > 0 && (
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <div className="bg-contest-blue text-white px-2 py-1.5 rounded-bl-lg text-base sm:text-lg font-bold shadow-sm cursor-pointer hover:bg-contest-blue/90 transition-colors">
-                        {rating.toFixed(1)}
-                      </div>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-3">
-                      <div className="text-sm">
-                        You rated {userRating.toFixed(0)} — <button 
-                          className="text-contest-blue hover:underline" 
-                          onClick={() => setIsEditing(true)}
-                        >
-                          change
-                        </button>
-                      </div>
-                    </PopoverContent>
-                  </Popover>
+                {/* Winner Badge */}
+                {isWinner && (
+                  <div className="bg-blue-500/80 text-white px-3 py-1.5 rounded-lg text-sm font-semibold mb-3 inline-block backdrop-blur-sm">
+                    🏆 WINNER + 5000 PHP
+                  </div>
                 )}
-              </div>
-            </div>
+                
+                {/* Profile info */}
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold text-lg truncate text-white">
+                      {contestantName}
+                      {age ? `, ${age}` : ""}
+                    </h3>
+                    <div className="text-sm text-white/90 flex items-center gap-3">
+                      {country && <span>{country}</span>}
+                      {weight && <span>{weight} кг</span>}
+                      {height && <span>{height} см</span>}
+                    </div>
+                  </div>
+                  
+                  {/* Rating badge */}
+                  {isUserVoted && !isEditing && !showThanks && rank > 0 && (
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <div className="bg-blue-500 text-white px-3 py-2 rounded-lg text-lg font-bold shadow-sm cursor-pointer hover:bg-blue-600 transition-colors backdrop-blur-sm">
+                          {rating.toFixed(1)}
+                        </div>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-3">
+                        <div className="text-sm">
+                          You rated {userRating.toFixed(0)} — <button 
+                            className="text-blue-600 hover:underline" 
+                            onClick={() => setIsEditing(true)}
+                          >
+                            change
+                          </button>
+                        </div>
+                      </PopoverContent>
+                    </Popover>
+                  )}
+                </div>
 
-            {/* Voting section */}
-            <div className="relative flex-1 bg-card">
-              {!isUserVoted && !showThanks && (
-                <div className="h-full bg-gray-100 flex items-center justify-center">
-                  <div className="flex items-center gap-6">
-                    <span className="text-2xl font-medium text-gray-800">Vote</span>
-                    <div className="scale-[2]">
-                      <StarRating 
-                        rating={0}
-                        isVoted={false}
-                        readonly={false}
-                        hideText={true}
-                        onRate={(newRating) => {
-                          handleRate(newRating);
-                        }}
-                      />
+                {/* Voting section */}
+                {!isUserVoted && !showThanks && (
+                  <div className="mb-4 bg-black/30 rounded-lg p-3 backdrop-blur-sm">
+                    <div className="flex items-center justify-center gap-4">
+                      <span className="text-lg font-medium text-white">Vote</span>
+                      <div className="scale-110">
+                        <StarRating 
+                          rating={0}
+                          isVoted={false}
+                          readonly={false}
+                          hideText={true}
+                          variant="white"
+                          onRate={(newRating) => {
+                            handleRate(newRating);
+                          }}
+                        />
+                      </div>
                     </div>
                   </div>
-                </div>
-              )}
-              
-              {/* Thank you message */}
-              {showThanks && (
-                <div className="h-full bg-gray-200 flex items-center justify-center">
-                  <span className="text-lg font-medium text-gray-800">Thank you! Rated {userRating.toFixed(0)}</span>
-                </div>
-              )}
-              
-              {/* Re-voting overlay */}
-              {isUserVoted && isEditing && !showThanks && (
-                <div className="h-full bg-gray-300 flex items-center justify-center">
-                  <div className="-translate-x-2 flex items-center gap-6">
-                    <span className="text-2xl font-medium text-gray-800 mr-8">Vote</span>
-                    <div className="scale-[2]">
-                      <StarRating 
-                        rating={rating}
-                        isVoted={false}
-                        variant="white"
-                        hideText={true}
-                        onRate={(newRating) => {
-                          setUserRating(newRating);
-                          setIsEditing(false);
-                          handleRate(newRating);
-                        }}
-                      />
-                    </div>
-                  </div>
-                </div>
-              )}
-              
-              {/* Empty space after voting */}
-              {isUserVoted && !isEditing && !showThanks && (
-                <div className="h-full"></div>
-              )}
-            </div>
-            {/* Action buttons */}
-            <div className="border-t border-contest-border px-4 py-3 flex items-center justify-between">
-              <div className="flex items-center gap-6">
-                <button
-                  type="button"
-                  className={cn(
-                    "inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors",
-                    currentPhotoLikes.isLiked && "text-contest-blue"
-                  )}
-                  onClick={handleLike}
-                  aria-label="Like"
-                >
-                  <ThumbsUp className="w-5 h-5 text-primary" strokeWidth={1} />
-                  <span>{currentPhotoLikes.count}</span>
-                </button>
-                <button
-                  type="button"
-                  className={cn(
-                    "inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors",
-                    currentPhotoComments.length > 0 && "text-contest-blue"
-                  )}
-                  onClick={focusCommentInput}
-                  aria-label="Comments"
-                >
-                  <MessageCircle className="w-5 h-5 text-primary" strokeWidth={1} />
-                  <span>{currentPhotoComments.length}</span>
-                </button>
-                <button
-                  type="button"
-                  className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
-                  onClick={handleShare}
-                  aria-label="Share"
-                >
-                  <Share2 className="w-5 h-5" strokeWidth={1} />
-                </button>
-              </div>
-            </div>
-            
-            {/* Comments section */}
-            <div className="flex-1 overflow-y-auto px-4" ref={commentsListRef}>
-              <div className="space-y-3 py-3">
-                {currentPhotoComments.map((comment) => (
-                  <div key={comment.id} className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium text-sm">{comment.author}</span>
-                      <span className="text-xs text-muted-foreground">{comment.timestamp}</span>
-                    </div>
-                    <p className="text-sm">{comment.text}</p>
-                  </div>
-                ))}
-                {currentPhotoComments.length === 0 && (
-                  <p className="text-muted-foreground text-center py-4 text-sm">
-                    Пока нет комментариев. Будьте первым!
-                  </p>
                 )}
-              </div>
-            </div>
+                
+                {/* Thank you message */}
+                {showThanks && (
+                  <div className="mb-4 bg-green-500/80 rounded-lg p-3 backdrop-blur-sm text-center">
+                    <span className="text-lg font-medium text-white">Thank you! Rated {userRating.toFixed(0)}</span>
+                  </div>
+                )}
+                
+                {/* Re-voting overlay */}
+                {isUserVoted && isEditing && !showThanks && (
+                  <div className="mb-4 bg-black/30 rounded-lg p-3 backdrop-blur-sm">
+                    <div className="flex items-center justify-center gap-4">
+                      <span className="text-lg font-medium text-white">Vote</span>
+                      <div className="scale-110">
+                        <StarRating 
+                          rating={rating}
+                          isVoted={false}
+                          variant="white"
+                          hideText={true}
+                          onRate={(newRating) => {
+                            setUserRating(newRating);
+                            setIsEditing(false);
+                            handleRate(newRating);
+                          }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
 
-            {/* Comment input */}
-            <div className="border-t p-4">
-              <div className="flex gap-2">
-                <Textarea
-                  ref={textareaRef}
-                  value={commentText}
-                  onChange={(e) => setCommentText(e.target.value)}
-                  placeholder="Write a comment for this photo..."
-                  className="flex-1 resize-none min-h-[44px] max-h-32 text-sm"
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' && !e.shiftKey) {
-                      e.preventDefault();
-                      handleCommentSubmit();
-                    }
-                  }}
-                />
-                <Button
-                  onClick={handleCommentSubmit}
-                  disabled={!commentText.trim()}
-                  size="icon"
-                  className="self-end"
-                >
-                  <Send className="h-4 w-4" />
-                </Button>
+                {/* Action buttons */}
+                <div className="flex items-center gap-6">
+                  <button
+                    type="button"
+                    className={cn(
+                      "inline-flex items-center gap-2 text-sm text-white/90 hover:text-white transition-colors",
+                      currentPhotoLikes.isLiked && "text-red-400"
+                    )}
+                    onClick={handleLike}
+                    aria-label="Like"
+                  >
+                    <ThumbsUp className={cn(
+                      "w-5 h-5",
+                      currentPhotoLikes.isLiked && "fill-current"
+                    )} strokeWidth={1} />
+                    <span>{currentPhotoLikes.count}</span>
+                  </button>
+                  
+                  <button
+                    type="button"
+                    className="inline-flex items-center gap-2 text-sm text-white/90 hover:text-white transition-colors"
+                    onClick={focusCommentInput}
+                    aria-label="Comments"
+                  >
+                    <MessageCircle className="w-5 h-5" strokeWidth={1} />
+                    <span>{currentPhotoComments.length}</span>
+                  </button>
+                  
+                  <button
+                    type="button"
+                    className="inline-flex items-center gap-2 text-sm text-white/90 hover:text-white transition-colors"
+                    onClick={handleShare}
+                    aria-label="Share"
+                  >
+                    <Share2 className="w-5 h-5" strokeWidth={1} />
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
           </div>
         </div>
       )}
