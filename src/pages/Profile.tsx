@@ -92,6 +92,7 @@ const Profile = () => {
   const [loadingParticipation, setLoadingParticipation] = useState(true);
   const [participationViewMode, setParticipationViewMode] = useState<'compact' | 'full'>('compact');
   const [photoModalOpen, setPhotoModalOpen] = useState(false);
+  const [profilePhotoModalOpen, setProfilePhotoModalOpen] = useState(false);
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState(0);
   const [userPosts, setUserPosts] = useState<any[]>([]);
   const [loadingPosts, setLoadingPosts] = useState(true);
@@ -1036,7 +1037,7 @@ const Profile = () => {
                       key={idx}
                       onClick={() => {
                         setSelectedPhotoIndex(idx);
-                        setPhotoModalOpen(true);
+                        setProfilePhotoModalOpen(true);
                       }}
                       className="relative group cursor-pointer"
                     >
@@ -1923,6 +1924,16 @@ const Profile = () => {
         height={profile.height_cm || undefined}
         country={profile.country || undefined}
         city={profile.city || undefined}
+      />
+
+      {/* Profile Photo Modal */}
+      <ProfilePhotoModal
+        isOpen={profilePhotoModalOpen}
+        onClose={() => setProfilePhotoModalOpen(false)}
+        photos={profilePhotos}
+        currentIndex={selectedPhotoIndex}
+        profileId={id || ""}
+        profileName={profile.display_name || "Пользователь"}
       />
 
     </div>
