@@ -391,7 +391,10 @@ export function PhotoModal({
         .upsert({
           user_id: user.id,
           contestant_name: contestantName,
+          contestant_user_id: profileId, // Use profileId if available
           rating: newRating,
+        }, {
+          onConflict: 'user_id,contestant_user_id'
         });
 
       if (error) {

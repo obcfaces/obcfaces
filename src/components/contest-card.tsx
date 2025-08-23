@@ -262,34 +262,21 @@ export function ContestantCard({
       
       console.log('Saving rating to database:', ratingData);
       
-      // Try regular insert first to see if that works
+      // Use upsert to handle one rating per user per contestant
       const { data, error } = await supabase
         .from('contestant_ratings')
-        .insert(ratingData)
+        .upsert(ratingData, { 
+          onConflict: 'user_id,contestant_user_id',
+          ignoreDuplicates: false 
+        })
         .select();
       
-      console.log('Rating save result:', { data, error });
+      console.log('Rating upsert result:', { data, error });
       
       if (error) {
-        console.error('Insert failed with error:', error);
-        console.error('Error details:', JSON.stringify(error, null, 2));
-        
-        // If insert fails due to conflict, try upsert
-        const { data: upsertData, error: upsertError } = await supabase
-          .from('contestant_ratings')
-          .upsert(ratingData, { 
-            onConflict: 'user_id,contestant_name',
-            ignoreDuplicates: false 
-          })
-          .select();
-          
-        console.log('Upsert result:', { upsertData, upsertError });
-        
-        if (upsertError) {
-          console.error('Upsert also failed:', upsertError);
-          toast({ description: "Ошибка при сохранении оценки: " + upsertError.message });
-          return;
-        }
+        console.error('Upsert failed with error:', error);
+        toast({ description: "Ошибка при сохранении оценки: " + error.message });
+        return;
       }
       
       // Also keep in localStorage for immediate feedback
