@@ -7,111 +7,33 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Heart, AlignJustify, Grid2X2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-// Mock data for likes (copying the structure from Profile.tsx)
-const mockLikedItems = [
-  {
-    likeId: "1",
-    contentType: "contest" as const,
-    contentId: "1",
-    authorName: "Anna Petrova",
-    authorAvatarUrl: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=100&h=100&fit=crop&crop=face",
-    authorProfileId: "user1",
-    time: "2 часа назад",
-    content: "Participating in beauty contest",
-    imageSrc: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=400&h=400&fit=crop&crop=face",
-    likes: 124,
-    comments: 18,
-    candidateData: {
-      country: "Russia",
-      age: 24,
-      height: 165
-    },
-    participantType: "candidate" as const
-  },
-  {
-    likeId: "2", 
-    contentType: "photo" as const,
-    contentId: "2",
-    authorName: "Elena Martinez",
-    authorAvatarUrl: "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=100&h=100&fit=crop&crop=face",
-    authorProfileId: "user2",
-    time: "1 день назад",
-    content: "Beautiful sunset photoshoot",
-    imageSrc: "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=400&h=400&fit=crop&crop=face",
-    likes: 89,
-    comments: 12,
-    candidateData: {
-      country: "Philippines",
-      age: 22,
-      height: 160
-    }
-  },
-  {
-    likeId: "3",
-    contentType: "post" as const,
-    contentId: "3", 
-    authorName: "Sofia Chen",
-    authorAvatarUrl: "https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?w=100&h=100&fit=crop&crop=face",
-    authorProfileId: "user3",
-    time: "3 дня назад",
-    content: "Morning coffee vibes ☕",
-    imageSrc: "https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?w=400&h=400&fit=crop&crop=face",
-    likes: 45,
-    comments: 8,
-    candidateData: {
-      country: "Singapore",
-      age: 26,
-      height: 158
-    }
-  }
-];
-
-// Mock data for who liked me
-const mockWhoLikedMe = [
-  {
-    likeId: "w1",
-    contentType: "post" as const,
-    contentId: "my1",
-    authorName: "Maria Santos",
-    authorAvatarUrl: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&crop=face",
-    authorProfileId: "liker1",
-    time: "1 час назад",
-    content: "liked your photo",
-    imageSrc: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&fit=crop&crop=face",
-    likes: 67,
-    comments: 5,
-    candidateData: {
-      country: "Brazil",
-      age: 23,
-      height: 168
-    }
-  },
-  {
-    likeId: "w2",
-    contentType: "contest" as const,
-    contentId: "my2",
-    authorName: "Lisa Johnson",
-    authorAvatarUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop&crop=face",
-    authorProfileId: "liker2",
-    time: "4 часа назад",
-    content: "liked your contest participation",
-    imageSrc: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&h=400&fit=crop&crop=face",
-    likes: 156,
-    comments: 23,
-    candidateData: {
-      country: "USA",
-      age: 25,
-      height: 172
-    }
-  }
-];
+// Interface for liked item data
+interface LikedItemData {
+  likeId: string;
+  contentType: 'contest' | 'photo' | 'post';
+  contentId: string;
+  authorName: string;
+  authorAvatarUrl: string;
+  authorProfileId: string;
+  time: string;
+  content: string;
+  imageSrc: string;
+  likes: number;
+  comments: number;
+  candidateData: {
+    country: string;
+    age: number;
+    height: number;
+  };
+  participantType?: 'candidate' | 'finalist' | 'winner';
+}
 
 const Likes = () => {
   const navigate = useNavigate();
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const [likedItems, setLikedItems] = useState<any[]>([]);
-  const [whoLikedMe, setWhoLikedMe] = useState<any[]>([]);
+  const [likedItems, setLikedItems] = useState<LikedItemData[]>([]);
+  const [whoLikedMe, setWhoLikedMe] = useState<LikedItemData[]>([]);
   const [likesViewMode, setLikesViewMode] = useState<'compact' | 'full'>('compact');
   const [likesCountryFilter, setLikesCountryFilter] = useState<string>("all");
   const [whoLikedMeViewMode, setWhoLikedMeViewMode] = useState<'compact' | 'full'>('compact');
@@ -137,57 +59,63 @@ const Likes = () => {
 
     const loadLikedItems = async () => {
       try {
-        // Get items the current user liked
-        const { data: userLikes, error: likesError } = await supabase
-          .from('likes')
-          .select(`
-            id,
-            content_id,
-            content_type,
-            created_at
-          `)
-          .eq('user_id', currentUserId)
-          .order('created_at', { ascending: false });
+        // Get users the current user has liked using the database function
+        const { data: usersILiked, error: likedError } = await supabase
+          .rpc('get_users_i_liked', { target_user_id: currentUserId });
 
-        if (likesError) throw likesError;
+        if (likedError) throw likedError;
 
-        // Transform likes data for display
-        const transformedLikes = (userLikes || []).map(like => {
-          // Extract contestant name from content_id for contest content
-          let authorName = 'Unknown';
-          if (like.content_type === 'contest' && like.content_id.includes('contestant-photo-')) {
-            const nameMatch = like.content_id.match(/contestant-photo-(.+)-\d+$/);
-            if (nameMatch) {
-              authorName = nameMatch[1].replace(/\+/g, ' ');
-            }
-          }
-
-          return {
-            likeId: like.id,
-            contentType: like.content_type as 'contest' | 'photo' | 'post',
-            contentId: like.content_id,
-            authorName: authorName,
-            authorAvatarUrl: `https://images.unsplash.com/photo-1494790108755-2616b612b786?w=100&h=100&fit=crop&crop=face`,
-            authorProfileId: 'unknown',
-            time: new Date(like.created_at).toLocaleDateString('ru-RU'),
-            content: like.content_type === 'contest' ? 'Contest participation' : 'Liked content',
-            imageSrc: `https://images.unsplash.com/photo-1494790108755-2616b612b786?w=400&h=400&fit=crop&crop=face`,
-            likes: 0,
-            comments: 0,
-            candidateData: {
-              country: 'Unknown',
-              age: 0,
-              height: 0
-            },
-            participantType: 'candidate' as const
-          };
-        });
+        // Transform the data for display
+        const transformedLikes: LikedItemData[] = (usersILiked || []).map((user: any) => ({
+          likeId: user.like_id,
+          contentType: user.content_type as 'contest' | 'photo' | 'post',
+          contentId: user.content_id,
+          authorName: user.display_name || 'Unknown User',
+          authorAvatarUrl: user.avatar_url || user.photo_1_url || '/placeholder.svg',
+          authorProfileId: user.liked_user_id,
+          time: new Date(user.created_at).toLocaleDateString('ru-RU'),
+          content: user.content_type === 'contest' ? 'Contest participation' : 'Liked content',
+          imageSrc: user.photo_1_url || user.avatar_url || '/placeholder.svg',
+          likes: 0,
+          comments: 0,
+          candidateData: {
+            country: user.country || 'Unknown',
+            age: user.age || 0,
+            height: 0
+          },
+          participantType: (user.participant_type as 'candidate' | 'finalist' | 'winner') || 'candidate'
+        }));
 
         setLikedItems(transformedLikes);
 
-        // Get items where others liked current user's content
-        // For now, set empty array as we need to implement this logic
-        setWhoLikedMe([]);
+        // Get users who liked the current user's content
+        const { data: usersWhoLikedMe, error: whoLikedError } = await supabase
+          .rpc('get_users_who_liked_me', { target_user_id: currentUserId });
+
+        if (whoLikedError) throw whoLikedError;
+
+        // Transform the data for display
+        const transformedWhoLikedMe: LikedItemData[] = (usersWhoLikedMe || []).map((user: any) => ({
+          likeId: user.like_id,
+          contentType: user.content_type as 'contest' | 'photo' | 'post',
+          contentId: user.content_id,
+          authorName: user.display_name || 'Unknown User',
+          authorAvatarUrl: user.avatar_url || user.photo_1_url || '/placeholder.svg',
+          authorProfileId: user.liker_user_id,
+          time: new Date(user.created_at).toLocaleDateString('ru-RU'),
+          content: 'liked your contest photo',
+          imageSrc: user.photo_1_url || user.avatar_url || '/placeholder.svg',
+          likes: 0,
+          comments: 0,
+          candidateData: {
+            country: user.country || 'Unknown',
+            age: user.age || 0,
+            height: 0
+          },
+          participantType: (user.participant_type as 'candidate' | 'finalist' | 'winner') || 'candidate'
+        }));
+
+        setWhoLikedMe(transformedWhoLikedMe);
 
       } catch (error) {
         console.error('Error loading likes:', error);
