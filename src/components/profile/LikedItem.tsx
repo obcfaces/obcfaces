@@ -108,11 +108,11 @@ const LikedItem = ({
   const { data: cardData, loading: cardDataLoading } = useCardData(authorName, user?.id);
   
   // Get real participant data from database
-  const { data: participantsList, loading: participantsLoading, getParticipantByName } = useParticipantData();
+  const { getParticipantByName } = useParticipantData();
   const realParticipantData = getParticipantByName(authorName);
   
-  // Don't render until all data is loaded
-  const isDataLoading = cardDataLoading || participantsLoading;
+  // Don't render until card data is loaded (participant data loads separately)
+  const isDataLoading = cardDataLoading;
 
   // Get current user
   useEffect(() => {
