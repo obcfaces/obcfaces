@@ -131,14 +131,72 @@ const Likes = () => {
     getCurrentUser();
   }, [navigate]);
 
-  // Load liked items
+  // Load liked items from database
   useEffect(() => {
-    if (currentUserId) {
-      // Load actual user data from database
-      // For now, initialize with empty arrays until real data is implemented
-      setLikedItems([]);
-      setWhoLikedMe([]);
-    }
+    if (!currentUserId) return;
+
+    const loadLikedItems = async () => {
+      try {
+        // Get items the current user liked
+        const { data: userLikes, error: likesError } = await supabase
+          .from('likes')
+          .select(`
+            id,
+            content_id,
+            content_type,
+            created_at
+          `)
+          .eq('user_id', currentUserId)
+          .order('created_at', { ascending: false });
+
+        if (likesError) throw likesError;
+
+        // Transform likes data for display
+        const transformedLikes = (userLikes || []).map(like => {
+          // Extract contestant name from content_id for contest content
+          let authorName = 'Unknown';
+          if (like.content_type === 'contest' && like.content_id.includes('contestant-photo-')) {
+            const nameMatch = like.content_id.match(/contestant-photo-(.+)-\d+$/);
+            if (nameMatch) {
+              authorName = nameMatch[1].replace(/\+/g, ' ');
+            }
+          }
+
+          return {
+            likeId: like.id,
+            contentType: like.content_type as 'contest' | 'photo' | 'post',
+            contentId: like.content_id,
+            authorName: authorName,
+            authorAvatarUrl: `https://images.unsplash.com/photo-1494790108755-2616b612b786?w=100&h=100&fit=crop&crop=face`,
+            authorProfileId: 'unknown',
+            time: new Date(like.created_at).toLocaleDateString('ru-RU'),
+            content: like.content_type === 'contest' ? 'Contest participation' : 'Liked content',
+            imageSrc: `https://images.unsplash.com/photo-1494790108755-2616b612b786?w=400&h=400&fit=crop&crop=face`,
+            likes: 0,
+            comments: 0,
+            candidateData: {
+              country: 'Unknown',
+              age: 0,
+              height: 0
+            },
+            participantType: 'candidate' as const
+          };
+        });
+
+        setLikedItems(transformedLikes);
+
+        // Get items where others liked current user's content
+        // For now, set empty array as we need to implement this logic
+        setWhoLikedMe([]);
+
+      } catch (error) {
+        console.error('Error loading likes:', error);
+        setLikedItems([]);
+        setWhoLikedMe([]);
+      }
+    };
+
+    loadLikedItems();
   }, [currentUserId]);
 
   const handleUnlike = (likeId: string) => {
