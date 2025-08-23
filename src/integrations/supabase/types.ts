@@ -584,6 +584,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      cleanup_duplicate_conversations_safe: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       create_weekly_contest: {
         Args: { contest_date?: string }
         Returns: string
