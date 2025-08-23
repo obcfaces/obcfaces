@@ -421,9 +421,10 @@ const Admin = () => {
       return;
     }
 
-    // If approved, make user a contest participant and add to current weekly contest
+    const application = contestApplications.find(app => app.id === applicationId);
+    
     if (status === 'approved') {
-      const application = contestApplications.find(app => app.id === applicationId);
+      // If approved, make user a contest participant and add to current weekly contest
       if (application) {
         // Update profile
         const { error: profileError } = await supabase
@@ -461,11 +462,34 @@ const Admin = () => {
           }
         }
       }
+    } else if (status === 'rejected') {
+      // If rejected, remove user from contest participation and remove from weekly contests
+      if (application) {
+        // Update profile to remove contest participant status
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .update({ is_contest_participant: false })
+          .eq('id', application.user_id);
+
+        if (profileError) {
+          console.error('Error updating profile:', profileError);
+        }
+
+        // Remove from all weekly contest participants
+        const { error: participantError } = await supabase
+          .from('weekly_contest_participants')
+          .delete()
+          .eq('user_id', application.user_id);
+
+        if (participantError) {
+          console.error('Error removing from weekly contests:', participantError);
+        }
+      }
     }
 
     toast({
       title: "Success",
-      description: `Application ${status}${status === 'approved' ? ' and added to contest' : ''}`,
+      description: `Application ${status}${status === 'approved' ? ' and added to contest' : status === 'rejected' ? ' and removed from contest' : ''}`,
     });
 
     fetchContestApplications();
