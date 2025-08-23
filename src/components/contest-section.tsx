@@ -211,8 +211,8 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
             fullBodyImage: contestant.photo_2_url || contestant1Full,
             additionalPhotos: [],
             isVoted: showWinner ? true : averageRating > 0,
-            isWinner: showWinner && contestant.final_rank === 1,
-            prize: showWinner && contestant.final_rank === 1 ? "+ 5000 PHP" : undefined,
+            isWinner: false, // Will be set after sorting
+            prize: undefined, // Will be set after sorting
             isRealContestant: true // Mark as real contestant to disable fake likes/comments
           };
           
@@ -226,12 +226,24 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
         })
       );
       
-      return contestantsWithRatings.filter(Boolean).sort((a, b) => {
-        // Sort by average rating (highest first), then by rank if ratings are equal
+      // Sort by average rating (highest first) and assign ranks based on rating
+      const sortedContestants = contestantsWithRatings.filter(Boolean).sort((a, b) => {
         if (b.rating !== a.rating) {
           return b.rating - a.rating;
         }
-        return (a.rank || 999) - (b.rank || 999);
+        // If ratings are equal, sort by total votes (higher votes first)
+        return (b.totalVotes || 0) - (a.totalVotes || 0);
+      });
+
+      // Assign ranks based on rating order (1 for highest rating)
+      return sortedContestants.map((contestant, index) => {
+        const newRank = contestant.rating > 0 ? index + 1 : 0;
+        return {
+          ...contestant,
+          rank: newRank,
+          isWinner: showWinner && newRank === 1,
+          prize: showWinner && newRank === 1 ? "+ 5000 PHP" : undefined
+        };
       });
     }
     
