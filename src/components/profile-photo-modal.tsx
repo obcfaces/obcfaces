@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { Link } from "react-router-dom";
 import { X, ChevronLeft, ChevronRight, ThumbsUp, MessageCircle, Send, Share2 } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -11,6 +12,7 @@ import LoginModalContent from "@/components/login-modal-content";
 interface Comment {
   id: string;
   author: string;
+  authorId: string;
   text: string;
   timestamp: string;
 }
@@ -125,6 +127,7 @@ export function ProfilePhotoModal({
             return {
               id: comment.id,
               author: profile?.display_name || 'User',
+              authorId: comment.user_id,
               text: comment.comment_text,
               timestamp: new Date(comment.created_at).toLocaleString()
             };
@@ -335,6 +338,7 @@ export function ProfilePhotoModal({
         const newComment: Comment = {
           id: `temp-${Date.now()}`,
           author: "Вы",
+          authorId: user.id,
           text: commentText.trim(),
           timestamp: "только что"
         };
@@ -372,6 +376,7 @@ export function ProfilePhotoModal({
                 return {
                   id: comment.id,
                   author: profile?.display_name || 'User',
+                  authorId: comment.user_id,
                   text: comment.comment_text,
                   timestamp: new Date(comment.created_at).toLocaleString()
                 };
@@ -591,7 +596,12 @@ export function ProfilePhotoModal({
                   {currentPhotoComments.map((comment) => (
                     <div key={comment.id} className="space-y-1">
                       <div className="flex items-center gap-2">
-                        <span className="font-medium text-sm">{comment.author}</span>
+                        <Link 
+                          to={`/u/${comment.authorId}`} 
+                          className="font-medium text-sm hover:text-primary underline-offset-2 hover:underline"
+                        >
+                          {comment.author}
+                        </Link>
                         <span className="text-xs text-gray-500">{comment.timestamp}</span>
                       </div>
                       <p className="text-sm text-gray-800">{comment.text}</p>
