@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { Link } from "react-router-dom";
 import { X, ChevronLeft, ChevronRight, ThumbsUp, MessageCircle, Send, Share2, ThumbsDown } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -14,6 +15,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 interface Comment {
   id: number;
   author: string;
+  authorId: string;
   text: string;
   timestamp: string;
 }
@@ -154,6 +156,7 @@ export function PhotoModal({
           return {
             id: parseInt(comment.id.slice(-8), 16),
             author: profile?.display_name || 'User',
+            authorId: comment.user_id,
             text: comment.comment_text,
             timestamp: new Date(comment.created_at).toLocaleString()
           };
@@ -290,6 +293,7 @@ export function PhotoModal({
         const newComment: Comment = {
           id: Date.now(),
           author: "You",
+          authorId: user.id,
           text: commentText.trim(),
           timestamp: "just now"
         };
@@ -330,6 +334,7 @@ export function PhotoModal({
                 return {
                   id: parseInt(comment.id.slice(-8), 16),
                   author: profile?.display_name || 'User',
+                  authorId: comment.user_id,
                   text: comment.comment_text,
                   timestamp: new Date(comment.created_at).toLocaleString()
                 };
@@ -567,7 +572,12 @@ export function PhotoModal({
                   {currentPhotoComments.map((comment) => (
                     <div key={comment.id} className="space-y-1">
                       <div className="flex items-center gap-2">
-                        <span className="font-medium text-sm">{comment.author}</span>
+                        <Link 
+                          to={`/u/${comment.authorId}`} 
+                          className="font-medium text-sm hover:text-primary underline-offset-2 hover:underline"
+                        >
+                          {comment.author}
+                        </Link>
                         <span className="text-xs text-gray-500">{comment.timestamp}</span>
                       </div>
                       <p className="text-sm text-gray-800">{comment.text}</p>
