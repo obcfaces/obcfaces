@@ -214,6 +214,15 @@ export function PhotoModal({
     const contentId = `contestant-photo-${contestantName}-${activeIndex}`;
     const wasLiked = photoLikes[activeIndex]?.isLiked || false;
     
+    // Optimistic update first for immediate UI feedback
+    setPhotoLikes(prev => ({
+      ...prev,
+      [activeIndex]: {
+        count: wasLiked ? (prev[activeIndex]?.count || 0) - 1 : (prev[activeIndex]?.count || 0) + 1,
+        isLiked: !wasLiked
+      }
+    }));
+    
     try {
       if (wasLiked) {
         // Unlike
@@ -234,16 +243,16 @@ export function PhotoModal({
           });
       }
       
+    } catch (error) {
+      console.error('Error handling like:', error);
+      // Revert optimistic update on error
       setPhotoLikes(prev => ({
         ...prev,
         [activeIndex]: {
-          count: wasLiked ? (prev[activeIndex]?.count || 0) - 1 : (prev[activeIndex]?.count || 0) + 1,
-          isLiked: !wasLiked
+          count: wasLiked ? (prev[activeIndex]?.count || 0) + 1 : (prev[activeIndex]?.count || 0) - 1,
+          isLiked: wasLiked
         }
       }));
-      
-    } catch (error) {
-      console.error('Error handling like:', error);
     }
   };
 
