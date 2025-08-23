@@ -470,9 +470,9 @@ export function ContestantCard({
                 onClick={() => handleLike(0)}
                 aria-label="Like"
               >
-                 <ThumbsUp className={cn("w-4 h-4 text-primary", (isLiked[0] || isLiked[1]) && "fill-blue-500 text-blue-500")} strokeWidth={1} />
-                 <span className="hidden sm:inline">Like</span>
-                  {cardData.likes > 0 && <span>{cardData.likes}</span>}
+                 <ThumbsUp className={cn("w-4 h-4", (isLiked[0] || isLiked[1]) ? "text-blue-500 fill-blue-500" : "text-gray-500")} strokeWidth={1} />
+                 <span className={cn("hidden sm:inline", (isLiked[0] || isLiked[1]) ? "text-blue-500" : "text-gray-500")}>Like</span>
+                  {cardData.likes > 0 && <span className={cn((isLiked[0] || isLiked[1]) ? "text-blue-500" : "text-gray-500")}>{cardData.likes}</span>}
               </button>
               {showDislike && (
                 <button
@@ -711,9 +711,9 @@ export function ContestantCard({
                    onClick={() => handleLike(0)}
                    aria-label="Like"
                  >
-                    <ThumbsUp className={cn("w-3.5 h-3.5 text-primary", (isLiked[0] || isLiked[1]) && "fill-blue-500 text-blue-500")} strokeWidth={1} />
-                    <span className="hidden xl:inline">Like</span>
-                     {cardData.likes > 0 && <span>{cardData.likes}</span>}
+                    <ThumbsUp className={cn("w-3.5 h-3.5", (isLiked[0] || isLiked[1]) ? "text-blue-500 fill-blue-500" : "text-gray-500")} strokeWidth={1} />
+                    <span className={cn("hidden xl:inline", (isLiked[0] || isLiked[1]) ? "text-blue-500" : "text-gray-500")}>Like</span>
+                     {cardData.likes > 0 && <span className={cn((isLiked[0] || isLiked[1]) ? "text-blue-500" : "text-gray-500")}>{cardData.likes}</span>}
                  </button>
                 {showDislike && (
                   <button
