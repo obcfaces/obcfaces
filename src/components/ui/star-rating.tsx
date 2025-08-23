@@ -44,10 +44,10 @@ export function StarRating({ rating, isVoted, onRate, readonly, variant = "defau
               className={cn(
                 "w-4 h-4 transition-colors",
                 variant === "white"
-                  ? star <= hoveredRating
+                  ? (star <= (hoveredRating || rating))
                     ? "fill-yellow-400 text-yellow-400"
                     : "fill-white text-white stroke-2"
-                  : star <= hoveredRating
+                  : (star <= (hoveredRating || rating))
                     ? "fill-star-active text-star-active"
                     : "fill-star-inactive text-star-inactive"
               )}
