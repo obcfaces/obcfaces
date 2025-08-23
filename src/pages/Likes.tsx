@@ -69,52 +69,25 @@ const Likes = () => {
 
         if (likedError) throw likedError;
 
-        // Transform the data for display and load likes/comments counts
-        const transformedLikes: LikedItemData[] = await Promise.all((usersILiked || []).map(async (user: any) => {
-          // Count all likes for this user's content (card + photos)
-          const userName = user.display_name || `${user.first_name || ''} ${user.last_name || ''}`.trim();
-          const { data: allLikes } = await supabase
-            .from("likes")
-            .select("content_id")
-            .eq("content_type", "contest")
-            .or(`content_id.ilike.%${userName}%`);
-          
-          // Filter and count likes for this specific user
-          const userLikes = allLikes?.filter(like => 
-            like.content_id.includes(userName) &&
-            (like.content_id.includes('contestant-card-') || like.content_id.includes('contestant-photo-'))
-          ).length || 0;
-
-          // Count comments for this user
-          const { data: allComments } = await supabase
-            .from("photo_comments")
-            .select("content_id")
-            .eq("content_type", "contest")
-            .or(`content_id.ilike.%${userName}%`);
-          
-          const userComments = allComments?.filter(comment => 
-            comment.content_id.includes(userName)
-          ).length || 0;
-
-          return {
-            likeId: user.like_id,
-            contentType: user.content_type as 'contest' | 'photo' | 'post',
-            contentId: user.content_id,
-            authorName: user.display_name || 'Unknown User',
-            authorAvatarUrl: user.avatar_url || user.photo_1_url || '/placeholder.svg',
-            authorProfileId: user.liked_user_id,
-            time: new Date(user.created_at).toLocaleDateString('ru-RU'),
-            content: user.content_type === 'contest' ? 'Contest participation' : 'Liked content',
-            imageSrc: user.photo_1_url || user.avatar_url || '/placeholder.svg',
-            likes: userLikes,
-            comments: userComments,
-            candidateData: {
-              country: user.country || 'Unknown',
-              age: user.age || 0,
-              height: 0
-            },
-            participantType: (user.participant_type as 'candidate' | 'finalist' | 'winner') || 'candidate'
-          };
+        // Transform the data for display - now using real-time data from unified hook
+        const transformedLikes: LikedItemData[] = (usersILiked || []).map((user: any) => ({
+          likeId: user.like_id,
+          contentType: user.content_type as 'contest' | 'photo' | 'post',
+          contentId: user.content_id,
+          authorName: user.display_name || 'Unknown User',
+          authorAvatarUrl: user.avatar_url || user.photo_1_url || '/placeholder.svg',
+          authorProfileId: user.liked_user_id,
+          time: new Date(user.created_at).toLocaleDateString('ru-RU'),
+          content: user.content_type === 'contest' ? 'Contest participation' : 'Liked content',
+          imageSrc: user.photo_1_url || user.avatar_url || '/placeholder.svg',
+          likes: 0, // Will be loaded by useCardData in LikedItem component
+          comments: 0, // Will be loaded by useCardData in LikedItem component
+          candidateData: {
+            country: user.country || 'Unknown',
+            age: user.age || 0,
+            height: 0
+          },
+          participantType: (user.participant_type as 'candidate' | 'finalist' | 'winner') || 'candidate'
         }));
 
         setLikedItems(transformedLikes);
