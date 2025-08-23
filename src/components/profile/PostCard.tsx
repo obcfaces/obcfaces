@@ -1,7 +1,7 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ThumbsUp, MessageCircle, Share2, MoreHorizontal, Pin, Edit3, Check, X } from "lucide-react";
+import { ThumbsUp, MessageCircle, Share2, MoreHorizontal, Pin, Edit3, Check, X, Trash2 } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Textarea } from "@/components/ui/textarea";
 import { useState, useEffect } from "react";
@@ -29,6 +29,7 @@ interface PostCardProps {
   isPinned?: boolean;
   onPin?: (postId: string) => void;
   onEdit?: (postId: string) => void;
+  onDelete?: (postId: string) => void;
   isOwnPost?: boolean;
 }
 
@@ -53,6 +54,7 @@ const PostCard = ({
   isPinned = false,
   onPin,
   onEdit,
+  onDelete,
   isOwnPost = false,
 }: PostCardProps) => {
   const [isLiked, setIsLiked] = useState(false);
@@ -94,7 +96,7 @@ const PostCard = ({
 
   const handleLike = async () => {
     if (!currentUserId) {
-      toast({ description: "Войдите, чтобы ставить лайки" });
+      toast({ description: "Please sign in to like posts" });
       return;
     }
 
@@ -115,7 +117,7 @@ const PostCard = ({
         
         if (error) throw error;
         
-        toast({ description: "Лайк убран" });
+        toast({ description: "Like removed" });
       } else {
         // Like
         const { error } = await supabase
@@ -128,7 +130,7 @@ const PostCard = ({
         
         if (error) throw error;
         
-        toast({ description: "Пост понравился!" });
+        toast({ description: "Post liked!" });
       }
     } catch (error) {
       // Revert optimistic update on error
@@ -178,6 +180,27 @@ const PostCard = ({
   const handleEditCancel = () => {
     setIsEditing(false);
     setEditedContent(content);
+  };
+
+  const handleDelete = async () => {
+    if (!currentUserId || !id) return;
+
+    try {
+      const { error } = await supabase
+        .from('posts')
+        .delete()
+        .eq('id', id)
+        .eq('user_id', currentUserId);
+
+      if (error) throw error;
+
+      if (onDelete) {
+        onDelete(id);
+      }
+      toast({ description: "Post deleted successfully" });
+    } catch (error) {
+      toast({ description: "Failed to delete post" });
+    }
   };
 
   const displayMediaUrls = mediaUrls && mediaUrls.length > 0 ? mediaUrls : (imageSrc ? [imageSrc] : []);
@@ -236,6 +259,10 @@ const PostCard = ({
                 <DropdownMenuItem onClick={handleEditStart}>
                   <Edit3 className="h-4 w-4 mr-2" />
                   Edit
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleDelete} className="text-destructive">
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Delete
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

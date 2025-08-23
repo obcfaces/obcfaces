@@ -996,8 +996,9 @@ const Profile = () => {
                     <PostCard 
                       key={post.id} 
                       id={post.id}
-                      authorName={post.profiles?.display_name || "Пользователь"}
-                      time={new Date(post.created_at).toLocaleDateString('ru-RU', {
+                      authorName={post.profiles?.display_name || "User"}
+                      authorProfileId={post.user_id}
+                      time={new Date(post.created_at).toLocaleDateString('en-US', {
                         day: 'numeric',
                         month: 'long',
                         hour: '2-digit',
@@ -1009,6 +1010,19 @@ const Profile = () => {
                       comments={post.comments_count || 0}
                       mediaUrls={post.media_urls || []}
                       mediaTypes={post.media_types || []}
+                      isOwnPost={isOwner}
+                      onPin={(postId) => {
+                        // Handle pin/unpin functionality
+                        console.log('Pin/unpin post:', postId);
+                      }}
+                      onEdit={(postId) => {
+                        // Refresh posts after edit
+                        loadUserPosts();
+                      }}
+                      onDelete={(postId) => {
+                        // Remove post from local state after deletion
+                        setUserPosts(prev => prev.filter(p => p.id !== postId));
+                      }}
                     />
                   ))}
                 </div>
