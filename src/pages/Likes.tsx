@@ -21,9 +21,15 @@ interface LikedItemData {
   likes: number;
   comments: number;
   candidateData: {
-    country: string;
     age: number;
+    weight: number;
     height: number;
+    country: string;
+    city: string;
+    state: string;
+    faceImage: string;
+    fullBodyImage: string;
+    additionalPhotos: string[];
   };
   participantType?: 'candidate' | 'finalist' | 'winner';
 }
@@ -104,7 +110,7 @@ const Likes = () => {
 
         if (whoLikedError) throw whoLikedError;
 
-        // Transform the data for display
+        // Transform the data for display - People Who Liked Me
         const transformedWhoLikedMe: LikedItemData[] = (usersWhoLikedMe || []).map((user: any) => ({
           likeId: user.like_id,
           contentType: user.content_type as 'contest' | 'photo' | 'post',
