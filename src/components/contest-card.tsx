@@ -10,7 +10,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/hooks/use-toast";
-import { cn } from "@/lib/utils";
+import { cn, getCountryDisplayName } from "@/lib/utils";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useCardData } from "@/hooks/useCardData";
@@ -376,7 +376,7 @@ export function ContestantCard({
                       ({weight} kg · {height} cm)
                     </span>
                   </h3>
-                  <div className="text-contest-blue text-sm">{country} · {city}</div>
+                  <div className="text-contest-blue text-sm">{getCountryDisplayName(country)} · {city}</div>
                 </div>
                 {/* Remove rating display from header since it's now in corner */}
               </div>
@@ -693,7 +693,7 @@ export function ContestantCard({
                    <h3 className="font-semibold text-contest-text text-base sm:text-lg truncate">{profileId ? (<Link to={`/u/${profileId}`} className="hover:text-primary underline-offset-2 hover:underline">{name}</Link>) : name}, {age}</h3>
                    <div className="text-xs sm:text-sm text-muted-foreground font-normal">{weight} kg · {height} cm</div>
                    <div className="text-sm sm:text-base text-contest-blue truncate">
-                     {country} · {city}
+                     {getCountryDisplayName(country)} · {city}
                    </div>
                 </div>
                 

@@ -5,7 +5,7 @@ import { ThumbsUp, MessageCircle, Share2, ThumbsDown } from "lucide-react";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
-import { cn } from "@/lib/utils";
+import { cn, getCountryDisplayName } from "@/lib/utils";
 import { PhotoModal } from "@/components/photo-modal";
 import { Link } from "react-router-dom";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
@@ -292,7 +292,7 @@ const LikedItem = ({
                   </h3>
                    <div className="text-xs sm:text-sm text-muted-foreground font-normal">{candidateWeight} kg · {candidateHeight} cm</div>
                    <div className="text-sm sm:text-base text-contest-blue truncate">
-                     {candidateCountry}{candidateCity !== "Unknown" && candidateCity !== candidateCountry ? ` · ${candidateCity}` : ''}
+                     {getCountryDisplayName(candidateCountry)}{candidateCity !== "Unknown" && candidateCity !== candidateCountry ? ` · ${candidateCity}` : ''}
                    </div>
                 </div>
                 
@@ -384,7 +384,7 @@ const LikedItem = ({
               authorName
             )}, {candidateAge} <span className="text-sm text-muted-foreground font-normal">({candidateWeight} kg · {candidateHeight} cm)</span>
           </h3>
-          <div className="text-contest-blue text-sm">{candidateCountry}{candidateCity !== "Unknown" && candidateCity !== candidateCountry ? ` · ${candidateCity}` : ''}</div>
+          <div className="text-contest-blue text-sm">{getCountryDisplayName(candidateCountry)}{candidateCity !== "Unknown" && candidateCity !== candidateCountry ? ` · ${candidateCity}` : ''}</div>
         </div>
         
         {/* Header - пустой как в проголосованных карточках конкурса */}
