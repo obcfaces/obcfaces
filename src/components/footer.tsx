@@ -9,11 +9,9 @@ export const Footer = () => {
           <div className="col-span-1 md:col-span-2">
             <h3 className="text-lg font-semibold text-foreground mb-4">OBC - Online Beauty Contest</h3>
             <p className="text-muted-foreground text-sm mb-4">
-              The Philippines' premier online beauty contest platform. Celebrating natural beauty 
-              and empowering women across the archipelago.
-            </p>
-            <p className="text-muted-foreground text-sm">
-              Weekly contests with exciting prizes and opportunities for recognition.
+              The world&apos;s weekly online beauty contest. A global platform that celebrates 
+              natural beauty and talent in different categories of participants, offering 
+              exciting prizes and international recognition.
             </p>
           </div>
 
