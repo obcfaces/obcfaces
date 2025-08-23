@@ -709,11 +709,14 @@ export type Database = {
           country: string
           created_at: string
           display_name: string
+          height_cm: number
           like_id: string
           liker_user_id: string
           participant_type: string
           photo_1_url: string
           photo_2_url: string
+          state: string
+          weight_kg: number
         }[]
       }
       get_week_monday: {
