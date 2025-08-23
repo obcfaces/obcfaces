@@ -687,6 +687,17 @@ export type Database = {
           photo_2_url: string
         }[]
       }
+      get_users_i_liked_debug: {
+        Args: { target_user_id: string }
+        Returns: {
+          content_id: string
+          display_name: string
+          extracted_name: string
+          like_id: string
+          participant_name: string
+          user_id: string
+        }[]
+      }
       get_users_who_liked_me: {
         Args: { target_user_id: string }
         Returns: {
