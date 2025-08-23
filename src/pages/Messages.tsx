@@ -368,12 +368,11 @@ const Messages = () => {
   }
 
   return (
-    <div className="flex h-screen bg-background fixed inset-0 z-50">
+    <div className="flex h-[calc(100vh-80px)] bg-background">
       {/* Список разговоров */}
       <div className={`w-full md:w-80 flex-shrink-0 border-r ${selectedConversation ? 'hidden md:flex' : 'flex'} flex-col`}>
         {/* Заголовок */}
         <div className="p-4 border-b">
-          <h1 className="text-xl font-semibold">Сообщения</h1>
           <div className="mt-2 relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
