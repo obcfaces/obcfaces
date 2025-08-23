@@ -32,15 +32,21 @@ export const useUnreadLikes = () => {
           return;
         }
 
-        // Count likes from the last 24 hours as "unread"
-        const oneDayAgo = new Date();
-        oneDayAgo.setDate(oneDayAgo.getDate() - 1);
+        // Count likes from the last 1 hour as "unread" (changed from 24 hours to reduce test notifications)
+        const oneHourAgo = new Date();
+        oneHourAgo.setHours(oneHourAgo.getHours() - 1);
 
         const recentLikes = (likedMeData || []).filter((like: any) => 
-          new Date(like.created_at) > oneDayAgo
+          new Date(like.created_at) > oneHourAgo
         );
 
-        console.log('useUnreadLikes: Recent likes found:', recentLikes.length);
+        console.log('useUnreadLikes: Recent likes found (last hour):', recentLikes.length);
+        console.log('useUnreadLikes: Likes data:', recentLikes.map(like => ({
+          created_at: like.created_at,
+          liker_name: like.display_name
+        })));
+        
+        // Only show notifications for very recent likes to avoid test data
         setUnreadLikesCount(recentLikes.length);
         setIsLoading(false);
       } catch (error) {
