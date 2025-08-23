@@ -527,15 +527,15 @@ export function PhotoModal({
                       )}
                       onClick={handleLike}
                     >
-                      <ThumbsUp className="w-5 h-5" strokeWidth={1} />
+                      <ThumbsUp className={cn(
+                        "w-5 h-5",
+                        currentPhotoLikes.isLiked && "fill-current"
+                      )} strokeWidth={1} />
                       <span>{currentPhotoLikes.count}</span>
                     </button>
                     <button
                       type="button"
-                      className={cn(
-                        "inline-flex items-center gap-2 text-sm",
-                        currentPhotoComments.length > 0 ? "text-blue-600" : "text-gray-600"
-                      )}
+                      className="inline-flex items-center gap-2 text-sm text-gray-600"
                       onClick={focusCommentInput}
                     >
                       <MessageCircle className="w-5 h-5" strokeWidth={1} />
