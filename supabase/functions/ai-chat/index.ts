@@ -7,7 +7,7 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
-  console.log(`[${new Date().toISOString()}] ${req.method} request to ai-chat`);
+  console.log(`[${new Date().toISOString()}] Starting ai-chat function`);
   
   if (req.method === 'OPTIONS') {
     console.log('[CORS] Handling OPTIONS request');
@@ -15,82 +15,56 @@ serve(async (req) => {
   }
 
   try {
-    console.log('[REQUEST] Processing POST request...');
+    console.log('[REQUEST] Processing request...');
     
     const body = await req.json();
-    console.log('[REQUEST] Body received:', JSON.stringify(body, null, 2));
-    
     const { message } = body;
 
     if (!message) {
-      console.error('[ERROR] No message provided');
       throw new Error('Message is required');
     }
 
-    console.log('[ENV] Checking environment variables...');
     const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
     
     if (!openAIApiKey) {
-      console.error('[ERROR] OPENAI_API_KEY not found');
-      throw new Error('OpenAI API key not configured. Please check your secrets.');
+      throw new Error('OpenAI API key not configured');
     }
 
-    console.log('[ENV] OpenAI API key found, length:', openAIApiKey.length);
-
-    // Test OpenAI API call
-    console.log('[OPENAI] Making request to OpenAI API...');
+    console.log('[OPENAI] Making API request...');
     
-    const requestBody = {
-      model: 'gpt-4o-mini',
-      messages: [
-        { 
-          role: 'system', 
-          content: 'You are a helpful AI assistant for a beauty contest website. Respond briefly and friendly.' 
-        },
-        { role: 'user', content: message }
-      ],
-      max_tokens: 500,
-      temperature: 0.7
-    };
-
-    console.log('[OPENAI] Request body:', JSON.stringify(requestBody, null, 2));
-
     const openAIResponse = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${openAIApiKey}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(requestBody),
+      body: JSON.stringify({
+        model: 'gpt-5-mini-2025-08-07',
+        messages: [
+          { 
+            role: 'system', 
+            content: 'You are a helpful AI assistant for a beauty contest website. Respond briefly and friendly in Russian if the user writes in Russian, otherwise in English.' 
+          },
+          { role: 'user', content: message }
+        ],
+        max_completion_tokens: 500
+      }),
     });
-
-    console.log('[OPENAI] Response status:', openAIResponse.status);
-    console.log('[OPENAI] Response headers:', Object.fromEntries(openAIResponse.headers.entries()));
 
     if (!openAIResponse.ok) {
       const errorText = await openAIResponse.text();
-      console.error('[OPENAI] API error response:', errorText);
-      
-      if (openAIResponse.status === 401) {
-        throw new Error('Invalid OpenAI API key. Please check your API key.');
-      } else if (openAIResponse.status === 429) {
-        throw new Error('OpenAI API rate limit exceeded or insufficient credits.');
-      } else {
-        throw new Error(`OpenAI API error (${openAIResponse.status}): ${errorText}`);
-      }
+      console.error('[OPENAI] Error:', errorText);
+      throw new Error(`OpenAI API error: ${errorText}`);
     }
 
     const openAIData = await openAIResponse.json();
-    console.log('[OPENAI] Response received:', JSON.stringify(openAIData, null, 2));
-    
     const aiResponse = openAIData.choices?.[0]?.message?.content;
     
     if (!aiResponse) {
-      console.error('[ERROR] No response content from OpenAI');
-      throw new Error('No response received from OpenAI');
+      throw new Error('No response from OpenAI');
     }
 
-    console.log('[SUCCESS] Sending response to client');
+    console.log('[SUCCESS] Returning response');
     
     return new Response(
       JSON.stringify({ response: aiResponse }), 
@@ -101,14 +75,11 @@ serve(async (req) => {
     );
 
   } catch (error) {
-    console.error('[ERROR] Function error:', error.message);
-    console.error('[ERROR] Stack trace:', error.stack);
+    console.error('[ERROR]:', error.message);
     
     return new Response(
       JSON.stringify({ 
-        error: error.message,
-        timestamp: new Date().toISOString(),
-        details: 'Check function logs for detailed error information'
+        error: error.message
       }), 
       {
         status: 500,
