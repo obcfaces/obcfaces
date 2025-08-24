@@ -405,9 +405,9 @@ const LikedItem = ({
       <>
         <Card className="bg-card border-contest-border relative overflow-hidden flex h-32 sm:h-36 md:h-40">
           {/* Edit button for owner */}
-          {isOwner && (
+          {isOwner && !editingParticipant && (
             <Button
-              onClick={onEditPhotos}
+              onClick={startEditingParticipant}
               size="sm"
               className="absolute top-2 right-2 z-30 w-8 h-8 p-0"
             >
@@ -424,16 +424,52 @@ const LikedItem = ({
                 src={displayFaceImage}
                 alt={`${authorName} face`}
                 className="w-24 sm:w-28 md:w-32 h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
-                onClick={() => openModal(0)}
+                onClick={() => !editingParticipant && openModal(0)}
               />
+              {/* Edit overlay for photo 1 */}
+              {editingParticipant && (
+                <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleParticipantPhoto1Upload}
+                    className="hidden"
+                    id="photo1-upload"
+                  />
+                  <label
+                    htmlFor="photo1-upload"
+                    className="bg-white text-black px-2 py-1 rounded text-xs cursor-pointer hover:bg-gray-100"
+                  >
+                    Заменить
+                  </label>
+                </div>
+              )}
             </div>
             <div className="relative">
               <img 
                 src={displayFullImage}
                 alt={`${authorName} full body`}
                 className="w-24 sm:w-28 md:w-32 h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
-                onClick={() => openModal(1)}
+                onClick={() => !editingParticipant && openModal(1)}
               />
+              {/* Edit overlay for photo 2 */}
+              {editingParticipant && (
+                <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleParticipantPhoto2Upload}
+                    className="hidden"
+                    id="photo2-upload"
+                  />
+                  <label
+                    htmlFor="photo2-upload"
+                    className="bg-white text-black px-2 py-1 rounded text-xs cursor-pointer hover:bg-gray-100"
+                  >
+                    Заменить
+                  </label>
+                </div>
+              )}
             </div>
           </div>
           
@@ -459,17 +495,38 @@ const LikedItem = ({
               </div>
               
               <div className="flex items-center justify-end gap-4">
-                <button
-                  type="button"
-                  className="inline-flex items-center gap-1 text-xs sm:text-sm text-contest-blue hover:text-contest-blue/80 transition-colors"
-                  aria-label="Unlike"
-                  onClick={handleUnlike}
-                  disabled={isUnliking}
-                >
-                  <ThumbsUp className="w-3.5 h-3.5 text-primary" strokeWidth={1} />
-                   <span className="hidden xl:inline">Unlike</span>
-                   <span>{cardData.likes}</span>
-                </button>
+                {editingParticipant ? (
+                  <div className="flex gap-2">
+                    <Button
+                      onClick={saveParticipantPhotos}
+                      disabled={uploadingParticipantPhotos}
+                      size="sm"
+                      className="text-xs"
+                    >
+                      {uploadingParticipantPhotos ? "Сохранение..." : "Сохранить"}
+                    </Button>
+                    <Button
+                      onClick={cancelParticipantEdit}
+                      variant="outline"
+                      size="sm"
+                      className="text-xs"
+                    >
+                      Отмена
+                    </Button>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    className="inline-flex items-center gap-1 text-xs sm:text-sm text-contest-blue hover:text-contest-blue/80 transition-colors"
+                    aria-label="Unlike"
+                    onClick={handleUnlike}
+                    disabled={isUnliking}
+                  >
+                    <ThumbsUp className="w-3.5 h-3.5 text-primary" strokeWidth={1} />
+                     <span className="hidden xl:inline">Unlike</span>
+                     <span>{cardData.likes}</span>
+                  </button>
+                )}
                 <button
                   type="button"
                   className="inline-flex items-center gap-1 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors"
@@ -617,9 +674,9 @@ const LikedItem = ({
     <>
       <Card className="bg-card border-contest-border relative overflow-hidden">
         {/* Edit button for owner */}
-        {isOwner && (
+        {isOwner && !editingParticipant && (
           <Button
-            onClick={onEditPhotos}
+            onClick={startEditingParticipant}
             size="sm"
             className="absolute top-2 right-2 z-30 w-8 h-8 p-0"
           >
@@ -656,33 +713,88 @@ const LikedItem = ({
                 src={displayFaceImage} 
                 alt={`${authorName} face`}
                 className="w-full aspect-[4/5] object-cover cursor-pointer hover:opacity-90 transition-opacity"
-                onClick={() => openModal(0)}
+                onClick={() => !editingParticipant && openModal(0)}
               />
+              {/* Edit overlay for photo 1 */}
+              {editingParticipant && (
+                <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleParticipantPhoto1Upload}
+                    className="hidden"
+                    id="photo1-upload-full"
+                  />
+                  <label
+                    htmlFor="photo1-upload-full"
+                    className="bg-white text-black px-3 py-2 rounded cursor-pointer hover:bg-gray-100"
+                  >
+                    Заменить фото
+                  </label>
+                </div>
+              )}
             </div>
             <div className="relative">
               <img 
                 src={displayFullImage} 
                 alt={`${authorName} full body`}
                 className="w-full aspect-[4/5] object-cover cursor-pointer hover:opacity-90 transition-opacity"
-                onClick={() => openModal(1)}
+                onClick={() => !editingParticipant && openModal(1)}
               />
+              {/* Edit overlay for photo 2 */}
+              {editingParticipant && (
+                <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleParticipantPhoto2Upload}
+                    className="hidden"
+                    id="photo2-upload-full"
+                  />
+                  <label
+                    htmlFor="photo2-upload-full"
+                    className="bg-white text-black px-3 py-2 rounded cursor-pointer hover:bg-gray-100"
+                  >
+                    Заменить фото
+                  </label>
+                </div>
+              )}
             </div>
           </div>
         </div>
         
         {/* Footer with actions */}
         <div className="border-t border-contest-border px-4 py-2 flex items-center justify-evenly gap-4">
-          <button
-            type="button"
-            className="inline-flex items-center gap-1 text-sm text-contest-blue hover:text-contest-blue/80 transition-colors"
-            aria-label="Unlike"
-            onClick={handleUnlike}
-            disabled={isUnliking}
-          >
-            <ThumbsUp className="w-4 h-4 text-blue-500 fill-blue-500" strokeWidth={1} />
-             <span className="hidden sm:inline text-blue-500">Unlike</span>
-             <span className="text-blue-500">{cardData.likes}</span>
-          </button>
+          {editingParticipant ? (
+            <div className="flex gap-2 w-full justify-center">
+              <Button
+                onClick={saveParticipantPhotos}
+                disabled={uploadingParticipantPhotos}
+                size="sm"
+              >
+                {uploadingParticipantPhotos ? "Сохранение..." : "Сохранить"}
+              </Button>
+              <Button
+                onClick={cancelParticipantEdit}
+                variant="outline"
+                size="sm"
+              >
+                Отмена
+              </Button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              className="inline-flex items-center gap-1 text-sm text-contest-blue hover:text-contest-blue/80 transition-colors"
+              aria-label="Unlike"
+              onClick={handleUnlike}
+              disabled={isUnliking}
+            >
+              <ThumbsUp className="w-4 h-4 text-blue-500 fill-blue-500" strokeWidth={1} />
+               <span className="hidden sm:inline text-blue-500">Unlike</span>
+               <span className="text-blue-500">{cardData.likes}</span>
+            </button>
+          )}
           <button
             type="button"
             className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
