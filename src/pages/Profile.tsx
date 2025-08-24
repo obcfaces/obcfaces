@@ -1284,92 +1284,7 @@ const Profile = () => {
                         }}
                       />
                     ))}
-                  </div>
-                  </div>
-                  
-                  {/* Photo editing dialog exactly like in Admin */}
-                  <Dialog open={editingParticipation} onOpenChange={(open) => !open && cancelParticipationEdit()}>
-                    <DialogContent className="max-w-2xl">
-                      <DialogHeader>
-                        <DialogTitle>
-                          Edit Contest Photos
-                        </DialogTitle>
-                      </DialogHeader>
-                      
-                      <div className="space-y-6">
-                        {/* Current Photos */}
-                        <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <Label className="text-sm font-medium">Current Portrait Photo</Label>
-                            {participationItems[0]?.candidateData?.faceImage && (
-                              <img 
-                                src={participationItems[0].candidateData.faceImage} 
-                                alt="Current portrait" 
-                                className="w-full h-48 object-cover rounded border mt-2"
-                              />
-                            )}
-                          </div>
-                          <div>
-                            <Label className="text-sm font-medium">Current Full Length Photo</Label>
-                            {participationItems[0]?.candidateData?.fullBodyImage && (
-                              <img 
-                                src={participationItems[0].candidateData.fullBodyImage} 
-                                alt="Current full length" 
-                                className="w-full h-48 object-cover rounded border mt-2"
-                              />
-                            )}
-                          </div>
-                        </div>
-                        
-                        {/* New Photo Uploads */}
-                        <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <Label className="text-sm font-medium">Replace Portrait Photo</Label>
-                            <Input
-                              type="file"
-                              accept="image/*"
-                              onChange={handleParticipantPhoto1Upload}
-                              className="mt-2"
-                            />
-                            {participantPhoto1File && (
-                              <p className="text-sm text-green-600 mt-1">
-                                New portrait selected: {participantPhoto1File.name}
-                              </p>
-                            )}
-                          </div>
-                          
-                          <div>
-                            <Label className="text-sm font-medium">Replace Full Length Photo</Label>
-                            <Input
-                              type="file"
-                              accept="image/*"
-                              onChange={handleParticipantPhoto2Upload}
-                              className="mt-2"
-                            />
-                            {participantPhoto2File && (
-                              <p className="text-sm text-green-600 mt-1">
-                                New full length selected: {participantPhoto2File.name}
-                              </p>
-                            )}
-                          </div>
-                        </div>
-                        
-                        {/* Action Buttons */}
-                        <div className="flex justify-end gap-2 pt-4 border-t">
-                          <Button variant="outline" onClick={cancelParticipationEdit} disabled={uploadingParticipantPhotos}>
-                            Cancel
-                          </Button>
-                          <Button 
-                            onClick={saveParticipationPhotos} 
-                            className="bg-blue-600 hover:bg-blue-700" 
-                            disabled={uploadingParticipantPhotos || (!participantPhoto1File && !participantPhoto2File)}
-                          >
-                            {uploadingParticipantPhotos ? "Uploading..." : "Save Photos"}
-                          </Button>
-                        </div>
-                      </div>
-                    </DialogContent>
-                  </Dialog>
+                   </div>
                 </div>
               ) : (
                 <p className="text-muted-foreground text-center py-8 px-6">Нет участий в конкурсах</p>
@@ -2158,6 +2073,90 @@ const Profile = () => {
           </Tabs>
         </section>
       </main>
+
+      {/* Photo editing dialog for participation */}
+      <Dialog open={editingParticipation} onOpenChange={(open) => !open && cancelParticipationEdit()}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>
+              Edit Contest Photos
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-6">
+            {/* Current Photos */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label className="text-sm font-medium">Current Portrait Photo</Label>
+                {participationItems[0]?.candidateData?.faceImage && (
+                  <img 
+                    src={participationItems[0].candidateData.faceImage} 
+                    alt="Current portrait" 
+                    className="w-full h-48 object-cover rounded border mt-2"
+                  />
+                )}
+              </div>
+              <div>
+                <Label className="text-sm font-medium">Current Full Length Photo</Label>
+                {participationItems[0]?.candidateData?.fullBodyImage && (
+                  <img 
+                    src={participationItems[0].candidateData.fullBodyImage} 
+                    alt="Current full length" 
+                    className="w-full h-48 object-cover rounded border mt-2"
+                  />
+                )}
+              </div>
+            </div>
+            
+            {/* New Photo Uploads */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label className="text-sm font-medium">Replace Portrait Photo</Label>
+                <Input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleParticipantPhoto1Upload}
+                  className="mt-2"
+                />
+                {participantPhoto1File && (
+                  <p className="text-sm text-green-600 mt-1">
+                    New portrait selected: {participantPhoto1File.name}
+                  </p>
+                )}
+              </div>
+              
+              <div>
+                <Label className="text-sm font-medium">Replace Full Length Photo</Label>
+                <Input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleParticipantPhoto2Upload}
+                  className="mt-2"
+                />
+                {participantPhoto2File && (
+                  <p className="text-sm text-green-600 mt-1">
+                    New full length selected: {participantPhoto2File.name}
+                  </p>
+                )}
+              </div>
+            </div>
+            
+            {/* Action Buttons */}
+            <div className="flex justify-end gap-2 pt-4 border-t">
+              <Button variant="outline" onClick={cancelParticipationEdit} disabled={uploadingParticipantPhotos}>
+                Cancel
+              </Button>
+              <Button 
+                onClick={saveParticipationPhotos} 
+                className="bg-blue-600 hover:bg-blue-700" 
+                disabled={uploadingParticipantPhotos || (!participantPhoto1File && !participantPhoto2File)}
+              >
+                {uploadingParticipantPhotos ? "Uploading..." : "Save Photos"}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Photo Modal */}
       <PhotoModal
