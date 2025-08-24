@@ -615,7 +615,7 @@ export function ContestantCard({
             />
             {/* Example Badge on photo for compact view */}
             {isExample && (
-              <div className="absolute top-0.5 left-0.5 bg-yellow-500 text-white px-1 py-0.5 text-xs font-bold rounded">
+              <div className="absolute top-0 left-0 bg-yellow-500 text-white px-1 py-0.5 text-xs font-bold">
                 Example
               </div>
             )}
