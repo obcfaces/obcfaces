@@ -68,8 +68,7 @@ export function EditPhotosModal({
       console.log('👤 User authenticated for upload:', user.id);
 
       const fileExt = file.name.split('.').pop();
-      const timestamp = Date.now();
-      const fileName = `${user.id}/photo${photoNumber}-${timestamp}.${fileExt}`;
+      const fileName = `${user.id}/photo_${photoNumber}.${fileExt}`;
       
       console.log(`📁 Uploading to path: ${fileName}`);
       console.log(`🪣 Bucket: contest-photos`);
@@ -96,10 +95,8 @@ export function EditPhotosModal({
       
       console.log(`🔗 Generated public URL: ${data.publicUrl}`);
       
-      // Add cache-busting timestamp to ensure new image loads
-      const finalUrl = `${data.publicUrl}?t=${Date.now()}`;
-      console.log(`✅ Photo ${photoNumber} upload result: ${finalUrl}`);
-      return finalUrl;
+      console.log(`✅ Photo ${photoNumber} upload result: ${data.publicUrl}`);
+      return data.publicUrl;
     } catch (error) {
       console.error(`❌ Error uploading photo ${photoNumber}:`, error);
       toast({ 
@@ -159,14 +156,13 @@ export function EditPhotosModal({
         photo2Url
       });
 
-      // Update profile with new photo URLs (with cache-busting timestamp)
-      const timestamp = Date.now();
+      // Update profile with new photo URLs
       const updateData: any = {};
       if (photo1Url) {
-        updateData.photo_1_url = `${photo1Url}?t=${timestamp}`;
+        updateData.photo_1_url = photo1Url;
       }
       if (photo2Url) {
-        updateData.photo_2_url = `${photo2Url}?t=${timestamp}`;
+        updateData.photo_2_url = photo2Url;
       }
 
       console.log('💾 Updating profile with URLs:', updateData);
