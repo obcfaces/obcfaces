@@ -444,13 +444,13 @@ const LikedItem = ({
                         return;
                       }
                       
+                      setUploadingPhoto(true);
                       try {
                         const updates: any = {};
 
-                        // Upload photo_1 if a new one was selected
+                        // Upload photo1 if provided - ТОЧНО КАК В АДМИНКЕ
                         if (photo1File) {
                           console.log('📤 Uploading photo1...');
-                          setUploadingPhoto(true);
                           const fileExt = photo1File.name.split('.').pop();
                           const fileName = `photo_1.${fileExt}`;
                           const filePath = `${currentUserId}/${fileName}`;
@@ -470,10 +470,9 @@ const LikedItem = ({
                           console.log('✅ Photo1 uploaded:', timestampedUrl);
                         }
 
-                        // Upload photo_2 if a new one was selected
+                        // Upload photo2 if provided - ТОЧНО КАК В АДМИНКЕ
                         if (photo2File) {
                           console.log('📤 Uploading photo2...');
-                          setUploadingPhoto(true);
                           const fileExt = photo2File.name.split('.').pop();
                           const fileName = `photo_2.${fileExt}`;
                           const filePath = `${currentUserId}/${fileName}`;
@@ -493,7 +492,7 @@ const LikedItem = ({
                           console.log('✅ Photo2 uploaded:', timestampedUrl);
                         }
 
-                        // Update profile if there are changes
+                        // Update profile if there are changes - ТОЧНО КАК В АДМИНКЕ
                         if (Object.keys(updates).length > 0) {
                           console.log('💾 Updating profile with:', updates);
                           const { error: profileError } = await supabase
@@ -749,13 +748,13 @@ const LikedItem = ({
                   return;
                 }
                 
+                setUploadingPhoto(true);
                 try {
                   const updates: any = {};
 
-                  // Upload photo_1 if a new one was selected
+                  // Upload photo1 if provided - ТОЧНО КАК В АДМИНКЕ
                   if (photo1File) {
                     console.log('📤 Uploading photo1...');
-                    setUploadingPhoto(true);
                     const fileExt = photo1File.name.split('.').pop();
                     const fileName = `photo_1.${fileExt}`;
                     const filePath = `${currentUserId}/${fileName}`;
@@ -775,10 +774,9 @@ const LikedItem = ({
                     console.log('✅ Photo1 uploaded:', timestampedUrl);
                   }
 
-                  // Upload photo_2 if a new one was selected
+                  // Upload photo2 if provided - ТОЧНО КАК В АДМИНКЕ
                   if (photo2File) {
                     console.log('📤 Uploading photo2...');
-                    setUploadingPhoto(true);
                     const fileExt = photo2File.name.split('.').pop();
                     const fileName = `photo_2.${fileExt}`;
                     const filePath = `${currentUserId}/${fileName}`;
@@ -798,7 +796,7 @@ const LikedItem = ({
                     console.log('✅ Photo2 uploaded:', timestampedUrl);
                   }
 
-                  // Update profile if there are changes
+                  // Update profile if there are changes - ТОЧНО КАК В АДМИНКЕ
                   if (Object.keys(updates).length > 0) {
                     console.log('💾 Updating profile with:', updates);
                     const { error: profileError } = await supabase
