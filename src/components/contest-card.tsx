@@ -429,13 +429,28 @@ export function ContestantCard({
           
            {/* Photos section */}
            <div className="relative">
-             {/* Example text area - yellow background for example cards */}
-             {isExample && (
-               <div className="bg-yellow-400 text-black px-4 py-3 text-center font-semibold">
-                 <div className="text-lg">Example Card</div>
-                 <div className="text-sm opacity-80">This is how your card will look</div>
-               </div>
-             )}
+              {/* Example text area with photo requirements */}
+              {isExample && (
+                <div className="bg-yellow-400 text-black px-4 py-3">
+                  <div className="text-lg font-semibold text-center mb-2">Example Card</div>
+                  <div className="text-sm opacity-80 text-center mb-3">This is how your card will look</div>
+                  <div className="text-xs space-y-2">
+                    <div>
+                      <div className="font-semibold">Portrait Photo</div>
+                      <div>Frame: Face and shoulders only.</div>
+                      <div>Look directly into the camera.</div>
+                      <div>Neutral facial expression (no smile).</div>
+                    </div>
+                    <div>
+                      <div className="font-semibold">Full-Body Photo</div>
+                      <div>Standing straight, facing the camera.</div>
+                      <div>Arms should be down by your sides or resting on your waist</div>
+                      <div>Form-fitting outfit required: either a top with shorts or a bikini.</div>
+                      <div>Barefoot or flat shoes only — no heels.</div>
+                    </div>
+                  </div>
+                </div>
+              )}
              
              <div className="grid grid-cols-2 gap-px">
                {/* Winner Badge - overlaid on photos like in profile */}
