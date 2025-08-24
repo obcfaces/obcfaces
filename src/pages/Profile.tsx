@@ -678,12 +678,18 @@ const Profile = () => {
     try {
       console.log('Loading participation for user:', id);
       
-      // Сначала получаем профиль пользователя
+      // Сначала получаем профиль пользователя (принудительно из базы)
       const { data: profileData, error } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', id)
         .maybeSingle();
+
+      console.log('🔄 Fresh profile data loaded for participation:', {
+        photo_1_url: profileData?.photo_1_url,
+        photo_2_url: profileData?.photo_2_url,
+        updated_at: profileData?.updated_at
+      });
 
       console.log('Profile data:', profileData);
       console.log('Profile error:', error);
@@ -1976,6 +1982,8 @@ const Profile = () => {
         currentPhoto2={data?.photo_2_url}
         onUpdate={async () => {
           console.log('🔄 Photo update callback triggered');
+          // Принудительно обновляем состояние данных профиля
+          setData(null);
           // Сначала обновляем основные данные профиля
           await loadProfile();
           // Затем обновляем данные участия
