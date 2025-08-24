@@ -427,36 +427,38 @@ export function ContestantCard({
             )}
           </div>
           
-          {/* Photos section */}
-          <div className="relative">
-            <div className="grid grid-cols-2 gap-px">
-              {/* Winner Badge - overlaid on photos like in profile */}
-              {isWinner && (
-                <div className="absolute top-0 left-0 right-0 z-20 bg-blue-100 text-blue-700 px-2 py-1 text-xs font-semibold flex justify-start items-center">
-                  <span>🏆 WINNER   + 5000 PHP</span>
-                </div>
-              )}
-              
-              {/* Example Badge for test cards */}
-              {isExample && (
-                <div className="absolute top-2 left-2 z-30 bg-yellow-500 text-white px-2 py-1 text-xs font-bold rounded">
-                  Example
-                </div>
-              )}
-              <div className="relative">
-                <img 
-                  src={faceImage} 
-                  alt={`${name} face`}
-                  className="w-full aspect-[4/5] object-cover cursor-pointer hover:opacity-90 transition-opacity"
-                  onClick={() => openModal(0)}
-                />
-                {/* Example Badge on photo */}
-                {isExample && (
-                  <div className="absolute top-1 left-1 bg-yellow-500 text-white px-1.5 py-0.5 text-xs font-bold rounded">
-                    Example
-                  </div>
-                )}
-              </div>
+           {/* Photos section */}
+           <div className="relative">
+             {/* Example text area - yellow background for example cards */}
+             {isExample && (
+               <div className="bg-yellow-400 text-black px-4 py-3 text-center font-semibold">
+                 <div className="text-lg">Example Card</div>
+                 <div className="text-sm opacity-80">This is how your card will look</div>
+               </div>
+             )}
+             
+             <div className="grid grid-cols-2 gap-px">
+               {/* Winner Badge - overlaid on photos like in profile */}
+               {isWinner && (
+                 <div className="absolute top-0 left-0 right-0 z-20 bg-blue-100 text-blue-700 px-2 py-1 text-xs font-semibold flex justify-start items-center">
+                   <span>🏆 WINNER   + 5000 PHP</span>
+                 </div>
+               )}
+               
+               <div className="relative">
+                 <img 
+                   src={faceImage} 
+                   alt={`${name} face`}
+                   className="w-full aspect-[4/5] object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                   onClick={() => openModal(0)}
+                 />
+                 {/* Example Badge in corner of first photo */}
+                 {isExample && (
+                   <div className="absolute top-1 left-1 bg-yellow-500 text-white px-1.5 py-0.5 text-xs font-bold rounded">
+                     Example
+                   </div>
+                 )}
+               </div>
               <div className="relative">
                 <img 
                   src={fullBodyImage} 
