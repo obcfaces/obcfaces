@@ -446,7 +446,7 @@ export function PhotoModal({
           </button>
 
           {/* Photo container - top half */}
-          <div className="absolute top-0 left-0 right-0 h-1/2 flex items-center justify-center bg-black"
+          <div className="relative w-full h-1/2 flex items-center justify-center bg-black"
                onTouchStart={onTouchStart}
                onTouchMove={onTouchMove}
                onTouchEnd={onTouchEnd}>
@@ -499,9 +499,10 @@ export function PhotoModal({
                 ))}
               </div>
             )}
+          </div>
 
-            {/* Info overlay - bottom half */}
-            <div className="absolute bottom-0 left-0 right-0 h-1/2 bg-white flex flex-col">
+          {/* Info overlay - bottom half */}
+          <div className="w-full h-1/2 bg-white flex flex-col">
               {/* Winner Badge */}
               {isWinner && (
                 <div className="bg-blue-100 text-blue-700 px-4 py-2 text-sm font-semibold flex justify-start items-center border-b">
@@ -619,7 +620,6 @@ export function PhotoModal({
                 </div>
               </div>
             </div>
-          </div>
         </div>
       )}
 
