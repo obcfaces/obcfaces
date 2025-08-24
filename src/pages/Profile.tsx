@@ -1974,9 +1974,13 @@ const Profile = () => {
         onClose={() => setEditPhotosModalOpen(false)}
         currentPhoto1={data?.photo_1_url}
         currentPhoto2={data?.photo_2_url}
-        onUpdate={() => {
-          loadParticipationItems();
-          loadProfile(); // Обновляем данные профиля
+        onUpdate={async () => {
+          console.log('🔄 Photo update callback triggered');
+          // Сначала обновляем основные данные профиля
+          await loadProfile();
+          // Затем обновляем данные участия
+          await loadParticipationItems();
+          console.log('✅ Both profile and participation data refreshed');
         }}
       />
 
