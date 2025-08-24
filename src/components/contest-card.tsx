@@ -724,11 +724,12 @@ export function ContestantCard({
                      <div className="absolute inset-0 bg-yellow-100 border-2 border-yellow-300 rounded-lg flex items-center justify-center z-10">
                        <div className="text-center text-gray-800 p-2">
                          <h4 className="font-bold text-sm mb-1">How your photos should look:</h4>
-                         <div className="text-xs space-y-0.5">
+                         <div className="text-xs space-y-0.5 text-left">
                            <div>• No makeup</div>
                            <div>• No filter</div>
                            <div>• No photo editing</div>
                            <div>• No glasses</div>
+                           <div>• Tight-fitting clothes</div>
                          </div>
                        </div>
                      </div>
