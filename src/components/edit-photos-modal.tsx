@@ -115,10 +115,18 @@ export function EditPhotosModal({
 
       console.log(`💾 Updating profile photos:`, { photo1Url, photo2Url });
 
-      // Prepare update data
+      // Prepare update data - ONLY update fields that have new values
       const updateData: any = {};
-      if (photo1Url) updateData.photo_1_url = photo1Url;
-      if (photo2Url) updateData.photo_2_url = photo2Url;
+      if (photo1Url) {
+        updateData.photo_1_url = photo1Url;
+        console.log(`📝 Will update photo_1_url to: ${photo1Url}`);
+      }
+      if (photo2Url) {
+        updateData.photo_2_url = photo2Url;
+        console.log(`📝 Will update photo_2_url to: ${photo2Url}`);
+      }
+
+      console.log(`📋 Final update data:`, updateData);
 
       // Update profile table
       const { error: profileError } = await supabase
