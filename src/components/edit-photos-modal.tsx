@@ -53,36 +53,59 @@ export function EditPhotosModal({
 
   const uploadPhoto = async (file: File, photoNumber: 1 | 2): Promise<string | null> => {
     try {
+      console.log(`📤 Starting upload for photo ${photoNumber}:`, {
+        fileName: file.name,
+        fileSize: file.size,
+        fileType: file.type
+      });
+
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return null;
+      if (!user) {
+        console.log('❌ No user for upload');
+        return null;
+      }
 
       const fileExt = file.name.split('.').pop();
       const timestamp = Date.now();
       const fileName = `${user.id}/photo${photoNumber}-${timestamp}.${fileExt}`;
       
+      console.log(`📁 Uploading to path: ${fileName}`);
+
       const { error: uploadError } = await supabase.storage
         .from('contest-photos')
         .upload(fileName, file, { upsert: true });
       
-      if (uploadError) throw uploadError;
+      if (uploadError) {
+        console.error(`❌ Upload error for photo ${photoNumber}:`, uploadError);
+        throw uploadError;
+      }
+
+      console.log(`✅ Upload successful for photo ${photoNumber}`);
       
       const { data } = supabase.storage
         .from('contest-photos')
         .getPublicUrl(fileName);
       
+      console.log(`🔗 Generated public URL: ${data.publicUrl}`);
+      
       // Add cache-busting timestamp to ensure new image loads
-      return `${data.publicUrl}?t=${Date.now()}`;
+      const finalUrl = `${data.publicUrl}?t=${Date.now()}`;
+      console.log(`✅ Photo ${photoNumber} upload result: ${finalUrl}`);
+      return finalUrl;
     } catch (error) {
-      console.error('Error uploading photo:', error);
+      console.error(`❌ Error uploading photo ${photoNumber}:`, error);
       return null;
     }
   };
 
   const handleSave = async () => {
+    console.log('🔄 Starting photo save process...');
     setUploading(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
+      console.log('👤 User authenticated:', user?.id);
       if (!user) {
+        console.log('❌ User not authenticated');
         toast({ description: "Не авторизован" });
         return;
       }
@@ -140,6 +163,7 @@ export function EditPhotosModal({
       
       onUpdate?.();
       onClose();
+      console.log('🏁 Photo save process completed');
     } catch (error) {
       console.error('Error updating photos:', error);
       toast({ description: "Ошибка обновления фотографий" });
