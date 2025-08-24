@@ -123,14 +123,11 @@ const LikedItem = ({
   const [currentParticipantType, setCurrentParticipantType] = useState<'candidate' | 'finalist' | 'winner' | null>(participantType || null);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   
-  // Inline photo editing state
-  const [isEditingInline, setIsEditingInline] = useState(false);
+  // Photo editing states exactly like in Admin
+  const [editingParticipant, setEditingParticipant] = useState<ParticipantData | null>(null);
   const [participantPhoto1File, setParticipantPhoto1File] = useState<File | null>(null);
   const [participantPhoto2File, setParticipantPhoto2File] = useState<File | null>(null);
   const [uploadingParticipantPhotos, setUploadingParticipantPhotos] = useState(false);
-  
-  // Debug log to ensure variables are defined
-  console.log('LikedItem: isEditingInline state initialized:', { isEditingInline });
   
   // Use unified card data hook
   const { data: cardData, loading: cardDataLoading } = useCardData(authorName, user?.id);
@@ -157,7 +154,30 @@ const LikedItem = ({
     return () => subscription.unsubscribe();
   }, []);
 
-  // Inline photo editing functions
+  // Participant photo editing functions exactly like in Admin
+  const startEditingParticipant = () => {
+    if (!authorProfileId) return;
+    
+    const participant: ParticipantData = {
+      id: authorProfileId,
+      user_id: authorProfileId,
+      first_name: candidateData?.name?.split(' ')[0] || authorName.split(' ')[0],
+      last_name: candidateData?.name?.split(' ').slice(1).join(' ') || authorName.split(' ').slice(1).join(' '),
+      photo1_url: candidateData?.faceImage || imageSrc || '',
+      photo2_url: candidateData?.fullBodyImage || imageSrc || ''
+    };
+    
+    setEditingParticipant(participant);
+    setParticipantPhoto1File(null);
+    setParticipantPhoto2File(null);
+  };
+
+  const cancelParticipantEdit = () => {
+    setEditingParticipant(null);
+    setParticipantPhoto1File(null);
+    setParticipantPhoto2File(null);
+  };
+
   const handleParticipantPhoto1Upload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
@@ -172,26 +192,20 @@ const LikedItem = ({
     }
   };
 
-  const cancelInlineEdit = () => {
-    setIsEditingInline(false);
-    setParticipantPhoto1File(null);
-    setParticipantPhoto2File(null);
-  };
-
-  // Save participant photos inline
-  const saveInlinePhotos = async () => {
-    if (!authorProfileId) return;
+  // Save participant photos exactly like in Admin
+  const saveParticipantPhotos = async () => {
+    if (!editingParticipant) return;
 
     setUploadingParticipantPhotos(true);
 
     try {
       const updates: any = {};
 
-      // Upload photo1 if provided
+      // Upload photo1 if provided - ТОЧНО КАК В АДМИНКЕ
       if (participantPhoto1File) {
         const fileExt = participantPhoto1File.name.split('.').pop();
         const fileName = `photo_1.${fileExt}`;
-        const filePath = `${authorProfileId}/${fileName}`;
+        const filePath = `${editingParticipant.user_id}/${fileName}`;
 
         const { error: uploadError } = await supabase.storage
           .from('contest-photos')
@@ -207,11 +221,11 @@ const LikedItem = ({
         updates.photo_1_url = timestampedUrl;
       }
 
-      // Upload photo2 if provided
+      // Upload photo2 if provided - ТОЧНО КАК В АДМИНКЕ  
       if (participantPhoto2File) {
         const fileExt = participantPhoto2File.name.split('.').pop();
         const fileName = `photo_2.${fileExt}`;
-        const filePath = `${authorProfileId}/${fileName}`;
+        const filePath = `${editingParticipant.user_id}/${fileName}`;
 
         const { error: uploadError } = await supabase.storage
           .from('contest-photos')
@@ -227,41 +241,14 @@ const LikedItem = ({
         updates.photo_2_url = timestampedUrl;
       }
 
-      // Update profile if there are changes
+      // Update profile if there are changes - ТОЧНО КАК В АДМИНКЕ
       if (Object.keys(updates).length > 0) {
         const { error: profileError } = await supabase
           .from('profiles')
           .update(updates)
-          .eq('id', authorProfileId);
+          .eq('id', editingParticipant.user_id);
 
         if (profileError) throw profileError;
-
-        // Also update weekly contest participants application_data
-        const { data: contestParticipants, error: fetchError } = await supabase
-          .from('weekly_contest_participants')
-          .select('*')
-          .eq('user_id', authorProfileId);
-
-        if (!fetchError && contestParticipants && contestParticipants.length > 0) {
-          for (const participant of contestParticipants) {
-            const currentData = participant.application_data as Record<string, any> || {};
-            const updatedApplicationData = {
-              ...currentData
-            };
-            
-            if (updates.photo_1_url) {
-              updatedApplicationData.photo1_url = updates.photo_1_url;
-            }
-            if (updates.photo_2_url) {
-              updatedApplicationData.photo2_url = updates.photo_2_url;
-            }
-
-            await supabase
-              .from('weekly_contest_participants')
-              .update({ application_data: updatedApplicationData })
-              .eq('id', participant.id);
-          }
-        }
 
         toast({
           title: "Success",
@@ -277,7 +264,7 @@ const LikedItem = ({
         }
       }
 
-      cancelInlineEdit();
+      cancelParticipantEdit();
     } catch (error: any) {
       console.error('Error updating participant photos:', error);
       toast({
@@ -418,9 +405,9 @@ const LikedItem = ({
       <>
         <Card className="bg-card border-contest-border relative overflow-hidden flex h-32 sm:h-36 md:h-40">
           {/* Edit button for owner */}
-          {isOwner && !isEditingInline && (
+          {isOwner && (
             <Button
-              onClick={() => setIsEditingInline(true)}
+              onClick={onEditPhotos}
               size="sm"
               className="absolute top-2 right-2 z-30 w-8 h-8 p-0"
             >
@@ -516,8 +503,91 @@ const LikedItem = ({
           </div>
         </Card>
 
-        {/* Participant Type Badge */}
-        {!isEditingInline && showStatusBadge && getParticipantBadge(currentParticipantType)}
+        {/* Photo editing dialog exactly like in Admin */}
+        <Dialog open={!!editingParticipant} onOpenChange={(open) => !open && cancelParticipantEdit()}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>
+                Edit Photos for {editingParticipant?.first_name} {editingParticipant?.last_name}
+              </DialogTitle>
+            </DialogHeader>
+            
+            {editingParticipant && (
+              <div className="space-y-6">
+                {/* Current Photos */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-sm font-medium">Current Portrait Photo</Label>
+                    {editingParticipant.photo1_url && (
+                      <img 
+                        src={editingParticipant.photo1_url} 
+                        alt="Current portrait" 
+                        className="w-full h-48 object-cover rounded border mt-2"
+                      />
+                    )}
+                  </div>
+                  <div>
+                    <Label className="text-sm font-medium">Current Full Length Photo</Label>
+                    {editingParticipant.photo2_url && (
+                      <img 
+                        src={editingParticipant.photo2_url} 
+                        alt="Current full length" 
+                        className="w-full h-48 object-cover rounded border mt-2"
+                      />
+                    )}
+                  </div>
+                </div>
+                
+                {/* New Photo Uploads */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-sm font-medium">Replace Portrait Photo</Label>
+                    <Input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleParticipantPhoto1Upload}
+                      className="mt-2"
+                    />
+                    {participantPhoto1File && (
+                      <p className="text-sm text-green-600 mt-1">
+                        New portrait selected: {participantPhoto1File.name}
+                      </p>
+                    )}
+                  </div>
+                  
+                  <div>
+                    <Label className="text-sm font-medium">Replace Full Length Photo</Label>
+                    <Input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleParticipantPhoto2Upload}
+                      className="mt-2"
+                    />
+                    {participantPhoto2File && (
+                      <p className="text-sm text-green-600 mt-1">
+                        New full length selected: {participantPhoto2File.name}
+                      </p>
+                    )}
+                  </div>
+                </div>
+                
+                {/* Action Buttons */}
+                <div className="flex justify-end gap-2 pt-4 border-t">
+                  <Button variant="outline" onClick={cancelParticipantEdit} disabled={uploadingParticipantPhotos}>
+                    Cancel
+                  </Button>
+                  <Button 
+                    onClick={saveParticipantPhotos} 
+                    className="bg-blue-600 hover:bg-blue-700" 
+                    disabled={uploadingParticipantPhotos || (!participantPhoto1File && !participantPhoto2File)}
+                  >
+                    {uploadingParticipantPhotos ? "Uploading..." : "Save Photos"}
+                  </Button>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
 
         <PhotoModal
           isOpen={isModalOpen}
@@ -547,9 +617,9 @@ const LikedItem = ({
     <>
       <Card className="bg-card border-contest-border relative overflow-hidden">
         {/* Edit button for owner */}
-        {isOwner && !isEditingInline && (
+        {isOwner && (
           <Button
-            onClick={() => setIsEditingInline(true)}
+            onClick={onEditPhotos}
             size="sm"
             className="absolute top-2 right-2 z-30 w-8 h-8 p-0"
           >
@@ -576,133 +646,28 @@ const LikedItem = ({
           <div className="h-full"></div>
         </div>
         
-        {/* Photos section or edit form */}
+        {/* Photos section */}
         <div className="relative">
-          {isEditingInline ? (
-            <div className="grid grid-cols-2 gap-px">
-              {/* Photo 1 with edit options */}
-              <div className="relative">
-                <img 
-                  src={displayFaceImage} 
-                  alt={`${authorName} face`}
-                  className="w-full aspect-[4/5] object-cover"
-                />
-                <div className="absolute inset-0 bg-black/50 flex items-center justify-center gap-2">
-                  <Button
-                    size="sm"
-                    className="w-10 h-10 p-0"
-                    onClick={() => document.getElementById('photo1-upload')?.click()}
-                  >
-                    <Edit className="w-4 h-4" />
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="destructive"
-                    className="w-10 h-10 p-0"
-                    onClick={() => {
-                      // TODO: Handle photo deletion
-                      console.log('Delete photo 1');
-                    }}
-                  >
-                    <span className="text-lg">×</span>
-                  </Button>
-                </div>
-                <input
-                  id="photo1-upload"
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={handleParticipantPhoto1Upload}
-                />
-                {participantPhoto1File && (
-                  <div className="absolute bottom-2 left-2 right-2 bg-green-600 text-white text-xs p-1 rounded">
-                    New: {participantPhoto1File.name.slice(0, 20)}...
-                  </div>
-                )}
-              </div>
-              
-              {/* Photo 2 with edit options */}
-              <div className="relative">
-                <img 
-                  src={displayFullImage} 
-                  alt={`${authorName} full body`}
-                  className="w-full aspect-[4/5] object-cover"
-                />
-                <div className="absolute inset-0 bg-black/50 flex items-center justify-center gap-2">
-                  <Button
-                    size="sm"
-                    className="w-10 h-10 p-0"
-                    onClick={() => document.getElementById('photo2-upload')?.click()}
-                  >
-                    <Edit className="w-4 h-4" />
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="destructive"
-                    className="w-10 h-10 p-0"
-                    onClick={() => {
-                      // TODO: Handle photo deletion
-                      console.log('Delete photo 2');
-                    }}
-                  >
-                    <span className="text-lg">×</span>
-                  </Button>
-                </div>
-                <input
-                  id="photo2-upload"
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={handleParticipantPhoto2Upload}
-                />
-                {participantPhoto2File && (
-                  <div className="absolute bottom-2 left-2 right-2 bg-green-600 text-white text-xs p-1 rounded">
-                    New: {participantPhoto2File.name.slice(0, 20)}...
-                  </div>
-                )}
-              </div>
-              
-              {/* Save/Cancel buttons */}
-              <div className="col-span-2 p-4 border-t border-contest-border">
-                <div className="flex gap-2 justify-end">
-                  <Button
-                    variant="outline"
-                    onClick={cancelInlineEdit}
-                    disabled={uploadingParticipantPhotos}
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    onClick={saveInlinePhotos}
-                    disabled={uploadingParticipantPhotos || (!participantPhoto1File && !participantPhoto2File)}
-                  >
-                    {uploadingParticipantPhotos ? "Saving..." : "Save Photos"}
-                  </Button>
-                </div>
-              </div>
+          <div className="grid grid-cols-2 gap-px">
+            {/* Participant Type Badge */}
+            {showStatusBadge && getParticipantBadge(currentParticipantType, true)}
+            <div className="relative">
+              <img 
+                src={displayFaceImage} 
+                alt={`${authorName} face`}
+                className="w-full aspect-[4/5] object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                onClick={() => openModal(0)}
+              />
             </div>
-          ) : (
-            <div className="grid grid-cols-2 gap-px">
-              {/* Participant Type Badge */}
-              {showStatusBadge && getParticipantBadge(currentParticipantType, true)}
-              <div className="relative">
-                <img 
-                  src={displayFaceImage} 
-                  alt={`${authorName} face`}
-                  className="w-full aspect-[4/5] object-cover cursor-pointer hover:opacity-90 transition-opacity"
-                  onClick={() => openModal(0)}
-                />
-              </div>
-              <div className="relative">
-                <img 
-                  src={displayFullImage} 
-                  alt={`${authorName} full body`}
-                  className="w-full aspect-[4/5] object-cover cursor-pointer hover:opacity-90 transition-opacity"
-                  onClick={() => openModal(1)}
-                />
-              </div>
+            <div className="relative">
+              <img 
+                src={displayFullImage} 
+                alt={`${authorName} full body`}
+                className="w-full aspect-[4/5] object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                onClick={() => openModal(1)}
+              />
             </div>
-          )}
+          </div>
         </div>
         
         {/* Footer with actions */}
@@ -748,6 +713,92 @@ const LikedItem = ({
           </button>
         </div>
       </Card>
+
+      {/* Photo editing dialog exactly like in Admin */}
+      <Dialog open={!!editingParticipant} onOpenChange={(open) => !open && cancelParticipantEdit()}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>
+              Edit Photos for {editingParticipant?.first_name} {editingParticipant?.last_name}
+            </DialogTitle>
+          </DialogHeader>
+          
+          {editingParticipant && (
+            <div className="space-y-6">
+              {/* Current Photos */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-sm font-medium">Current Portrait Photo</Label>
+                  {editingParticipant.photo1_url && (
+                    <img 
+                      src={editingParticipant.photo1_url} 
+                      alt="Current portrait" 
+                      className="w-full h-48 object-cover rounded border mt-2"
+                    />
+                  )}
+                </div>
+                <div>
+                  <Label className="text-sm font-medium">Current Full Length Photo</Label>
+                  {editingParticipant.photo2_url && (
+                    <img 
+                      src={editingParticipant.photo2_url} 
+                      alt="Current full length" 
+                      className="w-full h-48 object-cover rounded border mt-2"
+                    />
+                  )}
+                </div>
+              </div>
+              
+              {/* New Photo Uploads */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-sm font-medium">Replace Portrait Photo</Label>
+                  <Input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleParticipantPhoto1Upload}
+                    className="mt-2"
+                  />
+                  {participantPhoto1File && (
+                    <p className="text-sm text-green-600 mt-1">
+                      New portrait selected: {participantPhoto1File.name}
+                    </p>
+                  )}
+                </div>
+                
+                <div>
+                  <Label className="text-sm font-medium">Replace Full Length Photo</Label>
+                  <Input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleParticipantPhoto2Upload}
+                    className="mt-2"
+                  />
+                  {participantPhoto2File && (
+                    <p className="text-sm text-green-600 mt-1">
+                      New full length selected: {participantPhoto2File.name}
+                    </p>
+                  )}
+                </div>
+              </div>
+              
+              {/* Action Buttons */}
+              <div className="flex justify-end gap-2 pt-4 border-t">
+                <Button variant="outline" onClick={cancelParticipantEdit} disabled={uploadingParticipantPhotos}>
+                  Cancel
+                </Button>
+                <Button 
+                  onClick={saveParticipantPhotos} 
+                  className="bg-blue-600 hover:bg-blue-700" 
+                  disabled={uploadingParticipantPhotos || (!participantPhoto1File && !participantPhoto2File)}
+                >
+                  {uploadingParticipantPhotos ? "Uploading..." : "Save Photos"}
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
       <PhotoModal
         isOpen={isModalOpen}
