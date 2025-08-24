@@ -346,13 +346,13 @@ export function ContestantCard({
   if (viewMode === 'full') {
     return (
       <>
-        <Card className="bg-card border-contest-border relative overflow-hidden">
+        <Card className={`${isExample ? 'border-yellow-400 border-2 bg-yellow-50/50' : 'bg-card border-contest-border'} relative overflow-hidden`}>
           {/* Example overlay for full view */}
           {isExample && (
-            <div className="absolute inset-0 z-30 bg-black/80 flex items-center justify-center">
+            <div className="absolute inset-0 z-30 bg-gradient-to-br from-yellow-400/90 to-orange-400/90 flex items-center justify-center">
               <div className="text-center text-white">
-                <h3 className="text-2xl font-bold mb-2">This is an example</h3>
-                <p className="text-lg">Real contestants will appear here</p>
+                <h3 className="text-2xl font-bold mb-2 drop-shadow-lg">🔖 This is an example</h3>
+                <p className="text-lg drop-shadow-md">Real contestants will appear here</p>
               </div>
             </div>
           )}
@@ -566,13 +566,13 @@ export function ContestantCard({
 
   return (
     <>
-      <Card className="bg-card border-contest-border relative overflow-hidden flex h-36 sm:h-40 md:h-44">
+      <Card className={`${isExample ? 'border-yellow-400 border-2 bg-yellow-50/50' : 'bg-card border-contest-border'} relative overflow-hidden flex h-36 sm:h-40 md:h-44`}>
         {/* Example overlay for compact view */}
         {isExample && (
-          <div className="absolute inset-0 z-30 bg-black/80 flex items-center justify-center">
+          <div className="absolute inset-0 z-30 bg-gradient-to-br from-yellow-400/90 to-orange-400/90 flex items-center justify-center">
             <div className="text-center text-white">
-              <h3 className="text-xl font-bold mb-2">This is an example</h3>
-              <p className="text-sm">Real contestants will appear here</p>
+              <h3 className="text-xl font-bold mb-2 drop-shadow-lg">🔖 This is an example</h3>
+              <p className="text-sm drop-shadow-md">Real contestants will appear here</p>
             </div>
           </div>
         )}

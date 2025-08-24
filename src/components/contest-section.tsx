@@ -235,7 +235,45 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
         return (b.totalVotes || 0) - (a.totalVotes || 0);
       });
 
-      // Assign ranks based on rating order (1 for highest rating)
+      // For "THIS WEEK" section, always add test card at the beginning
+      if (title === "THIS WEEK") {
+        const testCard = {
+          rank: 0, // Use 0 to distinguish from real ranks
+          name: "Example Card", 
+          profileId: "example-id",
+          country: "Philippines",
+          city: "Manila",
+          age: 25,
+          weight: 55,
+          height: 165,
+          rating: 4.8,
+          averageRating: 4.8,
+          totalVotes: 124,
+          faceImage: contestant1Face,
+          fullBodyImage: contestant1Full,
+          additionalPhotos: [],
+          isVoted: false,
+          isWinner: false,
+          prize: undefined,
+          isRealContestant: false,
+          isExample: true // Special flag for example card
+        };
+        
+        // Add test card at the beginning, then real contestants
+        const realContestantsWithRanks = sortedContestants.map((contestant, index) => {
+          const newRank = contestant.rating > 0 ? index + 1 : 0;
+          return {
+            ...contestant,
+            rank: newRank,
+            isWinner: showWinner && newRank === 1,
+            prize: showWinner && newRank === 1 ? "+ 5000 PHP" : undefined
+          };
+        });
+        
+        return [testCard, ...realContestantsWithRanks];
+      }
+
+      // Assign ranks based on rating order (1 for highest rating) for other weeks
       return sortedContestants.map((contestant, index) => {
         const newRank = contestant.rating > 0 ? index + 1 : 0;
         return {
@@ -245,31 +283,6 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
           prize: showWinner && newRank === 1 ? "+ 5000 PHP" : undefined
         };
       });
-    }
-    
-    // For "THIS WEEK" section, show test card if no real contestants
-    if (title === "THIS WEEK") {
-      return [{
-        rank: 1,
-        name: "Example Card",
-        profileId: "example-id",
-        country: "Philippines",
-        city: "Manila",
-        age: 25,
-        weight: 55,
-        height: 165,
-        rating: 4.8,
-        averageRating: 4.8,
-        totalVotes: 124,
-        faceImage: contestant1Face,
-        fullBodyImage: contestant1Full,
-        additionalPhotos: [],
-        isVoted: false,
-        isWinner: false,
-        prize: undefined,
-        isRealContestant: false,
-        isExample: true // Special flag for example card
-      }];
     }
     
     // Return empty array if no real contestants found
