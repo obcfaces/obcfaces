@@ -17,7 +17,6 @@ import LikedItem from "@/components/profile/LikedItem";
 import { PhotoModal } from "@/components/photo-modal";
 import { ProfilePhotoModal } from "@/components/profile-photo-modal";
 import { ContestParticipationModal } from "@/components/contest-participation-modal";
-import { EditPhotosModalNew } from "@/components/edit-photos-modal-new";
 import CreatePostModal from "@/components/create-post-modal";
 import c1 from "@/assets/contestant-1.jpg";
 import c2 from "@/assets/contestant-2.jpg";
@@ -39,8 +38,6 @@ interface ProfileRow {
   country?: string | null;
   bio?: string | null;
   gender?: string | null;
-  photo_1_url?: string | null;
-  photo_2_url?: string | null;
 }
 
 const Profile = () => {
@@ -103,8 +100,6 @@ const Profile = () => {
   const [postsViewMode, setPostsViewMode] = useState<'compact' | 'full'>('full');
   const [profilePhotos, setProfilePhotos] = useState<string[]>([]);
   const [loadingPhotos, setLoadingPhotos] = useState(true);
-  const [editPhotosModalOpen, setEditPhotosModalOpen] = useState(false);
-  const [isParticipationEditMode, setIsParticipationEditMode] = useState(false);
 
   // Demo profile for fallback
   const demoProfile: ProfileRow = {
@@ -188,49 +183,49 @@ const Profile = () => {
   const isOwner = currentUserId && currentUserId === id;
 
   // Load profile data
-  const loadProfile = async () => {
-    if (!id) return;
-    
-    try {
-      const { data: profileData } = await supabase
-        .from("profiles")
-        .select("display_name, first_name, last_name, birthdate, height_cm, weight_kg, avatar_url, city, country, bio, gender, photo_1_url, photo_2_url")
-        .eq("id", id)
-        .maybeSingle();
-      
-      setData(profileData);
-      setBioDraft(profileData?.bio ?? "");
-      
-      // Initialize edit form with loaded data
-      setEditForm({
-        display_name: profileData?.display_name || '',
-        gender: profileData?.gender || '',
-        gender_privacy: 'public',
-        country: profileData?.country || '',
-        country_privacy: 'public',
-        birthdate: profileData?.birthdate || '',
-        birthdate_privacy: 'only_me',
-        bio: profileData?.bio || '',
-        email: ''
-      });
-      
-      // Load real follower/following counts
-      const { data: followStats } = await supabase.rpc('get_follow_stats', { target_user_id: id });
-      if (followStats && followStats.length > 0) {
-        setFollowersCount(followStats[0]?.followers_count || 0);
-        setFollowingCount(followStats[0]?.following_count || 0);
-      } else {
-        setFollowersCount(0);
-        setFollowingCount(0);
-      }
-    } catch (error) {
-      console.error("Error loading profile:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
+    const loadProfile = async () => {
+      if (!id) return;
+      
+      try {
+        const { data: profileData } = await supabase
+          .from("profiles")
+          .select("display_name, first_name, last_name, birthdate, height_cm, weight_kg, avatar_url, city, country, bio, gender")
+          .eq("id", id)
+          .maybeSingle();
+        
+        setData(profileData);
+        setBioDraft(profileData?.bio ?? "");
+        
+        // Initialize edit form with loaded data
+        setEditForm({
+          display_name: profileData?.display_name || '',
+          gender: profileData?.gender || '',
+          gender_privacy: 'public',
+          country: profileData?.country || '',
+          country_privacy: 'public',
+          birthdate: profileData?.birthdate || '',
+          birthdate_privacy: 'only_me',
+          bio: profileData?.bio || '',
+          email: ''
+        });
+        
+        // Load real follower/following counts
+        const { data: followStats } = await supabase.rpc('get_follow_stats', { target_user_id: id });
+        if (followStats && followStats.length > 0) {
+          setFollowersCount(followStats[0]?.followers_count || 0);
+          setFollowingCount(followStats[0]?.following_count || 0);
+        } else {
+          setFollowersCount(0);
+          setFollowingCount(0);
+        }
+      } catch (error) {
+        console.error("Error loading profile:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
     loadProfile();
   }, [id]);
 
@@ -678,18 +673,12 @@ const Profile = () => {
     try {
       console.log('Loading participation for user:', id);
       
-      // Сначала получаем профиль пользователя (принудительно из базы)
+      // Сначала получаем профиль пользователя
       const { data: profileData, error } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', id)
         .maybeSingle();
-
-      console.log('🔄 Fresh profile data loaded for participation:', {
-        photo_1_url: profileData?.photo_1_url,
-        photo_2_url: profileData?.photo_2_url,
-        updated_at: profileData?.updated_at
-      });
 
       console.log('Profile data:', profileData);
       console.log('Profile error:', error);
@@ -718,22 +707,17 @@ const Profile = () => {
         return;
       }
 
-      // Add cache-busting timestamp to ensure fresh images display immediately
-      const timestamp = Date.now();
-      const photo1UrlWithCache = profileData.photo_1_url ? `${profileData.photo_1_url}?t=${timestamp}` : c1face;
-      const photo2UrlWithCache = profileData.photo_2_url ? `${profileData.photo_2_url}?t=${timestamp}` : c1;
-
       // Создаем карточку участия пользователя на основе его профиля
       const participationCard = {
-        likeId: `participation-${id}`,
+        likeId: `participation-${currentUserId}`,
         contentType: 'contest' as const,
-        contentId: id,
+        contentId: currentUserId,
         authorName: `${profileData.first_name || ''} ${profileData.last_name || ''}`.trim() || 'Участник',
-        authorProfileId: id,
+        authorProfileId: currentUserId,
         time: new Date(profileData.created_at).toLocaleString('ru-RU'),
         likes: Math.floor(Math.random() * 200) + 50, // Mock likes
         comments: Math.floor(Math.random() * 40) + 5, // Mock comments
-        imageSrc: photo1UrlWithCache, // Use first photo as main display with cache busting
+        imageSrc: profileData.photo_1_url || c1face, // Use first photo as main display
         participantType: (profileData.participant_type as 'candidate' | 'finalist' | 'winner') || 'candidate',
         candidateData: {
           name: `${profileData.first_name || ''} ${profileData.last_name || ''}`.trim() || 'Участник',
@@ -742,8 +726,8 @@ const Profile = () => {
           height: profileData.height_cm || 165,
           country: [profileData.country, profileData.state, profileData.city].filter(Boolean).join(', ') || 'Philippines',
           city: profileData.city || 'Manila',
-          faceImage: photo1UrlWithCache, // Formal photo with cache busting
-          fullBodyImage: photo2UrlWithCache, // Casual photo with cache busting
+          faceImage: profileData.photo_1_url || c1face, // Formal photo (first image)
+          fullBodyImage: profileData.photo_2_url || c1, // Casual photo (second image)
           participantType: (profileData.participant_type as 'candidate' | 'finalist' | 'winner') || 'candidate'
         }
       };
@@ -1154,15 +1138,6 @@ const Profile = () => {
                         viewMode={participationViewMode}
                         candidateData={item.candidateData}
                         participantType={item.participantType}
-                        isOwner={isOwner}
-                        isEditMode={isParticipationEditMode}
-                        onToggleEditMode={() => setIsParticipationEditMode(!isParticipationEditMode)}
-                        onEditPhotos={() => setEditPhotosModalOpen(true)}
-                        onUpdatePhotos={(photo1, photo2) => {
-                          // Update the data and reload participation items
-                          setData(prev => prev ? { ...prev, photo_1_url: photo1, photo_2_url: photo2 } : null);
-                          loadParticipationItems();
-                        }}
                       />
                     ))}
                   </div>
@@ -1977,20 +1952,6 @@ const Profile = () => {
         currentIndex={selectedPhotoIndex}
         profileId={id || ""}
         profileName={profile.display_name || "Пользователь"}
-      />
-
-      {/* Edit Photos Modal */}
-      <EditPhotosModalNew
-        isOpen={editPhotosModalOpen}
-        onClose={() => setEditPhotosModalOpen(false)}
-        currentPhoto1={data?.photo_1_url}
-        currentPhoto2={data?.photo_2_url}
-        onUpdate={async () => {
-          console.log('🔄 Photo update callback triggered');
-          // Force reload profile data and participation items
-          await loadProfile();
-          await loadParticipationItems();
-        }}
       />
 
     </div>
