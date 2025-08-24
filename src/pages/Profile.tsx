@@ -718,6 +718,11 @@ const Profile = () => {
         return;
       }
 
+      // Add cache-busting timestamp to ensure fresh images display immediately
+      const timestamp = Date.now();
+      const photo1UrlWithCache = profileData.photo_1_url ? `${profileData.photo_1_url}?t=${timestamp}` : c1face;
+      const photo2UrlWithCache = profileData.photo_2_url ? `${profileData.photo_2_url}?t=${timestamp}` : c1;
+
       // Создаем карточку участия пользователя на основе его профиля
       const participationCard = {
         likeId: `participation-${id}`,
@@ -728,7 +733,7 @@ const Profile = () => {
         time: new Date(profileData.created_at).toLocaleString('ru-RU'),
         likes: Math.floor(Math.random() * 200) + 50, // Mock likes
         comments: Math.floor(Math.random() * 40) + 5, // Mock comments
-        imageSrc: profileData.photo_1_url || c1face, // Use first photo as main display
+        imageSrc: photo1UrlWithCache, // Use first photo as main display with cache busting
         participantType: (profileData.participant_type as 'candidate' | 'finalist' | 'winner') || 'candidate',
         candidateData: {
           name: `${profileData.first_name || ''} ${profileData.last_name || ''}`.trim() || 'Участник',
@@ -737,8 +742,8 @@ const Profile = () => {
           height: profileData.height_cm || 165,
           country: [profileData.country, profileData.state, profileData.city].filter(Boolean).join(', ') || 'Philippines',
           city: profileData.city || 'Manila',
-          faceImage: profileData.photo_1_url || c1face, // Formal photo (first image)
-          fullBodyImage: profileData.photo_2_url || c1, // Casual photo (second image)
+          faceImage: photo1UrlWithCache, // Formal photo with cache busting
+          fullBodyImage: photo2UrlWithCache, // Casual photo with cache busting
           participantType: (profileData.participant_type as 'candidate' | 'finalist' | 'winner') || 'candidate'
         }
       };

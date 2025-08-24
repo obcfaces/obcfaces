@@ -93,10 +93,12 @@ export function EditPhotosModal({
         .from('contest-photos')
         .getPublicUrl(fileName);
       
-      console.log(`🔗 Generated public URL: ${data.publicUrl}`);
+      // Add cache-busting timestamp to ensure new image loads immediately
+      const finalUrl = `${data.publicUrl}?t=${Date.now()}`;
+      console.log(`🔗 Generated public URL with cache busting: ${finalUrl}`);
       
-      console.log(`✅ Photo ${photoNumber} upload result: ${data.publicUrl}`);
-      return data.publicUrl;
+      console.log(`✅ Photo ${photoNumber} upload result: ${finalUrl}`);
+      return finalUrl;
     } catch (error) {
       console.error(`❌ Error uploading photo ${photoNumber}:`, error);
       toast({ 
