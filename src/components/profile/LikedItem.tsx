@@ -108,9 +108,12 @@ const LikedItem = ({
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [currentParticipantType, setCurrentParticipantType] = useState<'candidate' | 'finalist' | 'winner' | null>(participantType || null);
   const [isEditMode, setIsEditMode] = useState(false);
-  const [uploadingPhoto, setUploadingPhoto] = useState<'photo_1' | 'photo_2' | null>(null);
-  const [photoFiles, setPhotoFiles] = useState<{[key: string]: File | null}>({});
-  const [photoPreviews, setPhotoPreviews] = useState<{[key: string]: string | null}>({});
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [photo1File, setPhoto1File] = useState<File | null>(null);
+  const [photo2File, setPhoto2File] = useState<File | null>(null);
+  const [photo1Preview, setPhoto1Preview] = useState<string | null>(null);
+  const [photo2Preview, setPhoto2Preview] = useState<string | null>(null);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
   // Use unified card data hook
   const { data: cardData, loading: cardDataLoading } = useCardData(authorName, user?.id);
@@ -122,14 +125,16 @@ const LikedItem = ({
   // Don't render until card data is loaded (participant data loads separately)
   const isDataLoading = cardDataLoading;
 
-  // Get current user
+  // Get current user (копируем точно как в About)
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
       setUser(session?.user ?? null);
+      setCurrentUserId(session?.user?.id || null);
     });
 
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
+      setCurrentUserId(session?.user?.id || null);
     });
 
     return () => subscription.unsubscribe();
@@ -192,33 +197,38 @@ const LikedItem = ({
     openModal(0);
   };
 
-  const handlePhotoChange = (photoType: 'photo_1' | 'photo_2', event: React.ChangeEvent<HTMLInputElement>) => {
+  // Функции для работы с фото (копируем логику из About)
+  const handlePhoto1Change = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      setPhotoFiles(prev => ({ ...prev, [photoType]: file }));
+      setPhoto1File(file);
       const reader = new FileReader();
       reader.onload = (e) => {
-        setPhotoPreviews(prev => ({ 
-          ...prev, 
-          [photoType]: e.target?.result as string 
-        }));
+        setPhoto1Preview(e.target?.result as string);
       };
       reader.readAsDataURL(file);
     }
   };
 
-  const handlePhotoDelete = (photoType: 'photo_1' | 'photo_2') => {
-    setPhotoFiles(prev => ({ ...prev, [photoType]: null }));
-    setPhotoPreviews(prev => ({ ...prev, [photoType]: null }));
+  const handlePhoto2Change = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setPhoto2File(file);
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setPhoto2Preview(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
+  // Загрузка фото точно как в About разделе
   const uploadPhoto = async (file: File, photoType: 'photo_1' | 'photo_2'): Promise<string | null> => {
-    if (!user?.id) return null;
+    if (!currentUserId) return null;
     
-    setUploadingPhoto(photoType);
     try {
       const fileExt = file.name.split('.').pop();
-      const fileName = `${user.id}/${photoType}.${fileExt}`;
+      const fileName = `${currentUserId}/${photoType}.${fileExt}`;
       
       const { error: uploadError } = await supabase.storage
         .from('contest-photos')
@@ -233,67 +243,60 @@ const LikedItem = ({
       return data.publicUrl;
     } catch (error) {
       console.error('Error uploading photo:', error);
-      toast({ description: "Ошибка загрузки фото" });
+      toast({ description: "Error uploading photo" });
       return null;
-    } finally {
-      setUploadingPhoto(null);
     }
   };
 
+  // Сохранение фото точно как в About разделе
   const handleSavePhotos = async () => {
-    console.log('💾 handleSavePhotos called', { 
-      userId: user?.id, 
-      authorProfileId, 
-      photoFiles: Object.keys(photoFiles),
-      hasPhoto1: !!photoFiles.photo_1,
-      hasPhoto2: !!photoFiles.photo_2
-    });
+    if (!currentUserId || currentUserId !== authorProfileId) return;
     
-    if (!user?.id || !authorProfileId) {
-      console.error('❌ Missing required data:', { userId: user?.id, authorProfileId });
-      return;
-    }
-
+    setUploadingPhoto(true);
     try {
-      const updates: { [key: string]: string } = {};
+      const updates: any = {};
 
-      // Upload photo_1 if changed
-      if (photoFiles.photo_1) {
-        const url = await uploadPhoto(photoFiles.photo_1, 'photo_1');
-        if (url) {
-          updates.photo_1_url = url;
-          onPhotoUpdate?.('photo_1', url);
+      // Upload photo_1 if a new one was selected
+      if (photo1File) {
+        const uploadedUrl = await uploadPhoto(photo1File, 'photo_1');
+        if (uploadedUrl) {
+          updates.photo_1_url = uploadedUrl;
+          onPhotoUpdate?.('photo_1', uploadedUrl);
         }
       }
 
-      // Upload photo_2 if changed  
-      if (photoFiles.photo_2) {
-        const url = await uploadPhoto(photoFiles.photo_2, 'photo_2');
-        if (url) {
-          updates.photo_2_url = url;
-          onPhotoUpdate?.('photo_2', url);
+      // Upload photo_2 if a new one was selected  
+      if (photo2File) {
+        const uploadedUrl = await uploadPhoto(photo2File, 'photo_2');
+        if (uploadedUrl) {
+          updates.photo_2_url = uploadedUrl;
+          onPhotoUpdate?.('photo_2', uploadedUrl);
         }
       }
 
       // Update profile if there are changes
       if (Object.keys(updates).length > 0) {
-        const { error } = await supabase
+        const { error: profileError } = await supabase
           .from('profiles')
           .update(updates)
           .eq('id', authorProfileId);
 
-        if (error) throw error;
+        if (profileError) throw profileError;
 
         toast({ description: "Фото обновлены успешно" });
       }
 
       // Reset edit mode
       setIsEditMode(false);
-      setPhotoFiles({});
-      setPhotoPreviews({});
+      setPhoto1File(null);
+      setPhoto2File(null);
+      setPhoto1Preview(null);
+      setPhoto2Preview(null);
     } catch (error) {
       console.error('Error updating photos:', error);
       toast({ description: "Ошибка обновления фото" });
+    } finally {
+      setUploadingPhoto(false);
     }
   };
 
@@ -385,7 +388,7 @@ const LikedItem = ({
             <div className="relative">
               {/* Photo 1 */}
               <img 
-                src={photoPreviews.photo_1 || displayFaceImage}
+                src={photo1Preview || displayFaceImage}
                 alt={`${authorName} face`}
                 className="w-24 sm:w-28 md:w-32 h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
                 onClick={() => !isEditMode && openModal(0)}
@@ -396,15 +399,18 @@ const LikedItem = ({
                     type="file"
                     id="photo1-compact"
                     accept="image/*"
-                    onChange={(e) => handlePhotoChange('photo_1', e)}
+                    onChange={handlePhoto1Change}
                     className="hidden"
                   />
                   <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                    {photoFiles.photo_1 ? (
+                    {photo1File ? (
                       <div className="flex gap-1">
                         <button
                           type="button"
-                          onClick={() => handlePhotoDelete('photo_1')}
+                          onClick={() => {
+                            setPhoto1File(null);
+                            setPhoto1Preview(null);
+                          }}
                           className="w-6 h-6 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center text-white text-sm transition-colors"
                         >
                           <X className="w-4 h-4" />
@@ -425,7 +431,7 @@ const LikedItem = ({
             <div className="relative">
               {/* Photo 2 */}
               <img 
-                src={photoPreviews.photo_2 || displayFullImage} 
+                src={photo2Preview || displayFullImage}
                 alt={`${authorName} full body`}
                 className="w-24 sm:w-28 md:w-32 h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
                 onClick={() => !isEditMode && openModal(1)}
@@ -436,15 +442,18 @@ const LikedItem = ({
                     type="file"
                     id="photo2-compact"
                     accept="image/*"
-                    onChange={(e) => handlePhotoChange('photo_2', e)}
+                    onChange={handlePhoto2Change}
                     className="hidden"
                   />
                   <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                    {photoFiles.photo_2 ? (
+                    {photo2File ? (
                       <div className="flex gap-1">
                         <button
                           type="button"
-                          onClick={() => handlePhotoDelete('photo_2')}
+                          onClick={() => {
+                            setPhoto2File(null);
+                            setPhoto2Preview(null);
+                          }}
                           className="w-6 h-6 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center text-white text-sm transition-colors"
                         >
                           <X className="w-4 h-4" />
@@ -490,10 +499,10 @@ const LikedItem = ({
               </div>
               
               <div className="flex items-center justify-end gap-4">
-                {isEditMode && (photoFiles.photo_1 || photoFiles.photo_2) ? (
+                {isEditMode && (photo1File || photo2File) ? (
                   <Button
                     onClick={handleSavePhotos}
-                    disabled={uploadingPhoto !== null}
+                    disabled={uploadingPhoto}
                     className="px-2 py-1 text-xs h-6"
                   >
                     {uploadingPhoto ? "Сохранение..." : "Сохранить"}
@@ -611,7 +620,7 @@ const LikedItem = ({
             <div className="relative">
               {/* Photo 1 */}
               <img 
-                src={photoPreviews.photo_1 || displayFaceImage} 
+                src={photo1Preview || displayFaceImage} 
                 alt={`${authorName} face`}
                 className="w-full aspect-[4/5] object-cover cursor-pointer hover:opacity-90 transition-opacity"
                 onClick={() => !isEditMode && openModal(0)}
@@ -622,15 +631,18 @@ const LikedItem = ({
                     type="file"
                     id="photo1-full"
                     accept="image/*"
-                    onChange={(e) => handlePhotoChange('photo_1', e)}
+                    onChange={handlePhoto1Change}
                     className="hidden"
                   />
                   <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                    {photoFiles.photo_1 ? (
+                    {photo1File ? (
                       <div className="flex gap-2">
                         <button
                           type="button"
-                          onClick={() => handlePhotoDelete('photo_1')}
+                          onClick={() => {
+                            setPhoto1File(null);
+                            setPhoto1Preview(null);
+                          }}
                           className="w-10 h-10 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center text-white transition-colors"
                         >
                           <X className="w-5 h-5" />
@@ -651,7 +663,7 @@ const LikedItem = ({
             <div className="relative">
               {/* Photo 2 */}
               <img 
-                src={photoPreviews.photo_2 || displayFullImage} 
+                src={photo2Preview || displayFullImage} 
                 alt={`${authorName} full body`}
                 className="w-full aspect-[4/5] object-cover cursor-pointer hover:opacity-90 transition-opacity"
                 onClick={() => !isEditMode && openModal(1)}
@@ -662,15 +674,18 @@ const LikedItem = ({
                     type="file"
                     id="photo2-full"
                     accept="image/*"
-                    onChange={(e) => handlePhotoChange('photo_2', e)}
+                    onChange={handlePhoto2Change}
                     className="hidden"
                   />
                   <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                    {photoFiles.photo_2 ? (
+                    {photo2File ? (
                       <div className="flex gap-2">
                         <button
                           type="button"
-                          onClick={() => handlePhotoDelete('photo_2')}
+                          onClick={() => {
+                            setPhoto2File(null);
+                            setPhoto2Preview(null);
+                          }}
                           className="w-10 h-10 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center text-white transition-colors"
                         >
                           <X className="w-5 h-5" />
@@ -693,10 +708,10 @@ const LikedItem = ({
         
         {/* Footer with actions - точно как в конкурсе */}
         <div className="border-t border-contest-border px-4 py-2 flex items-center justify-evenly gap-4">
-          {isEditMode && (photoFiles.photo_1 || photoFiles.photo_2) ? (
+          {isEditMode && (photo1File || photo2File) ? (
             <Button
               onClick={handleSavePhotos}
-              disabled={uploadingPhoto !== null}
+              disabled={uploadingPhoto}
               className="px-3 py-1 text-sm h-8"
             >
               {uploadingPhoto ? "Сохранение..." : "Сохранить"}
