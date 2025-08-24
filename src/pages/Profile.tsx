@@ -1146,6 +1146,7 @@ const Profile = () => {
                         isOwner={isOwner}
                         isEditMode={isParticipationEditMode}
                         onToggleEditMode={() => setIsParticipationEditMode(!isParticipationEditMode)}
+                        onEditPhotos={() => setEditPhotosModalOpen(true)}
                         onUpdatePhotos={(photo1, photo2) => {
                           // Update the data and reload participation items
                           setData(prev => prev ? { ...prev, photo_1_url: photo1, photo_2_url: photo2 } : null);
