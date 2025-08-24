@@ -114,7 +114,17 @@ const LikedItem = ({
   const [photo1Preview, setPhoto1Preview] = useState<string | null>(null);
   const [photo2Preview, setPhoto2Preview] = useState<string | null>(null);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
-
+  
+  // Логирование состояния для отладки
+  console.log('🔍 LikedItem state:', {
+    isOwner,
+    currentUserId,
+    authorProfileId,
+    isEditMode,
+    photo1File: !!photo1File,
+    photo2File: !!photo2File,
+    uploadingPhoto
+  });
   // Use unified card data hook
   const { data: cardData, loading: cardDataLoading } = useCardData(authorName, user?.id);
   
@@ -199,11 +209,14 @@ const LikedItem = ({
 
   // Функции для работы с фото (копируем логику из About)
   const handlePhoto1Change = (event: React.ChangeEvent<HTMLInputElement>) => {
+    console.log('📸 Photo1 file selected');
     const file = event.target.files?.[0];
     if (file) {
+      console.log('✅ Photo1 file valid:', file.name);
       setPhoto1File(file);
       const reader = new FileReader();
       reader.onload = (e) => {
+        console.log('✅ Photo1 preview created');
         setPhoto1Preview(e.target?.result as string);
       };
       reader.readAsDataURL(file);
@@ -547,7 +560,10 @@ const LikedItem = ({
               <div className="flex items-center justify-end gap-4">
                 {isEditMode && (photo1File || photo2File) ? (
                   <Button
-                    onClick={handleSavePhotos}
+                    onClick={() => {
+                      console.log('🔥 Save button clicked!');
+                      handleSavePhotos();
+                    }}
                     disabled={uploadingPhoto}
                     className="px-2 py-1 text-xs h-6"
                   >
@@ -756,7 +772,10 @@ const LikedItem = ({
         <div className="border-t border-contest-border px-4 py-2 flex items-center justify-evenly gap-4">
           {isEditMode && (photo1File || photo2File) ? (
             <Button
-              onClick={handleSavePhotos}
+              onClick={() => {
+                console.log('🔥 Save button clicked (full view)!');
+                handleSavePhotos();
+              }}
               disabled={uploadingPhoto}
               className="px-3 py-1 text-sm h-8"
             >
