@@ -235,6 +235,12 @@ export function EditPhotosModal({
       
       // Force component refresh and close modal
       onUpdate?.();
+      
+      // Force page reload to ensure all cached images are cleared
+      setTimeout(() => {
+        window.location.reload();
+      }, 500);
+      
       onClose();
       console.log('🏁 Photo save process completed');
     } catch (error) {
