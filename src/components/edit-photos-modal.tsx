@@ -53,54 +53,52 @@ export function EditPhotosModal({
 
   const uploadPhoto = async (file: File, photoNumber: 1 | 2): Promise<string | null> => {
     try {
-      console.log(`📤 Starting upload for photo ${photoNumber}:`, {
-        fileName: file.name,
-        fileSize: file.size,
-        fileType: file.type
-      });
-
+      console.log(`🔄 Starting upload for photo ${photoNumber}`);
+      
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        console.log('❌ No user for upload');
+        console.log('❌ No authenticated user');
         return null;
       }
 
-      console.log('👤 User authenticated for upload:', user.id);
-
+      // Generate unique filename with timestamp to avoid caching
       const fileExt = file.name.split('.').pop();
-      const fileName = `${user.id}/photo_${photoNumber}.${fileExt}`;
+      const timestamp = Date.now();
+      const fileName = `${user.id}/photo_${photoNumber}_${timestamp}.${fileExt}`;
       
-      console.log(`📁 Uploading to path: ${fileName}`);
-      console.log(`🪣 Bucket: contest-photos`);
+      console.log(`📁 Uploading to: ${fileName}`);
 
-      const { error: uploadError } = await supabase.storage
+      // Upload file to storage
+      const { data: uploadData, error: uploadError } = await supabase.storage
         .from('contest-photos')
-        .upload(fileName, file, { upsert: true });
+        .upload(fileName, file, { 
+          cacheControl: '0',
+          upsert: false 
+        });
       
       if (uploadError) {
-        console.error(`❌ Upload error for photo ${photoNumber}:`, uploadError);
+        console.error(`❌ Upload failed:`, uploadError);
         toast({ 
           title: "Ошибка загрузки",
-          description: `Не удалось загрузить фото ${photoNumber}: ${uploadError.message}`,
+          description: `Не удалось загрузить фото ${photoNumber}`,
           variant: "destructive"
         });
-        throw uploadError;
+        return null;
       }
 
-      console.log(`✅ Upload successful for photo ${photoNumber}`);
+      console.log(`✅ Upload successful:`, uploadData);
       
-      const { data } = supabase.storage
+      // Get public URL
+      const { data: urlData } = supabase.storage
         .from('contest-photos')
         .getPublicUrl(fileName);
       
-      // Add cache-busting timestamp to ensure new image loads immediately
-      const finalUrl = `${data.publicUrl}?t=${Date.now()}`;
-      console.log(`🔗 Generated public URL with cache busting: ${finalUrl}`);
+      const finalUrl = `${urlData.publicUrl}?t=${timestamp}`;
+      console.log(`🔗 Public URL: ${finalUrl}`);
       
-      console.log(`✅ Photo ${photoNumber} upload result: ${finalUrl}`);
       return finalUrl;
     } catch (error) {
-      console.error(`❌ Error uploading photo ${photoNumber}:`, error);
+      console.error(`❌ Upload error:`, error);
       toast({ 
         title: "Ошибка",
         description: `Произошла ошибка при загрузке фото ${photoNumber}`,
@@ -110,83 +108,34 @@ export function EditPhotosModal({
     }
   };
 
-  const handleSave = async () => {
-    console.log('🔄 Starting photo save process...');
-    setUploading(true);
+  const updateProfilePhotos = async (photo1Url: string | null, photo2Url: string | null) => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      console.log('👤 User authenticated:', user?.id);
       if (!user) {
-        console.log('❌ User not authenticated');
-        toast({ description: "Не авторизован" });
-        return;
+        throw new Error('No authenticated user');
       }
 
-      console.log('📸 Initial photo URLs:', {
-        photo1Url: currentPhoto1,
-        photo2Url: currentPhoto2
-      });
+      console.log(`💾 Updating profile photos:`, { photo1Url, photo2Url });
 
-      let photo1Url = currentPhoto1;
-      let photo2Url = currentPhoto2;
-
-      // Upload new photos if selected
-      if (photo1File) {
-        console.log('⬆️ Uploading photo 1...');
-        photo1Url = await uploadPhoto(photo1File, 1);
-        if (!photo1Url) {
-          console.log('❌ Photo 1 upload failed');
-          toast({ description: "Ошибка загрузки первого фото" });
-          return;
-        }
-        console.log('✅ Photo 1 uploaded successfully:', photo1Url);
-      }
-
-      if (photo2File) {
-        console.log('⬆️ Uploading photo 2...');
-        photo2Url = await uploadPhoto(photo2File, 2);
-        if (!photo2Url) {
-          console.log('❌ Photo 2 upload failed');
-          toast({ description: "Ошибка загрузки второго фото" });
-          return;
-        }
-        console.log('✅ Photo 2 uploaded successfully:', photo2Url);
-      }
-
-      console.log('📸 Final photo URLs before saving:', {
-        photo1Url,
-        photo2Url
-      });
-
-      // Update profile with new photo URLs
+      // Prepare update data
       const updateData: any = {};
-      if (photo1Url) {
-        updateData.photo_1_url = photo1Url;
-      }
-      if (photo2Url) {
-        updateData.photo_2_url = photo2Url;
-      }
+      if (photo1Url) updateData.photo_1_url = photo1Url;
+      if (photo2Url) updateData.photo_2_url = photo2Url;
 
-      console.log('💾 Updating profile with URLs:', updateData);
-
-      const { error } = await supabase
+      // Update profile table
+      const { error: profileError } = await supabase
         .from('profiles')
         .update(updateData)
         .eq('id', user.id);
 
-      if (error) {
-        console.error('❌ Profile update error:', error);
-        toast({ 
-          title: "Ошибка обновления профиля",
-          description: `Не удалось обновить профиль: ${error.message}`,
-          variant: "destructive"
-        });
-        throw error;
+      if (profileError) {
+        console.error('❌ Profile update failed:', profileError);
+        throw profileError;
       }
 
       console.log('✅ Profile updated successfully');
 
-      // Также обновляем данные в weekly_contest_participants если пользователь участвует
+      // Update weekly_contest_participants if exists
       try {
         const { data: participantData } = await supabase
           .from('weekly_contest_participants')
@@ -195,59 +144,92 @@ export function EditPhotosModal({
           .maybeSingle();
 
         if (participantData) {
-          console.log('📋 Updating weekly contest participant data...');
+          console.log('📋 Updating contest participant data...');
+          
           const existingData = (participantData.application_data as Record<string, any>) || {};
           const updatedApplicationData = {
             ...existingData,
-            photo1_url: photo1Url,
-            photo2_url: photo2Url
+            ...(photo1Url && { photo1_url: photo1Url }),
+            ...(photo2Url && { photo2_url: photo2Url })
           };
 
           const { error: participantError } = await supabase
             .from('weekly_contest_participants')
-            .update({
-              application_data: updatedApplicationData
-            })
+            .update({ application_data: updatedApplicationData })
             .eq('user_id', user.id);
 
           if (participantError) {
-            console.error('❌ Participant update error:', participantError);
-            toast({ 
-              title: "Предупреждение",
-              description: "Профиль обновлен, но не удалось обновить данные участника конкурса",
-              variant: "destructive"
-            });
+            console.error('❌ Participant update failed:', participantError);
           } else {
-            console.log('✅ Weekly contest participant updated successfully');
+            console.log('✅ Contest participant updated');
           }
         }
-      } catch (participantUpdateError) {
-        console.error('❌ Error updating participant data:', participantUpdateError);
+      } catch (participantError) {
+        console.error('❌ Participant update error:', participantError);
       }
 
-      toast({ description: "Фотографии обновлены!" });
-      
-      // Reset state
-      setPhoto1File(null);
-      setPhoto2File(null);
-      setPhoto1Preview(null);
-      setPhoto2Preview(null);
-      
-      // Force component refresh and close modal
-      onUpdate?.();
-      
-      // Force page reload to ensure all cached images are cleared
-      setTimeout(() => {
-        window.location.reload();
-      }, 500);
-      
-      onClose();
-      console.log('🏁 Photo save process completed');
+      return true;
     } catch (error) {
-      console.error('❌ Error updating photos:', error);
+      console.error('❌ Profile update error:', error);
+      toast({ 
+        title: "Ошибка обновления",
+        description: "Не удалось обновить профиль",
+        variant: "destructive"
+      });
+      return false;
+    }
+  };
+
+  const handleSave = async () => {
+    console.log('🔄 Starting photo save process...');
+    setUploading(true);
+    
+    try {
+      let finalPhoto1Url = currentPhoto1;
+      let finalPhoto2Url = currentPhoto2;
+
+      // Upload new photos if selected
+      if (photo1File) {
+        console.log('⬆️ Uploading photo 1...');
+        finalPhoto1Url = await uploadPhoto(photo1File, 1);
+        if (!finalPhoto1Url) {
+          toast({ description: "Ошибка загрузки первого фото" });
+          return;
+        }
+      }
+
+      if (photo2File) {
+        console.log('⬆️ Uploading photo 2...');
+        finalPhoto2Url = await uploadPhoto(photo2File, 2);
+        if (!finalPhoto2Url) {
+          toast({ description: "Ошибка загрузки второго фото" });
+          return;
+        }
+      }
+
+      // Update profile with new URLs
+      const success = await updateProfilePhotos(finalPhoto1Url, finalPhoto2Url);
+      
+      if (success) {
+        toast({ description: "Фотографии успешно обновлены!" });
+        
+        // Reset form state
+        setPhoto1File(null);
+        setPhoto2File(null);
+        setPhoto1Preview(null);
+        setPhoto2Preview(null);
+        
+        // Trigger parent component refresh
+        onUpdate?.();
+        onClose();
+        
+        console.log('🏁 Photo save completed successfully');
+      }
+    } catch (error) {
+      console.error('❌ Save process failed:', error);
       toast({ 
         title: "Ошибка",
-        description: "Произошла ошибка при обновлении фотографий",
+        description: "Произошла ошибка при сохранении фотографий",
         variant: "destructive"
       });
     } finally {
