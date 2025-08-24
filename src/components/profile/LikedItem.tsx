@@ -242,6 +242,7 @@ const LikedItem = ({
       return null;
     }
     
+    setUploadingPhoto(true);
     console.log(`📸 Uploading ${photoType} for user ${currentUserId}`);
     
     try {
@@ -269,6 +270,8 @@ const LikedItem = ({
       console.error('💥 Error uploading photo:', error);
       toast({ description: "Error uploading photo" });
       return null;
+    } finally {
+      setUploadingPhoto(false);
     }
   };
 
@@ -286,8 +289,6 @@ const LikedItem = ({
       console.log('❌ Permission denied', { currentUserId, authorProfileId });
       return;
     }
-    
-    setUploadingPhoto(true);
     try {
       const updates: any = {};
 
