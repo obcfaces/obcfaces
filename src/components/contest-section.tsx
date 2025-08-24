@@ -8,6 +8,8 @@ import contestant2Face from "@/assets/contestant-2-face.jpg";
 import contestant2Full from "@/assets/contestant-2-full.jpg";
 import contestant3Face from "@/assets/contestant-3-face.jpg";
 import contestant3Full from "@/assets/contestant-3-full.jpg";
+import testContestantFace from "@/assets/test-contestant-face.jpg";
+import testContestantFull from "@/assets/test-contestant-full.jpg";
 
 interface ContestSectionProps {
   title: string;
@@ -249,8 +251,8 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
           rating: 4.8,
           averageRating: 4.8,
           totalVotes: 124,
-          faceImage: contestant1Face,
-          fullBodyImage: contestant1Full,
+          faceImage: testContestantFace,
+          fullBodyImage: testContestantFull,
           additionalPhotos: [],
           isVoted: false,
           isWinner: false,
