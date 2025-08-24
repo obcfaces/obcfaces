@@ -110,18 +110,25 @@ export function EditPhotosModal({
       // Update profile with new photo URLs (with cache-busting timestamp)
       const updateData: any = {};
       if (photo1Url) {
-        updateData.photo_1_url = `${photo1Url}${photo1Url.includes('?') ? '&' : '?'}t=${Date.now()}`;
+        updateData.photo_1_url = photo1Url;
       }
       if (photo2Url) {
-        updateData.photo_2_url = `${photo2Url}${photo2Url.includes('?') ? '&' : '?'}t=${Date.now()}`;
+        updateData.photo_2_url = photo2Url;
       }
+
+      console.log('💾 Updating profile with URLs:', updateData);
 
       const { error } = await supabase
         .from('profiles')
         .update(updateData)
         .eq('id', user.id);
 
-      if (error) throw error;
+      if (error) {
+        console.error('❌ Profile update error:', error);
+        throw error;
+      }
+
+      console.log('✅ Profile updated successfully');
 
       toast({ description: "Фотографии обновлены!" });
       
