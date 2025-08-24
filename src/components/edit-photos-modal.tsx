@@ -117,14 +117,15 @@ export function EditPhotosModal({
       if (error) throw error;
 
       toast({ description: "Фотографии обновлены!" });
-      onUpdate?.();
-      onClose();
       
       // Reset state
       setPhoto1File(null);
       setPhoto2File(null);
       setPhoto1Preview(null);
       setPhoto2Preview(null);
+      
+      onUpdate?.();
+      onClose();
     } catch (error) {
       console.error('Error updating photos:', error);
       toast({ description: "Ошибка обновления фотографий" });
