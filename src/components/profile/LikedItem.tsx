@@ -182,6 +182,8 @@ const LikedItem = ({
     const file = event.target.files?.[0];
     if (file) {
       setParticipantPhoto1File(file);
+      // Auto-save photo immediately
+      savePhotoImmediately(1, file);
     }
   };
 
@@ -189,6 +191,62 @@ const LikedItem = ({
     const file = event.target.files?.[0];
     if (file) {
       setParticipantPhoto2File(file);
+      // Auto-save photo immediately
+      savePhotoImmediately(2, file);
+    }
+  };
+
+  // Auto-save single photo immediately
+  const savePhotoImmediately = async (photoNumber: 1 | 2, file: File) => {
+    if (!editingParticipant) return;
+
+    setUploadingParticipantPhotos(true);
+
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `photo_${photoNumber}.${fileExt}`;
+      const filePath = `${editingParticipant.user_id}/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('contest-photos')
+        .upload(filePath, file, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('contest-photos')
+        .getPublicUrl(filePath);
+      
+      const timestampedUrl = `${publicUrl}?t=${Date.now()}`;
+      const updates = photoNumber === 1 ? { photo_1_url: timestampedUrl } : { photo_2_url: timestampedUrl };
+
+      // Update profile
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .update(updates)
+        .eq('id', editingParticipant.user_id);
+
+      if (profileError) throw profileError;
+
+      toast({
+        title: "Success",
+        description: "Photo updated successfully",
+      });
+
+      // Notify parent component about photo update
+      onPhotoUpdate?.(photoNumber === 1 ? 'photo_1' : 'photo_2', timestampedUrl);
+
+      // Exit editing mode
+      cancelParticipantEdit();
+    } catch (error: any) {
+      console.error('Error updating photo:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update photo",
+        variant: "destructive",
+      });
+    } finally {
+      setUploadingParticipantPhotos(false);
     }
   };
 
@@ -427,9 +485,9 @@ const LikedItem = ({
                 className="w-24 sm:w-28 md:w-32 h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
                 onClick={() => !editingParticipant && openModal(0)}
               />
-              {/* Edit overlay for photo 1 */}
+              {/* Replace icon for photo 1 */}
               {editingParticipant && (
-                <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                <div className="absolute top-1 right-1">
                   <input
                     type="file"
                     accept="image/*"
@@ -439,9 +497,10 @@ const LikedItem = ({
                   />
                   <label
                     htmlFor="photo1-upload"
-                    className="bg-white text-black px-2 py-1 rounded text-xs cursor-pointer hover:bg-gray-100"
+                    className="bg-white/90 text-black p-1 rounded-full text-xs cursor-pointer hover:bg-white shadow-sm flex items-center justify-center w-6 h-6"
+                    title="Заменить фото"
                   >
-                    Заменить
+                    ↻
                   </label>
                 </div>
               )}
@@ -453,9 +512,9 @@ const LikedItem = ({
                 className="w-24 sm:w-28 md:w-32 h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
                 onClick={() => !editingParticipant && openModal(1)}
               />
-              {/* Edit overlay for photo 2 */}
+              {/* Replace icon for photo 2 */}
               {editingParticipant && (
-                <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                <div className="absolute top-1 right-1">
                   <input
                     type="file"
                     accept="image/*"
@@ -465,9 +524,10 @@ const LikedItem = ({
                   />
                   <label
                     htmlFor="photo2-upload"
-                    className="bg-white text-black px-2 py-1 rounded text-xs cursor-pointer hover:bg-gray-100"
+                    className="bg-white/90 text-black p-1 rounded-full text-xs cursor-pointer hover:bg-white shadow-sm flex items-center justify-center w-6 h-6"
+                    title="Заменить фото"
                   >
-                    Заменить
+                    ↻
                   </label>
                 </div>
               )}
@@ -572,27 +632,6 @@ const LikedItem = ({
   return (
     <>
       <Card className="bg-card border-contest-border relative overflow-hidden">
-        {/* Save/Cancel buttons for editing mode */}
-        {editingParticipant && (
-          <div className="absolute top-2 right-2 z-30 flex gap-1">
-            <Button
-              onClick={saveParticipantPhotos}
-              size="sm"
-              disabled={uploadingParticipantPhotos}
-              className="h-7 px-2 text-xs"
-            >
-              {uploadingParticipantPhotos ? "..." : "Сохранить"}
-            </Button>
-            <Button
-              onClick={cancelParticipantEdit}
-              variant="outline"
-              size="sm"
-              className="h-7 px-2 text-xs"
-            >
-              Отмена
-            </Button>
-          </div>
-        )}
         
         {/* Edit button for owner */}
         {isOwner && !editingParticipant && (
@@ -636,9 +675,9 @@ const LikedItem = ({
                 className="w-full aspect-[4/5] object-cover cursor-pointer hover:opacity-90 transition-opacity"
                 onClick={() => !editingParticipant && openModal(0)}
               />
-              {/* Edit overlay for photo 1 */}
+              {/* Replace icon for photo 1 */}
               {editingParticipant && (
-                <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                <div className="absolute top-2 right-2">
                   <input
                     type="file"
                     accept="image/*"
@@ -648,9 +687,10 @@ const LikedItem = ({
                   />
                   <label
                     htmlFor="photo1-upload-full"
-                    className="bg-white text-black px-3 py-2 rounded cursor-pointer hover:bg-gray-100"
+                    className="bg-white/90 text-black p-2 rounded-full text-sm cursor-pointer hover:bg-white shadow-sm flex items-center justify-center w-8 h-8"
+                    title="Заменить фото"
                   >
-                    Заменить фото
+                    ↻
                   </label>
                 </div>
               )}
@@ -662,9 +702,9 @@ const LikedItem = ({
                 className="w-full aspect-[4/5] object-cover cursor-pointer hover:opacity-90 transition-opacity"
                 onClick={() => !editingParticipant && openModal(1)}
               />
-              {/* Edit overlay for photo 2 */}
+              {/* Replace icon for photo 2 */}
               {editingParticipant && (
-                <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                <div className="absolute top-2 right-2">
                   <input
                     type="file"
                     accept="image/*"
@@ -674,9 +714,10 @@ const LikedItem = ({
                   />
                   <label
                     htmlFor="photo2-upload-full"
-                    className="bg-white text-black px-3 py-2 rounded cursor-pointer hover:bg-gray-100"
+                    className="bg-white/90 text-black p-2 rounded-full text-sm cursor-pointer hover:bg-white shadow-sm flex items-center justify-center w-8 h-8"
+                    title="Заменить фото"
                   >
-                    Заменить фото
+                    ↻
                   </label>
                 </div>
               )}
@@ -686,36 +727,17 @@ const LikedItem = ({
         
         {/* Footer with actions */}
         <div className="border-t border-contest-border px-4 py-2 flex items-center justify-evenly gap-4">
-          {editingParticipant ? (
-            <div className="flex gap-2 w-full justify-center">
-              <Button
-                onClick={saveParticipantPhotos}
-                disabled={uploadingParticipantPhotos}
-                size="sm"
-              >
-                {uploadingParticipantPhotos ? "Сохранение..." : "Сохранить"}
-              </Button>
-              <Button
-                onClick={cancelParticipantEdit}
-                variant="outline"
-                size="sm"
-              >
-                Отмена
-              </Button>
-            </div>
-          ) : (
-            <button
-              type="button"
-              className="inline-flex items-center gap-1 text-sm text-contest-blue hover:text-contest-blue/80 transition-colors"
-              aria-label="Unlike"
-              onClick={handleUnlike}
-              disabled={isUnliking}
-            >
-              <ThumbsUp className="w-4 h-4 text-blue-500 fill-blue-500" strokeWidth={1} />
-               <span className="hidden sm:inline text-blue-500">Unlike</span>
-               <span className="text-blue-500">{cardData.likes}</span>
-            </button>
-          )}
+          <button
+            type="button"
+            className="inline-flex items-center gap-1 text-sm text-contest-blue hover:text-contest-blue/80 transition-colors"
+            aria-label="Unlike"
+            onClick={handleUnlike}
+            disabled={isUnliking}
+          >
+            <ThumbsUp className="w-4 h-4 text-blue-500 fill-blue-500" strokeWidth={1} />
+             <span className="hidden sm:inline text-blue-500">Unlike</span>
+             <span className="text-blue-500">{cardData.likes}</span>
+          </button>
           <button
             type="button"
             className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
