@@ -317,8 +317,8 @@ const LikedItem = ({
   const randomIndex = Math.floor(Math.random() * images.length);
   
   // Use real candidate photos if available, otherwise use mock images
-  const displayFaceImage = candidateFaceImage || images[randomIndex];
-  const displayFullImage = candidateFullImage || fullImages[randomIndex];
+  const displayFaceImage = photo1Preview || candidateFaceImage || images[randomIndex];
+  const displayFullImage = photo2Preview || candidateFullImage || fullImages[randomIndex];
   const allPhotos = [displayFaceImage, displayFullImage, ...candidateAdditionalPhotos].filter(Boolean);
   
   // Show loading skeleton while data is loading
