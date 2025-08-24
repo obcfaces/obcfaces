@@ -449,6 +449,13 @@ export function ContestantCard({
                   <span>🏆 WINNER   + 5000 PHP</span>
                 </div>
               )}
+              
+              {/* Example Badge for test cards */}
+              {isExample && (
+                <div className="absolute top-2 left-2 z-30 bg-yellow-500 text-white px-2 py-1 text-xs font-bold rounded">
+                  Example
+                </div>
+              )}
               <div className="relative">
                 <img 
                   src={faceImage} 
