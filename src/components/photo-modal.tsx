@@ -446,7 +446,7 @@ export function PhotoModal({
           </button>
 
           {/* Photo container */}
-          <div className="relative h-full w-full flex items-center justify-center"
+          <div className="relative h-full w-full flex items-center justify-center bg-black"
                onTouchStart={onTouchStart}
                onTouchMove={onTouchMove}
                onTouchEnd={onTouchEnd}>
@@ -454,7 +454,7 @@ export function PhotoModal({
             <img
               src={photos[activeIndex]}
               alt={`${contestantName} photo ${activeIndex + 1}`}
-              className="w-full h-full object-cover"
+              className="max-w-full max-h-[50vh] w-auto h-auto object-contain"
               draggable={false}
             />
 
