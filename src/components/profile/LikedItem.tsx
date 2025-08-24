@@ -224,25 +224,36 @@ const LikedItem = ({
 
   // Загрузка фото точно как в About разделе
   const uploadPhoto = async (file: File, photoType: 'photo_1' | 'photo_2'): Promise<string | null> => {
-    if (!currentUserId) return null;
+    if (!currentUserId) {
+      console.log('❌ No currentUserId for upload');
+      return null;
+    }
+    
+    console.log(`📸 Uploading ${photoType} for user ${currentUserId}`);
     
     try {
       const fileExt = file.name.split('.').pop();
       const fileName = `${currentUserId}/${photoType}.${fileExt}`;
       
+      console.log('📁 Uploading to:', fileName);
+      
       const { error: uploadError } = await supabase.storage
         .from('contest-photos')
         .upload(fileName, file, { upsert: true });
       
-      if (uploadError) throw uploadError;
+      if (uploadError) {
+        console.error('❌ Upload error:', uploadError);
+        throw uploadError;
+      }
       
       const { data } = supabase.storage
         .from('contest-photos')
         .getPublicUrl(fileName);
       
+      console.log('✅ Upload successful, URL:', data.publicUrl);
       return data.publicUrl;
     } catch (error) {
-      console.error('Error uploading photo:', error);
+      console.error('💥 Error uploading photo:', error);
       toast({ description: "Error uploading photo" });
       return null;
     }
@@ -250,51 +261,86 @@ const LikedItem = ({
 
   // Сохранение фото точно как в About разделе
   const handleSavePhotos = async () => {
-    if (!currentUserId || currentUserId !== authorProfileId) return;
+    console.log('🔥 Starting handleSavePhotos', {
+      currentUserId,
+      authorProfileId,
+      photo1File: !!photo1File,
+      photo2File: !!photo2File,
+      isOwner: currentUserId === authorProfileId
+    });
+    
+    if (!currentUserId || currentUserId !== authorProfileId) {
+      console.log('❌ Permission denied', { currentUserId, authorProfileId });
+      return;
+    }
     
     setUploadingPhoto(true);
     try {
       const updates: any = {};
 
-      // Upload photo_1 if a new one was selected
+      // Upload photo_1 if a new one was selected (точно как avatar в About)
+      let photo1Url = candidateFaceImage;
       if (photo1File) {
+        console.log('📤 Uploading photo1...');
         const uploadedUrl = await uploadPhoto(photo1File, 'photo_1');
         if (uploadedUrl) {
+          photo1Url = uploadedUrl;
           updates.photo_1_url = uploadedUrl;
-          onPhotoUpdate?.('photo_1', uploadedUrl);
+          console.log('✅ Photo1 uploaded:', uploadedUrl);
         }
       }
 
-      // Upload photo_2 if a new one was selected  
+      // Upload photo_2 if a new one was selected (точно как avatar в About)
+      let photo2Url = candidateFullImage;
       if (photo2File) {
+        console.log('📤 Uploading photo2...');
         const uploadedUrl = await uploadPhoto(photo2File, 'photo_2');
         if (uploadedUrl) {
+          photo2Url = uploadedUrl;
           updates.photo_2_url = uploadedUrl;
-          onPhotoUpdate?.('photo_2', uploadedUrl);
+          console.log('✅ Photo2 uploaded:', uploadedUrl);
         }
       }
 
-      // Update profile if there are changes
+      // Update profile if there are changes (точно как в About)
       if (Object.keys(updates).length > 0) {
+        console.log('💾 Updating profile with:', updates);
         const { error: profileError } = await supabase
           .from('profiles')
           .update(updates)
           .eq('id', authorProfileId);
 
-        if (profileError) throw profileError;
+        if (profileError) {
+          console.error('❌ Profile update error:', profileError);
+          throw profileError;
+        }
+
+        console.log('✅ Profile updated successfully');
+        
+        // Notify parent component about photo updates
+        if (updates.photo_1_url) {
+          onPhotoUpdate?.('photo_1', updates.photo_1_url);
+        }
+        if (updates.photo_2_url) {
+          onPhotoUpdate?.('photo_2', updates.photo_2_url);
+        }
 
         toast({ description: "Фото обновлены успешно" });
+      } else {
+        console.log('ℹ️ No updates needed');
       }
 
-      // Reset edit mode
+      // Reset edit mode (точно как в About)
       setIsEditMode(false);
       setPhoto1File(null);
       setPhoto2File(null);
       setPhoto1Preview(null);
       setPhoto2Preview(null);
-    } catch (error) {
-      console.error('Error updating photos:', error);
-      toast({ description: "Ошибка обновления фото" });
+      
+      console.log('🎉 handleSavePhotos completed successfully');
+    } catch (error: any) {
+      console.error('💥 Error in handleSavePhotos:', error);
+      toast({ description: error.message || "Ошибка обновления фото" });
     } finally {
       setUploadingPhoto(false);
     }
