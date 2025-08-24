@@ -445,8 +445,8 @@ export function PhotoModal({
             <X className="h-5 w-5 md:h-6 md:w-6 text-white" />
           </button>
 
-          {/* Photo container */}
-          <div className="relative h-full w-full flex items-center justify-center bg-black"
+          {/* Photo container - top half */}
+          <div className="absolute top-0 left-0 right-0 h-1/2 flex items-center justify-center bg-black"
                onTouchStart={onTouchStart}
                onTouchMove={onTouchMove}
                onTouchEnd={onTouchEnd}>
@@ -454,7 +454,7 @@ export function PhotoModal({
             <img
               src={photos[activeIndex]}
               alt={`${contestantName} photo ${activeIndex + 1}`}
-              className="max-w-full max-h-[50vh] w-auto h-auto object-contain"
+              className="max-w-full max-h-full w-auto h-auto object-contain"
               draggable={false}
             />
 
@@ -500,8 +500,8 @@ export function PhotoModal({
               </div>
             )}
 
-            {/* Info overlay at bottom */}
-            <div className="absolute bottom-0 left-0 right-0 bg-white max-h-[50vh] flex flex-col">
+            {/* Info overlay - bottom half */}
+            <div className="absolute bottom-0 left-0 right-0 h-1/2 bg-white flex flex-col">
               {/* Winner Badge */}
               {isWinner && (
                 <div className="bg-blue-100 text-blue-700 px-4 py-2 text-sm font-semibold flex justify-start items-center border-b">
