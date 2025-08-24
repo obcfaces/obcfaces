@@ -188,49 +188,49 @@ const Profile = () => {
   const isOwner = currentUserId && currentUserId === id;
 
   // Load profile data
-  useEffect(() => {
-    const loadProfile = async () => {
-      if (!id) return;
+  const loadProfile = async () => {
+    if (!id) return;
+    
+    try {
+      const { data: profileData } = await supabase
+        .from("profiles")
+        .select("display_name, first_name, last_name, birthdate, height_cm, weight_kg, avatar_url, city, country, bio, gender, photo_1_url, photo_2_url")
+        .eq("id", id)
+        .maybeSingle();
       
-      try {
-        const { data: profileData } = await supabase
-          .from("profiles")
-          .select("display_name, first_name, last_name, birthdate, height_cm, weight_kg, avatar_url, city, country, bio, gender, photo_1_url, photo_2_url")
-          .eq("id", id)
-          .maybeSingle();
-        
-        setData(profileData);
-        setBioDraft(profileData?.bio ?? "");
-        
-        // Initialize edit form with loaded data
-        setEditForm({
-          display_name: profileData?.display_name || '',
-          gender: profileData?.gender || '',
-          gender_privacy: 'public',
-          country: profileData?.country || '',
-          country_privacy: 'public',
-          birthdate: profileData?.birthdate || '',
-          birthdate_privacy: 'only_me',
-          bio: profileData?.bio || '',
-          email: ''
-        });
-        
-        // Load real follower/following counts
-        const { data: followStats } = await supabase.rpc('get_follow_stats', { target_user_id: id });
-        if (followStats && followStats.length > 0) {
-          setFollowersCount(followStats[0]?.followers_count || 0);
-          setFollowingCount(followStats[0]?.following_count || 0);
-        } else {
-          setFollowersCount(0);
-          setFollowingCount(0);
-        }
-      } catch (error) {
-        console.error("Error loading profile:", error);
-      } finally {
-        setLoading(false);
+      setData(profileData);
+      setBioDraft(profileData?.bio ?? "");
+      
+      // Initialize edit form with loaded data
+      setEditForm({
+        display_name: profileData?.display_name || '',
+        gender: profileData?.gender || '',
+        gender_privacy: 'public',
+        country: profileData?.country || '',
+        country_privacy: 'public',
+        birthdate: profileData?.birthdate || '',
+        birthdate_privacy: 'only_me',
+        bio: profileData?.bio || '',
+        email: ''
+      });
+      
+      // Load real follower/following counts
+      const { data: followStats } = await supabase.rpc('get_follow_stats', { target_user_id: id });
+      if (followStats && followStats.length > 0) {
+        setFollowersCount(followStats[0]?.followers_count || 0);
+        setFollowingCount(followStats[0]?.following_count || 0);
+      } else {
+        setFollowersCount(0);
+        setFollowingCount(0);
       }
-    };
+    } catch (error) {
+      console.error("Error loading profile:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     loadProfile();
   }, [id]);
 
@@ -1975,10 +1975,7 @@ const Profile = () => {
         currentPhoto2={data?.photo_2_url}
         onUpdate={() => {
           loadParticipationItems();
-          // Force reload profile data to get updated photo URLs
-          if (id) {
-            window.location.reload();
-          }
+          loadProfile(); // Обновляем данные профиля
         }}
       />
 
