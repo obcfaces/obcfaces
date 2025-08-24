@@ -70,8 +70,8 @@ export default function HeightFilterDropdown({ onSelect, value, className }: Pro
           <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-auto min-w-[200px] p-0 pointer-events-auto" onWheel={(e) => e.stopPropagation()}>
-        <div className="max-h-[400px] overflow-y-auto pointer-events-auto" style={{ scrollBehavior: 'auto' }}>
+      <PopoverContent className="w-auto min-w-[200px] p-0 bg-popover border z-50" side="bottom" align="center">
+        <div className="max-h-[400px] overflow-y-auto bg-popover" style={{ scrollBehavior: 'smooth' }}>
           {/* Шапка с заголовками */}
           <div className="flex gap-4 p-4 pb-2 bg-popover border-b sticky top-0 z-20">
             <div className="text-xs font-medium text-muted-foreground text-center" style={{ width: '70px' }}>CM</div>
