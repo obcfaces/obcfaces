@@ -349,8 +349,8 @@ export function ContestantCard({
         <Card className={`${isExample ? 'border-yellow-400 border-2 bg-yellow-50/50' : 'bg-card border-contest-border'} relative overflow-hidden`}>
           
           
-          {/* Rank and rating in top right corner */}
-          {rank > 0 && isVoted && (
+          {/* Rank and rating in top right corner - hidden for example cards */}
+          {rank > 0 && isVoted && !isExample && (
             <div className="absolute top-0 right-0 z-20 flex items-center">
               <div className="text-xl font-bold text-contest-blue bg-white px-2 py-1.5 rounded-bl-lg shadow-sm">
                 #{rank}
@@ -380,12 +380,16 @@ export function ContestantCard({
                   </h3>
                   <div className="text-contest-blue text-sm">{getCountryDisplayName(country)} · {city}</div>
                   {isExample && (
-                    <div className="mt-2 text-sm text-gray-700 bg-yellow-100 p-2 rounded border border-yellow-300">
-                      <strong>How your photos should look:</strong><br/>
-                      • No makeup<br/>
-                      • No filter<br/>
-                      • No photo editing<br/>
-                      • No glasses
+                    <div className="absolute inset-4 bg-yellow-100 border-2 border-yellow-300 rounded-lg flex items-center justify-center z-30">
+                      <div className="text-center text-gray-800 p-4">
+                        <h4 className="font-bold text-lg mb-2">How your photos should look:</h4>
+                        <div className="text-sm space-y-1">
+                          <div>• No makeup</div>
+                          <div>• No filter</div>
+                          <div>• No photo editing</div>
+                          <div>• No glasses</div>
+                        </div>
+                      </div>
                     </div>
                   )}
                 </div>
@@ -471,62 +475,64 @@ export function ContestantCard({
               </div>
             </div>
            </div>
-           <div className="border-t border-contest-border px-4 py-2 flex items-center justify-evenly gap-4">
-               <button
-                type="button"
-                className={cn(
-                  "inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors",
-                  (isLiked[0] || isLiked[1]) && "text-contest-blue"
-                )}
-                onClick={() => handleLike(0)}
-                aria-label="Like"
-              >
-                 <ThumbsUp className={cn("w-4 h-4", (isLiked[0] || isLiked[1]) ? "text-blue-500 fill-blue-500" : "text-gray-500")} strokeWidth={1} />
-                 <span className={cn("hidden sm:inline", (isLiked[0] || isLiked[1]) ? "text-blue-500" : "text-gray-500")}>Like</span>
-                  {cardData.likes > 0 && <span className={cn((isLiked[0] || isLiked[1]) ? "text-blue-500" : "text-gray-500")}>{cardData.likes}</span>}
-              </button>
-              {showDislike && (
+           {!isExample && (
+             <div className="border-t border-contest-border px-4 py-2 flex items-center justify-evenly gap-4">
                 <button
-                  type="button"
-                  className={cn(
-                    "inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors",
-                    isDisliked && "text-red-500"
-                  )}
-                  onClick={handleDislike}
-                  aria-label="Dislike"
-                >
-                  <ThumbsDown className="w-4 h-4" />
-                  <span className="hidden sm:inline">Dislike</span>
-                  <span>{dislikesCount}</span>
-                </button>
-              )}
-              <button
-                type="button"
-                className={cn(
-                  "inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors",
-                  hasCommented && "text-contest-blue"
-                )}
-                onClick={handleComment}
-                aria-label="Comments"
-              >
-                <MessageCircle className="w-4 h-4 text-primary" strokeWidth={1} />
-                <span className="hidden sm:inline">Comment</span>
-                 <span>{cardData.comments}</span>
-              </button>
-              <button
-                type="button"
-                className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
-                onClick={() => openShareModal({
-                  title: `${name} - Beauty Contest`,
-                  url: profileId ? `https://obcface.com/u/${profileId}` : `https://obcface.com`,
-                  description: `Check out ${name}, ${age} from ${city}, ${country} in this beauty contest!`
-                })}
-                aria-label="Share"
-              >
-                 <Share2 className="w-4 h-4" strokeWidth={1} />
-                 <span className="hidden sm:inline">Share</span>
-              </button>
-           </div>
+                 type="button"
+                 className={cn(
+                   "inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors",
+                   (isLiked[0] || isLiked[1]) && "text-contest-blue"
+                 )}
+                 onClick={() => handleLike(0)}
+                 aria-label="Like"
+               >
+                  <ThumbsUp className={cn("w-4 h-4", (isLiked[0] || isLiked[1]) ? "text-blue-500 fill-blue-500" : "text-gray-500")} strokeWidth={1} />
+                  <span className={cn("hidden sm:inline", (isLiked[0] || isLiked[1]) ? "text-blue-500" : "text-gray-500")}>Like</span>
+                   {cardData.likes > 0 && <span className={cn((isLiked[0] || isLiked[1]) ? "text-blue-500" : "text-gray-500")}>{cardData.likes}</span>}
+               </button>
+               {showDislike && (
+                 <button
+                   type="button"
+                   className={cn(
+                     "inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors",
+                     isDisliked && "text-red-500"
+                   )}
+                   onClick={handleDislike}
+                   aria-label="Dislike"
+                 >
+                   <ThumbsDown className="w-4 h-4" />
+                   <span className="hidden sm:inline">Dislike</span>
+                   <span>{dislikesCount}</span>
+                 </button>
+               )}
+               <button
+                 type="button"
+                 className={cn(
+                   "inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors",
+                   hasCommented && "text-contest-blue"
+                 )}
+                 onClick={handleComment}
+                 aria-label="Comments"
+               >
+                 <MessageCircle className="w-4 h-4 text-primary" strokeWidth={1} />
+                 <span className="hidden sm:inline">Comment</span>
+                  <span>{cardData.comments}</span>
+               </button>
+               <button
+                 type="button"
+                 className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                 onClick={() => openShareModal({
+                   title: `${name} - Beauty Contest`,
+                   url: profileId ? `https://obcface.com/u/${profileId}` : `https://obcface.com`,
+                   description: `Check out ${name}, ${age} from ${city}, ${country} in this beauty contest!`
+                 })}
+                 aria-label="Share"
+               >
+                  <Share2 className="w-4 h-4" strokeWidth={1} />
+                  <span className="hidden sm:inline">Share</span>
+               </button>
+            </div>
+           )}
          </Card>
 
         <PhotoModal
@@ -573,8 +579,8 @@ export function ContestantCard({
           </div>
         )}
         
-        {/* Rating badge in top right corner - only if rank > 0 */}
-        {isVoted && !isEditing && !showThanks && rank > 0 && (
+        {/* Rating badge in top right corner - hidden for example cards */}
+        {isVoted && !isEditing && !showThanks && rank > 0 && !isExample && (
           <div className="absolute top-0 right-0 z-10 flex flex-col items-end">
             <Popover>
               <PopoverTrigger asChild>
@@ -707,9 +713,16 @@ export function ContestantCard({
                      {getCountryDisplayName(country)} · {city}
                    </div>
                    {isExample && (
-                     <div className="mt-1 text-xs text-gray-700 bg-yellow-100 p-1 rounded border border-yellow-300">
-                       <strong>How your photos should look:</strong><br/>
-                       No makeup, no filter, no editing, no glasses
+                     <div className="absolute inset-0 bg-yellow-100 border-2 border-yellow-300 rounded-lg flex items-center justify-center z-10">
+                       <div className="text-center text-gray-800 p-2">
+                         <h4 className="font-bold text-sm mb-1">How your photos should look:</h4>
+                         <div className="text-xs space-y-0.5">
+                           <div>• No makeup</div>
+                           <div>• No filter</div>
+                           <div>• No photo editing</div>
+                           <div>• No glasses</div>
+                         </div>
+                       </div>
                      </div>
                    )}
                 </div>
@@ -718,62 +731,64 @@ export function ContestantCard({
                 </div>
               </div>
               
-              <div className="flex items-center justify-end gap-2 sm:gap-4">
-                 <button
-                   type="button"
-                   className={cn(
-                     "inline-flex items-center gap-1 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors",
-                     (isLiked[0] || isLiked[1]) && "text-contest-blue"
-                   )}
-                   onClick={() => handleLike(0)}
-                   aria-label="Like"
-                 >
-                    <ThumbsUp className={cn("w-3.5 h-3.5", (isLiked[0] || isLiked[1]) ? "text-blue-500 fill-blue-500" : "text-gray-500")} strokeWidth={1} />
-                    <span className={cn("hidden xl:inline", (isLiked[0] || isLiked[1]) ? "text-blue-500" : "text-gray-500")}>Like</span>
-                     {cardData.likes > 0 && <span className={cn((isLiked[0] || isLiked[1]) ? "text-blue-500" : "text-gray-500")}>{cardData.likes}</span>}
-                 </button>
-                {showDislike && (
-                  <button
-                    type="button"
-                    className={cn(
-                      "inline-flex items-center gap-1 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors",
-                      isDisliked && "text-red-500"
-                    )}
-                    onClick={handleDislike}
-                    aria-label="Dislike"
-                  >
-                    <ThumbsDown className="w-3.5 h-3.5" />
-                    <span className="hidden xl:inline">Dislike</span>
-                    <span>{dislikesCount}</span>
-                  </button>
-                )}
-                 <button
-                   type="button"
-                   className={cn(
-                     "inline-flex items-center gap-1 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors",
-                     hasCommented && "text-contest-blue"
-                   )}
-                   onClick={handleComment}
-                   aria-label="Comments"
-                 >
-                    <MessageCircle className="w-3.5 h-3.5 text-primary" strokeWidth={1} />
-                    <span className="hidden xl:inline">Comment</span>
-                    <span>{cardData.comments}</span>
-                 </button>
-                 <button
-                   type="button"
-                   className="inline-flex items-center gap-1 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors"
-                   onClick={() => openShareModal({
-                     title: `${name} - Beauty Contest`,
-                     url: profileId ? `https://obcface.com/u/${profileId}` : `https://obcface.com`,
-                     description: `Check out ${name}, ${age} from ${city}, ${country} in this beauty contest!`
-                   })}
-                   aria-label="Share"
-                 >
-                   <Share2 className="w-3.5 h-3.5" strokeWidth={1} />
-                   <span className="hidden sm:inline">Share</span>
-                 </button>
-              </div>
+              {!isExample && (
+                <div className="flex items-center justify-end gap-2 sm:gap-4">
+                   <button
+                     type="button"
+                     className={cn(
+                       "inline-flex items-center gap-1 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors",
+                       (isLiked[0] || isLiked[1]) && "text-contest-blue"
+                     )}
+                     onClick={() => handleLike(0)}
+                     aria-label="Like"
+                   >
+                      <ThumbsUp className={cn("w-3.5 h-3.5", (isLiked[0] || isLiked[1]) ? "text-blue-500 fill-blue-500" : "text-gray-500")} strokeWidth={1} />
+                      <span className={cn("hidden xl:inline", (isLiked[0] || isLiked[1]) ? "text-blue-500" : "text-gray-500")}>Like</span>
+                       {cardData.likes > 0 && <span className={cn((isLiked[0] || isLiked[1]) ? "text-blue-500" : "text-gray-500")}>{cardData.likes}</span>}
+                   </button>
+                  {showDislike && (
+                    <button
+                      type="button"
+                      className={cn(
+                        "inline-flex items-center gap-1 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors",
+                        isDisliked && "text-red-500"
+                      )}
+                      onClick={handleDislike}
+                      aria-label="Dislike"
+                    >
+                      <ThumbsDown className="w-3.5 h-3.5" />
+                      <span className="hidden xl:inline">Dislike</span>
+                      <span>{dislikesCount}</span>
+                    </button>
+                  )}
+                   <button
+                     type="button"
+                     className={cn(
+                       "inline-flex items-center gap-1 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors",
+                       hasCommented && "text-contest-blue"
+                     )}
+                     onClick={handleComment}
+                     aria-label="Comments"
+                   >
+                      <MessageCircle className="w-3.5 h-3.5 text-primary" strokeWidth={1} />
+                      <span className="hidden xl:inline">Comment</span>
+                      <span>{cardData.comments}</span>
+                   </button>
+                   <button
+                     type="button"
+                     className="inline-flex items-center gap-1 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors"
+                     onClick={() => openShareModal({
+                       title: `${name} - Beauty Contest`,
+                       url: profileId ? `https://obcface.com/u/${profileId}` : `https://obcface.com`,
+                       description: `Check out ${name}, ${age} from ${city}, ${country} in this beauty contest!`
+                     })}
+                     aria-label="Share"
+                   >
+                     <Share2 className="w-3.5 h-3.5" strokeWidth={1} />
+                     <span className="hidden sm:inline">Share</span>
+                   </button>
+                </div>
+              )}
             </div>
           )}
           
