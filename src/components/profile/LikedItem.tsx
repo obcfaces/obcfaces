@@ -1,7 +1,7 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ThumbsUp, MessageCircle, Share2, ThumbsDown } from "lucide-react";
+import { ThumbsUp, MessageCircle, Share2, ThumbsDown, Pencil } from "lucide-react";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
@@ -38,6 +38,8 @@ interface LikedItemProps {
   candidateData?: any;
   participantType?: 'candidate' | 'finalist' | 'winner';
   showStatusBadge?: boolean;
+  isOwner?: boolean; // New prop to check if current user is the owner
+  onEditPhotos?: () => void; // New prop for edit callback
 }
 
 const getInitials = (name: string) => {
@@ -82,6 +84,7 @@ const getParticipantBadge = (type?: 'candidate' | 'finalist' | 'winner', isFullV
 const LikedItem = ({
   likeId,
   contentType,
+  contentId,
   authorName,
   authorAvatarUrl,
   authorProfileId,
@@ -91,10 +94,12 @@ const LikedItem = ({
   likes = 0,
   comments = 0,
   onUnlike,
-  viewMode = 'full',
+  viewMode = 'compact',
   candidateData,
   participantType,
-  showStatusBadge = true
+  showStatusBadge = false,
+  isOwner = false,
+  onEditPhotos
 }: LikedItemProps) => {
   const [isUnliking, setIsUnliking] = useState(false);
   const [isLiked, setIsLiked] = useState(true);
@@ -254,6 +259,17 @@ const LikedItem = ({
     return (
       <>
         <Card className="bg-card border-contest-border relative overflow-hidden flex h-32 sm:h-36 md:h-40">
+          {/* Edit button for owner */}
+          {isOwner && onEditPhotos && (
+            <button
+              onClick={onEditPhotos}
+              className="absolute top-2 right-2 z-20 bg-white/90 hover:bg-white border border-gray-200 rounded-full p-1.5 shadow-sm transition-colors"
+              aria-label="Edit photos"
+            >
+              <Pencil className="w-4 h-4 text-gray-600" />
+            </button>
+          )}
+          
           {/* Participant Type Badge */}
           {showStatusBadge && getParticipantBadge(currentParticipantType)}
           {/* Main two photos */}
@@ -373,6 +389,17 @@ const LikedItem = ({
   return (
     <>
       <Card className="bg-card border-contest-border relative overflow-hidden">
+        {/* Edit button for owner */}
+        {isOwner && onEditPhotos && (
+          <button
+            onClick={onEditPhotos}
+            className="absolute top-4 right-4 z-20 bg-white/90 hover:bg-white border border-gray-200 rounded-full p-2 shadow-sm transition-colors"
+            aria-label="Edit photos"
+          >
+            <Pencil className="w-5 h-5 text-gray-600" />
+          </button>
+        )}
+        
         {/* Name in top left - показываем всегда как в проголосованных */}
         <div className="absolute top-2 left-4 z-20">
           <h3 className="text-xl font-semibold text-contest-text">

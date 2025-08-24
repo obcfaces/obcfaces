@@ -17,6 +17,7 @@ import LikedItem from "@/components/profile/LikedItem";
 import { PhotoModal } from "@/components/photo-modal";
 import { ProfilePhotoModal } from "@/components/profile-photo-modal";
 import { ContestParticipationModal } from "@/components/contest-participation-modal";
+import { EditPhotosModal } from "@/components/edit-photos-modal";
 import CreatePostModal from "@/components/create-post-modal";
 import c1 from "@/assets/contestant-1.jpg";
 import c2 from "@/assets/contestant-2.jpg";
@@ -38,6 +39,8 @@ interface ProfileRow {
   country?: string | null;
   bio?: string | null;
   gender?: string | null;
+  photo_1_url?: string | null;
+  photo_2_url?: string | null;
 }
 
 const Profile = () => {
@@ -100,6 +103,7 @@ const Profile = () => {
   const [postsViewMode, setPostsViewMode] = useState<'compact' | 'full'>('full');
   const [profilePhotos, setProfilePhotos] = useState<string[]>([]);
   const [loadingPhotos, setLoadingPhotos] = useState(true);
+  const [editPhotosModalOpen, setEditPhotosModalOpen] = useState(false);
 
   // Demo profile for fallback
   const demoProfile: ProfileRow = {
@@ -190,7 +194,7 @@ const Profile = () => {
       try {
         const { data: profileData } = await supabase
           .from("profiles")
-          .select("display_name, first_name, last_name, birthdate, height_cm, weight_kg, avatar_url, city, country, bio, gender")
+          .select("display_name, first_name, last_name, birthdate, height_cm, weight_kg, avatar_url, city, country, bio, gender, photo_1_url, photo_2_url")
           .eq("id", id)
           .maybeSingle();
         
@@ -1138,6 +1142,10 @@ const Profile = () => {
                         viewMode={participationViewMode}
                         candidateData={item.candidateData}
                         participantType={item.participantType}
+                        isOwner={isOwner}
+                        onEditPhotos={() => {
+                          setEditPhotosModalOpen(true);
+                        }}
                       />
                     ))}
                   </div>
@@ -1952,6 +1960,15 @@ const Profile = () => {
         currentIndex={selectedPhotoIndex}
         profileId={id || ""}
         profileName={profile.display_name || "Пользователь"}
+      />
+
+      {/* Edit Photos Modal */}
+      <EditPhotosModal
+        isOpen={editPhotosModalOpen}
+        onClose={() => setEditPhotosModalOpen(false)}
+        currentPhoto1={data?.photo_1_url}
+        currentPhoto2={data?.photo_2_url}
+        onUpdate={loadParticipationItems}
       />
 
     </div>
