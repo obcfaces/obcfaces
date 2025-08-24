@@ -277,11 +277,9 @@ const LikedItem = ({
         .from('contest-photos')
         .getPublicUrl(fileName);
       
-      // Add cache-busting timestamp like About section to force browser reload
-      const timestampedUrl = `${data.publicUrl}?t=${Date.now()}`;
-      console.log(`🔗 Generated public URL with cache busting: ${timestampedUrl}`);
+      console.log(`🔗 ABOUT-STYLE Generated public URL: ${data.publicUrl}`);
       
-      return timestampedUrl;
+      return data.publicUrl;
     } catch (error) {
       console.error(`❌ Error uploading photo ${photoNumber}:`, error);
       return null;
@@ -338,14 +336,21 @@ const LikedItem = ({
         }
       }
 
-      console.log('💾 Updating profile with URLs:', { photo1Url, photo2Url });
+      // Add cache-busting timestamp like About section to force browser reload
+      const finalPhoto1Url = photo1Url ? `${photo1Url}?t=${Date.now()}` : null;
+      const finalPhoto2Url = photo2Url ? `${photo2Url}?t=${Date.now()}` : null;
+      
+      console.log('💾 ABOUT-STYLE Updating profile with cache-busted URLs:', { 
+        finalPhoto1Url, 
+        finalPhoto2Url 
+      });
 
       // Update profile with new photo URLs
       const { error } = await supabase
         .from('profiles')
         .update({
-          photo_1_url: photo1Url,
-          photo_2_url: photo2Url
+          photo_1_url: finalPhoto1Url,
+          photo_2_url: finalPhoto2Url
         })
         .eq('id', user.id);
 
