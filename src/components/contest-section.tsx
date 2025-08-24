@@ -341,13 +341,33 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
         </div>
       ) : (
         <div className="px-0 sm:px-6 grid grid-cols-1 lg:grid-cols-2 gap-1 sm:gap-3 max-w-full overflow-hidden">
-          {contestants.map((contestant) => (
-            <ContestantCard
-              key={contestant.rank}
-              {...contestant}
-              viewMode={viewMode}
-              onRate={(rating) => handleRate(contestant.rank, rating)}
-            />
+          {contestants.map((contestant, index) => (
+            <div key={contestant.rank} className={contestant.isExample ? "mb-6" : ""}>
+              {contestant.isExample && (
+                <div className="mb-3 px-4 sm:px-0">
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground border-b border-border pb-2">
+                    <span className="bg-primary/10 text-primary px-2 py-1 rounded-md font-medium">
+                      Example Card
+                    </span>
+                    <span>This is how your card will look</span>
+                  </div>
+                </div>
+              )}
+              <ContestantCard
+                {...contestant}
+                viewMode={viewMode}
+                onRate={(rating) => handleRate(contestant.rank, rating)}
+              />
+              {contestant.isExample && contestants.length > 1 && (
+                <div className="mt-6 px-4 sm:px-0">
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground border-b border-border pb-2">
+                    <span className="bg-muted text-muted-foreground px-2 py-1 rounded-md font-medium">
+                      Current Participants
+                    </span>
+                  </div>
+                </div>
+              )}
+            </div>
           ))}
         </div>
       )}
