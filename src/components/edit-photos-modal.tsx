@@ -65,11 +65,14 @@ export function EditPhotosModal({
         return null;
       }
 
+      console.log('👤 User authenticated for upload:', user.id);
+
       const fileExt = file.name.split('.').pop();
       const timestamp = Date.now();
       const fileName = `${user.id}/photo${photoNumber}-${timestamp}.${fileExt}`;
       
       console.log(`📁 Uploading to path: ${fileName}`);
+      console.log(`🪣 Bucket: contest-photos`);
 
       const { error: uploadError } = await supabase.storage
         .from('contest-photos')
@@ -77,6 +80,11 @@ export function EditPhotosModal({
       
       if (uploadError) {
         console.error(`❌ Upload error for photo ${photoNumber}:`, uploadError);
+        toast({ 
+          title: "Ошибка загрузки",
+          description: `Не удалось загрузить фото ${photoNumber}: ${uploadError.message}`,
+          variant: "destructive"
+        });
         throw uploadError;
       }
 
@@ -94,6 +102,11 @@ export function EditPhotosModal({
       return finalUrl;
     } catch (error) {
       console.error(`❌ Error uploading photo ${photoNumber}:`, error);
+      toast({ 
+        title: "Ошибка",
+        description: `Произошла ошибка при загрузке фото ${photoNumber}`,
+        variant: "destructive"
+      });
       return null;
     }
   };
@@ -164,6 +177,11 @@ export function EditPhotosModal({
 
       if (error) {
         console.error('❌ Profile update error:', error);
+        toast({ 
+          title: "Ошибка обновления профиля",
+          description: `Не удалось обновить профиль: ${error.message}`,
+          variant: "destructive"
+        });
         throw error;
       }
 
@@ -195,6 +213,11 @@ export function EditPhotosModal({
 
           if (participantError) {
             console.error('❌ Participant update error:', participantError);
+            toast({ 
+              title: "Предупреждение",
+              description: "Профиль обновлен, но не удалось обновить данные участника конкурса",
+              variant: "destructive"
+            });
           } else {
             console.log('✅ Weekly contest participant updated successfully');
           }
@@ -215,8 +238,12 @@ export function EditPhotosModal({
       onClose();
       console.log('🏁 Photo save process completed');
     } catch (error) {
-      console.error('Error updating photos:', error);
-      toast({ description: "Ошибка обновления фотографий" });
+      console.error('❌ Error updating photos:', error);
+      toast({ 
+        title: "Ошибка",
+        description: "Произошла ошибка при обновлении фотографий",
+        variant: "destructive"
+      });
     } finally {
       setUploading(false);
     }
