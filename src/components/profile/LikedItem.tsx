@@ -123,7 +123,8 @@ const LikedItem = ({
     isEditMode,
     photo1File: !!photo1File,
     photo2File: !!photo2File,
-    uploadingPhoto
+    uploadingPhoto,
+    ownerCheck: currentUserId === authorProfileId
   });
   // Use unified card data hook
   const { data: cardData, loading: cardDataLoading } = useCardData(authorName, user?.id);
