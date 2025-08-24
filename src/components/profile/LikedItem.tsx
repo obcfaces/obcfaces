@@ -182,8 +182,6 @@ const LikedItem = ({
     const file = event.target.files?.[0];
     if (file) {
       setParticipantPhoto1File(file);
-      // Auto-save photo immediately
-      savePhotoImmediately(1, file);
     }
   };
 
@@ -191,62 +189,6 @@ const LikedItem = ({
     const file = event.target.files?.[0];
     if (file) {
       setParticipantPhoto2File(file);
-      // Auto-save photo immediately
-      savePhotoImmediately(2, file);
-    }
-  };
-
-  // Auto-save single photo immediately
-  const savePhotoImmediately = async (photoNumber: 1 | 2, file: File) => {
-    if (!editingParticipant) return;
-
-    setUploadingParticipantPhotos(true);
-
-    try {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `photo_${photoNumber}.${fileExt}`;
-      const filePath = `${editingParticipant.user_id}/${fileName}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from('contest-photos')
-        .upload(filePath, file, { upsert: true });
-
-      if (uploadError) throw uploadError;
-
-      const { data: { publicUrl } } = supabase.storage
-        .from('contest-photos')
-        .getPublicUrl(filePath);
-      
-      const timestampedUrl = `${publicUrl}?t=${Date.now()}`;
-      const updates = photoNumber === 1 ? { photo_1_url: timestampedUrl } : { photo_2_url: timestampedUrl };
-
-      // Update profile
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .update(updates)
-        .eq('id', editingParticipant.user_id);
-
-      if (profileError) throw profileError;
-
-      toast({
-        title: "Success",
-        description: "Photo updated successfully",
-      });
-
-      // Notify parent component about photo update
-      onPhotoUpdate?.(photoNumber === 1 ? 'photo_1' : 'photo_2', timestampedUrl);
-
-      // Exit editing mode
-      cancelParticipantEdit();
-    } catch (error: any) {
-      console.error('Error updating photo:', error);
-      toast({
-        title: "Error",
-        description: error.message || "Failed to update photo",
-        variant: "destructive",
-      });
-    } finally {
-      setUploadingParticipantPhotos(false);
     }
   };
 
@@ -462,7 +404,6 @@ const LikedItem = ({
     return (
       <>
         <Card className="bg-card border-contest-border relative overflow-hidden flex h-32 sm:h-36 md:h-40">
-          
           {/* Edit button for owner */}
           {isOwner && !editingParticipant && (
             <Button
@@ -485,9 +426,9 @@ const LikedItem = ({
                 className="w-24 sm:w-28 md:w-32 h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
                 onClick={() => !editingParticipant && openModal(0)}
               />
-              {/* Replace icon for photo 1 */}
+              {/* Edit overlay for photo 1 */}
               {editingParticipant && (
-                <div className="absolute top-1 right-1">
+                <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
                   <input
                     type="file"
                     accept="image/*"
@@ -497,10 +438,9 @@ const LikedItem = ({
                   />
                   <label
                     htmlFor="photo1-upload"
-                    className="bg-white/90 text-black p-1 rounded-full text-xs cursor-pointer hover:bg-white shadow-sm flex items-center justify-center w-6 h-6"
-                    title="Заменить фото"
+                    className="bg-white text-black px-2 py-1 rounded text-xs cursor-pointer hover:bg-gray-100"
                   >
-                    ↻
+                    Заменить
                   </label>
                 </div>
               )}
@@ -512,9 +452,9 @@ const LikedItem = ({
                 className="w-24 sm:w-28 md:w-32 h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
                 onClick={() => !editingParticipant && openModal(1)}
               />
-              {/* Replace icon for photo 2 */}
+              {/* Edit overlay for photo 2 */}
               {editingParticipant && (
-                <div className="absolute top-1 right-1">
+                <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
                   <input
                     type="file"
                     accept="image/*"
@@ -524,10 +464,9 @@ const LikedItem = ({
                   />
                   <label
                     htmlFor="photo2-upload"
-                    className="bg-white/90 text-black p-1 rounded-full text-xs cursor-pointer hover:bg-white shadow-sm flex items-center justify-center w-6 h-6"
-                    title="Заменить фото"
+                    className="bg-white text-black px-2 py-1 rounded text-xs cursor-pointer hover:bg-gray-100"
                   >
-                    ↻
+                    Заменить
                   </label>
                 </div>
               )}
@@ -556,54 +495,156 @@ const LikedItem = ({
               </div>
               
               <div className="flex items-center justify-end gap-4">
-                 {!editingParticipant && (
-                   <>
-                     <button
-                       type="button"
-                       className="inline-flex items-center gap-1 text-xs sm:text-sm text-contest-blue hover:text-contest-blue/80 transition-colors"
-                       aria-label="Unlike"
-                       onClick={handleUnlike}
-                       disabled={isUnliking}
-                     >
-                       <ThumbsUp className="w-3.5 h-3.5 text-primary" strokeWidth={1} />
-                       <span className="hidden xl:inline">Unlike</span>
-                       <span>{cardData.likes}</span>
-                     </button>
-                     <button
-                       type="button"
-                       className="inline-flex items-center gap-1 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors"
-                       onClick={handleComment}
-                       aria-label="Comments"
-                     >
-                       <MessageCircle className="w-3.5 h-3.5 text-primary" strokeWidth={1} />
-                       <span className="hidden xl:inline">Comment</span>
-                       <span>{cardData.comments}</span>
-                     </button>
-                     <button
-                       type="button"
-                       className="inline-flex items-center gap-1 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors"
-                       onClick={async () => {
-                         try {
-                           if ((navigator as any).share) {
-                             await (navigator as any).share({ title: authorName, url: window.location.href });
-                           } else if (navigator.clipboard) {
-                             await navigator.clipboard.writeText(window.location.href);
-                             toast({ title: "Link copied" });
-                           }
-                         } catch {}
-                       }}
-                       aria-label="Share"
-                     >
-                       <Share2 className="w-3.5 h-3.5" strokeWidth={1} />
-                       <span className="hidden xl:inline">Share</span>
-                     </button>
-                   </>
-                 )}
-               </div>
+                {editingParticipant ? (
+                  <div className="flex gap-2">
+                    <Button
+                      onClick={saveParticipantPhotos}
+                      disabled={uploadingParticipantPhotos}
+                      size="sm"
+                      className="text-xs"
+                    >
+                      {uploadingParticipantPhotos ? "Сохранение..." : "Сохранить"}
+                    </Button>
+                    <Button
+                      onClick={cancelParticipantEdit}
+                      variant="outline"
+                      size="sm"
+                      className="text-xs"
+                    >
+                      Отмена
+                    </Button>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    className="inline-flex items-center gap-1 text-xs sm:text-sm text-contest-blue hover:text-contest-blue/80 transition-colors"
+                    aria-label="Unlike"
+                    onClick={handleUnlike}
+                    disabled={isUnliking}
+                  >
+                    <ThumbsUp className="w-3.5 h-3.5 text-primary" strokeWidth={1} />
+                     <span className="hidden xl:inline">Unlike</span>
+                     <span>{cardData.likes}</span>
+                  </button>
+                )}
+                <button
+                  type="button"
+                  className="inline-flex items-center gap-1 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors"
+                  onClick={handleComment}
+                  aria-label="Comments"
+                >
+                  <MessageCircle className="w-3.5 h-3.5 text-primary" strokeWidth={1} />
+                  <span className="hidden xl:inline">Comment</span>
+                   <span>{cardData.comments}</span>
+                </button>
+                <button
+                  type="button"
+                  className="inline-flex items-center gap-1 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors"
+                  onClick={async () => {
+                    try {
+                      if ((navigator as any).share) {
+                        await (navigator as any).share({ title: authorName, url: window.location.href });
+                      } else if (navigator.clipboard) {
+                        await navigator.clipboard.writeText(window.location.href);
+                        toast({ title: "Link copied" });
+                      }
+                    } catch {}
+                  }}
+                  aria-label="Share"
+                >
+                  <Share2 className="w-3.5 h-3.5" strokeWidth={1} />
+                  <span className="hidden xl:inline">Share</span>
+                </button>
+              </div>
             </div>
           </div>
         </Card>
 
+        {/* Photo editing dialog exactly like in Admin */}
+        <Dialog open={!!editingParticipant} onOpenChange={(open) => !open && cancelParticipantEdit()}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>
+                Edit Photos for {editingParticipant?.first_name} {editingParticipant?.last_name}
+              </DialogTitle>
+            </DialogHeader>
+            
+            {editingParticipant && (
+              <div className="space-y-6">
+                {/* Current Photos */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-sm font-medium">Current Portrait Photo</Label>
+                    {editingParticipant.photo1_url && (
+                      <img 
+                        src={editingParticipant.photo1_url} 
+                        alt="Current portrait" 
+                        className="w-full h-48 object-cover rounded border mt-2"
+                      />
+                    )}
+                  </div>
+                  <div>
+                    <Label className="text-sm font-medium">Current Full Length Photo</Label>
+                    {editingParticipant.photo2_url && (
+                      <img 
+                        src={editingParticipant.photo2_url} 
+                        alt="Current full length" 
+                        className="w-full h-48 object-cover rounded border mt-2"
+                      />
+                    )}
+                  </div>
+                </div>
+                
+                {/* New Photo Uploads */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-sm font-medium">Replace Portrait Photo</Label>
+                    <Input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleParticipantPhoto1Upload}
+                      className="mt-2"
+                    />
+                    {participantPhoto1File && (
+                      <p className="text-sm text-green-600 mt-1">
+                        New portrait selected: {participantPhoto1File.name}
+                      </p>
+                    )}
+                  </div>
+                  
+                  <div>
+                    <Label className="text-sm font-medium">Replace Full Length Photo</Label>
+                    <Input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleParticipantPhoto2Upload}
+                      className="mt-2"
+                    />
+                    {participantPhoto2File && (
+                      <p className="text-sm text-green-600 mt-1">
+                        New full length selected: {participantPhoto2File.name}
+                      </p>
+                    )}
+                  </div>
+                </div>
+                
+                {/* Action Buttons */}
+                <div className="flex justify-end gap-2 pt-4 border-t">
+                  <Button variant="outline" onClick={cancelParticipantEdit} disabled={uploadingParticipantPhotos}>
+                    Cancel
+                  </Button>
+                  <Button 
+                    onClick={saveParticipantPhotos} 
+                    className="bg-blue-600 hover:bg-blue-700" 
+                    disabled={uploadingParticipantPhotos || (!participantPhoto1File && !participantPhoto2File)}
+                  >
+                    {uploadingParticipantPhotos ? "Uploading..." : "Save Photos"}
+                  </Button>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
 
         <PhotoModal
           isOpen={isModalOpen}
@@ -632,7 +673,6 @@ const LikedItem = ({
   return (
     <>
       <Card className="bg-card border-contest-border relative overflow-hidden">
-        
         {/* Edit button for owner */}
         {isOwner && !editingParticipant && (
           <Button
@@ -675,9 +715,9 @@ const LikedItem = ({
                 className="w-full aspect-[4/5] object-cover cursor-pointer hover:opacity-90 transition-opacity"
                 onClick={() => !editingParticipant && openModal(0)}
               />
-              {/* Replace icon for photo 1 */}
+              {/* Edit overlay for photo 1 */}
               {editingParticipant && (
-                <div className="absolute top-2 right-2">
+                <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
                   <input
                     type="file"
                     accept="image/*"
@@ -687,10 +727,9 @@ const LikedItem = ({
                   />
                   <label
                     htmlFor="photo1-upload-full"
-                    className="bg-white/90 text-black p-2 rounded-full text-sm cursor-pointer hover:bg-white shadow-sm flex items-center justify-center w-8 h-8"
-                    title="Заменить фото"
+                    className="bg-white text-black px-3 py-2 rounded cursor-pointer hover:bg-gray-100"
                   >
-                    ↻
+                    Заменить фото
                   </label>
                 </div>
               )}
@@ -702,9 +741,9 @@ const LikedItem = ({
                 className="w-full aspect-[4/5] object-cover cursor-pointer hover:opacity-90 transition-opacity"
                 onClick={() => !editingParticipant && openModal(1)}
               />
-              {/* Replace icon for photo 2 */}
+              {/* Edit overlay for photo 2 */}
               {editingParticipant && (
-                <div className="absolute top-2 right-2">
+                <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
                   <input
                     type="file"
                     accept="image/*"
@@ -714,10 +753,9 @@ const LikedItem = ({
                   />
                   <label
                     htmlFor="photo2-upload-full"
-                    className="bg-white/90 text-black p-2 rounded-full text-sm cursor-pointer hover:bg-white shadow-sm flex items-center justify-center w-8 h-8"
-                    title="Заменить фото"
+                    className="bg-white text-black px-3 py-2 rounded cursor-pointer hover:bg-gray-100"
                   >
-                    ↻
+                    Заменить фото
                   </label>
                 </div>
               )}
@@ -727,17 +765,36 @@ const LikedItem = ({
         
         {/* Footer with actions */}
         <div className="border-t border-contest-border px-4 py-2 flex items-center justify-evenly gap-4">
-          <button
-            type="button"
-            className="inline-flex items-center gap-1 text-sm text-contest-blue hover:text-contest-blue/80 transition-colors"
-            aria-label="Unlike"
-            onClick={handleUnlike}
-            disabled={isUnliking}
-          >
-            <ThumbsUp className="w-4 h-4 text-blue-500 fill-blue-500" strokeWidth={1} />
-             <span className="hidden sm:inline text-blue-500">Unlike</span>
-             <span className="text-blue-500">{cardData.likes}</span>
-          </button>
+          {editingParticipant ? (
+            <div className="flex gap-2 w-full justify-center">
+              <Button
+                onClick={saveParticipantPhotos}
+                disabled={uploadingParticipantPhotos}
+                size="sm"
+              >
+                {uploadingParticipantPhotos ? "Сохранение..." : "Сохранить"}
+              </Button>
+              <Button
+                onClick={cancelParticipantEdit}
+                variant="outline"
+                size="sm"
+              >
+                Отмена
+              </Button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              className="inline-flex items-center gap-1 text-sm text-contest-blue hover:text-contest-blue/80 transition-colors"
+              aria-label="Unlike"
+              onClick={handleUnlike}
+              disabled={isUnliking}
+            >
+              <ThumbsUp className="w-4 h-4 text-blue-500 fill-blue-500" strokeWidth={1} />
+               <span className="hidden sm:inline text-blue-500">Unlike</span>
+               <span className="text-blue-500">{cardData.likes}</span>
+            </button>
+          )}
           <button
             type="button"
             className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
@@ -769,6 +826,91 @@ const LikedItem = ({
         </div>
       </Card>
 
+      {/* Photo editing dialog exactly like in Admin */}
+      <Dialog open={!!editingParticipant} onOpenChange={(open) => !open && cancelParticipantEdit()}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>
+              Edit Photos for {editingParticipant?.first_name} {editingParticipant?.last_name}
+            </DialogTitle>
+          </DialogHeader>
+          
+          {editingParticipant && (
+            <div className="space-y-6">
+              {/* Current Photos */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-sm font-medium">Current Portrait Photo</Label>
+                  {editingParticipant.photo1_url && (
+                    <img 
+                      src={editingParticipant.photo1_url} 
+                      alt="Current portrait" 
+                      className="w-full h-48 object-cover rounded border mt-2"
+                    />
+                  )}
+                </div>
+                <div>
+                  <Label className="text-sm font-medium">Current Full Length Photo</Label>
+                  {editingParticipant.photo2_url && (
+                    <img 
+                      src={editingParticipant.photo2_url} 
+                      alt="Current full length" 
+                      className="w-full h-48 object-cover rounded border mt-2"
+                    />
+                  )}
+                </div>
+              </div>
+              
+              {/* New Photo Uploads */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-sm font-medium">Replace Portrait Photo</Label>
+                  <Input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleParticipantPhoto1Upload}
+                    className="mt-2"
+                  />
+                  {participantPhoto1File && (
+                    <p className="text-sm text-green-600 mt-1">
+                      New portrait selected: {participantPhoto1File.name}
+                    </p>
+                  )}
+                </div>
+                
+                <div>
+                  <Label className="text-sm font-medium">Replace Full Length Photo</Label>
+                  <Input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleParticipantPhoto2Upload}
+                    className="mt-2"
+                  />
+                  {participantPhoto2File && (
+                    <p className="text-sm text-green-600 mt-1">
+                      New full length selected: {participantPhoto2File.name}
+                    </p>
+                  )}
+                </div>
+              </div>
+              
+              {/* Action Buttons */}
+              <div className="flex justify-end gap-2 pt-4 border-t">
+                <Button variant="outline" onClick={cancelParticipantEdit} disabled={uploadingParticipantPhotos}>
+                  Cancel
+                </Button>
+                <Button 
+                  onClick={saveParticipantPhotos} 
+                  className="bg-blue-600 hover:bg-blue-700" 
+                  disabled={uploadingParticipantPhotos || (!participantPhoto1File && !participantPhoto2File)}
+                >
+                  {uploadingParticipantPhotos ? "Uploading..." : "Save Photos"}
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
       <PhotoModal
         isOpen={isModalOpen}
