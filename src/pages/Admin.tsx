@@ -93,6 +93,9 @@ const Admin = () => {
   const [selectedContest, setSelectedContest] = useState<string | null>(null);
   const [editingApplication, setEditingApplication] = useState<ContestApplication | null>(null);
   const [editForm, setEditForm] = useState<any>({});
+  const [photo1File, setPhoto1File] = useState<File | null>(null);
+  const [photo2File, setPhoto2File] = useState<File | null>(null);
+  const [uploadingPhotos, setUploadingPhotos] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -320,85 +323,203 @@ const Admin = () => {
   const saveApplicationEdit = async () => {
     if (!editingApplication) return;
 
-    // Update contest application
-    const { error: appError } = await supabase
-      .from('contest_applications')
-      .update({
-        application_data: editForm,
-        updated_at: new Date().toISOString()
-      })
-      .eq('id', editingApplication.id);
+    setUploadingPhotos(true);
 
-    if (appError) {
+    try {
+      // Upload new photos if provided
+      let updatedEditForm = { ...editForm };
+
+      if (photo1File) {
+        const photo1Url = await uploadPhoto(photo1File, 1);
+        updatedEditForm.photo1_url = photo1Url;
+      }
+
+      if (photo2File) {
+        const photo2Url = await uploadPhoto(photo2File, 2);
+        updatedEditForm.photo2_url = photo2Url;
+      }
+
+      // Update contest application
+      const { error: appError } = await supabase
+        .from('contest_applications')
+        .update({
+          application_data: updatedEditForm,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', editingApplication.id);
+
+      if (appError) {
+        toast({
+          title: "Error",
+          description: "Failed to update application",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      // Update user profile with the same data
+      const birthDate = updatedEditForm.birth_year && updatedEditForm.birth_month && updatedEditForm.birth_day
+        ? new Date(updatedEditForm.birth_year, updatedEditForm.birth_month - 1, updatedEditForm.birth_day).toISOString().split('T')[0]
+        : null;
+
+      const age = updatedEditForm.birth_year ? new Date().getFullYear() - updatedEditForm.birth_year : null;
+
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .update({
+          first_name: updatedEditForm.first_name,
+          last_name: updatedEditForm.last_name,
+          display_name: `${updatedEditForm.first_name || ''} ${updatedEditForm.last_name || ''}`.trim(),
+          city: updatedEditForm.city,
+          state: updatedEditForm.state,
+          country: updatedEditForm.country,
+          gender: updatedEditForm.gender,
+          height_cm: updatedEditForm.height_cm,
+          weight_kg: updatedEditForm.weight_kg,
+          marital_status: updatedEditForm.marital_status,
+          has_children: updatedEditForm.has_children,
+          birthdate: birthDate,
+          age: age,
+          photo_1_url: updatedEditForm.photo1_url,
+          photo_2_url: updatedEditForm.photo2_url,
+          avatar_url: updatedEditForm.photo1_url, // Use portrait photo as avatar
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', editingApplication.user_id);
+
+      if (profileError) {
+        console.error('Error updating profile:', profileError);
+        // Don't fail the operation if profile update fails
+      }
+
+      // Update weekly contest participants data if they're in a contest
+      const { error: participantError } = await supabase
+        .from('weekly_contest_participants')
+        .update({
+          application_data: updatedEditForm
+        })
+        .eq('user_id', editingApplication.user_id);
+
+      if (participantError) {
+        console.error('Error updating contest participant:', participantError);
+        // Don't fail the operation if participant update fails
+      }
+
+      toast({
+        title: "Success",
+        description: "Application and profile updated successfully",
+      });
+
+      setEditingApplication(null);
+      setEditForm({});
+      setPhoto1File(null);
+      setPhoto2File(null);
+      fetchContestApplications();
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: "Failed to update application",
+        description: error.message || "Failed to update application",
         variant: "destructive"
       });
-      return;
+    } finally {
+      setUploadingPhotos(false);
     }
-
-    // Update user profile with the same data
-    const birthDate = editForm.birth_year && editForm.birth_month && editForm.birth_day
-      ? new Date(editForm.birth_year, editForm.birth_month - 1, editForm.birth_day).toISOString().split('T')[0]
-      : null;
-
-    const age = editForm.birth_year ? new Date().getFullYear() - editForm.birth_year : null;
-
-    const { error: profileError } = await supabase
-      .from('profiles')
-      .update({
-        first_name: editForm.first_name,
-        last_name: editForm.last_name,
-        display_name: `${editForm.first_name || ''} ${editForm.last_name || ''}`.trim(),
-        city: editForm.city,
-        state: editForm.state,
-        country: editForm.country,
-        gender: editForm.gender,
-        height_cm: editForm.height_cm,
-        weight_kg: editForm.weight_kg,
-        marital_status: editForm.marital_status,
-        has_children: editForm.has_children,
-        birthdate: birthDate,
-        age: age,
-        photo_1_url: editForm.photo1_url,
-        photo_2_url: editForm.photo2_url,
-        avatar_url: editForm.photo1_url, // Use portrait photo as avatar
-        updated_at: new Date().toISOString()
-      })
-      .eq('id', editingApplication.user_id);
-
-    if (profileError) {
-      console.error('Error updating profile:', profileError);
-      // Don't fail the operation if profile update fails
-    }
-
-    // Update weekly contest participants data if they're in a contest
-    const { error: participantError } = await supabase
-      .from('weekly_contest_participants')
-      .update({
-        application_data: editForm
-      })
-      .eq('user_id', editingApplication.user_id);
-
-    if (participantError) {
-      console.error('Error updating contest participant:', participantError);
-      // Don't fail the operation if participant update fails
-    }
-
-    toast({
-      title: "Success",
-      description: "Application and profile updated successfully",
-    });
-
-    setEditingApplication(null);
-    setEditForm({});
-    fetchContestApplications();
   };
 
   const cancelEdit = () => {
     setEditingApplication(null);
     setEditForm({});
+    setPhoto1File(null);
+    setPhoto2File(null);
+  };
+
+  // Photo upload handlers
+  const handlePhoto1Upload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setPhoto1File(file);
+    }
+  };
+
+  const handlePhoto2Upload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setPhoto2File(file);
+    }
+  };
+
+  // Process image to maintain 4:5 aspect ratio (width:height) with side padding if needed
+  const processImageAspectRatio = (file: File): Promise<File> => {
+    return new Promise((resolve) => {
+      const img = new Image();
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      
+      img.onload = () => {
+        const aspectRatio = img.width / img.height;
+        const targetAspectRatio = 4 / 5; // width:height = 4:5
+        
+        // If image is narrower than 4:5 ratio, add padding on sides
+        if (aspectRatio < targetAspectRatio) {
+          // Image is too narrow, need to add horizontal padding (make it wider)
+          const targetHeight = img.height;
+          const targetWidth = img.height * targetAspectRatio; // width = height * (4/5)
+          
+          canvas.width = targetWidth;
+          canvas.height = targetHeight;
+          
+          // Fill with white background (padding)
+          ctx!.fillStyle = '#ffffff';
+          ctx!.fillRect(0, 0, targetWidth, targetHeight);
+          
+          // Center the original image horizontally
+          const offsetX = (targetWidth - img.width) / 2;
+          ctx!.drawImage(img, offsetX, 0, img.width, img.height);
+        } else {
+          // For images with aspect ratio >= 4:5, keep original
+          canvas.width = img.width;
+          canvas.height = img.height;
+          ctx!.drawImage(img, 0, 0);
+        }
+        
+        canvas.toBlob((blob) => {
+          if (blob) {
+            const processedFile = new File([blob], file.name, {
+              type: file.type,
+              lastModified: Date.now()
+            });
+            resolve(processedFile);
+          } else {
+            resolve(file);
+          }
+        }, file.type, 0.9);
+      };
+      
+      img.src = URL.createObjectURL(file);
+    });
+  };
+
+  // Upload photo to Supabase storage
+  const uploadPhoto = async (file: File, photoNumber: number): Promise<string> => {
+    if (!user) throw new Error('Not authenticated');
+
+    // Process image for proper aspect ratio
+    const processedFile = await processImageAspectRatio(file);
+
+    // Create file path with user folder structure for RLS to work
+    const fileName = `${user.id}/photo${photoNumber}-${Date.now()}.${processedFile.name.split('.').pop()}`;
+    
+    const { error: uploadError } = await supabase.storage
+      .from('contest-photos')
+      .upload(fileName, processedFile);
+
+    if (uploadError) throw uploadError;
+
+    const { data } = supabase.storage
+      .from('contest-photos')
+      .getPublicUrl(fileName);
+
+    return data.publicUrl;
   };
 
   const reviewApplication = async (applicationId: string, status: 'approved' | 'rejected', notes?: string) => {
@@ -1363,34 +1484,58 @@ const Admin = () => {
                   {/* Photos Grid */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="photo1_url">Portrait Photo URL</Label>
+                      <Label htmlFor="photo1_url">Portrait Photo</Label>
                       <Input
                         id="photo1_url"
                         value={editForm.photo1_url || ''}
                         onChange={(e) => handleEditFormChange('photo1_url', e.target.value)}
                         placeholder="Portrait photo URL"
+                        className="mb-2"
                       />
+                      <Input
+                        type="file"
+                        accept="image/*"
+                        onChange={handlePhoto1Upload}
+                        className="mb-2"
+                      />
+                      {photo1File && (
+                        <p className="text-sm text-green-600 mb-2">
+                          New photo selected: {photo1File.name}
+                        </p>
+                      )}
                       {editForm.photo1_url && (
                         <img 
                           src={editForm.photo1_url} 
                           alt="Portrait preview" 
-                          className="w-24 h-32 object-cover rounded border mt-2"
+                          className="w-24 h-32 object-cover rounded border"
                         />
                       )}
                     </div>
                     <div>
-                      <Label htmlFor="photo2_url">Full Length Photo URL</Label>
+                      <Label htmlFor="photo2_url">Full Length Photo</Label>
                       <Input
                         id="photo2_url"
                         value={editForm.photo2_url || ''}
                         onChange={(e) => handleEditFormChange('photo2_url', e.target.value)}
                         placeholder="Full length photo URL"
+                        className="mb-2"
                       />
+                      <Input
+                        type="file"
+                        accept="image/*"
+                        onChange={handlePhoto2Upload}
+                        className="mb-2"
+                      />
+                      {photo2File && (
+                        <p className="text-sm text-green-600 mb-2">
+                          New photo selected: {photo2File.name}
+                        </p>
+                      )}
                       {editForm.photo2_url && (
                         <img 
                           src={editForm.photo2_url} 
                           alt="Full length preview" 
-                          className="w-24 h-32 object-cover rounded border mt-2"
+                          className="w-24 h-32 object-cover rounded border"
                         />
                       )}
                     </div>
@@ -1398,11 +1543,11 @@ const Admin = () => {
 
                   {/* Action Buttons */}
                   <div className="flex justify-end gap-2 pt-4 border-t">
-                    <Button variant="outline" onClick={cancelEdit}>
+                    <Button variant="outline" onClick={cancelEdit} disabled={uploadingPhotos}>
                       Cancel
                     </Button>
-                    <Button onClick={saveApplicationEdit} className="bg-blue-600 hover:bg-blue-700">
-                      Save Changes
+                    <Button onClick={saveApplicationEdit} className="bg-blue-600 hover:bg-blue-700" disabled={uploadingPhotos}>
+                      {uploadingPhotos ? "Uploading..." : "Save Changes"}
                     </Button>
                   </div>
                 </div>
