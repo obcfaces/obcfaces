@@ -379,19 +379,6 @@ export function ContestantCard({
                     </span>
                   </h3>
                   <div className="text-contest-blue text-sm">{getCountryDisplayName(country)} · {city}</div>
-                  {isExample && (
-                    <div className="absolute inset-4 bg-yellow-100 border-2 border-yellow-300 rounded-lg flex items-center justify-center z-30">
-                      <div className="text-center text-gray-800 p-4">
-                        <h4 className="font-bold text-lg mb-2">How your photos should look:</h4>
-                        <div className="text-sm space-y-1">
-                          <div>• No makeup</div>
-                          <div>• No filter</div>
-                          <div>• No photo editing</div>
-                          <div>• No glasses</div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
                 </div>
                 {/* Remove rating display from header since it's now in corner */}
               </div>
