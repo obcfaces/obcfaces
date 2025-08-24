@@ -129,6 +129,9 @@ const LikedItem = ({
   const [participantPhoto2File, setParticipantPhoto2File] = useState<File | null>(null);
   const [uploadingParticipantPhotos, setUploadingParticipantPhotos] = useState(false);
   
+  // Debug log to ensure variables are defined
+  console.log('LikedItem: isEditingInline state initialized:', { isEditingInline });
+  
   // Use unified card data hook
   const { data: cardData, loading: cardDataLoading } = useCardData(authorName, user?.id);
   
