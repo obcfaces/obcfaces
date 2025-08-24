@@ -153,6 +153,40 @@ export function EditPhotosModal({
 
       console.log('✅ Profile updated successfully');
 
+      // Также обновляем данные в weekly_contest_participants если пользователь участвует
+      try {
+        const { data: participantData } = await supabase
+          .from('weekly_contest_participants')
+          .select('*')
+          .eq('user_id', user.id)
+          .maybeSingle();
+
+        if (participantData) {
+          console.log('📋 Updating weekly contest participant data...');
+          const existingData = (participantData.application_data as Record<string, any>) || {};
+          const updatedApplicationData = {
+            ...existingData,
+            photo1_url: photo1Url,
+            photo2_url: photo2Url
+          };
+
+          const { error: participantError } = await supabase
+            .from('weekly_contest_participants')
+            .update({
+              application_data: updatedApplicationData
+            })
+            .eq('user_id', user.id);
+
+          if (participantError) {
+            console.error('❌ Participant update error:', participantError);
+          } else {
+            console.log('✅ Weekly contest participant updated successfully');
+          }
+        }
+      } catch (participantUpdateError) {
+        console.error('❌ Error updating participant data:', participantUpdateError);
+      }
+
       toast({ description: "Фотографии обновлены!" });
       
       // Reset state
