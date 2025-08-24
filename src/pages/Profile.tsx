@@ -17,7 +17,7 @@ import LikedItem from "@/components/profile/LikedItem";
 import { PhotoModal } from "@/components/photo-modal";
 import { ProfilePhotoModal } from "@/components/profile-photo-modal";
 import { ContestParticipationModal } from "@/components/contest-participation-modal";
-import { EditPhotosModal } from "@/components/edit-photos-modal";
+import { EditPhotosModalNew } from "@/components/edit-photos-modal-new";
 import CreatePostModal from "@/components/create-post-modal";
 import c1 from "@/assets/contestant-1.jpg";
 import c2 from "@/assets/contestant-2.jpg";
@@ -1980,7 +1980,7 @@ const Profile = () => {
       />
 
       {/* Edit Photos Modal */}
-      <EditPhotosModal
+      <EditPhotosModalNew
         isOpen={editPhotosModalOpen}
         onClose={() => setEditPhotosModalOpen(false)}
         currentPhoto1={data?.photo_1_url}
