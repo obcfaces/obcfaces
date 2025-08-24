@@ -160,12 +160,13 @@ export function EditPhotosModal({
       });
 
       // Update profile with new photo URLs (with cache-busting timestamp)
+      const timestamp = Date.now();
       const updateData: any = {};
       if (photo1Url) {
-        updateData.photo_1_url = photo1Url;
+        updateData.photo_1_url = `${photo1Url}?t=${timestamp}`;
       }
       if (photo2Url) {
-        updateData.photo_2_url = photo2Url;
+        updateData.photo_2_url = `${photo2Url}?t=${timestamp}`;
       }
 
       console.log('💾 Updating profile with URLs:', updateData);
