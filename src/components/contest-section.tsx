@@ -340,15 +340,34 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
           ))}
         </div>
       ) : (
-        <div className="px-0 sm:px-6 grid grid-cols-1 lg:grid-cols-2 gap-1 sm:gap-3 max-w-full overflow-hidden">
-          {contestants.map((contestant) => (
-            <ContestantCard
-              key={contestant.rank}
-              {...contestant}
-              viewMode={viewMode}
-              onRate={(rating) => handleRate(contestant.rank, rating)}
-            />
-          ))}
+        <div className="px-0 sm:px-6">
+          {/* Test/Example card */}
+          {contestants.some(c => c.isExample) && (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-1 sm:gap-3 max-w-full overflow-hidden mb-12">
+              {contestants.filter(c => c.isExample).map((contestant) => (
+                <ContestantCard
+                  key={contestant.rank}
+                  {...contestant}
+                  viewMode={viewMode}
+                  onRate={(rating) => handleRate(contestant.rank, rating)}
+                />
+              ))}
+            </div>
+          )}
+          
+          {/* Real contestants */}
+          {contestants.filter(c => !c.isExample).length > 0 && (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-1 sm:gap-3 max-w-full overflow-hidden">
+              {contestants.filter(c => !c.isExample).map((contestant) => (
+                <ContestantCard
+                  key={contestant.rank}
+                  {...contestant}
+                  viewMode={viewMode}
+                  onRate={(rating) => handleRate(contestant.rank, rating)}
+                />
+              ))}
+            </div>
+          )}
         </div>
       )}
 
