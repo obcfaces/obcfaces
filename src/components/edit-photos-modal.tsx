@@ -69,7 +69,8 @@ export function EditPhotosModal({
         .from('contest-photos')
         .getPublicUrl(fileName);
       
-      return data.publicUrl;
+      // Add cache-busting timestamp to ensure new image loads
+      return `${data.publicUrl}?t=${Date.now()}`;
     } catch (error) {
       console.error('Error uploading photo:', error);
       return null;
