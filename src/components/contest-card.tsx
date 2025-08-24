@@ -463,6 +463,12 @@ export function ContestantCard({
                   className="w-full aspect-[4/5] object-cover cursor-pointer hover:opacity-90 transition-opacity"
                   onClick={() => openModal(0)}
                 />
+                {/* Example Badge on photo */}
+                {isExample && (
+                  <div className="absolute top-1 left-1 bg-yellow-500 text-white px-1.5 py-0.5 text-xs font-bold rounded">
+                    Example
+                  </div>
+                )}
               </div>
               <div className="relative">
                 <img 
@@ -609,14 +615,6 @@ export function ContestantCard({
           </div>
         )}
         
-        
-        {/* Example Badge for compact view */}
-        {isExample && (
-          <div className="absolute top-1 left-1 z-30 bg-yellow-500 text-white px-1.5 py-0.5 text-xs font-bold rounded">
-            Example
-          </div>
-        )}
-        
         {/* Main two photos with additional photos indicator */}
         <div className="flex-shrink-0 flex h-full relative gap-px">
           <div className="relative">
@@ -626,7 +624,13 @@ export function ContestantCard({
               className="w-24 sm:w-28 md:w-32 h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
               onClick={() => openModal(0)}
             />
-            {rank > 0 && isVoted && (
+            {/* Example Badge on photo for compact view */}
+            {isExample && (
+              <div className="absolute top-0.5 left-0.5 bg-yellow-500 text-white px-1 py-0.5 text-xs font-bold rounded">
+                Example
+              </div>
+            )}
+            {rank > 0 && isVoted && !isExample && (
               <div className="absolute top-0 left-0 bg-black/70 text-white text-xs font-bold px-1 py-0.5 rounded-br">
                 {rank}
               </div>
