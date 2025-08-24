@@ -41,6 +41,7 @@ interface ContestantCardProps {
   isRealContestant?: boolean; // New prop for real contestants
   averageRating?: number; // Add average rating prop
   totalVotes?: number; // Add total votes prop
+  isExample?: boolean; // Add example flag prop
 }
 
 export function ContestantCard({
@@ -64,7 +65,8 @@ export function ContestantCard({
   showDislike = false,
   isRealContestant = false,
   averageRating = 0,
-  totalVotes = 0
+  totalVotes = 0,
+  isExample = false
 }: ContestantCardProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalStartIndex, setModalStartIndex] = useState(0);
@@ -345,6 +347,15 @@ export function ContestantCard({
     return (
       <>
         <Card className="bg-card border-contest-border relative overflow-hidden">
+          {/* Example overlay for full view */}
+          {isExample && (
+            <div className="absolute inset-0 z-30 bg-black/80 flex items-center justify-center">
+              <div className="text-center text-white">
+                <h3 className="text-2xl font-bold mb-2">This is an example</h3>
+                <p className="text-lg">Real contestants will appear here</p>
+              </div>
+            </div>
+          )}
           
           
           {/* Rank and rating in top right corner */}
@@ -556,6 +567,15 @@ export function ContestantCard({
   return (
     <>
       <Card className="bg-card border-contest-border relative overflow-hidden flex h-36 sm:h-40 md:h-44">
+        {/* Example overlay for compact view */}
+        {isExample && (
+          <div className="absolute inset-0 z-30 bg-black/80 flex items-center justify-center">
+            <div className="text-center text-white">
+              <h3 className="text-xl font-bold mb-2">This is an example</h3>
+              <p className="text-sm">Real contestants will appear here</p>
+            </div>
+          </div>
+        )}
         {isWinner && (
           <div className="absolute bottom-0 left-0 w-[193px] sm:w-[225px] md:w-[257px] bg-blue-100 text-blue-700 pl-2 pr-2 py-1 text-xs font-semibold flex items-center justify-start z-20">
             <span>🏆 WINNER   + 5000 PHP</span>
