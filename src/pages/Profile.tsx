@@ -1281,7 +1281,6 @@ const Profile = () => {
                         candidateData={item.candidateData}
                         participantType={item.participantType}
                          isOwner={isOwner}
-                         onEditPhotos={startEditingParticipationPhotos}
                          onPhotoUpdate={(type, url) => {
                            // Update the displayed image immediately
                            setParticipationItems(prev => 
