@@ -579,48 +579,106 @@ const LikedItem = ({
         {/* Photos section or edit form */}
         <div className="relative">
           {isEditingInline ? (
-            <div className="p-6 space-y-4">
-              <h4 className="font-semibold">Edit Photos</h4>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="text-sm font-medium">Portrait Photo</label>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleParticipantPhoto1Upload}
-                    className="w-full border rounded p-2 mt-2"
-                  />
-                  {participantPhoto1File && (
-                    <p className="text-sm text-green-600 mt-1">Selected: {participantPhoto1File.name}</p>
-                  )}
+            <div className="grid grid-cols-2 gap-px">
+              {/* Photo 1 with edit options */}
+              <div className="relative">
+                <img 
+                  src={displayFaceImage} 
+                  alt={`${authorName} face`}
+                  className="w-full aspect-[4/5] object-cover"
+                />
+                <div className="absolute inset-0 bg-black/50 flex items-center justify-center gap-2">
+                  <Button
+                    size="sm"
+                    className="w-10 h-10 p-0"
+                    onClick={() => document.getElementById('photo1-upload')?.click()}
+                  >
+                    <Edit className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="destructive"
+                    className="w-10 h-10 p-0"
+                    onClick={() => {
+                      // TODO: Handle photo deletion
+                      console.log('Delete photo 1');
+                    }}
+                  >
+                    <span className="text-lg">×</span>
+                  </Button>
                 </div>
-                <div>
-                  <label className="text-sm font-medium">Full Length Photo</label>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleParticipantPhoto2Upload}
-                    className="w-full border rounded p-2 mt-2"
-                  />
-                  {participantPhoto2File && (
-                    <p className="text-sm text-green-600 mt-1">Selected: {participantPhoto2File.name}</p>
-                  )}
-                </div>
+                <input
+                  id="photo1-upload"
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleParticipantPhoto1Upload}
+                />
+                {participantPhoto1File && (
+                  <div className="absolute bottom-2 left-2 right-2 bg-green-600 text-white text-xs p-1 rounded">
+                    New: {participantPhoto1File.name.slice(0, 20)}...
+                  </div>
+                )}
               </div>
-              <div className="flex gap-2 justify-end">
-                <Button
-                  variant="outline"
-                  onClick={cancelInlineEdit}
-                  disabled={uploadingParticipantPhotos}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  onClick={saveInlinePhotos}
-                  disabled={uploadingParticipantPhotos || (!participantPhoto1File && !participantPhoto2File)}
-                >
-                  {uploadingParticipantPhotos ? "Saving..." : "Save Photos"}
-                </Button>
+              
+              {/* Photo 2 with edit options */}
+              <div className="relative">
+                <img 
+                  src={displayFullImage} 
+                  alt={`${authorName} full body`}
+                  className="w-full aspect-[4/5] object-cover"
+                />
+                <div className="absolute inset-0 bg-black/50 flex items-center justify-center gap-2">
+                  <Button
+                    size="sm"
+                    className="w-10 h-10 p-0"
+                    onClick={() => document.getElementById('photo2-upload')?.click()}
+                  >
+                    <Edit className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="destructive"
+                    className="w-10 h-10 p-0"
+                    onClick={() => {
+                      // TODO: Handle photo deletion
+                      console.log('Delete photo 2');
+                    }}
+                  >
+                    <span className="text-lg">×</span>
+                  </Button>
+                </div>
+                <input
+                  id="photo2-upload"
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleParticipantPhoto2Upload}
+                />
+                {participantPhoto2File && (
+                  <div className="absolute bottom-2 left-2 right-2 bg-green-600 text-white text-xs p-1 rounded">
+                    New: {participantPhoto2File.name.slice(0, 20)}...
+                  </div>
+                )}
+              </div>
+              
+              {/* Save/Cancel buttons */}
+              <div className="col-span-2 p-4 border-t border-contest-border">
+                <div className="flex gap-2 justify-end">
+                  <Button
+                    variant="outline"
+                    onClick={cancelInlineEdit}
+                    disabled={uploadingParticipantPhotos}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={saveInlinePhotos}
+                    disabled={uploadingParticipantPhotos || (!participantPhoto1File && !participantPhoto2File)}
+                  >
+                    {uploadingParticipantPhotos ? "Saving..." : "Save Photos"}
+                  </Button>
+                </div>
               </div>
             </div>
           ) : (
