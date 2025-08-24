@@ -247,6 +247,31 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
       });
     }
     
+    // For "THIS WEEK" section, show test card if no real contestants
+    if (title === "THIS WEEK") {
+      return [{
+        rank: 1,
+        name: "Example Card",
+        profileId: "example-id",
+        country: "Philippines",
+        city: "Manila",
+        age: 25,
+        weight: 55,
+        height: 165,
+        rating: 4.8,
+        averageRating: 4.8,
+        totalVotes: 124,
+        faceImage: contestant1Face,
+        fullBodyImage: contestant1Full,
+        additionalPhotos: [],
+        isVoted: false,
+        isWinner: false,
+        prize: undefined,
+        isRealContestant: false,
+        isExample: true // Special flag for example card
+      }];
+    }
+    
     // Return empty array if no real contestants found
     console.log(`No real contestants found for ${title}, returning empty array`);
     return [];
