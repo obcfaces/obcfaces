@@ -244,58 +244,100 @@ const LikedItem = ({
   };
 
   const uploadPhoto = async (file: File, photoNumber: 1 | 2): Promise<string | null> => {
+    console.log(`📤 Starting upload for photo ${photoNumber}:`, { 
+      fileName: file.name, 
+      fileSize: file.size, 
+      fileType: file.type 
+    });
+    
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return null;
+      if (!user) {
+        console.error('❌ User not authenticated for upload');
+        return null;
+      }
 
       const fileExt = file.name.split('.').pop();
       const fileName = `${user.id}/photo_${photoNumber}.${fileExt}`;
+      
+      console.log(`📁 Uploading to path: ${fileName}`);
       
       const { error: uploadError } = await supabase.storage
         .from('contest-photos')
         .upload(fileName, file, { upsert: true });
       
-      if (uploadError) throw uploadError;
+      if (uploadError) {
+        console.error(`❌ Upload error for photo ${photoNumber}:`, uploadError);
+        throw uploadError;
+      }
+      
+      console.log(`✅ Upload successful for photo ${photoNumber}`);
       
       const { data } = supabase.storage
         .from('contest-photos')
         .getPublicUrl(fileName);
       
-      return data.publicUrl;
+      const publicUrl = data.publicUrl;
+      console.log(`🔗 Generated public URL: ${publicUrl}`);
+      
+      return publicUrl;
     } catch (error) {
-      console.error('Error uploading photo:', error);
+      console.error(`❌ Error uploading photo ${photoNumber}:`, error);
       return null;
     }
   };
 
   const savePhotoChanges = async () => {
+    console.log('🔄 Starting photo save process...');
+    console.log('📷 Photo states:', {
+      photo1Deleted,
+      photo2Deleted,
+      hasEditingPhoto1: !!editingPhoto1,
+      hasEditingPhoto2: !!editingPhoto2,
+      currentPhoto1: displayFaceImage,
+      currentPhoto2: displayFullImage
+    });
+    
     setUploading(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
+        console.error('❌ User not authenticated');
         toast({ description: "Не авторизован" });
         return;
       }
 
+      console.log('👤 User authenticated:', user.id);
+
       let photo1Url = photo1Deleted ? null : displayFaceImage;
       let photo2Url = photo2Deleted ? null : displayFullImage;
 
+      console.log('📸 Initial photo URLs:', { photo1Url, photo2Url });
+
       // Upload new photos if selected
       if (editingPhoto1) {
+        console.log('⬆️ Uploading photo 1...');
         photo1Url = await uploadPhoto(editingPhoto1, 1);
+        console.log('✅ Photo 1 upload result:', photo1Url);
         if (!photo1Url) {
+          console.error('❌ Failed to upload photo 1');
           toast({ description: "Ошибка загрузки первого фото" });
           return;
         }
       }
 
       if (editingPhoto2) {
+        console.log('⬆️ Uploading photo 2...');
         photo2Url = await uploadPhoto(editingPhoto2, 2);
+        console.log('✅ Photo 2 upload result:', photo2Url);
         if (!photo2Url) {
+          console.error('❌ Failed to upload photo 2');
           toast({ description: "Ошибка загрузки второго фото" });
           return;
         }
       }
+
+      console.log('💾 Updating profile with URLs:', { photo1Url, photo2Url });
 
       // Update profile with new photo URLs
       const { error } = await supabase
@@ -306,8 +348,12 @@ const LikedItem = ({
         })
         .eq('id', user.id);
 
-      if (error) throw error;
+      if (error) {
+        console.error('❌ Database update error:', error);
+        throw error;
+      }
 
+      console.log('✅ Profile updated successfully');
       toast({ description: "Фотографии обновлены!" });
       onUpdatePhotos?.(photo1Url, photo2Url);
       onToggleEditMode?.();
@@ -320,10 +366,11 @@ const LikedItem = ({
       setPhoto1Deleted(false);
       setPhoto2Deleted(false);
     } catch (error) {
-      console.error('Error updating photos:', error);
+      console.error('❌ Error updating photos:', error);
       toast({ description: "Ошибка обновления фотографий" });
     } finally {
       setUploading(false);
+      console.log('🏁 Photo save process completed');
     }
   };
 
