@@ -277,10 +277,11 @@ const LikedItem = ({
         .from('contest-photos')
         .getPublicUrl(fileName);
       
-      const publicUrl = data.publicUrl;
-      console.log(`🔗 Generated public URL: ${publicUrl}`);
+      // Add cache-busting timestamp like About section to force browser reload
+      const timestampedUrl = `${data.publicUrl}?t=${Date.now()}`;
+      console.log(`🔗 Generated public URL with cache busting: ${timestampedUrl}`);
       
-      return publicUrl;
+      return timestampedUrl;
     } catch (error) {
       console.error(`❌ Error uploading photo ${photoNumber}:`, error);
       return null;
