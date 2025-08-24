@@ -41,6 +41,7 @@ interface LikedItemProps {
   participantType?: 'candidate' | 'finalist' | 'winner';
   showStatusBadge?: boolean;
   isOwner?: boolean;
+  onEditPhotos?: () => void;
   onPhotoUpdate?: (type: 'photo_1' | 'photo_2', url: string) => void;
 }
 
@@ -110,6 +111,7 @@ const LikedItem = ({
   participantType,
   showStatusBadge = true,
   isOwner = false,
+  onEditPhotos,
   onPhotoUpdate
 }: LikedItemProps) => {
   const [isUnliking, setIsUnliking] = useState(false);
@@ -405,7 +407,7 @@ const LikedItem = ({
           {/* Edit button for owner */}
           {isOwner && (
             <Button
-              onClick={startEditingParticipant}
+              onClick={onEditPhotos}
               size="sm"
               className="absolute top-2 right-2 z-30 w-8 h-8 p-0"
             >
@@ -617,12 +619,11 @@ const LikedItem = ({
         {/* Edit button for owner */}
         {isOwner && (
           <Button
-            onClick={startEditingParticipant}
+            onClick={onEditPhotos}
             size="sm"
-            className="absolute top-2 right-4 z-30 flex items-center gap-1"
+            className="absolute top-2 right-2 z-30 w-8 h-8 p-0"
           >
             <Edit className="w-3 h-3" />
-            Edit Photos
           </Button>
         )}
         

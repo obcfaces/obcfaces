@@ -1224,21 +1224,9 @@ const Profile = () => {
               ) : participationItems.length > 0 ? (
                 <div className="px-0 sm:px-6">
                   {/* Edit photos button and view mode toggle buttons */}
-                  <div className="flex justify-between items-center gap-1 mb-4 px-6 sm:px-0 -mt-[15px]">
-                    {/* Edit photos button for owner */}
-                    {isOwner && (
-                      <Button
-                        onClick={startEditingParticipationPhotos}
-                        size="sm"
-                        className="flex items-center gap-1"
-                      >
-                        <Edit className="w-3 h-3" />
-                        Edit Photos
-                      </Button>
-                    )}
-                    
-                    {/* View mode toggle buttons */}
-                    <div className="flex items-center gap-1">
+                   <div className="flex justify-end items-center gap-1 mb-4 px-6 sm:px-0 -mt-[15px]">
+                     {/* View mode toggle buttons */}
+                     <div className="flex items-center gap-1">
                     <button
                       type="button"
                       onClick={() => setParticipationViewMode("compact")}
@@ -1292,23 +1280,24 @@ const Profile = () => {
                         viewMode={participationViewMode}
                         candidateData={item.candidateData}
                         participantType={item.participantType}
-                        isOwner={isOwner}
-                        onPhotoUpdate={(type, url) => {
-                          // Update the displayed image immediately
-                          setParticipationItems(prev => 
-                            prev.map(participationItem => 
-                              participationItem.likeId === item.likeId 
-                                ? {
-                                    ...participationItem,
-                                    candidateData: {
-                                      ...participationItem.candidateData,
-                                      [type === 'photo_1' ? 'faceImage' : 'fullBodyImage']: url
-                                    }
-                                  }
-                                : participationItem
-                            )
-                          );
-                        }}
+                         isOwner={isOwner}
+                         onEditPhotos={startEditingParticipationPhotos}
+                         onPhotoUpdate={(type, url) => {
+                           // Update the displayed image immediately
+                           setParticipationItems(prev => 
+                             prev.map(participationItem => 
+                               participationItem.likeId === item.likeId 
+                                 ? {
+                                     ...participationItem,
+                                     candidateData: {
+                                       ...participationItem.candidateData,
+                                       [type === 'photo_1' ? 'faceImage' : 'fullBodyImage']: url
+                                     }
+                                   }
+                                 : participationItem
+                             )
+                           );
+                         }}
                       />
                     ))}
                    </div>
