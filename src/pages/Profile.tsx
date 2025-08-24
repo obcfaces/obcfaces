@@ -1138,6 +1138,23 @@ const Profile = () => {
                         viewMode={participationViewMode}
                         candidateData={item.candidateData}
                         participantType={item.participantType}
+                        isOwner={isOwner}
+                        onPhotoUpdate={(type, url) => {
+                          // Update the displayed image immediately
+                          setParticipationItems(prev => 
+                            prev.map(participationItem => 
+                              participationItem.likeId === item.likeId 
+                                ? {
+                                    ...participationItem,
+                                    candidateData: {
+                                      ...participationItem.candidateData,
+                                      [type === 'photo_1' ? 'faceImage' : 'fullBodyImage']: url
+                                    }
+                                  }
+                                : participationItem
+                            )
+                          );
+                        }}
                       />
                     ))}
                   </div>

@@ -1,7 +1,7 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ThumbsUp, MessageCircle, Share2, ThumbsDown } from "lucide-react";
+import { ThumbsUp, MessageCircle, Share2, ThumbsDown, Pencil, X } from "lucide-react";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
@@ -38,6 +38,8 @@ interface LikedItemProps {
   candidateData?: any;
   participantType?: 'candidate' | 'finalist' | 'winner';
   showStatusBadge?: boolean;
+  isOwner?: boolean;
+  onPhotoUpdate?: (type: 'photo_1' | 'photo_2', url: string) => void;
 }
 
 const getInitials = (name: string) => {
@@ -94,7 +96,9 @@ const LikedItem = ({
   viewMode = 'full',
   candidateData,
   participantType,
-  showStatusBadge = true
+  showStatusBadge = true,
+  isOwner = false,
+  onPhotoUpdate
 }: LikedItemProps) => {
   const [isUnliking, setIsUnliking] = useState(false);
   const [isLiked, setIsLiked] = useState(true);
@@ -103,6 +107,10 @@ const LikedItem = ({
   const [user, setUser] = useState<any>(null);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [currentParticipantType, setCurrentParticipantType] = useState<'candidate' | 'finalist' | 'winner' | null>(participantType || null);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [uploadingPhoto, setUploadingPhoto] = useState<'photo_1' | 'photo_2' | null>(null);
+  const [photoFiles, setPhotoFiles] = useState<{[key: string]: File | null}>({});
+  const [photoPreviews, setPhotoPreviews] = useState<{[key: string]: string | null}>({});
 
   // Use unified card data hook
   const { data: cardData, loading: cardDataLoading } = useCardData(authorName, user?.id);
@@ -184,6 +192,100 @@ const LikedItem = ({
     openModal(0);
   };
 
+  const handlePhotoChange = (photoType: 'photo_1' | 'photo_2', event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setPhotoFiles(prev => ({ ...prev, [photoType]: file }));
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setPhotoPreviews(prev => ({ 
+          ...prev, 
+          [photoType]: e.target?.result as string 
+        }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handlePhotoDelete = (photoType: 'photo_1' | 'photo_2') => {
+    setPhotoFiles(prev => ({ ...prev, [photoType]: null }));
+    setPhotoPreviews(prev => ({ ...prev, [photoType]: null }));
+  };
+
+  const uploadPhoto = async (file: File, photoType: 'photo_1' | 'photo_2'): Promise<string | null> => {
+    if (!user?.id) return null;
+    
+    setUploadingPhoto(photoType);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user.id}/${photoType}.${fileExt}`;
+      
+      const { error: uploadError } = await supabase.storage
+        .from('contest-photos')
+        .upload(fileName, file, { upsert: true });
+      
+      if (uploadError) throw uploadError;
+      
+      const { data } = supabase.storage
+        .from('contest-photos')
+        .getPublicUrl(fileName);
+      
+      return data.publicUrl;
+    } catch (error) {
+      console.error('Error uploading photo:', error);
+      toast({ description: "Ошибка загрузки фото" });
+      return null;
+    } finally {
+      setUploadingPhoto(null);
+    }
+  };
+
+  const handleSavePhotos = async () => {
+    if (!user?.id || !authorProfileId) return;
+
+    try {
+      const updates: { [key: string]: string } = {};
+
+      // Upload photo_1 if changed
+      if (photoFiles.photo_1) {
+        const url = await uploadPhoto(photoFiles.photo_1, 'photo_1');
+        if (url) {
+          updates.photo_1_url = url;
+          onPhotoUpdate?.('photo_1', url);
+        }
+      }
+
+      // Upload photo_2 if changed  
+      if (photoFiles.photo_2) {
+        const url = await uploadPhoto(photoFiles.photo_2, 'photo_2');
+        if (url) {
+          updates.photo_2_url = url;
+          onPhotoUpdate?.('photo_2', url);
+        }
+      }
+
+      // Update profile if there are changes
+      if (Object.keys(updates).length > 0) {
+        const { error } = await supabase
+          .from('profiles')
+          .update(updates)
+          .eq('id', authorProfileId);
+
+        if (error) throw error;
+
+        toast({ description: "Фото обновлены успешно" });
+      }
+
+      // Reset edit mode
+      setIsEditMode(false);
+      setPhotoFiles({});
+      setPhotoPreviews({});
+    } catch (error) {
+      console.error('Error updating photos:', error);
+      toast({ description: "Ошибка обновления фото" });
+    }
+  };
+
   // Use real participant data from database if available, otherwise fallback
   const candidateAge = realParticipantData?.age || candidateData?.age || 25;
   const candidateWeight = realParticipantData?.weight_kg || candidateData?.weight || 52;
@@ -254,25 +356,100 @@ const LikedItem = ({
     return (
       <>
         <Card className="bg-card border-contest-border relative overflow-hidden flex h-32 sm:h-36 md:h-40">
+          {/* Edit button for owner */}
+          {isOwner && (
+            <button
+              type="button"
+              onClick={() => setIsEditMode(!isEditMode)}
+              className="absolute top-2 right-2 z-30 w-8 h-8 bg-white/80 hover:bg-white rounded-full flex items-center justify-center shadow-md transition-colors"
+            >
+              {isEditMode ? <X className="w-4 h-4" /> : <Pencil className="w-4 h-4" />}
+            </button>
+          )}
+          
           {/* Participant Type Badge */}
           {showStatusBadge && getParticipantBadge(currentParticipantType)}
           {/* Main two photos */}
           <div className="flex-shrink-0 flex h-full relative gap-px">
             <div className="relative">
+              {/* Photo 1 */}
               <img 
-                src={displayFaceImage}
+                src={photoPreviews.photo_1 || displayFaceImage}
                 alt={`${authorName} face`}
                 className="w-24 sm:w-28 md:w-32 h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
-                onClick={() => openModal(0)}
+                onClick={() => !isEditMode && openModal(0)}
               />
+              {isEditMode && (
+                <>
+                  <input
+                    type="file"
+                    id="photo1-compact"
+                    accept="image/*"
+                    onChange={(e) => handlePhotoChange('photo_1', e)}
+                    className="hidden"
+                  />
+                  <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                    {photoFiles.photo_1 ? (
+                      <div className="flex gap-1">
+                        <button
+                          type="button"
+                          onClick={() => handlePhotoDelete('photo_1')}
+                          className="w-6 h-6 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center text-white text-sm transition-colors"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                        <label htmlFor="photo1-compact" className="w-6 h-6 bg-blue-500 hover:bg-blue-600 rounded-full flex items-center justify-center text-white text-sm cursor-pointer transition-colors">
+                          <Pencil className="w-3 h-3" />
+                        </label>
+                      </div>
+                    ) : (
+                      <label htmlFor="photo1-compact" className="w-8 h-8 bg-blue-500 hover:bg-blue-600 rounded-full flex items-center justify-center text-white cursor-pointer transition-colors">
+                        <Pencil className="w-4 h-4" />
+                      </label>
+                    )}
+                  </div>
+                </>
+              )}
             </div>
             <div className="relative">
+              {/* Photo 2 */}
               <img 
-                src={displayFullImage} 
+                src={photoPreviews.photo_2 || displayFullImage} 
                 alt={`${authorName} full body`}
                 className="w-24 sm:w-28 md:w-32 h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
-                onClick={() => openModal(1)}
+                onClick={() => !isEditMode && openModal(1)}
               />
+              {isEditMode && (
+                <>
+                  <input
+                    type="file"
+                    id="photo2-compact"
+                    accept="image/*"
+                    onChange={(e) => handlePhotoChange('photo_2', e)}
+                    className="hidden"
+                  />
+                  <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                    {photoFiles.photo_2 ? (
+                      <div className="flex gap-1">
+                        <button
+                          type="button"
+                          onClick={() => handlePhotoDelete('photo_2')}
+                          className="w-6 h-6 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center text-white text-sm transition-colors"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                        <label htmlFor="photo2-compact" className="w-6 h-6 bg-blue-500 hover:bg-blue-600 rounded-full flex items-center justify-center text-white text-sm cursor-pointer transition-colors">
+                          <Pencil className="w-3 h-3" />
+                        </label>
+                      </div>
+                    ) : (
+                      <label htmlFor="photo2-compact" className="w-8 h-8 bg-blue-500 hover:bg-blue-600 rounded-full flex items-center justify-center text-white cursor-pointer transition-colors">
+                        <Pencil className="w-4 h-4" />
+                      </label>
+                    )}
+                  </div>
+                </>
+              )}
             </div>
           </div>
           
@@ -302,45 +479,57 @@ const LikedItem = ({
               </div>
               
               <div className="flex items-center justify-end gap-4">
-                <button
-                  type="button"
-                  className="inline-flex items-center gap-1 text-xs sm:text-sm text-contest-blue hover:text-contest-blue/80 transition-colors"
-                  aria-label="Unlike"
-                  onClick={handleUnlike}
-                  disabled={isUnliking}
-                >
-                  <ThumbsUp className="w-3.5 h-3.5 text-primary" strokeWidth={1} />
-                   <span className="hidden xl:inline">Unlike</span>
-                   <span>{cardData.likes}</span>
-                </button>
-                <button
-                  type="button"
-                  className="inline-flex items-center gap-1 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors"
-                  onClick={handleComment}
-                  aria-label="Comments"
-                >
-                  <MessageCircle className="w-3.5 h-3.5 text-primary" strokeWidth={1} />
-                  <span className="hidden xl:inline">Comment</span>
-                   <span>{cardData.comments}</span>
-                </button>
-                <button
-                  type="button"
-                  className="inline-flex items-center gap-1 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors"
-                  onClick={async () => {
-                    try {
-                      if ((navigator as any).share) {
-                        await (navigator as any).share({ title: authorName, url: window.location.href });
-                      } else if (navigator.clipboard) {
-                        await navigator.clipboard.writeText(window.location.href);
-                        toast({ title: "Link copied" });
-                      }
-                    } catch {}
-                  }}
-                  aria-label="Share"
-                >
-                  <Share2 className="w-3.5 h-3.5" strokeWidth={1} />
-                  <span className="hidden xl:inline">Share</span>
-                </button>
+                {isEditMode && (photoFiles.photo_1 || photoFiles.photo_2) ? (
+                  <Button
+                    onClick={handleSavePhotos}
+                    disabled={uploadingPhoto !== null}
+                    className="px-2 py-1 text-xs h-6"
+                  >
+                    {uploadingPhoto ? "Сохранение..." : "Сохранить"}
+                  </Button>
+                ) : (
+                  <>
+                    <button
+                      type="button"
+                      className="inline-flex items-center gap-1 text-xs sm:text-sm text-contest-blue hover:text-contest-blue/80 transition-colors"
+                      aria-label="Unlike"
+                      onClick={handleUnlike}
+                      disabled={isUnliking}
+                    >
+                      <ThumbsUp className="w-3.5 h-3.5 text-primary" strokeWidth={1} />
+                       <span className="hidden xl:inline">Unlike</span>
+                       <span>{cardData.likes}</span>
+                    </button>
+                    <button
+                      type="button"
+                      className="inline-flex items-center gap-1 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors"
+                      onClick={handleComment}
+                      aria-label="Comments"
+                    >
+                      <MessageCircle className="w-3.5 h-3.5 text-primary" strokeWidth={1} />
+                      <span className="hidden xl:inline">Comment</span>
+                       <span>{cardData.comments}</span>
+                    </button>
+                    <button
+                      type="button"
+                      className="inline-flex items-center gap-1 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors"
+                      onClick={async () => {
+                        try {
+                          if ((navigator as any).share) {
+                            await (navigator as any).share({ title: authorName, url: window.location.href });
+                          } else if (navigator.clipboard) {
+                            await navigator.clipboard.writeText(window.location.href);
+                            toast({ title: "Link copied" });
+                          }
+                        } catch {}
+                      }}
+                      aria-label="Share"
+                    >
+                      <Share2 className="w-3.5 h-3.5" strokeWidth={1} />
+                      <span className="hidden xl:inline">Share</span>
+                    </button>
+                  </>
+                )}
               </div>
             </div>
           </div>
@@ -373,6 +562,17 @@ const LikedItem = ({
   return (
     <>
       <Card className="bg-card border-contest-border relative overflow-hidden">
+        {/* Edit button for owner */}
+        {isOwner && (
+          <button
+            type="button"
+            onClick={() => setIsEditMode(!isEditMode)}
+            className="absolute top-2 right-4 z-30 w-8 h-8 bg-white/80 hover:bg-white rounded-full flex items-center justify-center shadow-md transition-colors"
+          >
+            {isEditMode ? <X className="w-4 h-4" /> : <Pencil className="w-4 h-4" />}
+          </button>
+        )}
+        
         {/* Name in top left - показываем всегда как в проголосованных */}
         <div className="absolute top-2 left-4 z-20">
           <h3 className="text-xl font-semibold text-contest-text">
@@ -398,65 +598,141 @@ const LikedItem = ({
             {/* Participant Type Badge - overlaid on photos */}
             {showStatusBadge && getParticipantBadge(currentParticipantType, true)}
             <div className="relative">
+              {/* Photo 1 */}
               <img 
-                src={displayFaceImage} 
+                src={photoPreviews.photo_1 || displayFaceImage} 
                 alt={`${authorName} face`}
                 className="w-full aspect-[4/5] object-cover cursor-pointer hover:opacity-90 transition-opacity"
-                onClick={() => openModal(0)}
+                onClick={() => !isEditMode && openModal(0)}
               />
+              {isEditMode && (
+                <>
+                  <input
+                    type="file"
+                    id="photo1-full"
+                    accept="image/*"
+                    onChange={(e) => handlePhotoChange('photo_1', e)}
+                    className="hidden"
+                  />
+                  <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                    {photoFiles.photo_1 ? (
+                      <div className="flex gap-2">
+                        <button
+                          type="button"
+                          onClick={() => handlePhotoDelete('photo_1')}
+                          className="w-10 h-10 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center text-white transition-colors"
+                        >
+                          <X className="w-5 h-5" />
+                        </button>
+                        <label htmlFor="photo1-full" className="w-10 h-10 bg-blue-500 hover:bg-blue-600 rounded-full flex items-center justify-center text-white cursor-pointer transition-colors">
+                          <Pencil className="w-5 h-5" />
+                        </label>
+                      </div>
+                    ) : (
+                      <label htmlFor="photo1-full" className="w-12 h-12 bg-blue-500 hover:bg-blue-600 rounded-full flex items-center justify-center text-white cursor-pointer transition-colors">
+                        <Pencil className="w-6 h-6" />
+                      </label>
+                    )}
+                  </div>
+                </>
+              )}
             </div>
             <div className="relative">
+              {/* Photo 2 */}
               <img 
-                src={displayFullImage} 
+                src={photoPreviews.photo_2 || displayFullImage} 
                 alt={`${authorName} full body`}
                 className="w-full aspect-[4/5] object-cover cursor-pointer hover:opacity-90 transition-opacity"
-                onClick={() => openModal(1)}
+                onClick={() => !isEditMode && openModal(1)}
               />
+              {isEditMode && (
+                <>
+                  <input
+                    type="file"
+                    id="photo2-full"
+                    accept="image/*"
+                    onChange={(e) => handlePhotoChange('photo_2', e)}
+                    className="hidden"
+                  />
+                  <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                    {photoFiles.photo_2 ? (
+                      <div className="flex gap-2">
+                        <button
+                          type="button"
+                          onClick={() => handlePhotoDelete('photo_2')}
+                          className="w-10 h-10 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center text-white transition-colors"
+                        >
+                          <X className="w-5 h-5" />
+                        </button>
+                        <label htmlFor="photo2-full" className="w-10 h-10 bg-blue-500 hover:bg-blue-600 rounded-full flex items-center justify-center text-white cursor-pointer transition-colors">
+                          <Pencil className="w-5 h-5" />
+                        </label>
+                      </div>
+                    ) : (
+                      <label htmlFor="photo2-full" className="w-12 h-12 bg-blue-500 hover:bg-blue-600 rounded-full flex items-center justify-center text-white cursor-pointer transition-colors">
+                        <Pencil className="w-6 h-6" />
+                      </label>
+                    )}
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </div>
         
         {/* Footer with actions - точно как в конкурсе */}
         <div className="border-t border-contest-border px-4 py-2 flex items-center justify-evenly gap-4">
-          <button
-            type="button"
-            className="inline-flex items-center gap-1 text-sm text-contest-blue hover:text-contest-blue/80 transition-colors"
-            aria-label="Unlike"
-            onClick={handleUnlike}
-            disabled={isUnliking}
-          >
-            <ThumbsUp className="w-4 h-4 text-blue-500 fill-blue-500" strokeWidth={1} />
-             <span className="hidden sm:inline text-blue-500">Unlike</span>
-             <span className="text-blue-500">{cardData.likes}</span>
-          </button>
-          <button
-            type="button"
-            className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
-            onClick={handleComment}
-            aria-label="Comments"
-          >
-            <MessageCircle className="w-4 h-4 text-primary" strokeWidth={1} />
-            <span className="hidden sm:inline">Comment</span>
-            <span>{cardData.comments}</span>
-          </button>
-          <button
-            type="button"
-            className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
-            onClick={async () => {
-              try {
-                if ((navigator as any).share) {
-                  await (navigator as any).share({ title: authorName, url: window.location.href });
-                } else if (navigator.clipboard) {
-                  await navigator.clipboard.writeText(window.location.href);
-                  toast({ title: "Link copied" });
-                }
-              } catch {}
-            }}
-            aria-label="Share"
-          >
-            <Share2 className="w-4 h-4" strokeWidth={1} />
-            <span className="hidden sm:inline">Share</span>
-          </button>
+          {isEditMode && (photoFiles.photo_1 || photoFiles.photo_2) ? (
+            <Button
+              onClick={handleSavePhotos}
+              disabled={uploadingPhoto !== null}
+              className="px-3 py-1 text-sm h-8"
+            >
+              {uploadingPhoto ? "Сохранение..." : "Сохранить"}
+            </Button>
+          ) : (
+            <>
+              <button
+                type="button"
+                className="inline-flex items-center gap-1 text-sm text-contest-blue hover:text-contest-blue/80 transition-colors"
+                aria-label="Unlike"
+                onClick={handleUnlike}
+                disabled={isUnliking}
+              >
+                <ThumbsUp className="w-4 h-4 text-blue-500 fill-blue-500" strokeWidth={1} />
+                 <span className="hidden sm:inline text-blue-500">Unlike</span>
+                 <span className="text-blue-500">{cardData.likes}</span>
+              </button>
+              <button
+                type="button"
+                className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                onClick={handleComment}
+                aria-label="Comments"
+              >
+                <MessageCircle className="w-4 h-4 text-primary" strokeWidth={1} />
+                <span className="hidden sm:inline">Comment</span>
+                <span>{cardData.comments}</span>
+              </button>
+              <button
+                type="button"
+                className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                onClick={async () => {
+                  try {
+                    if ((navigator as any).share) {
+                      await (navigator as any).share({ title: authorName, url: window.location.href });
+                    } else if (navigator.clipboard) {
+                      await navigator.clipboard.writeText(window.location.href);
+                      toast({ title: "Link copied" });
+                    }
+                  } catch {}
+                }}
+                aria-label="Share"
+              >
+                <Share2 className="w-4 h-4" strokeWidth={1} />
+                <span className="hidden sm:inline">Share</span>
+              </button>
+            </>
+          )}
         </div>
       </Card>
 
