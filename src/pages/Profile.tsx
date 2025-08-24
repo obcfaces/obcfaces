@@ -1982,8 +1982,9 @@ const Profile = () => {
         currentPhoto2={data?.photo_2_url}
         onUpdate={async () => {
           console.log('🔄 Photo update callback triggered');
-          // Принудительная перезагрузка страницы для обновления фото
-          window.location.reload();
+          // Force reload profile data and participation items
+          await loadProfile();
+          await loadParticipationItems();
         }}
       />
 

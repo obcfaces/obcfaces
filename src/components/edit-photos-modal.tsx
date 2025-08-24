@@ -234,6 +234,7 @@ export function EditPhotosModal({
       setPhoto1Preview(null);
       setPhoto2Preview(null);
       
+      // Force component refresh and close modal
       onUpdate?.();
       onClose();
       console.log('🏁 Photo save process completed');
