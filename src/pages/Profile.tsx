@@ -1982,13 +1982,8 @@ const Profile = () => {
         currentPhoto2={data?.photo_2_url}
         onUpdate={async () => {
           console.log('🔄 Photo update callback triggered');
-          // Принудительно обновляем состояние данных профиля
-          setData(null);
-          // Сначала обновляем основные данные профиля
-          await loadProfile();
-          // Затем обновляем данные участия
-          await loadParticipationItems();
-          console.log('✅ Both profile and participation data refreshed');
+          // Принудительная перезагрузка страницы для обновления фото
+          window.location.reload();
         }}
       />
 
