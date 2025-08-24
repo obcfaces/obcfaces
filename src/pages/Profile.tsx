@@ -709,11 +709,11 @@ const Profile = () => {
 
       // Создаем карточку участия пользователя на основе его профиля
       const participationCard = {
-        likeId: `participation-${currentUserId}`,
+        likeId: `participation-${id}`,
         contentType: 'contest' as const,
-        contentId: currentUserId,
+        contentId: id,
         authorName: `${profileData.first_name || ''} ${profileData.last_name || ''}`.trim() || 'Участник',
-        authorProfileId: currentUserId,
+        authorProfileId: id, // Используем ID владельца профиля, а не currentUserId
         time: new Date(profileData.created_at).toLocaleString('ru-RU'),
         likes: Math.floor(Math.random() * 200) + 50, // Mock likes
         comments: Math.floor(Math.random() * 40) + 5, // Mock comments

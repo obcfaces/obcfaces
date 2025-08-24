@@ -241,7 +241,18 @@ const LikedItem = ({
   };
 
   const handleSavePhotos = async () => {
-    if (!user?.id || !authorProfileId) return;
+    console.log('💾 handleSavePhotos called', { 
+      userId: user?.id, 
+      authorProfileId, 
+      photoFiles: Object.keys(photoFiles),
+      hasPhoto1: !!photoFiles.photo_1,
+      hasPhoto2: !!photoFiles.photo_2
+    });
+    
+    if (!user?.id || !authorProfileId) {
+      console.error('❌ Missing required data:', { userId: user?.id, authorProfileId });
+      return;
+    }
 
     try {
       const updates: { [key: string]: string } = {};
