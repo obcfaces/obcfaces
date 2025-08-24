@@ -104,6 +104,7 @@ const Profile = () => {
   const [profilePhotos, setProfilePhotos] = useState<string[]>([]);
   const [loadingPhotos, setLoadingPhotos] = useState(true);
   const [editPhotosModalOpen, setEditPhotosModalOpen] = useState(false);
+  const [isParticipationEditMode, setIsParticipationEditMode] = useState(false);
 
   // Demo profile for fallback
   const demoProfile: ProfileRow = {
@@ -1143,8 +1144,12 @@ const Profile = () => {
                         candidateData={item.candidateData}
                         participantType={item.participantType}
                         isOwner={isOwner}
-                        onEditPhotos={() => {
-                          setEditPhotosModalOpen(true);
+                        isEditMode={isParticipationEditMode}
+                        onToggleEditMode={() => setIsParticipationEditMode(!isParticipationEditMode)}
+                        onUpdatePhotos={(photo1, photo2) => {
+                          // Update the data and reload participation items
+                          setData(prev => prev ? { ...prev, photo_1_url: photo1, photo_2_url: photo2 } : null);
+                          loadParticipationItems();
                         }}
                       />
                     ))}

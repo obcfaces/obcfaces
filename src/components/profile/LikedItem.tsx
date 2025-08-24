@@ -1,7 +1,7 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ThumbsUp, MessageCircle, Share2, ThumbsDown, Pencil } from "lucide-react";
+import { ThumbsUp, MessageCircle, Share2, ThumbsDown, Pencil, X, Upload, Check } from "lucide-react";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
@@ -38,8 +38,11 @@ interface LikedItemProps {
   candidateData?: any;
   participantType?: 'candidate' | 'finalist' | 'winner';
   showStatusBadge?: boolean;
-  isOwner?: boolean; // New prop to check if current user is the owner
-  onEditPhotos?: () => void; // New prop for edit callback
+  isOwner?: boolean;
+  onEditPhotos?: () => void;
+  isEditMode?: boolean;
+  onToggleEditMode?: () => void;
+  onUpdatePhotos?: (photo1: string | null, photo2: string | null) => void;
 }
 
 const getInitials = (name: string) => {
@@ -99,7 +102,10 @@ const LikedItem = ({
   participantType,
   showStatusBadge = false,
   isOwner = false,
-  onEditPhotos
+  onEditPhotos,
+  isEditMode = false,
+  onToggleEditMode,
+  onUpdatePhotos
 }: LikedItemProps) => {
   const [isUnliking, setIsUnliking] = useState(false);
   const [isLiked, setIsLiked] = useState(true);
@@ -107,6 +113,15 @@ const LikedItem = ({
   const [modalStartIndex, setModalStartIndex] = useState(0);
   const [user, setUser] = useState<any>(null);
   const [showLoginModal, setShowLoginModal] = useState(false);
+  
+  // Photo editing states
+  const [editingPhoto1, setEditingPhoto1] = useState<File | null>(null);
+  const [editingPhoto2, setEditingPhoto2] = useState<File | null>(null);
+  const [photo1Preview, setPhoto1Preview] = useState<string | null>(null);
+  const [photo2Preview, setPhoto2Preview] = useState<string | null>(null);
+  const [photo1Deleted, setPhoto1Deleted] = useState(false);
+  const [photo2Deleted, setPhoto2Deleted] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [currentParticipantType, setCurrentParticipantType] = useState<'candidate' | 'finalist' | 'winner' | null>(participantType || null);
 
   // Use unified card data hook
@@ -189,6 +204,139 @@ const LikedItem = ({
     openModal(0);
   };
 
+  // Photo upload handlers
+  const handlePhoto1Change = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setEditingPhoto1(file);
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setPhoto1Preview(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+      setPhoto1Deleted(false);
+    }
+  };
+
+  const handlePhoto2Change = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setEditingPhoto2(file);
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setPhoto2Preview(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+      setPhoto2Deleted(false);
+    }
+  };
+
+  const deletePhoto1 = () => {
+    setPhoto1Deleted(true);
+    setEditingPhoto1(null);
+    setPhoto1Preview(null);
+  };
+
+  const deletePhoto2 = () => {
+    setPhoto2Deleted(true);
+    setEditingPhoto2(null);
+    setPhoto2Preview(null);
+  };
+
+  const uploadPhoto = async (file: File, photoNumber: 1 | 2): Promise<string | null> => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return null;
+
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user.id}/photo_${photoNumber}.${fileExt}`;
+      
+      const { error: uploadError } = await supabase.storage
+        .from('contest-photos')
+        .upload(fileName, file, { upsert: true });
+      
+      if (uploadError) throw uploadError;
+      
+      const { data } = supabase.storage
+        .from('contest-photos')
+        .getPublicUrl(fileName);
+      
+      return data.publicUrl;
+    } catch (error) {
+      console.error('Error uploading photo:', error);
+      return null;
+    }
+  };
+
+  const savePhotoChanges = async () => {
+    setUploading(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast({ description: "Не авторизован" });
+        return;
+      }
+
+      let photo1Url = photo1Deleted ? null : displayFaceImage;
+      let photo2Url = photo2Deleted ? null : displayFullImage;
+
+      // Upload new photos if selected
+      if (editingPhoto1) {
+        photo1Url = await uploadPhoto(editingPhoto1, 1);
+        if (!photo1Url) {
+          toast({ description: "Ошибка загрузки первого фото" });
+          return;
+        }
+      }
+
+      if (editingPhoto2) {
+        photo2Url = await uploadPhoto(editingPhoto2, 2);
+        if (!photo2Url) {
+          toast({ description: "Ошибка загрузки второго фото" });
+          return;
+        }
+      }
+
+      // Update profile with new photo URLs
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          photo_1_url: photo1Url,
+          photo_2_url: photo2Url
+        })
+        .eq('id', user.id);
+
+      if (error) throw error;
+
+      toast({ description: "Фотографии обновлены!" });
+      onUpdatePhotos?.(photo1Url, photo2Url);
+      onToggleEditMode?.();
+      
+      // Reset editing state
+      setEditingPhoto1(null);
+      setEditingPhoto2(null);
+      setPhoto1Preview(null);
+      setPhoto2Preview(null);
+      setPhoto1Deleted(false);
+      setPhoto2Deleted(false);
+    } catch (error) {
+      console.error('Error updating photos:', error);
+      toast({ description: "Ошибка обновления фотографий" });
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const cancelEdit = () => {
+    setEditingPhoto1(null);
+    setEditingPhoto2(null);
+    setPhoto1Preview(null);
+    setPhoto2Preview(null);
+    setPhoto1Deleted(false);
+    setPhoto2Deleted(false);
+    onToggleEditMode?.();
+  };
+
   // Use real participant data from database if available, otherwise fallback
   const candidateAge = realParticipantData?.age || candidateData?.age || 25;
   const candidateWeight = realParticipantData?.weight_kg || candidateData?.weight || 52;
@@ -259,36 +407,130 @@ const LikedItem = ({
     return (
       <>
         <Card className="bg-card border-contest-border relative overflow-hidden flex h-32 sm:h-36 md:h-40">
-          {/* Edit button for owner */}
-          {isOwner && onEditPhotos && (
-            <button
-              onClick={onEditPhotos}
-              className="absolute top-2 right-2 z-20 bg-white/90 hover:bg-white border border-gray-200 rounded-full p-1.5 shadow-sm transition-colors"
-              aria-label="Edit photos"
-            >
-              <Pencil className="w-4 h-4 text-gray-600" />
-            </button>
+          {/* Edit/Save buttons for owner */}
+          {isOwner && (
+            <div className="absolute top-2 right-2 z-20 flex gap-1">
+              {isEditMode ? (
+                <>
+                  <button
+                    onClick={cancelEdit}
+                    className="bg-gray-500/90 hover:bg-gray-600 text-white rounded-full p-1.5 shadow-sm transition-colors"
+                    disabled={uploading}
+                    aria-label="Cancel edit"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={savePhotoChanges}
+                    className="bg-green-500/90 hover:bg-green-600 text-white rounded-full p-1.5 shadow-sm transition-colors"
+                    disabled={uploading}
+                    aria-label="Save changes"
+                  >
+                    <Check className="w-4 h-4" />
+                  </button>
+                </>
+              ) : (
+                <button
+                  onClick={onToggleEditMode}
+                  className="bg-white/90 hover:bg-white border border-gray-200 rounded-full p-1.5 shadow-sm transition-colors"
+                  aria-label="Edit photos"
+                >
+                  <Pencil className="w-4 h-4 text-gray-600" />
+                </button>
+              )}
+            </div>
           )}
           
           {/* Participant Type Badge */}
           {showStatusBadge && getParticipantBadge(currentParticipantType)}
           {/* Main two photos */}
           <div className="flex-shrink-0 flex h-full relative gap-px">
+            {/* Photo 1 */}
             <div className="relative">
-              <img 
-                src={displayFaceImage}
-                alt={`${authorName} face`}
-                className="w-24 sm:w-28 md:w-32 h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
-                onClick={() => openModal(0)}
-              />
+              {photo1Deleted ? (
+                <div className="w-24 sm:w-28 md:w-32 h-full bg-gray-100 border-2 border-dashed border-gray-300 flex items-center justify-center">
+                  <div className="text-center">
+                    <Upload className="w-6 h-6 text-gray-400 mx-auto mb-1" />
+                    <p className="text-xs text-gray-500">Фото 1</p>
+                  </div>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handlePhoto1Change}
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                  />
+                </div>
+              ) : (
+                <>
+                  <img 
+                    src={photo1Preview || displayFaceImage}
+                    alt={`${authorName} face`}
+                    className="w-24 sm:w-28 md:w-32 h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                    onClick={() => !isEditMode && openModal(0)}
+                  />
+                  {isEditMode && (
+                    <>
+                      <button
+                        onClick={deletePhoto1}
+                        className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-0.5 hover:bg-red-600 transition-colors"
+                        aria-label="Delete photo 1"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handlePhoto1Change}
+                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                      />
+                    </>
+                  )}
+                </>
+              )}
             </div>
+            
+            {/* Photo 2 */}
             <div className="relative">
-              <img 
-                src={displayFullImage} 
-                alt={`${authorName} full body`}
-                className="w-24 sm:w-28 md:w-32 h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
-                onClick={() => openModal(1)}
-              />
+              {photo2Deleted ? (
+                <div className="w-24 sm:w-28 md:w-32 h-full bg-gray-100 border-2 border-dashed border-gray-300 flex items-center justify-center">
+                  <div className="text-center">
+                    <Upload className="w-6 h-6 text-gray-400 mx-auto mb-1" />
+                    <p className="text-xs text-gray-500">Фото 2</p>
+                  </div>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handlePhoto2Change}
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                  />
+                </div>
+              ) : (
+                <>
+                  <img 
+                    src={photo2Preview || displayFullImage} 
+                    alt={`${authorName} full body`}
+                    className="w-24 sm:w-28 md:w-32 h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                    onClick={() => !isEditMode && openModal(1)}
+                  />
+                  {isEditMode && (
+                    <>
+                      <button
+                        onClick={deletePhoto2}
+                        className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-0.5 hover:bg-red-600 transition-colors"
+                        aria-label="Delete photo 2"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handlePhoto2Change}
+                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                      />
+                    </>
+                  )}
+                </>
+              )}
             </div>
           </div>
           
