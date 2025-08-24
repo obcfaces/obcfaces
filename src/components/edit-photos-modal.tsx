@@ -110,25 +110,41 @@ export function EditPhotosModal({
         return;
       }
 
+      console.log('📸 Initial photo URLs:', {
+        photo1Url: currentPhoto1,
+        photo2Url: currentPhoto2
+      });
+
       let photo1Url = currentPhoto1;
       let photo2Url = currentPhoto2;
 
       // Upload new photos if selected
       if (photo1File) {
+        console.log('⬆️ Uploading photo 1...');
         photo1Url = await uploadPhoto(photo1File, 1);
         if (!photo1Url) {
+          console.log('❌ Photo 1 upload failed');
           toast({ description: "Ошибка загрузки первого фото" });
           return;
         }
+        console.log('✅ Photo 1 uploaded successfully:', photo1Url);
       }
 
       if (photo2File) {
+        console.log('⬆️ Uploading photo 2...');
         photo2Url = await uploadPhoto(photo2File, 2);
         if (!photo2Url) {
+          console.log('❌ Photo 2 upload failed');
           toast({ description: "Ошибка загрузки второго фото" });
           return;
         }
+        console.log('✅ Photo 2 uploaded successfully:', photo2Url);
       }
+
+      console.log('📸 Final photo URLs before saving:', {
+        photo1Url,
+        photo2Url
+      });
 
       // Update profile with new photo URLs (with cache-busting timestamp)
       const updateData: any = {};
