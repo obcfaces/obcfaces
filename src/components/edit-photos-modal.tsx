@@ -61,20 +61,17 @@ export function EditPhotosModal({
         return null;
       }
 
-      // Generate unique filename with timestamp to avoid caching
+      // Use FIXED filename like in About section (avatar approach)
       const fileExt = file.name.split('.').pop();
-      const timestamp = Date.now();
-      const fileName = `${user.id}/photo_${photoNumber}_${timestamp}.${fileExt}`;
+      const fileName = `photo_${photoNumber}.${fileExt}`;
+      const filePath = `${user.id}/${fileName}`;
       
-      console.log(`📁 Uploading to: ${fileName}`);
+      console.log(`📁 Uploading to: ${filePath}`);
 
-      // Upload file to storage
-      const { data: uploadData, error: uploadError } = await supabase.storage
+      // Upload file to storage with UPSERT to replace existing file
+      const { error: uploadError } = await supabase.storage
         .from('contest-photos')
-        .upload(fileName, file, { 
-          cacheControl: '0',
-          upsert: false 
-        });
+        .upload(filePath, file, { upsert: true });
       
       if (uploadError) {
         console.error(`❌ Upload failed:`, uploadError);
@@ -86,17 +83,18 @@ export function EditPhotosModal({
         return null;
       }
 
-      console.log(`✅ Upload successful:`, uploadData);
+      console.log(`✅ Upload successful`);
       
       // Get public URL
-      const { data: urlData } = supabase.storage
+      const { data: { publicUrl } } = supabase.storage
         .from('contest-photos')
-        .getPublicUrl(fileName);
+        .getPublicUrl(filePath);
       
-      const finalUrl = `${urlData.publicUrl}?t=${timestamp}`;
-      console.log(`🔗 Public URL: ${finalUrl}`);
+      // Add cache-busting timestamp like in About section
+      const timestampedUrl = `${publicUrl}?t=${Date.now()}`;
+      console.log(`🔗 Final URL with cache busting: ${timestampedUrl}`);
       
-      return finalUrl;
+      return timestampedUrl;
     } catch (error) {
       console.error(`❌ Upload error:`, error);
       toast({ 
