@@ -347,15 +347,6 @@ export function ContestantCard({
     return (
       <>
         <Card className={`${isExample ? 'border-yellow-400 border-2 bg-yellow-50/50' : 'bg-card border-contest-border'} relative overflow-hidden`}>
-          {/* Example overlay for full view */}
-          {isExample && (
-            <div className="absolute inset-0 z-30 bg-gradient-to-br from-yellow-400/90 to-orange-400/90 flex items-center justify-center">
-              <div className="text-center text-white">
-                <h3 className="text-2xl font-bold mb-2 drop-shadow-lg">🔖 This is an example</h3>
-                <p className="text-lg drop-shadow-md">Real contestants will appear here</p>
-              </div>
-            </div>
-          )}
           
           
           {/* Rank and rating in top right corner */}
@@ -388,6 +379,15 @@ export function ContestantCard({
                     </span>
                   </h3>
                   <div className="text-contest-blue text-sm">{getCountryDisplayName(country)} · {city}</div>
+                  {isExample && (
+                    <div className="mt-2 text-sm text-gray-700 bg-yellow-100 p-2 rounded border border-yellow-300">
+                      <strong>How your photos should look:</strong><br/>
+                      • No makeup<br/>
+                      • No filter<br/>
+                      • No photo editing<br/>
+                      • No glasses
+                    </div>
+                  )}
                 </div>
                 {/* Remove rating display from header since it's now in corner */}
               </div>
@@ -567,15 +567,6 @@ export function ContestantCard({
   return (
     <>
       <Card className={`${isExample ? 'border-yellow-400 border-2 bg-yellow-50/50' : 'bg-card border-contest-border'} relative overflow-hidden flex h-36 sm:h-40 md:h-44`}>
-        {/* Example overlay for compact view */}
-        {isExample && (
-          <div className="absolute inset-0 z-30 bg-gradient-to-br from-yellow-400/90 to-orange-400/90 flex items-center justify-center">
-            <div className="text-center text-white">
-              <h3 className="text-xl font-bold mb-2 drop-shadow-lg">🔖 This is an example</h3>
-              <p className="text-sm drop-shadow-md">Real contestants will appear here</p>
-            </div>
-          </div>
-        )}
         {isWinner && (
           <div className="absolute bottom-0 left-0 w-[193px] sm:w-[225px] md:w-[257px] bg-blue-100 text-blue-700 pl-2 pr-2 py-1 text-xs font-semibold flex items-center justify-start z-20">
             <span>🏆 WINNER   + 5000 PHP</span>
@@ -715,6 +706,12 @@ export function ContestantCard({
                    <div className="text-sm sm:text-base text-contest-blue truncate">
                      {getCountryDisplayName(country)} · {city}
                    </div>
+                   {isExample && (
+                     <div className="mt-1 text-xs text-gray-700 bg-yellow-100 p-1 rounded border border-yellow-300">
+                       <strong>How your photos should look:</strong><br/>
+                       No makeup, no filter, no editing, no glasses
+                     </div>
+                   )}
                 </div>
                 
                 <div className="text-right flex-shrink-0">
