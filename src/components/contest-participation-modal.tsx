@@ -557,7 +557,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
       <DialogTrigger asChild>
         {children}
       </DialogTrigger>
-      <DialogContent className="w-full max-w-none max-h-[90vh] overflow-y-auto">
+      <DialogContent className="w-full max-w-4xl mx-auto max-h-[95vh] overflow-y-auto bg-background">
         <DialogHeader>
           <DialogTitle>
             {currentStep === 'auth' ? 'Sign in' : ''}
