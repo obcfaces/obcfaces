@@ -57,7 +57,8 @@ export function EditPhotosModal({
       if (!user) return null;
 
       const fileExt = file.name.split('.').pop();
-      const fileName = `${user.id}/photo_${photoNumber}.${fileExt}`;
+      const timestamp = Date.now();
+      const fileName = `${user.id}/photo${photoNumber}-${timestamp}.${fileExt}`;
       
       const { error: uploadError } = await supabase.storage
         .from('contest-photos')
