@@ -24,7 +24,7 @@ import c3 from "@/assets/contestant-3.jpg";
 import c1face from "@/assets/contestant-1-face.jpg";
 import c2face from "@/assets/contestant-2-face.jpg";
 import c3face from "@/assets/contestant-3-face.jpg";
-import { AlignJustify, Grid2X2 } from "lucide-react";
+import { AlignJustify, Grid2X2, Edit } from "lucide-react";
 
 interface ProfileRow {
   display_name: string | null;
@@ -42,6 +42,12 @@ interface ProfileRow {
 
 const Profile = () => {
   const navigate = useNavigate();
+  
+  // Participation photo editing states
+  const [editingParticipation, setEditingParticipation] = useState(false);
+  const [participantPhoto1File, setParticipantPhoto1File] = useState<File | null>(null);
+  const [participantPhoto2File, setParticipantPhoto2File] = useState<File | null>(null);
+  const [uploadingParticipantPhotos, setUploadingParticipantPhotos] = useState(false);
   const { id } = useParams<{ id: string }>();
   const [searchParams] = useSearchParams();
   const [logoutLoading, setLogoutLoading] = useState(false);
@@ -835,6 +841,112 @@ const Profile = () => {
     setParticipationItems(prev => prev.filter(item => item.likeId !== participationId));
   };
 
+  // Participation photo editing functions - ТОЧНО КАК В АДМИНКЕ
+  const startEditingParticipationPhotos = () => {
+    setEditingParticipation(true);
+    setParticipantPhoto1File(null);
+    setParticipantPhoto2File(null);
+  };
+
+  const cancelParticipationEdit = () => {
+    setEditingParticipation(false);
+    setParticipantPhoto1File(null);
+    setParticipantPhoto2File(null);
+  };
+
+  const handleParticipantPhoto1Upload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setParticipantPhoto1File(file);
+    }
+  };
+
+  const handleParticipantPhoto2Upload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setParticipantPhoto2File(file);
+    }
+  };
+
+  const saveParticipationPhotos = async () => {
+    if (!currentUserId || currentUserId !== id) return;
+
+    setUploadingParticipantPhotos(true);
+
+    try {
+      const updates: any = {};
+
+      // Upload photo1 if provided - ТОЧНО КАК В АДМИНКЕ
+      if (participantPhoto1File) {
+        const fileExt = participantPhoto1File.name.split('.').pop();
+        const fileName = `photo_1.${fileExt}`;
+        const filePath = `${currentUserId}/${fileName}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from('contest-photos')
+          .upload(filePath, participantPhoto1File, { upsert: true });
+
+        if (uploadError) throw uploadError;
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('contest-photos')
+          .getPublicUrl(filePath);
+        
+        const timestampedUrl = `${publicUrl}?t=${Date.now()}`;
+        updates.photo_1_url = timestampedUrl;
+      }
+
+      // Upload photo2 if provided - ТОЧНО КАК В АДМИНКЕ
+      if (participantPhoto2File) {
+        const fileExt = participantPhoto2File.name.split('.').pop();
+        const fileName = `photo_2.${fileExt}`;
+        const filePath = `${currentUserId}/${fileName}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from('contest-photos')
+          .upload(filePath, participantPhoto2File, { upsert: true });
+
+        if (uploadError) throw uploadError;
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('contest-photos')
+          .getPublicUrl(filePath);
+        
+        const timestampedUrl = `${publicUrl}?t=${Date.now()}`;
+        updates.photo_2_url = timestampedUrl;
+      }
+
+      // Update profile if there are changes - ТОЧНО КАК В АДМИНКЕ
+      if (Object.keys(updates).length > 0) {
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .update(updates)
+          .eq('id', currentUserId);
+
+        if (profileError) throw profileError;
+
+        toast({
+          title: "Success",
+          description: "Photos updated successfully",
+        });
+
+        // Refresh participation items
+        loadParticipationItems();
+      }
+
+      cancelParticipationEdit();
+    } catch (error: any) {
+      console.error('Error updating participation photos:', error);
+      toast({
+        title: "Error", 
+        description: error.message || "Failed to update photos",
+        variant: "destructive",
+      });
+    } finally {
+      setUploadingParticipantPhotos(false);
+    }
+  };
+
 
   // Sample posts data
   const samplePosts = [
@@ -1084,8 +1196,22 @@ const Profile = () => {
                 <p className="text-muted-foreground text-center py-8 px-6">Загрузка участий...</p>
               ) : participationItems.length > 0 ? (
                 <div className="px-0 sm:px-6">
-                  {/* View mode toggle buttons */}
-                  <div className="flex justify-end items-center gap-1 mb-4 px-6 sm:px-0 -mt-[15px]">
+                  {/* Edit photos button and view mode toggle buttons */}
+                  <div className="flex justify-between items-center gap-1 mb-4 px-6 sm:px-0 -mt-[15px]">
+                    {/* Edit photos button for owner */}
+                    {isOwner && (
+                      <Button
+                        onClick={startEditingParticipationPhotos}
+                        size="sm"
+                        className="flex items-center gap-1"
+                      >
+                        <Edit className="w-3 h-3" />
+                        Edit Photos
+                      </Button>
+                    )}
+                    
+                    {/* View mode toggle buttons */}
+                    <div className="flex items-center gap-1">
                     <button
                       type="button"
                       onClick={() => setParticipationViewMode("compact")}
@@ -1112,6 +1238,7 @@ const Profile = () => {
                         className={participationViewMode === "full" ? "text-primary" : "text-muted-foreground"}
                       />
                     </button>
+                    </div>
                   </div>
                   
                   {/* Participation items grid */}
@@ -1158,6 +1285,91 @@ const Profile = () => {
                       />
                     ))}
                   </div>
+                  </div>
+                  
+                  {/* Photo editing dialog exactly like in Admin */}
+                  <Dialog open={editingParticipation} onOpenChange={(open) => !open && cancelParticipationEdit()}>
+                    <DialogContent className="max-w-2xl">
+                      <DialogHeader>
+                        <DialogTitle>
+                          Edit Contest Photos
+                        </DialogTitle>
+                      </DialogHeader>
+                      
+                      <div className="space-y-6">
+                        {/* Current Photos */}
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label className="text-sm font-medium">Current Portrait Photo</Label>
+                            {participationItems[0]?.candidateData?.faceImage && (
+                              <img 
+                                src={participationItems[0].candidateData.faceImage} 
+                                alt="Current portrait" 
+                                className="w-full h-48 object-cover rounded border mt-2"
+                              />
+                            )}
+                          </div>
+                          <div>
+                            <Label className="text-sm font-medium">Current Full Length Photo</Label>
+                            {participationItems[0]?.candidateData?.fullBodyImage && (
+                              <img 
+                                src={participationItems[0].candidateData.fullBodyImage} 
+                                alt="Current full length" 
+                                className="w-full h-48 object-cover rounded border mt-2"
+                              />
+                            )}
+                          </div>
+                        </div>
+                        
+                        {/* New Photo Uploads */}
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label className="text-sm font-medium">Replace Portrait Photo</Label>
+                            <Input
+                              type="file"
+                              accept="image/*"
+                              onChange={handleParticipantPhoto1Upload}
+                              className="mt-2"
+                            />
+                            {participantPhoto1File && (
+                              <p className="text-sm text-green-600 mt-1">
+                                New portrait selected: {participantPhoto1File.name}
+                              </p>
+                            )}
+                          </div>
+                          
+                          <div>
+                            <Label className="text-sm font-medium">Replace Full Length Photo</Label>
+                            <Input
+                              type="file"
+                              accept="image/*"
+                              onChange={handleParticipantPhoto2Upload}
+                              className="mt-2"
+                            />
+                            {participantPhoto2File && (
+                              <p className="text-sm text-green-600 mt-1">
+                                New full length selected: {participantPhoto2File.name}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                        
+                        {/* Action Buttons */}
+                        <div className="flex justify-end gap-2 pt-4 border-t">
+                          <Button variant="outline" onClick={cancelParticipationEdit} disabled={uploadingParticipantPhotos}>
+                            Cancel
+                          </Button>
+                          <Button 
+                            onClick={saveParticipationPhotos} 
+                            className="bg-blue-600 hover:bg-blue-700" 
+                            disabled={uploadingParticipantPhotos || (!participantPhoto1File && !participantPhoto2File)}
+                          >
+                            {uploadingParticipantPhotos ? "Uploading..." : "Save Photos"}
+                          </Button>
+                        </div>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
                 </div>
               ) : (
                 <p className="text-muted-foreground text-center py-8 px-6">Нет участий в конкурсах</p>
