@@ -254,7 +254,7 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
           faceImage: testContestantFace,
           fullBodyImage: testContestantFull,
           additionalPhotos: [],
-          isVoted: false,
+          isVoted: true,
           isWinner: false,
           prize: undefined,
           isRealContestant: false,
