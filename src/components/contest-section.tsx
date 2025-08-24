@@ -9,7 +9,7 @@ import contestant2Full from "@/assets/contestant-2-full.jpg";
 import contestant3Face from "@/assets/contestant-3-face.jpg";
 import contestant3Full from "@/assets/contestant-3-full.jpg";
 import testContestantFace from "@/assets/test-contestant-face.jpg";
-import testContestantFull from "@/assets/test-contestant-full.jpg";
+import testContestantFull from "@/assets/test-contestant-full-updated.jpg";
 
 interface ContestSectionProps {
   title: string;
