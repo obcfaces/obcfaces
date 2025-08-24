@@ -1973,7 +1973,13 @@ const Profile = () => {
         onClose={() => setEditPhotosModalOpen(false)}
         currentPhoto1={data?.photo_1_url}
         currentPhoto2={data?.photo_2_url}
-        onUpdate={loadParticipationItems}
+        onUpdate={() => {
+          loadParticipationItems();
+          // Force reload profile data to get updated photo URLs
+          if (id) {
+            window.location.reload();
+          }
+        }}
       />
 
     </div>
