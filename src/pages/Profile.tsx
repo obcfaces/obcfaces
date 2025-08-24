@@ -925,6 +925,33 @@ const Profile = () => {
 
         if (profileError) throw profileError;
 
+        // Also update weekly contest participants application_data
+        const { data: contestParticipants, error: fetchError } = await supabase
+          .from('weekly_contest_participants')
+          .select('*')
+          .eq('user_id', currentUserId);
+
+        if (!fetchError && contestParticipants && contestParticipants.length > 0) {
+          for (const participant of contestParticipants) {
+            const currentData = participant.application_data as Record<string, any> || {};
+            const updatedApplicationData = {
+              ...currentData
+            };
+            
+            if (updates.photo_1_url) {
+              updatedApplicationData.photo1_url = updates.photo_1_url;
+            }
+            if (updates.photo_2_url) {
+              updatedApplicationData.photo2_url = updates.photo_2_url;
+            }
+
+            await supabase
+              .from('weekly_contest_participants')
+              .update({ application_data: updatedApplicationData })
+              .eq('id', participant.id);
+          }
+        }
+
         toast({
           title: "Success",
           description: "Photos updated successfully",
