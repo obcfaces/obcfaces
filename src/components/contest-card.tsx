@@ -721,18 +721,18 @@ export function ContestantCard({
                      {getCountryDisplayName(country)} · {city}
                    </div>
                    {isExample && (
-                     <div className="absolute inset-0 bg-yellow-100 border-2 border-yellow-300 rounded-lg flex items-center justify-center z-10">
-                       <div className="text-center text-gray-800 p-2">
-                         <h4 className="font-bold text-sm mb-1">How your photos should look:</h4>
-                         <div className="text-xs space-y-0.5 text-left">
-                           <div>• No makeup</div>
-                           <div>• No filter</div>
-                           <div>• No photo editing</div>
-                           <div>• No glasses</div>
-                           <div>• Tight-fitting clothes</div>
-                         </div>
-                       </div>
-                     </div>
+                      <div className="absolute inset-0 bg-yellow-100 border-2 border-yellow-300 rounded-lg flex items-start justify-start z-10 pt-2 pl-2">
+                        <div className="text-left text-gray-800">
+                          <h4 className="font-bold text-sm mb-1">How your photos should look:</h4>
+                          <div className="text-xs space-y-0.5">
+                            <div>• No makeup</div>
+                            <div>• No filter</div>
+                            <div>• No photo editing</div>
+                            <div>• No glasses</div>
+                            <div>• Tight-fitting clothes</div>
+                          </div>
+                        </div>
+                      </div>
                    )}
                 </div>
                 
