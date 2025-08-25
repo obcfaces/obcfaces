@@ -520,6 +520,9 @@ export const ContestParticipationModal = ({
       }
 
       // Update user profile to mark as contest participant and add all form data
+      const birthDate = `${formData.birth_year}-${formData.birth_month.padStart(2, '0')}-${formData.birth_day.padStart(2, '0')}`;
+      const age = new Date().getFullYear() - parseInt(formData.birth_year);
+      
       const profileUpdateData = {
         is_contest_participant: true,
         participant_type: 'candidate',
@@ -532,7 +535,8 @@ export const ContestParticipationModal = ({
         has_children: formData.has_children,
         photo_1_url: photo1Url,
         photo_2_url: photo2Url,
-        birthdate: `${formData.birth_year}-${formData.birth_month.padStart(2, '0')}-${formData.birth_day.padStart(2, '0')}`,
+        birthdate: birthDate,
+        age: age,
         country: countries.find(c => c.value === formData.countryCode)?.label || formData.countryCode,
         state: formData.stateCode,
         city: formData.city
