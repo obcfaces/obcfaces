@@ -722,7 +722,6 @@ const Admin = () => {
     setPhotoModalName(name);
     setPhotoModalOpen(true);
   };
-  };
 
   const reviewApplication = async (applicationId: string, status: 'approved' | 'rejected', notes?: string) => {
     const { error } = await supabase
@@ -1847,7 +1846,7 @@ const Admin = () => {
                           src={editForm.photo1_url} 
                           alt="Portrait preview" 
                           className="w-24 h-32 object-cover rounded border cursor-pointer hover:opacity-80 transition-opacity"
-                          onClick={() => openPhotoModal([editForm.photo1_url, editForm.photo2_url].filter(Boolean), 0, `${editForm.first_name} ${editForm.last_name}` || 'Application')}
+                          onClick={() => openPhotoModal([editForm.photo1_url, editForm.photo2_url].filter(Boolean), 0, `${editForm.first_name || ''} ${editForm.last_name || ''}`.trim() || 'Application')}
                         />
                       )}
                     </div>
@@ -1876,7 +1875,7 @@ const Admin = () => {
                           src={editForm.photo2_url} 
                           alt="Full length preview" 
                           className="w-24 h-32 object-cover rounded border cursor-pointer hover:opacity-80 transition-opacity"
-                          onClick={() => openPhotoModal([editForm.photo1_url, editForm.photo2_url].filter(Boolean), 1, `${editForm.first_name} ${editForm.last_name}` || 'Application')}
+                          onClick={() => openPhotoModal([editForm.photo1_url, editForm.photo2_url].filter(Boolean), 1, `${editForm.first_name || ''} ${editForm.last_name || ''}`.trim() || 'Application')}
                         />
                       )}
                     </div>
