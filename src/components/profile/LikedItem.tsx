@@ -425,21 +425,37 @@ const LikedItem = ({
                     .eq('user_id', session.user.id)
                     .order('created_at', { ascending: false })
                     .limit(1)
-                    .maybeSingle();
+                     .maybeSingle();
 
-                  if (error) {
-                    console.error('Error loading application:', error);
-                    toast({ description: "Ошибка загрузки данных заявки" });
-                    return;
-                  }
+                   console.log('Loaded application data:', latestApplication);
+                   
+                   if (error) {
+                     console.error('Error loading application:', error);
+                     toast({ description: "Ошибка загрузки данных заявки" });
+                     return;
+                   }
 
-                  // Dispatch event with application data to open the modal
-                  window.dispatchEvent(new CustomEvent('openEditModal', { 
-                    detail: { 
-                      editMode: true,
-                      existingData: latestApplication
-                    } 
-                  }));
+                   if (!latestApplication) {
+                     console.log('No application found for user');
+                     toast({ description: "Заявка не найдена" });
+                     return;
+                   }
+
+                   console.log('Application data structure:', latestApplication);
+                   console.log('Photo URLs in application_data:', {
+                     photo1_url: (latestApplication?.application_data as any)?.photo1_url,
+                     photo2_url: (latestApplication?.application_data as any)?.photo2_url,
+                     photo_1_url: (latestApplication?.application_data as any)?.photo_1_url,
+                     photo_2_url: (latestApplication?.application_data as any)?.photo_2_url
+                   });
+
+                   // Dispatch event with application data to open the modal
+                   window.dispatchEvent(new CustomEvent('openEditModal', { 
+                     detail: { 
+                       editMode: true,
+                       existingData: latestApplication
+                     } 
+                   }));
                 } catch (error) {
                   console.error('Error loading application data:', error);
                   toast({ description: "Ошибка загрузки данных" });
