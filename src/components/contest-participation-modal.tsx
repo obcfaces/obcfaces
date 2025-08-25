@@ -563,6 +563,18 @@ export const ContestParticipationModal = ({
         if (applicationData.weight_kg) {
           setSelectedWeight(`${applicationData.weight_kg} kg`);
         }
+        
+        // Log photo URLs for debugging
+        console.log('Photo URLs in existingData:', {
+          photo_1_url: existingData.photo_1_url,
+          photo_2_url: existingData.photo_2_url,
+          photo1_url: existingData.photo1_url,
+          photo2_url: existingData.photo2_url,
+          application_data_photo1: existingData.application_data?.photo1_url,
+          application_data_photo2: existingData.application_data?.photo2_url,
+          applicationData_photo1: applicationData.photo1_url,
+          applicationData_photo2: applicationData.photo2_url
+        });
       }
       
       // Load cached photos only if not in edit mode
@@ -1101,10 +1113,10 @@ export const ContestParticipationModal = ({
                         id="photo1-upload"
                       />
                       <label htmlFor="photo1-upload" className="cursor-pointer block">
-                        {photo1File || (editMode && existingData?.photo_1_url) ? (
+                        {photo1File || (editMode && (existingData?.photo_1_url || existingData?.photo1_url)) ? (
                           <div className="p-2 relative">
                             <img
-                              src={photo1File ? URL.createObjectURL(photo1File) : existingData?.photo_1_url}
+                              src={photo1File ? URL.createObjectURL(photo1File) : (existingData?.photo_1_url || existingData?.photo1_url)}
                               alt="Portrait photo preview"
                               className="w-full h-32 sm:h-40 md:h-48 lg:h-56 object-contain rounded bg-white"
                             />
@@ -1172,10 +1184,10 @@ export const ContestParticipationModal = ({
                         id="photo2-upload"
                       />
                       <label htmlFor="photo2-upload" className="cursor-pointer block">
-                        {photo2File || (editMode && existingData?.photo_2_url) ? (
+                        {photo2File || (editMode && (existingData?.photo_2_url || existingData?.photo2_url)) ? (
                           <div className="p-2 relative">
                             <img
-                              src={photo2File ? URL.createObjectURL(photo2File) : existingData?.photo_2_url}
+                              src={photo2File ? URL.createObjectURL(photo2File) : (existingData?.photo_2_url || existingData?.photo2_url)}
                               alt="Full length photo preview"
                               className="w-full h-32 sm:h-40 md:h-48 lg:h-56 object-contain rounded bg-white"
                             />
