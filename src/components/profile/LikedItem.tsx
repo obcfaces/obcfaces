@@ -844,7 +844,7 @@ const LikedItem = ({
         editMode={true}
         existingData={realParticipantData || candidateData}
       >
-        <div />
+        {/* No children needed for controlled mode */}
       </ContestParticipationModal>
     </>
   );

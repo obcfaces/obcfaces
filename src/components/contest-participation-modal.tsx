@@ -15,7 +15,7 @@ import SearchableSelect from "@/components/ui/searchable-select";
 import { getCitiesForLocation } from '@/lib/location-utils';
 
 interface ContestParticipationModalProps {
-  children: React.ReactNode;
+  children?: React.ReactNode;
   isOpen?: boolean;
   onOpenChange?: (open: boolean) => void;
   editMode?: boolean;
@@ -599,9 +599,12 @@ export const ContestParticipationModal = ({
         setContactForm({ name: "", contact: "", message: "", countryCode: "" });
       }
     }}>
-      <DialogTrigger asChild>
-        {children}
-      </DialogTrigger>
+      {/* Only show DialogTrigger if not in controlled mode */}
+      {controlledIsOpen === undefined && (
+        <DialogTrigger asChild>
+          {children}
+        </DialogTrigger>
+      )}
       <DialogContent className="w-full max-w-4xl mx-auto max-h-[95vh] overflow-y-auto bg-background">
         <DialogHeader>
           <DialogTitle>
