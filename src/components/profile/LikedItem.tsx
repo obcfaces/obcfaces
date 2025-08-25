@@ -62,114 +62,6 @@ const getInitials = (name: string) => {
   return initials || "U";
 };
 
-// EditButton component that checks application status
-const EditButton = () => {
-  const [applicationStatus, setApplicationStatus] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const checkApplicationStatus = async () => {
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session) {
-          setIsLoading(false);
-          return;
-        }
-
-        const { data: latestApplication, error } = await supabase
-          .from('contest_applications')
-          .select('status')
-          .eq('user_id', session.user.id)
-          .order('created_at', { ascending: false })
-          .limit(1)
-          .maybeSingle();
-
-        if (error) {
-          console.error('Error loading application status:', error);
-          setIsLoading(false);
-          return;
-        }
-
-        setApplicationStatus(latestApplication?.status || null);
-        setIsLoading(false);
-      } catch (error) {
-        console.error('Error checking application status:', error);
-        setIsLoading(false);
-      }
-    };
-
-    checkApplicationStatus();
-  }, []);
-
-  const handleEditClick = async () => {
-    console.log('Edit button clicked! Loading user application data...');
-    
-    // Get latest application data for the user
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        toast({ description: "Необходимо войти в систему" });
-        return;
-      }
-
-      const { data: latestApplication, error } = await supabase
-        .from('contest_applications')
-        .select('*')
-        .eq('user_id', session.user.id)
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .maybeSingle();
-
-      if (error) {
-        console.error('Error loading application:', error);
-        toast({ description: "Ошибка загрузки данных заявки" });
-        return;
-      }
-
-      if (!latestApplication) {
-        console.log('No application found for user');
-        toast({ description: "Заявка не найдена" });
-        return;
-      }
-
-      // Check if application is approved
-      if (latestApplication.status === 'approved') {
-        toast({ 
-          description: "Редактирование недоступно. Заявка уже одобрена.",
-          variant: "destructive"
-        });
-        return;
-      }
-
-      // Dispatch event with application data to open the modal
-      window.dispatchEvent(new CustomEvent('openEditModal', { 
-        detail: { 
-          editMode: true,
-          existingData: latestApplication
-        } 
-      }));
-    } catch (error) {
-      console.error('Error loading application data:', error);
-      toast({ description: "Ошибка загрузки данных" });
-    }
-  };
-
-  // Don't show edit button if application is approved or loading
-  if (isLoading || applicationStatus === 'approved') {
-    return null;
-  }
-
-  return (
-    <Button
-      onClick={handleEditClick}
-      size="sm"
-      className="absolute top-2 right-2 z-30 w-8 h-8 p-0"
-    >
-      <Edit className="w-3 h-3" />
-    </Button>
-  );
-};
-
 const getParticipantBadge = (type?: 'candidate' | 'finalist' | 'winner', isFullView = false) => {
   if (!type) return null;
   
@@ -513,9 +405,67 @@ const LikedItem = ({
     return (
       <>
         <Card className="bg-card border-contest-border relative overflow-hidden flex h-32 sm:h-36 md:h-40">
-          {/* Edit button for owner - show for contest participation, only if not approved */}
+          {/* Edit button for owner - show for contest participation */}
           {isOwner && (contentType === 'contest' || contentType === 'next_week_candidate') && (
-            <EditButton />
+            <Button
+              onClick={async () => {
+                console.log('Edit button clicked! Loading user application data...');
+                
+                // Get latest application data for the user
+                try {
+                  const { data: { session } } = await supabase.auth.getSession();
+                  if (!session) {
+                    toast({ description: "Необходимо войти в систему" });
+                    return;
+                  }
+
+                  const { data: latestApplication, error } = await supabase
+                    .from('contest_applications')
+                    .select('*')
+                    .eq('user_id', session.user.id)
+                    .order('created_at', { ascending: false })
+                    .limit(1)
+                     .maybeSingle();
+
+                   console.log('Loaded application data:', latestApplication);
+                   
+                   if (error) {
+                     console.error('Error loading application:', error);
+                     toast({ description: "Ошибка загрузки данных заявки" });
+                     return;
+                   }
+
+                   if (!latestApplication) {
+                     console.log('No application found for user');
+                     toast({ description: "Заявка не найдена" });
+                     return;
+                   }
+
+                   console.log('Application data structure:', latestApplication);
+                   console.log('Photo URLs in application_data:', {
+                     photo1_url: (latestApplication?.application_data as any)?.photo1_url,
+                     photo2_url: (latestApplication?.application_data as any)?.photo2_url,
+                     photo_1_url: (latestApplication?.application_data as any)?.photo_1_url,
+                     photo_2_url: (latestApplication?.application_data as any)?.photo_2_url
+                   });
+
+                   // Dispatch event with application data to open the modal
+                   window.dispatchEvent(new CustomEvent('openEditModal', { 
+                     detail: { 
+                       editMode: true,
+                       existingData: latestApplication
+                     } 
+                   }));
+                } catch (error) {
+                  console.error('Error loading application data:', error);
+                  toast({ description: "Ошибка загрузки данных" });
+                }
+              }}
+              size="sm"
+              className="absolute top-2 right-2 z-30 w-8 h-8 p-0"
+            >
+              <Edit className="w-3 h-3" />
+            </Button>
           )}
           
           {/* Participant Type Badge */}
@@ -719,9 +669,51 @@ const LikedItem = ({
   return (
     <>
       <Card className="bg-card border-contest-border relative overflow-hidden">
-          {/* Edit button for owner - show for contest participation, only if not approved */}
+          {/* Edit button for owner - show for contest participation */}
           {isOwner && (contentType === 'contest' || contentType === 'next_week_candidate') && (
-            <EditButton />
+            <Button
+              onClick={async () => {
+                console.log('Edit button clicked! Loading user application data...');
+                
+                // Get latest application data for the user
+                try {
+                  const { data: { session } } = await supabase.auth.getSession();
+                  if (!session) {
+                    toast({ description: "Необходимо войти в систему" });
+                    return;
+                  }
+
+                  const { data: latestApplication, error } = await supabase
+                    .from('contest_applications')
+                    .select('*')
+                    .eq('user_id', session.user.id)
+                    .order('created_at', { ascending: false })
+                    .limit(1)
+                    .maybeSingle();
+
+                  if (error) {
+                    console.error('Error loading application:', error);
+                    toast({ description: "Ошибка загрузки данных заявки" });
+                    return;
+                  }
+
+                  // Dispatch event with application data to open the modal
+                  window.dispatchEvent(new CustomEvent('openEditModal', { 
+                    detail: { 
+                      editMode: true,
+                      existingData: latestApplication
+                    } 
+                  }));
+                } catch (error) {
+                  console.error('Error loading application data:', error);
+                  toast({ description: "Ошибка загрузки данных" });
+                }
+              }}
+              size="sm"
+              className="absolute top-2 right-2 z-30 w-8 h-8 p-0"
+            >
+              <Edit className="w-3 h-3" />
+            </Button>
           )}
         
         {/* Name in top left */}

@@ -707,15 +707,11 @@ const Profile = () => {
         return;
       }
 
-      // Проверяем, является ли пользователь участником конкурса или имеет заявку
+      // Проверяем, является ли пользователь участником конкурса
       console.log('is_contest_participant:', profileData.is_contest_participant);
       
-      // Check if user has contest photos or application data - show participation card
-      const hasContestPhotos = profileData.photo_1_url || profileData.photo_2_url;
-      const hasParticipantType = profileData.participant_type;
-      
-      if (!profileData.is_contest_participant && !hasContestPhotos && !hasParticipantType) {
-        console.log('User is not a contest participant and has no contest data');
+      if (!profileData.is_contest_participant) {
+        console.log('User is not a contest participant');
         setParticipationItems([]);
         setLoadingParticipation(false);
         return;
