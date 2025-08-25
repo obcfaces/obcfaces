@@ -19,6 +19,7 @@ export type Database = {
           application_data: Json | null
           created_at: string
           id: string
+          is_active: boolean
           last_participation_date: string | null
           notes: string | null
           reviewed_at: string | null
@@ -32,6 +33,7 @@ export type Database = {
           application_data?: Json | null
           created_at?: string
           id?: string
+          is_active?: boolean
           last_participation_date?: string | null
           notes?: string | null
           reviewed_at?: string | null
@@ -45,6 +47,7 @@ export type Database = {
           application_data?: Json | null
           created_at?: string
           id?: string
+          is_active?: boolean
           last_participation_date?: string | null
           notes?: string | null
           reviewed_at?: string | null
@@ -513,6 +516,7 @@ export type Database = {
           created_at: string
           final_rank: number | null
           id: string
+          is_active: boolean
           total_votes: number | null
           user_id: string
         }
@@ -523,6 +527,7 @@ export type Database = {
           created_at?: string
           final_rank?: number | null
           id?: string
+          is_active?: boolean
           total_votes?: number | null
           user_id: string
         }
@@ -533,6 +538,7 @@ export type Database = {
           created_at?: string
           final_rank?: number | null
           id?: string
+          is_active?: boolean
           total_votes?: number | null
           user_id?: string
         }

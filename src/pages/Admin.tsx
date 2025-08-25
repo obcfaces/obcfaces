@@ -12,6 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { toast } from "@/components/ui/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Check, X, Eye, UserCog, FileText, Calendar, Trophy, RotateCcw, Edit } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 import { useNavigate } from "react-router-dom";
 
 interface ProfileData {
@@ -45,6 +46,7 @@ interface ContestApplication {
   reviewed_by: string | null;
   reviewed_at: string | null;
   notes: string | null;
+  is_active: boolean;
 }
 
 interface WeeklyContest {
@@ -79,6 +81,7 @@ interface WeeklyContestParticipant {
   contest_status?: string;
   week_start_date?: string;
   week_end_date?: string;
+  is_active: boolean;
 }
 
 const Admin = () => {
@@ -254,7 +257,8 @@ const Admin = () => {
       contest_status: participant.contest_status,
       week_start_date: participant.contest_start_date,
       week_end_date: participant.contest_end_date,
-      application_data: participant.application_data
+      application_data: participant.application_data,
+      is_active: true // Default to active for existing participants
     }));
 
     setWeeklyParticipants(transformedData);
@@ -335,6 +339,53 @@ const Admin = () => {
     });
 
     fetchWeeklyContests();
+  };
+
+  // Active/Inactive toggle functions
+  const toggleApplicationActive = async (applicationId: string, currentActive: boolean) => {
+    const { error } = await supabase
+      .from('contest_applications')
+      .update({ is_active: !currentActive })
+      .eq('id', applicationId);
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update application status",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    toast({
+      title: "Success",
+      description: `Application ${!currentActive ? 'activated' : 'deactivated'} successfully`,
+    });
+
+    fetchContestApplications();
+  };
+
+  const toggleParticipantActive = async (participantId: string, currentActive: boolean) => {
+    const { error } = await supabase
+      .from('weekly_contest_participants')
+      .update({ is_active: !currentActive })
+      .eq('id', participantId);
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update participant status",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    toast({
+      title: "Success",
+      description: `Participant ${!currentActive ? 'activated' : 'deactivated'} successfully`,
+    });
+
+    fetchWeeklyParticipants();
   };
 
   const startEditingApplication = (application: ContestApplication) => {
@@ -976,7 +1027,14 @@ const Admin = () => {
                           </div>
                         </div>
                         <div className="text-right space-y-2">
-                          <div className="flex flex-col items-end gap-1">
+                          <div className="flex flex-col items-end gap-2">
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm font-medium">Active:</span>
+                              <Switch
+                                checked={participant.is_active}
+                                onCheckedChange={() => toggleParticipantActive(participant.id, participant.is_active)}
+                              />
+                            </div>
                             {participant.average_rating && participant.average_rating > 0 ? (
                               <>
                                 <Badge variant="default" className="bg-contest-blue">
@@ -1173,7 +1231,14 @@ const Admin = () => {
                               </p>
                             </div>
                           </div>
-                          <div className="text-right">
+                          <div className="text-right space-y-2">
+                            <div className="flex items-center gap-2 justify-end">
+                              <span className="text-sm font-medium">Active:</span>
+                              <Switch
+                                checked={application.is_active ?? true}
+                                onCheckedChange={() => toggleApplicationActive(application.id, application.is_active ?? true)}
+                              />
+                            </div>
                             {getApplicationStatusBadge(application.status)}
                             <p className="text-xs text-muted-foreground mt-2">
                               Submitted: {submittedDate.toLocaleDateString('ru-RU')} {submittedDate.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}
