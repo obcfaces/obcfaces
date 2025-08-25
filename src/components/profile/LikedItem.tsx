@@ -123,12 +123,6 @@ const LikedItem = ({
   const [currentParticipantType, setCurrentParticipantType] = useState<'candidate' | 'finalist' | 'winner' | null>(participantType || null);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   
-  // Photo editing states exactly like in Admin
-  const [editingParticipant, setEditingParticipant] = useState<ParticipantData | null>(null);
-  const [participantPhoto1File, setParticipantPhoto1File] = useState<File | null>(null);
-  const [participantPhoto2File, setParticipantPhoto2File] = useState<File | null>(null);
-  const [uploadingParticipantPhotos, setUploadingParticipantPhotos] = useState(false);
-  
   // Use unified card data hook
   const { data: cardData, loading: cardDataLoading } = useCardData(authorName, user?.id);
   
@@ -136,9 +130,6 @@ const LikedItem = ({
   const { getParticipantByName } = useParticipantData();
   const realParticipantData = getParticipantByName(authorName);
   
-  // Don't render until card data is loaded
-  const isDataLoading = cardDataLoading;
-
   // Get current user
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
@@ -153,129 +144,6 @@ const LikedItem = ({
 
     return () => subscription.unsubscribe();
   }, []);
-
-  // Participant photo editing functions exactly like in Admin
-  const startEditingParticipant = () => {
-    if (!authorProfileId) return;
-    
-    const participant: ParticipantData = {
-      id: authorProfileId,
-      user_id: authorProfileId,
-      first_name: candidateData?.name?.split(' ')[0] || authorName.split(' ')[0],
-      last_name: candidateData?.name?.split(' ').slice(1).join(' ') || authorName.split(' ').slice(1).join(' '),
-      photo1_url: candidateData?.faceImage || imageSrc || '',
-      photo2_url: candidateData?.fullBodyImage || imageSrc || ''
-    };
-    
-    setEditingParticipant(participant);
-    setParticipantPhoto1File(null);
-    setParticipantPhoto2File(null);
-  };
-
-  const cancelParticipantEdit = () => {
-    setEditingParticipant(null);
-    setParticipantPhoto1File(null);
-    setParticipantPhoto2File(null);
-  };
-
-  const handleParticipantPhoto1Upload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      setParticipantPhoto1File(file);
-    }
-  };
-
-  const handleParticipantPhoto2Upload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      setParticipantPhoto2File(file);
-    }
-  };
-
-  // Save participant photos exactly like in Admin
-  const saveParticipantPhotos = async () => {
-    if (!editingParticipant) return;
-
-    setUploadingParticipantPhotos(true);
-
-    try {
-      const updates: any = {};
-
-      // Upload photo1 if provided - ТОЧНО КАК В АДМИНКЕ
-      if (participantPhoto1File) {
-        const fileExt = participantPhoto1File.name.split('.').pop();
-        const fileName = `photo_1.${fileExt}`;
-        const filePath = `${editingParticipant.user_id}/${fileName}`;
-
-        const { error: uploadError } = await supabase.storage
-          .from('contest-photos')
-          .upload(filePath, participantPhoto1File, { upsert: true });
-
-        if (uploadError) throw uploadError;
-
-        const { data: { publicUrl } } = supabase.storage
-          .from('contest-photos')
-          .getPublicUrl(filePath);
-        
-        const timestampedUrl = `${publicUrl}?t=${Date.now()}`;
-        updates.photo_1_url = timestampedUrl;
-      }
-
-      // Upload photo2 if provided - ТОЧНО КАК В АДМИНКЕ  
-      if (participantPhoto2File) {
-        const fileExt = participantPhoto2File.name.split('.').pop();
-        const fileName = `photo_2.${fileExt}`;
-        const filePath = `${editingParticipant.user_id}/${fileName}`;
-
-        const { error: uploadError } = await supabase.storage
-          .from('contest-photos')
-          .upload(filePath, participantPhoto2File, { upsert: true });
-
-        if (uploadError) throw uploadError;
-
-        const { data: { publicUrl } } = supabase.storage
-          .from('contest-photos')
-          .getPublicUrl(filePath);
-        
-        const timestampedUrl = `${publicUrl}?t=${Date.now()}`;
-        updates.photo_2_url = timestampedUrl;
-      }
-
-      // Update profile if there are changes - ТОЧНО КАК В АДМИНКЕ
-      if (Object.keys(updates).length > 0) {
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .update(updates)
-          .eq('id', editingParticipant.user_id);
-
-        if (profileError) throw profileError;
-
-        toast({
-          title: "Success",
-          description: "Photos updated successfully",
-        });
-
-        // Notify parent component about photo updates
-        if (updates.photo_1_url) {
-          onPhotoUpdate?.('photo_1', updates.photo_1_url);
-        }
-        if (updates.photo_2_url) {
-          onPhotoUpdate?.('photo_2', updates.photo_2_url);
-        }
-      }
-
-      cancelParticipantEdit();
-    } catch (error: any) {
-      console.error('Error updating participant photos:', error);
-      toast({
-        title: "Error",
-        description: error.message || "Failed to update photos",
-        variant: "destructive",
-      });
-    } finally {
-      setUploadingParticipantPhotos(false);
-    }
-  };
 
   // Fetch current participant type from database
   useEffect(() => {
@@ -356,7 +224,7 @@ const LikedItem = ({
   const allPhotos = [displayFaceImage, displayFullImage, ...candidateAdditionalPhotos].filter(Boolean);
   
   // Show loading skeleton while data is loading
-  if (isDataLoading) {
+  if (cardDataLoading) {
     return (
       <Card className="bg-card border-contest-border relative overflow-hidden animate-pulse">
         {viewMode === 'compact' ? (
@@ -503,92 +371,6 @@ const LikedItem = ({
           </div>
         </Card>
 
-        {/* Photo editing dialog exactly like in Admin */}
-        <Dialog open={!!editingParticipant} onOpenChange={(open) => !open && cancelParticipantEdit()}>
-          <DialogContent className="max-w-2xl">
-            <DialogHeader>
-              <DialogTitle>
-                Edit Photos for {editingParticipant?.first_name} {editingParticipant?.last_name}
-              </DialogTitle>
-            </DialogHeader>
-            
-            {editingParticipant && (
-              <div className="space-y-6">
-                {/* Current Photos */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label className="text-sm font-medium">Current Portrait Photo</Label>
-                    {editingParticipant.photo1_url && (
-                      <img 
-                        src={editingParticipant.photo1_url} 
-                        alt="Current portrait" 
-                        className="w-full h-48 object-cover rounded border mt-2"
-                      />
-                    )}
-                  </div>
-                  <div>
-                    <Label className="text-sm font-medium">Current Full Length Photo</Label>
-                    {editingParticipant.photo2_url && (
-                      <img 
-                        src={editingParticipant.photo2_url} 
-                        alt="Current full length" 
-                        className="w-full h-48 object-cover rounded border mt-2"
-                      />
-                    )}
-                  </div>
-                </div>
-                
-                {/* New Photo Uploads */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label className="text-sm font-medium">Replace Portrait Photo</Label>
-                    <Input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleParticipantPhoto1Upload}
-                      className="mt-2"
-                    />
-                    {participantPhoto1File && (
-                      <p className="text-sm text-green-600 mt-1">
-                        New portrait selected: {participantPhoto1File.name}
-                      </p>
-                    )}
-                  </div>
-                  
-                  <div>
-                    <Label className="text-sm font-medium">Replace Full Length Photo</Label>
-                    <Input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleParticipantPhoto2Upload}
-                      className="mt-2"
-                    />
-                    {participantPhoto2File && (
-                      <p className="text-sm text-green-600 mt-1">
-                        New full length selected: {participantPhoto2File.name}
-                      </p>
-                    )}
-                  </div>
-                </div>
-                
-                {/* Action Buttons */}
-                <div className="flex justify-end gap-2 pt-4 border-t">
-                  <Button variant="outline" onClick={cancelParticipantEdit} disabled={uploadingParticipantPhotos}>
-                    Cancel
-                  </Button>
-                  <Button 
-                    onClick={saveParticipantPhotos} 
-                    className="bg-blue-600 hover:bg-blue-700" 
-                    disabled={uploadingParticipantPhotos || (!participantPhoto1File && !participantPhoto2File)}
-                  >
-                    {uploadingParticipantPhotos ? "Uploading..." : "Save Photos"}
-                  </Button>
-                </div>
-              </div>
-            )}
-          </DialogContent>
-        </Dialog>
-
         <PhotoModal
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
@@ -713,92 +495,6 @@ const LikedItem = ({
           </button>
         </div>
       </Card>
-
-      {/* Photo editing dialog exactly like in Admin */}
-      <Dialog open={!!editingParticipant} onOpenChange={(open) => !open && cancelParticipantEdit()}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>
-              Edit Photos for {editingParticipant?.first_name} {editingParticipant?.last_name}
-            </DialogTitle>
-          </DialogHeader>
-          
-          {editingParticipant && (
-            <div className="space-y-6">
-              {/* Current Photos */}
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label className="text-sm font-medium">Current Portrait Photo</Label>
-                  {editingParticipant.photo1_url && (
-                    <img 
-                      src={editingParticipant.photo1_url} 
-                      alt="Current portrait" 
-                      className="w-full h-48 object-cover rounded border mt-2"
-                    />
-                  )}
-                </div>
-                <div>
-                  <Label className="text-sm font-medium">Current Full Length Photo</Label>
-                  {editingParticipant.photo2_url && (
-                    <img 
-                      src={editingParticipant.photo2_url} 
-                      alt="Current full length" 
-                      className="w-full h-48 object-cover rounded border mt-2"
-                    />
-                  )}
-                </div>
-              </div>
-              
-              {/* New Photo Uploads */}
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label className="text-sm font-medium">Replace Portrait Photo</Label>
-                  <Input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleParticipantPhoto1Upload}
-                    className="mt-2"
-                  />
-                  {participantPhoto1File && (
-                    <p className="text-sm text-green-600 mt-1">
-                      New portrait selected: {participantPhoto1File.name}
-                    </p>
-                  )}
-                </div>
-                
-                <div>
-                  <Label className="text-sm font-medium">Replace Full Length Photo</Label>
-                  <Input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleParticipantPhoto2Upload}
-                    className="mt-2"
-                  />
-                  {participantPhoto2File && (
-                    <p className="text-sm text-green-600 mt-1">
-                      New full length selected: {participantPhoto2File.name}
-                    </p>
-                  )}
-                </div>
-              </div>
-              
-              {/* Action Buttons */}
-              <div className="flex justify-end gap-2 pt-4 border-t">
-                <Button variant="outline" onClick={cancelParticipantEdit} disabled={uploadingParticipantPhotos}>
-                  Cancel
-                </Button>
-                <Button 
-                  onClick={saveParticipantPhotos} 
-                  className="bg-blue-600 hover:bg-blue-700" 
-                  disabled={uploadingParticipantPhotos || (!participantPhoto1File && !participantPhoto2File)}
-                >
-                  {uploadingParticipantPhotos ? "Uploading..." : "Save Photos"}
-                </Button>
-              </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
 
       <PhotoModal
         isOpen={isModalOpen}
