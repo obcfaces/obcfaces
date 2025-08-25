@@ -138,7 +138,7 @@ const LikedItem = ({
   const { data: cardData, loading: cardDataLoading } = useCardData(authorName, user?.id);
   
   // Get real participant data from database
-  const { getParticipantByName } = useParticipantData();
+  const { getParticipantByName, refresh: refreshParticipantData } = useParticipantData();
   const realParticipantData = getParticipantByName(authorName);
   
   // Don't render until card data is loaded
@@ -259,6 +259,9 @@ const LikedItem = ({
           title: "Success",
           description: "Photos updated successfully",
         });
+
+        // Refresh participant data to show updated photos
+        refreshParticipantData();
 
         // Notify parent component about photo updates
         if (updates.photo_1_url) {
