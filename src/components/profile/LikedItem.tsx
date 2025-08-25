@@ -406,8 +406,8 @@ const LikedItem = ({
     return (
       <>
         <Card className="bg-card border-contest-border relative overflow-hidden flex h-32 sm:h-36 md:h-40">
-          {/* Edit button for owner - only show for contest participation */}
-          {isOwner && contentType === 'next_week_candidate' && (
+          {/* Edit button for owner - show for contest participation */}
+          {isOwner && (
             <Button
               onClick={() => setIsEditModalOpen(true)}
               size="sm"
@@ -618,8 +618,8 @@ const LikedItem = ({
   return (
     <>
       <Card className="bg-card border-contest-border relative overflow-hidden">
-          {/* Edit button for owner - only show for contest participation */}
-          {isOwner && contentType === 'next_week_candidate' && (
+          {/* Edit button for owner - show for contest participation */}
+          {isOwner && (
             <Button
               onClick={() => setIsEditModalOpen(true)}
               size="sm"
