@@ -10,6 +10,7 @@ type Props = {
 };
 
 export default function HeightFilterDropdown({ onSelect, value, className }: Props) {
+  console.log("HeightFilterDropdown rendered with updated scroll fix");
   const [open, setOpen] = useState(false);
   
   // cm: 130..201 (72 элемента)
