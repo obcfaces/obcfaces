@@ -1019,94 +1019,92 @@ const Admin = () => {
               {/* Participants list */}
               <div className="grid gap-4">
                 {weeklyParticipants.map((participant) => (
-                  <Card key={participant.id}>
-                    <CardHeader>
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                          <Avatar className="h-16 w-16">
-                            <AvatarImage src={participant.photo1_url || ''} />
-                            <AvatarFallback>
-                              {participant.first_name?.charAt(0) || 'U'}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <h3 className="text-lg font-semibold">
-                              {participant.first_name} {participant.last_name}
-                            </h3>
-                            <p className="text-sm text-muted-foreground">
-                              {participant.age} years old • {participant.city}, {participant.country}
-                            </p>
-                            <p className="text-sm text-muted-foreground">
-                              Height: {participant.height_cm}cm • Weight: {participant.weight_kg}kg
-                            </p>
+                    <Card key={participant.id} className="py-3">
+                      <CardContent className="p-4">
+                        <div className="flex items-center justify-between gap-4">
+                          {/* Left section with avatar and basic info */}
+                          <div className="flex items-center gap-3 flex-1">
+                            <Avatar className="h-12 w-12 flex-shrink-0">
+                              <AvatarImage src={participant.photo1_url || ''} />
+                              <AvatarFallback>
+                                {participant.first_name?.charAt(0) || 'U'}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div className="flex-1 min-w-0">
+                              <h3 className="text-sm font-semibold truncate">
+                                {participant.first_name} {participant.last_name}
+                              </h3>
+                              <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                                <span>{participant.age} years old</span>
+                                <span>•</span>
+                                <span className="truncate">{participant.city}, {participant.country}</span>
+                                <span>•</span>
+                                <span>{participant.height_cm}cm, {participant.weight_kg}kg</span>
+                              </div>
+                            </div>
                           </div>
-                        </div>
-                        <div className="text-right space-y-2">
-                          <div className="flex flex-col items-end gap-2">
-                            <div className="flex items-center gap-2">
-                              <span className="text-sm font-medium">Active:</span>
+
+                          {/* Center section with photos */}
+                          <div className="flex items-center gap-2">
+                            <div className="text-center">
+                              <p className="text-xs text-muted-foreground mb-1">Portrait</p>
+                              {participant.photo1_url && (
+                                <img 
+                                  src={participant.photo1_url} 
+                                  alt="Portrait" 
+                                  className="w-16 h-20 object-cover rounded border cursor-pointer hover:opacity-80 transition-opacity"
+                                  onClick={() => openPhotoModal([participant.photo1_url, participant.photo2_url].filter(Boolean), 0, `${participant.first_name} ${participant.last_name}`)}
+                                />
+                              )}
+                            </div>
+                            <div className="text-center">
+                              <p className="text-xs text-muted-foreground mb-1">Full Length</p>
+                              {participant.photo2_url && (
+                                <img 
+                                  src={participant.photo2_url} 
+                                  alt="Full length" 
+                                  className="w-16 h-20 object-cover rounded border cursor-pointer hover:opacity-80 transition-opacity"
+                                  onClick={() => openPhotoModal([participant.photo1_url, participant.photo2_url].filter(Boolean), 1, `${participant.first_name} ${participant.last_name}`)}
+                                />
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Right section with controls and stats */}
+                          <div className="flex items-center gap-3">
+                            <div className="flex items-center gap-2 text-xs">
+                              <span className="font-medium">Active:</span>
                               <Switch
                                 checked={participant.is_active}
                                 onCheckedChange={() => toggleParticipantActive(participant.id, participant.is_active)}
                               />
                             </div>
-                            {participant.average_rating && participant.average_rating > 0 ? (
-                              <>
-                                <Badge variant="default" className="bg-contest-blue">
-                                  Rating: {participant.average_rating.toFixed(1)}
-                                </Badge>
-                                <Badge variant="secondary">
-                                  Votes: {participant.total_votes || 0}
-                                </Badge>
-                              </>
-                            ) : (
-                              <Badge variant="secondary">No Rating Yet</Badge>
-                            )}
+                            <div className="flex flex-col gap-1">
+                              {participant.average_rating && participant.average_rating > 0 ? (
+                                <>
+                                  <Badge variant="default" className="bg-contest-blue text-xs px-2 py-0">
+                                    Rating: {participant.average_rating.toFixed(1)}
+                                  </Badge>
+                                  <Badge variant="secondary" className="text-xs px-2 py-0">
+                                    Votes: {participant.total_votes || 0}
+                                  </Badge>
+                                </>
+                              ) : (
+                                <Badge variant="secondary" className="text-xs px-2 py-0">No Rating</Badge>
+                              )}
+                            </div>
+                            <Button
+                              onClick={() => startEditingParticipant(participant)}
+                              size="sm"
+                              className="flex items-center gap-1 text-xs px-2 py-1 h-7"
+                            >
+                              <Edit className="w-3 h-3" />
+                              Edit
+                            </Button>
                           </div>
-                          <Button
-                            onClick={() => startEditingParticipant(participant)}
-                            size="sm"
-                            className="flex items-center gap-1"
-                          >
-                            <Edit className="w-3 h-3" />
-                            Edit Photos
-                          </Button>
                         </div>
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                        <div>
-                          <h4 className="text-sm font-medium mb-2">Portrait Photo:</h4>
-                          {participant.photo1_url && (
-                            <img 
-                              src={participant.photo1_url} 
-                              alt="Portrait" 
-                              className="w-32 h-40 object-cover rounded border cursor-pointer hover:opacity-80 transition-opacity"
-                              onClick={() => openPhotoModal([participant.photo1_url, participant.photo2_url].filter(Boolean), 0, `${participant.first_name} ${participant.last_name}`)}
-                            />
-                          )}
-                        </div>
-                        <div>
-                          <h4 className="text-sm font-medium mb-2">Full Length Photo:</h4>
-                          {participant.photo2_url && (
-                            <img 
-                              src={participant.photo2_url} 
-                              alt="Full length" 
-                              className="w-32 h-40 object-cover rounded border cursor-pointer hover:opacity-80 transition-opacity"
-                              onClick={() => openPhotoModal([participant.photo1_url, participant.photo2_url].filter(Boolean), 1, `${participant.first_name} ${participant.last_name}`)}
-                            />
-                          )}
-                        </div>
-                      </div>
-
-                      <div className="text-center text-muted-foreground">
-                        <p className="text-sm">
-                          Места определяются автоматически по рейтингу участниц
-                        </p>
-                      </div>
-                    </CardContent>
-                  </Card>
+                      </CardContent>
+                    </Card>
                 ))}
                 
                 {weeklyParticipants.length === 0 && (
@@ -1225,147 +1223,136 @@ const Admin = () => {
                   const phone = appData.phone;
                   const submittedDate = new Date(application.submitted_at);
                   return (
-                    <Card key={application.id}>
-                      <CardHeader>
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-4">
-                            <Avatar className="h-16 w-16">
+                    <Card key={application.id} className="py-3">
+                      <CardContent className="p-4">
+                        <div className="flex items-center justify-between gap-4">
+                          {/* Left section with avatar and basic info */}
+                          <div className="flex items-center gap-3 flex-1">
+                            <Avatar className="h-12 w-12 flex-shrink-0">
                               <AvatarImage src={appData.photo1_url || ''} />
                               <AvatarFallback>
                                 {appData.first_name?.charAt(0) || 'U'}
                               </AvatarFallback>
                             </Avatar>
-                            <div>
-                              <h3 className="text-lg font-semibold">
+                            <div className="flex-1 min-w-0">
+                              <h3 className="text-sm font-semibold truncate">
                                 {appData.first_name} {appData.last_name}
                               </h3>
-                              <p className="text-sm text-muted-foreground">
-                                {appData.gender} • {new Date().getFullYear() - appData.birth_year} years old
-                              </p>
-                              <p className="text-sm text-muted-foreground">
-                                {appData.city}, {appData.state}, {appData.country}
-                              </p>
-                              <p className="text-sm text-muted-foreground">
-                                Height: {appData.height_cm}cm • Weight: {appData.weight_kg}kg
-                              </p>
+                              <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                                <span>{appData.gender}</span>
+                                <span>•</span>
+                                <span>{new Date().getFullYear() - appData.birth_year} years old</span>
+                                <span>•</span>
+                                <span className="truncate">{appData.city}, {appData.country}</span>
+                                <span>•</span>
+                                <span>{appData.height_cm}cm, {appData.weight_kg}kg</span>
+                              </div>
+                              <div className="flex items-center gap-3 text-xs text-muted-foreground mt-0.5">
+                                <span>Born: {appData.birth_day}/{appData.birth_month}/{appData.birth_year}</span>
+                                <span>•</span>
+                                <span>{appData.marital_status}</span>
+                                <span>•</span>
+                                <span>Children: {appData.has_children ? 'Yes' : 'No'}</span>
+                                <span>•</span>
+                                <span>Phone: {phone ? phone.full_number : 'Not provided'}</span>
+                              </div>
                             </div>
                           </div>
-                          <div className="text-right space-y-2">
-                            <div className="flex items-center gap-2 justify-end">
-                              <span className="text-sm font-medium">Active:</span>
+
+                          {/* Center section with photos */}
+                          <div className="flex items-center gap-2">
+                            <div className="text-center">
+                              <p className="text-xs text-muted-foreground mb-1">Portrait</p>
+                              {appData.photo1_url && (
+                                <img 
+                                  src={appData.photo1_url} 
+                                  alt="Portrait" 
+                                  className="w-16 h-20 object-cover rounded border cursor-pointer hover:opacity-80 transition-opacity"
+                                  onClick={() => openPhotoModal([appData.photo1_url, appData.photo2_url].filter(Boolean), 0, `${appData.first_name} ${appData.last_name}`)}
+                                />
+                              )}
+                            </div>
+                            <div className="text-center">
+                              <p className="text-xs text-muted-foreground mb-1">Full Length</p>
+                              {appData.photo2_url && (
+                                <img 
+                                  src={appData.photo2_url} 
+                                  alt="Full length" 
+                                  className="w-16 h-20 object-cover rounded border cursor-pointer hover:opacity-80 transition-opacity"
+                                  onClick={() => openPhotoModal([appData.photo1_url, appData.photo2_url].filter(Boolean), 1, `${appData.first_name} ${appData.last_name}`)}
+                                />
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Right section with controls and status */}
+                          <div className="flex items-center gap-3">
+                            <div className="flex items-center gap-2 text-xs">
+                              <span className="font-medium">Active:</span>
                               <Switch
                                 checked={application.is_active ?? true}
                                 onCheckedChange={() => toggleApplicationActive(application.id, application.is_active ?? true)}
                               />
                             </div>
-                            {getApplicationStatusBadge(application.status)}
-                            <p className="text-xs text-muted-foreground mt-2">
-                              Submitted: {submittedDate.toLocaleDateString('ru-RU')} {submittedDate.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}
-                            </p>
-                          </div>
-                        </div>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                          <div>
-                            <h4 className="text-sm font-medium mb-2">Personal Info:</h4>
-                            <p className="text-sm text-muted-foreground">
-                              Born: {appData.birth_day}/{appData.birth_month}/{appData.birth_year}
-                            </p>
-                            <p className="text-sm text-muted-foreground">
-                              Marital Status: {appData.marital_status}
-                            </p>
-                            <p className="text-sm text-muted-foreground">
-                              Has Children: {appData.has_children ? 'Yes' : 'No'}
-                            </p>
-                          </div>
-                          
-                          <div>
-                            <h4 className="text-sm font-medium mb-2">Contact Info:</h4>
-                            {phone ? (
-                              <p className="text-sm text-muted-foreground">
-                                Phone: {phone.full_number}
+                            <div className="flex flex-col gap-1 items-center">
+                              {getApplicationStatusBadge(application.status)}
+                              <p className="text-xs text-muted-foreground text-center">
+                                {submittedDate.toLocaleDateString('ru-RU')} {submittedDate.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}
                               </p>
-                            ) : (
-                              <p className="text-sm text-muted-foreground">
-                                Phone: Not provided
-                              </p>
-                            )}
+                            </div>
+                            <div className="flex gap-1">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => startEditingApplication(application)}
+                                className="flex items-center gap-1 text-xs px-2 py-1 h-7"
+                              >
+                                <Edit className="w-3 h-3" />
+                                Edit
+                              </Button>
+                              <Button
+                                size="sm"
+                                onClick={() => reviewApplication(application.id, 'approved')}
+                                disabled={application.status === 'approved'}
+                                className="bg-green-600 hover:bg-green-700 text-xs px-2 py-1 h-7"
+                              >
+                                <Check className="w-3 h-3" />
+                                Approve
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="destructive"
+                                onClick={() => {
+                                  const notes = prompt("Reason for rejection (optional):");
+                                  reviewApplication(application.id, 'rejected', notes || undefined);
+                                }}
+                                disabled={application.status === 'rejected'}
+                                className="text-xs px-2 py-1 h-7"
+                              >
+                                <X className="w-3 h-3" />
+                                Reject
+                              </Button>
+                            </div>
                           </div>
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                          <div>
-                            <h4 className="text-sm font-medium mb-2">Portrait Photo:</h4>
-                            {appData.photo1_url && (
-                              <img 
-                                src={appData.photo1_url} 
-                                alt="Portrait" 
-                                className="w-32 h-40 object-cover rounded border cursor-pointer hover:opacity-80 transition-opacity"
-                                onClick={() => openPhotoModal([appData.photo1_url, appData.photo2_url].filter(Boolean), 0, `${appData.first_name} ${appData.last_name}`)}
-                              />
-                            )}
-                          </div>
-                          <div>
-                            <h4 className="text-sm font-medium mb-2">Full Length Photo:</h4>
-                            {appData.photo2_url && (
-                              <img 
-                                src={appData.photo2_url} 
-                                alt="Full length" 
-                                className="w-32 h-40 object-cover rounded border cursor-pointer hover:opacity-80 transition-opacity"
-                                onClick={() => openPhotoModal([appData.photo1_url, appData.photo2_url].filter(Boolean), 1, `${appData.first_name} ${appData.last_name}`)}
-                              />
-                            )}
-                          </div>
-                        </div>
-
-                        <div className="text-sm text-muted-foreground mb-4">
-                          <p>Submitted: {new Date(application.submitted_at).toLocaleString()}</p>
-                          <p>Updated: {new Date(application.updated_at).toLocaleString()}</p>
-                          {application.reviewed_at && (
-                            <p>Reviewed: {new Date(application.reviewed_at).toLocaleString()}</p>
-                          )}
                         </div>
                         
-                        {application.notes && (
-                          <div className="mb-4">
-                            <h4 className="text-sm font-medium mb-2">Review Notes:</h4>
-                            <p className="text-sm text-muted-foreground">{application.notes}</p>
+                        {/* Timestamps and notes section - collapsed */}
+                        {(application.notes || application.reviewed_at) && (
+                          <div className="mt-3 pt-3 border-t border-border/50">
+                            <div className="flex justify-between items-start text-xs text-muted-foreground">
+                              <div className="flex gap-4">
+                                <span>Submitted: {new Date(application.submitted_at).toLocaleString()}</span>
+                                <span>Updated: {new Date(application.updated_at).toLocaleString()}</span>
+                                {application.reviewed_at && (
+                                  <span>Reviewed: {new Date(application.reviewed_at).toLocaleString()}</span>
+                                )}
+                              </div>
+                              {application.notes && (
+                                <span className="text-right max-w-md truncate">Notes: {application.notes}</span>
+                              )}
+                            </div>
                           </div>
                         )}
-
-                        <div className="flex gap-2">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => startEditingApplication(application)}
-                            className="flex items-center gap-1"
-                          >
-                            <Edit className="w-4 h-4" />
-                            Edit
-                          </Button>
-                          <Button
-                            size="sm"
-                            onClick={() => reviewApplication(application.id, 'approved')}
-                            disabled={application.status === 'approved'}
-                            className="bg-green-600 hover:bg-green-700"
-                          >
-                            <Check className="w-4 h-4 mr-1" />
-                            Approve
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="destructive"
-                            onClick={() => {
-                              const notes = prompt("Reason for rejection (optional):");
-                              reviewApplication(application.id, 'rejected', notes || undefined);
-                            }}
-                            disabled={application.status === 'rejected'}
-                          >
-                            <X className="w-4 h-4 mr-1" />
-                            Reject
-                          </Button>
-                        </div>
                       </CardContent>
                     </Card>
                   );
