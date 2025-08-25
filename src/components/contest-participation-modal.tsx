@@ -532,7 +532,26 @@ export const ContestParticipationModal = ({
       setInvalidFields(new Set());
       
       // Load form data (existing data for edit mode or cached data)
-      setFormData(loadCachedFormData());
+      const formDataToLoad = loadCachedFormData();
+      setFormData(formDataToLoad);
+      
+      // Set display values for height and weight dropdowns
+      if (editMode && existingData) {
+        let applicationData = existingData;
+        if (existingData.application_data) {
+          applicationData = { ...existingData, ...existingData.application_data };
+        }
+        
+        // Set height display value
+        if (applicationData.height_cm) {
+          setSelectedHeight(`${applicationData.height_cm} cm`);
+        }
+        
+        // Set weight display value  
+        if (applicationData.weight_kg) {
+          setSelectedWeight(`${applicationData.weight_kg} kg`);
+        }
+      }
       
       // Load cached photos only if not in edit mode
       if (!editMode) {
@@ -550,13 +569,13 @@ export const ContestParticipationModal = ({
         const { data: { session } } = await supabase.auth.getSession();
         if (session) {
           setCurrentStep('profile');
-    } else {
-      setCurrentStep('auth');
+        } else {
+          setCurrentStep('auth');
+        }
+      };
+      checkAuth();
     }
-  };
-  checkAuth();
-}
-  }, [isOpen]);
+  }, [isOpen, editMode, existingData]);
 
   // Save form data to cache
   const saveFormDataToCache = (data: typeof formData) => {
@@ -1070,10 +1089,10 @@ export const ContestParticipationModal = ({
                         id="photo1-upload"
                       />
                       <label htmlFor="photo1-upload" className="cursor-pointer block">
-                        {photo1File ? (
+                        {photo1File || (editMode && existingData?.photo_1_url) ? (
                           <div className="p-2 relative">
                             <img
-                              src={URL.createObjectURL(photo1File)}
+                              src={photo1File ? URL.createObjectURL(photo1File) : existingData?.photo_1_url}
                               alt="Portrait photo preview"
                               className="w-full h-32 sm:h-40 md:h-48 lg:h-56 object-contain rounded bg-white"
                             />
@@ -1141,10 +1160,10 @@ export const ContestParticipationModal = ({
                         id="photo2-upload"
                       />
                       <label htmlFor="photo2-upload" className="cursor-pointer block">
-                        {photo2File ? (
+                        {photo2File || (editMode && existingData?.photo_2_url) ? (
                           <div className="p-2 relative">
                             <img
-                              src={URL.createObjectURL(photo2File)}
+                              src={photo2File ? URL.createObjectURL(photo2File) : existingData?.photo_2_url}
                               alt="Full length photo preview"
                               className="w-full h-32 sm:h-40 md:h-48 lg:h-56 object-contain rounded bg-white"
                             />
