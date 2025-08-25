@@ -130,10 +130,6 @@ const LikedItem = ({
   const [participantPhoto2File, setParticipantPhoto2File] = useState<File | null>(null);
   const [uploadingParticipantPhotos, setUploadingParticipantPhotos] = useState(false);
   
-  // Contest application state
-  const [contestApplication, setContestApplication] = useState<any>(null);
-  const [loadingApplication, setLoadingApplication] = useState(false);
-  
   // Use unified card data hook
   const { data: cardData, loading: cardDataLoading } = useCardData(authorName, user?.id);
   
@@ -282,36 +278,6 @@ const LikedItem = ({
     }
   };
 
-  // Fetch contest application status
-  useEffect(() => {
-    const fetchApplicationStatus = async () => {
-      if (!user?.id || !isOwner || !(contentType === 'contest' || contentType === 'next_week_candidate')) {
-        return;
-      }
-
-      setLoadingApplication(true);
-      try {
-        const { data: application, error } = await supabase
-          .from('contest_applications')
-          .select('id, status, created_at, application_data')
-          .eq('user_id', user.id)
-          .order('created_at', { ascending: false })
-          .limit(1)
-          .maybeSingle();
-
-        if (!error && application) {
-          setContestApplication(application);
-        }
-      } catch (error) {
-        console.error('Error fetching application status:', error);
-      } finally {
-        setLoadingApplication(false);
-      }
-    };
-
-    fetchApplicationStatus();
-  }, [user?.id, isOwner, contentType]);
-
   // Fetch current participant type from database
   useEffect(() => {
     if (authorProfileId && contentType === 'next_week_candidate') {
@@ -334,21 +300,6 @@ const LikedItem = ({
       fetchParticipantType();
     }
   }, [authorProfileId, contentType]);
-
-  // Check if edit button should be shown
-  const canEditApplication = () => {
-    if (!isOwner || !(contentType === 'contest' || contentType === 'next_week_candidate')) {
-      return false;
-    }
-    
-    // If no application exists, allow creating new one
-    if (!contestApplication) {
-      return true;
-    }
-    
-    // Only allow editing if application status is 'pending'
-    return contestApplication.status === 'pending';
-  };
 
   const handleUnlike = async () => {
     setIsUnliking(true);
@@ -455,7 +406,7 @@ const LikedItem = ({
       <>
         <Card className="bg-card border-contest-border relative overflow-hidden flex h-32 sm:h-36 md:h-40">
           {/* Edit button for owner - show for contest participation */}
-          {canEditApplication() && (
+          {isOwner && (contentType === 'contest' || contentType === 'next_week_candidate') && (
             <Button
               onClick={async () => {
                 console.log('Edit button clicked! Loading user application data...');
@@ -719,7 +670,7 @@ const LikedItem = ({
     <>
       <Card className="bg-card border-contest-border relative overflow-hidden">
           {/* Edit button for owner - show for contest participation */}
-          {canEditApplication() && (
+          {isOwner && (contentType === 'contest' || contentType === 'next_week_candidate') && (
             <Button
               onClick={async () => {
                 console.log('Edit button clicked! Loading user application data...');
