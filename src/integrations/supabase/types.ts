@@ -752,6 +752,7 @@ export type Database = {
         Returns: {
           age: number
           application_data: Json
+          application_status: string
           avatar_url: string
           average_rating: number
           city: string
