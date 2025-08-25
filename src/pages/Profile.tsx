@@ -17,7 +17,6 @@ import LikedItem from "@/components/profile/LikedItem";
 import { PhotoModal } from "@/components/photo-modal";
 import { ProfilePhotoModal } from "@/components/profile-photo-modal";
 import { ContestParticipationModal } from "@/components/contest-participation-modal";
-import { ContestParticipationEditModal } from "@/components/contest-participation-edit-modal";
 import CreatePostModal from "@/components/create-post-modal";
 import c1 from "@/assets/contestant-1.jpg";
 import c2 from "@/assets/contestant-2.jpg";
@@ -44,8 +43,6 @@ interface ProfileRow {
 const Profile = () => {
   const navigate = useNavigate();
   
-  // Participation editing state
-  const [editingParticipation, setEditingParticipation] = useState(false);
   const { id } = useParams<{ id: string }>();
   const [searchParams] = useSearchParams();
   const [logoutLoading, setLogoutLoading] = useState(false);
@@ -840,6 +837,7 @@ const Profile = () => {
   };
 
 
+
   // Sample posts data
   const samplePosts = [
     {
@@ -1146,7 +1144,6 @@ const Profile = () => {
                         candidateData={item.candidateData}
                         participantType={item.participantType}
                          isOwner={isOwner}
-                         onEditParticipation={() => setEditingParticipation(true)}
                          onPhotoUpdate={(type, url) => {
                            // Update the displayed image immediately
                            setParticipationItems(prev => 
@@ -1955,16 +1952,6 @@ const Profile = () => {
         </section>
       </main>
 
-      {/* Contest Participation Edit Modal */}
-      <ContestParticipationEditModal
-        isOpen={editingParticipation}
-        onClose={() => {
-          setEditingParticipation(false);
-          // Refresh participation items after editing
-          loadParticipationItems();
-        }}
-        userId={currentUserId || undefined}
-      />
 
       {/* Photo Modal */}
       <PhotoModal
