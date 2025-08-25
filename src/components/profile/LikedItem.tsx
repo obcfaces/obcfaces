@@ -14,6 +14,7 @@ import { Label } from "@/components/ui/label";
 import { useCardData } from "@/hooks/useCardData";
 import { useParticipantData } from "@/hooks/useParticipantData";
 import LoginModalContent from "@/components/login-modal-content";
+import { ContestParticipationModal } from "@/components/contest-participation-modal";
 
 // Import contest images for mock display
 import contestant1Face from "@/assets/contestant-1-face.jpg";
@@ -122,6 +123,7 @@ const LikedItem = ({
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [currentParticipantType, setCurrentParticipantType] = useState<'candidate' | 'finalist' | 'winner' | null>(participantType || null);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   
   // Photo editing states exactly like in Admin
   const [editingParticipant, setEditingParticipant] = useState<ParticipantData | null>(null);
@@ -404,10 +406,10 @@ const LikedItem = ({
     return (
       <>
         <Card className="bg-card border-contest-border relative overflow-hidden flex h-32 sm:h-36 md:h-40">
-          {/* Edit button for owner */}
-          {isOwner && (
+          {/* Edit button for owner - only show for contest participation */}
+          {isOwner && contentType === 'next_week_candidate' && (
             <Button
-              onClick={onEditPhotos}
+              onClick={() => setIsEditModalOpen(true)}
               size="sm"
               className="absolute top-2 right-2 z-30 w-8 h-8 p-0"
             >
@@ -616,16 +618,16 @@ const LikedItem = ({
   return (
     <>
       <Card className="bg-card border-contest-border relative overflow-hidden">
-        {/* Edit button for owner */}
-        {isOwner && (
-          <Button
-            onClick={onEditPhotos}
-            size="sm"
-            className="absolute top-2 right-2 z-30 w-8 h-8 p-0"
-          >
-            <Edit className="w-3 h-3" />
-          </Button>
-        )}
+          {/* Edit button for owner - only show for contest participation */}
+          {isOwner && contentType === 'next_week_candidate' && (
+            <Button
+              onClick={() => setIsEditModalOpen(true)}
+              size="sm"
+              className="absolute top-2 right-2 z-30 w-8 h-8 p-0"
+            >
+              <Edit className="w-3 h-3" />
+            </Button>
+          )}
         
         {/* Name in top left */}
         <div className="absolute top-2 left-4 z-20">
@@ -819,6 +821,16 @@ const LikedItem = ({
           <LoginModalContent onClose={() => setShowLoginModal(false)} />
         </DialogContent>
       </Dialog>
+
+      {/* Contest Participation Edit Modal */}
+      <ContestParticipationModal
+        isOpen={isEditModalOpen}
+        onOpenChange={setIsEditModalOpen}
+        editMode={true}
+        existingData={realParticipantData}
+      >
+        <div />
+      </ContestParticipationModal>
     </>
   );
 };
