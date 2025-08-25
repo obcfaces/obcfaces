@@ -14,6 +14,47 @@ export type Database = {
   }
   public: {
     Tables: {
+      contest_application_history: {
+        Row: {
+          application_data: Json | null
+          application_id: string
+          change_reason: string | null
+          changed_by: string | null
+          created_at: string
+          id: string
+          notes: string | null
+          status: string
+        }
+        Insert: {
+          application_data?: Json | null
+          application_id: string
+          change_reason?: string | null
+          changed_by?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          status: string
+        }
+        Update: {
+          application_data?: Json | null
+          application_id?: string
+          change_reason?: string | null
+          changed_by?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contest_application_history_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "contest_applications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       contest_applications: {
         Row: {
           application_data: Json | null

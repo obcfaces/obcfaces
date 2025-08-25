@@ -9,12 +9,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { toast } from "@/components/ui/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Check, X, Eye, UserCog, FileText, Calendar, Trophy, RotateCcw, Edit } from "lucide-react";
+import { Check, X, Eye, UserCog, FileText, Calendar, Trophy, RotateCcw, Edit, Plus, History, AlertCircle } from "lucide-react";
 import { PhotoModal } from "@/components/photo-modal";
 import { Switch } from "@/components/ui/switch";
 import { useNavigate } from "react-router-dom";
+import { useApplicationHistory } from "@/hooks/useApplicationHistory";
 
 interface ProfileData {
   id: string;
@@ -109,6 +111,7 @@ const Admin = () => {
   const [photoModalImages, setPhotoModalImages] = useState<string[]>([]);
   const [photoModalIndex, setPhotoModalIndex] = useState(0);
   const [photoModalName, setPhotoModalName] = useState("");
+  const [expandedHistory, setExpandedHistory] = useState<Set<string>>(new Set());
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -391,6 +394,125 @@ const Admin = () => {
     });
 
     fetchWeeklyParticipants();
+  };
+
+  const toggleHistoryExpansion = (participantId: string) => {
+    setExpandedHistory(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(participantId)) {
+        newSet.delete(participantId);
+      } else {
+        newSet.add(participantId);
+      }
+      return newSet;
+    });
+  };
+
+  const getApplicationIdForParticipant = (participant: WeeklyContestParticipant): string | undefined => {
+    // Find the corresponding application for this participant
+    const application = contestApplications.find(app => app.user_id === participant.user_id);
+    return application?.id;
+  };
+
+  const ApplicationHistorySection = ({ applicationId }: { applicationId?: string }) => {
+    const { history, loading, error } = useApplicationHistory(applicationId);
+
+    if (!applicationId) {
+      return (
+        <div className="border-t p-4">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <AlertCircle className="h-4 w-4" />
+            <span>Заявка не найдена</span>
+          </div>
+        </div>
+      );
+    }
+
+    if (loading) {
+      return (
+        <div className="border-t p-4">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <History className="h-4 w-4" />
+            <span>Загрузка истории...</span>
+          </div>
+        </div>
+      );
+    }
+
+    if (error) {
+      return (
+        <div className="border-t p-4">
+          <div className="flex items-center gap-2 text-sm text-destructive">
+            <AlertCircle className="h-4 w-4" />
+            <span>Ошибка загрузки истории: {error}</span>
+          </div>
+        </div>
+      );
+    }
+
+    if (history.length === 0) {
+      return (
+        <div className="border-t p-4">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <History className="h-4 w-4" />
+            <span>История изменений пуста</span>
+          </div>
+        </div>
+      );
+    }
+
+    const getStatusBadgeVariant = (status: string) => {
+      switch (status) {
+        case 'approved': return 'default';
+        case 'rejected': return 'destructive';
+        case 'pending': return 'secondary';
+        default: return 'outline';
+      }
+    };
+
+    const getStatusText = (status: string) => {
+      switch (status) {
+        case 'approved': return 'Одобрена';
+        case 'rejected': return 'Отклонена';
+        case 'pending': return 'На рассмотрении';
+        default: return status;
+      }
+    };
+
+    return (
+      <div className="border-t">
+        <div className="p-4">
+          <div className="flex items-center gap-2 mb-3">
+            <History className="h-4 w-4" />
+            <span className="font-medium text-sm">История изменений</span>
+          </div>
+          <div className="space-y-3 max-h-60 overflow-y-auto">
+            {history.map((item) => (
+              <div key={item.id} className="text-xs space-y-1 p-2 rounded border bg-muted/50">
+                <div className="flex justify-between items-center">
+                  <span className="font-medium">{item.change_reason || 'Изменение'}</span>
+                  <span className="text-muted-foreground">
+                    {new Date(item.created_at).toLocaleString('ru-RU')}
+                  </span>
+                </div>
+                <div className="flex gap-4">
+                  <span className="text-muted-foreground">Статус:</span>
+                  <Badge variant={getStatusBadgeVariant(item.status)} className="h-5 text-xs">
+                    {getStatusText(item.status)}
+                  </Badge>
+                </div>
+                {item.notes && (
+                  <div>
+                    <span className="text-muted-foreground">Заметки: </span>
+                    <span>{item.notes}</span>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
   };
 
   const startEditingApplication = (application: ContestApplication) => {
@@ -1094,6 +1216,15 @@ const Admin = () => {
                               )}
                             </div>
                             <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => toggleHistoryExpansion(participant.id)}
+                              className="px-2"
+                              title="История изменений"
+                            >
+                              <Plus className={`h-4 w-4 transition-transform ${expandedHistory.has(participant.id) ? 'rotate-45' : ''}`} />
+                            </Button>
+                            <Button
                               onClick={() => startEditingParticipant(participant)}
                               size="sm"
                               className="flex items-center gap-1 text-xs px-2 py-1 h-7"
@@ -1103,6 +1234,12 @@ const Admin = () => {
                             </Button>
                           </div>
                         </div>
+                        
+                        <Collapsible open={expandedHistory.has(participant.id)}>
+                          <CollapsibleContent>
+                            <ApplicationHistorySection applicationId={getApplicationIdForParticipant(participant)} />
+                          </CollapsibleContent>
+                        </Collapsible>
                       </CardContent>
                     </Card>
                 ))}
