@@ -123,7 +123,6 @@ const LikedItem = ({
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [currentParticipantType, setCurrentParticipantType] = useState<'candidate' | 'finalist' | 'winner' | null>(participantType || null);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   
   // Photo editing states exactly like in Admin
   const [editingParticipant, setEditingParticipant] = useState<ParticipantData | null>(null);
@@ -410,14 +409,24 @@ const LikedItem = ({
           {isOwner && (contentType === 'contest' || contentType === 'next_week_candidate') && (
             <Button
               onClick={() => {
-                console.log('Edit button clicked!', { 
-                  realParticipantData, 
-                  candidateData,
-                  contentType, 
-                  isOwner,
-                  finalData: realParticipantData || candidateData
-                });
-                setIsEditModalOpen(true);
+                console.log('Edit button clicked! Trying to find and click Join button...');
+                // Find and click the Join & Win button
+                const joinButton = document.querySelector('button:has-text("🏆 Join & Win 5,000 PHP")') || 
+                                 document.querySelector('button[class*="gradient"]:has-text("Join")') ||
+                                 document.querySelector('button:contains("Join & Win")');
+                
+                if (joinButton) {
+                  console.log('Found join button, clicking it...');
+                  (joinButton as HTMLButtonElement).click();
+                } else {
+                  console.log('Join button not found, trying different approach...');
+                  // Dispatch a custom event that the Profile page can listen to
+                  window.dispatchEvent(new CustomEvent('openEditModal', { 
+                    detail: { 
+                      userData: realParticipantData || candidateData 
+                    } 
+                  }));
+                }
               }}
               size="sm"
               className="absolute top-2 right-2 z-30 w-8 h-8 p-0"
@@ -631,8 +640,24 @@ const LikedItem = ({
           {isOwner && (contentType === 'contest' || contentType === 'next_week_candidate') && (
             <Button
               onClick={() => {
-                console.log('Edit button clicked!', { realParticipantData, contentType, isOwner });
-                setIsEditModalOpen(true);
+                console.log('Edit button clicked! Trying to find and click Join button...');
+                // Find and click the Join & Win button
+                const joinButton = document.querySelector('button:has-text("🏆 Join & Win 5,000 PHP")') || 
+                                 document.querySelector('button[class*="gradient"]:has-text("Join")') ||
+                                 document.querySelector('button:contains("Join & Win")');
+                
+                if (joinButton) {
+                  console.log('Found join button, clicking it...');
+                  (joinButton as HTMLButtonElement).click();
+                } else {
+                  console.log('Join button not found, trying different approach...');
+                  // Dispatch a custom event that the Profile page can listen to
+                  window.dispatchEvent(new CustomEvent('openEditModal', { 
+                    detail: { 
+                      userData: realParticipantData || candidateData 
+                    } 
+                  }));
+                }
               }}
               size="sm"
               className="absolute top-2 right-2 z-30 w-8 h-8 p-0"
@@ -834,18 +859,6 @@ const LikedItem = ({
         </DialogContent>
       </Dialog>
 
-      {/* Contest Participation Edit Modal */}
-      <ContestParticipationModal
-        isOpen={isEditModalOpen}
-        onOpenChange={(open) => {
-          console.log('Modal state changing:', { open, isEditModalOpen });
-          setIsEditModalOpen(open);
-        }}
-        editMode={true}
-        existingData={realParticipantData || candidateData}
-      >
-        {/* No children needed for controlled mode */}
-      </ContestParticipationModal>
     </>
   );
 };
