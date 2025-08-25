@@ -1099,35 +1099,6 @@ export const ContestParticipationModal = ({
                 {/* Minimal spacing after text */}
                 <div className="w-1 flex-shrink-0"></div>
 
-                {/* Show current photos BEFORE upload areas when in edit mode - exactly like in Admin */}
-                {editMode && existingData && ((existingData?.application_data as any)?.photo1_url || (existingData?.application_data as any)?.photo2_url) && (
-                  <div className="mb-6">
-                    <Label className="text-sm font-medium mb-3 block">Current Photos</Label>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <Label className="text-xs text-muted-foreground">Current Portrait Photo</Label>
-                        {(existingData?.application_data as any)?.photo1_url && (
-                          <img 
-                            src={(existingData?.application_data as any)?.photo1_url} 
-                            alt="Current portrait" 
-                            className="w-full h-32 sm:h-40 object-cover rounded border mt-2"
-                          />
-                        )}
-                      </div>
-                      <div>
-                        <Label className="text-xs text-muted-foreground">Current Full Length Photo</Label>
-                        {(existingData?.application_data as any)?.photo2_url && (
-                          <img 
-                            src={(existingData?.application_data as any)?.photo2_url} 
-                            alt="Current full length" 
-                            className="w-full h-32 sm:h-40 object-cover rounded border mt-2"
-                          />
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                )}
-
                 {/* Fixed photo upload areas */}
                 <div className="flex flex-row gap-0 items-start">
                   {/* Portrait Photo */}
@@ -1142,10 +1113,10 @@ export const ContestParticipationModal = ({
                         id="photo1-upload"
                       />
                       <label htmlFor="photo1-upload" className="cursor-pointer block">
-                        {photo1File ? (
+                        {photo1File || (editMode && (existingData?.application_data as any)?.photo1_url) ? (
                           <div className="p-2 relative">
                             <img
-                              src={URL.createObjectURL(photo1File)}
+                              src={photo1File ? URL.createObjectURL(photo1File) : (existingData?.application_data as any)?.photo1_url}
                               alt="Portrait photo preview"
                               className="w-full h-32 sm:h-40 md:h-48 lg:h-56 object-contain rounded bg-white"
                             />
@@ -1171,7 +1142,7 @@ export const ContestParticipationModal = ({
                                 }}
                                 className="px-2 py-1 bg-primary text-primary-foreground rounded text-xs hover:bg-primary/90 transition-colors"
                               >
-                                Change
+                                {photo1File ? 'Change' : 'Change Photo'}
                               </button>
                             </div>
                           </div>
@@ -1215,10 +1186,10 @@ export const ContestParticipationModal = ({
                         id="photo2-upload"
                       />
                       <label htmlFor="photo2-upload" className="cursor-pointer block">
-                        {photo2File ? (
+                        {photo2File || (editMode && (existingData?.application_data as any)?.photo2_url) ? (
                           <div className="p-2 relative">
                             <img
-                              src={URL.createObjectURL(photo2File)}
+                              src={photo2File ? URL.createObjectURL(photo2File) : (existingData?.application_data as any)?.photo2_url}
                               alt="Full length photo preview"
                               className="w-full h-32 sm:h-40 md:h-48 lg:h-56 object-contain rounded bg-white"
                             />
@@ -1244,7 +1215,7 @@ export const ContestParticipationModal = ({
                                 }}
                                 className="px-2 py-1 bg-primary text-primary-foreground rounded text-xs hover:bg-primary/90 transition-colors"
                               >
-                                Change
+                                {photo2File ? 'Change' : 'Change Photo'}
                               </button>
                             </div>
                           </div>
