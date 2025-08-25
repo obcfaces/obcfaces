@@ -177,9 +177,110 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
       actualParticipantsLength: actualParticipants.length,
       participantsData: participantsData.slice(0, 2) // Log first 2 for debugging
     });
+
+    // For "THIS WEEK" section, always create and show example card
+    if (title === "THIS WEEK") {
+      const testCard = {
+        rank: 0, // Use 0 to distinguish from real ranks
+        name: "Example Card", 
+        profileId: "example-id",
+        country: "Philippines",
+        city: "Manila",
+        age: 25,
+        weight: 55,
+        height: 165,
+        rating: 4.8,
+        averageRating: 4.8,
+        totalVotes: 124,
+        faceImage: testContestantFace,
+        fullBodyImage: testContestantFull,
+        additionalPhotos: [],
+        isVoted: true,
+        isWinner: false,
+        prize: undefined,
+        isRealContestant: false,
+        isExample: true // Special flag for example card
+      };
+
+      // If there are real contestants, process them too
+      if (actualParticipants.length > 0) {
+        console.log(`Using real contestants for ${title}:`, actualParticipants.length);
+        const contestantsWithRatings = await Promise.all(
+          actualParticipants.map(async (contestant) => {
+            // Validate contestant data structure
+            if (!contestant || typeof contestant !== 'object') {
+              console.warn('Invalid contestant data:', contestant);
+              return null;
+            }
+            
+            // Get average rating from database
+            const { data: avgRating } = await supabase.rpc('get_contestant_average_rating', {
+              contestant_name_param: `${contestant.first_name || ''} ${contestant.last_name || ''}`.trim(),
+              contestant_user_id_param: contestant.user_id
+            });
+            
+            const averageRating = avgRating || 0;
+            
+            const contestantData = {
+              rank: contestant.final_rank || 0,
+              name: `${contestant.first_name || 'Unknown'} ${contestant.last_name || ''}`.trim(),
+              profileId: contestant.user_id,
+              country: contestant.country || 'Unknown',
+              city: contestant.city || 'Unknown',
+              age: contestant.age || 0,
+              weight: contestant.weight_kg || 0,
+              height: contestant.height_cm || 0,
+              rating: averageRating,
+              averageRating: contestant.average_rating || 0, // Add average rating from DB
+              totalVotes: contestant.total_votes || 0, // Add total votes from DB
+              faceImage: contestant.photo_1_url || contestant1Face,
+              fullBodyImage: contestant.photo_2_url || contestant1Full,
+              additionalPhotos: [],
+              isVoted: showWinner ? true : averageRating > 0,
+              isWinner: false, // Will be set after sorting
+              prize: undefined, // Will be set after sorting
+              isRealContestant: true // Mark as real contestant to disable fake likes/comments
+            };
+            
+            console.log(`Real contestant data for ${contestantData.name}:`, {
+              profileId: contestantData.profileId,
+              user_id: contestant.user_id,
+              hasProfileId: !!contestantData.profileId
+            });
+            
+            return contestantData;
+          })
+        );
+        
+        // Sort by average rating (highest first) and assign ranks based on rating
+        const sortedContestants = contestantsWithRatings.filter(Boolean).sort((a, b) => {
+          if (b.rating !== a.rating) {
+            return b.rating - a.rating;
+          }
+          // If ratings are equal, sort by total votes (higher votes first)
+          return (b.totalVotes || 0) - (a.totalVotes || 0);
+        });
+
+        // Add test card at the beginning, then real contestants
+        const realContestantsWithRanks = sortedContestants.map((contestant, index) => {
+          const newRank = contestant.rating > 0 ? index + 1 : 0;
+          return {
+            ...contestant,
+            rank: newRank,
+            isWinner: showWinner && newRank === 1,
+            prize: showWinner && newRank === 1 ? "+ 5000 PHP" : undefined
+          };
+        });
+        
+        return [testCard, ...realContestantsWithRanks];
+      } else {
+        // Only show example card if no real contestants
+        return [testCard];
+      }
+    }
     
-    // Use real contestants from weekly contests if available
-    if (["THIS WEEK", "1 WEEK AGO", "2 WEEKS AGO", "3 WEEKS AGO"].includes(title) && actualParticipants.length > 0) {
+    // Use real contestants from weekly contests if available for other weeks
+    if (["1 WEEK AGO", "2 WEEKS AGO", "3 WEEKS AGO"].includes(title) && actualParticipants.length > 0) {
       console.log(`Using real contestants for ${title}:`, actualParticipants.length);
       const contestantsWithRatings = await Promise.all(
         actualParticipants.map(async (contestant) => {
@@ -237,44 +338,6 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
         return (b.totalVotes || 0) - (a.totalVotes || 0);
       });
 
-      // For "THIS WEEK" section, always add test card at the beginning
-      if (title === "THIS WEEK") {
-        const testCard = {
-          rank: 0, // Use 0 to distinguish from real ranks
-          name: "Example Card", 
-          profileId: "example-id",
-          country: "Philippines",
-          city: "Manila",
-          age: 25,
-          weight: 55,
-          height: 165,
-          rating: 4.8,
-          averageRating: 4.8,
-          totalVotes: 124,
-          faceImage: testContestantFace,
-          fullBodyImage: testContestantFull,
-          additionalPhotos: [],
-          isVoted: true,
-          isWinner: false,
-          prize: undefined,
-          isRealContestant: false,
-          isExample: true // Special flag for example card
-        };
-        
-        // Add test card at the beginning, then real contestants
-        const realContestantsWithRanks = sortedContestants.map((contestant, index) => {
-          const newRank = contestant.rating > 0 ? index + 1 : 0;
-          return {
-            ...contestant,
-            rank: newRank,
-            isWinner: showWinner && newRank === 1,
-            prize: showWinner && newRank === 1 ? "+ 5000 PHP" : undefined
-          };
-        });
-        
-        return [testCard, ...realContestantsWithRanks];
-      }
-
       // Assign ranks based on rating order (1 for highest rating) for other weeks
       return sortedContestants.map((contestant, index) => {
         const newRank = contestant.rating > 0 ? index + 1 : 0;
@@ -287,7 +350,7 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
       });
     }
     
-    // Return empty array if no real contestants found
+    // Return empty array if no real contestants found for other weeks
     console.log(`No real contestants found for ${title}, returning empty array`);
     return [];
   };
