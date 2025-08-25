@@ -70,7 +70,7 @@ export default function WeightFilterDropdown({ onSelect, value, className }: Pro
   };
 
   return (
-    <Popover open={open} onOpenChange={setOpen} modal={true}>
+    <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button
           variant="outline"
@@ -82,16 +82,7 @@ export default function WeightFilterDropdown({ onSelect, value, className }: Pro
           <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent 
-        className="w-auto min-w-[200px] p-0 bg-popover border z-[9999]" 
-        side="bottom" 
-        align="center"
-        onOpenAutoFocus={(e) => e.preventDefault()}
-        onCloseAutoFocus={(e) => e.preventDefault()}
-        onInteractOutside={(e) => {
-          setOpen(false);
-        }}
-      >
+      <PopoverContent className="w-auto min-w-[200px] p-0 bg-popover border z-50" side="bottom" align="center">
         <div className="max-h-[400px] overflow-y-auto overscroll-contain touch-pan-y" style={{ 
           scrollBehavior: 'smooth', 
           WebkitOverflowScrolling: 'touch',
