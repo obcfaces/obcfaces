@@ -346,8 +346,8 @@ const LikedItem = ({
       return true;
     }
     
-    // Only allow editing if application status is 'pending'
-    return contestApplication.status === 'pending';
+    // Allow editing if application status is 'pending' or 'rejected'
+    return contestApplication.status === 'pending' || contestApplication.status === 'rejected';
   };
 
   const handleUnlike = async () => {
