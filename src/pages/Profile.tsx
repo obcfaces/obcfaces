@@ -845,7 +845,9 @@ const Profile = () => {
   useEffect(() => {
     const handleOpenEditModal = (event: any) => {
       console.log('Received openEditModal event:', event.detail);
+      console.log('Event detail existingData:', event.detail?.existingData);
       if (event.detail?.editMode && event.detail?.existingData) {
+        console.log('Setting edit modal data:', event.detail.existingData);
         setEditModalData(event.detail.existingData);
         setIsEditModalOpen(true);
       }
@@ -1116,6 +1118,11 @@ const Profile = () => {
                   existingData={editModalData}
                 />
               )}
+              {(() => {
+                console.log('Profile.tsx - Rendering edit modal with data:', editModalData);
+                console.log('Profile.tsx - Edit mode is:', true);
+                return null;
+              })()}
                 {isOwner && (
                   <CreatePostModal onPostCreated={handlePostCreated}>
                     <Button variant="outline">Add Post</Button>
