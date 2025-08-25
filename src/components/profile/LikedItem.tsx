@@ -405,271 +405,7 @@ const LikedItem = ({
     return (
       <>
         <Card className="bg-card border-contest-border relative overflow-hidden flex h-32 sm:h-36 md:h-40">
-          {/* Edit button for owner - show for contest participation */}
-          {isOwner && (contentType === 'contest' || contentType === 'next_week_candidate') && (
-            <Button
-              onClick={async () => {
-                console.log('Edit button clicked! Loading user application data...');
-                
-                // Get latest application data for the user
-                try {
-                  const { data: { session } } = await supabase.auth.getSession();
-                  if (!session) {
-                    toast({ description: "Необходимо войти в систему" });
-                    return;
-                  }
-
-                  const { data: latestApplication, error } = await supabase
-                    .from('contest_applications')
-                    .select('*')
-                    .eq('user_id', session.user.id)
-                    .order('created_at', { ascending: false })
-                    .limit(1)
-                     .maybeSingle();
-
-                   console.log('Loaded application data:', latestApplication);
-                   
-                   if (error) {
-                     console.error('Error loading application:', error);
-                     toast({ description: "Ошибка загрузки данных заявки" });
-                     return;
-                   }
-
-                   if (!latestApplication) {
-                     console.log('No application found for user');
-                     toast({ description: "Заявка не найдена" });
-                     return;
-                   }
-
-                   console.log('Application data structure:', latestApplication);
-                   console.log('Photo URLs in application_data:', {
-                     photo1_url: (latestApplication?.application_data as any)?.photo1_url,
-                     photo2_url: (latestApplication?.application_data as any)?.photo2_url,
-                     photo_1_url: (latestApplication?.application_data as any)?.photo_1_url,
-                     photo_2_url: (latestApplication?.application_data as any)?.photo_2_url
-                   });
-
-                   // Dispatch event with application data to open the modal
-                   window.dispatchEvent(new CustomEvent('openEditModal', { 
-                     detail: { 
-                       editMode: true,
-                       existingData: latestApplication
-                     } 
-                   }));
-                } catch (error) {
-                  console.error('Error loading application data:', error);
-                  toast({ description: "Ошибка загрузки данных" });
-                }
-              }}
-              size="sm"
-              className="absolute top-2 right-2 z-30 w-8 h-8 p-0"
-            >
-              <Edit className="w-3 h-3" />
-            </Button>
-          )}
-          
-          {/* Participant Type Badge */}
-          {showStatusBadge && getParticipantBadge(currentParticipantType)}
-          {/* Main two photos */}
-          <div className="flex-shrink-0 flex h-full relative gap-px">
-            <div className="relative">
-              <img 
-                src={displayFaceImage}
-                alt={`${authorName} face`}
-                className="w-24 sm:w-28 md:w-32 h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
-                onClick={() => openModal(0)}
-              />
-            </div>
-            <div className="relative">
-              <img 
-                src={displayFullImage}
-                alt={`${authorName} full body`}
-                className="w-24 sm:w-28 md:w-32 h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
-                onClick={() => openModal(1)}
-              />
-            </div>
-          </div>
-          
-          {/* Content area */}
-          <div className="flex-1 p-1.5 sm:p-2 md:p-3 flex flex-col relative">
-            <div className="absolute inset-0 bg-white rounded-r flex flex-col justify-between p-2 sm:p-3">
-              <div className="flex items-start justify-between">
-                <div className="min-w-0 flex-1 mr-2">
-                  <h3 className="font-semibold text-contest-text text-base sm:text-lg truncate">
-                    {authorProfileId ? (
-                      <Link to={`/u/${authorProfileId}`} className="hover:text-primary underline-offset-2 hover:underline">
-                        {authorName}
-                      </Link>
-                    ) : (
-                      authorName
-                    )}, {candidateAge}
-                  </h3>
-                   <div className="text-xs sm:text-sm text-muted-foreground font-normal">{candidateWeight} kg · {candidateHeight} cm</div>
-                   <div className="text-sm sm:text-base text-contest-blue truncate">
-                     {getCountryDisplayName(candidateCountry)}{candidateCity !== "Unknown" && candidateCity !== candidateCountry ? ` · ${candidateCity}` : ''}
-                   </div>
-                </div>
-              </div>
-              
-              <div className="flex items-center justify-end gap-4">
-                <button
-                  type="button"
-                  className="inline-flex items-center gap-1 text-xs sm:text-sm text-contest-blue hover:text-contest-blue/80 transition-colors"
-                  aria-label="Unlike"
-                  onClick={handleUnlike}
-                  disabled={isUnliking}
-                >
-                  <ThumbsUp className="w-3.5 h-3.5 text-primary" strokeWidth={1} />
-                   <span className="hidden xl:inline">Unlike</span>
-                   <span>{cardData.likes}</span>
-                </button>
-                <button
-                  type="button"
-                  className="inline-flex items-center gap-1 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors"
-                  onClick={handleComment}
-                  aria-label="Comments"
-                >
-                  <MessageCircle className="w-3.5 h-3.5 text-primary" strokeWidth={1} />
-                  <span className="hidden xl:inline">Comment</span>
-                   <span>{cardData.comments}</span>
-                </button>
-                <button
-                  type="button"
-                  className="inline-flex items-center gap-1 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors"
-                  onClick={async () => {
-                    try {
-                      if ((navigator as any).share) {
-                        await (navigator as any).share({ title: authorName, url: window.location.href });
-                      } else if (navigator.clipboard) {
-                        await navigator.clipboard.writeText(window.location.href);
-                        toast({ title: "Link copied" });
-                      }
-                    } catch {}
-                  }}
-                  aria-label="Share"
-                >
-                  <Share2 className="w-3.5 h-3.5" strokeWidth={1} />
-                  <span className="hidden xl:inline">Share</span>
-                </button>
-              </div>
-            </div>
-          </div>
-        </Card>
-
-        {/* Photo editing dialog exactly like in Admin */}
-        <Dialog open={!!editingParticipant} onOpenChange={(open) => !open && cancelParticipantEdit()}>
-          <DialogContent className="max-w-2xl">
-            <DialogHeader>
-              <DialogTitle>
-                Edit Photos for {editingParticipant?.first_name} {editingParticipant?.last_name}
-              </DialogTitle>
-            </DialogHeader>
-            
-            {editingParticipant && (
-              <div className="space-y-6">
-                {/* Current Photos */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label className="text-sm font-medium">Current Portrait Photo</Label>
-                    {editingParticipant.photo1_url && (
-                      <img 
-                        src={editingParticipant.photo1_url} 
-                        alt="Current portrait" 
-                        className="w-full h-48 object-cover rounded border mt-2"
-                      />
-                    )}
-                  </div>
-                  <div>
-                    <Label className="text-sm font-medium">Current Full Length Photo</Label>
-                    {editingParticipant.photo2_url && (
-                      <img 
-                        src={editingParticipant.photo2_url} 
-                        alt="Current full length" 
-                        className="w-full h-48 object-cover rounded border mt-2"
-                      />
-                    )}
-                  </div>
-                </div>
-                
-                {/* New Photo Uploads */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label className="text-sm font-medium">Replace Portrait Photo</Label>
-                    <Input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleParticipantPhoto1Upload}
-                      className="mt-2"
-                    />
-                    {participantPhoto1File && (
-                      <p className="text-sm text-green-600 mt-1">
-                        New portrait selected: {participantPhoto1File.name}
-                      </p>
-                    )}
-                  </div>
-                  
-                  <div>
-                    <Label className="text-sm font-medium">Replace Full Length Photo</Label>
-                    <Input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleParticipantPhoto2Upload}
-                      className="mt-2"
-                    />
-                    {participantPhoto2File && (
-                      <p className="text-sm text-green-600 mt-1">
-                        New full length selected: {participantPhoto2File.name}
-                      </p>
-                    )}
-                  </div>
-                </div>
-                
-                {/* Action Buttons */}
-                <div className="flex justify-end gap-2 pt-4 border-t">
-                  <Button variant="outline" onClick={cancelParticipantEdit} disabled={uploadingParticipantPhotos}>
-                    Cancel
-                  </Button>
-                  <Button 
-                    onClick={saveParticipantPhotos} 
-                    className="bg-blue-600 hover:bg-blue-700" 
-                    disabled={uploadingParticipantPhotos || (!participantPhoto1File && !participantPhoto2File)}
-                  >
-                    {uploadingParticipantPhotos ? "Uploading..." : "Save Photos"}
-                  </Button>
-                </div>
-              </div>
-            )}
-          </DialogContent>
-        </Dialog>
-
-        <PhotoModal
-          isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
-          photos={allPhotos}
-          currentIndex={modalStartIndex}
-          contestantName={authorName}
-          age={candidateAge}
-          weight={candidateWeight}
-          height={candidateHeight}
-          country={candidateCountry}
-          city={candidateCity}
-        />
-
-        {/* Login Modal */}
-        <Dialog open={showLoginModal} onOpenChange={setShowLoginModal}>
-          <DialogContent className="sm:max-w-lg">
-            <LoginModalContent onClose={() => setShowLoginModal(false)} />
-          </DialogContent>
-        </Dialog>
-      </>
-    );
-  }
-  
-  // Full view
-  return (
-    <>
-      <Card className="bg-card border-contest-border relative overflow-hidden">
-          {/* Edit button for owner - show for contest participation */}
+          {/* Edit button for owner - show for contest participation only if not approved */}
           {isOwner && (contentType === 'contest' || contentType === 'next_week_candidate') && (
             <Button
               onClick={async () => {
@@ -694,6 +430,15 @@ const LikedItem = ({
                   if (error) {
                     console.error('Error loading application:', error);
                     toast({ description: "Ошибка загрузки данных заявки" });
+                    return;
+                  }
+
+                  // Check if application is approved - don't allow editing
+                  if (latestApplication?.status === 'approved') {
+                    toast({ 
+                      description: "Редактирование недоступно - заявка уже одобрена",
+                      variant: "destructive" 
+                    });
                     return;
                   }
 
@@ -902,13 +647,264 @@ const LikedItem = ({
         city={candidateCity}
       />
 
+        {/* Login Modal */}
+        <Dialog open={showLoginModal} onOpenChange={setShowLoginModal}>
+          <DialogContent className="sm:max-w-lg">
+            <LoginModalContent onClose={() => setShowLoginModal(false)} />
+          </DialogContent>
+        </Dialog>
+      </>
+    );
+  }
+  
+  // Full view
+  return (
+    <>
+      <Card className="bg-card border-contest-border relative overflow-hidden">
+          {/* Edit button for owner - show for contest participation only if not approved */}
+          {isOwner && (contentType === 'contest' || contentType === 'next_week_candidate') && (
+            <Button
+              onClick={async () => {
+                console.log('Edit button clicked! Loading user application data...');
+                
+                // Get latest application data for the user
+                try {
+                  const { data: { session } } = await supabase.auth.getSession();
+                  if (!session) {
+                    toast({ description: "Необходимо войти в систему" });
+                    return;
+                  }
+
+                  const { data: latestApplication, error } = await supabase
+                    .from('contest_applications')
+                    .select('*')
+                    .eq('user_id', session.user.id)
+                    .order('created_at', { ascending: false })
+                    .limit(1)
+                    .maybeSingle();
+
+                  if (error) {
+                    console.error('Error loading application:', error);
+                    toast({ description: "Ошибка загрузки данных заявки" });
+                    return;
+                  }
+
+                  // Check if application is approved - don't allow editing
+                  if (latestApplication?.status === 'approved') {
+                    toast({ 
+                      description: "Редактирование недоступно - заявка уже одобрена",
+                      variant: "destructive" 
+                    });
+                    return;
+                  }
+
+                  // Dispatch event with application data to open the modal
+                  window.dispatchEvent(new CustomEvent('openEditModal', { 
+                    detail: { 
+                      editMode: true,
+                      existingData: latestApplication
+                    } 
+                  }));
+                } catch (error) {
+                  console.error('Error loading application data:', error);
+                  toast({ description: "Ошибка загрузки данных" });
+                }
+              }}
+              size="sm"
+              className="absolute top-2 right-2 z-30 w-8 h-8 p-0"
+            >
+              <Edit className="w-3 h-3" />
+            </Button>
+          )}
+        
+        {/* Name in top left */}
+        <div className="absolute top-2 left-4 z-20">
+          <h3 className="text-xl font-semibold text-contest-text">
+            {authorProfileId ? (
+              <Link to={`/u/${authorProfileId}`} className="hover:text-primary underline-offset-2 hover:underline">
+                {authorName}
+              </Link>
+            ) : (
+              authorName
+            )}, {candidateAge} <span className="text-sm text-muted-foreground font-normal">({candidateWeight} kg · {candidateHeight} cm)</span>
+          </h3>
+          <div className="text-contest-blue text-sm">{getCountryDisplayName(candidateCountry)}{candidateCity !== "Unknown" && candidateCity !== candidateCountry ? ` · ${candidateCity}` : ''}</div>
+        </div>
+        
+        {/* Header */}
+        <div className="relative p-4 border-b border-contest-border h-[72px]">
+          <div className="h-full"></div>
+        </div>
+        
+        {/* Photos section */}
+        <div className="relative">
+          <div className="grid grid-cols-2 gap-px">
+            {/* Participant Type Badge */}
+            {showStatusBadge && getParticipantBadge(currentParticipantType, false)}
+            <div className="relative">
+              <img 
+                src={displayFaceImage} 
+                alt={`${authorName} face`}
+                className="w-full aspect-[4/5] object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                onClick={() => openModal(0)}
+              />
+            </div>
+            <div className="relative">
+              <img 
+                src={displayFullImage} 
+                alt={`${authorName} full body`}
+                className="w-full aspect-[4/5] object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                onClick={() => openModal(1)}
+              />
+            </div>
+          </div>
+        </div>
+        
+        {/* Footer with actions */}
+        <div className="border-t border-contest-border px-4 py-3 flex items-center justify-evenly gap-4">
+          <button
+            type="button"
+            className="inline-flex items-center gap-1 text-sm text-contest-blue hover:text-contest-blue/80 transition-colors"
+            aria-label="Unlike"
+            onClick={handleUnlike}
+            disabled={isUnliking}
+          >
+            <ThumbsUp className="w-4 h-4 text-blue-500 fill-blue-500" strokeWidth={1} />
+             <span className="hidden sm:inline text-blue-500">Unlike</span>
+             <span className="text-blue-500">{cardData.likes}</span>
+          </button>
+          <button
+            type="button"
+            className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
+            onClick={handleComment}
+            aria-label="Comments"
+          >
+            <MessageCircle className="w-4 h-4 text-primary" strokeWidth={1} />
+            <span className="hidden sm:inline">Comment</span>
+            <span>{cardData.comments}</span>
+          </button>
+          <button
+            type="button"
+            className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
+            onClick={async () => {
+              try {
+                if ((navigator as any).share) {
+                  await (navigator as any).share({ title: authorName, url: window.location.href });
+                } else if (navigator.clipboard) {
+                  await navigator.clipboard.writeText(window.location.href);
+                  toast({ title: "Link copied" });
+                }
+              } catch {}
+            }}
+            aria-label="Share"
+          >
+            <Share2 className="w-4 h-4" strokeWidth={1} />
+            <span className="hidden sm:inline">Share</span>
+          </button>
+        </div>
+      </Card>
+
+      {/* Photo editing dialog exactly like in Admin */}
+      <Dialog open={!!editingParticipant} onOpenChange={(open) => !open && cancelParticipantEdit()}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>
+              Edit Photos for {editingParticipant?.first_name} {editingParticipant?.last_name}
+            </DialogTitle>
+          </DialogHeader>
+          
+          {editingParticipant && (
+            <div className="space-y-6">
+              {/* Current Photos */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-sm font-medium">Current Portrait Photo</Label>
+                  {editingParticipant.photo1_url && (
+                    <img 
+                      src={editingParticipant.photo1_url} 
+                      alt="Current portrait" 
+                      className="w-full h-48 object-cover rounded border mt-2"
+                    />
+                  )}
+                </div>
+                <div>
+                  <Label className="text-sm font-medium">Current Full Length Photo</Label>
+                  {editingParticipant.photo2_url && (
+                    <img 
+                      src={editingParticipant.photo2_url} 
+                      alt="Current full length" 
+                      className="w-full h-48 object-cover rounded border mt-2"
+                    />
+                  )}
+                </div>
+              </div>
+              
+              {/* New Photo Uploads */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-sm font-medium">Replace Portrait Photo</Label>
+                  <Input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleParticipantPhoto1Upload}
+                    className="mt-2"
+                  />
+                  {participantPhoto1File && (
+                    <p className="text-sm text-green-600 mt-1">
+                      New portrait selected: {participantPhoto1File.name}
+                    </p>
+                  )}
+                </div>
+                <div>
+                  <Label className="text-sm font-medium">Replace Full Length Photo</Label>
+                  <Input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleParticipantPhoto2Upload}
+                    className="mt-2"
+                  />
+                  {participantPhoto2File && (
+                    <p className="text-sm text-green-600 mt-1">
+                      New full length selected: {participantPhoto2File.name}
+                    </p>
+                  )}
+                </div>
+              </div>
+              
+              {/* Action Buttons */}
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={cancelParticipantEdit}>
+                  Cancel
+                </Button>
+                <Button onClick={saveParticipantPhotos} className="bg-blue-600 hover:bg-blue-700" disabled={uploadingParticipantPhotos}>
+                  {uploadingParticipantPhotos ? "Uploading..." : "Save Changes"}
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Photo Modal */}
+      <PhotoModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        photos={allPhotos}
+        currentIndex={modalStartIndex}
+        contestantName={authorName}
+        age={candidateAge}
+        weight={candidateWeight}
+        height={candidateHeight}
+        country={candidateCountry}
+        city={candidateCity}
+      />
+
       {/* Login Modal */}
       <Dialog open={showLoginModal} onOpenChange={setShowLoginModal}>
         <DialogContent className="sm:max-w-lg">
           <LoginModalContent onClose={() => setShowLoginModal(false)} />
         </DialogContent>
       </Dialog>
-
     </>
   );
 };
