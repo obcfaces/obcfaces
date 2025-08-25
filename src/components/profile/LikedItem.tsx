@@ -255,6 +255,30 @@ const LikedItem = ({
 
         if (profileError) throw profileError;
 
+        // Also update weekly_contest_participants table
+        const { data: participantRecord, error: fetchError } = await supabase
+          .from('weekly_contest_participants')
+          .select('application_data')
+          .eq('user_id', editingParticipant.user_id)
+          .single();
+
+        if (!fetchError && participantRecord) {
+          const currentData = (participantRecord.application_data as Record<string, any>) || {};
+          const updatedApplicationData = {
+            ...currentData,
+            ...updates
+          };
+
+          const { error: participantError } = await supabase
+            .from('weekly_contest_participants')
+            .update({ application_data: updatedApplicationData })
+            .eq('user_id', editingParticipant.user_id);
+
+          if (participantError) {
+            console.error('Error updating weekly participant data:', participantError);
+          }
+        }
+
         toast({
           title: "Success",
           description: "Photos updated successfully",
