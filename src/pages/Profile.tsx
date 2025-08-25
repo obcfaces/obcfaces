@@ -853,8 +853,19 @@ const Profile = () => {
       }
     };
 
+    const handleParticipationUpdated = (event: any) => {
+      console.log('Participation updated:', event.detail);
+      // Reload participation data to show updated information
+      loadParticipationItems();
+    };
+
     window.addEventListener('openEditModal', handleOpenEditModal);
-    return () => window.removeEventListener('openEditModal', handleOpenEditModal);
+    window.addEventListener('participationUpdated', handleParticipationUpdated);
+    
+    return () => {
+      window.removeEventListener('openEditModal', handleOpenEditModal);
+      window.removeEventListener('participationUpdated', handleParticipationUpdated);
+    };
   }, []);
 
   const handleRemoveParticipation = (participationId: string) => {

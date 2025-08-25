@@ -557,6 +557,13 @@ export const ContestParticipationModal = ({
       
       // In edit mode, close modal after successful update
       if (editMode) {
+        // Trigger update event to refresh participation data in profile
+        window.dispatchEvent(new CustomEvent('participationUpdated', { 
+          detail: { 
+            applicationData: applicationData,
+            updatedAt: new Date().toISOString()
+          } 
+        }));
         setIsOpen(false);
       } else {
         // Set submission success to show contact form for new applications
