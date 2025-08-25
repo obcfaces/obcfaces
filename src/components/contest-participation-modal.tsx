@@ -16,10 +16,22 @@ import { getCitiesForLocation } from '@/lib/location-utils';
 
 interface ContestParticipationModalProps {
   children: React.ReactNode;
+  isOpen?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  editMode?: boolean;
+  existingData?: any;
 }
 
-export const ContestParticipationModal = ({ children }: ContestParticipationModalProps) => {
-  const [isOpen, setIsOpen] = useState(false);
+export const ContestParticipationModal = ({ 
+  children, 
+  isOpen: controlledIsOpen, 
+  onOpenChange: controlledOnOpenChange, 
+  editMode = false, 
+  existingData 
+}: ContestParticipationModalProps) => {
+  const [internalIsOpen, setInternalIsOpen] = useState(false);
+  const isOpen = controlledIsOpen !== undefined ? controlledIsOpen : internalIsOpen;
+  const setIsOpen = controlledOnOpenChange || setInternalIsOpen;
   const [currentStep, setCurrentStep] = useState<'auth' | 'profile'>('auth');
   const [mode, setMode] = useState<'login' | 'signup'>('login');
   const [isLoading, setIsLoading] = useState(false);
@@ -45,8 +57,32 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
   // Cache key for localStorage
   const FORM_CACHE_KEY = 'contest_form_cache';
 
-  // Load cached form data
+  // Load cached form data or existing data for edit mode
   const loadCachedFormData = () => {
+    // If in edit mode, prioritize existing data
+    if (editMode && existingData) {
+      const birthdate = existingData.birthdate ? new Date(existingData.birthdate) : null;
+      return {
+        first_name: existingData.first_name || "",
+        last_name: existingData.last_name || "",
+        country: existingData.country || "",
+        countryCode: existingData.state || "", // In edit mode, we need the country code
+        state: existingData.state || "",
+        stateCode: existingData.state || "",
+        city: existingData.city || "",
+        gender: existingData.gender || "",
+        birth_day: birthdate ? birthdate.getDate().toString() : "",
+        birth_month: birthdate ? (birthdate.getMonth() + 1).toString() : "",
+        birth_year: birthdate ? birthdate.getFullYear().toString() : "",
+        marital_status: existingData.marital_status || "",
+        has_children: existingData.has_children as boolean | undefined,
+        height_cm: existingData.height_cm ? existingData.height_cm.toString() : "",
+        height_ft: "",
+        weight_kg: existingData.weight_kg ? existingData.weight_kg.toString() : "",
+        measurement_system: "metric",
+      };
+    }
+    
     try {
       const cached = localStorage.getItem(FORM_CACHE_KEY);
       if (cached) {
@@ -488,22 +524,31 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
       setSubmitted(false);
       setInvalidFields(new Set());
       
-      // Load cached photos
-      const cachedPhoto1 = loadPhotoFromCache(1);
-      const cachedPhoto2 = loadPhotoFromCache(2);
-      if (cachedPhoto1) setPhoto1File(cachedPhoto1);
-      if (cachedPhoto2) setPhoto2File(cachedPhoto2);
+      // Load form data (existing data for edit mode or cached data)
+      setFormData(loadCachedFormData());
+      
+      // Load cached photos only if not in edit mode
+      if (!editMode) {
+        const cachedPhoto1 = loadPhotoFromCache(1);
+        const cachedPhoto2 = loadPhotoFromCache(2);
+        if (cachedPhoto1) setPhoto1File(cachedPhoto1);
+        if (cachedPhoto2) setPhoto2File(cachedPhoto2);
+      } else if (existingData) {
+        // In edit mode, photos are already uploaded
+        setPhoto1File(null);
+        setPhoto2File(null);
+      }
       
       const checkAuth = async () => {
         const { data: { session } } = await supabase.auth.getSession();
         if (session) {
           setCurrentStep('profile');
-        } else {
-          setCurrentStep('auth');
-        }
-      };
-      checkAuth();
+    } else {
+      setCurrentStep('auth');
     }
+  };
+  checkAuth();
+}
   }, [isOpen]);
 
   // Save form data to cache
@@ -560,7 +605,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
       <DialogContent className="w-full max-w-4xl mx-auto max-h-[95vh] overflow-y-auto bg-background">
         <DialogHeader>
           <DialogTitle>
-            {currentStep === 'auth' ? 'Sign in' : ''}
+            {currentStep === 'auth' ? 'Sign in' : editMode ? 'Edit Contest Application' : ''}
           </DialogTitle>
         </DialogHeader>
 
@@ -800,7 +845,9 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
         ) : (
           <form onSubmit={handleProfileSubmit} className="space-y-3">
             <div className="text-center mb-4">
-              <h2 className="text-lg font-semibold text-foreground">Contest Registration Form</h2>
+              <h2 className="text-lg font-semibold text-foreground">
+                {editMode ? 'Edit Contest Application' : 'Contest Registration Form'}
+              </h2>
             </div>
             <div className="grid gap-2 grid-cols-3">
               <Input
