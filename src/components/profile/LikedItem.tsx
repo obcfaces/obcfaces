@@ -154,8 +154,8 @@ const LikedItem = ({
     return () => subscription.unsubscribe();
   }, []);
 
-  // Initialize editing state with current participant data
-  const initEditingParticipant = () => {
+  // Participant photo editing functions exactly like in Admin
+  const startEditingParticipant = () => {
     if (!authorProfileId) return;
     
     const participant: ParticipantData = {
@@ -168,14 +168,9 @@ const LikedItem = ({
     };
     
     setEditingParticipant(participant);
+    setParticipantPhoto1File(null);
+    setParticipantPhoto2File(null);
   };
-
-  // Initialize editing participant on component mount for inline editing
-  useEffect(() => {
-    if (isOwner && authorProfileId) {
-      initEditingParticipant();
-    }
-  }, [isOwner, authorProfileId, candidateData, imageSrc]);
 
   const cancelParticipantEdit = () => {
     setEditingParticipant(null);
@@ -199,10 +194,7 @@ const LikedItem = ({
 
   // Save participant photos exactly like in Admin
   const saveParticipantPhotos = async () => {
-    if (!editingParticipant) {
-      initEditingParticipant();
-      return;
-    }
+    if (!editingParticipant) return;
 
     setUploadingParticipantPhotos(true);
 
@@ -272,9 +264,7 @@ const LikedItem = ({
         }
       }
 
-      // Reset file inputs after successful upload
-      setParticipantPhoto1File(null);
-      setParticipantPhoto2File(null);
+      cancelParticipantEdit();
     } catch (error: any) {
       console.error('Error updating participant photos:', error);
       toast({
@@ -414,100 +404,36 @@ const LikedItem = ({
     return (
       <>
         <Card className="bg-card border-contest-border relative overflow-hidden flex h-32 sm:h-36 md:h-40">
+          {/* Edit button for owner */}
+          {isOwner && (
+            <Button
+              onClick={onEditPhotos}
+              size="sm"
+              className="absolute top-2 right-2 z-30 w-8 h-8 p-0"
+            >
+              <Edit className="w-3 h-3" />
+            </Button>
+          )}
           
           {/* Participant Type Badge */}
           {showStatusBadge && getParticipantBadge(currentParticipantType)}
           {/* Main two photos */}
           <div className="flex-shrink-0 flex h-full relative gap-px">
-            <div className="relative group">
+            <div className="relative">
               <img 
                 src={displayFaceImage}
                 alt={`${authorName} face`}
                 className="w-24 sm:w-28 md:w-32 h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
                 onClick={() => openModal(0)}
               />
-              {/* Photo edit overlay for owner */}
-              {isOwner && (
-                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/50 transition-all duration-200 flex items-center justify-center">
-                  <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex flex-col gap-1">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      id={`photo1-${likeId}`}
-                      onChange={handleParticipantPhoto1Upload}
-                    />
-                    <Button
-                      size="sm"
-                      className="w-6 h-6 p-0 bg-white/90 hover:bg-white text-black"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        document.getElementById(`photo1-${likeId}`)?.click();
-                      }}
-                    >
-                      <Edit className="w-3 h-3" />
-                    </Button>
-                    {participantPhoto1File && (
-                      <Button
-                        size="sm"
-                        className="w-6 h-6 p-0 bg-green-600 hover:bg-green-700 text-white"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          saveParticipantPhotos();
-                        }}
-                        disabled={uploadingParticipantPhotos}
-                      >
-                        ✓
-                      </Button>
-                    )}
-                  </div>
-                </div>
-              )}
             </div>
-            <div className="relative group">
+            <div className="relative">
               <img 
                 src={displayFullImage}
                 alt={`${authorName} full body`}
                 className="w-24 sm:w-28 md:w-32 h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
                 onClick={() => openModal(1)}
               />
-              {/* Photo edit overlay for owner */}
-              {isOwner && (
-                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/50 transition-all duration-200 flex items-center justify-center">
-                  <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex flex-col gap-1">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      id={`photo2-${likeId}`}
-                      onChange={handleParticipantPhoto2Upload}
-                    />
-                    <Button
-                      size="sm"
-                      className="w-6 h-6 p-0 bg-white/90 hover:bg-white text-black"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        document.getElementById(`photo2-${likeId}`)?.click();
-                      }}
-                    >
-                      <Edit className="w-3 h-3" />
-                    </Button>
-                    {participantPhoto2File && (
-                      <Button
-                        size="sm"
-                        className="w-6 h-6 p-0 bg-green-600 hover:bg-green-700 text-white"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          saveParticipantPhotos();
-                        }}
-                        disabled={uploadingParticipantPhotos}
-                      >
-                        ✓
-                      </Button>
-                    )}
-                  </div>
-                </div>
-              )}
             </div>
           </div>
           
@@ -577,6 +503,92 @@ const LikedItem = ({
           </div>
         </Card>
 
+        {/* Photo editing dialog exactly like in Admin */}
+        <Dialog open={!!editingParticipant} onOpenChange={(open) => !open && cancelParticipantEdit()}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>
+                Edit Photos for {editingParticipant?.first_name} {editingParticipant?.last_name}
+              </DialogTitle>
+            </DialogHeader>
+            
+            {editingParticipant && (
+              <div className="space-y-6">
+                {/* Current Photos */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-sm font-medium">Current Portrait Photo</Label>
+                    {editingParticipant.photo1_url && (
+                      <img 
+                        src={editingParticipant.photo1_url} 
+                        alt="Current portrait" 
+                        className="w-full h-48 object-cover rounded border mt-2"
+                      />
+                    )}
+                  </div>
+                  <div>
+                    <Label className="text-sm font-medium">Current Full Length Photo</Label>
+                    {editingParticipant.photo2_url && (
+                      <img 
+                        src={editingParticipant.photo2_url} 
+                        alt="Current full length" 
+                        className="w-full h-48 object-cover rounded border mt-2"
+                      />
+                    )}
+                  </div>
+                </div>
+                
+                {/* New Photo Uploads */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-sm font-medium">Replace Portrait Photo</Label>
+                    <Input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleParticipantPhoto1Upload}
+                      className="mt-2"
+                    />
+                    {participantPhoto1File && (
+                      <p className="text-sm text-green-600 mt-1">
+                        New portrait selected: {participantPhoto1File.name}
+                      </p>
+                    )}
+                  </div>
+                  
+                  <div>
+                    <Label className="text-sm font-medium">Replace Full Length Photo</Label>
+                    <Input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleParticipantPhoto2Upload}
+                      className="mt-2"
+                    />
+                    {participantPhoto2File && (
+                      <p className="text-sm text-green-600 mt-1">
+                        New full length selected: {participantPhoto2File.name}
+                      </p>
+                    )}
+                  </div>
+                </div>
+                
+                {/* Action Buttons */}
+                <div className="flex justify-end gap-2 pt-4 border-t">
+                  <Button variant="outline" onClick={cancelParticipantEdit} disabled={uploadingParticipantPhotos}>
+                    Cancel
+                  </Button>
+                  <Button 
+                    onClick={saveParticipantPhotos} 
+                    className="bg-blue-600 hover:bg-blue-700" 
+                    disabled={uploadingParticipantPhotos || (!participantPhoto1File && !participantPhoto2File)}
+                  >
+                    {uploadingParticipantPhotos ? "Uploading..." : "Save Photos"}
+                  </Button>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+
         <PhotoModal
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
@@ -602,8 +614,18 @@ const LikedItem = ({
   
   // Full view
   return (
-      <>
+    <>
       <Card className="bg-card border-contest-border relative overflow-hidden">
+        {/* Edit button for owner */}
+        {isOwner && (
+          <Button
+            onClick={onEditPhotos}
+            size="sm"
+            className="absolute top-2 right-2 z-30 w-8 h-8 p-0"
+          >
+            <Edit className="w-3 h-3" />
+          </Button>
+        )}
         
         {/* Name in top left */}
         <div className="absolute top-2 left-4 z-20">
@@ -629,95 +651,21 @@ const LikedItem = ({
           <div className="grid grid-cols-2 gap-px">
             {/* Participant Type Badge */}
             {showStatusBadge && getParticipantBadge(currentParticipantType, true)}
-            <div className="relative group">
+            <div className="relative">
               <img 
                 src={displayFaceImage} 
                 alt={`${authorName} face`}
                 className="w-full aspect-[4/5] object-cover cursor-pointer hover:opacity-90 transition-opacity"
                 onClick={() => openModal(0)}
               />
-              {/* Photo edit overlay for owner */}
-              {isOwner && (
-                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/50 transition-all duration-200 flex items-center justify-center">
-                  <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex flex-col gap-2">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      id={`photo1-full-${likeId}`}
-                      onChange={handleParticipantPhoto1Upload}
-                    />
-                    <Button
-                      size="sm"
-                      className="w-8 h-8 p-0 bg-white/90 hover:bg-white text-black"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        document.getElementById(`photo1-full-${likeId}`)?.click();
-                      }}
-                    >
-                      <Edit className="w-4 h-4" />
-                    </Button>
-                    {participantPhoto1File && (
-                      <Button
-                        size="sm"
-                        className="w-8 h-8 p-0 bg-green-600 hover:bg-green-700 text-white"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          saveParticipantPhotos();
-                        }}
-                        disabled={uploadingParticipantPhotos}
-                      >
-                        ✓
-                      </Button>
-                    )}
-                  </div>
-                </div>
-              )}
             </div>
-            <div className="relative group">
+            <div className="relative">
               <img 
                 src={displayFullImage} 
                 alt={`${authorName} full body`}
                 className="w-full aspect-[4/5] object-cover cursor-pointer hover:opacity-90 transition-opacity"
                 onClick={() => openModal(1)}
               />
-              {/* Photo edit overlay for owner */}
-              {isOwner && (
-                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/50 transition-all duration-200 flex items-center justify-center">
-                  <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex flex-col gap-2">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      id={`photo2-full-${likeId}`}
-                      onChange={handleParticipantPhoto2Upload}
-                    />
-                    <Button
-                      size="sm"
-                      className="w-8 h-8 p-0 bg-white/90 hover:bg-white text-black"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        document.getElementById(`photo2-full-${likeId}`)?.click();
-                      }}
-                    >
-                      <Edit className="w-4 h-4" />
-                    </Button>
-                    {participantPhoto2File && (
-                      <Button
-                        size="sm"
-                        className="w-8 h-8 p-0 bg-green-600 hover:bg-green-700 text-white"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          saveParticipantPhotos();
-                        }}
-                        disabled={uploadingParticipantPhotos}
-                      >
-                        ✓
-                      </Button>
-                    )}
-                  </div>
-                </div>
-              )}
             </div>
           </div>
         </div>
@@ -765,6 +713,92 @@ const LikedItem = ({
           </button>
         </div>
       </Card>
+
+      {/* Photo editing dialog exactly like in Admin */}
+      <Dialog open={!!editingParticipant} onOpenChange={(open) => !open && cancelParticipantEdit()}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>
+              Edit Photos for {editingParticipant?.first_name} {editingParticipant?.last_name}
+            </DialogTitle>
+          </DialogHeader>
+          
+          {editingParticipant && (
+            <div className="space-y-6">
+              {/* Current Photos */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-sm font-medium">Current Portrait Photo</Label>
+                  {editingParticipant.photo1_url && (
+                    <img 
+                      src={editingParticipant.photo1_url} 
+                      alt="Current portrait" 
+                      className="w-full h-48 object-cover rounded border mt-2"
+                    />
+                  )}
+                </div>
+                <div>
+                  <Label className="text-sm font-medium">Current Full Length Photo</Label>
+                  {editingParticipant.photo2_url && (
+                    <img 
+                      src={editingParticipant.photo2_url} 
+                      alt="Current full length" 
+                      className="w-full h-48 object-cover rounded border mt-2"
+                    />
+                  )}
+                </div>
+              </div>
+              
+              {/* New Photo Uploads */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-sm font-medium">Replace Portrait Photo</Label>
+                  <Input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleParticipantPhoto1Upload}
+                    className="mt-2"
+                  />
+                  {participantPhoto1File && (
+                    <p className="text-sm text-green-600 mt-1">
+                      New portrait selected: {participantPhoto1File.name}
+                    </p>
+                  )}
+                </div>
+                
+                <div>
+                  <Label className="text-sm font-medium">Replace Full Length Photo</Label>
+                  <Input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleParticipantPhoto2Upload}
+                    className="mt-2"
+                  />
+                  {participantPhoto2File && (
+                    <p className="text-sm text-green-600 mt-1">
+                      New full length selected: {participantPhoto2File.name}
+                    </p>
+                  )}
+                </div>
+              </div>
+              
+              {/* Action Buttons */}
+              <div className="flex justify-end gap-2 pt-4 border-t">
+                <Button variant="outline" onClick={cancelParticipantEdit} disabled={uploadingParticipantPhotos}>
+                  Cancel
+                </Button>
+                <Button 
+                  onClick={saveParticipantPhotos} 
+                  className="bg-blue-600 hover:bg-blue-700" 
+                  disabled={uploadingParticipantPhotos || (!participantPhoto1File && !participantPhoto2File)}
+                >
+                  {uploadingParticipantPhotos ? "Uploading..." : "Save Photos"}
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
       <PhotoModal
         isOpen={isModalOpen}
