@@ -10,6 +10,7 @@ type Props = {
 };
 
 export default function WeightFilterDropdown({ onSelect, value, className }: Props) {
+  console.log("WeightFilterDropdown rendered with updated scroll fix");
   const [open, setOpen] = useState(false);
   
   // kg: 40..120 (81 элемент)
