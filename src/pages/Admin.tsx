@@ -91,6 +91,7 @@ const Admin = () => {
   const [weeklyContests, setWeeklyContests] = useState<WeeklyContest[]>([]);
   const [weeklyParticipants, setWeeklyParticipants] = useState<WeeklyContestParticipant[]>([]);
   const [selectedContest, setSelectedContest] = useState<string | null>(null);
+  const [selectedWeekOffset, setSelectedWeekOffset] = useState<number>(0); // 0 = current week, -1 = last week, etc.
   const [editingApplication, setEditingApplication] = useState<ContestApplication | null>(null);
   const [editForm, setEditForm] = useState<any>({});
   const [photo1File, setPhoto1File] = useState<File | null>(null);
@@ -262,11 +263,37 @@ const Admin = () => {
   };
 
   // Load participants when selected contest changes
+  // Fetch participants when week offset changes
   useEffect(() => {
-    if (selectedContest) {
-      fetchWeeklyParticipants();
+    fetchWeeklyParticipants();
+  }, [selectedWeekOffset]);
+
+  // Generate week options for selector
+  const getWeekOptions = () => {
+    const options = [];
+    const today = new Date();
+    
+    for (let i = 0; i >= -8; i--) { // Current week and 8 previous weeks
+      const weekDate = new Date(today);
+      weekDate.setDate(today.getDate() + (i * 7));
+      
+      const monday = new Date(weekDate);
+      monday.setDate(weekDate.getDate() - weekDate.getDay() + 1);
+      
+      const sunday = new Date(monday);
+      sunday.setDate(monday.getDate() + 6);
+      
+      const label = i === 0 
+        ? `This Week (${monday.toLocaleDateString()} - ${sunday.toLocaleDateString()})`
+        : i === -1
+        ? `Last Week (${monday.toLocaleDateString()} - ${sunday.toLocaleDateString()})`
+        : `${Math.abs(i)} Weeks Ago (${monday.toLocaleDateString()} - ${sunday.toLocaleDateString()})`;
+      
+      options.push({ value: i, label });
     }
-  }, [selectedContest]);
+    
+    return options;
+  };
 
   const rotateWeeklyContests = async () => {
     const { error } = await supabase.rpc('rotate_weekly_contests');
@@ -893,21 +920,36 @@ const Admin = () => {
                 </Button>
               </div>
               
-              {/* Contest selector */}
+              {/* Week selector */}
               <div className="mb-4">
                 <label className="block text-sm font-medium mb-2">Select Contest Week:</label>
                 <select 
-                  value={selectedContest || ''} 
-                  onChange={(e) => setSelectedContest(e.target.value)}
+                  value={selectedWeekOffset} 
+                  onChange={(e) => setSelectedWeekOffset(parseInt(e.target.value))}
                   className="w-full p-2 border rounded-md bg-background"
                 >
-                  {weeklyContests.map((contest) => (
-                    <option key={contest.id} value={contest.id}>
-                      {contest.title} ({contest.status}) - 
-                      {new Date(contest.week_start_date).toLocaleDateString()} to {new Date(contest.week_end_date).toLocaleDateString()}
+                  {getWeekOptions().map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
                     </option>
                   ))}
                 </select>
+              </div>
+
+              
+              {/* Display current week info */}
+              <div className="mb-4 p-4 bg-muted/50 rounded-lg">
+                <h3 className="font-medium mb-1">
+                  {selectedWeekOffset === 0 ? "Current Week Contest" 
+                   : selectedWeekOffset === -1 ? "Last Week Contest"
+                   : `Contest from ${Math.abs(selectedWeekOffset)} weeks ago`}
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  Showing {weeklyParticipants.length} participant{weeklyParticipants.length !== 1 ? 's' : ''}
+                  {weeklyParticipants.length > 0 && weeklyParticipants[0].week_start_date && 
+                    ` for the period ${new Date(weeklyParticipants[0].week_start_date).toLocaleDateString()} - ${new Date(weeklyParticipants[0].week_end_date).toLocaleDateString()}`
+                  }
+                </p>
               </div>
 
               {/* Participants list */}
@@ -994,12 +1036,20 @@ const Admin = () => {
                   </Card>
                 ))}
                 
-                {weeklyParticipants.length === 0 && selectedContest && (
+                {weeklyParticipants.length === 0 && (
                   <Card>
                     <CardContent className="text-center py-8">
-                      <p className="text-muted-foreground">No participants found for this week.</p>
+                      <p className="text-muted-foreground">
+                        {selectedWeekOffset === 0 
+                          ? "No participants in this week's contest yet." 
+                          : "No participants found for the selected week."
+                        }
+                      </p>
                       <p className="text-sm text-muted-foreground mt-2">
-                        Approve contest applications to add participants to weekly contests.
+                        {selectedWeekOffset === 0 
+                          ? "Approve contest applications to add participants to weekly contests."
+                          : "This week may not have had any approved participants."
+                        }
                       </p>
                     </CardContent>
                   </Card>
