@@ -1958,7 +1958,11 @@ const Profile = () => {
       {/* Contest Participation Edit Modal */}
       <ContestParticipationEditModal
         isOpen={editingParticipation}
-        onClose={() => setEditingParticipation(false)}
+        onClose={() => {
+          setEditingParticipation(false);
+          // Refresh participation items after editing
+          loadParticipationItems();
+        }}
         userId={currentUserId || undefined}
       />
 
