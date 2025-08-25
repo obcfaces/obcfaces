@@ -707,11 +707,29 @@ const Profile = () => {
         return;
       }
 
-      // Проверяем, является ли пользователь участником конкурса
+      // Проверяем, является ли пользователь участником конкурса или имеет заявку
       console.log('is_contest_participant:', profileData.is_contest_participant);
       
-      if (!profileData.is_contest_participant) {
-        console.log('User is not a contest participant');
+      // Также проверяем наличие заявки на участие
+      const { data: contestApplication } = await supabase
+        .from('contest_applications')
+        .select('id, status, created_at')
+        .eq('user_id', id)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      console.log('Contest application:', contestApplication);
+
+      // Показываем карточку если пользователь участник ИЛИ имеет заявку ИЛИ есть фотографии участника
+      const hasParticipationPhotos = profileData.photo_1_url || profileData.photo_2_url;
+      const shouldShowParticipation = profileData.is_contest_participant || 
+                                    contestApplication || 
+                                    hasParticipationPhotos ||
+                                    profileData.participant_type;
+
+      if (!shouldShowParticipation) {
+        console.log('User has no contest participation');
         setParticipationItems([]);
         setLoadingParticipation(false);
         return;
