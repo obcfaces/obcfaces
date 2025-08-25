@@ -12,6 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { toast } from "@/components/ui/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Check, X, Eye, UserCog, FileText, Calendar, Trophy, RotateCcw, Edit } from "lucide-react";
+import { PhotoModal } from "@/components/photo-modal";
 import { Switch } from "@/components/ui/switch";
 import { useNavigate } from "react-router-dom";
 
@@ -104,6 +105,10 @@ const Admin = () => {
   const [participantPhoto1File, setParticipantPhoto1File] = useState<File | null>(null);
   const [participantPhoto2File, setParticipantPhoto2File] = useState<File | null>(null);
   const [uploadingParticipantPhotos, setUploadingParticipantPhotos] = useState(false);
+  const [photoModalOpen, setPhotoModalOpen] = useState(false);
+  const [photoModalImages, setPhotoModalImages] = useState<string[]>([]);
+  const [photoModalIndex, setPhotoModalIndex] = useState(0);
+  const [photoModalName, setPhotoModalName] = useState("");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -708,6 +713,17 @@ const Admin = () => {
     return data.publicUrl;
   };
 
+  const openPhotoModal = (photos: string[], index: number, name: string) => {
+    const validPhotos = photos.filter(photo => photo && photo.trim() !== '');
+    if (validPhotos.length === 0) return;
+    
+    setPhotoModalImages(validPhotos);
+    setPhotoModalIndex(index);
+    setPhotoModalName(name);
+    setPhotoModalOpen(true);
+  };
+  };
+
   const reviewApplication = async (applicationId: string, status: 'approved' | 'rejected', notes?: string) => {
     const { error } = await supabase
       .from('contest_applications')
@@ -1067,7 +1083,8 @@ const Admin = () => {
                             <img 
                               src={participant.photo1_url} 
                               alt="Portrait" 
-                              className="w-32 h-40 object-cover rounded border"
+                              className="w-32 h-40 object-cover rounded border cursor-pointer hover:opacity-80 transition-opacity"
+                              onClick={() => openPhotoModal([participant.photo1_url, participant.photo2_url].filter(Boolean), 0, `${participant.first_name} ${participant.last_name}`)}
                             />
                           )}
                         </div>
@@ -1077,7 +1094,8 @@ const Admin = () => {
                             <img 
                               src={participant.photo2_url} 
                               alt="Full length" 
-                              className="w-32 h-40 object-cover rounded border"
+                              className="w-32 h-40 object-cover rounded border cursor-pointer hover:opacity-80 transition-opacity"
+                              onClick={() => openPhotoModal([participant.photo1_url, participant.photo2_url].filter(Boolean), 1, `${participant.first_name} ${participant.last_name}`)}
                             />
                           )}
                         </div>
@@ -1131,7 +1149,8 @@ const Admin = () => {
                             <img 
                               src={editingParticipant.photo1_url} 
                               alt="Current portrait" 
-                              className="w-full h-48 object-cover rounded border mt-2"
+                              className="w-full h-48 object-cover rounded border mt-2 cursor-pointer hover:opacity-80 transition-opacity"
+                              onClick={() => openPhotoModal([editingParticipant.photo1_url, editingParticipant.photo2_url].filter(Boolean), 0, `${editingParticipant.first_name} ${editingParticipant.last_name}`)}
                             />
                           )}
                         </div>
@@ -1141,7 +1160,8 @@ const Admin = () => {
                             <img 
                               src={editingParticipant.photo2_url} 
                               alt="Current full length" 
-                              className="w-full h-48 object-cover rounded border mt-2"
+                              className="w-full h-48 object-cover rounded border mt-2 cursor-pointer hover:opacity-80 transition-opacity"
+                              onClick={() => openPhotoModal([editingParticipant.photo1_url, editingParticipant.photo2_url].filter(Boolean), 1, `${editingParticipant.first_name} ${editingParticipant.last_name}`)}
                             />
                           )}
                         </div>
@@ -1282,7 +1302,8 @@ const Admin = () => {
                               <img 
                                 src={appData.photo1_url} 
                                 alt="Portrait" 
-                                className="w-32 h-40 object-cover rounded border"
+                                className="w-32 h-40 object-cover rounded border cursor-pointer hover:opacity-80 transition-opacity"
+                                onClick={() => openPhotoModal([appData.photo1_url, appData.photo2_url].filter(Boolean), 0, `${appData.first_name} ${appData.last_name}`)}
                               />
                             )}
                           </div>
@@ -1292,7 +1313,8 @@ const Admin = () => {
                               <img 
                                 src={appData.photo2_url} 
                                 alt="Full length" 
-                                className="w-32 h-40 object-cover rounded border"
+                                className="w-32 h-40 object-cover rounded border cursor-pointer hover:opacity-80 transition-opacity"
+                                onClick={() => openPhotoModal([appData.photo1_url, appData.photo2_url].filter(Boolean), 1, `${appData.first_name} ${appData.last_name}`)}
                               />
                             )}
                           </div>
@@ -1824,7 +1846,8 @@ const Admin = () => {
                         <img 
                           src={editForm.photo1_url} 
                           alt="Portrait preview" 
-                          className="w-24 h-32 object-cover rounded border"
+                          className="w-24 h-32 object-cover rounded border cursor-pointer hover:opacity-80 transition-opacity"
+                          onClick={() => openPhotoModal([editForm.photo1_url, editForm.photo2_url].filter(Boolean), 0, `${editForm.first_name} ${editForm.last_name}` || 'Application')}
                         />
                       )}
                     </div>
@@ -1852,7 +1875,8 @@ const Admin = () => {
                         <img 
                           src={editForm.photo2_url} 
                           alt="Full length preview" 
-                          className="w-24 h-32 object-cover rounded border"
+                          className="w-24 h-32 object-cover rounded border cursor-pointer hover:opacity-80 transition-opacity"
+                          onClick={() => openPhotoModal([editForm.photo1_url, editForm.photo2_url].filter(Boolean), 1, `${editForm.first_name} ${editForm.last_name}` || 'Application')}
                         />
                       )}
                     </div>
@@ -1873,6 +1897,15 @@ const Admin = () => {
           </Dialog>
         </div>
       </div>
+
+      {/* Photo Modal */}
+      <PhotoModal
+        isOpen={photoModalOpen}
+        onClose={() => setPhotoModalOpen(false)}
+        photos={photoModalImages}
+        currentIndex={photoModalIndex}
+        contestantName={photoModalName}
+      />
     </>
   );
 };
