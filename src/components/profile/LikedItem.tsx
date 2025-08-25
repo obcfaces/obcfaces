@@ -409,23 +409,19 @@ const LikedItem = ({
           {isOwner && (contentType === 'contest' || contentType === 'next_week_candidate') && (
             <Button
               onClick={() => {
-                console.log('Edit button clicked! Trying to find and click Join button...');
-                // Find and click the Join & Win button
-                const joinButton = document.querySelector('button:has-text("🏆 Join & Win 5,000 PHP")') || 
-                                 document.querySelector('button[class*="gradient"]:has-text("Join")') ||
-                                 document.querySelector('button:contains("Join & Win")');
+                console.log('Edit button clicked! Looking for Join button...');
+                // Find the Join & Win button with proper CSS selector
+                const buttons = Array.from(document.querySelectorAll('button'));
+                const joinButton = buttons.find(btn => 
+                  btn.textContent?.includes('🏆 Join & Win 5,000 PHP')
+                );
                 
                 if (joinButton) {
                   console.log('Found join button, clicking it...');
-                  (joinButton as HTMLButtonElement).click();
+                  joinButton.click();
                 } else {
-                  console.log('Join button not found, trying different approach...');
-                  // Dispatch a custom event that the Profile page can listen to
-                  window.dispatchEvent(new CustomEvent('openEditModal', { 
-                    detail: { 
-                      userData: realParticipantData || candidateData 
-                    } 
-                  }));
+                  console.log('Join button not found on page');
+                  toast({ description: "Кнопка участия не найдена. Перейдите на главную страницу профиля." });
                 }
               }}
               size="sm"
@@ -640,23 +636,19 @@ const LikedItem = ({
           {isOwner && (contentType === 'contest' || contentType === 'next_week_candidate') && (
             <Button
               onClick={() => {
-                console.log('Edit button clicked! Trying to find and click Join button...');
-                // Find and click the Join & Win button
-                const joinButton = document.querySelector('button:has-text("🏆 Join & Win 5,000 PHP")') || 
-                                 document.querySelector('button[class*="gradient"]:has-text("Join")') ||
-                                 document.querySelector('button:contains("Join & Win")');
+                console.log('Edit button clicked! Looking for Join button...');
+                // Find the Join & Win button with proper CSS selector
+                const buttons = Array.from(document.querySelectorAll('button'));
+                const joinButton = buttons.find(btn => 
+                  btn.textContent?.includes('🏆 Join & Win 5,000 PHP')
+                );
                 
                 if (joinButton) {
                   console.log('Found join button, clicking it...');
-                  (joinButton as HTMLButtonElement).click();
+                  joinButton.click();
                 } else {
-                  console.log('Join button not found, trying different approach...');
-                  // Dispatch a custom event that the Profile page can listen to
-                  window.dispatchEvent(new CustomEvent('openEditModal', { 
-                    detail: { 
-                      userData: realParticipantData || candidateData 
-                    } 
-                  }));
+                  console.log('Join button not found on page');
+                  toast({ description: "Кнопка участия не найдена. Перейдите на главную страницу профиля." });
                 }
               }}
               size="sm"
