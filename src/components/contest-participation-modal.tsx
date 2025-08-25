@@ -1118,7 +1118,7 @@ export const ContestParticipationModal = ({
                             <img
                               src={photo1File ? URL.createObjectURL(photo1File) : (existingData?.application_data as any)?.photo1_url}
                               alt="Portrait photo preview"
-                              className="w-full h-32 sm:h-40 md:h-48 lg:h-56 object-contain rounded bg-white"
+                              className="w-full aspect-[4/5] object-cover rounded bg-white"
                             />
                             <button 
                               type="button"
@@ -1148,7 +1148,7 @@ export const ContestParticipationModal = ({
                           </div>
                         ) : (
                           <div className="p-2 text-center">
-                            <div className={`h-32 sm:h-40 md:h-48 lg:h-56 rounded-lg mb-2 flex items-center justify-center relative overflow-hidden aspect-[4/5] border-2 border-dashed cursor-pointer hover:border-primary transition-colors ${hasRedBorder('photo1') ? 'border-red-500' : 'border-muted-foreground/25'}`}>
+                            <div className={`aspect-[4/5] rounded-lg mb-2 flex items-center justify-center relative overflow-hidden border-2 border-dashed cursor-pointer hover:border-primary transition-colors ${hasRedBorder('photo1') ? 'border-red-500' : 'border-muted-foreground/25'}`}>
                               <img 
                                 src="/lovable-uploads/1147be30-a1d2-466f-a9a8-067f4628cbb2.png" 
                                 alt="Portrait placeholder" 
@@ -1191,7 +1191,7 @@ export const ContestParticipationModal = ({
                             <img
                               src={photo2File ? URL.createObjectURL(photo2File) : (existingData?.application_data as any)?.photo2_url}
                               alt="Full length photo preview"
-                              className="w-full h-32 sm:h-40 md:h-48 lg:h-56 object-contain rounded bg-white"
+                              className="w-full aspect-[4/5] object-cover rounded bg-white"
                             />
                             <button 
                               type="button"
@@ -1221,7 +1221,7 @@ export const ContestParticipationModal = ({
                           </div>
                          ) : (
                           <div className="p-2 text-center">
-                            <div className={`h-32 sm:h-40 md:h-48 lg:h-56 rounded-lg mb-2 flex items-center justify-center relative overflow-hidden aspect-[4/5] border-2 border-dashed cursor-pointer hover:border-primary transition-colors ${hasRedBorder('photo2') ? 'border-red-500' : 'border-muted-foreground/25'}`}>
+                            <div className={`aspect-[4/5] rounded-lg mb-2 flex items-center justify-center relative overflow-hidden border-2 border-dashed cursor-pointer hover:border-primary transition-colors ${hasRedBorder('photo2') ? 'border-red-500' : 'border-muted-foreground/25'}`}>
                               <img 
                                 src="/lovable-uploads/009d20f0-cac7-4c08-9bc9-146617664bc3.png" 
                                 alt="Full body placeholder" 
