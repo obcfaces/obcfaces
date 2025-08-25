@@ -255,7 +255,7 @@ const LikedItem = ({
 
         if (profileError) throw profileError;
 
-        // Also update weekly_contest_participants table
+        // Also update weekly_contest_participants table with correct field mapping
         const { data: participantRecord, error: fetchError } = await supabase
           .from('weekly_contest_participants')
           .select('application_data')
@@ -264,9 +264,15 @@ const LikedItem = ({
 
         if (!fetchError && participantRecord) {
           const currentData = (participantRecord.application_data as Record<string, any>) || {};
+          
+          // Map profile field names to application_data field names
+          const applicationUpdates: Record<string, any> = {};
+          if (updates.photo_1_url) applicationUpdates.photo1_url = updates.photo_1_url;
+          if (updates.photo_2_url) applicationUpdates.photo2_url = updates.photo_2_url;
+          
           const updatedApplicationData = {
             ...currentData,
-            ...updates
+            ...applicationUpdates
           };
 
           const { error: participantError } = await supabase
