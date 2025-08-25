@@ -1099,6 +1099,35 @@ export const ContestParticipationModal = ({
                 {/* Minimal spacing after text */}
                 <div className="w-1 flex-shrink-0"></div>
 
+                {/* Show current photos BEFORE upload areas when in edit mode - exactly like in Admin */}
+                {editMode && existingData && ((existingData?.application_data as any)?.photo1_url || (existingData?.application_data as any)?.photo2_url) && (
+                  <div className="mb-6">
+                    <Label className="text-sm font-medium mb-3 block">Current Photos</Label>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label className="text-xs text-muted-foreground">Current Portrait Photo</Label>
+                        {(existingData?.application_data as any)?.photo1_url && (
+                          <img 
+                            src={(existingData?.application_data as any)?.photo1_url} 
+                            alt="Current portrait" 
+                            className="w-full h-32 sm:h-40 object-cover rounded border mt-2"
+                          />
+                        )}
+                      </div>
+                      <div>
+                        <Label className="text-xs text-muted-foreground">Current Full Length Photo</Label>
+                        {(existingData?.application_data as any)?.photo2_url && (
+                          <img 
+                            src={(existingData?.application_data as any)?.photo2_url} 
+                            alt="Current full length" 
+                            className="w-full h-32 sm:h-40 object-cover rounded border mt-2"
+                          />
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 {/* Fixed photo upload areas */}
                 <div className="flex flex-row gap-0 items-start">
                   {/* Portrait Photo */}
@@ -1169,25 +1198,7 @@ export const ContestParticipationModal = ({
                           </div>
                         )}
                         
-                        {/* Show current photo from application when in edit mode and no new file selected */}
-                        {!photo1File && editMode && (existingData?.photo_1_url || existingData?.photo1_url) && (
-                          <div className="mt-2">
-                            <p className="text-xs text-muted-foreground mb-1">Current photo:</p>
-                            <img 
-                              src={existingData?.photo_1_url || existingData?.photo1_url} 
-                              alt="Current portrait photo" 
-                              className="w-24 h-32 object-cover rounded border"
-                            />
-                          </div>
-                        )}
-                        {(() => {
-                          console.log('Photo1 debug - photo1File:', photo1File);
-                          console.log('Photo1 debug - editMode:', editMode);
-                          console.log('Photo1 debug - existingData:', existingData);
-                          console.log('Photo1 debug - photo_1_url:', existingData?.photo_1_url);
-                          console.log('Photo1 debug - photo1_url:', existingData?.photo1_url);
-                          return null;
-                        })()}
+                        {/* Remove the old current photo display since we show it above now */}
                       </label>
                     </div>
                   </div>
@@ -1260,25 +1271,7 @@ export const ContestParticipationModal = ({
                           </div>
                         )}
                         
-                        {/* Show current photo from application when in edit mode and no new file selected */}
-                        {!photo2File && editMode && (existingData?.photo_2_url || existingData?.photo2_url) && (
-                          <div className="mt-2">
-                            <p className="text-xs text-muted-foreground mb-1">Current photo:</p>
-                            <img 
-                              src={existingData?.photo_2_url || existingData?.photo2_url} 
-                              alt="Current full length photo" 
-                              className="w-24 h-32 object-cover rounded border"
-                            />
-                          </div>
-                        )}
-                        {(() => {
-                          console.log('Photo2 debug - photo2File:', photo2File);
-                          console.log('Photo2 debug - editMode:', editMode);
-                          console.log('Photo2 debug - existingData:', existingData);
-                          console.log('Photo2 debug - photo_2_url:', existingData?.photo_2_url);
-                          console.log('Photo2 debug - photo2_url:', existingData?.photo2_url);
-                          return null;
-                        })()}
+                        {/* Remove the old current photo display since we show it above now */}
                       </label>
                     </div>
                   </div>
