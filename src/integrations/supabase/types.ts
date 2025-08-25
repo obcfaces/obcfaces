@@ -774,6 +774,7 @@ export type Database = {
           gender: string
           has_children: boolean
           height_cm: number
+          is_active: boolean
           last_name: string
           marital_status: string
           participant_id: string
