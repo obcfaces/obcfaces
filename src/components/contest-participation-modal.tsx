@@ -1120,18 +1120,6 @@ export const ContestParticipationModal = ({
                               alt="Portrait photo preview"
                               className="w-full aspect-[4/5] object-cover rounded bg-white"
                             />
-                            <button 
-                              type="button"
-                              onClick={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                setPhoto1File(null);
-                                handleFieldChange('photo1', null);
-                              }}
-                              className="absolute top-1 right-1 w-6 h-6 bg-gray-500 hover:bg-gray-600 rounded-full flex items-center justify-center text-white text-sm font-bold transition-colors shadow-md"
-                            >
-                              ×
-                            </button>
                             <div className="mt-2 text-center">
                               <button 
                                 type="button" 
@@ -1193,18 +1181,6 @@ export const ContestParticipationModal = ({
                               alt="Full length photo preview"
                               className="w-full aspect-[4/5] object-cover rounded bg-white"
                             />
-                            <button 
-                              type="button"
-                              onClick={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                setPhoto2File(null);
-                                handleFieldChange('photo2', null);
-                              }}
-                              className="absolute top-1 right-1 w-6 h-6 bg-gray-500 hover:bg-gray-600 rounded-full flex items-center justify-center text-white text-sm font-bold transition-colors shadow-md"
-                            >
-                              ×
-                            </button>
                             <div className="mt-2 text-center">
                               <button 
                                 type="button" 
