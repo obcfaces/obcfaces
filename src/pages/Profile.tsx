@@ -48,6 +48,10 @@ const Profile = () => {
   const [participantPhoto1File, setParticipantPhoto1File] = useState<File | null>(null);
   const [participantPhoto2File, setParticipantPhoto2File] = useState<File | null>(null);
   const [uploadingParticipantPhotos, setUploadingParticipantPhotos] = useState(false);
+  
+  // Edit modal states
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editModalData, setEditModalData] = useState<any>(null);
   const { id } = useParams<{ id: string }>();
   const [searchParams] = useSearchParams();
   const [logoutLoading, setLogoutLoading] = useState(false);
@@ -837,6 +841,20 @@ const Profile = () => {
     loadProfilePhotos();
   }, [id]);
 
+  // Listen for edit modal events
+  useEffect(() => {
+    const handleOpenEditModal = (event: any) => {
+      console.log('Received openEditModal event:', event.detail);
+      if (event.detail?.editMode && event.detail?.existingData) {
+        setEditModalData(event.detail.existingData);
+        setIsEditModalOpen(true);
+      }
+    };
+
+    window.addEventListener('openEditModal', handleOpenEditModal);
+    return () => window.removeEventListener('openEditModal', handleOpenEditModal);
+  }, []);
+
   const handleRemoveParticipation = (participationId: string) => {
     setParticipationItems(prev => prev.filter(item => item.likeId !== participationId));
   };
@@ -1087,6 +1105,16 @@ const Profile = () => {
                      🏆 Join & Win 5,000 PHP
                    </Button>
                  </ContestParticipationModal>
+              )}
+              
+              {/* Edit Modal for existing applications */}
+              {isOwner && (
+                <ContestParticipationModal
+                  isOpen={isEditModalOpen}
+                  onOpenChange={setIsEditModalOpen}
+                  editMode={true}
+                  existingData={editModalData}
+                />
               )}
                 {isOwner && (
                   <CreatePostModal onPostCreated={handlePostCreated}>
