@@ -744,8 +744,8 @@ const Admin = () => {
           description: "Photos updated successfully",
         });
 
-        // Refresh participants list
-        fetchWeeklyParticipants();
+        // Refresh participants list immediately
+        await fetchWeeklyParticipants();
       }
 
       cancelParticipantEdit();
