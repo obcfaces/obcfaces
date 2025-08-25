@@ -400,8 +400,20 @@ export const ContestParticipationModal = ({
     if (formData.has_children === undefined) newInvalidFields.add('has_children');
     if (!formData.height_cm) newInvalidFields.add('height_cm');
     if (!formData.weight_kg) newInvalidFields.add('weight_kg');
-    if (!photo1File) newInvalidFields.add('photo1');
-    if (!photo2File) newInvalidFields.add('photo2');
+    // Validate photos - in edit mode, check if existing photos exist, not new uploads
+    if (editMode) {
+      // In edit mode, photos are optional (user can keep existing ones)
+      // Only validate if there are no existing photos and no new photos
+      const hasExistingPhoto1 = (existingData?.application_data as any)?.photo1_url;
+      const hasExistingPhoto2 = (existingData?.application_data as any)?.photo2_url;
+      
+      if (!photo1File && !hasExistingPhoto1) newInvalidFields.add('photo1');
+      if (!photo2File && !hasExistingPhoto2) newInvalidFields.add('photo2');
+    } else {
+      // In new application mode, photos are required
+      if (!photo1File) newInvalidFields.add('photo1');
+      if (!photo2File) newInvalidFields.add('photo2');
+    }
 
     setInvalidFields(newInvalidFields);
 
@@ -424,10 +436,17 @@ export const ContestParticipationModal = ({
         .eq('user_id', session.user.id)
         .single();
 
-      // Upload photos
+      // Upload photos or keep existing ones
       let photo1Url = null;
       let photo2Url = null;
 
+      // In edit mode, start with existing photo URLs
+      if (editMode && existingData) {
+        photo1Url = (existingData?.application_data as any)?.photo1_url || null;
+        photo2Url = (existingData?.application_data as any)?.photo2_url || null;
+      }
+
+      // Upload new photos if provided
       if (photo1File) {
         photo1Url = await uploadPhoto(photo1File, 1);
       }
@@ -457,8 +476,21 @@ export const ContestParticipationModal = ({
 
       let dbError = null;
 
-      if (existingApplication) {
+      if (editMode && existingData) {
         // Update existing application
+        const { error } = await supabase
+          .from('contest_applications')
+          .update({
+            application_data: applicationData,
+            status: 'pending',
+            submitted_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', existingData.id);
+        
+        dbError = error;
+      } else if (existingApplication) {
+        // Update existing application by user_id
         const { error } = await supabase
           .from('contest_applications')
           .update({
@@ -517,14 +549,19 @@ export const ContestParticipationModal = ({
 
       toast({
         title: "Success!",
-        description: "Your contest application has been submitted successfully."
+        description: editMode ? "Your application has been updated successfully." : "Your contest application has been submitted successfully."
       });
 
       // Clear cache after successful submission
       clearFormCache();
       
-      // Set submission success to show contact form
-      setSubmissionSuccess(true);
+      // In edit mode, close modal after successful update
+      if (editMode) {
+        setIsOpen(false);
+      } else {
+        // Set submission success to show contact form for new applications
+        setSubmissionSuccess(true);
+      }
     } catch (error: any) {
       console.error('Submission error:', error);
       toast({
