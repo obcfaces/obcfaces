@@ -61,24 +61,31 @@ export const ContestParticipationModal = ({
   const loadCachedFormData = () => {
     // If in edit mode, prioritize existing data
     if (editMode && existingData) {
-      const birthdate = existingData.birthdate ? new Date(existingData.birthdate) : null;
+      let applicationData = existingData;
+      
+      // If existingData has application_data, use it
+      if (existingData.application_data) {
+        applicationData = { ...existingData, ...existingData.application_data };
+      }
+      
+      const birthdate = applicationData.birthdate ? new Date(applicationData.birthdate) : null;
       return {
-        first_name: existingData.first_name || "",
-        last_name: existingData.last_name || "",
-        country: existingData.country || "",
-        countryCode: existingData.state || "", // In edit mode, we need the country code
-        state: existingData.state || "",
-        stateCode: existingData.state || "",
-        city: existingData.city || "",
-        gender: existingData.gender || "",
+        first_name: applicationData.first_name || "",
+        last_name: applicationData.last_name || "",
+        country: applicationData.country || "",
+        countryCode: applicationData.country || "",
+        state: applicationData.state || "",
+        stateCode: applicationData.state || "",
+        city: applicationData.city || "",
+        gender: applicationData.gender || "",
         birth_day: birthdate ? birthdate.getDate().toString() : "",
         birth_month: birthdate ? (birthdate.getMonth() + 1).toString() : "",
         birth_year: birthdate ? birthdate.getFullYear().toString() : "",
-        marital_status: existingData.marital_status || "",
-        has_children: existingData.has_children as boolean | undefined,
-        height_cm: existingData.height_cm ? existingData.height_cm.toString() : "",
+        marital_status: applicationData.marital_status || "",
+        has_children: applicationData.has_children as boolean | undefined,
+        height_cm: applicationData.height_cm ? applicationData.height_cm.toString() : "",
         height_ft: "",
-        weight_kg: existingData.weight_kg ? existingData.weight_kg.toString() : "",
+        weight_kg: applicationData.weight_kg ? applicationData.weight_kg.toString() : "",
         measurement_system: "metric",
       };
     }

@@ -408,20 +408,41 @@ const LikedItem = ({
           {/* Edit button for owner - show for contest participation */}
           {isOwner && (contentType === 'contest' || contentType === 'next_week_candidate') && (
             <Button
-              onClick={() => {
-                console.log('Edit button clicked! Looking for Join button...');
-                // Find the Join & Win button with proper CSS selector
-                const buttons = Array.from(document.querySelectorAll('button'));
-                const joinButton = buttons.find(btn => 
-                  btn.textContent?.includes('🏆 Join & Win 5,000 PHP')
-                );
+              onClick={async () => {
+                console.log('Edit button clicked! Loading user application data...');
                 
-                if (joinButton) {
-                  console.log('Found join button, clicking it...');
-                  joinButton.click();
-                } else {
-                  console.log('Join button not found on page');
-                  toast({ description: "Кнопка участия не найдена. Перейдите на главную страницу профиля." });
+                // Get latest application data for the user
+                try {
+                  const { data: { session } } = await supabase.auth.getSession();
+                  if (!session) {
+                    toast({ description: "Необходимо войти в систему" });
+                    return;
+                  }
+
+                  const { data: latestApplication, error } = await supabase
+                    .from('contest_applications')
+                    .select('*')
+                    .eq('user_id', session.user.id)
+                    .order('created_at', { ascending: false })
+                    .limit(1)
+                    .maybeSingle();
+
+                  if (error) {
+                    console.error('Error loading application:', error);
+                    toast({ description: "Ошибка загрузки данных заявки" });
+                    return;
+                  }
+
+                  // Dispatch event with application data to open the modal
+                  window.dispatchEvent(new CustomEvent('openEditModal', { 
+                    detail: { 
+                      editMode: true,
+                      existingData: latestApplication
+                    } 
+                  }));
+                } catch (error) {
+                  console.error('Error loading application data:', error);
+                  toast({ description: "Ошибка загрузки данных" });
                 }
               }}
               size="sm"
@@ -635,20 +656,41 @@ const LikedItem = ({
           {/* Edit button for owner - show for contest participation */}
           {isOwner && (contentType === 'contest' || contentType === 'next_week_candidate') && (
             <Button
-              onClick={() => {
-                console.log('Edit button clicked! Looking for Join button...');
-                // Find the Join & Win button with proper CSS selector
-                const buttons = Array.from(document.querySelectorAll('button'));
-                const joinButton = buttons.find(btn => 
-                  btn.textContent?.includes('🏆 Join & Win 5,000 PHP')
-                );
+              onClick={async () => {
+                console.log('Edit button clicked! Loading user application data...');
                 
-                if (joinButton) {
-                  console.log('Found join button, clicking it...');
-                  joinButton.click();
-                } else {
-                  console.log('Join button not found on page');
-                  toast({ description: "Кнопка участия не найдена. Перейдите на главную страницу профиля." });
+                // Get latest application data for the user
+                try {
+                  const { data: { session } } = await supabase.auth.getSession();
+                  if (!session) {
+                    toast({ description: "Необходимо войти в систему" });
+                    return;
+                  }
+
+                  const { data: latestApplication, error } = await supabase
+                    .from('contest_applications')
+                    .select('*')
+                    .eq('user_id', session.user.id)
+                    .order('created_at', { ascending: false })
+                    .limit(1)
+                    .maybeSingle();
+
+                  if (error) {
+                    console.error('Error loading application:', error);
+                    toast({ description: "Ошибка загрузки данных заявки" });
+                    return;
+                  }
+
+                  // Dispatch event with application data to open the modal
+                  window.dispatchEvent(new CustomEvent('openEditModal', { 
+                    detail: { 
+                      editMode: true,
+                      existingData: latestApplication
+                    } 
+                  }));
+                } catch (error) {
+                  console.error('Error loading application data:', error);
+                  toast({ description: "Ошибка загрузки данных" });
                 }
               }}
               size="sm"
