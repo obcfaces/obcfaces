@@ -410,7 +410,13 @@ const LikedItem = ({
           {isOwner && (contentType === 'contest' || contentType === 'next_week_candidate') && (
             <Button
               onClick={() => {
-                console.log('Edit button clicked!', { realParticipantData, contentType, isOwner });
+                console.log('Edit button clicked!', { 
+                  realParticipantData, 
+                  candidateData,
+                  contentType, 
+                  isOwner,
+                  finalData: realParticipantData || candidateData
+                });
                 setIsEditModalOpen(true);
               }}
               size="sm"
@@ -836,7 +842,7 @@ const LikedItem = ({
           setIsEditModalOpen(open);
         }}
         editMode={true}
-        existingData={realParticipantData}
+        existingData={realParticipantData || candidateData}
       >
         <div />
       </ContestParticipationModal>
