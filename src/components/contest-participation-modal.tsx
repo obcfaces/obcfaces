@@ -1113,10 +1113,10 @@ export const ContestParticipationModal = ({
                         id="photo1-upload"
                       />
                       <label htmlFor="photo1-upload" className="cursor-pointer block">
-                        {photo1File || (editMode && (existingData?.photo_1_url || existingData?.photo1_url)) ? (
+                        {photo1File ? (
                           <div className="p-2 relative">
                             <img
-                              src={photo1File ? URL.createObjectURL(photo1File) : (existingData?.photo_1_url || existingData?.photo1_url)}
+                              src={URL.createObjectURL(photo1File)}
                               alt="Portrait photo preview"
                               className="w-full h-32 sm:h-40 md:h-48 lg:h-56 object-contain rounded bg-white"
                             />
@@ -1168,6 +1168,18 @@ export const ContestParticipationModal = ({
                             </button>
                           </div>
                         )}
+                        
+                        {/* Show current photo from application when in edit mode and no new file selected */}
+                        {!photo1File && editMode && (existingData?.photo_1_url || existingData?.photo1_url) && (
+                          <div className="mt-2">
+                            <p className="text-xs text-muted-foreground mb-1">Current photo:</p>
+                            <img 
+                              src={existingData?.photo_1_url || existingData?.photo1_url} 
+                              alt="Current portrait photo" 
+                              className="w-24 h-32 object-cover rounded border"
+                            />
+                          </div>
+                        )}
                       </label>
                     </div>
                   </div>
@@ -1184,10 +1196,10 @@ export const ContestParticipationModal = ({
                         id="photo2-upload"
                       />
                       <label htmlFor="photo2-upload" className="cursor-pointer block">
-                        {photo2File || (editMode && (existingData?.photo_2_url || existingData?.photo2_url)) ? (
+                        {photo2File ? (
                           <div className="p-2 relative">
                             <img
-                              src={photo2File ? URL.createObjectURL(photo2File) : (existingData?.photo_2_url || existingData?.photo2_url)}
+                              src={URL.createObjectURL(photo2File)}
                               alt="Full length photo preview"
                               className="w-full h-32 sm:h-40 md:h-48 lg:h-56 object-contain rounded bg-white"
                             />
@@ -1237,6 +1249,18 @@ export const ContestParticipationModal = ({
                             >
                               Upload
                             </button>
+                          </div>
+                        )}
+                        
+                        {/* Show current photo from application when in edit mode and no new file selected */}
+                        {!photo2File && editMode && (existingData?.photo_2_url || existingData?.photo2_url) && (
+                          <div className="mt-2">
+                            <p className="text-xs text-muted-foreground mb-1">Current photo:</p>
+                            <img 
+                              src={existingData?.photo_2_url || existingData?.photo2_url} 
+                              alt="Current full length photo" 
+                              className="w-24 h-32 object-cover rounded border"
+                            />
                           </div>
                         )}
                       </label>
