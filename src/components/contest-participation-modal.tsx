@@ -16,10 +16,22 @@ import { getCitiesForLocation } from '@/lib/location-utils';
 
 interface ContestParticipationModalProps {
   children: React.ReactNode;
+  isOpen?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  editMode?: boolean;
+  existingData?: any;
 }
 
-export const ContestParticipationModal = ({ children }: ContestParticipationModalProps) => {
-  const [isOpen, setIsOpen] = useState(false);
+export const ContestParticipationModal = ({ 
+  children, 
+  isOpen: externalIsOpen, 
+  onOpenChange: externalOnOpenChange,
+  editMode = false,
+  existingData
+}: ContestParticipationModalProps) => {
+  const [internalIsOpen, setInternalIsOpen] = useState(false);
+  const isOpen = externalIsOpen !== undefined ? externalIsOpen : internalIsOpen;
+  const setIsOpen = externalOnOpenChange || setInternalIsOpen;
   const [currentStep, setCurrentStep] = useState<'auth' | 'profile'>('auth');
   const [mode, setMode] = useState<'login' | 'signup'>('login');
   const [isLoading, setIsLoading] = useState(false);
@@ -482,9 +494,86 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
     }
   };
 
-  // Reset form when modal opens
+  // Load existing data when in edit mode
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen && editMode && existingData) {
+      const data = existingData;
+      
+      // Parse birthdate
+      let birth_day = "", birth_month = "", birth_year = "";
+      if (data.birthdate) {
+        const birthDate = new Date(data.birthdate);
+        birth_day = birthDate.getDate().toString();
+        birth_month = (birthDate.getMonth() + 1).toString();
+        birth_year = birthDate.getFullYear().toString();
+      }
+
+      // Find country code from country name
+      let countryCode = "";
+      if (data.country) {
+        const country = countries.find(c => c.label === data.country || c.value === data.country);
+        countryCode = country?.value || "PH";
+      }
+
+      // Set form data with existing values
+      setFormData({
+        first_name: data.first_name || "",
+        last_name: data.last_name || "",
+        country: data.country || "",
+        countryCode: countryCode,
+        state: data.state || "",
+        stateCode: data.state || "",
+        city: data.city || "",
+        gender: data.gender || "",
+        birth_day,
+        birth_month,
+        birth_year,
+        marital_status: data.marital_status || "",
+        has_children: data.has_children,
+        height_cm: data.height_cm?.toString() || "",
+        height_ft: "",
+        weight_kg: data.weight_kg?.toString() || "",
+        measurement_system: "metric",
+      });
+
+      // Set display values for height and weight
+      if (data.height_cm) {
+        setSelectedHeight(`${data.height_cm} cm`);
+      }
+      if (data.weight_kg) {
+        setSelectedWeight(`${data.weight_kg} kg`);
+      }
+
+      // Load existing photos if available
+      if (data.photo_1_url) {
+        // Convert URL to File object for display purposes
+        fetch(data.photo_1_url)
+          .then(res => res.blob())
+          .then(blob => {
+            const file = new File([blob], 'photo1.jpg', { type: 'image/jpeg' });
+            setPhoto1File(file);
+          })
+          .catch(() => {}); // Ignore errors
+      }
+      
+      if (data.photo_2_url) {
+        // Convert URL to File object for display purposes
+        fetch(data.photo_2_url)
+          .then(res => res.blob())
+          .then(blob => {
+            const file = new File([blob], 'photo2.jpg', { type: 'image/jpeg' });
+            setPhoto2File(file);
+          })
+          .catch(() => {}); // Ignore errors
+      }
+
+      setCurrentStep('profile');
+    }
+  }, [isOpen, editMode, existingData, countries]);
+
+  // Reset form when modal opens (for new applications)
+  useEffect(() => {
+    if (isOpen && !editMode) {
       setSubmitted(false);
       setInvalidFields(new Set());
       
@@ -504,7 +593,7 @@ export const ContestParticipationModal = ({ children }: ContestParticipationModa
       };
       checkAuth();
     }
-  }, [isOpen]);
+  }, [isOpen, editMode]);
 
   // Save form data to cache
   const saveFormDataToCache = (data: typeof formData) => {

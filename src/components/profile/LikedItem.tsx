@@ -9,8 +9,7 @@ import { cn, getCountryDisplayName } from "@/lib/utils";
 import { PhotoModal } from "@/components/photo-modal";
 import { Link } from "react-router-dom";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { ContestParticipationModal } from "@/components/contest-participation-modal";
 import { useCardData } from "@/hooks/useCardData";
 import { useParticipantData } from "@/hooks/useParticipantData";
 import LoginModalContent from "@/components/login-modal-content";
@@ -45,15 +44,6 @@ interface LikedItemProps {
   onPhotoUpdate?: (type: 'photo_1' | 'photo_2', url: string) => void;
 }
 
-// Participant interface exactly like in Admin
-interface ParticipantData {
-  id: string;
-  user_id: string;
-  first_name: string;
-  last_name: string;
-  photo1_url: string;
-  photo2_url: string;
-}
 
 const getInitials = (name: string) => {
   const parts = name.trim().split(/\s+/);
@@ -122,12 +112,7 @@ const LikedItem = ({
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [currentParticipantType, setCurrentParticipantType] = useState<'candidate' | 'finalist' | 'winner' | null>(participantType || null);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
-  
-  // Photo editing states exactly like in Admin
-  const [editingParticipant, setEditingParticipant] = useState<ParticipantData | null>(null);
-  const [participantPhoto1File, setParticipantPhoto1File] = useState<File | null>(null);
-  const [participantPhoto2File, setParticipantPhoto2File] = useState<File | null>(null);
-  const [uploadingParticipantPhotos, setUploadingParticipantPhotos] = useState(false);
+  const [showParticipationModal, setShowParticipationModal] = useState(false);
   
   // Use unified card data hook
   const { data: cardData, loading: cardDataLoading } = useCardData(authorName, user?.id);
@@ -154,138 +139,6 @@ const LikedItem = ({
     return () => subscription.unsubscribe();
   }, []);
 
-  // Initialize editing state with current participant data
-  const initEditingParticipant = () => {
-    if (!authorProfileId) return;
-    
-    const participant: ParticipantData = {
-      id: authorProfileId,
-      user_id: authorProfileId,
-      first_name: candidateData?.name?.split(' ')[0] || authorName.split(' ')[0],
-      last_name: candidateData?.name?.split(' ').slice(1).join(' ') || authorName.split(' ').slice(1).join(' '),
-      photo1_url: candidateData?.faceImage || imageSrc || '',
-      photo2_url: candidateData?.fullBodyImage || imageSrc || ''
-    };
-    
-    setEditingParticipant(participant);
-  };
-
-  // Initialize editing participant on component mount for inline editing
-  useEffect(() => {
-    if (isOwner && authorProfileId) {
-      initEditingParticipant();
-    }
-  }, [isOwner, authorProfileId, candidateData, imageSrc]);
-
-  const cancelParticipantEdit = () => {
-    setEditingParticipant(null);
-    setParticipantPhoto1File(null);
-    setParticipantPhoto2File(null);
-  };
-
-  const handleParticipantPhoto1Upload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      setParticipantPhoto1File(file);
-    }
-  };
-
-  const handleParticipantPhoto2Upload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      setParticipantPhoto2File(file);
-    }
-  };
-
-  // Save participant photos exactly like in Admin
-  const saveParticipantPhotos = async () => {
-    if (!editingParticipant) {
-      initEditingParticipant();
-      return;
-    }
-
-    setUploadingParticipantPhotos(true);
-
-    try {
-      const updates: any = {};
-
-      // Upload photo1 if provided - ТОЧНО КАК В АДМИНКЕ
-      if (participantPhoto1File) {
-        const fileExt = participantPhoto1File.name.split('.').pop();
-        const fileName = `photo_1.${fileExt}`;
-        const filePath = `${editingParticipant.user_id}/${fileName}`;
-
-        const { error: uploadError } = await supabase.storage
-          .from('contest-photos')
-          .upload(filePath, participantPhoto1File, { upsert: true });
-
-        if (uploadError) throw uploadError;
-
-        const { data: { publicUrl } } = supabase.storage
-          .from('contest-photos')
-          .getPublicUrl(filePath);
-        
-        const timestampedUrl = `${publicUrl}?t=${Date.now()}`;
-        updates.photo_1_url = timestampedUrl;
-      }
-
-      // Upload photo2 if provided - ТОЧНО КАК В АДМИНКЕ  
-      if (participantPhoto2File) {
-        const fileExt = participantPhoto2File.name.split('.').pop();
-        const fileName = `photo_2.${fileExt}`;
-        const filePath = `${editingParticipant.user_id}/${fileName}`;
-
-        const { error: uploadError } = await supabase.storage
-          .from('contest-photos')
-          .upload(filePath, participantPhoto2File, { upsert: true });
-
-        if (uploadError) throw uploadError;
-
-        const { data: { publicUrl } } = supabase.storage
-          .from('contest-photos')
-          .getPublicUrl(filePath);
-        
-        const timestampedUrl = `${publicUrl}?t=${Date.now()}`;
-        updates.photo_2_url = timestampedUrl;
-      }
-
-      // Update profile if there are changes - ТОЧНО КАК В АДМИНКЕ
-      if (Object.keys(updates).length > 0) {
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .update(updates)
-          .eq('id', editingParticipant.user_id);
-
-        if (profileError) throw profileError;
-
-        toast({
-          title: "Success",
-          description: "Photos updated successfully",
-        });
-
-        // Notify parent component about photo updates
-        if (updates.photo_1_url) {
-          onPhotoUpdate?.('photo_1', updates.photo_1_url);
-        }
-        if (updates.photo_2_url) {
-          onPhotoUpdate?.('photo_2', updates.photo_2_url);
-        }
-      }
-
-      // Reset file inputs after successful upload
-      setParticipantPhoto1File(null);
-      setParticipantPhoto2File(null);
-    } catch (error: any) {
-      console.error('Error updating participant photos:', error);
-      toast({
-        title: "Error",
-        description: error.message || "Failed to update photos",
-        variant: "destructive",
-      });
-    } finally {
-      setUploadingParticipantPhotos(false);
-    }
-  };
 
   // Fetch current participant type from database
   useEffect(() => {
@@ -426,43 +279,6 @@ const LikedItem = ({
                 className="w-24 sm:w-28 md:w-32 h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
                 onClick={() => openModal(0)}
               />
-              {/* Photo edit overlay for owner */}
-              {isOwner && (
-                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/50 transition-all duration-200 flex items-center justify-center">
-                  <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex flex-col gap-1">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      id={`photo1-${likeId}`}
-                      onChange={handleParticipantPhoto1Upload}
-                    />
-                    <Button
-                      size="sm"
-                      className="w-6 h-6 p-0 bg-white/90 hover:bg-white text-black"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        document.getElementById(`photo1-${likeId}`)?.click();
-                      }}
-                    >
-                      <Edit className="w-3 h-3" />
-                    </Button>
-                    {participantPhoto1File && (
-                      <Button
-                        size="sm"
-                        className="w-6 h-6 p-0 bg-green-600 hover:bg-green-700 text-white"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          saveParticipantPhotos();
-                        }}
-                        disabled={uploadingParticipantPhotos}
-                      >
-                        ✓
-                      </Button>
-                    )}
-                  </div>
-                </div>
-              )}
             </div>
             <div className="relative group">
               <img 
@@ -471,43 +287,6 @@ const LikedItem = ({
                 className="w-24 sm:w-28 md:w-32 h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
                 onClick={() => openModal(1)}
               />
-              {/* Photo edit overlay for owner */}
-              {isOwner && (
-                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/50 transition-all duration-200 flex items-center justify-center">
-                  <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex flex-col gap-1">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      id={`photo2-${likeId}`}
-                      onChange={handleParticipantPhoto2Upload}
-                    />
-                    <Button
-                      size="sm"
-                      className="w-6 h-6 p-0 bg-white/90 hover:bg-white text-black"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        document.getElementById(`photo2-${likeId}`)?.click();
-                      }}
-                    >
-                      <Edit className="w-3 h-3" />
-                    </Button>
-                    {participantPhoto2File && (
-                      <Button
-                        size="sm"
-                        className="w-6 h-6 p-0 bg-green-600 hover:bg-green-700 text-white"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          saveParticipantPhotos();
-                        }}
-                        disabled={uploadingParticipantPhotos}
-                      >
-                        ✓
-                      </Button>
-                    )}
-                  </div>
-                </div>
-              )}
             </div>
           </div>
           
@@ -605,18 +384,34 @@ const LikedItem = ({
       <>
       <Card className="bg-card border-contest-border relative overflow-hidden">
         
-        {/* Name in top left */}
-        <div className="absolute top-2 left-4 z-20">
-          <h3 className="text-xl font-semibold text-contest-text">
-            {authorProfileId ? (
-              <Link to={`/u/${authorProfileId}`} className="hover:text-primary underline-offset-2 hover:underline">
-                {authorName}
-              </Link>
-            ) : (
-              authorName
-            )}, {candidateAge} <span className="text-sm text-muted-foreground font-normal">({candidateWeight} kg · {candidateHeight} cm)</span>
-          </h3>
-          <div className="text-contest-blue text-sm">{getCountryDisplayName(candidateCountry)}{candidateCity !== "Unknown" && candidateCity !== candidateCountry ? ` · ${candidateCity}` : ''}</div>
+        {/* Name in top left and edit button */}
+        <div className="absolute top-2 left-4 z-20 flex items-start justify-between w-full pr-8">
+          <div>
+            <h3 className="text-xl font-semibold text-contest-text">
+              {authorProfileId ? (
+                <Link to={`/u/${authorProfileId}`} className="hover:text-primary underline-offset-2 hover:underline">
+                  {authorName}
+                </Link>
+              ) : (
+                authorName
+              )}, {candidateAge} <span className="text-sm text-muted-foreground font-normal">({candidateWeight} kg · {candidateHeight} cm)</span>
+            </h3>
+            <div className="text-contest-blue text-sm">{getCountryDisplayName(candidateCountry)}{candidateCity !== "Unknown" && candidateCity !== candidateCountry ? ` · ${candidateCity}` : ''}</div>
+          </div>
+          {/* Edit button for owner */}
+          {isOwner && (
+            <Button
+              size="sm"
+              variant="outline"
+              className="bg-white/90 hover:bg-white"
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowParticipationModal(true);
+              }}
+            >
+              <Edit className="w-4 h-4" />
+            </Button>
+          )}
         </div>
         
         {/* Header */}
@@ -636,43 +431,6 @@ const LikedItem = ({
                 className="w-full aspect-[4/5] object-cover cursor-pointer hover:opacity-90 transition-opacity"
                 onClick={() => openModal(0)}
               />
-              {/* Photo edit overlay for owner */}
-              {isOwner && (
-                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/50 transition-all duration-200 flex items-center justify-center">
-                  <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex flex-col gap-2">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      id={`photo1-full-${likeId}`}
-                      onChange={handleParticipantPhoto1Upload}
-                    />
-                    <Button
-                      size="sm"
-                      className="w-8 h-8 p-0 bg-white/90 hover:bg-white text-black"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        document.getElementById(`photo1-full-${likeId}`)?.click();
-                      }}
-                    >
-                      <Edit className="w-4 h-4" />
-                    </Button>
-                    {participantPhoto1File && (
-                      <Button
-                        size="sm"
-                        className="w-8 h-8 p-0 bg-green-600 hover:bg-green-700 text-white"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          saveParticipantPhotos();
-                        }}
-                        disabled={uploadingParticipantPhotos}
-                      >
-                        ✓
-                      </Button>
-                    )}
-                  </div>
-                </div>
-              )}
             </div>
             <div className="relative group">
               <img 
@@ -681,43 +439,6 @@ const LikedItem = ({
                 className="w-full aspect-[4/5] object-cover cursor-pointer hover:opacity-90 transition-opacity"
                 onClick={() => openModal(1)}
               />
-              {/* Photo edit overlay for owner */}
-              {isOwner && (
-                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/50 transition-all duration-200 flex items-center justify-center">
-                  <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex flex-col gap-2">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      id={`photo2-full-${likeId}`}
-                      onChange={handleParticipantPhoto2Upload}
-                    />
-                    <Button
-                      size="sm"
-                      className="w-8 h-8 p-0 bg-white/90 hover:bg-white text-black"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        document.getElementById(`photo2-full-${likeId}`)?.click();
-                      }}
-                    >
-                      <Edit className="w-4 h-4" />
-                    </Button>
-                    {participantPhoto2File && (
-                      <Button
-                        size="sm"
-                        className="w-8 h-8 p-0 bg-green-600 hover:bg-green-700 text-white"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          saveParticipantPhotos();
-                        }}
-                        disabled={uploadingParticipantPhotos}
-                      >
-                        ✓
-                      </Button>
-                    )}
-                  </div>
-                </div>
-              )}
             </div>
           </div>
         </div>
@@ -785,6 +506,32 @@ const LikedItem = ({
           <LoginModalContent onClose={() => setShowLoginModal(false)} />
         </DialogContent>
       </Dialog>
+
+      {/* Contest Participation Modal */}
+      {isOwner && (
+        <ContestParticipationModal
+          isOpen={showParticipationModal}
+          onOpenChange={setShowParticipationModal}
+          editMode={true}
+          existingData={{
+            first_name: candidateData?.name?.split(' ')[0] || authorName.split(' ')[0],
+            last_name: candidateData?.name?.split(' ').slice(1).join(' ') || authorName.split(' ').slice(1).join(' '),
+            country: candidateCountry,
+            state: candidateState,
+            city: candidateCity,
+            gender: realParticipantData?.gender,
+            height_cm: candidateHeight,
+            weight_kg: candidateWeight,
+            marital_status: realParticipantData?.marital_status,
+            has_children: realParticipantData?.has_children,
+            
+            photo_1_url: candidateFaceImage,
+            photo_2_url: candidateFullImage
+          }}
+        >
+          <div className="hidden" />
+        </ContestParticipationModal>
+      )}
     </>
   );
 };
