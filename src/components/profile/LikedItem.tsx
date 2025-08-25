@@ -398,8 +398,8 @@ const LikedItem = ({
             </h3>
             <div className="text-contest-blue text-sm">{getCountryDisplayName(candidateCountry)}{candidateCity !== "Unknown" && candidateCity !== candidateCountry ? ` · ${candidateCity}` : ''}</div>
           </div>
-          {/* Edit button for owner */}
-          {isOwner && (
+          {/* Edit button for contest participation */}
+          {contentType === 'next_week_candidate' && (
             <Button
               size="sm"
               variant="outline"
