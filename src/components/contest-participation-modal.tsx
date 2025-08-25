@@ -605,7 +605,7 @@ export const ContestParticipationModal = ({
       <DialogContent className="w-full max-w-4xl mx-auto max-h-[95vh] overflow-y-auto bg-background">
         <DialogHeader>
           <DialogTitle>
-            {currentStep === 'auth' ? 'Sign in' : editMode ? 'Edit Contest Application' : ''}
+            {currentStep === 'auth' ? 'Sign in' : ''}
           </DialogTitle>
         </DialogHeader>
 
@@ -845,9 +845,7 @@ export const ContestParticipationModal = ({
         ) : (
           <form onSubmit={handleProfileSubmit} className="space-y-3">
             <div className="text-center mb-4">
-              <h2 className="text-lg font-semibold text-foreground">
-                {editMode ? 'Edit Contest Application' : 'Contest Registration Form'}
-              </h2>
+              <h2 className="text-lg font-semibold text-foreground">Contest Registration Form</h2>
             </div>
             <div className="grid gap-2 grid-cols-3">
               <Input
