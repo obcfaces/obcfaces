@@ -722,7 +722,6 @@ const Admin = () => {
     setPhotoModalName(name);
     setPhotoModalOpen(true);
   };
-  };
 
   const reviewApplication = async (applicationId: string, status: 'approved' | 'rejected', notes?: string) => {
     const { error } = await supabase
