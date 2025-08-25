@@ -61,6 +61,7 @@ export const ContestParticipationModal = ({
   const loadCachedFormData = () => {
     // If in edit mode, prioritize existing data
     if (editMode && existingData) {
+      console.log('Loading existing data for edit mode:', existingData);
       let applicationData = existingData;
       
       // If existingData has application_data, use it
@@ -68,7 +69,18 @@ export const ContestParticipationModal = ({
         applicationData = { ...existingData, ...existingData.application_data };
       }
       
-      const birthdate = applicationData.birthdate ? new Date(applicationData.birthdate) : null;
+      console.log('Processing application data:', applicationData);
+      
+      // Handle birthdate from multiple possible sources
+      let birthdate = null;
+      if (applicationData.birthdate) {
+        birthdate = new Date(applicationData.birthdate);
+      } else if (applicationData.birth_year && applicationData.birth_month && applicationData.birth_day) {
+        birthdate = new Date(applicationData.birth_year, applicationData.birth_month - 1, applicationData.birth_day);
+      }
+      
+      console.log('Parsed birthdate:', birthdate);
+      
       return {
         first_name: applicationData.first_name || "",
         last_name: applicationData.last_name || "",
@@ -78,9 +90,9 @@ export const ContestParticipationModal = ({
         stateCode: applicationData.state || "",
         city: applicationData.city || "",
         gender: applicationData.gender || "",
-        birth_day: birthdate ? birthdate.getDate().toString() : "",
-        birth_month: birthdate ? (birthdate.getMonth() + 1).toString() : "",
-        birth_year: birthdate ? birthdate.getFullYear().toString() : "",
+        birth_day: birthdate ? birthdate.getDate().toString() : (applicationData.birth_day?.toString() || ""),
+        birth_month: birthdate ? (birthdate.getMonth() + 1).toString() : (applicationData.birth_month?.toString() || ""),
+        birth_year: birthdate ? birthdate.getFullYear().toString() : (applicationData.birth_year?.toString() || ""),
         marital_status: applicationData.marital_status || "",
         has_children: applicationData.has_children as boolean | undefined,
         height_cm: applicationData.height_cm ? applicationData.height_cm.toString() : "",

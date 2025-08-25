@@ -83,7 +83,12 @@ export default function WeightFilterDropdown({ onSelect, value, className }: Pro
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-auto min-w-[200px] p-0 bg-popover border z-50" side="bottom" align="center">
-        <div className="max-h-[400px] overflow-y-auto bg-popover touch-pan-y" style={{ scrollBehavior: 'smooth', WebkitOverflowScrolling: 'touch' }}>
+        <div className="max-h-[400px] overflow-y-auto overscroll-contain touch-pan-y" style={{ 
+          scrollBehavior: 'smooth', 
+          WebkitOverflowScrolling: 'touch',
+          transform: 'translateZ(0)', // Forces hardware acceleration
+          willChange: 'scroll-position'
+        }}>
           {/* Шапка с заголовками */}
           <div className="flex gap-4 p-4 pb-2 bg-popover border-b sticky top-0 z-20">
             <div className="text-xs font-medium text-muted-foreground text-center" style={{ width: '70px' }}>KG</div>
