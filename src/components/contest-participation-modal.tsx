@@ -1180,6 +1180,14 @@ export const ContestParticipationModal = ({
                             />
                           </div>
                         )}
+                        {(() => {
+                          console.log('Photo1 debug - photo1File:', photo1File);
+                          console.log('Photo1 debug - editMode:', editMode);
+                          console.log('Photo1 debug - existingData:', existingData);
+                          console.log('Photo1 debug - photo_1_url:', existingData?.photo_1_url);
+                          console.log('Photo1 debug - photo1_url:', existingData?.photo1_url);
+                          return null;
+                        })()}
                       </label>
                     </div>
                   </div>
@@ -1263,6 +1271,14 @@ export const ContestParticipationModal = ({
                             />
                           </div>
                         )}
+                        {(() => {
+                          console.log('Photo2 debug - photo2File:', photo2File);
+                          console.log('Photo2 debug - editMode:', editMode);
+                          console.log('Photo2 debug - existingData:', existingData);
+                          console.log('Photo2 debug - photo_2_url:', existingData?.photo_2_url);
+                          console.log('Photo2 debug - photo2_url:', existingData?.photo2_url);
+                          return null;
+                        })()}
                       </label>
                     </div>
                   </div>
