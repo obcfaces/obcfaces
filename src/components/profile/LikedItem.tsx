@@ -41,7 +41,7 @@ interface LikedItemProps {
   participantType?: 'candidate' | 'finalist' | 'winner';
   showStatusBadge?: boolean;
   isOwner?: boolean;
-  onEditPhotos?: () => void;
+  onEditParticipation?: () => void;
   onPhotoUpdate?: (type: 'photo_1' | 'photo_2', url: string) => void;
 }
 
@@ -111,7 +111,7 @@ const LikedItem = ({
   participantType,
   showStatusBadge = true,
   isOwner = false,
-  onEditPhotos,
+  onEditParticipation,
   onPhotoUpdate
 }: LikedItemProps) => {
   const [isUnliking, setIsUnliking] = useState(false);
@@ -407,7 +407,7 @@ const LikedItem = ({
           {/* Edit button for owner */}
           {isOwner && (
             <Button
-              onClick={onEditPhotos}
+              onClick={onEditParticipation}
               size="sm"
               className="absolute top-2 right-2 z-30 w-8 h-8 p-0"
             >
@@ -616,16 +616,16 @@ const LikedItem = ({
   return (
     <>
       <Card className="bg-card border-contest-border relative overflow-hidden">
-        {/* Edit button for owner */}
-        {isOwner && (
-          <Button
-            onClick={onEditPhotos}
-            size="sm"
-            className="absolute top-2 right-2 z-30 w-8 h-8 p-0"
-          >
-            <Edit className="w-3 h-3" />
-          </Button>
-        )}
+            {/* Edit button for owner */}
+            {isOwner && (
+              <Button
+                onClick={onEditParticipation}
+                size="sm"
+                className="absolute top-2 right-2 z-30 w-8 h-8 p-0"
+              >
+                <Edit className="w-3 h-3" />
+              </Button>
+            )}
         
         {/* Name in top left */}
         <div className="absolute top-2 left-4 z-20">
