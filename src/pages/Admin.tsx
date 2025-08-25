@@ -258,7 +258,7 @@ const Admin = () => {
       week_start_date: participant.contest_start_date,
       week_end_date: participant.contest_end_date,
       application_data: participant.application_data,
-      is_active: true // Default to active for existing participants
+      is_active: participant.is_active ?? true
     }));
 
     setWeeklyParticipants(transformedData);
