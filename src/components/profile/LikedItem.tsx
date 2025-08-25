@@ -409,7 +409,10 @@ const LikedItem = ({
           {/* Edit button for owner - show for contest participation */}
           {isOwner && (contentType === 'contest' || contentType === 'next_week_candidate') && (
             <Button
-              onClick={() => setIsEditModalOpen(true)}
+              onClick={() => {
+                console.log('Edit button clicked!', { realParticipantData, contentType, isOwner });
+                setIsEditModalOpen(true);
+              }}
               size="sm"
               className="absolute top-2 right-2 z-30 w-8 h-8 p-0"
             >
@@ -621,7 +624,10 @@ const LikedItem = ({
           {/* Edit button for owner - show for contest participation */}
           {isOwner && (contentType === 'contest' || contentType === 'next_week_candidate') && (
             <Button
-              onClick={() => setIsEditModalOpen(true)}
+              onClick={() => {
+                console.log('Edit button clicked!', { realParticipantData, contentType, isOwner });
+                setIsEditModalOpen(true);
+              }}
               size="sm"
               className="absolute top-2 right-2 z-30 w-8 h-8 p-0"
             >
@@ -825,7 +831,10 @@ const LikedItem = ({
       {/* Contest Participation Edit Modal */}
       <ContestParticipationModal
         isOpen={isEditModalOpen}
-        onOpenChange={setIsEditModalOpen}
+        onOpenChange={(open) => {
+          console.log('Modal state changing:', { open, isEditModalOpen });
+          setIsEditModalOpen(open);
+        }}
         editMode={true}
         existingData={realParticipantData}
       >
