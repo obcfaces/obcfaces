@@ -83,12 +83,27 @@ export default function WeightFilterDropdown({ onSelect, value, className }: Pro
           <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-auto min-w-[200px] p-0 bg-popover border z-[9999]" side="bottom" align="center">
-        <div className="max-h-[400px] overflow-y-auto overscroll-contain" style={{ 
-          WebkitOverflowScrolling: 'touch',
-          touchAction: 'pan-y',
-          scrollBehavior: 'smooth'
-        }}>
+      <PopoverContent 
+        className="w-auto min-w-[200px] p-0 bg-popover border z-[9999]" 
+        side="bottom" 
+        align="center"
+        onWheel={(e) => {
+          e.stopPropagation();
+          console.log("Weight dropdown wheel event:", e.deltaY);
+        }}
+      >
+        <div 
+          className="max-h-[400px] overflow-y-auto overscroll-contain" 
+          style={{ 
+            WebkitOverflowScrolling: 'touch',
+            touchAction: 'pan-y',
+            scrollBehavior: 'smooth'
+          }}
+          onWheel={(e) => {
+            console.log("Weight dropdown scroll container wheel event");
+            // Don't prevent default - let it scroll naturally
+          }}
+        >
           {/* Шапка с заголовками */}
           <div className="flex gap-4 p-4 pb-2 bg-popover border-b sticky top-0 z-20">
             <div className="text-xs font-medium text-muted-foreground text-center" style={{ width: '70px' }}>KG</div>
