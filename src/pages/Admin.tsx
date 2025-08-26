@@ -569,6 +569,15 @@ const Admin = () => {
       .single();
 
     if (application) {
+      // Remove contest participant status from profile when deleting application
+      await supabase
+        .from('profiles')
+        .update({ 
+          is_contest_participant: false,
+          participant_type: null 
+        })
+        .eq('id', application.user_id);
+
       await supabase
         .from('weekly_contest_participants')
         .update({ is_active: false })
