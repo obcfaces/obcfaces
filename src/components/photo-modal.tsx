@@ -84,18 +84,18 @@ export function PhotoModal({
   // Use card data hook for contestant data
   const cardData = useCardData(contestantName, user?.id);
 
-  // Load user's current rating using secure function
+  // Load user's current rating using secure function with user_id
   useEffect(() => {
     const loadUserRating = async () => {
-      if (!user?.id) return;
+      if (!user?.id || !profileId) return;
 
       try {
         const { data: userRating } = await supabase
-          .rpc('get_user_rating', { 
-            contestant_name_param: contestantName 
+          .rpc('get_user_rating_for_participant', { 
+            target_user_id: profileId 
           });
 
-        if (userRating !== null) {
+        if (userRating !== null && typeof userRating === 'number') {
           setUserRating(userRating);
           setIsUserVoted(true);
         }
@@ -105,7 +105,7 @@ export function PhotoModal({
     };
 
     loadUserRating();
-  }, [user?.id, contestantName]);
+  }, [user?.id, profileId]);
 
   // Refs for focusing comment input and scrolling
   const commentsListRef = useRef<HTMLDivElement>(null);
@@ -128,8 +128,8 @@ export function PhotoModal({
     if (!isOpen) return;
     
     const loadPhotoData = async () => {
-      // Load comments for current photo
-      const contentId = `contestant-photo-${contestantName}-${activeIndex}`;
+      // Load comments for current photo using user_id based approach
+      const contentId = profileId ? `contestant-user-${profileId}-${activeIndex}` : `contestant-photo-${contestantName}-${activeIndex}`;
       
       // Try without join first to see if basic query works
       const { data: comments, error: commentsError } = await supabase
@@ -212,7 +212,7 @@ export function PhotoModal({
       return;
     }
     
-    const contentId = `contestant-photo-${contestantName}-${activeIndex}`;
+    const contentId = profileId ? `contestant-user-${profileId}-${activeIndex}` : `contestant-photo-${contestantName}-${activeIndex}`;
     const wasLiked = photoLikes[activeIndex]?.isLiked || false;
     
     // Optimistic update first for immediate UI feedback
@@ -264,7 +264,7 @@ export function PhotoModal({
     }
     
     if (commentText.trim()) {
-      const contentId = `contestant-photo-${contestantName}-${activeIndex}`;
+      const contentId = profileId ? `contestant-user-${profileId}-${activeIndex}` : `contestant-photo-${contestantName}-${activeIndex}`;
       
       try {
         // Save comment to database

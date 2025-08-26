@@ -80,20 +80,20 @@ export function ContestantCard({
   const [dislikesCount, setDislikesCount] = useState<number>(0);
   
   // Use unified card data hook
-  const { data: cardData, loading: cardDataLoading } = useCardData(name, user?.id);
+  const { data: cardData, loading: cardDataLoading } = useCardData(name, user?.id, profileId);
 
-  // Load user's current rating using secure function
+  // Load user's current rating using secure function with user_id
   useEffect(() => {
     const loadUserRating = async () => {
-      if (!user?.id) return;
+      if (!user?.id || !profileId) return;
 
       try {
         const { data: userRating } = await supabase
-          .rpc('get_user_rating', { 
-            contestant_name_param: name 
+          .rpc('get_user_rating_for_participant', { 
+            target_user_id: profileId 
           });
 
-        if (userRating !== null) {
+        if (userRating !== null && typeof userRating === 'number') {
           setUserRating(userRating);
           setIsVoted(true);
         }
@@ -103,7 +103,7 @@ export function ContestantCard({
     };
 
     loadUserRating();
-  }, [user?.id, name]);
+  }, [user?.id, profileId]);
   // Initialize isVoted state synchronously by checking localStorage
   const [isVoted, setIsVoted] = useState(() => {
     if (propIsVoted) return true;
