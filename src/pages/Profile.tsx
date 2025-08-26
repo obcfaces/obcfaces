@@ -710,11 +710,12 @@ const Profile = () => {
       // Проверяем, является ли пользователь участником конкурса или имеет заявку
       console.log('is_contest_participant:', profileData.is_contest_participant);
       
-      // Также проверяем наличие заявки на участие
+      // Также проверяем наличие заявки на участие (исключаем удалённые)
       const { data: contestApplication } = await supabase
         .from('contest_applications')
         .select('id, status, created_at, application_data')
         .eq('user_id', id)
+        .is('deleted_at', null)  // Исключаем удалённые заявки
         .order('created_at', { ascending: false })
         .limit(1)
         .maybeSingle();
