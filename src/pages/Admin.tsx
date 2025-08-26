@@ -401,26 +401,60 @@ const Admin = () => {
       return;
     }
 
-    const { error } = await supabase
-      .from('weekly_contest_participants')
-      .delete()
-      .eq('id', participantId);
+    try {
+      // Получаем участника для получения user_id
+      const { data: participant } = await supabase
+        .from('weekly_contest_participants')
+        .select('user_id')
+        .eq('id', participantId)
+        .single();
 
-    if (error) {
+      if (!participant) {
+        throw new Error('Участник не найден');
+      }
+
+      // Удаляем связанные лайки (по имени участника)
+      await supabase
+        .from('likes')
+        .delete()
+        .or(`content_id.like.contestant-card-${participantName},content_id.like.contestant-photo-${participantName}-%`);
+
+      // Удаляем связанные комментарии (по имени участника)
+      await supabase
+        .from('photo_comments')
+        .delete()
+        .or(`content_id.like.contestant-card-${participantName},content_id.like.contestant-photo-${participantName}-%`);
+
+      // Удаляем рейтинги участника
+      await supabase
+        .from('contestant_ratings')
+        .delete()
+        .eq('contestant_user_id', participant.user_id);
+
+      // Удаляем самого участника
+      const { error } = await supabase
+        .from('weekly_contest_participants')
+        .delete()
+        .eq('id', participantId);
+
+      if (error) {
+        throw error;
+      }
+
+      toast({
+        title: "Успех",
+        description: `Участник ${participantName} и все связанные данные успешно удалены`,
+      });
+
+      await fetchWeeklyParticipants();
+    } catch (error) {
+      console.error('Ошибка удаления участника:', error);
       toast({
         title: "Ошибка",
         description: "Не удалось удалить участника",
         variant: "destructive"
       });
-      return;
     }
-
-    toast({
-      title: "Успех",
-      description: `Участник ${participantName} успешно удален`,
-    });
-
-    await fetchWeeklyParticipants();
   };
 
   const deleteApplication = async (applicationId: string, applicationName: string) => {
