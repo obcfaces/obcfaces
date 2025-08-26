@@ -713,7 +713,7 @@ const Profile = () => {
       // Также проверяем наличие заявки на участие
       const { data: contestApplication } = await supabase
         .from('contest_applications')
-        .select('id, status, created_at')
+        .select('id, status, created_at, application_data')
         .eq('user_id', id)
         .order('created_at', { ascending: false })
         .limit(1)
