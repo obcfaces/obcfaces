@@ -456,7 +456,7 @@ const Admin = () => {
 
       console.log(`Удалено рейтингов: ${deletedRatings?.length || 0}`);
 
-      // Удаляем самого участника
+      // Удаляем самого участника из weekly_contest_participants
       const { error, data: deletedParticipant } = await supabase
         .from('weekly_contest_participants')
         .delete()
@@ -469,9 +469,46 @@ const Admin = () => {
 
       console.log(`Участник удален:`, deletedParticipant);
 
+      // ВАЖНО: Обновляем профиль пользователя - убираем статус участника конкурса
+      // Проверяем, есть ли у пользователя другие активные участия в конкурсах
+      const { data: otherParticipations } = await supabase
+        .from('weekly_contest_participants')
+        .select('id')
+        .eq('user_id', participant.user_id)
+        .eq('is_active', true);
+
+      // Если нет других активных участий, убираем флаг is_contest_participant
+      if (!otherParticipations || otherParticipations.length === 0) {
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .update({ 
+            is_contest_participant: false,
+            participant_type: null 
+          })
+          .eq('id', participant.user_id);
+
+        if (profileError) {
+          console.error('Ошибка обновления профиля:', profileError);
+        } else {
+          console.log('Профиль пользователя обновлен - убран статус участника конкурса');
+        }
+      }
+
+      // Делаем неактивной заявку пользователя, чтобы не блокировать новые заявки
+      const { error: applicationError } = await supabase
+        .from('contest_applications')
+        .update({ is_active: false })
+        .eq('user_id', participant.user_id);
+
+      if (applicationError) {
+        console.error('Ошибка при деактивации заявки:', applicationError);
+      } else {
+        console.log('Заявка пользователя деактивирована для возможности подачи новых заявок');
+      }
+
       toast({
         title: "Успех",
-        description: `Участник ${participantName} и все связанные данные успешно удалены`,
+        description: `Участник ${participantName} полностью удален. Пользователь может подавать новые заявки.`,
       });
 
       // Принудительно обновляем данные
