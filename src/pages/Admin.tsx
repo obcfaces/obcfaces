@@ -12,7 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { toast } from "@/components/ui/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Check, X, Eye, UserCog, FileText, Calendar, Trophy, RotateCcw, Edit, Plus, History, AlertCircle } from "lucide-react";
+import { Check, X, Eye, UserCog, FileText, Calendar, Trophy, RotateCcw, Edit, Plus, History, AlertCircle, Trash2 } from "lucide-react";
 import { PhotoModal } from "@/components/photo-modal";
 import { Switch } from "@/components/ui/switch";
 import { useNavigate } from "react-router-dom";
@@ -393,7 +393,34 @@ const Admin = () => {
       description: `Participant ${!currentActive ? 'activated' : 'deactivated'} successfully`,
     });
 
-    fetchWeeklyParticipants();
+    await fetchWeeklyParticipants();
+  };
+
+  const deleteParticipant = async (participantId: string, participantName: string) => {
+    if (!confirm(`Вы уверены, что хотите удалить участника ${participantName}? Это действие нельзя отменить.`)) {
+      return;
+    }
+
+    const { error } = await supabase
+      .from('weekly_contest_participants')
+      .delete()
+      .eq('id', participantId);
+
+    if (error) {
+      toast({
+        title: "Ошибка",
+        description: "Не удалось удалить участника",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    toast({
+      title: "Успех",
+      description: `Участник ${participantName} успешно удален`,
+    });
+
+    await fetchWeeklyParticipants();
   };
 
   const toggleHistoryExpansion = (participantId: string) => {
@@ -1231,6 +1258,15 @@ const Admin = () => {
                             >
                               <Edit className="w-3 h-3" />
                               Edit
+                            </Button>
+                            <Button
+                              onClick={() => deleteParticipant(participant.id, `${participant.first_name} ${participant.last_name}`)}
+                              size="sm"
+                              variant="destructive"
+                              className="flex items-center gap-1 text-xs px-2 py-1 h-7"
+                              title="Удалить участника"
+                            >
+                              <Trash2 className="w-3 h-3" />
                             </Button>
                           </div>
                         </div>
