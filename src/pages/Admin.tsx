@@ -417,13 +417,23 @@ const Admin = () => {
       await supabase
         .from('likes')
         .delete()
-        .or(`content_id.like.contestant-card-${participantName},content_id.like.contestant-photo-${participantName}-%`);
+        .like('content_id', `contestant-card-${participantName}%`);
+
+      await supabase
+        .from('likes')
+        .delete()
+        .like('content_id', `contestant-photo-${participantName}-%`);
 
       // Удаляем связанные комментарии (по имени участника)
       await supabase
         .from('photo_comments')
         .delete()
-        .or(`content_id.like.contestant-card-${participantName},content_id.like.contestant-photo-${participantName}-%`);
+        .like('content_id', `contestant-card-${participantName}%`);
+
+      await supabase
+        .from('photo_comments')
+        .delete()
+        .like('content_id', `contestant-photo-${participantName}-%`);
 
       // Удаляем рейтинги участника
       await supabase
