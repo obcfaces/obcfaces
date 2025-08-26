@@ -213,13 +213,14 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
               return null;
             }
             
-            // Get average rating from database
-            const { data: avgRating } = await supabase.rpc('get_contestant_average_rating', {
+            // Get rating stats using secure function
+            const { data: ratingStats } = await supabase.rpc('get_rating_stats', {
               contestant_name_param: `${contestant.first_name || ''} ${contestant.last_name || ''}`.trim(),
               contestant_user_id_param: contestant.user_id
             });
             
-            const averageRating = avgRating || 0;
+            const averageRating = ratingStats?.[0]?.average_rating || 0;
+            const totalVotes = ratingStats?.[0]?.total_votes || 0;
             
             const contestantData = {
               rank: contestant.final_rank || 0,
@@ -231,8 +232,8 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
               weight: contestant.weight_kg || 0,
               height: contestant.height_cm || 0,
               rating: averageRating,
-              averageRating: contestant.average_rating || 0, // Add average rating from DB
-              totalVotes: contestant.total_votes || 0, // Add total votes from DB
+              averageRating: averageRating, // Use secure rating from function
+              totalVotes: totalVotes, // Use secure vote count from function
               faceImage: contestant.photo_1_url || contestant1Face,
               fullBodyImage: contestant.photo_2_url || contestant1Full,
               additionalPhotos: [],
@@ -290,13 +291,14 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
             return null;
           }
           
-          // Get average rating from database
-          const { data: avgRating } = await supabase.rpc('get_contestant_average_rating', {
+          // Get rating stats using secure function
+          const { data: ratingStats } = await supabase.rpc('get_rating_stats', {
             contestant_name_param: `${contestant.first_name || ''} ${contestant.last_name || ''}`.trim(),
             contestant_user_id_param: contestant.user_id
           });
           
-          const averageRating = avgRating || 0;
+          const averageRating = ratingStats?.[0]?.average_rating || 0;
+          const totalVotes = ratingStats?.[0]?.total_votes || 0;
           
           const contestantData = {
             rank: contestant.final_rank || 0,
@@ -308,8 +310,8 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
             weight: contestant.weight_kg || 0,
             height: contestant.height_cm || 0,
             rating: averageRating,
-            averageRating: contestant.average_rating || 0, // Add average rating from DB
-            totalVotes: contestant.total_votes || 0, // Add total votes from DB
+            averageRating: averageRating, // Use secure rating from function
+            totalVotes: totalVotes, // Use secure vote count from function
             faceImage: contestant.photo_1_url || contestant1Face,
             fullBodyImage: contestant.photo_2_url || contestant1Full,
             additionalPhotos: [],
