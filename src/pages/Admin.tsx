@@ -402,13 +402,13 @@ const Admin = () => {
     }
 
     try {
-      console.log(`=== НАЧАЛО УДАЛЕНИЯ ===`);
+      console.log(`=== НАЧАЛО УДАЛЕНИЯ (ID-BASED) ===`);
       console.log(`Удаление участника: "${participantName}" (ID: ${participantId})`);
 
       // Получаем участника для получения user_id
       const { data: participant } = await supabase
         .from('weekly_contest_participants')
-        .select('user_id, contest_id, application_data')
+        .select('user_id, contest_id')
         .eq('id', participantId)
         .single();
 
@@ -416,107 +416,35 @@ const Admin = () => {
         throw new Error('Участник не найден');
       }
 
-      console.log(`Найден участник:`, participant);
-      
-      // Получаем точное имя из application_data
-      const appData = participant.application_data as any;
-      const exactName = `${appData?.first_name || ''} ${appData?.last_name || ''}`.trim();
-      console.log(`Точное имя участника из БД: "${exactName}"`);
-      console.log(`Имя для поиска: "${participantName}"`);
+      const userId = participant.user_id;
+      console.log(`User ID участника: ${userId}`);
 
-      // Ищем все рейтинги участника ДО удаления
-      const { data: existingRatings } = await supabase
-        .from('contestant_ratings')
-        .select('*')
-        .or(`contestant_name.eq.${participantName},contestant_name.eq.${exactName},contestant_user_id.eq.${participant.user_id}`);
-      
-      console.log(`Найдено рейтингов ДО удаления:`, existingRatings?.length || 0, existingRatings);
-
-      // Ищем все лайки участника ДО удаления
-      const { data: existingLikes } = await supabase
-        .from('likes')
-        .select('*')
-        .or(`content_id.like.contestant-card-${participantName}%,content_id.like.contestant-card-${exactName}%,content_id.like.contestant-photo-${participantName}-%,content_id.like.contestant-photo-${exactName}-%`);
-      
-      console.log(`Найдено лайков ДО удаления:`, existingLikes?.length || 0, existingLikes);
-
-      // Удаляем связанные лайки (по обоим именам)
-      const { data: deletedLikes1 } = await supabase
+      // Удаляем ВСЕ лайки, связанные с этим user_id (используем новый формат)
+      const { data: deletedLikes } = await supabase
         .from('likes')
         .delete()
-        .like('content_id', `contestant-card-${participantName}%`)
+        .or(`content_id.eq.contestant-user-${userId},content_id.like.contestant-user-${userId}-%`)
         .select();
 
-      const { data: deletedLikes2 } = await supabase
-        .from('likes')
-        .delete()
-        .like('content_id', `contestant-card-${exactName}%`)
-        .select();
+      console.log(`Удалено лайков: ${deletedLikes?.length || 0}`);
 
-      const { data: deletedLikes3 } = await supabase
-        .from('likes')
-        .delete()
-        .like('content_id', `contestant-photo-${participantName}-%`)
-        .select();
-
-      const { data: deletedLikes4 } = await supabase
-        .from('likes')
-        .delete()
-        .like('content_id', `contestant-photo-${exactName}-%`)
-        .select();
-
-      const totalDeletedLikes = (deletedLikes1?.length || 0) + (deletedLikes2?.length || 0) + (deletedLikes3?.length || 0) + (deletedLikes4?.length || 0);
-      console.log(`Удалено лайков: ${totalDeletedLikes}`);
-
-      // Удаляем связанные комментарии (по обоим именам)
-      const { data: deletedComments1 } = await supabase
+      // Удаляем ВСЕ комментарии, связанные с этим user_id
+      const { data: deletedComments } = await supabase
         .from('photo_comments')
         .delete()
-        .like('content_id', `contestant-card-${participantName}%`)
+        .or(`content_id.eq.contestant-user-${userId},content_id.like.contestant-user-${userId}-%`)
         .select();
 
-      const { data: deletedComments2 } = await supabase
-        .from('photo_comments')
-        .delete()
-        .like('content_id', `contestant-card-${exactName}%`)
-        .select();
+      console.log(`Удалено комментариев: ${deletedComments?.length || 0}`);
 
-      const { data: deletedComments3 } = await supabase
-        .from('photo_comments')
-        .delete()
-        .like('content_id', `contestant-photo-${participantName}-%`)
-        .select();
-
-      const { data: deletedComments4 } = await supabase
-        .from('photo_comments')
-        .delete()
-        .like('content_id', `contestant-photo-${exactName}-%`)
-        .select();
-
-      const totalDeletedComments = (deletedComments1?.length || 0) + (deletedComments2?.length || 0) + (deletedComments3?.length || 0) + (deletedComments4?.length || 0);
-      console.log(`Удалено комментариев: ${totalDeletedComments}`);
-
-      // Удаляем рейтинги участника (по обоим именам и user_id)
-      const { data: deletedRatings1 } = await supabase
+      // Удаляем ВСЕ рейтинги участника по user_id
+      const { data: deletedRatings } = await supabase
         .from('contestant_ratings')
         .delete()
-        .eq('contestant_name', participantName)
+        .eq('contestant_user_id', userId)
         .select();
 
-      const { data: deletedRatings2 } = await supabase
-        .from('contestant_ratings')
-        .delete()
-        .eq('contestant_name', exactName)
-        .select();
-
-      const { data: deletedRatings3 } = await supabase
-        .from('contestant_ratings')
-        .delete()
-        .eq('contestant_user_id', participant.user_id)
-        .select();
-
-      const totalDeletedRatings = (deletedRatings1?.length || 0) + (deletedRatings2?.length || 0) + (deletedRatings3?.length || 0);
-      console.log(`Удалено рейтингов: ${totalDeletedRatings}`);
+      console.log(`Удалено рейтингов: ${deletedRatings?.length || 0}`);
 
       // Удаляем самого участника из weekly_contest_participants
       const { error, data: deletedParticipant } = await supabase
@@ -529,17 +457,16 @@ const Admin = () => {
         throw error;
       }
 
-      console.log(`Участник удален:`, deletedParticipant);
+      console.log(`Участник удален из weekly_contest_participants:`, deletedParticipant);
 
-      // ВАЖНО: Обновляем профиль пользователя - убираем статус участника конкурса
       // Проверяем, есть ли у пользователя другие активные участия в конкурсах
       const { data: otherParticipations } = await supabase
         .from('weekly_contest_participants')
         .select('id')
-        .eq('user_id', participant.user_id)
+        .eq('user_id', userId)
         .eq('is_active', true);
 
-      console.log(`Другие активные участия:`, otherParticipations?.length || 0);
+      console.log(`Другие активные участия: ${otherParticipations?.length || 0}`);
 
       // Если нет других активных участий, убираем флаг is_contest_participant
       if (!otherParticipations || otherParticipations.length === 0) {
@@ -549,7 +476,7 @@ const Admin = () => {
             is_contest_participant: false,
             participant_type: null 
           })
-          .eq('id', participant.user_id);
+          .eq('id', userId);
 
         if (profileError) {
           console.error('Ошибка обновления профиля:', profileError);
@@ -562,7 +489,7 @@ const Admin = () => {
       const { error: applicationError } = await supabase
         .from('contest_applications')
         .update({ is_active: false })
-        .eq('user_id', participant.user_id);
+        .eq('user_id', userId);
 
       if (applicationError) {
         console.error('Ошибка при деактивации заявки:', applicationError);
@@ -574,7 +501,7 @@ const Admin = () => {
 
       toast({
         title: "Успех",
-        description: `Участник ${participantName} полностью удален. Пользователь может подавать новые заявки.`,
+        description: `Участник ${participantName} полностью удален по ID. Пользователь может подавать новые заявки.`,
       });
 
       // Принудительно обновляем данные

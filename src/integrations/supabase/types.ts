@@ -631,6 +631,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      check_user_liked_participant: {
+        Args: { target_user_id: string }
+        Returns: boolean
+      }
       check_user_voted: {
         Args: { contestant_name_param: string; user_id_param: string }
         Returns: boolean
@@ -708,6 +712,10 @@ export type Database = {
           id: string
         }[]
       }
+      get_my_rating_for_user: {
+        Args: { target_user_id: string }
+        Returns: number
+      }
       get_or_create_conversation: {
         Args: { user1_id: string; user2_id: string }
         Returns: string
@@ -735,9 +743,25 @@ export type Database = {
         Args: { user_id_param: string }
         Returns: number
       }
-      get_user_rating: {
-        Args: { contestant_name_param: string }
+      get_user_comments_count: {
+        Args: { target_user_id: string }
         Returns: number
+      }
+      get_user_likes_count: {
+        Args: { target_user_id: string }
+        Returns: number
+      }
+      get_user_rating_for_participant: {
+        Args: { target_user_id: string }
+        Returns: number
+      }
+      get_user_rating_stats: {
+        Args: { target_user_id: string }
+        Returns: {
+          average_rating: number
+          total_votes: number
+          user_has_voted: boolean
+        }[]
       }
       get_users_i_liked: {
         Args: { target_user_id: string }
