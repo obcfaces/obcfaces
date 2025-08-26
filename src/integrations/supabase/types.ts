@@ -628,9 +628,34 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      participant_stats: {
+        Row: {
+          avg_rating: number | null
+          contest_id: string | null
+          contest_status: string | null
+          first_name: string | null
+          last_name: string | null
+          total_ratings: number | null
+          user_id: string | null
+          week_end_date: string | null
+          week_start_date: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "weekly_contest_participants_contest_id_fkey"
+            columns: ["contest_id"]
+            isOneToOne: false
+            referencedRelation: "weekly_contests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
+      archive_old_data: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       check_user_liked_participant: {
         Args: { target_user_id: string }
         Returns: boolean
@@ -646,6 +671,17 @@ export type Database = {
       create_weekly_contest: {
         Args: { contest_date?: string }
         Returns: string
+      }
+      get_contest_leaderboard: {
+        Args: { contest_week_offset?: number }
+        Returns: {
+          avatar_url: string
+          avg_rating: number
+          full_name: string
+          rank_position: number
+          total_votes: number
+          user_id: string
+        }[]
       }
       get_contest_participant_info: {
         Args: Record<PropertyKey, never> | { participant_id: string }
@@ -916,6 +952,10 @@ export type Database = {
       }
       mark_conversation_as_read: {
         Args: { conversation_id_param: string; user_id_param: string }
+        Returns: undefined
+      }
+      refresh_participant_stats: {
+        Args: Record<PropertyKey, never>
         Returns: undefined
       }
       rotate_weekly_contests: {
