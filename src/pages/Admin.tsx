@@ -423,6 +423,33 @@ const Admin = () => {
     await fetchWeeklyParticipants();
   };
 
+  const deleteApplication = async (applicationId: string, applicationName: string) => {
+    if (!confirm(`Вы уверены, что хотите удалить заявку ${applicationName}? Это действие нельзя отменить.`)) {
+      return;
+    }
+
+    const { error } = await supabase
+      .from('contest_applications')
+      .delete()
+      .eq('id', applicationId);
+
+    if (error) {
+      toast({
+        title: "Ошибка",
+        description: "Не удалось удалить заявку",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    toast({
+      title: "Успех",
+      description: `Заявка ${applicationName} успешно удалена`,
+    });
+
+    fetchContestApplications();
+  };
+
   const toggleHistoryExpansion = (participantId: string) => {
     setExpandedHistory(prev => {
       const newSet = new Set(prev);
@@ -1492,19 +1519,28 @@ const Admin = () => {
                                 <Check className="w-3 h-3" />
                                 Approve
                               </Button>
-                              <Button
-                                size="sm"
-                                variant="destructive"
-                                onClick={() => {
-                                  const notes = prompt("Reason for rejection (optional):");
-                                  reviewApplication(application.id, 'rejected', notes || undefined);
-                                }}
-                                disabled={application.status === 'rejected'}
-                                className="text-xs px-2 py-1 h-7"
-                              >
-                                <X className="w-3 h-3" />
-                                Reject
-                              </Button>
+                               <Button
+                                 size="sm"
+                                 variant="destructive"
+                                 onClick={() => {
+                                   const notes = prompt("Reason for rejection (optional):");
+                                   reviewApplication(application.id, 'rejected', notes || undefined);
+                                 }}
+                                 disabled={application.status === 'rejected'}
+                                 className="text-xs px-2 py-1 h-7"
+                               >
+                                 <X className="w-3 h-3" />
+                                 Reject
+                               </Button>
+                               <Button
+                                 onClick={() => deleteApplication(application.id, `${appData.first_name} ${appData.last_name}`)}
+                                 size="sm"
+                                 variant="destructive"
+                                 className="flex items-center gap-1 text-xs px-2 py-1 h-7"
+                                 title="Удалить заявку"
+                               >
+                                 <Trash2 className="w-3 h-3" />
+                               </Button>
                             </div>
                           </div>
                         </div>
