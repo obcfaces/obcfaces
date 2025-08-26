@@ -106,6 +106,7 @@ export type Database = {
           contestant_user_id: string | null
           created_at: string
           id: string
+          participant_id: string | null
           rating: number
           updated_at: string
           user_id: string
@@ -115,6 +116,7 @@ export type Database = {
           contestant_user_id?: string | null
           created_at?: string
           id?: string
+          participant_id?: string | null
           rating: number
           updated_at?: string
           user_id: string
@@ -124,11 +126,20 @@ export type Database = {
           contestant_user_id?: string | null
           created_at?: string
           id?: string
+          participant_id?: string | null
           rating?: number
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "contestant_ratings_participant_id_fkey"
+            columns: ["participant_id"]
+            isOneToOne: false
+            referencedRelation: "weekly_contest_participants"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       conversation_participants: {
         Row: {
@@ -219,6 +230,7 @@ export type Database = {
           content_type: string
           created_at: string
           id: string
+          participant_id: string | null
           user_id: string
         }
         Insert: {
@@ -226,6 +238,7 @@ export type Database = {
           content_type: string
           created_at?: string
           id?: string
+          participant_id?: string | null
           user_id: string
         }
         Update: {
@@ -233,9 +246,18 @@ export type Database = {
           content_type?: string
           created_at?: string
           id?: string
+          participant_id?: string | null
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "likes_participant_id_fkey"
+            columns: ["participant_id"]
+            isOneToOne: false
+            referencedRelation: "weekly_contest_participants"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       messages: {
         Row: {
@@ -309,6 +331,7 @@ export type Database = {
           content_type: string
           created_at: string
           id: string
+          participant_id: string | null
           updated_at: string
           user_id: string
         }
@@ -318,6 +341,7 @@ export type Database = {
           content_type?: string
           created_at?: string
           id?: string
+          participant_id?: string | null
           updated_at?: string
           user_id: string
         }
@@ -327,10 +351,19 @@ export type Database = {
           content_type?: string
           created_at?: string
           id?: string
+          participant_id?: string | null
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "photo_comments_participant_id_fkey"
+            columns: ["participant_id"]
+            isOneToOne: false
+            referencedRelation: "weekly_contest_participants"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       post_likes: {
         Row: {
@@ -660,6 +693,10 @@ export type Database = {
         Args: { target_user_id: string }
         Returns: boolean
       }
+      check_user_liked_participant_id: {
+        Args: { participant_id_param: string }
+        Returns: boolean
+      }
       check_user_voted: {
         Args: { contestant_name_param: string; user_id_param: string }
         Returns: boolean
@@ -748,6 +785,10 @@ export type Database = {
           id: string
         }[]
       }
+      get_my_rating_for_participant: {
+        Args: { participant_id_param: string }
+        Returns: number
+      }
       get_my_rating_for_user: {
         Args: { target_user_id: string }
         Returns: number
@@ -755,6 +796,22 @@ export type Database = {
       get_or_create_conversation: {
         Args: { user1_id: string; user2_id: string }
         Returns: string
+      }
+      get_participant_comments_count: {
+        Args: { participant_id_param: string }
+        Returns: number
+      }
+      get_participant_likes_count: {
+        Args: { participant_id_param: string }
+        Returns: number
+      }
+      get_participant_rating_stats: {
+        Args: { participant_id_param: string }
+        Returns: {
+          average_rating: number
+          total_votes: number
+          user_has_voted: boolean
+        }[]
       }
       get_public_profile_summary: {
         Args: { profile_user_id: string }
