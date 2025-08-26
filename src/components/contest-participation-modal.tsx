@@ -429,12 +429,47 @@ export const ContestParticipationModal = ({
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) return;
 
-      // Check if user already has an application
-      const { data: existingApplication } = await supabase
-        .from('contest_applications')
-        .select('id, status')
-        .eq('user_id', session.user.id)
-        .single();
+      // In edit mode, check if application is still editable
+      if (editMode && existingData) {
+        if (existingData.status === 'approved') {
+          toast({
+            title: "Cannot Edit",
+            description: "Your application has already been approved and cannot be edited. You can submit a new application instead.",
+            variant: "destructive"
+          });
+          setIsLoading(false);
+          return;
+        }
+        if (!['pending', 'under_review'].includes(existingData.status)) {
+          toast({
+            title: "Cannot Edit",
+            description: "This application can no longer be edited. You can submit a new application instead.",
+            variant: "destructive"
+          });
+          setIsLoading(false);
+          return;
+        }
+      }
+
+      // Check if user already has an approved application (only for new applications)
+      if (!editMode) {
+        const { data: existingApplication } = await supabase
+          .from('contest_applications')
+          .select('id, status')
+          .eq('user_id', session.user.id)
+          .in('status', ['approved'])
+          .single();
+
+        if (existingApplication) {
+          toast({
+            title: "Application Already Approved",
+            description: "You already have an approved application. You can submit a new one for the next contest period.",
+            variant: "destructive"
+          });
+          setIsLoading(false);
+          return;
+        }
+      }
 
       // Upload photos or keep existing ones
       let photo1Url = null;
@@ -487,19 +522,6 @@ export const ContestParticipationModal = ({
             updated_at: new Date().toISOString()
           })
           .eq('id', existingData.id);
-        
-        dbError = error;
-      } else if (existingApplication) {
-        // Update existing application by user_id
-        const { error } = await supabase
-          .from('contest_applications')
-          .update({
-            application_data: applicationData,
-            status: 'pending',
-            submitted_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          })
-          .eq('user_id', session.user.id);
         
         dbError = error;
       } else {

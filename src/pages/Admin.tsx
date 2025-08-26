@@ -17,6 +17,7 @@ import { PhotoModal } from "@/components/photo-modal";
 import { Switch } from "@/components/ui/switch";
 import { useNavigate } from "react-router-dom";
 import { useApplicationHistory } from "@/hooks/useApplicationHistory";
+import { Clock } from "lucide-react";
 
 interface ProfileData {
   id: string;
@@ -112,6 +113,8 @@ const Admin = () => {
   const [photoModalIndex, setPhotoModalIndex] = useState(0);
   const [photoModalName, setPhotoModalName] = useState("");
   const [expandedHistory, setExpandedHistory] = useState<Set<string>>(new Set());
+  const [viewingApplicationHistory, setViewingApplicationHistory] = useState<string | null>(null);
+  const [applicationHistoryOpen, setApplicationHistoryOpen] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -1087,7 +1090,64 @@ const Admin = () => {
     fetchContestApplications();
   };
 
-  const getApplicationStatusBadge = (status: string) => {
+interface ApplicationHistoryModalProps {
+  applicationId: string | null;
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+const ApplicationHistoryModal = ({ applicationId, isOpen, onClose }: ApplicationHistoryModalProps) => {
+  const { history, loading } = useApplicationHistory(applicationId || undefined);
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Application History</DialogTitle>
+        </DialogHeader>
+        
+        {loading ? (
+          <div className="flex items-center justify-center py-8">
+            <div className="text-muted-foreground">Loading history...</div>
+          </div>
+        ) : history.length === 0 ? (
+          <div className="text-center py-8 text-muted-foreground">
+            No changes recorded for this application.
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {history.map((item, index) => (
+              <Card key={item.id} className="p-4">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Badge variant={item.status === 'approved' ? 'default' : item.status === 'rejected' ? 'destructive' : 'secondary'}>
+                        {item.status}
+                      </Badge>
+                      <span className="text-sm text-muted-foreground">
+                        {new Date(item.created_at).toLocaleString()}
+                      </span>
+                    </div>
+                    {item.change_reason && (
+                      <p className="text-sm mb-2">{item.change_reason}</p>
+                    )}
+                    {item.notes && (
+                      <div className="bg-muted p-2 rounded text-sm">
+                        <strong>Notes:</strong> {item.notes}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </Card>
+            ))}
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+const getApplicationStatusBadge = (status: string) => {
     switch (status) {
       case 'pending':
         return <Badge variant="secondary">Pending</Badge>;
@@ -1595,6 +1655,17 @@ const Admin = () => {
                               </p>
                             </div>
                             <div className="flex gap-1">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => {
+                                  setViewingApplicationHistory(application.id);
+                                  setApplicationHistoryOpen(true);
+                                }}
+                                className="px-2"
+                              >
+                                <Clock className="w-3 h-3" />
+                              </Button>
                               <Button
                                 size="sm"
                                 variant="outline"
@@ -2184,6 +2255,16 @@ const Admin = () => {
               )}
             </DialogContent>
           </Dialog>
+
+          {/* Application History Modal */}
+          <ApplicationHistoryModal 
+            applicationId={viewingApplicationHistory}
+            isOpen={applicationHistoryOpen}
+            onClose={() => {
+              setApplicationHistoryOpen(false);
+              setViewingApplicationHistory(null);
+            }}
+          />
         </div>
       </div>
 
