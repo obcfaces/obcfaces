@@ -183,7 +183,7 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
       const testCard = {
         rank: 0, // Use 0 to distinguish from real ranks
         name: "Example Card", 
-        profileId: "example-id",
+        profileId: "00000000-0000-0000-0000-000000000000", // Use null UUID for example
         country: "Philippines",
         city: "Manila",
         age: 25,

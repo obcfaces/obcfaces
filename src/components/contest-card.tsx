@@ -266,6 +266,12 @@ export function ContestantCard({
       setShowLoginModal(true);
       return;
     }
+
+    // Prevent rating example cards
+    if (profileId === "00000000-0000-0000-0000-000000000000" || name === "Example Card") {
+      toast({ description: "Cannot rate example cards" });
+      return;
+    }
     
     setUserRating(rating);
     setIsVoted(true); // Mark as voted
