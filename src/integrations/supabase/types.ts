@@ -59,6 +59,7 @@ export type Database = {
         Row: {
           application_data: Json | null
           created_at: string
+          deleted_at: string | null
           id: string
           is_active: boolean
           last_participation_date: string | null
@@ -73,6 +74,7 @@ export type Database = {
         Insert: {
           application_data?: Json | null
           created_at?: string
+          deleted_at?: string | null
           id?: string
           is_active?: boolean
           last_participation_date?: string | null
@@ -87,6 +89,7 @@ export type Database = {
         Update: {
           application_data?: Json | null
           created_at?: string
+          deleted_at?: string | null
           id?: string
           is_active?: boolean
           last_participation_date?: string | null
@@ -708,6 +711,23 @@ export type Database = {
       create_weekly_contest: {
         Args: { contest_date?: string }
         Returns: string
+      }
+      get_contest_applications_admin: {
+        Args: { include_deleted?: boolean }
+        Returns: {
+          application_data: Json
+          created_at: string
+          deleted_at: string
+          id: string
+          is_active: boolean
+          notes: string
+          reviewed_at: string
+          reviewed_by: string
+          status: string
+          submitted_at: string
+          updated_at: string
+          user_id: string
+        }[]
       }
       get_contest_leaderboard: {
         Args: { contest_week_offset?: number }

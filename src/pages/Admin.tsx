@@ -95,10 +95,12 @@ const Admin = () => {
   const [profiles, setProfiles] = useState<ProfileData[]>([]);
   const [userRoles, setUserRoles] = useState<UserRole[]>([]);
   const [contestApplications, setContestApplications] = useState<ContestApplication[]>([]);
+  const [deletedApplications, setDeletedApplications] = useState<ContestApplication[]>([]);
   const [weeklyContests, setWeeklyContests] = useState<WeeklyContest[]>([]);
   const [weeklyParticipants, setWeeklyParticipants] = useState<WeeklyContestParticipant[]>([]);
   const [selectedContest, setSelectedContest] = useState<string | null>(null);
   const [selectedWeekOffset, setSelectedWeekOffset] = useState<number>(0); // 0 = current week, -1 = last week, etc.
+  const [showDeletedApplications, setShowDeletedApplications] = useState(false);
   const [editingApplication, setEditingApplication] = useState<ContestApplication | null>(null);
   const [editForm, setEditForm] = useState<any>({});
   const [photo1File, setPhoto1File] = useState<File | null>(null);
@@ -199,6 +201,7 @@ const Admin = () => {
     const { data, error } = await supabase
       .from('contest_applications')
       .select('*')
+      .is('deleted_at', null)
       .order('submitted_at', { ascending: false });
 
     if (error) {
@@ -211,6 +214,21 @@ const Admin = () => {
     }
 
     setContestApplications(data || []);
+  };
+
+  const fetchDeletedApplications = async () => {
+    const { data, error } = await supabase
+      .from('contest_applications')
+      .select('*')
+      .not('deleted_at', 'is', null)
+      .order('deleted_at', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching deleted applications:', error);
+      return [];
+    }
+
+    return data || [];
   };
 
   const fetchWeeklyContests = async () => {
@@ -521,13 +539,17 @@ const Admin = () => {
   };
 
   const deleteApplication = async (applicationId: string, applicationName: string) => {
-    if (!confirm(`Вы уверены, что хотите удалить заявку ${applicationName}? Это действие нельзя отменить.`)) {
+    if (!confirm(`Вы уверены, что хотите удалить заявку ${applicationName}? Заявка будет перемещена в удалённые.`)) {
       return;
     }
 
+    // Soft delete - mark as deleted instead of removing completely
     const { error } = await supabase
       .from('contest_applications')
-      .delete()
+      .update({ 
+        deleted_at: new Date().toISOString(),
+        is_active: false 
+      })
       .eq('id', applicationId);
 
     if (error) {
@@ -539,9 +561,49 @@ const Admin = () => {
       return;
     }
 
+    // Also remove from weekly contest participants if exists
+    const { data: application } = await supabase
+      .from('contest_applications')
+      .select('user_id')
+      .eq('id', applicationId)
+      .single();
+
+    if (application) {
+      await supabase
+        .from('weekly_contest_participants')
+        .update({ is_active: false })
+        .eq('user_id', application.user_id);
+    }
+
     toast({
       title: "Успех",
-      description: `Заявка ${applicationName} успешно удалена`,
+      description: `Заявка ${applicationName} перемещена в удалённые`,
+    });
+
+    fetchContestApplications();
+  };
+
+  const restoreApplication = async (applicationId: string, applicationName: string) => {
+    const { error } = await supabase
+      .from('contest_applications')
+      .update({ 
+        deleted_at: null,
+        is_active: true 
+      })
+      .eq('id', applicationId);
+
+    if (error) {
+      toast({
+        title: "Ошибка",
+        description: "Не удалось восстановить заявку",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    toast({
+      title: "Успех",
+      description: `Заявка ${applicationName} восстановлена`,
     });
 
     fetchContestApplications();
@@ -1571,8 +1633,31 @@ const getApplicationStatusBadge = (status: string) => {
             </TabsContent>
 
             <TabsContent value="applications" className="space-y-4">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-semibold">Contest Applications</h2>
+                <div className="flex gap-2">
+                  <Button
+                    variant={!showDeletedApplications ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setShowDeletedApplications(false)}
+                  >
+                    Active Applications
+                  </Button>
+                  <Button
+                    variant={showDeletedApplications ? "default" : "outline"}
+                    size="sm"
+                    onClick={async () => {
+                      setShowDeletedApplications(true);
+                      const deleted = await fetchDeletedApplications();
+                      setDeletedApplications(deleted);
+                    }}
+                  >
+                    Deleted Applications
+                  </Button>
+                </div>
+              </div>
               <div className="grid gap-4">
-                {contestApplications.map((application) => {
+                {(showDeletedApplications ? deletedApplications : contestApplications).map((application) => {
                   const appData = application.application_data || {};
                   const phone = appData.phone;
                   const submittedDate = new Date(application.submitted_at);
@@ -1666,46 +1751,61 @@ const getApplicationStatusBadge = (status: string) => {
                               >
                                 <Clock className="w-3 h-3" />
                               </Button>
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => startEditingApplication(application)}
-                                className="flex items-center gap-1 text-xs px-2 py-1 h-7"
-                              >
-                                <Edit className="w-3 h-3" />
-                                Edit
-                              </Button>
-                              <Button
-                                size="sm"
-                                onClick={() => reviewApplication(application.id, 'approved')}
-                                disabled={application.status === 'approved'}
-                                className="bg-green-600 hover:bg-green-700 text-xs px-2 py-1 h-7"
-                              >
-                                <Check className="w-3 h-3" />
-                                Approve
-                              </Button>
-                               <Button
-                                 size="sm"
-                                 variant="destructive"
-                                 onClick={() => {
-                                   const notes = prompt("Reason for rejection (optional):");
-                                   reviewApplication(application.id, 'rejected', notes || undefined);
-                                 }}
-                                 disabled={application.status === 'rejected'}
-                                 className="text-xs px-2 py-1 h-7"
-                               >
-                                 <X className="w-3 h-3" />
-                                 Reject
-                               </Button>
-                               <Button
-                                 onClick={() => deleteApplication(application.id, `${appData.first_name} ${appData.last_name}`)}
-                                 size="sm"
-                                 variant="destructive"
-                                 className="flex items-center gap-1 text-xs px-2 py-1 h-7"
-                                 title="Удалить заявку"
-                               >
-                                 <Trash2 className="w-3 h-3" />
-                               </Button>
+                               {!showDeletedApplications && (
+                                <>
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => startEditingApplication(application)}
+                                    className="flex items-center gap-1 text-xs px-2 py-1 h-7"
+                                  >
+                                    <Edit className="w-3 h-3" />
+                                    Edit
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    onClick={() => reviewApplication(application.id, 'approved')}
+                                    disabled={application.status === 'approved'}
+                                    className="bg-green-600 hover:bg-green-700 text-xs px-2 py-1 h-7"
+                                  >
+                                    <Check className="w-3 h-3" />
+                                    Approve
+                                  </Button>
+                                   <Button
+                                     size="sm"
+                                     variant="destructive"
+                                     onClick={() => {
+                                       const notes = prompt("Reason for rejection (optional):");
+                                       reviewApplication(application.id, 'rejected', notes || undefined);
+                                     }}
+                                     disabled={application.status === 'rejected'}
+                                     className="text-xs px-2 py-1 h-7"
+                                   >
+                                     <X className="w-3 h-3" />
+                                     Reject
+                                   </Button>
+                                   <Button
+                                     onClick={() => deleteApplication(application.id, `${appData.first_name} ${appData.last_name}`)}
+                                     size="sm"
+                                     variant="destructive"
+                                     className="flex items-center gap-1 text-xs px-2 py-1 h-7"
+                                     title="Удалить заявку"
+                                   >
+                                     <Trash2 className="w-3 h-3" />
+                                   </Button>
+                                </>
+                               )}
+                               {showDeletedApplications && (
+                                 <Button
+                                   onClick={() => restoreApplication(application.id, `${appData.first_name} ${appData.last_name}`)}
+                                   size="sm"
+                                   className="bg-blue-600 hover:bg-blue-700 text-xs px-2 py-1 h-7"
+                                   title="Восстановить заявку"
+                                 >
+                                   <RotateCcw className="w-3 h-3" />
+                                   Restore
+                                 </Button>
+                               )}
                             </div>
                           </div>
                         </div>
