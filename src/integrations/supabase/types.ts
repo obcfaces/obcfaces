@@ -631,6 +631,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      check_user_voted: {
+        Args: { contestant_name_param: string; user_id_param: string }
+        Returns: boolean
+      }
       cleanup_duplicate_conversations_safe: {
         Args: Record<PropertyKey, never>
         Returns: undefined
@@ -716,8 +720,23 @@ export type Database = {
           id: string
         }[]
       }
+      get_rating_stats: {
+        Args: {
+          contestant_name_param: string
+          contestant_user_id_param?: string
+        }
+        Returns: {
+          average_rating: number
+          rating_distribution: Json
+          total_votes: number
+        }[]
+      }
       get_unread_messages_count: {
         Args: { user_id_param: string }
+        Returns: number
+      }
+      get_user_rating: {
+        Args: { contestant_name_param: string }
         Returns: number
       }
       get_users_i_liked: {

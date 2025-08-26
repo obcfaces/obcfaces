@@ -82,25 +82,23 @@ export function ContestantCard({
   // Use unified card data hook
   const { data: cardData, loading: cardDataLoading } = useCardData(name, user?.id);
 
-  // Load user's current rating
+  // Load user's current rating using secure function
   useEffect(() => {
     const loadUserRating = async () => {
       if (!user?.id) return;
 
       try {
-        const { data: userRatingData } = await supabase
-          .from('contestant_ratings')
-          .select('rating')
-          .eq('user_id', user.id)
-          .eq('contestant_name', name)
-          .single();
+        const { data: userRating } = await supabase
+          .rpc('get_user_rating', { 
+            contestant_name_param: name 
+          });
 
-        if (userRatingData) {
-          setUserRating(userRatingData.rating);
+        if (userRating !== null) {
+          setUserRating(userRating);
           setIsVoted(true);
         }
       } catch (error) {
-        console.log('No existing rating found');
+        console.error('Error loading user rating:', error);
       }
     };
 

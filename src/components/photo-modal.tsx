@@ -84,25 +84,23 @@ export function PhotoModal({
   // Use card data hook for contestant data
   const cardData = useCardData(contestantName, user?.id);
 
-  // Load user's current rating
+  // Load user's current rating using secure function
   useEffect(() => {
     const loadUserRating = async () => {
       if (!user?.id) return;
 
       try {
-        const { data: userRatingData } = await supabase
-          .from('contestant_ratings')
-          .select('rating')
-          .eq('user_id', user.id)
-          .eq('contestant_name', contestantName)
-          .single();
+        const { data: userRating } = await supabase
+          .rpc('get_user_rating', { 
+            contestant_name_param: contestantName 
+          });
 
-        if (userRatingData) {
-          setUserRating(userRatingData.rating);
+        if (userRating !== null) {
+          setUserRating(userRating);
           setIsUserVoted(true);
         }
       } catch (error) {
-        console.log('No existing rating found');
+        console.error('Error loading user rating:', error);
       }
     };
 
