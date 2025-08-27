@@ -230,6 +230,27 @@ export type Database = {
           },
         ]
       }
+      like_counts: {
+        Row: {
+          content_id: string
+          content_type: string
+          like_count: number
+          updated_at: string | null
+        }
+        Insert: {
+          content_id: string
+          content_type: string
+          like_count?: number
+          updated_at?: string | null
+        }
+        Update: {
+          content_id?: string
+          content_type?: string
+          like_count?: number
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       likes: {
         Row: {
           content_id: string
@@ -667,14 +688,6 @@ export type Database = {
       }
     }
     Views: {
-      like_counts: {
-        Row: {
-          content_id: string | null
-          content_type: string | null
-          like_count: number | null
-        }
-        Relationships: []
-      }
       participant_stats: {
         Row: {
           avg_rating: number | null
