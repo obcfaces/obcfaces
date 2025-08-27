@@ -1467,28 +1467,24 @@ const getApplicationStatusBadge = (status: string) => {
                                  <span className="truncate">{participant.city}, {participant.country}</span>
                                  <span>•</span>
                                  <span>{participant.height_cm}cm, {participant.weight_kg}kg</span>
-                               </div>
-                               {/* Contact Information */}
-                               {(participant.application_data?.phone || participant.application_data?.facebook_url) && (
-                                 <div className="flex items-center gap-3 text-xs text-muted-foreground mt-1">
-                                   {participant.application_data?.phone && (
-                                     <span>📞 {participant.application_data.phone.full_number}</span>
-                                   )}
-                                   {participant.application_data?.facebook_url && (
-                                     <>
-                                       {participant.application_data?.phone && <span>•</span>}
-                                       <a 
-                                         href={participant.application_data.facebook_url} 
-                                         target="_blank" 
-                                         rel="noopener noreferrer"
-                                         className="text-blue-600 hover:underline"
-                                       >
-                                         Facebook
-                                       </a>
-                                     </>
-                                   )}
-                                 </div>
-                               )}
+                                </div>
+                                {/* Contact Information - Always show section with status */}
+                                <div className="flex items-center gap-3 text-xs text-muted-foreground mt-1">
+                                  <span>📞 {participant.application_data?.phone?.full_number || 'Not provided'}</span>
+                                  <span>•</span>
+                                  {participant.application_data?.facebook_url ? (
+                                    <a 
+                                      href={participant.application_data.facebook_url} 
+                                      target="_blank" 
+                                      rel="noopener noreferrer"
+                                      className="text-blue-600 hover:underline"
+                                    >
+                                      Facebook
+                                    </a>
+                                  ) : (
+                                    <span>Facebook: Not provided</span>
+                                  )}
+                                </div>
                             </div>
                           </div>
 
@@ -1765,6 +1761,17 @@ const getApplicationStatusBadge = (status: string) => {
                                 <span>Children: {appData.has_children ? 'Yes' : 'No'}</span>
                                 <span>•</span>
                                 <span>Phone: {phone ? phone.full_number : 'Not provided'}</span>
+                                <span>•</span>
+                                <span>Facebook: {appData.facebook_url ? (
+                                  <a 
+                                    href={appData.facebook_url} 
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    className="text-blue-600 hover:underline ml-1"
+                                  >
+                                    Profile Link
+                                  </a>
+                                ) : 'Not provided'}</span>
                               </div>
                             </div>
                           </div>
