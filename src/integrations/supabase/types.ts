@@ -844,6 +844,20 @@ export type Database = {
           user_has_voted: boolean
         }[]
       }
+      get_participant_statistics: {
+        Args: { contest_week_offset?: number }
+        Returns: {
+          avg_rating: number
+          contest_id: string
+          contest_status: string
+          first_name: string
+          last_name: string
+          total_ratings: number
+          user_id: string
+          week_end_date: string
+          week_start_date: string
+        }[]
+      }
       get_public_profile_summary: {
         Args: { profile_user_id: string }
         Returns: {
