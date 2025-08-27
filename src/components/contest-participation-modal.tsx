@@ -926,6 +926,59 @@ export const ContestParticipationModal = ({
                 Add your contact info in case you win.
               </h3>
               
+              {/* Facebook Login Option */}
+              <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <h4 className="text-sm font-semibold mb-3 text-center text-blue-900">
+                  Quick Contact via Facebook
+                </h4>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full border-blue-300 hover:bg-blue-100"
+                  onClick={async () => {
+                    try {
+                      const { error } = await supabase.auth.signInWithOAuth({
+                        provider: 'facebook',
+                        options: {
+                          redirectTo: `${window.location.origin}/`,
+                        }
+                      });
+                      
+                      if (error) {
+                        toast({
+                          title: "Facebook Login Error",
+                          description: error.message,
+                          variant: "destructive"
+                        });
+                      }
+                    } catch (error) {
+                      toast({
+                        title: "Error",
+                        description: "Facebook authentication failed",
+                        variant: "destructive"
+                      });
+                    }
+                  }}
+                >
+                  <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                  </svg>
+                  Connect Facebook Account
+                </Button>
+                <p className="text-xs text-center text-blue-700 mt-2">
+                  Automatically import your verified contact info from Facebook
+                </p>
+              </div>
+              
+              <div className="relative mb-4">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-background px-2 text-muted-foreground">Or add manually</span>
+                </div>
+              </div>
+              
               <div className="space-y-3">
                 <div>
                   <div className="flex gap-2 items-center">
