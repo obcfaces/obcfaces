@@ -127,6 +127,7 @@ const Index = () => {
             centerSubtitle
             showWinner={true}
             viewMode={viewMode}
+            isAdmin={isAdmin}
           />
 
           <ContestSection
