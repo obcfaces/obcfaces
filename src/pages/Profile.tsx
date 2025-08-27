@@ -1334,22 +1334,22 @@ const Profile = () => {
                       <div className="mx-6 sm:mx-0 mb-6 p-4 bg-destructive/10 border border-destructive/20 rounded-lg">
                         <div className="flex items-center gap-2 mb-2">
                           <AlertCircle className="h-5 w-5 text-destructive" />
-                          <h3 className="font-semibold text-destructive">Заявка отклонена</h3>
+                          <h3 className="font-semibold text-destructive">Application Rejected</h3>
                         </div>
                         <div className="space-y-2">
                           {contestApplication.rejection_reason_type && (
                             <p className="text-sm text-destructive/80">
-                              <span className="font-medium">Причина:</span> {REJECTION_REASONS[contestApplication.rejection_reason_type as keyof typeof REJECTION_REASONS]}
+                              <span className="font-medium">Reason:</span> {REJECTION_REASONS[contestApplication.rejection_reason_type as keyof typeof REJECTION_REASONS]}
                             </p>
                           )}
                           {contestApplication.rejection_reason && (
                             <p className="text-sm text-destructive/80">
-                              <span className="font-medium">Комментарий:</span> {contestApplication.rejection_reason}
+                              <span className="font-medium">Comment:</span> {contestApplication.rejection_reason}
                             </p>
                           )}
                         </div>
                         <p className="text-sm text-muted-foreground mt-3">
-                          Пожалуйста, исправьте указанные замечания и подайте заявку повторно.
+                          Please address the issues mentioned above and resubmit your application.
                         </p>
                       </div>
                     )}

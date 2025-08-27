@@ -28,13 +28,13 @@ export type RejectionReasonType =
   | 'other';
 
 const REJECTION_REASONS = {
-  inappropriate_photos: "Неподходящие фотографии",
-  incomplete_information: "Неполная информация",
-  age_requirements: "Не соответствует возрастным требованиям",
-  duplicate_application: "Дублирующая заявка",
-  quality_standards: "Не соответствует стандартам качества",
-  terms_violation: "Нарушение условий участия",
-  other: "Другая причина"
+  inappropriate_photos: "Inappropriate photos",
+  incomplete_information: "Incomplete information",
+  age_requirements: "Does not meet age requirements",
+  duplicate_application: "Duplicate application",
+  quality_standards: "Does not meet quality standards",
+  terms_violation: "Terms violation",
+  other: "Other reason"
 };
 
 interface RejectReasonModalProps {
@@ -73,21 +73,21 @@ export const RejectReasonModal = ({
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Причина отклонения</DialogTitle>
+          <DialogTitle>Rejection Reason</DialogTitle>
           <DialogDescription>
-            Выберите причину отклонения заявки и добавьте комментарий при необходимости.
+            Select the reason for rejecting the application and add a comment if necessary.
           </DialogDescription>
         </DialogHeader>
         
         <div className="space-y-4">
           <div>
-            <Label htmlFor="rejection-reason">Причина отклонения</Label>
+            <Label htmlFor="rejection-reason">Rejection Reason</Label>
             <Select 
               value={selectedReason} 
               onValueChange={(value: RejectionReasonType) => setSelectedReason(value)}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Выберите причину..." />
+                <SelectValue placeholder="Select a reason..." />
               </SelectTrigger>
               <SelectContent>
                 {Object.entries(REJECTION_REASONS).map(([key, label]) => (
@@ -100,10 +100,10 @@ export const RejectReasonModal = ({
           </div>
           
           <div>
-            <Label htmlFor="notes">Дополнительные комментарии (опционально)</Label>
+            <Label htmlFor="notes">Additional Comments (optional)</Label>
             <Textarea
               id="notes"
-              placeholder="Дополнительная информация..."
+              placeholder="Additional information..."
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               rows={3}
@@ -113,14 +113,14 @@ export const RejectReasonModal = ({
 
         <DialogFooter>
           <Button variant="outline" onClick={handleClose} disabled={isLoading}>
-            Отмена
+            Cancel
           </Button>
           <Button 
             variant="destructive" 
             onClick={handleConfirm} 
             disabled={!selectedReason || isLoading}
           >
-            {isLoading ? "Отклоняем..." : "Отклонить заявку"}
+            {isLoading ? "Rejecting..." : "Reject Application"}
           </Button>
         </DialogFooter>
       </DialogContent>

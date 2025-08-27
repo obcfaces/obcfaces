@@ -1994,7 +1994,7 @@ const getApplicationStatusBadge = (status: string) => {
                               <div className="mt-2 p-2 bg-destructive/10 border border-destructive/20 rounded text-xs">
                                 <div className="flex items-center gap-2 text-destructive font-medium mb-1">
                                   <AlertCircle className="h-3 w-3" />
-                                  <span>Причина отклонения:</span>
+                                  <span>Rejection Reason:</span>
                                 </div>
                                 {application.rejection_reason_type && (
                                   <p className="text-destructive/80 mb-1">
@@ -2003,7 +2003,7 @@ const getApplicationStatusBadge = (status: string) => {
                                 )}
                                 {application.rejection_reason && (
                                   <p className="text-destructive/70">
-                                    Комментарий: {application.rejection_reason}
+                                    Comment: {application.rejection_reason}
                                   </p>
                                 )}
                               </div>
