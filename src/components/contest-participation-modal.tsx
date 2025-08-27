@@ -681,20 +681,22 @@ export const ContestParticipationModal = ({
       // Clear cache after successful submission
       clearFormCache();
       
-      // In edit mode, close modal after successful update
+      // Trigger update event to refresh participation data in profile (for both edit and new)
       if (editMode) {
-        // Trigger update event to refresh participation data in profile
         window.dispatchEvent(new CustomEvent('participationUpdated', { 
           detail: { 
             applicationData: applicationData,
             updatedAt: new Date().toISOString()
           } 
         }));
-        setIsOpen(false);
-      } else {
-        // Set submission success to show contact form for new applications
-        setSubmissionSuccess(true);
+        // Store the application ID for contact form in edit mode
+        if (existingData) {
+          setCurrentApplicationId(existingData.id);
+        }
       }
+      
+      // Set submission success to show contact form for both new and edited applications
+      setSubmissionSuccess(true);
     } catch (error: any) {
       console.error('Submission error:', error);
       toast({
