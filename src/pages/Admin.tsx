@@ -1099,82 +1099,104 @@ const Admin = () => {
   };
 
   const reviewApplication = async (applicationId: string, status: 'approved' | 'rejected', notes?: string, rejectionReason?: string, rejectionReasonType?: RejectionReasonType) => {
-    try {
-      // Use the new database function for updating application status
-      const { data, error } = await supabase.rpc('update_application_status', {
-        application_id_param: applicationId,
-        new_status_param: status,
-        notes_param: notes || null,
-        reviewer_id_param: user?.id
-      });
+    const updateData: any = {
+      status,
+      notes: notes || null,
+      reviewed_by: user?.id,
+      reviewed_at: new Date().toISOString()
+    };
 
-      if (error) {
-        toast({
-          title: "Error",
-          description: "Failed to update application: " + error.message,
-          variant: "destructive"
-        });
-        return;
+    if (status === 'rejected') {
+      updateData.rejection_reason = rejectionReason;
+      if (rejectionReasonType) {
+        updateData.rejection_reason_type = rejectionReasonType;
       }
+    }
 
-      // If status is rejected, also update rejection reason fields manually
-      if (status === 'rejected' && (rejectionReason || rejectionReasonType)) {
-        const { error: rejectError } = await supabase
-          .from('contest_applications')
-          .update({
-            rejection_reason: rejectionReason,
-            rejection_reason_type: rejectionReasonType
-          })
-          .eq('id', applicationId);
+    const { error } = await supabase
+      .from('contest_applications')
+      .update(updateData)
+      .eq('id', applicationId);
 
-        if (rejectError) {
-          console.error('Error updating rejection reason:', rejectError);
-        }
-      }
-
-      const application = contestApplications.find(app => app.id === applicationId);
-      
-      if (status === 'approved') {
-        // Update profile to mark as contest participant
-        if (application) {
-          const { error: profileError } = await supabase
-            .from('profiles')
-            .update({ is_contest_participant: true })
-            .eq('id', application.user_id);
-
-          if (profileError) {
-            console.error('Error updating profile:', profileError);
-          }
-        }
-      } else if (status === 'rejected') {
-        // Keep user as contest participant but ensure they're removed from weekly contest
-        if (application) {
-          const { error: profileError } = await supabase
-            .from('profiles')
-            .update({ is_contest_participant: true })
-            .eq('id', application.user_id);
-
-          if (profileError) {
-            console.error('Error updating profile:', profileError);
-          }
-        }
-      }
-
-      toast({
-        title: "Success",
-        description: `Application ${status}${status === 'approved' ? ' and added to contest' : status === 'rejected' ? ' and removed from contest' : ''}`,
-      });
-
-      // Refresh all data
-      fetchContestApplications();
-      fetchWeeklyParticipants();
-    } catch (error: any) {
+    if (error) {
       toast({
         title: "Error",
-        description: error.message || "Failed to update application",
+        description: "Failed to update application",
         variant: "destructive"
       });
+      return;
     }
+
+    const application = contestApplications.find(app => app.id === applicationId);
+    
+    if (status === 'approved') {
+      // If approved, make user a contest participant and add to current weekly contest
+      if (application) {
+        // Update profile
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .update({ is_contest_participant: true })
+          .eq('id', application.user_id);
+
+        if (profileError) {
+          toast({
+            title: "Warning",
+            description: "Application approved but failed to add to contest",
+            variant: "destructive"
+          });
+          return;
+        }
+
+        // Add to current weekly contest
+        const { data: currentContest } = await supabase
+          .from('weekly_contests')
+          .select('id')
+          .eq('status', 'active')
+          .single();
+
+        if (currentContest) {
+          const { error: participantError } = await supabase
+            .from('weekly_contest_participants')
+            .insert({
+              contest_id: currentContest.id,
+              user_id: application.user_id,
+              application_data: application.application_data
+            });
+
+          if (participantError) {
+            console.error('Error adding to weekly contest:', participantError);
+          }
+        }
+      }
+    } else if (status === 'rejected') {
+      // If rejected, keep user as contest participant but remove from current weekly contests
+      if (application) {
+        // Ensure user keeps contest participant status so card shows in profile with rejection reason
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .update({ is_contest_participant: true })
+          .eq('id', application.user_id);
+
+        if (profileError) {
+          console.error('Error updating profile:', profileError);
+        }
+
+        // Only deactivate from weekly contest participants (don't delete completely)
+        const { error: participantError } = await supabase
+          .from('weekly_contest_participants')
+          .update({ is_active: false })
+          .eq('user_id', application.user_id);
+
+        if (participantError) {
+          console.error('Error deactivating from weekly contests:', participantError);
+        }
+      }
+    }
+
+    toast({
+      title: "Success",
+      description: `Application ${status}${status === 'approved' ? ' and added to contest' : status === 'rejected' ? ' and removed from contest' : ''}`,
+    });
 
     fetchContestApplications();
   };
