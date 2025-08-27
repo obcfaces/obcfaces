@@ -1169,26 +1169,26 @@ const Admin = () => {
         }
       }
     } else if (status === 'rejected') {
-      // If rejected, remove user from contest participation and remove from weekly contests
+      // If rejected, keep user as contest participant but remove from current weekly contests
       if (application) {
-        // Update profile to remove contest participant status
+        // Ensure user keeps contest participant status so card shows in profile with rejection reason
         const { error: profileError } = await supabase
           .from('profiles')
-          .update({ is_contest_participant: false })
+          .update({ is_contest_participant: true })
           .eq('id', application.user_id);
 
         if (profileError) {
           console.error('Error updating profile:', profileError);
         }
 
-        // Remove from all weekly contest participants
+        // Only deactivate from weekly contest participants (don't delete completely)
         const { error: participantError } = await supabase
           .from('weekly_contest_participants')
-          .delete()
+          .update({ is_active: false })
           .eq('user_id', application.user_id);
 
         if (participantError) {
-          console.error('Error removing from weekly contests:', participantError);
+          console.error('Error deactivating from weekly contests:', participantError);
         }
       }
     }
