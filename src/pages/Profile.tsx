@@ -18,6 +18,7 @@ import { PhotoModal } from "@/components/photo-modal";
 import { ProfilePhotoModal } from "@/components/profile-photo-modal";
 import { ContestParticipationModal } from "@/components/contest-participation-modal";
 import CreatePostModal from "@/components/create-post-modal";
+import { REJECTION_REASONS } from "@/components/reject-reason-modal";
 import c1 from "@/assets/contestant-1.jpg";
 import c2 from "@/assets/contestant-2.jpg";
 import c3 from "@/assets/contestant-3.jpg";
@@ -714,7 +715,7 @@ const Profile = () => {
       // Также проверяем наличие заявки на участие (исключаем удалённые)
       const { data: contestApplication } = await supabase
         .from('contest_applications')
-        .select('id, status, created_at, application_data, rejection_reason')
+        .select('id, status, created_at, application_data, rejection_reason, rejection_reason_type')
         .eq('user_id', id)
         .is('deleted_at', null)  // Исключаем удалённые заявки
         .order('created_at', { ascending: false })
@@ -1328,21 +1329,30 @@ const Profile = () => {
                     </div>
                    </div>
                    
-                   {/* Rejection reason notice */}
-                   {isOwner && contestApplication?.status === 'rejected' && contestApplication?.rejection_reason && (
-                     <div className="mx-6 sm:mx-0 mb-6 p-4 bg-destructive/10 border border-destructive/20 rounded-lg">
-                       <div className="flex items-center gap-2 mb-2">
-                         <AlertCircle className="h-5 w-5 text-destructive" />
-                         <h3 className="font-semibold text-destructive">Application Rejected</h3>
-                       </div>
-                       <p className="text-sm text-destructive/80 mb-3">
-                         Reason: {contestApplication.rejection_reason}
-                       </p>
-                       <p className="text-sm text-muted-foreground">
-                         Please upload new photos addressing the issues mentioned above and resubmit your application.
-                       </p>
-                     </div>
-                   )}
+                    {/* Rejection reason notice */}
+                    {isOwner && contestApplication?.status === 'rejected' && (contestApplication?.rejection_reason || contestApplication?.rejection_reason_type) && (
+                      <div className="mx-6 sm:mx-0 mb-6 p-4 bg-destructive/10 border border-destructive/20 rounded-lg">
+                        <div className="flex items-center gap-2 mb-2">
+                          <AlertCircle className="h-5 w-5 text-destructive" />
+                          <h3 className="font-semibold text-destructive">Заявка отклонена</h3>
+                        </div>
+                        <div className="space-y-2">
+                          {contestApplication.rejection_reason_type && (
+                            <p className="text-sm text-destructive/80">
+                              <span className="font-medium">Причина:</span> {REJECTION_REASONS[contestApplication.rejection_reason_type as keyof typeof REJECTION_REASONS]}
+                            </p>
+                          )}
+                          {contestApplication.rejection_reason && (
+                            <p className="text-sm text-destructive/80">
+                              <span className="font-medium">Комментарий:</span> {contestApplication.rejection_reason}
+                            </p>
+                          )}
+                        </div>
+                        <p className="text-sm text-muted-foreground mt-3">
+                          Пожалуйста, исправьте указанные замечания и подайте заявку повторно.
+                        </p>
+                      </div>
+                    )}
                    
                    {/* Participation items grid */}
                   <div className={`grid gap-1 sm:gap-3 ${

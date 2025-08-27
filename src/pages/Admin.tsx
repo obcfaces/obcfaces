@@ -14,7 +14,7 @@ import { toast } from "@/components/ui/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Check, X, Eye, UserCog, FileText, Calendar, Trophy, RotateCcw, Edit, Plus, History, AlertCircle, Trash2 } from "lucide-react";
 import { PhotoModal } from "@/components/photo-modal";
-import { RejectReasonModal } from "@/components/reject-reason-modal";
+import { RejectReasonModal, RejectionReasonType, REJECTION_REASONS } from "@/components/reject-reason-modal";
 import { Switch } from "@/components/ui/switch";
 import { useNavigate } from "react-router-dom";
 import { useApplicationHistory } from "@/hooks/useApplicationHistory";
@@ -56,6 +56,8 @@ interface ContestApplication {
   reviewed_at: string | null;
   notes: string | null;
   is_active: boolean;
+  rejection_reason?: string | null;
+  rejection_reason_type?: RejectionReasonType | null;
 }
 
 interface WeeklyContest {
@@ -1096,7 +1098,7 @@ const Admin = () => {
     setPhotoModalOpen(true);
   };
 
-  const reviewApplication = async (applicationId: string, status: 'approved' | 'rejected', notes?: string, rejectionReason?: string) => {
+  const reviewApplication = async (applicationId: string, status: 'approved' | 'rejected', notes?: string, rejectionReason?: string, rejectionReasonType?: RejectionReasonType) => {
     const updateData: any = {
       status,
       notes: notes || null,
@@ -1104,8 +1106,11 @@ const Admin = () => {
       reviewed_at: new Date().toISOString()
     };
 
-    if (status === 'rejected' && rejectionReason) {
+    if (status === 'rejected') {
       updateData.rejection_reason = rejectionReason;
+      if (rejectionReasonType) {
+        updateData.rejection_reason_type = rejectionReasonType;
+      }
     }
 
     const { error } = await supabase
@@ -1196,10 +1201,11 @@ const Admin = () => {
     fetchContestApplications();
   };
 
-  const handleRejectConfirm = (reason: string) => {
+  const handleRejectConfirm = async (reasonType: RejectionReasonType, notes: string) => {
     if (applicationToReject) {
-      reviewApplication(applicationToReject.id, 'rejected', undefined, reason);
+      await reviewApplication(applicationToReject.id, 'rejected', notes, notes, reasonType);
       setApplicationToReject(null);
+      setRejectModalOpen(false);
     }
   };
 
@@ -1969,7 +1975,7 @@ const getApplicationStatusBadge = (status: string) => {
                         </div>
                         
                         {/* Timestamps and notes section - collapsed */}
-                        {(application.notes || application.reviewed_at) && (
+                        {(application.notes || application.reviewed_at || (application.status === 'rejected' && (application.rejection_reason || application.rejection_reason_type))) && (
                           <div className="mt-3 pt-3 border-t border-border/50">
                             <div className="flex justify-between items-start text-xs text-muted-foreground">
                               <div className="flex gap-4">
@@ -1983,6 +1989,25 @@ const getApplicationStatusBadge = (status: string) => {
                                 <span className="text-right max-w-md truncate">Notes: {application.notes}</span>
                               )}
                             </div>
+                            {/* Rejection reason display */}
+                            {application.status === 'rejected' && (application.rejection_reason || application.rejection_reason_type) && (
+                              <div className="mt-2 p-2 bg-destructive/10 border border-destructive/20 rounded text-xs">
+                                <div className="flex items-center gap-2 text-destructive font-medium mb-1">
+                                  <AlertCircle className="h-3 w-3" />
+                                  <span>Причина отклонения:</span>
+                                </div>
+                                {application.rejection_reason_type && (
+                                  <p className="text-destructive/80 mb-1">
+                                    {REJECTION_REASONS[application.rejection_reason_type as keyof typeof REJECTION_REASONS]}
+                                  </p>
+                                )}
+                                {application.rejection_reason && (
+                                  <p className="text-destructive/70">
+                                    Комментарий: {application.rejection_reason}
+                                  </p>
+                                )}
+                              </div>
+                            )}
                           </div>
                         )}
                       </CardContent>
@@ -2567,7 +2592,6 @@ const getApplicationStatusBadge = (status: string) => {
           setApplicationToReject(null);
         }}
         onConfirm={handleRejectConfirm}
-        applicantName={applicationToReject?.name || ""}
       />
     </>
   );
