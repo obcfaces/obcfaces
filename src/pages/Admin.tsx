@@ -33,6 +33,9 @@ interface ProfileData {
   is_approved: boolean | null;
   moderation_notes: string | null;
   created_at: string;
+  auth_provider?: string;
+  email?: string;
+  facebook_data?: any;
 }
 
 interface UserRole {
@@ -167,12 +170,13 @@ const Admin = () => {
   };
 
   const fetchProfiles = async () => {
-    const { data, error } = await supabase
+    // First fetch profiles
+    const { data: profilesData, error: profilesError } = await supabase
       .from('profiles')
       .select('*')
       .order('created_at', { ascending: false });
 
-    if (error) {
+    if (profilesError) {
       toast({
         title: "Error",
         description: "Failed to fetch profiles",
@@ -181,7 +185,54 @@ const Admin = () => {
       return;
     }
 
-    setProfiles(data || []);
+    // Then fetch auth data for each profile
+    const profilesWithAuth = await Promise.all(
+      (profilesData || []).map(async (profile) => {
+        try {
+          // Query auth.users for authentication data
+          const { data: authData } = await supabase
+            .from('auth.users')
+            .select('email, raw_app_meta_data, raw_user_meta_data')
+            .eq('id', profile.id)
+            .maybeSingle();
+
+          let authProvider = 'unknown';
+          let facebookData = null;
+
+          if (authData) {
+            // Get provider from raw_app_meta_data
+            const appMetadata = authData.raw_app_meta_data as any;
+            if (appMetadata?.provider) {
+              authProvider = appMetadata.provider;
+            } else if (appMetadata?.providers && Array.isArray(appMetadata.providers)) {
+              authProvider = appMetadata.providers[0] || 'unknown';
+            }
+
+            // Extract Facebook data if provider is facebook
+            if (authProvider === 'facebook' && authData.raw_user_meta_data) {
+              facebookData = authData.raw_user_meta_data;
+            }
+          }
+
+          return {
+            ...profile,
+            auth_provider: authProvider,
+            email: authData?.email || null,
+            facebook_data: facebookData
+          };
+        } catch (error) {
+          console.warn(`Failed to fetch auth data for user ${profile.id}:`, error);
+          return {
+            ...profile,
+            auth_provider: 'unknown',
+            email: null,
+            facebook_data: null
+          };
+        }
+      })
+    );
+
+    setProfiles(profilesWithAuth);
   };
 
   const fetchUserRoles = async () => {
