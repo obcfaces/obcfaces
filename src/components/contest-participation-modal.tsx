@@ -1057,23 +1057,25 @@ export const ContestParticipationModal = ({
                              return;
                            }
 
-                            // Get the current application
-                            const { data: application, error: fetchError } = await supabase
-                              .from('contest_applications')
-                              .select('application_data')
-                              .eq('user_id', session.user.id)
-                              .maybeSingle();
+                             // Get the latest application
+                             const { data: applications, error: fetchError } = await supabase
+                               .from('contest_applications')
+                               .select('application_data')
+                               .eq('user_id', session.user.id)
+                               .order('created_at', { ascending: false })
+                               .limit(1);
 
-                            if (fetchError) {
-                              toast({
-                                title: "Error",
-                                description: "Failed to load application data.",
-                                variant: "destructive"
-                              });
-                              return;
-                            }
+                             if (fetchError) {
+                               toast({
+                                 title: "Error",
+                                 description: "Failed to load application data.",
+                                 variant: "destructive"
+                               });
+                               return;
+                             }
 
-                            if (!application) {
+                             const application = applications?.[0];
+                             if (!application) {
                               toast({
                                 title: "Error",
                                 description: "Application not found.",
