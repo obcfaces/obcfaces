@@ -1201,97 +1201,99 @@ const ApplicationHistoryModal = ({ applicationId, isOpen, onClose }: Application
     const phone = appData.phone;
     
     return (
-      <Card key={item.id} className="p-4">
-        <div className="flex justify-between items-start mb-3">
-          <h4 className="font-medium text-base">Версия {history.length - index}</h4>
-          <div className="text-sm text-muted-foreground">
-            {new Date(item.created_at).toLocaleString('ru-RU')}
-          </div>
-        </div>
-        
-        <div className="flex gap-4">
-          {/* Main Info Section */}
-          <div className="flex-1">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Personal Information */}
-              <div className="space-y-2">
-                <h5 className="font-medium text-sm text-muted-foreground">Личная информация</h5>
-                <div className="space-y-1 text-sm">
-                  <div><span className="font-medium">Имя:</span> {appData.first_name || 'Не указано'}</div>
-                  <div><span className="font-medium">Фамилия:</span> {appData.last_name || 'Не указано'}</div>
-                  <div><span className="font-medium">Возраст:</span> {appData.age || 'Не указано'}</div>
-                  <div><span className="font-medium">Пол:</span> {appData.gender || 'Не указано'}</div>
-                  <div><span className="font-medium">Рост:</span> {appData.height_cm ? `${appData.height_cm} см` : 'Не указано'}</div>
-                  <div><span className="font-medium">Вес:</span> {appData.weight_kg ? `${appData.weight_kg} кг` : 'Не указано'}</div>
+      <Card key={item.id} className="py-3">
+        <CardContent className="p-4">
+          <div className="flex items-center justify-between gap-4">
+            {/* Left section with avatar and basic info */}
+            <div className="flex items-center gap-3 flex-1">
+              <Avatar className="h-12 w-12 flex-shrink-0">
+                <AvatarImage src={appData.photo_1_url || ''} />
+                <AvatarFallback>
+                  {appData.first_name?.charAt(0) || 'U'}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex-1 min-w-0">
+                <h3 className="text-sm font-semibold truncate">
+                  {appData.first_name} {appData.last_name} - Версия {history.length - index}
+                </h3>
+                <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                  <span>{appData.gender}</span>
+                  <span>•</span>
+                  <span>{new Date().getFullYear() - appData.birth_year} years old</span>
+                  <span>•</span>
+                  <span className="truncate">{appData.city}, {appData.country}</span>
+                  <span>•</span>
+                  <span>{appData.height_cm}cm, {appData.weight_kg}kg</span>
                 </div>
-              </div>
-
-              {/* Location & Contact */}
-              <div className="space-y-2">
-                <h5 className="font-medium text-sm text-muted-foreground">Местоположение и контакты</h5>
-                <div className="space-y-1 text-sm">
-                  <div><span className="font-medium">Страна:</span> {appData.country || 'Не указано'}</div>
-                  <div><span className="font-medium">Город:</span> {appData.city || 'Не указано'}</div>
-                  <div><span className="font-medium">Телефон:</span> {phone ? phone.full_number : 'Не указано'}</div>
-                  <div><span className="font-medium">Facebook:</span> {appData.facebook_url || 'Не указано'}</div>
+                <div className="flex items-center gap-3 text-xs text-muted-foreground mt-0.5">
+                  <span>Born: {appData.birth_day}/{appData.birth_month}/{appData.birth_year}</span>
+                  <span>•</span>
+                  <span>{appData.marital_status}</span>
+                  <span>•</span>
+                  <span>Children: {appData.has_children ? 'Yes' : 'No'}</span>
+                  <span>•</span>
+                  <span>Phone: {phone ? phone.full_number : 'Not provided'}</span>
+                  <span>•</span>
+                  <span>Facebook: {appData.facebook_url || 'Not provided'}</span>
                 </div>
               </div>
             </div>
 
-            {/* Photos Section */}
-            {(appData.photo_1_url || appData.photo_2_url) && (
-              <div className="mt-4">
-                <h5 className="font-medium text-sm text-muted-foreground mb-2">Фотографии</h5>
-                <div className="flex gap-4">
-                  {appData.photo_1_url && (
-                    <div className="text-center">
-                      <p className="text-xs text-muted-foreground mb-1">Портрет</p>
-                      <img 
-                        src={appData.photo_1_url} 
-                        alt="Portrait" 
-                        className="w-16 h-20 object-cover rounded border"
-                      />
-                    </div>
-                  )}
-                  {appData.photo_2_url && (
-                    <div className="text-center">
-                      <p className="text-xs text-muted-foreground mb-1">В полный рост</p>
-                      <img 
-                        src={appData.photo_2_url} 
-                        alt="Full length" 
-                        className="w-16 h-20 object-cover rounded border"
-                      />
-                    </div>
-                  )}
-                </div>
+            {/* Center section with photos */}
+            <div className="flex items-center gap-2">
+              <div className="text-center">
+                <p className="text-xs text-muted-foreground mb-1">Portrait</p>
+                {appData.photo_1_url && (
+                  <img 
+                    src={appData.photo_1_url} 
+                    alt="Portrait" 
+                    className="w-16 h-20 object-cover rounded border cursor-pointer hover:opacity-80 transition-opacity"
+                  />
+                )}
               </div>
-            )}
+              <div className="text-center">
+                <p className="text-xs text-muted-foreground mb-1">Full Length</p>
+                {appData.photo_2_url && (
+                  <img 
+                    src={appData.photo_2_url} 
+                    alt="Full length" 
+                    className="w-16 h-20 object-cover rounded border cursor-pointer hover:opacity-80 transition-opacity"
+                  />
+                )}
+              </div>
+            </div>
 
-            {/* Status and Notes */}
-            <div className="mt-4 pt-3 border-t">
-              <div className="flex items-center gap-4 text-sm">
-                <span><strong>Статус:</strong> 
-                  <Badge 
-                    variant={item.status === 'approved' ? 'default' : item.status === 'rejected' ? 'destructive' : 'secondary'}
-                    className="ml-1"
-                  >
-                    {item.status}
-                  </Badge>
-                </span>
-              </div>
-              {item.notes && (
-                <div className="mt-2 text-sm">
-                  <strong>Заметки:</strong> {item.notes}
-                </div>
-              )}
-              {item.change_reason && (
-                <div className="mt-1 text-sm">
-                  <strong>Причина изменения:</strong> {item.change_reason}
-                </div>
-              )}
+            {/* Right section with status and timestamp */}
+            <div className="flex flex-col gap-1 items-center">
+              <Badge 
+                variant={item.status === 'approved' ? 'default' : item.status === 'rejected' ? 'destructive' : 'secondary'}
+              >
+                {item.status}
+              </Badge>
+              <p className="text-xs text-muted-foreground text-center">
+                {new Date(item.created_at).toLocaleDateString('ru-RU')} {new Date(item.created_at).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}
+              </p>
             </div>
           </div>
-        </div>
+          
+          {/* Notes and reason section - if present */}
+          {(item.notes || item.change_reason) && (
+            <div className="mt-3 pt-3 border-t border-border/50">
+              <div className="text-xs text-muted-foreground">
+                {item.notes && (
+                  <div className="mb-1">
+                    <span className="font-medium">Заметки:</span> {item.notes}
+                  </div>
+                )}
+                {item.change_reason && (
+                  <div>
+                    <span className="font-medium">Причина изменения:</span> {item.change_reason}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </CardContent>
       </Card>
     );
   };
