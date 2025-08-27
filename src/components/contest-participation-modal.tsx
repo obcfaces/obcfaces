@@ -550,6 +550,7 @@ export const ContestParticipationModal = ({
       }
 
       // Save application to database
+      console.log('Saving application with contact form data:', contactForm);
       const applicationData = {
         first_name: formData.first_name,
         last_name: formData.last_name,
@@ -575,6 +576,8 @@ export const ContestParticipationModal = ({
           full_number: `+${Country.getCountryByCode(contactForm.countryCode)?.phonecode || '63'}${contactForm.contact.replace(/\s/g, '')}`
         } : null,
       };
+      
+      console.log('Final application data to save:', applicationData);
 
       let dbError = null;
 
@@ -963,7 +966,10 @@ export const ContestParticipationModal = ({
                   type="url"
                   placeholder="Add your Facebook profile link"
                   value={contactForm.facebookUrl || ''}
-                  onChange={(e) => setContactForm({...contactForm, facebookUrl: e.target.value})}
+                  onChange={(e) => {
+                    console.log('Facebook URL changed:', e.target.value);
+                    setContactForm({...contactForm, facebookUrl: e.target.value});
+                  }}
                   className="w-full h-10"
                 />
               </div>
