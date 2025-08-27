@@ -1130,14 +1130,16 @@ export const ContestParticipationModal = ({
                                facebook_url: contactForm.facebookUrl || ''
                              };
 
-                            // Update the specific application with contact data
-                            const { error: updateError } = await supabase
-                              .from('contest_applications')
-                              .update({
-                                application_data: updatedApplicationData,
-                                updated_at: new Date().toISOString()
-                              })
-                              .eq('id', currentApplicationId);
+                             // Update the specific application with contact data
+                             // This will trigger the save_application_history() function automatically
+                             const { error: updateError } = await supabase
+                               .from('contest_applications')
+                               .update({
+                                 application_data: updatedApplicationData,
+                                 updated_at: new Date().toISOString(),
+                                 notes: `Contact information updated: ${contactForm.contact ? 'Phone updated' : ''} ${contactForm.facebookUrl ? 'Facebook updated' : ''}`.trim()
+                               })
+                               .eq('id', currentApplicationId);
 
                            if (updateError) {
                              toast({
