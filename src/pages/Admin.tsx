@@ -725,9 +725,9 @@ const Admin = () => {
 
     const getStatusText = (status: string) => {
       switch (status) {
-        case 'approved': return 'Одобрена';
-        case 'rejected': return 'Отклонена';
-        case 'pending': return 'На рассмотрении';
+        case 'approved': return 'Approved';
+        case 'rejected': return 'Rejected';
+        case 'pending': return 'Under review';
         default: return status;
       }
     };
