@@ -1097,6 +1097,15 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      update_application_status: {
+        Args: {
+          application_id_param: string
+          new_status_param: string
+          notes_param?: string
+          reviewer_id_param?: string
+        }
+        Returns: boolean
+      }
       user_in_conversation: {
         Args: { conversation_id: string; user_id: string }
         Returns: boolean
