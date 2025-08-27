@@ -664,6 +664,14 @@ export type Database = {
       }
     }
     Views: {
+      like_counts: {
+        Row: {
+          content_id: string | null
+          content_type: string | null
+          like_count: number | null
+        }
+        Relationships: []
+      }
       participant_stats: {
         Row: {
           avg_rating: number | null
