@@ -32,7 +32,7 @@ interface LikedItemData {
     fullBodyImage: string;
     additionalPhotos: string[];
   };
-  participantType?: 'candidate' | 'finalist' | 'winner';
+  participantType?: 'under_review' | 'candidate' | 'finalist' | 'winner';
 }
 
 const Likes = () => {
@@ -107,7 +107,7 @@ const Likes = () => {
             fullBodyImage: user.photo_2_url,
             additionalPhotos: []
           },
-          participantType: (user.participant_type as 'candidate' | 'finalist' | 'winner') || 'candidate'
+          participantType: (user.participant_type as 'under_review' | 'candidate' | 'finalist' | 'winner') || 'candidate'
         }));
 
         setLikedItems(transformedLikes);
@@ -142,7 +142,7 @@ const Likes = () => {
             fullBodyImage: user.photo_2_url,
             additionalPhotos: []
           },
-          participantType: (user.participant_type as 'candidate' | 'finalist' | 'winner') || 'candidate'
+          participantType: (user.participant_type as 'under_review' | 'candidate' | 'finalist' | 'winner') || 'candidate'
         }));
 
         setWhoLikedMe(transformedWhoLikedMe);

@@ -39,7 +39,7 @@ interface LikedItemProps {
   onUnlike?: (likeId: string) => void;
   viewMode?: 'compact' | 'full';
   candidateData?: any;
-  participantType?: 'candidate' | 'finalist' | 'winner';
+  participantType?: 'under_review' | 'candidate' | 'finalist' | 'winner';
   showStatusBadge?: boolean;
   isOwner?: boolean;
   onEditPhotos?: () => void;
@@ -62,26 +62,50 @@ const getInitials = (name: string) => {
   return initials || "U";
 };
 
-const getParticipantBadge = (type?: 'candidate' | 'finalist' | 'winner', isFullView = false) => {
+const getParticipantBadge = (type?: 'under_review' | 'candidate' | 'finalist' | 'winner', isFullView = false) => {
   if (!type) return null;
   
   const badgeStyles = {
+    under_review: "bg-gray-100 text-gray-700",
     candidate: "bg-yellow-100 text-yellow-700",
     finalist: "bg-orange-100 text-orange-700", 
     winner: "bg-blue-100 text-blue-700"
   };
   
   const labels = {
+    under_review: "Under review",
     candidate: "Candidate",
     finalist: "Finalist",
-    winner: "🏆 Winner + 5000 PHP"
+    winner: "Winner"
   };
 
-  const dates = {
-    candidate: "1 Sep",
-    finalist: "9 Sep",
-    winner: "16 Sep"
+  // Calculate date for current week start (Monday)
+  const getWeekStartDate = (weeksOffset: number = 0) => {
+    const today = new Date();
+    const currentDay = today.getDay();
+    const mondayOffset = currentDay === 0 ? -6 : 1 - currentDay;
+    
+    const monday = new Date(today);
+    monday.setDate(today.getDate() + mondayOffset + (weeksOffset * 7));
+    
+    const day = monday.getDate();
+    const month = monday.toLocaleDateString('en-US', { month: 'short' });
+    return `${day} ${month}`;
   };
+
+  const getDates = () => {
+    const currentWeekStart = getWeekStartDate(0); // Current week Monday
+    const nextWeekStart = getWeekStartDate(1); // Next week Monday
+    
+    return {
+      under_review: "",
+      candidate: currentWeekStart,
+      finalist: nextWeekStart,
+      winner: currentWeekStart // Winner shows when they became finalist
+    };
+  };
+
+  const dates = getDates();
   
   const positionClasses = isFullView 
     ? "absolute bottom-0 left-0 right-0 z-20" 
@@ -90,7 +114,7 @@ const getParticipantBadge = (type?: 'candidate' | 'finalist' | 'winner', isFullV
   return (
     <div className={`${positionClasses} px-2 py-1 text-xs font-semibold ${badgeStyles[type]} flex justify-between items-center`}>
       <span>{labels[type]}</span>
-      <span>{dates[type]}</span>
+      {dates[type] && <span>{dates[type]}</span>}
     </div>
   );
 };
@@ -121,7 +145,7 @@ const LikedItem = ({
   const [modalStartIndex, setModalStartIndex] = useState(0);
   const [user, setUser] = useState<any>(null);
   const [showLoginModal, setShowLoginModal] = useState(false);
-  const [currentParticipantType, setCurrentParticipantType] = useState<'candidate' | 'finalist' | 'winner' | null>(participantType || null);
+  const [currentParticipantType, setCurrentParticipantType] = useState<'under_review' | 'candidate' | 'finalist' | 'winner' | null>(participantType || null);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   
   // Photo editing states exactly like in Admin
@@ -357,7 +381,7 @@ const LikedItem = ({
             .single();
           
           if (!error && data?.participant_type) {
-            setCurrentParticipantType(data.participant_type as 'candidate' | 'finalist' | 'winner');
+            setCurrentParticipantType(data.participant_type as 'under_review' | 'candidate' | 'finalist' | 'winner');
           }
         } catch (error) {
           console.error('Error fetching participant type:', error);
