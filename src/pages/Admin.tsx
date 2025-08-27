@@ -1098,7 +1098,7 @@ const Admin = () => {
     setPhotoModalOpen(true);
   };
 
-  const reviewApplication = async (applicationId: string, status: 'approved' | 'rejected', notes?: string, rejectionReason?: string, rejectionReasonType?: RejectionReasonType) => {
+  const reviewApplication = async (applicationId: string, status: 'approved' | 'rejected' | 'pending', notes?: string, rejectionReason?: string, rejectionReasonType?: RejectionReasonType) => {
     const updateData: any = {
       status,
       notes: notes || null,
@@ -1191,11 +1191,24 @@ const Admin = () => {
           console.error('Error deactivating from weekly contests:', participantError);
         }
       }
+    } else if (status === 'pending') {
+      // If set back to pending, remove from current weekly contest and reset status
+      if (application) {
+        // Remove from weekly contest participants
+        const { error: participantError } = await supabase
+          .from('weekly_contest_participants')
+          .delete()
+          .eq('user_id', application.user_id);
+
+        if (participantError) {
+          console.error('Error removing from weekly contests:', participantError);
+        }
+      }
     }
 
     toast({
       title: "Success",
-      description: `Application ${status}${status === 'approved' ? ' and added to contest' : status === 'rejected' ? ' and removed from contest' : ''}`,
+      description: `Application ${status}${status === 'approved' ? ' and added to contest' : status === 'rejected' ? ' and removed from contest' : status === 'pending' ? ' and removed from contest' : ''}`,
     });
 
     fetchContestApplications();
@@ -1926,12 +1939,21 @@ const getApplicationStatusBadge = (status: string) => {
                                   </Button>
                                   <Button
                                     size="sm"
-                                    onClick={() => reviewApplication(application.id, 'approved')}
-                                    disabled={application.status === 'approved'}
-                                    className="bg-green-600 hover:bg-green-700 text-xs px-2 py-1 h-7"
+                                    onClick={() => {
+                                      if (application.status === 'approved') {
+                                        reviewApplication(application.id, 'pending')
+                                      } else {
+                                        reviewApplication(application.id, 'approved')
+                                      }
+                                    }}
+                                    className={
+                                      application.status === 'approved'
+                                        ? "bg-yellow-600 hover:bg-yellow-700 text-xs px-2 py-1 h-7"
+                                        : "bg-green-600 hover:bg-green-700 text-xs px-2 py-1 h-7"
+                                    }
                                   >
                                     <Check className="w-3 h-3" />
-                                    Approve
+                                    {application.status === 'approved' ? 'Unapprove' : 'Approve'}
                                   </Button>
                                    <Button
                                      size="sm"
