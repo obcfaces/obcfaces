@@ -38,6 +38,7 @@ export const ContestParticipationModal = ({
   const [showPassword, setShowPassword] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [submissionSuccess, setSubmissionSuccess] = useState(false);
+  const [currentApplicationId, setCurrentApplicationId] = useState<string | null>(null);
   const [authError, setAuthError] = useState<string>("");
   const { toast } = useToast();
 
@@ -595,16 +596,23 @@ export const ContestParticipationModal = ({
         
         dbError = error;
       } else {
-        // Insert new application
-        const { error } = await supabase
+        // Insert new application and get the returned data
+        const { data: insertedData, error } = await supabase
           .from('contest_applications')
           .insert({
             user_id: session.user.id,
             application_data: applicationData,
             status: 'pending'
-          });
+          })
+          .select('id')
+          .single();
         
         dbError = error;
+        
+        // Store the application ID for later use in contact form
+        if (insertedData) {
+          setCurrentApplicationId(insertedData.id);
+        }
       }
 
       if (dbError) {
@@ -832,6 +840,7 @@ export const ContestParticipationModal = ({
       if (!open) {
         // Reset states when modal closes
         setSubmissionSuccess(false);
+        setCurrentApplicationId(null);
         setSelectedContactMethod(null);
         setContactForm({ name: "", contact: "", message: "", countryCode: "", facebookUrl: "" });
       }
@@ -1057,25 +1066,24 @@ export const ContestParticipationModal = ({
                              return;
                            }
 
-                             // Get the latest application
-                             const { data: applications, error: fetchError } = await supabase
-                               .from('contest_applications')
-                               .select('application_data')
-                               .eq('user_id', session.user.id)
-                               .order('created_at', { ascending: false })
-                               .limit(1);
-
-                             if (fetchError) {
+                             // Use the specific application ID from the current submission
+                             if (!currentApplicationId) {
                                toast({
                                  title: "Error",
-                                 description: "Failed to load application data.",
+                                 description: "No application found to update.",
                                  variant: "destructive"
                                });
                                return;
                              }
 
-                             const application = applications?.[0];
-                             if (!application) {
+                             // Get the specific application by ID
+                             const { data: application, error: fetchError } = await supabase
+                               .from('contest_applications')
+                               .select('application_data')
+                               .eq('id', currentApplicationId)
+                               .single();
+
+                             if (fetchError || !application) {
                               toast({
                                 title: "Error",
                                 description: "Application not found.",
@@ -1100,14 +1108,14 @@ export const ContestParticipationModal = ({
                                facebook_url: contactForm.facebookUrl || ''
                              };
 
-                           // Update the application with phone data
-                           const { error: updateError } = await supabase
-                             .from('contest_applications')
-                             .update({
-                               application_data: updatedApplicationData,
-                               updated_at: new Date().toISOString()
-                             })
-                             .eq('user_id', session.user.id);
+                            // Update the specific application with contact data
+                            const { error: updateError } = await supabase
+                              .from('contest_applications')
+                              .update({
+                                application_data: updatedApplicationData,
+                                updated_at: new Date().toISOString()
+                              })
+                              .eq('id', currentApplicationId);
 
                            if (updateError) {
                              toast({
