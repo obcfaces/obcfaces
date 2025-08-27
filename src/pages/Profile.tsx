@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import SearchableSelect from "@/components/ui/searchable-select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { LogOut, Eye, EyeOff, UserIcon, MapPin, Pencil, Lock, MessageCircle } from "lucide-react";
+import { LogOut, Eye, EyeOff, UserIcon, MapPin, Pencil, Lock, MessageCircle, AlertCircle } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import PostCard from "@/components/profile/PostCard";
 import LikedItem from "@/components/profile/LikedItem";
@@ -98,6 +98,7 @@ const Profile = () => {
   const [likedItems, setLikedItems] = useState<any[]>([]);
   const [loadingLikes, setLoadingLikes] = useState(true);
   const [likesViewMode, setLikesViewMode] = useState<'compact' | 'full'>('compact');
+  const [contestApplication, setContestApplication] = useState<any>(null);
   const [likesCountryFilter, setLikesCountryFilter] = useState<string>("all");
   const [participationItems, setParticipationItems] = useState<any[]>([]);
   const [loadingParticipation, setLoadingParticipation] = useState(true);
@@ -713,7 +714,7 @@ const Profile = () => {
       // Также проверяем наличие заявки на участие (исключаем удалённые)
       const { data: contestApplication } = await supabase
         .from('contest_applications')
-        .select('id, status, created_at, application_data')
+        .select('id, status, created_at, application_data, rejection_reason')
         .eq('user_id', id)
         .is('deleted_at', null)  // Исключаем удалённые заявки
         .order('created_at', { ascending: false })
@@ -721,6 +722,9 @@ const Profile = () => {
         .maybeSingle();
 
       console.log('Contest application:', contestApplication);
+      
+      // Store contest application data
+      setContestApplication(contestApplication);
 
       // Показываем карточку только если пользователь является участником конкурса И имеет активную заявку
       const shouldShowParticipation = profileData.is_contest_participant && contestApplication;
@@ -1322,9 +1326,25 @@ const Profile = () => {
                       />
                     </button>
                     </div>
-                  </div>
-                  
-                  {/* Participation items grid */}
+                   </div>
+                   
+                   {/* Rejection reason notice */}
+                   {isOwner && contestApplication?.status === 'rejected' && contestApplication?.rejection_reason && (
+                     <div className="mx-6 sm:mx-0 mb-6 p-4 bg-destructive/10 border border-destructive/20 rounded-lg">
+                       <div className="flex items-center gap-2 mb-2">
+                         <AlertCircle className="h-5 w-5 text-destructive" />
+                         <h3 className="font-semibold text-destructive">Application Rejected</h3>
+                       </div>
+                       <p className="text-sm text-destructive/80 mb-3">
+                         Reason: {contestApplication.rejection_reason}
+                       </p>
+                       <p className="text-sm text-muted-foreground">
+                         Please upload new photos addressing the issues mentioned above and resubmit your application.
+                       </p>
+                     </div>
+                   )}
+                   
+                   {/* Participation items grid */}
                   <div className={`grid gap-1 sm:gap-3 ${
                     participationViewMode === 'compact' 
                       ? 'grid-cols-1' 
