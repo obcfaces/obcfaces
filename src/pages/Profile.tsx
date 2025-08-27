@@ -865,6 +865,13 @@ const Profile = () => {
         console.log('Setting edit modal data:', event.detail.existingData);
         setEditModalData(event.detail.existingData);
         setIsEditModalOpen(true);
+      } else {
+        console.error('Cannot open edit modal: missing existingData');
+        toast({
+          title: "Error",
+          description: "Failed to load application data.",
+          variant: "destructive"
+        });
       }
     };
 

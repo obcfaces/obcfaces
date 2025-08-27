@@ -688,6 +688,7 @@ export const ContestParticipationModal = ({
         
         // If in edit mode, prioritize existing data
         if (editMode && existingData) {
+          console.log('Edit mode detected, loading existing data:', existingData);
           formDataToLoad = loadCachedFormData();
           // Load contact information from existing data
           if (existingData.application_data) {
@@ -700,6 +701,9 @@ export const ContestParticipationModal = ({
               facebookUrl: appData.facebook_url || ""
             });
           }
+        } else if (editMode && !existingData) {
+          console.log('Edit mode but no existing data, showing error');
+          throw new Error('Failed to load application data.');
         } else {
           // For new applications, try to load last application data first
           const lastAppData = await loadLastApplicationData();
