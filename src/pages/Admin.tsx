@@ -36,6 +36,7 @@ interface ProfileData {
   auth_provider?: string;
   email?: string;
   facebook_data?: any;
+  last_sign_in_at?: string;
 }
 
 interface UserRole {
@@ -185,52 +186,26 @@ const Admin = () => {
       return;
     }
 
-    // Then fetch auth data for each profile
-    const profilesWithAuth = await Promise.all(
-      (profilesData || []).map(async (profile) => {
-        try {
-          // Query auth.users for authentication data
-          const { data: authData } = await supabase
-            .from('auth.users')
-            .select('email, raw_app_meta_data, raw_user_meta_data')
-            .eq('id', profile.id)
-            .maybeSingle();
+    // Then fetch auth data using our secure function
+    const { data: authData, error: authError } = await supabase
+      .rpc('get_user_auth_data_admin');
 
-          let authProvider = 'unknown';
-          let facebookData = null;
+    if (authError) {
+      console.warn('Failed to fetch auth data:', authError);
+    }
 
-          if (authData) {
-            // Get provider from raw_app_meta_data
-            const appMetadata = authData.raw_app_meta_data as any;
-            if (appMetadata?.provider) {
-              authProvider = appMetadata.provider;
-            } else if (appMetadata?.providers && Array.isArray(appMetadata.providers)) {
-              authProvider = appMetadata.providers[0] || 'unknown';
-            }
-
-            // Extract Facebook data if provider is facebook
-            if (authProvider === 'facebook' && authData.raw_user_meta_data) {
-              facebookData = authData.raw_user_meta_data;
-            }
-          }
-
-          return {
-            ...profile,
-            auth_provider: authProvider,
-            email: authData?.email || null,
-            facebook_data: facebookData
-          };
-        } catch (error) {
-          console.warn(`Failed to fetch auth data for user ${profile.id}:`, error);
-          return {
-            ...profile,
-            auth_provider: 'unknown',
-            email: null,
-            facebook_data: null
-          };
-        }
-      })
-    );
+    // Merge profile and auth data
+    const profilesWithAuth = (profilesData || []).map(profile => {
+      const userAuthData = authData?.find(auth => auth.user_id === profile.id);
+      
+      return {
+        ...profile,
+        auth_provider: userAuthData?.auth_provider || 'unknown',
+        email: userAuthData?.email || null,
+        facebook_data: userAuthData?.facebook_data || null,
+        last_sign_in_at: userAuthData?.last_sign_in_at || null
+      };
+    });
 
     setProfiles(profilesWithAuth);
   };
@@ -1721,6 +1696,10 @@ const getApplicationStatusBadge = (status: string) => {
                   const appData = application.application_data || {};
                   const phone = appData.phone;
                   const submittedDate = new Date(application.submitted_at);
+                  
+                  // Find the user's profile to get auth data
+                  const userProfile = profiles.find(p => p.id === application.user_id);
+                  
                   return (
                     <Card key={application.id} className="py-3">
                       <CardContent className="p-4">
@@ -1737,6 +1716,17 @@ const getApplicationStatusBadge = (status: string) => {
                               <h3 className="text-sm font-semibold truncate">
                                 {appData.first_name} {appData.last_name}
                               </h3>
+                              {userProfile && (
+                                <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1">
+                                  <span>Auth:</span>
+                                  <Badge variant={userProfile.auth_provider === 'facebook' ? 'default' : 'outline'} className="text-xs">
+                                    {userProfile.auth_provider || 'email'}
+                                  </Badge>
+                                  {userProfile.email && (
+                                    <span>• {userProfile.email}</span>
+                                  )}
+                                </div>
+                              )}
                               <div className="flex items-center gap-3 text-xs text-muted-foreground">
                                 <span>{appData.gender}</span>
                                 <span>•</span>
@@ -2087,6 +2077,31 @@ const getApplicationStatusBadge = (status: string) => {
                               <h3 className="font-semibold">
                                 {profile.display_name || `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 'No Name'}
                               </h3>
+                              <div className="text-sm text-muted-foreground mb-1">
+                                {profile.email && (
+                                  <div>Email: {profile.email}</div>
+                                )}
+                                <div className="flex items-center gap-2">
+                                  <span>Auth Provider:</span>
+                                  <Badge variant={profile.auth_provider === 'facebook' ? 'default' : 'secondary'}>
+                                    {profile.auth_provider || 'unknown'}
+                                  </Badge>
+                                </div>
+                                {profile.facebook_data && (
+                                  <div className="text-xs mt-1 p-2 bg-blue-50 rounded border">
+                                    <strong>Facebook Data:</strong>
+                                    {profile.facebook_data.name && <div>Name: {profile.facebook_data.name}</div>}
+                                    {profile.facebook_data.email && <div>FB Email: {profile.facebook_data.email}</div>}
+                                    {profile.facebook_data.picture && <div>Profile Pic: Available</div>}
+                                    {profile.facebook_data.verified && <div>Verified: {profile.facebook_data.verified ? 'Yes' : 'No'}</div>}
+                                  </div>
+                                )}
+                                {profile.last_sign_in_at && (
+                                  <div className="text-xs">
+                                    Last Login: {new Date(profile.last_sign_in_at).toLocaleString()}
+                                  </div>
+                                )}
+                              </div>
                               <div className="flex gap-2 mt-1">
                                 {roles.map((role) => (
                                   <Badge key={role} variant="outline">

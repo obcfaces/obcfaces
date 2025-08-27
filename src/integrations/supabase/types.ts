@@ -856,6 +856,17 @@ export type Database = {
         Args: { user_id_param: string }
         Returns: number
       }
+      get_user_auth_data_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          auth_provider: string
+          created_at: string
+          email: string
+          facebook_data: Json
+          last_sign_in_at: string
+          user_id: string
+        }[]
+      }
       get_user_comments_count: {
         Args: { target_user_id: string }
         Returns: number
