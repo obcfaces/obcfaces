@@ -36,7 +36,22 @@ export const useApplicationHistory = (applicationId?: string) => {
           return;
         }
 
-        setHistory(data || []);
+        // Remove duplicates based on application_data content and status
+        const uniqueHistory = [];
+        const seen = new Set();
+        
+        for (const item of data || []) {
+          const key = JSON.stringify({ 
+            application_data: item.application_data, 
+            status: item.status 
+          });
+          if (!seen.has(key)) {
+            seen.add(key);
+            uniqueHistory.push(item);
+          }
+        }
+
+        setHistory(uniqueHistory);
       } catch (error) {
         console.error('Error loading application history:', error);
         setError('Failed to load application history');
