@@ -92,7 +92,7 @@ export function PhotoModal({
       try {
         const { data: userRating } = await supabase
           .rpc('get_user_rating_for_participant', { 
-            target_user_id: profileId 
+            participant_id_param: profileId 
           });
 
         if (userRating !== null && typeof userRating === 'number') {
