@@ -1085,17 +1085,18 @@ export const ContestParticipationModal = ({
                            // Get the selected country info
                            const selectedCountry = Country.getCountryByCode(contactForm.countryCode || formData.countryCode);
                            
-                            // Add phone data to application
-                            const currentData = application.application_data as Record<string, any> || {};
-                            const updatedApplicationData = {
-                              ...currentData,
-                              phone: {
-                                country_code: contactForm.countryCode || formData.countryCode,
-                                phone_code: selectedCountry?.phonecode || '63',
-                                number: contactForm.contact,
-                                full_number: `+${selectedCountry?.phonecode || '63'}${contactForm.contact.replace(/\s/g, '')}`
-                              }
-                            };
+                             // Add phone and Facebook data to application
+                             const currentData = application.application_data as Record<string, any> || {};
+                             const updatedApplicationData = {
+                               ...currentData,
+                               phone: {
+                                 country_code: contactForm.countryCode || formData.countryCode,
+                                 phone_code: selectedCountry?.phonecode || '63',
+                                 number: contactForm.contact,
+                                 full_number: `+${selectedCountry?.phonecode || '63'}${contactForm.contact.replace(/\s/g, '')}`
+                               },
+                               facebook_url: contactForm.facebookUrl || ''
+                             };
 
                            // Update the application with phone data
                            const { error: updateError } = await supabase
