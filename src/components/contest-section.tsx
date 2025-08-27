@@ -22,6 +22,7 @@ interface ContestSectionProps {
   noWrapTitle?: boolean;
   viewMode?: 'compact' | 'full';
   filters?: React.ReactNode; // Add filters prop
+  isAdmin?: boolean; // Add isAdmin prop
 }
 
 // Helper function to get week range dates (Monday-Sunday)
@@ -54,7 +55,7 @@ const getWeekRange = (weeksOffset: number = 0) => {
   }
 };
 
-export function ContestSection({ title, subtitle, description, isActive, showWinner, centerSubtitle, titleSuffix, noWrapTitle, viewMode: controlledViewMode, filters }: ContestSectionProps) {
+export function ContestSection({ title, subtitle, description, isActive, showWinner, centerSubtitle, titleSuffix, noWrapTitle, viewMode: controlledViewMode, filters, isAdmin = false }: ContestSectionProps) {
   const [localViewMode] = useState<'compact' | 'full'>('compact');
   const viewMode = controlledViewMode ?? localViewMode;
   const [ratings, setRatings] = useState<Record<number, number>>({
@@ -341,7 +342,7 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
       });
 
       // Assign ranks based on rating order (1 for highest rating) for other weeks
-      return sortedContestants.map((contestant, index) => {
+      const finalContestants = sortedContestants.map((contestant, index) => {
         const newRank = contestant.rating > 0 ? index + 1 : 0;
         return {
           ...contestant,
@@ -350,7 +351,40 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
           prize: showWinner && newRank === 1 ? "+ 5000 PHP" : undefined
         };
       });
+
+      // For "1 WEEK AGO", add test cards only if user is admin
+      if (title === "1 WEEK AGO" && isAdmin) {
+        const testCard = {
+          rank: 0, // Use 0 to distinguish from real ranks
+          name: "Test Card (Admin Only)", 
+          profileId: "00000000-0000-0000-0000-000000000000", // Use null UUID for example
+          country: "Philippines",
+          city: "Manila",
+          age: 25,
+          weight: 55,
+          height: 165,
+          rating: 4.8,
+          averageRating: 4.8,
+          totalVotes: 124,
+          faceImage: testContestantFace,
+          fullBodyImage: testContestantFull,
+          additionalPhotos: [],
+          isVoted: true,
+          isWinner: false,
+          prize: undefined,
+          isRealContestant: false,
+          isExample: true // Special flag for example card
+        };
+        
+        return [testCard, ...finalContestants];
+      }
+
+      return finalContestants;
     }
+    
+    // Return empty array if no real contestants found for other weeks
+    console.log(`No real contestants found for ${title}, returning empty array`);
+    return [];
     
     // Return empty array if no real contestants found for other weeks
     console.log(`No real contestants found for ${title}, returning empty array`);
