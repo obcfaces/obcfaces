@@ -82,6 +82,17 @@ export const ContestParticipationModal = ({
       }
       
       console.log('Parsed birthdate:', birthdate);
+
+      // Load existing contact data for the contact form
+      if (applicationData.phone || applicationData.facebook_url) {
+        setContactForm({
+          name: `${applicationData.first_name || ''} ${applicationData.last_name || ''}`.trim(),
+          contact: applicationData.phone?.number || '',
+          message: '',
+          countryCode: applicationData.phone?.country_code || applicationData.country || '',
+          facebookUrl: applicationData.facebook_url || ''
+        });
+      }
       
       return {
         first_name: applicationData.first_name || "",
@@ -102,6 +113,17 @@ export const ContestParticipationModal = ({
         weight_kg: applicationData.weight_kg ? applicationData.weight_kg.toString() : "",
         measurement_system: "metric",
       };
+      
+      // Initialize contact form with existing data
+      setTimeout(() => {
+        setContactForm({
+          name: `${applicationData.first_name || ''} ${applicationData.last_name || ''}`.trim(),
+          contact: applicationData.phone?.number || '',
+          message: '',
+          countryCode: applicationData.phone?.country_code || applicationData.country || '',
+          facebookUrl: applicationData.facebook_url || ''
+        });
+      }, 0);
     }
     
     try {
@@ -1126,11 +1148,29 @@ export const ContestParticipationModal = ({
                              return;
                            }
                         
-                           toast({
-                             title: "Contact information saved",
-                             description: "We will contact you in case of victory."
-                           });
-                           setIsOpen(false);
+                            toast({
+                              title: "Contact information saved",
+                              description: "We will contact you in case of victory."
+                            });
+                            
+                            // Close modal after successful contact update
+                            setIsOpen(false);
+                            
+                            // Reset states 
+                            setSubmissionSuccess(false);
+                            setCurrentApplicationId(null);
+                            setSelectedContactMethod(null);
+                            setContactForm({ name: "", contact: "", message: "", countryCode: "", facebookUrl: "" });
+                            
+                            // Dispatch event for profile updates if this was from edit mode
+                            if (editMode) {
+                              window.dispatchEvent(new CustomEvent('participationUpdated', { 
+                                detail: { 
+                                  contactUpdated: true,
+                                  updatedAt: new Date().toISOString()
+                                } 
+                              }));
+                            }
                          } catch (error) {
                            console.error('Contact save error:', error);
                            toast({
