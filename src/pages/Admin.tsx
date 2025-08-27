@@ -1473,14 +1473,7 @@ const getApplicationStatusBadge = (status: string) => {
                                   <span>📞 {participant.application_data?.phone?.full_number || 'Not provided'}</span>
                                   <span>•</span>
                                   {participant.application_data?.facebook_url ? (
-                                    <a 
-                                      href={participant.application_data.facebook_url} 
-                                      target="_blank" 
-                                      rel="noopener noreferrer"
-                                      className="text-blue-600 hover:underline"
-                                    >
-                                      Facebook
-                                    </a>
+                                    <span>{participant.application_data.facebook_url}</span>
                                   ) : (
                                     <span>Facebook: Not provided</span>
                                   )}
@@ -1762,16 +1755,7 @@ const getApplicationStatusBadge = (status: string) => {
                                 <span>•</span>
                                 <span>Phone: {phone ? phone.full_number : 'Not provided'}</span>
                                 <span>•</span>
-                                <span>Facebook: {appData.facebook_url ? (
-                                  <a 
-                                    href={appData.facebook_url} 
-                                    target="_blank" 
-                                    rel="noopener noreferrer"
-                                    className="text-blue-600 hover:underline ml-1"
-                                  >
-                                    Profile Link
-                                  </a>
-                                ) : 'Not provided'}</span>
+                                <span>Facebook: {appData.facebook_url || 'Not provided'}</span>
                               </div>
                             </div>
                           </div>
