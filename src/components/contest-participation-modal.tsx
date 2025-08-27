@@ -686,6 +686,17 @@ export const ContestParticipationModal = ({
         // If in edit mode, prioritize existing data
         if (editMode && existingData) {
           formDataToLoad = loadCachedFormData();
+          // Load contact information from existing data
+          if (existingData.application_data) {
+            const appData = existingData.application_data as any;
+            setContactForm({
+              name: "",
+              contact: appData.phone?.number || "",
+              message: "",
+              countryCode: appData.phone?.country_code || "",
+              facebookUrl: appData.facebook_url || ""
+            });
+          }
         } else {
           // For new applications, try to load last application data first
           const lastAppData = await loadLastApplicationData();
@@ -713,9 +724,24 @@ export const ContestParticipationModal = ({
       
       // Set display values for height and weight dropdowns for edit mode
       if (editMode && existingData) {
+        console.log('Loading existing data for edit mode:', existingData);
         let applicationData = existingData;
         if (existingData.application_data) {
           applicationData = { ...existingData, ...existingData.application_data };
+          console.log('Application data found:', existingData.application_data);
+          
+          // Load contact information
+          const appData = existingData.application_data as any;
+          if (appData.phone || appData.facebook_url) {
+            console.log('Loading contact data:', { phone: appData.phone, facebook_url: appData.facebook_url });
+            setContactForm({
+              name: "",
+              contact: appData.phone?.number || "",
+              message: "",
+              countryCode: appData.phone?.country_code || "",
+              facebookUrl: appData.facebook_url || ""
+            });
+          }
         }
         
         // Log photo URLs for debugging
