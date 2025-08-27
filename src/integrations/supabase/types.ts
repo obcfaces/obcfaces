@@ -887,7 +887,7 @@ export type Database = {
         Returns: number
       }
       get_user_rating_for_participant: {
-        Args: { target_user_id: string }
+        Args: { participant_id_param: string }
         Returns: number
       }
       get_user_rating_stats: {
