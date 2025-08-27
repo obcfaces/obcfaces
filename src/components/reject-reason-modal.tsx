@@ -25,6 +25,11 @@ export type RejectionReasonType =
   | 'duplicate_application'
   | 'quality_standards'
   | 'terms_violation'
+  | 'makeup_not_allowed'
+  | 'incorrect_pose'
+  | 'poor_photo_quality'
+  | 'clothing_not_form_fitting'
+  | 'filters_not_allowed'
   | 'other';
 
 const REJECTION_REASONS = {
@@ -34,6 +39,11 @@ const REJECTION_REASONS = {
   duplicate_application: "Duplicate application",
   quality_standards: "Does not meet quality standards",
   terms_violation: "Terms violation",
+  makeup_not_allowed: "Makeup is not allowed",
+  incorrect_pose: "Incorrect body position or pose",
+  poor_photo_quality: "Poor photo quality",
+  clothing_not_form_fitting: "Clothing must be form-fitting",
+  filters_not_allowed: "Filters are not allowed",
   other: "Other reason"
 };
 

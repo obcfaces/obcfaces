@@ -1116,6 +1116,11 @@ export type Database = {
         | "quality_standards"
         | "terms_violation"
         | "other"
+        | "makeup_not_allowed"
+        | "incorrect_pose"
+        | "poor_photo_quality"
+        | "clothing_not_form_fitting"
+        | "filters_not_allowed"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1252,6 +1257,11 @@ export const Constants = {
         "quality_standards",
         "terms_violation",
         "other",
+        "makeup_not_allowed",
+        "incorrect_pose",
+        "poor_photo_quality",
+        "clothing_not_form_fitting",
+        "filters_not_allowed",
       ],
     },
   },
