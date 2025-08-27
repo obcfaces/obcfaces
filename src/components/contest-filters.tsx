@@ -1,4 +1,5 @@
 import React, { useMemo } from "react";
+import { Country } from 'country-state-city';
 import SearchableSelect, { type Option } from "@/components/ui/searchable-select";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import HeightFilterDropdown from "@/components/ui/height-filter-dropdown";
@@ -53,14 +54,25 @@ const ContestFilters: React.FC<ContestFiltersProps> = ({
   weight,
   onWeightChange,
 }) => {
-  const countryOptions: Option[] = useMemo(() => [
-    { value: "PH", label: "Philippines" },
-    { value: "__divider__", label: "", disabled: true, divider: true },
-    { value: "US", label: "United States", disabled: true },
-    { value: "GB", label: "United Kingdom", disabled: true },
-    { value: "CA", label: "Canada", disabled: true },
-    { value: "AU", label: "Australia", disabled: true },
-  ], []);
+  const countryOptions: Option[] = useMemo(() => {
+    const allCountries = Country.getAllCountries().map(country => ({
+      value: country.isoCode,
+      label: country.isoCode === 'PH' ? country.name : `${country.name} soon`,
+      disabled: country.isoCode !== 'PH'
+    }));
+    
+    // Sort alphabetically but put Philippines first
+    const philippines = allCountries.find(c => c.value === 'PH');
+    const otherCountries = allCountries.filter(c => c.value !== 'PH').sort((a, b) => a.label.localeCompare(b.label));
+    
+    return [
+      // Active countries
+      ...(philippines ? [philippines] : []),
+      { value: "__divider__", label: "", disabled: true, divider: true },
+      // All other countries with "soon" label
+      ...otherCountries
+    ];
+  }, []);
 
   const genderOptions: Option[] = useMemo(() => {
     const av = genderAvailability ?? { male: false, female: true };
