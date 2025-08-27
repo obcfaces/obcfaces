@@ -131,6 +131,64 @@ export const ContestParticipationModal = ({
     };
   };
 
+  // Load user's last application data from database
+  const loadLastApplicationData = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user) return null;
+
+      const { data: applications, error } = await supabase
+        .from('contest_applications')
+        .select('*')
+        .eq('user_id', session.user.id)
+        .order('created_at', { ascending: false })
+        .limit(1);
+
+      if (error) {
+        console.warn('Failed to load last application:', error);
+        return null;
+      }
+
+      if (applications && applications.length > 0) {
+        const lastApp = applications[0];
+        console.log('Loading last application data:', lastApp);
+        
+        const applicationData = lastApp.application_data as any || {};
+        
+        // Handle birthdate from multiple possible sources
+        let birthdate = null;
+        if (applicationData.birthdate) {
+          birthdate = new Date(applicationData.birthdate);
+        } else if (applicationData.birth_year && applicationData.birth_month && applicationData.birth_day) {
+          birthdate = new Date(applicationData.birth_year, applicationData.birth_month - 1, applicationData.birth_day);
+        }
+        
+        return {
+          first_name: applicationData.first_name || "",
+          last_name: applicationData.last_name || "",
+          country: applicationData.country || "",
+          countryCode: applicationData.country || "",
+          state: applicationData.state || "",
+          stateCode: applicationData.state || "",
+          city: applicationData.city || "",
+          gender: applicationData.gender || "",
+          birth_day: birthdate ? birthdate.getDate().toString() : (applicationData.birth_day?.toString() || ""),
+          birth_month: birthdate ? (birthdate.getMonth() + 1).toString() : (applicationData.birth_month?.toString() || ""),
+          birth_year: birthdate ? birthdate.getFullYear().toString() : (applicationData.birth_year?.toString() || ""),
+          marital_status: applicationData.marital_status || "",
+          has_children: applicationData.has_children as boolean | undefined,
+          height_cm: applicationData.height_cm ? applicationData.height_cm.toString() : "",
+          height_ft: "",
+          weight_kg: applicationData.weight_kg ? applicationData.weight_kg.toString() : "",
+          measurement_system: "metric",
+        };
+      }
+    } catch (error) {
+      console.warn('Error loading last application:', error);
+    }
+    return null;
+  };
+
   // Profile form data
   const [formData, setFormData] = useState(loadCachedFormData);
   
@@ -613,25 +671,42 @@ export const ContestParticipationModal = ({
       setSubmitted(false);
       setInvalidFields(new Set());
       
-      // Load form data (existing data for edit mode or cached data)
-      const formDataToLoad = loadCachedFormData();
-      setFormData(formDataToLoad);
+      const initializeForm = async () => {
+        let formDataToLoad;
+        
+        // If in edit mode, prioritize existing data
+        if (editMode && existingData) {
+          formDataToLoad = loadCachedFormData();
+        } else {
+          // For new applications, try to load last application data first
+          const lastAppData = await loadLastApplicationData();
+          if (lastAppData) {
+            formDataToLoad = lastAppData;
+            console.log('Loaded last application data:', lastAppData);
+          } else {
+            // Fall back to cached data if no last application
+            formDataToLoad = loadCachedFormData();
+          }
+        }
+        
+        setFormData(formDataToLoad);
+        
+        // Set display values for height and weight dropdowns
+        if (formDataToLoad.height_cm) {
+          setSelectedHeight(`${formDataToLoad.height_cm} cm`);
+        }
+        if (formDataToLoad.weight_kg) {
+          setSelectedWeight(`${formDataToLoad.weight_kg} kg`);
+        }
+      };
       
-      // Set display values for height and weight dropdowns
+      initializeForm();
+      
+      // Set display values for height and weight dropdowns for edit mode
       if (editMode && existingData) {
         let applicationData = existingData;
         if (existingData.application_data) {
           applicationData = { ...existingData, ...existingData.application_data };
-        }
-        
-        // Set height display value
-        if (applicationData.height_cm) {
-          setSelectedHeight(`${applicationData.height_cm} cm`);
-        }
-        
-        // Set weight display value  
-        if (applicationData.weight_kg) {
-          setSelectedWeight(`${applicationData.weight_kg} kg`);
         }
         
         // Log photo URLs for debugging
