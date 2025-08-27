@@ -1705,9 +1705,9 @@ const getApplicationStatusBadge = (status: string) => {
                       <CardContent className="p-4">
                         <div className="flex items-center justify-between gap-4">
                           {/* Left section with avatar and basic info */}
-                          <div className="flex items-center gap-3 flex-1">
+                           <div className="flex items-center gap-3 flex-1">
                             <Avatar className="h-12 w-12 flex-shrink-0">
-                              <AvatarImage src={appData.photo1_url || ''} />
+                              <AvatarImage src={userProfile?.avatar_url || ''} />
                               <AvatarFallback>
                                 {appData.first_name?.charAt(0) || 'U'}
                               </AvatarFallback>
