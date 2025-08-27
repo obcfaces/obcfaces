@@ -1,127 +1,131 @@
 import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { X } from "lucide-react";
+import { Label } from "@/components/ui/label";
+
+export type RejectionReasonType = 
+  | 'inappropriate_photos'
+  | 'incomplete_information'
+  | 'age_requirements'
+  | 'duplicate_application'
+  | 'quality_standards'
+  | 'terms_violation'
+  | 'other';
+
+const REJECTION_REASONS = {
+  inappropriate_photos: "Неподходящие фотографии",
+  incomplete_information: "Неполная информация",
+  age_requirements: "Не соответствует возрастным требованиям",
+  duplicate_application: "Дублирующая заявка",
+  quality_standards: "Не соответствует стандартам качества",
+  terms_violation: "Нарушение условий участия",
+  other: "Другая причина"
+};
 
 interface RejectReasonModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onConfirm: (reason: string) => void;
-  applicantName: string;
+  onConfirm: (reasonType: RejectionReasonType, notes: string) => Promise<void>;
+  isLoading?: boolean;
 }
 
-const PREDEFINED_REASONS = [
-  "Makeup is not allowed",
-  "Incorrect body position or pose", 
-  "Poor photo quality",
-  "Clothing must be form-fitting",
-  "Filters are not allowed"
-];
+export const RejectReasonModal = ({
+  isOpen,
+  onClose,
+  onConfirm,
+  isLoading = false
+}: RejectReasonModalProps) => {
+  const [selectedReason, setSelectedReason] = useState<RejectionReasonType | "">("");
+  const [notes, setNotes] = useState("");
 
-export const RejectReasonModal = ({ isOpen, onClose, onConfirm, applicantName }: RejectReasonModalProps) => {
-  const [selectedReason, setSelectedReason] = useState<string>("");
-  const [customReason, setCustomReason] = useState<string>("");
-  const [showCustomInput, setShowCustomInput] = useState(false);
-
-  const handleReasonChange = (value: string) => {
-    if (value === "custom") {
-      setShowCustomInput(true);
-      setSelectedReason("");
-    } else {
-      setShowCustomInput(false);
-      setSelectedReason(value);
-      setCustomReason("");
-    }
-  };
-
-  const handleConfirm = () => {
-    const reason = showCustomInput ? customReason.trim() : selectedReason;
-    if (reason) {
-      onConfirm(reason);
-      handleClose();
-    }
+  const handleConfirm = async () => {
+    if (!selectedReason) return;
+    
+    await onConfirm(selectedReason, notes);
+    
+    // Reset form
+    setSelectedReason("");
+    setNotes("");
   };
 
   const handleClose = () => {
     setSelectedReason("");
-    setCustomReason("");
-    setShowCustomInput(false);
+    setNotes("");
     onClose();
   };
 
-  const isValidSelection = showCustomInput ? customReason.trim().length > 0 : selectedReason.length > 0;
-
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="flex items-center justify-between">
-            Reject Application
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleClose}
-              className="h-6 w-6 p-0"
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          </DialogTitle>
+          <DialogTitle>Причина отклонения</DialogTitle>
+          <DialogDescription>
+            Выберите причину отклонения заявки и добавьте комментарий при необходимости.
+          </DialogDescription>
         </DialogHeader>
         
         <div className="space-y-4">
-          <p className="text-sm text-muted-foreground">
-            Select a reason for rejecting <strong>{applicantName}</strong>'s application:
-          </p>
-
-          <RadioGroup value={showCustomInput ? "custom" : selectedReason} onValueChange={handleReasonChange}>
-            {PREDEFINED_REASONS.map((reason) => (
-              <div key={reason} className="flex items-center space-x-2">
-                <RadioGroupItem value={reason} id={reason} />
-                <Label htmlFor={reason} className="text-sm cursor-pointer">
-                  {reason}
-                </Label>
-              </div>
-            ))}
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="custom" id="custom" />
-              <Label htmlFor="custom" className="text-sm cursor-pointer">
-                Custom reason
-              </Label>
-            </div>
-          </RadioGroup>
-
-          {showCustomInput && (
-            <div className="space-y-2">
-              <Label htmlFor="customReason" className="text-sm">
-                Enter custom reason:
-              </Label>
-              <Textarea
-                id="customReason"
-                value={customReason}
-                onChange={(e) => setCustomReason(e.target.value)}
-                placeholder="Please specify the reason for rejection..."
-                className="min-h-[80px]"
-              />
-            </div>
-          )}
-
-          <div className="flex justify-end space-x-2 pt-4">
-            <Button variant="outline" onClick={handleClose}>
-              Cancel
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={handleConfirm}
-              disabled={!isValidSelection}
+          <div>
+            <Label htmlFor="rejection-reason">Причина отклонения</Label>
+            <Select 
+              value={selectedReason} 
+              onValueChange={(value: RejectionReasonType) => setSelectedReason(value)}
             >
-              Reject Application
-            </Button>
+              <SelectTrigger>
+                <SelectValue placeholder="Выберите причину..." />
+              </SelectTrigger>
+              <SelectContent>
+                {Object.entries(REJECTION_REASONS).map(([key, label]) => (
+                  <SelectItem key={key} value={key}>
+                    {label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          
+          <div>
+            <Label htmlFor="notes">Дополнительные комментарии (опционально)</Label>
+            <Textarea
+              id="notes"
+              placeholder="Дополнительная информация..."
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              rows={3}
+            />
           </div>
         </div>
+
+        <DialogFooter>
+          <Button variant="outline" onClick={handleClose} disabled={isLoading}>
+            Отмена
+          </Button>
+          <Button 
+            variant="destructive" 
+            onClick={handleConfirm} 
+            disabled={!selectedReason || isLoading}
+          >
+            {isLoading ? "Отклоняем..." : "Отклонить заявку"}
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
 };
+
+export { REJECTION_REASONS };

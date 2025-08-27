@@ -65,6 +65,9 @@ export type Database = {
           last_participation_date: string | null
           notes: string | null
           rejection_reason: string | null
+          rejection_reason_type:
+            | Database["public"]["Enums"]["rejection_reason_type"]
+            | null
           reviewed_at: string | null
           reviewed_by: string | null
           status: string
@@ -81,6 +84,9 @@ export type Database = {
           last_participation_date?: string | null
           notes?: string | null
           rejection_reason?: string | null
+          rejection_reason_type?:
+            | Database["public"]["Enums"]["rejection_reason_type"]
+            | null
           reviewed_at?: string | null
           reviewed_by?: string | null
           status?: string
@@ -97,6 +103,9 @@ export type Database = {
           last_participation_date?: string | null
           notes?: string | null
           rejection_reason?: string | null
+          rejection_reason_type?:
+            | Database["public"]["Enums"]["rejection_reason_type"]
+            | null
           reviewed_at?: string | null
           reviewed_by?: string | null
           status?: string
@@ -1099,6 +1108,14 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
+      rejection_reason_type:
+        | "inappropriate_photos"
+        | "incomplete_information"
+        | "age_requirements"
+        | "duplicate_application"
+        | "quality_standards"
+        | "terms_violation"
+        | "other"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1227,6 +1244,15 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "moderator", "user"],
+      rejection_reason_type: [
+        "inappropriate_photos",
+        "incomplete_information",
+        "age_requirements",
+        "duplicate_application",
+        "quality_standards",
+        "terms_violation",
+        "other",
+      ],
     },
   },
 } as const
