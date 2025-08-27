@@ -64,6 +64,7 @@ export type Database = {
           is_active: boolean
           last_participation_date: string | null
           notes: string | null
+          rejection_reason: string | null
           reviewed_at: string | null
           reviewed_by: string | null
           status: string
@@ -79,6 +80,7 @@ export type Database = {
           is_active?: boolean
           last_participation_date?: string | null
           notes?: string | null
+          rejection_reason?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
           status?: string
@@ -94,6 +96,7 @@ export type Database = {
           is_active?: boolean
           last_participation_date?: string | null
           notes?: string | null
+          rejection_reason?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
           status?: string

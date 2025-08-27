@@ -14,6 +14,7 @@ import { toast } from "@/components/ui/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Check, X, Eye, UserCog, FileText, Calendar, Trophy, RotateCcw, Edit, Plus, History, AlertCircle, Trash2 } from "lucide-react";
 import { PhotoModal } from "@/components/photo-modal";
+import { RejectReasonModal } from "@/components/reject-reason-modal";
 import { Switch } from "@/components/ui/switch";
 import { useNavigate } from "react-router-dom";
 import { useApplicationHistory } from "@/hooks/useApplicationHistory";
@@ -121,6 +122,8 @@ const Admin = () => {
   const [expandedHistory, setExpandedHistory] = useState<Set<string>>(new Set());
   const [viewingApplicationHistory, setViewingApplicationHistory] = useState<string | null>(null);
   const [applicationHistoryOpen, setApplicationHistoryOpen] = useState(false);
+  const [rejectModalOpen, setRejectModalOpen] = useState(false);
+  const [applicationToReject, setApplicationToReject] = useState<{ id: string; name: string } | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -1093,15 +1096,21 @@ const Admin = () => {
     setPhotoModalOpen(true);
   };
 
-  const reviewApplication = async (applicationId: string, status: 'approved' | 'rejected', notes?: string) => {
+  const reviewApplication = async (applicationId: string, status: 'approved' | 'rejected', notes?: string, rejectionReason?: string) => {
+    const updateData: any = {
+      status,
+      notes: notes || null,
+      reviewed_by: user?.id,
+      reviewed_at: new Date().toISOString()
+    };
+
+    if (status === 'rejected' && rejectionReason) {
+      updateData.rejection_reason = rejectionReason;
+    }
+
     const { error } = await supabase
       .from('contest_applications')
-      .update({
-        status,
-        notes: notes || null,
-        reviewed_by: user?.id,
-        reviewed_at: new Date().toISOString()
-      })
+      .update(updateData)
       .eq('id', applicationId);
 
     if (error) {
@@ -1185,6 +1194,13 @@ const Admin = () => {
     });
 
     fetchContestApplications();
+  };
+
+  const handleRejectConfirm = (reason: string) => {
+    if (applicationToReject) {
+      reviewApplication(applicationToReject.id, 'rejected', undefined, reason);
+      setApplicationToReject(null);
+    }
   };
 
 interface ApplicationHistoryModalProps {
@@ -1915,8 +1931,10 @@ const getApplicationStatusBadge = (status: string) => {
                                      size="sm"
                                      variant="destructive"
                                      onClick={() => {
-                                       const notes = prompt("Reason for rejection (optional):");
-                                       reviewApplication(application.id, 'rejected', notes || undefined);
+                                       const appData = application.application_data as any;
+                                       const name = `${appData.first_name || ''} ${appData.last_name || ''}`.trim();
+                                       setApplicationToReject({ id: application.id, name });
+                                       setRejectModalOpen(true);
                                      }}
                                      disabled={application.status === 'rejected'}
                                      className="text-xs px-2 py-1 h-7"
@@ -2540,6 +2558,16 @@ const getApplicationStatusBadge = (status: string) => {
         photos={photoModalImages}
         currentIndex={photoModalIndex}
         contestantName={photoModalName}
+      />
+      
+      <RejectReasonModal
+        isOpen={rejectModalOpen}
+        onClose={() => {
+          setRejectModalOpen(false);
+          setApplicationToReject(null);
+        }}
+        onConfirm={handleRejectConfirm}
+        applicantName={applicationToReject?.name || ""}
       />
     </>
   );
