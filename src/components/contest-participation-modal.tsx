@@ -566,6 +566,14 @@ export const ContestParticipationModal = ({
         weight_kg: parseFloat(formData.weight_kg),
         photo1_url: photo1Url,
         photo2_url: photo2Url,
+        // Include contact information
+        facebook_url: contactForm.facebookUrl || '',
+        phone: contactForm.contact && contactForm.countryCode ? {
+          country_code: contactForm.countryCode,
+          phone_code: Country.getCountryByCode(contactForm.countryCode)?.phonecode || '63',
+          number: contactForm.contact,
+          full_number: `+${Country.getCountryByCode(contactForm.countryCode)?.phonecode || '63'}${contactForm.contact.replace(/\s/g, '')}`
+        } : null,
       };
 
       let dbError = null;

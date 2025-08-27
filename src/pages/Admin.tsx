@@ -1461,13 +1461,34 @@ const getApplicationStatusBadge = (status: string) => {
                               <h3 className="text-sm font-semibold truncate">
                                 {participant.first_name} {participant.last_name}
                               </h3>
-                              <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                                <span>{participant.age} years old</span>
-                                <span>•</span>
-                                <span className="truncate">{participant.city}, {participant.country}</span>
-                                <span>•</span>
-                                <span>{participant.height_cm}cm, {participant.weight_kg}kg</span>
-                              </div>
+                               <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                                 <span>{participant.age} years old</span>
+                                 <span>•</span>
+                                 <span className="truncate">{participant.city}, {participant.country}</span>
+                                 <span>•</span>
+                                 <span>{participant.height_cm}cm, {participant.weight_kg}kg</span>
+                               </div>
+                               {/* Contact Information */}
+                               {(participant.application_data?.phone || participant.application_data?.facebook_url) && (
+                                 <div className="flex items-center gap-3 text-xs text-muted-foreground mt-1">
+                                   {participant.application_data?.phone && (
+                                     <span>📞 {participant.application_data.phone.full_number}</span>
+                                   )}
+                                   {participant.application_data?.facebook_url && (
+                                     <>
+                                       {participant.application_data?.phone && <span>•</span>}
+                                       <a 
+                                         href={participant.application_data.facebook_url} 
+                                         target="_blank" 
+                                         rel="noopener noreferrer"
+                                         className="text-blue-600 hover:underline"
+                                       >
+                                         Facebook
+                                       </a>
+                                     </>
+                                   )}
+                                 </div>
+                               )}
                             </div>
                           </div>
 
