@@ -722,12 +722,8 @@ const Profile = () => {
 
       console.log('Contest application:', contestApplication);
 
-      // Показываем карточку если пользователь участник ИЛИ имеет заявку ИЛИ есть фотографии участника
-      const hasParticipationPhotos = profileData.photo_1_url || profileData.photo_2_url;
-      const shouldShowParticipation = profileData.is_contest_participant || 
-                                    contestApplication || 
-                                    hasParticipationPhotos ||
-                                    profileData.participant_type;
+      // Показываем карточку только если пользователь является участником конкурса И имеет активную заявку
+      const shouldShowParticipation = profileData.is_contest_participant && contestApplication;
 
       if (!shouldShowParticipation) {
         console.log('User has no contest participation');
