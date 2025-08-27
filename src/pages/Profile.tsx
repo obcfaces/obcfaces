@@ -749,7 +749,7 @@ const Profile = () => {
           age: profileData.age || 25,
           weight: profileData.weight_kg || 55,
           height: profileData.height_cm || 165,
-          country: [profileData.country, profileData.state, profileData.city].filter(Boolean).join(', ') || 'Philippines',
+          country: profileData.country || 'Philippines',
           city: profileData.city || 'Manila',
           faceImage: profileData.photo_1_url || c1face, // Formal photo (first image)
           fullBodyImage: profileData.photo_2_url || c1, // Casual photo (second image)
