@@ -1196,47 +1196,123 @@ interface ApplicationHistoryModalProps {
 const ApplicationHistoryModal = ({ applicationId, isOpen, onClose }: ApplicationHistoryModalProps) => {
   const { history, loading } = useApplicationHistory(applicationId || undefined);
 
+  const renderApplicationCard = (item: any, index: number) => {
+    const appData = item.application_data || {};
+    const phone = appData.phone;
+    
+    return (
+      <Card key={item.id} className="p-4">
+        <div className="flex justify-between items-start mb-3">
+          <h4 className="font-medium text-base">Версия {history.length - index}</h4>
+          <div className="text-sm text-muted-foreground">
+            {new Date(item.created_at).toLocaleString('ru-RU')}
+          </div>
+        </div>
+        
+        <div className="flex gap-4">
+          {/* Main Info Section */}
+          <div className="flex-1">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Personal Information */}
+              <div className="space-y-2">
+                <h5 className="font-medium text-sm text-muted-foreground">Личная информация</h5>
+                <div className="space-y-1 text-sm">
+                  <div><span className="font-medium">Имя:</span> {appData.first_name || 'Не указано'}</div>
+                  <div><span className="font-medium">Фамилия:</span> {appData.last_name || 'Не указано'}</div>
+                  <div><span className="font-medium">Возраст:</span> {appData.age || 'Не указано'}</div>
+                  <div><span className="font-medium">Пол:</span> {appData.gender || 'Не указано'}</div>
+                  <div><span className="font-medium">Рост:</span> {appData.height_cm ? `${appData.height_cm} см` : 'Не указано'}</div>
+                  <div><span className="font-medium">Вес:</span> {appData.weight_kg ? `${appData.weight_kg} кг` : 'Не указано'}</div>
+                </div>
+              </div>
+
+              {/* Location & Contact */}
+              <div className="space-y-2">
+                <h5 className="font-medium text-sm text-muted-foreground">Местоположение и контакты</h5>
+                <div className="space-y-1 text-sm">
+                  <div><span className="font-medium">Страна:</span> {appData.country || 'Не указано'}</div>
+                  <div><span className="font-medium">Город:</span> {appData.city || 'Не указано'}</div>
+                  <div><span className="font-medium">Телефон:</span> {phone ? phone.full_number : 'Не указано'}</div>
+                  <div><span className="font-medium">Facebook:</span> {appData.facebook_url || 'Не указано'}</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Photos Section */}
+            {(appData.photo_1_url || appData.photo_2_url) && (
+              <div className="mt-4">
+                <h5 className="font-medium text-sm text-muted-foreground mb-2">Фотографии</h5>
+                <div className="flex gap-4">
+                  {appData.photo_1_url && (
+                    <div className="text-center">
+                      <p className="text-xs text-muted-foreground mb-1">Портрет</p>
+                      <img 
+                        src={appData.photo_1_url} 
+                        alt="Portrait" 
+                        className="w-16 h-20 object-cover rounded border"
+                      />
+                    </div>
+                  )}
+                  {appData.photo_2_url && (
+                    <div className="text-center">
+                      <p className="text-xs text-muted-foreground mb-1">В полный рост</p>
+                      <img 
+                        src={appData.photo_2_url} 
+                        alt="Full length" 
+                        className="w-16 h-20 object-cover rounded border"
+                      />
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Status and Notes */}
+            <div className="mt-4 pt-3 border-t">
+              <div className="flex items-center gap-4 text-sm">
+                <span><strong>Статус:</strong> 
+                  <Badge 
+                    variant={item.status === 'approved' ? 'default' : item.status === 'rejected' ? 'destructive' : 'secondary'}
+                    className="ml-1"
+                  >
+                    {item.status}
+                  </Badge>
+                </span>
+              </div>
+              {item.notes && (
+                <div className="mt-2 text-sm">
+                  <strong>Заметки:</strong> {item.notes}
+                </div>
+              )}
+              {item.change_reason && (
+                <div className="mt-1 text-sm">
+                  <strong>Причина изменения:</strong> {item.change_reason}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </Card>
+    );
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+      <DialogContent className="max-w-6xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Application History</DialogTitle>
+          <DialogTitle>История заявки</DialogTitle>
         </DialogHeader>
-        
         {loading ? (
           <div className="flex items-center justify-center py-8">
-            <div className="text-muted-foreground">Loading history...</div>
+            <div className="text-muted-foreground">Загрузка истории...</div>
           </div>
         ) : history.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">
-            No changes recorded for this application.
+            История изменений пуста
           </div>
         ) : (
           <div className="space-y-4">
-            {history.map((item, index) => (
-              <Card key={item.id} className="p-4">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Badge variant={item.status === 'approved' ? 'default' : item.status === 'rejected' ? 'destructive' : 'secondary'}>
-                        {item.status}
-                      </Badge>
-                      <span className="text-sm text-muted-foreground">
-                        {new Date(item.created_at).toLocaleString()}
-                      </span>
-                    </div>
-                    {item.change_reason && (
-                      <p className="text-sm mb-2">{item.change_reason}</p>
-                    )}
-                    {item.notes && (
-                      <div className="bg-muted p-2 rounded text-sm">
-                        <strong>Notes:</strong> {item.notes}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </Card>
-            ))}
+            {history.map((item, index) => renderApplicationCard(item, index))}
           </div>
         )}
       </DialogContent>
