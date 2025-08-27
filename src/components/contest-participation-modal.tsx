@@ -47,7 +47,8 @@ export const ContestParticipationModal = ({
     name: "",
     contact: "",
     message: "",
-    countryCode: ""
+    countryCode: "",
+    facebookUrl: ""
   });
 
   // Auth form data
@@ -791,7 +792,7 @@ export const ContestParticipationModal = ({
         // Reset states when modal closes
         setSubmissionSuccess(false);
         setSelectedContactMethod(null);
-        setContactForm({ name: "", contact: "", message: "", countryCode: "" });
+        setContactForm({ name: "", contact: "", message: "", countryCode: "", facebookUrl: "" });
       }
     }}>
       {/* Only show DialogTrigger if not in controlled mode */}
@@ -917,7 +918,7 @@ export const ContestParticipationModal = ({
         ) : submissionSuccess ? (
           <div className="space-y-4">
             {/* Contact for Prize Transfer Section */}
-            <div className="p-4 bg-background border rounded-lg">
+            <div>
               <h3 className="text-md font-semibold mb-4 text-center">
                 Add your contact info in case you win.
               </h3>
@@ -926,70 +927,71 @@ export const ContestParticipationModal = ({
               <div className="mb-4">
                 <Input
                   type="url"
-                  placeholder="https://www.facebook.com/yourprofile"
-                  value={contactForm.contact}
-                  onChange={(e) => setContactForm({...contactForm, contact: e.target.value})}
-                  className="w-full"
+                  placeholder="Add your Facebook profile link"
+                  value={contactForm.facebookUrl || ''}
+                  onChange={(e) => setContactForm({...contactForm, facebookUrl: e.target.value})}
+                  className="w-full h-10"
                 />
               </div>
               
-              <div className="space-y-3">
-                <div>
-                  <div className="flex gap-2 items-center">
-                    <div className="flex border border-input rounded-md bg-background overflow-hidden">
-                      {/* Country Code Selector */}
-                      <div className="w-24 border-r border-border">
-                        <SearchableSelect
-                          value={contactForm.countryCode || formData.countryCode}
-                          onValueChange={(value) => setContactForm({...contactForm, countryCode: value})}
-                          options={Country.getAllCountries().map((country) => ({
-                            value: country.isoCode,
-                            label: `${country.flag} +${country.phonecode} ${country.name}`
-                          }))}
-                          placeholder=""
-                          customTriggerRenderer={(value, options) => {
-                            const selectedCountry = Country.getCountryByCode(value);
-                            if (!selectedCountry) return '';
-                            
-                            const phoneCode = `+${selectedCountry.phonecode}`;
-                            const shouldWrap = phoneCode.length > 4;
-                            
-                            return (
-                              <span className={shouldWrap ? "whitespace-normal break-words leading-tight" : "whitespace-nowrap"}>
-                                {selectedCountry.flag} {phoneCode}
-                              </span>
-                            );
-                          }}
-                        />
-                      </div>
-                      
-                      {/* Phone Number Input */}
-                      <div className="flex-1">
-                        <Input
-                          id="contact-phone"
-                          value={contactForm.contact}
-                          onChange={(e) => {
-                            let value = e.target.value.replace(/[^0-9]/g, '');
-                            if (value.length >= 3) {
-                              value = value.substring(0, 3) + ' ' + value.substring(3);
-                            }
-                            if (value.length >= 7) {
-                              value = value.substring(0, 7) + ' ' + value.substring(7, 11);
-                            }
-                            setContactForm({...contactForm, contact: value});
-                          }}
-                          placeholder="123 456 7890"
-                          className="text-sm border-0 focus-visible:ring-0 focus-visible:ring-offset-0 pl-3 rounded-l-none h-full"
-                          type="tel"
-                          inputMode="numeric"
-                          maxLength={12}
-                          autoComplete="tel"
-                        />
-                      </div>
-                    </div>
-                    <Button 
-                      type="button" 
-                      size="sm" 
+              {/* Phone Input */}
+              <div className="mb-4">
+                <div className="flex border border-input rounded-md bg-background overflow-hidden h-10">
+                  {/* Country Code Selector */}
+                  <div className="w-24 border-r border-border">
+                    <SearchableSelect
+                      value={contactForm.countryCode || formData.countryCode}
+                      onValueChange={(value) => setContactForm({...contactForm, countryCode: value})}
+                      options={Country.getAllCountries().map((country) => ({
+                        value: country.isoCode,
+                        label: `${country.flag} +${country.phonecode} ${country.name}`
+                      }))}
+                      placeholder=""
+                      customTriggerRenderer={(value, options) => {
+                        const selectedCountry = Country.getCountryByCode(value);
+                        if (!selectedCountry) return '';
+                        
+                        const phoneCode = `+${selectedCountry.phonecode}`;
+                        const shouldWrap = phoneCode.length > 4;
+                        
+                        return (
+                          <span className={shouldWrap ? "whitespace-normal break-words leading-tight" : "whitespace-nowrap"}>
+                            {selectedCountry.flag} {phoneCode}
+                          </span>
+                        );
+                      }}
+                    />
+                  </div>
+                  
+                  {/* Phone Number Input */}
+                  <div className="flex-1">
+                    <Input
+                      id="contact-phone"
+                      value={contactForm.contact}
+                      onChange={(e) => {
+                        let value = e.target.value.replace(/[^0-9]/g, '');
+                        if (value.length >= 3) {
+                          value = value.substring(0, 3) + ' ' + value.substring(3);
+                        }
+                        if (value.length >= 7) {
+                          value = value.substring(0, 7) + ' ' + value.substring(7, 11);
+                        }
+                        setContactForm({...contactForm, contact: value});
+                      }}
+                      placeholder="123 456 7890"
+                      className="text-sm border-0 focus-visible:ring-0 focus-visible:ring-offset-0 pl-3 rounded-l-none h-full"
+                      type="tel"
+                      inputMode="numeric"
+                      maxLength={12}
+                      autoComplete="tel"
+                    />
+                  </div>
+                </div>
+              </div>
+              
+              <Button 
+                type="button" 
+                size="sm"
                        onClick={async () => {
                          if (!contactForm.contact.trim()) {
                            toast({
@@ -1083,12 +1085,9 @@ export const ContestParticipationModal = ({
                            });
                          }
                        }}
-                    >
-                      Add Contact
-                    </Button>
-                  </div>
-                </div>
-              </div>
+                     >
+                       Add Contact
+                     </Button>
             </div>
           </div>
         ) : (
