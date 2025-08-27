@@ -1207,7 +1207,7 @@ const ApplicationHistoryModal = ({ applicationId, isOpen, onClose }: Application
             {/* Left section with avatar and basic info */}
             <div className="flex items-center gap-3 flex-1">
               <Avatar className="h-12 w-12 flex-shrink-0">
-                <AvatarImage src={appData.photo_1_url || ''} />
+                <AvatarImage src={appData.photo1_url || ''} />
                 <AvatarFallback>
                   {appData.first_name?.charAt(0) || 'U'}
                 </AvatarFallback>
@@ -1243,9 +1243,9 @@ const ApplicationHistoryModal = ({ applicationId, isOpen, onClose }: Application
             <div className="flex items-center gap-2">
               <div className="text-center">
                 <p className="text-xs text-muted-foreground mb-1">Portrait</p>
-                {appData.photo_1_url && (
+                {appData.photo1_url && (
                   <img 
-                    src={appData.photo_1_url} 
+                    src={appData.photo1_url} 
                     alt="Portrait" 
                     className="w-16 h-20 object-cover rounded border cursor-pointer hover:opacity-80 transition-opacity"
                   />
@@ -1253,9 +1253,9 @@ const ApplicationHistoryModal = ({ applicationId, isOpen, onClose }: Application
               </div>
               <div className="text-center">
                 <p className="text-xs text-muted-foreground mb-1">Full Length</p>
-                {appData.photo_2_url && (
+                {appData.photo2_url && (
                   <img 
-                    src={appData.photo_2_url} 
+                    src={appData.photo2_url} 
                     alt="Full length" 
                     className="w-16 h-20 object-cover rounded border cursor-pointer hover:opacity-80 transition-opacity"
                   />
