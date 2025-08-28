@@ -120,39 +120,51 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
 
     loadParticipants();
 
-    // Set up real-time subscription for contest participant updates
+    // Set up real-time subscription for contest participant updates with error handling
     if (["THIS WEEK", "1 WEEK AGO", "2 WEEKS AGO", "3 WEEKS AGO"].includes(title)) {
-      const channel = supabase
-        .channel('contest_participant_updates')
-        .on(
-          'postgres_changes',
-          {
-            event: '*',
-            schema: 'public',
-            table: 'weekly_contest_participants'
-          },
-          (payload) => {
-            console.log('Weekly contest participants changed:', payload);
-            loadParticipants();
-          }
-        )
-        .on(
-          'postgres_changes',
-          {
-            event: '*',
-            schema: 'public',
-            table: 'contest_applications'
-          },
-          (payload) => {
-            console.log('Contest applications changed:', payload);
-            loadParticipants();
-          }
-        )
-        .subscribe();
+      try {
+        const channel = supabase
+          .channel('contest_participant_updates')
+          .on(
+            'postgres_changes',
+            {
+              event: '*',
+              schema: 'public',
+              table: 'weekly_contest_participants'
+            },
+            (payload) => {
+              console.log('Weekly contest participants changed:', payload);
+              loadParticipants();
+            }
+          )
+          .on(
+            'postgres_changes',
+            {
+              event: '*',
+              schema: 'public',
+              table: 'contest_applications'
+            },
+            (payload) => {
+              console.log('Contest applications changed:', payload);
+              loadParticipants();
+            }
+          )
+          .subscribe((status) => {
+            if (status === 'CHANNEL_ERROR') {
+              console.warn('Failed to subscribe to realtime updates, falling back to polling');
+            }
+          });
 
-      return () => {
-        supabase.removeChannel(channel);
-      };
+        return () => {
+          try {
+            supabase.removeChannel(channel);
+          } catch (error) {
+            console.warn('Error removing realtime channel:', error);
+          }
+        };
+      } catch (error) {
+        console.warn('Realtime subscription failed, continuing without real-time updates:', error);
+      }
     }
   }, [title]);
 

@@ -46,33 +46,46 @@ export const useUnreadMessages = () => {
     }
   };
 
-  // Set up real-time listener for new messages
+  // Set up real-time listener for new messages with error handling
   useEffect(() => {
     if (!currentUserId) return;
 
-    const channel = supabase
-      .channel('unread-messages')
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'messages'
-        },
-        (payload) => {
-          console.log('New message received:', payload.new);
-          // Only increment if it's not our message AND we're a participant in this conversation
-          if (payload.new.sender_id !== currentUserId) {
-            // Reload the actual count instead of incrementing to avoid false positives
-            loadUnreadCount(currentUserId);
+    try {
+      const channel = supabase
+        .channel('unread-messages')
+        .on(
+          'postgres_changes',
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'messages'
+          },
+          (payload) => {
+            console.log('New message received:', payload.new);
+            // Only increment if it's not our message AND we're a participant in this conversation
+            if (payload.new.sender_id !== currentUserId) {
+              // Reload the actual count instead of incrementing to avoid false positives
+              loadUnreadCount(currentUserId);
+            }
           }
-        }
-      )
-      .subscribe();
+        )
+        .subscribe((status) => {
+          if (status === 'CHANNEL_ERROR') {
+            console.warn('Failed to subscribe to message updates');
+          }
+        });
 
-    return () => {
-      supabase.removeChannel(channel);
-    };
+      return () => {
+        try {
+          supabase.removeChannel(channel);
+        } catch (error) {
+          console.warn('Error removing messages channel:', error);
+        }
+      };
+    } catch (error) {
+      console.warn('Realtime messages subscription failed:', error);
+      return () => {};
+    }
   }, [currentUserId]);
 
   const markAsRead = async (conversationId: string) => {
