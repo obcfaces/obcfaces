@@ -725,6 +725,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      check_conversation_membership: {
+        Args: { conversation_id_param: string; user_id_param: string }
+        Returns: boolean
+      }
       check_user_liked_participant: {
         Args: { target_user_id: string }
         Returns: boolean
@@ -1096,6 +1100,15 @@ export type Database = {
       rotate_weekly_contests: {
         Args: Record<PropertyKey, never>
         Returns: undefined
+      }
+      update_application_status: {
+        Args: {
+          application_id_param: string
+          new_status_param: string
+          notes_param?: string
+          reviewer_id_param?: string
+        }
+        Returns: boolean
       }
       user_in_conversation: {
         Args: { conversation_id: string; user_id: string }
