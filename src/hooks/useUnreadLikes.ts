@@ -84,27 +84,42 @@ export const useUnreadLikes = () => {
       }
     });
 
-    // Subscribe to real-time likes updates
-    const likesChannel = supabase
-      .channel('likes-changes')
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'likes'
-        },
-        () => {
-          console.log('useUnreadLikes: New like detected, refreshing count');
-          loadUnreadLikes();
-        }
-      )
-      .subscribe();
+    // Subscribe to real-time likes updates with error handling
+    try {
+      const likesChannel = supabase
+        .channel('likes-changes')
+        .on(
+          'postgres_changes',
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'likes'
+          },
+          () => {
+            console.log('useUnreadLikes: New like detected, refreshing count');
+            loadUnreadLikes();
+          }
+        )
+        .subscribe((status) => {
+          if (status === 'CHANNEL_ERROR') {
+            console.warn('Failed to subscribe to likes updates');
+          }
+        });
 
-    return () => {
-      subscription.unsubscribe();
-      supabase.removeChannel(likesChannel);
-    };
+      return () => {
+        subscription.unsubscribe();
+        try {
+          supabase.removeChannel(likesChannel);
+        } catch (error) {
+          console.warn('Error removing likes channel:', error);
+        }
+      };
+    } catch (error) {
+      console.warn('Realtime likes subscription failed:', error);
+      return () => {
+        subscription.unsubscribe();
+      };
+    }
   }, [loadUnreadLikes]);
 
   return { unreadLikesCount, isLoading, markLikesAsViewed };
