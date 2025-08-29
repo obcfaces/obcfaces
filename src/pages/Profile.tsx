@@ -177,6 +177,11 @@ const Profile = () => {
     { value: "Other", label: "Other" }
   ];
 
+  const profile = data;
+  const isOwner = currentUserId && currentUserId === id;
+
+  // ALL useEffect hooks MUST be at the top, before any conditional returns
+  
   // Load profile data
   useEffect(() => {
     const loadProfile = async () => {
@@ -245,34 +250,6 @@ const Profile = () => {
     loadProfile();
   }, [id]);
 
-  const profile = data;
-  const isOwner = currentUserId && currentUserId === id;
-
-  // Show loading state if profile data is not loaded yet
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Загрузка профиля...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // If no profile data found after loading
-  if (!profile) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <AlertCircle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-          <h2 className="text-xl font-semibold mb-2">Профиль не найден</h2>
-          <p className="text-muted-foreground">Пользователь с таким ID не существует</p>
-        </div>
-      </div>
-    );
-  }
-
   // Get current user
   useEffect(() => {
     const getCurrentUser = async () => {
@@ -302,87 +279,6 @@ const Profile = () => {
     checkFollowStatus();
   }, [currentUserId, id]);
 
-  const handleFollowToggle = async () => {
-    if (!currentUserId || currentUserId === id) return;
-    
-    setLoadingFollow(true);
-    try {
-      if (isFollowing) {
-        // Unfollow
-        const { error } = await supabase
-          .from('follows')
-          .delete()
-          .eq('follower_id', currentUserId)
-          .eq('followee_id', id);
-        
-        if (error) throw error;
-        
-        setIsFollowing(false);
-        setFollowersCount(prev => prev - 1);
-        toast({ description: "Отписались" });
-      } else {
-        // Follow
-        const { error } = await supabase
-          .from('follows')
-          .insert({ follower_id: currentUserId, followee_id: id });
-        
-        if (error) throw error;
-        
-        setIsFollowing(true);
-        setFollowersCount(prev => prev + 1);
-        toast({ description: "Подписались" });
-      }
-    } catch (error) {
-      toast({ description: "Error changing subscription" });
-    } finally {
-      setLoadingFollow(false);
-    }
-  };
-
-  const handleMessage = () => {
-    if (!currentUserId) {
-      toast({ description: "Войдите в систему для отправки сообщений" });
-      return;
-    }
-    // Navigate to messages page with recipient parameter using React Router
-    navigate(`/messages?recipient=${id}`);
-  };
-
-  const handleBioSave = async () => {
-    if (!currentUserId || currentUserId !== id) return;
-    
-    setSavingBio(true);
-    try {
-      const { error } = await supabase
-        .from("profiles")
-        .update({ bio: bioDraft })
-        .eq("id", id);
-      
-      if (error) throw error;
-      
-      setData(prev => prev ? { ...prev, bio: bioDraft } : null);
-      setIsEditingBio(false);
-      toast({ description: "Bio saved" });
-    } catch (error) {
-      toast({ description: "Error saving bio" });
-    } finally {
-      setSavingBio(false);
-    }
-  };
-
-  // Check if a field should have red border
-  const hasRedBorder = (fieldName: string) => {
-    return submitted && invalidFields.has(fieldName);
-  };
-
-  // Get CSS classes for form fields
-  const getFieldClasses = (fieldName: string, baseClasses: string = "") => {
-    if (hasRedBorder(fieldName)) {
-      return `${baseClasses} border border-red-500`.trim();
-    }
-    return baseClasses;
-  };
-
   // Load current user email
   useEffect(() => {
     const loadCurrentUserEmail = async () => {
@@ -397,229 +293,6 @@ const Profile = () => {
     };
     loadCurrentUserEmail();
   }, [currentUserId, id]);
-
-  const initEditForm = () => {
-    setEditForm({
-      display_name: data?.display_name || '',
-      gender: data?.gender || '',
-      gender_privacy: 'public',
-      country: data?.country || '',
-      country_privacy: 'public',
-      birthdate: data?.birthdate || '',
-      birthdate_privacy: 'only_me',
-      bio: data?.bio || '',
-      email: currentUserEmail
-    });
-    setIsEditingProfile(true);
-    setSubmitted(false);
-    setInvalidFields(new Set());
-    setAvatarFile(null);
-    setAvatarPreview(null);
-  };
-
-  const handleAvatarChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      setAvatarFile(file);
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setAvatarPreview(e.target?.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const uploadAvatar = async (file: File): Promise<string | null> => {
-    if (!currentUserId) return null;
-    
-    setUploadingAvatar(true);
-    try {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${currentUserId}/avatar.${fileExt}`;
-      
-      const { error: uploadError } = await supabase.storage
-        .from('avatars')
-        .upload(fileName, file, { upsert: true });
-      
-      if (uploadError) throw uploadError;
-      
-      const { data } = supabase.storage
-        .from('avatars')
-        .getPublicUrl(fileName);
-      
-      return data.publicUrl;
-    } catch (error) {
-      console.error('Error uploading avatar:', error);
-      toast({ description: "Error uploading photo" });
-      return null;
-    } finally {
-      setUploadingAvatar(false);
-    }
-  };
-
-  const handleEditFormChange = (field: string, value: string) => {
-    setEditForm(prev => ({ ...prev, [field]: value }));
-    
-    // Remove field from invalid set when user types
-    if (invalidFields.has(field)) {
-      setInvalidFields(prev => {
-        const newSet = new Set(prev);
-        newSet.delete(field);
-        return newSet;
-      });
-    }
-  };
-
-  const handlePasswordFormChange = (field: string, value: string) => {
-    setPasswordForm(prev => ({ ...prev, [field]: value }));
-    
-    // Remove field from invalid set when user types
-    if (passwordInvalidFields.has(field)) {
-      setPasswordInvalidFields(prev => {
-        const newSet = new Set(prev);
-        newSet.delete(field);
-        return newSet;
-      });
-    }
-  };
-
-  const handleChangePassword = async () => {
-    setPasswordSubmitted(true);
-
-    // Validate password form
-    const newInvalidFields = new Set<string>();
-    if (!passwordForm.currentPassword.trim()) newInvalidFields.add('currentPassword');
-    if (!passwordForm.newPassword.trim()) newInvalidFields.add('newPassword');
-    if (!passwordForm.confirmPassword.trim()) newInvalidFields.add('confirmPassword');
-    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
-      newInvalidFields.add('confirmPassword');
-    }
-
-    setPasswordInvalidFields(newInvalidFields);
-
-    if (newInvalidFields.size > 0) {
-      if (passwordForm.newPassword !== passwordForm.confirmPassword) {
-        toast({ description: "Пароли не совпадают" });
-      }
-      return;
-    }
-
-    setSavingPassword(true);
-    try {
-      const { error } = await supabase.auth.updateUser({
-        password: passwordForm.newPassword
-      });
-      
-      if (error) throw error;
-      
-      setShowPasswordModal(false);
-      setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
-      setPasswordSubmitted(false);
-      setPasswordInvalidFields(new Set());
-      toast({ description: "Password changed" });
-    } catch (error: any) {
-      toast({ description: error.message || "Error changing password" });
-    } finally {
-      setSavingPassword(false);
-    }
-  };
-
-  // Check if a password field should have red border
-  const hasPasswordRedBorder = (fieldName: string) => {
-    return passwordSubmitted && passwordInvalidFields.has(fieldName);
-  };
-
-  // Get CSS classes for password form fields
-  const getPasswordFieldClasses = (fieldName: string, baseClasses: string = "") => {
-    if (hasPasswordRedBorder(fieldName)) {
-      return `${baseClasses} border border-red-500`.trim();
-    }
-    return baseClasses;
-  };
-
-  const handleSaveProfile = async () => {
-    if (!currentUserId || currentUserId !== id) return;
-    
-    setSubmitted(true);
-
-    // Validate required fields
-    const newInvalidFields = new Set<string>();
-    if (!editForm.display_name.trim()) newInvalidFields.add('display_name');
-    if (!editForm.gender) newInvalidFields.add('gender');
-    if (!editForm.country.trim()) newInvalidFields.add('country');
-    if (editForm.email && !editForm.email.trim()) newInvalidFields.add('email');
-
-    setInvalidFields(newInvalidFields);
-
-    if (newInvalidFields.size > 0) {
-      return;
-    }
-    
-    setSavingProfile(true);
-    try {
-      // Upload avatar if a new one was selected
-      let avatarUrl = profile.avatar_url;
-      if (avatarFile) {
-        const uploadedUrl = await uploadAvatar(avatarFile);
-        if (uploadedUrl) {
-          avatarUrl = uploadedUrl;
-        }
-      }
-
-      // Update profile data
-      const updates: any = {
-        display_name: editForm.display_name,
-        gender: editForm.gender,
-        country: editForm.country,
-        bio: editForm.bio
-      };
-
-      // Add birthdate if provided
-      if (editForm.birthdate) {
-        updates.birthdate = editForm.birthdate;
-      }
-
-      // Add avatar URL if we have one
-      if (avatarUrl) {
-        updates.avatar_url = avatarUrl;
-      }
-
-      const { error: profileError } = await supabase
-        .from("profiles")
-        .update(updates)
-        .eq("id", id);
-      
-      if (profileError) throw profileError;
-
-      // Update email if provided and different from current
-      if (editForm.email && editForm.email !== currentUserEmail) {
-        const { error: emailError } = await supabase.auth.updateUser({
-          email: editForm.email
-        });
-        if (emailError) throw emailError;
-      }
-      
-      setData(prev => prev ? { ...prev, ...updates } : null);
-      setIsEditingProfile(false);
-      toast({ description: "Profile saved" });
-    } catch (error: any) {
-      toast({ description: error.message || "Error saving profile" });
-    } finally {
-      setSavingProfile(false);
-    }
-  };
-
-  const logout = async () => {
-    setLogoutLoading(true);
-    try {
-      await supabase.auth.signOut();
-      navigate("/", { replace: true });
-    } catch (error) {
-      toast({ description: "Error signing out" });
-    } finally {
-      setLogoutLoading(false);
-    }
-  };
 
   const loadLikedItems = async () => {
     if (!currentUserId) return;
@@ -1064,6 +737,334 @@ const Profile = () => {
     }
   };
 
+  // Show loading state if profile data is not loaded yet
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Загрузка профиля...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // If no profile data found after loading
+  if (!profile) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <AlertCircle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+          <h2 className="text-xl font-semibold mb-2">Профиль не найден</h2>
+          <p className="text-muted-foreground">Пользователь с таким ID не существует</p>
+        </div>
+      </div>
+    );
+  }
+
+  const handleEditFormChange = (field: string, value: string) => {
+    setEditForm(prev => ({ ...prev, [field]: value }));
+    
+    // Remove field from invalid set when user types
+    if (invalidFields.has(field)) {
+      setInvalidFields(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(field);
+        return newSet;
+      });
+    }
+  };
+
+  const handlePasswordFormChange = (field: string, value: string) => {
+    setPasswordForm(prev => ({ ...prev, [field]: value }));
+    
+    // Remove field from invalid set when user types
+    if (passwordInvalidFields.has(field)) {
+      setPasswordInvalidFields(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(field);
+        return newSet;
+      });
+    }
+  };
+
+  const handleChangePassword = async () => {
+    setPasswordSubmitted(true);
+
+    // Validate password form
+    const newInvalidFields = new Set<string>();
+    if (!passwordForm.currentPassword.trim()) newInvalidFields.add('currentPassword');
+    if (!passwordForm.newPassword.trim()) newInvalidFields.add('newPassword');
+    if (!passwordForm.confirmPassword.trim()) newInvalidFields.add('confirmPassword');
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      newInvalidFields.add('confirmPassword');
+    }
+
+    setPasswordInvalidFields(newInvalidFields);
+
+    if (newInvalidFields.size > 0) {
+      if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+        toast({ description: "Пароли не совпадают" });
+      }
+      return;
+    }
+
+    setSavingPassword(true);
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password: passwordForm.newPassword
+      });
+      
+      if (error) throw error;
+      
+      setShowPasswordModal(false);
+      setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+      setPasswordSubmitted(false);
+      setPasswordInvalidFields(new Set());
+      toast({ description: "Password changed" });
+    } catch (error: any) {
+      toast({ description: error.message || "Error changing password" });
+    } finally {
+      setSavingPassword(false);
+    }
+  };
+
+  // Check if a field should have red border
+  const hasRedBorder = (fieldName: string) => {
+    return submitted && invalidFields.has(fieldName);
+  };
+
+  // Get CSS classes for form fields
+  const getFieldClasses = (fieldName: string, baseClasses: string = "") => {
+    if (hasRedBorder(fieldName)) {
+      return `${baseClasses} border border-red-500`.trim();
+    }
+    return baseClasses;
+  };
+
+  // Check if a password field should have red border
+  const hasPasswordRedBorder = (fieldName: string) => {
+    return passwordSubmitted && passwordInvalidFields.has(fieldName);
+  };
+
+  // Get CSS classes for password form fields
+  const getPasswordFieldClasses = (fieldName: string, baseClasses: string = "") => {
+    if (hasPasswordRedBorder(fieldName)) {
+      return `${baseClasses} border border-red-500`.trim();
+    }
+    return baseClasses;
+  };
+
+  const initEditForm = () => {
+    setEditForm({
+      display_name: data?.display_name || '',
+      gender: data?.gender || '',
+      gender_privacy: 'public',
+      country: data?.country || '',
+      country_privacy: 'public',
+      birthdate: data?.birthdate || '',
+      birthdate_privacy: 'only_me',
+      bio: data?.bio || '',
+      email: currentUserEmail
+    });
+    setIsEditingProfile(true);
+    setSubmitted(false);
+    setInvalidFields(new Set());
+    setAvatarFile(null);
+    setAvatarPreview(null);
+  };
+
+  const handleAvatarChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setAvatarFile(file);
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setAvatarPreview(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const uploadAvatar = async (file: File): Promise<string | null> => {
+    if (!currentUserId) return null;
+    
+    setUploadingAvatar(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${currentUserId}/avatar.${fileExt}`;
+      
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(fileName, file, { upsert: true });
+      
+      if (uploadError) throw uploadError;
+      
+      const { data } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(fileName);
+      
+      return data.publicUrl;
+    } catch (error) {
+      console.error('Error uploading avatar:', error);
+      toast({ description: "Error uploading photo" });
+      return null;
+    } finally {
+      setUploadingAvatar(false);
+    }
+  };
+
+  const handleSaveProfile = async () => {
+    if (!currentUserId || currentUserId !== id) return;
+    
+    setSubmitted(true);
+
+    // Validate required fields
+    const newInvalidFields = new Set<string>();
+    if (!editForm.display_name.trim()) newInvalidFields.add('display_name');
+    if (!editForm.gender) newInvalidFields.add('gender');
+    if (!editForm.country.trim()) newInvalidFields.add('country');
+    if (editForm.email && !editForm.email.trim()) newInvalidFields.add('email');
+
+    setInvalidFields(newInvalidFields);
+
+    if (newInvalidFields.size > 0) {
+      return;
+    }
+    
+    setSavingProfile(true);
+    try {
+      // Upload avatar if a new one was selected
+      let avatarUrl = profile.avatar_url;
+      if (avatarFile) {
+        const uploadedUrl = await uploadAvatar(avatarFile);
+        if (uploadedUrl) {
+          avatarUrl = uploadedUrl;
+        }
+      }
+
+      // Update profile data
+      const updates: any = {
+        display_name: editForm.display_name,
+        gender: editForm.gender,
+        country: editForm.country,
+        bio: editForm.bio
+      };
+
+      // Add birthdate if provided
+      if (editForm.birthdate) {
+        updates.birthdate = editForm.birthdate;
+      }
+
+      // Add avatar URL if we have one
+      if (avatarUrl) {
+        updates.avatar_url = avatarUrl;
+      }
+
+      const { error: profileError } = await supabase
+        .from("profiles")
+        .update(updates)
+        .eq("id", id);
+      
+      if (profileError) throw profileError;
+
+      // Update email if provided and different from current
+      if (editForm.email && editForm.email !== currentUserEmail) {
+        const { error: emailError } = await supabase.auth.updateUser({
+          email: editForm.email
+        });
+        if (emailError) throw emailError;
+      }
+      
+      setData(prev => prev ? { ...prev, ...updates } : null);
+      setIsEditingProfile(false);
+      toast({ description: "Profile saved" });
+    } catch (error: any) {
+      toast({ description: error.message || "Error saving profile" });
+    } finally {
+      setSavingProfile(false);
+    }
+  };
+
+  const logout = async () => {
+    setLogoutLoading(true);
+    try {
+      await supabase.auth.signOut();
+      navigate("/", { replace: true });
+    } catch (error) {
+      toast({ description: "Error signing out" });
+    } finally {
+      setLogoutLoading(false);
+    }
+  };
+
+  const handleFollowToggle = async () => {
+    if (!currentUserId || currentUserId === id) return;
+    
+    setLoadingFollow(true);
+    try {
+      if (isFollowing) {
+        // Unfollow
+        const { error } = await supabase
+          .from('follows')
+          .delete()
+          .eq('follower_id', currentUserId)
+          .eq('followee_id', id);
+        
+        if (error) throw error;
+        
+        setIsFollowing(false);
+        setFollowersCount(prev => prev - 1);
+        toast({ description: "Отписались" });
+      } else {
+        // Follow
+        const { error } = await supabase
+          .from('follows')
+          .insert({ follower_id: currentUserId, followee_id: id });
+        
+        if (error) throw error;
+        
+        setIsFollowing(true);
+        setFollowersCount(prev => prev + 1);
+        toast({ description: "Подписались" });
+      }
+    } catch (error) {
+      toast({ description: "Error changing subscription" });
+    } finally {
+      setLoadingFollow(false);
+    }
+  };
+
+  const handleMessage = () => {
+    if (!currentUserId) {
+      toast({ description: "Войдите в систему для отправки сообщений" });
+      return;
+    }
+    // Navigate to messages page with recipient parameter using React Router
+    navigate(`/messages?recipient=${id}`);
+  };
+
+  const handleBioSave = async () => {
+    if (!currentUserId || currentUserId !== id) return;
+    
+    setSavingBio(true);
+    try {
+      const { error } = await supabase
+        .from("profiles")
+        .update({ bio: bioDraft })
+        .eq("id", id);
+      
+      if (error) throw error;
+      
+      setData(prev => prev ? { ...prev, bio: bioDraft } : null);
+      setIsEditingBio(false);
+      toast({ description: "Bio saved" });
+    } catch (error) {
+      toast({ description: "Error saving bio" });
+    } finally {
+      setSavingBio(false);
+    }
+  };
 
   // Sample posts data
   const samplePosts = [
