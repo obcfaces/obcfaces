@@ -113,20 +113,6 @@ const Profile = () => {
   const [profilePhotos, setProfilePhotos] = useState<string[]>([]);
   const [loadingPhotos, setLoadingPhotos] = useState(true);
 
-  // Demo profile for fallback
-  const demoProfile: ProfileRow = {
-    display_name: "Anna Petrova",
-    first_name: "Anna",
-    last_name: "Petrova",
-    birthdate: "1999-03-15",
-    height_cm: 165,
-    weight_kg: 55,
-    avatar_url: c1face,
-    city: "Moscow",
-    country: "Russia",
-    bio: "Model and photographer. Love traveling and discovering new places. Always looking for inspiration in everyday moments."
-  };
-
   // Country options
   const countryOptions = [
     { value: "Philippines", label: "Philippines" },
@@ -191,7 +177,7 @@ const Profile = () => {
     { value: "Other", label: "Other" }
   ];
 
-  const profile = data || demoProfile;
+  const profile = data;
   const isOwner = currentUserId && currentUserId === id;
 
   // Load profile data
