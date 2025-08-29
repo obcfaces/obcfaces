@@ -208,42 +208,63 @@ const Profile = () => {
   // Load profile data
   useEffect(() => {
     const loadProfile = async () => {
-      if (!id) return;
+      if (!id) {
+        console.log('Profile: No user ID provided');
+        return;
+      }
+      
+      console.log('Profile: Loading profile for ID:', id);
+      setLoading(true);
       
       try {
-        const { data: profileData } = await supabase
+        const { data: profileData, error } = await supabase
           .from("profiles")
           .select("display_name, first_name, last_name, birthdate, height_cm, weight_kg, avatar_url, city, country, bio, gender")
           .eq("id", id)
           .maybeSingle();
         
-        setData(profileData);
-        setBioDraft(profileData?.bio ?? "");
-        
-        // Initialize edit form with loaded data
-        setEditForm({
-          display_name: profileData?.display_name || '',
-          gender: profileData?.gender || '',
-          gender_privacy: 'public',
-          country: profileData?.country || '',
-          country_privacy: 'public',
-          birthdate: profileData?.birthdate || '',
-          birthdate_privacy: 'only_me',
-          bio: profileData?.bio || '',
-          email: ''
-        });
+        if (error) {
+          console.error('Profile: Error loading profile:', error);
+          setData(null);
+        } else {
+          console.log('Profile: Loaded profile data:', profileData);
+          setData(profileData);
+          setBioDraft(profileData?.bio ?? "");
+          
+          // Initialize edit form with loaded data
+          setEditForm({
+            display_name: profileData?.display_name || '',
+            gender: profileData?.gender || '',
+            gender_privacy: 'public',
+            country: profileData?.country || '',
+            country_privacy: 'public',
+            birthdate: profileData?.birthdate || '',
+            birthdate_privacy: 'only_me',
+            bio: profileData?.bio || '',
+            email: ''
+          });
+        }
         
         // Load real follower/following counts
-        const { data: followStats } = await supabase.rpc('get_follow_stats', { target_user_id: id });
-        if (followStats && followStats.length > 0) {
-          setFollowersCount(followStats[0]?.followers_count || 0);
-          setFollowingCount(followStats[0]?.following_count || 0);
-        } else {
+        try {
+          const { data: followStats, error: followError } = await supabase.rpc('get_follow_stats', { target_user_id: id });
+          if (followError) {
+            console.error('Profile: Error loading follow stats:', followError);
+          } else if (followStats && followStats.length > 0) {
+            setFollowersCount(followStats[0]?.followers_count || 0);
+            setFollowingCount(followStats[0]?.following_count || 0);
+          } else {
+            setFollowersCount(0);
+            setFollowingCount(0);
+          }
+        } catch (followStatsError) {
+          console.error('Profile: Error in follow stats:', followStatsError);
           setFollowersCount(0);
           setFollowingCount(0);
         }
       } catch (error) {
-        console.error("Error loading profile:", error);
+        console.error("Profile: Error loading profile:", error);
+        setData(null);
       } finally {
         setLoading(false);
       }
