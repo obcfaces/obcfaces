@@ -1330,7 +1330,7 @@ const Profile = () => {
                    </div>
                    
                     {/* Rejection reason notice */}
-                    {isOwner && contestApplication?.status === 'rejected' && (contestApplication?.rejection_reason || contestApplication?.rejection_reason_type) && (
+                    {isOwner && contestApplication?.status === 'rejected' && (contestApplication?.rejection_reason || contestApplication?.rejection_reason_type) && contestApplication?.rejection_reason_type !== 'without_signature' && (
                       <div className="mx-6 sm:mx-0 mb-6 p-4 bg-destructive/10 border border-destructive/20 rounded-lg">
                         <div className="flex items-center gap-2 mb-2">
                           <AlertCircle className="h-5 w-5 text-destructive" />

@@ -30,6 +30,7 @@ export type RejectionReasonType =
   | 'poor_photo_quality'
   | 'clothing_not_form_fitting'
   | 'filters_not_allowed'
+  | 'without_signature'
   | 'other';
 
 const REJECTION_REASONS = {
@@ -44,6 +45,7 @@ const REJECTION_REASONS = {
   poor_photo_quality: "Poor photo quality",
   clothing_not_form_fitting: "Clothing must be form-fitting",
   filters_not_allowed: "Filters are not allowed",
+  without_signature: "Without signature",
   other: "Other reason"
 };
 
