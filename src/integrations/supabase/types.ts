@@ -729,6 +729,10 @@ export type Database = {
         Args: { conversation_id_param: string; user_id_param: string }
         Returns: boolean
       }
+      check_user_in_conversation_safe: {
+        Args: { conversation_id_param: string; user_id_param: string }
+        Returns: boolean
+      }
       check_user_liked_participant: {
         Args: { target_user_id: string }
         Returns: boolean
