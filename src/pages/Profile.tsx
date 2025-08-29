@@ -181,12 +181,25 @@ const Profile = () => {
   const isOwner = currentUserId && currentUserId === id;
 
   // Show loading state if profile data is not loaded yet
-  if (loading || !profile) {
+  if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
           <p className="text-muted-foreground">Загрузка профиля...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // If no profile data found after loading
+  if (!profile) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <AlertCircle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+          <h2 className="text-xl font-semibold mb-2">Профиль не найден</h2>
+          <p className="text-muted-foreground">Пользователь с таким ID не существует</p>
         </div>
       </div>
     );
@@ -1053,15 +1066,6 @@ const Profile = () => {
     }
   ];
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-background">
-        <main className="container mx-auto px-6 py-8">
-          <p>Loading...</p>
-        </main>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-background">
