@@ -285,54 +285,41 @@ const Messages = () => {
     }
   }, [user, searchParams.get('recipient')]);
 
-  // Real-time подписка на новые сообщения с обработкой ошибок
+  // Real-time подписка на новые сообщения
   useEffect(() => {
     if (!user) return;
 
-    try {
-      const channel = supabase
-        .channel('messages-changes')
-        .on(
-          'postgres_changes',
-          {
-            event: 'INSERT',
-            schema: 'public',
-            table: 'messages'
-          },
-          (payload) => {
-            const newMessage = payload.new as Message;
+    const channel = supabase
+      .channel('messages-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'messages'
+        },
+        (payload) => {
+          const newMessage = payload.new as Message;
+          
+          // Обновляем сообщения если это текущий разговор
+          if (selectedConversation === newMessage.conversation_id) {
+            setMessages(prev => [...prev, newMessage]);
             
-            // Обновляем сообщения если это текущий разговор
-            if (selectedConversation === newMessage.conversation_id) {
-              setMessages(prev => [...prev, newMessage]);
-              
-              // Отмечаем как прочитанное если сообщение от другого пользователя
-              if (newMessage.sender_id !== user.id) {
-                markAsRead(newMessage.conversation_id);
-              }
+            // Отмечаем как прочитанное если сообщение от другого пользователя
+            if (newMessage.sender_id !== user.id) {
+              markAsRead(newMessage.conversation_id);
             }
-            
-            // Обновляем список разговоров для показа нового последнего сообщения
-            loadConversations();
           }
-        )
-        .subscribe((status) => {
-          if (status === 'CHANNEL_ERROR') {
-            console.warn('Failed to subscribe to message updates');
-          }
-        });
-
-      return () => {
-        try {
-          supabase.removeChannel(channel);
-        } catch (error) {
-          console.warn('Error removing messages channel:', error);
+          
+          // Обновляем список разговоров для показа нового последнего сообщения
+          loadConversations();
         }
-      };
-    } catch (error) {
-      console.warn('Realtime messages subscription failed:', error);
-      return () => {};
-    }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [user, selectedConversation, markAsRead]);
 
   // Автоскролл к низу при новых сообщениях
