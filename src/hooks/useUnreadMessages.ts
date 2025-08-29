@@ -46,46 +46,33 @@ export const useUnreadMessages = () => {
     }
   };
 
-  // Set up real-time listener for new messages with error handling
+  // Set up real-time listener for new messages
   useEffect(() => {
     if (!currentUserId) return;
 
-    try {
-      const channel = supabase
-        .channel('unread-messages')
-        .on(
-          'postgres_changes',
-          {
-            event: 'INSERT',
-            schema: 'public',
-            table: 'messages'
-          },
-          (payload) => {
-            console.log('New message received:', payload.new);
-            // Only increment if it's not our message AND we're a participant in this conversation
-            if (payload.new.sender_id !== currentUserId) {
-              // Reload the actual count instead of incrementing to avoid false positives
-              loadUnreadCount(currentUserId);
-            }
+    const channel = supabase
+      .channel('unread-messages')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'messages'
+        },
+        (payload) => {
+          console.log('New message received:', payload.new);
+          // Only increment if it's not our message AND we're a participant in this conversation
+          if (payload.new.sender_id !== currentUserId) {
+            // Reload the actual count instead of incrementing to avoid false positives
+            loadUnreadCount(currentUserId);
           }
-        )
-        .subscribe((status) => {
-          if (status === 'CHANNEL_ERROR') {
-            console.warn('Failed to subscribe to message updates');
-          }
-        });
-
-      return () => {
-        try {
-          supabase.removeChannel(channel);
-        } catch (error) {
-          console.warn('Error removing messages channel:', error);
         }
-      };
-    } catch (error) {
-      console.warn('Realtime messages subscription failed:', error);
-      return () => {};
-    }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [currentUserId]);
 
   const markAsRead = async (conversationId: string) => {

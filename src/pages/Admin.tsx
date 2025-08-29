@@ -1957,24 +1957,18 @@ const getApplicationStatusBadge = (status: string) => {
                                   </Button>
                                    <Button
                                      size="sm"
+                                     variant="destructive"
                                      onClick={() => {
-                                       if (application.status === 'rejected') {
-                                         reviewApplication(application.id, 'pending')
-                                       } else {
-                                         const appData = application.application_data as any;
-                                         const name = `${appData.first_name || ''} ${appData.last_name || ''}`.trim();
-                                         setApplicationToReject({ id: application.id, name });
-                                         setRejectModalOpen(true);
-                                       }
+                                       const appData = application.application_data as any;
+                                       const name = `${appData.first_name || ''} ${appData.last_name || ''}`.trim();
+                                       setApplicationToReject({ id: application.id, name });
+                                       setRejectModalOpen(true);
                                      }}
-                                     className={
-                                       application.status === 'rejected'
-                                         ? "bg-gray-600 hover:bg-gray-700 text-xs px-2 py-1 h-7"
-                                         : "bg-red-600 hover:bg-red-700 text-xs px-2 py-1 h-7"
-                                     }
+                                     disabled={application.status === 'rejected'}
+                                     className="text-xs px-2 py-1 h-7"
                                    >
                                      <X className="w-3 h-3" />
-                                     {application.status === 'rejected' ? 'Unreject' : 'Reject'}
+                                     Reject
                                    </Button>
                                    <Button
                                      onClick={() => deleteApplication(application.id, `${appData.first_name} ${appData.last_name}`)}
