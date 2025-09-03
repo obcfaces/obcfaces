@@ -87,21 +87,20 @@ export default function WeightFilterDropdown({ onSelect, value, className }: Pro
         className="w-auto min-w-[200px] p-0 bg-popover border z-[9999]" 
         side="bottom" 
         align="center"
-        onWheel={(e) => {
-          e.stopPropagation();
-          console.log("Weight dropdown wheel event:", e.deltaY);
-        }}
       >
         <div 
           className="max-h-[400px] overflow-y-auto overscroll-contain" 
           style={{ 
             WebkitOverflowScrolling: 'touch',
             touchAction: 'pan-y',
-            scrollBehavior: 'smooth'
+            scrollBehavior: 'smooth',
+            overscrollBehavior: 'contain'
           }}
-          onWheel={(e) => {
-            console.log("Weight dropdown scroll container wheel event");
-            // Don't prevent default - let it scroll naturally
+          onTouchStart={(e) => {
+            e.stopPropagation();
+          }}
+          onTouchMove={(e) => {
+            e.stopPropagation();
           }}
         >
           {/* Шапка с заголовками */}
