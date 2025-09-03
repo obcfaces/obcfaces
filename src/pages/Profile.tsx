@@ -80,7 +80,7 @@ const Profile = () => {
     email: ''
   });
   const [submitted, setSubmitted] = useState(false);
-  const [invalidFields, setInvalidFields] = useState<Set<string>>(new Set());
+  const [invalidFields, setInvalidFields] = useState<Set<string>>(() => new Set());
   const [savingProfile, setSavingProfile] = useState(false);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [passwordForm, setPasswordForm] = useState({
@@ -89,7 +89,7 @@ const Profile = () => {
     confirmPassword: ''
   });
   const [passwordSubmitted, setPasswordSubmitted] = useState(false);
-  const [passwordInvalidFields, setPasswordInvalidFields] = useState<Set<string>>(new Set());
+  const [passwordInvalidFields, setPasswordInvalidFields] = useState<Set<string>>(() => new Set());
   const [savingPassword, setSavingPassword] = useState(false);
   const [currentUserEmail, setCurrentUserEmail] = useState('');
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
