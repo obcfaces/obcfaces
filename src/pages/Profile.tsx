@@ -882,8 +882,10 @@ const Profile = () => {
 
     const handleParticipationUpdated = (event: any) => {
       console.log('Participation updated:', event.detail);
-      // Reload participation data to show updated information
-      loadParticipationItems();
+      // Add delay to prevent immediate re-render cycles
+      setTimeout(() => {
+        loadParticipationItems();
+      }, 200);
     };
 
     window.addEventListener('openEditModal', handleOpenEditModal);
