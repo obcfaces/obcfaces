@@ -701,15 +701,6 @@ export const ContestParticipationModal = ({
       
       // Trigger update event to refresh participation data in profile (for both edit and new)
       if (editMode) {
-        // Use setTimeout to prevent immediate re-render and potential infinite loops
-        setTimeout(() => {
-          window.dispatchEvent(new CustomEvent('participationUpdated', { 
-            detail: { 
-              applicationData: applicationData,
-              updatedAt: new Date().toISOString()
-            } 
-          }));
-        }, 100);
         // Store the application ID for contact form in edit mode
         if (existingData) {
           setCurrentApplicationId(existingData.id);
