@@ -826,7 +826,24 @@ export const ContestParticipationModal = ({
       };
       checkAuth();
     }
-  }, [isOpen, editMode, existingData]);
+  }, [isOpen, editMode]); // Removed existingData from dependencies to prevent infinite loops
+  
+  // Handle existingData changes separately to avoid infinite loops
+  useEffect(() => {
+    if (editMode && existingData && isOpen) {
+      console.log('ExistingData changed, updating contact form:', existingData);
+      if (existingData.application_data) {
+        const appData = existingData.application_data as any;
+        setContactForm({
+          name: "",
+          contact: appData.phone?.number || "",
+          message: "",
+          countryCode: appData.phone?.country_code || "",
+          facebookUrl: appData.facebook_url || ""
+        });
+      }
+    }
+  }, [editMode, existingData, isOpen]);
 
   // Save form data to cache
   const saveFormDataToCache = (data: typeof formData) => {
