@@ -512,17 +512,11 @@ export const ContestParticipationModal = ({
       if (!session) return;
 
       // In edit mode, check if application is still editable
+      // Note: Allow editing if this is for a weekly contest participant (approved applications that are active participants)
       if (editMode && existingData) {
-        if (existingData.status === 'approved') {
-          toast({
-            title: "Cannot Edit",
-            description: "Your application has already been approved and cannot be edited. You can submit a new application instead.",
-            variant: "destructive"
-          });
-          setIsLoading(false);
-          return;
-        }
-        if (!['pending', 'under_review'].includes(existingData.status)) {
+        // Only prevent editing if the status is rejected or permanently denied
+        // Allow editing of approved applications since they can be active weekly contest participants
+        if (existingData.status === 'rejected' || existingData.status === 'denied') {
           toast({
             title: "Cannot Edit",
             description: "This application can no longer be edited. You can submit a new application instead.",
