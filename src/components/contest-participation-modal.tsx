@@ -245,6 +245,16 @@ export const ContestParticipationModal = ({
     const reader = new FileReader();
     reader.onload = () => {
       try {
+        // Check storage quota before saving
+        const testKey = 'test-storage';
+        try {
+          localStorage.setItem(testKey, 'test');
+          localStorage.removeItem(testKey);
+        } catch (quotaError) {
+          console.warn('Storage quota exceeded, skipping photo cache');
+          return;
+        }
+        
         const photoData = {
           name: file.name,
           type: file.type,
@@ -846,11 +856,21 @@ export const ContestParticipationModal = ({
         });
       }
     }
-  }, [editMode, existingData, isOpen]);
+  }, [editMode, isOpen]); // Removed existingData from dependencies to prevent infinite loops
 
   // Save form data to cache
   const saveFormDataToCache = (data: typeof formData) => {
     try {
+      // Clear existing cache if quota exceeded to prevent infinite loops
+      const testKey = 'test-storage';
+      try {
+        localStorage.setItem(testKey, 'test');
+        localStorage.removeItem(testKey);
+      } catch (quotaError) {
+        console.warn('Storage quota exceeded, clearing form cache');
+        clearFormCache();
+        return;
+      }
       localStorage.setItem(FORM_CACHE_KEY, JSON.stringify(data));
     } catch (error) {
       console.warn('Failed to save form data to cache:', error);
