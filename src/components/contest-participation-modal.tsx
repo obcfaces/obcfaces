@@ -673,6 +673,20 @@ export const ContestParticipationModal = ({
         console.warn('Failed to update profile:', profileError);
       }
 
+      // Update weekly contest participant data if user is already in current week's contest
+      if (editMode) {
+        const { error: participantUpdateError } = await supabase
+          .from('weekly_contest_participants')
+          .update({
+            application_data: applicationData
+          })
+          .eq('user_id', session.user.id);
+
+        if (participantUpdateError) {
+          console.warn('Failed to update weekly contest participant:', participantUpdateError);
+        }
+      }
+
       toast({
         title: "Success!",
         description: editMode ? "Your application has been updated successfully." : "Your contest application has been submitted successfully."
