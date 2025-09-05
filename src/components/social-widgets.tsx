@@ -1,9 +1,10 @@
 import { MessageCircle, Send, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 
 export const SocialWidgets = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const openTelegram = () => {
     window.open('https://t.me/obcfaces', '_blank');
@@ -14,9 +15,42 @@ export const SocialWidgets = () => {
     window.open(`https://wa.me/${phoneNumber.replace(/[^0-9]/g, '')}`, '_blank');
   };
 
-  const toggleMenu = () => {
-    setIsOpen(!isOpen);
+  const clearAutoCloseTimeout = () => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
   };
+
+  const startAutoCloseTimeout = () => {
+    clearAutoCloseTimeout();
+    timeoutRef.current = setTimeout(() => {
+      setIsOpen(false);
+    }, 2000);
+  };
+
+  const toggleMenu = () => {
+    const newIsOpen = !isOpen;
+    setIsOpen(newIsOpen);
+    
+    if (newIsOpen) {
+      startAutoCloseTimeout();
+    } else {
+      clearAutoCloseTimeout();
+    }
+  };
+
+  const handleSocialClick = (action: () => void) => {
+    clearAutoCloseTimeout();
+    setIsOpen(false);
+    action();
+  };
+
+  useEffect(() => {
+    return () => {
+      clearAutoCloseTimeout();
+    };
+  }, []);
 
   return (
     <div className="fixed bottom-6 right-6 flex flex-col items-end gap-3 z-50">
@@ -24,7 +58,7 @@ export const SocialWidgets = () => {
       {isOpen && (
         <>
           <Button
-            onClick={openTelegram}
+            onClick={() => handleSocialClick(openTelegram)}
             size="lg"
             className="w-12 h-12 rounded-full bg-blue-500 hover:bg-blue-600 text-white shadow-lg hover:shadow-xl transition-all duration-300 animate-fade-in"
             aria-label="Написать в Telegram"
@@ -33,7 +67,7 @@ export const SocialWidgets = () => {
           </Button>
           
           <Button
-            onClick={openWhatsApp}
+            onClick={() => handleSocialClick(openWhatsApp)}
             size="lg"
             className="w-12 h-12 rounded-full bg-green-500 hover:bg-green-600 text-white shadow-lg hover:shadow-xl transition-all duration-300 animate-fade-in"
             aria-label="Написать в WhatsApp"
