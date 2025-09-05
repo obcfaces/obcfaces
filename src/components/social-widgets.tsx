@@ -26,7 +26,7 @@ export const SocialWidgets = () => {
     clearAutoCloseTimeout();
     timeoutRef.current = setTimeout(() => {
       setIsOpen(false);
-    }, 2000);
+    }, 5000);
   };
 
   const toggleMenu = () => {
