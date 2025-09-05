@@ -18,6 +18,7 @@ import Admin from "./pages/Admin";
 import AuthCallbackHandler from "@/components/auth-callback-handler";
 import TopBar from "@/components/top-bar";
 import { Footer } from "@/components/footer";
+import { SocialWidgets } from "@/components/social-widgets";
 
 
 const queryClient = new QueryClient();
@@ -52,6 +53,7 @@ const App = () => {
                 </Routes>
               </main>
               <Footer />
+              <SocialWidgets />
             </BrowserRouter>
           </TooltipProvider>
         </QueryClientProvider>
