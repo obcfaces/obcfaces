@@ -161,7 +161,7 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
     
     // Refresh contestants data after rating to show updated average
     setTimeout(async () => {
-      const updatedContestants = await getContestantsSync();
+      const updatedContestants = await getContestantsSync(realContestants);
       setContestants(updatedContestants || []);
     }, 1000);
   };
