@@ -158,12 +158,7 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
 
   const handleRate = async (contestantId: number, rating: number) => {
     setVotes(prev => ({ ...prev, [contestantId]: rating }));
-    
-    // Refresh contestants data after rating to show updated average
-    setTimeout(async () => {
-      const updatedContestants = await getContestantsSync(realContestants);
-      setContestants(updatedContestants || []);
-    }, 1000);
+    // Let real-time subscription handle the refresh automatically
   };
 
   // Define contestants based on week type (synchronous version)
