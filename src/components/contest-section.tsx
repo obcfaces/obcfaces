@@ -203,7 +203,7 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
       };
 
       // If there are real contestants, process them too
-      if (actualParticipants.length > 0) {
+      if (actualParticipants && actualParticipants.length > 0) {
         console.log(`Using real contestants for ${title}:`, actualParticipants.length);
         const contestantsWithRatings = await Promise.all(
           actualParticipants.map(async (contestant) => {
