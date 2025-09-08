@@ -473,6 +473,7 @@ export const ContestParticipationModal = ({
   // Profile form submission with validation
   const handleProfileSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log('Form submission started', { formData });
     setSubmitted(true);
 
     // Validate all required fields
@@ -507,19 +508,34 @@ export const ContestParticipationModal = ({
       if (!photo2File) newInvalidFields.add('photo2');
     }
 
+    console.log('Validation completed', { 
+      invalidFields: Array.from(newInvalidFields),
+      hasValidationErrors: newInvalidFields.size > 0
+    });
+
     setInvalidFields(newInvalidFields);
 
     // If there are validation errors, stop here
     if (newInvalidFields.size > 0) {
+      toast({
+        title: "Validation Error",
+        description: "Please fill in all required fields marked in red.",
+        variant: "destructive"
+      });
       return;
     }
 
     // All fields are valid, proceed with submission
+    console.log('Starting form submission process');
     setIsLoading(true);
 
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return;
+      console.log('Auth session check', { hasSession: !!session?.user });
+      
+      if (!session?.user) {
+        throw new Error('You must be logged in to submit an application');
+      }
 
       // In edit mode, check if application is still editable
       // Allow editing of all application statuses including rejected ones
@@ -539,12 +555,15 @@ export const ContestParticipationModal = ({
 
       // Check if user already has an approved application (only for new applications)
       if (!editMode) {
-        const { data: existingApplication } = await supabase
+        console.log('Checking for existing approved applications');
+        const { data: existingApplication, error: checkError } = await supabase
           .from('contest_applications')
           .select('id, status')
           .eq('user_id', session.user.id)
           .in('status', ['approved'])
-          .single();
+          .maybeSingle();
+
+        console.log('Existing application check result', { existingApplication, checkError });
 
         if (existingApplication) {
           toast({
@@ -623,6 +642,7 @@ export const ContestParticipationModal = ({
         dbError = error;
       } else {
         // Insert new application and get the returned data
+        console.log('Inserting new application to database');
         const { data: insertedData, error } = await supabase
           .from('contest_applications')
           .insert({
@@ -633,6 +653,7 @@ export const ContestParticipationModal = ({
           .select('id')
           .single();
         
+        console.log('Database insert result', { insertedData, error });
         dbError = error;
         
         // Store the application ID for later use in contact form
@@ -642,8 +663,11 @@ export const ContestParticipationModal = ({
       }
 
       if (dbError) {
+        console.error('Database error details:', dbError);
         throw new Error(`Database error: ${dbError.message}`);
       }
+
+      console.log('Application saved successfully, updating profile');
 
       // Update user profile to mark as contest participant and add all form data
       const birthDate = `${formData.birth_year}-${formData.birth_month.padStart(2, '0')}-${formData.birth_day.padStart(2, '0')}`;
@@ -711,12 +735,22 @@ export const ContestParticipationModal = ({
       setSubmissionSuccess(true);
     } catch (error: any) {
       console.error('Submission error:', error);
+      console.error('Error stack:', error.stack);
+      console.error('Error details:', {
+        name: error.name,
+        message: error.message,
+        code: error.code,
+        details: error.details,
+        hint: error.hint
+      });
+      
       toast({
         title: "Error",
         description: error.message || "Failed to submit application. Please try again.",
         variant: "destructive"
       });
     } finally {
+      console.log('Form submission completed, setting loading to false');
       setIsLoading(false);
     }
   };
@@ -821,7 +855,9 @@ export const ContestParticipationModal = ({
       }
       
       const checkAuth = async () => {
+        console.log('Checking authentication status');
         const { data: { session } } = await supabase.auth.getSession();
+        console.log('Auth check result', { hasSession: !!session?.user });
         if (session) {
           setCurrentStep('profile');
         } else {
