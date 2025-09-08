@@ -4,7 +4,6 @@ import { ContestHeader } from "@/components/contest-header";
 import { ContestSection } from "@/components/contest-section";
 import { NextWeekSection } from "@/components/next-week-section";
 import ContestFilters from "@/components/contest-filters";
-import { TestFormDebug } from "@/components/test-form-debug";
 
 import { EditableContent } from "@/components/editable-content";
 import { supabase } from "@/integrations/supabase/client";
@@ -107,11 +106,6 @@ const Index = () => {
               onCategoryChange={handleCategoryChange}
               genderAvailability={{ male: false, female: true }}
             />
-          </div>
-
-          {/* Debug test form - show for all authenticated users temporarily */}
-          <div className="max-w-6xl mx-auto px-6 pt-2 pb-2">
-            <TestFormDebug />
           </div>
           
           <section className="max-w-6xl mx-auto pt-2 mb-2 mt-2 bg-background rounded-lg shadow-sm shadow-foreground/10">
