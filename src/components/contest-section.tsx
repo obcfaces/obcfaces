@@ -180,6 +180,7 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
 
     // For "THIS WEEK" section, always create and show example card
     if (title === "THIS WEEK") {
+      console.log('Creating test card for THIS WEEK');
       const testCard = {
         rank: 0, // Use 0 to distinguish from real ranks
         name: "Example Card", 
@@ -276,6 +277,7 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
         return [testCard, ...realContestantsWithRanks];
       } else {
         // Only show example card if no real contestants
+        console.log('Returning only test card for THIS WEEK');
         return [testCard];
       }
     }
