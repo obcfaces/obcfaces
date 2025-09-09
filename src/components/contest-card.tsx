@@ -88,14 +88,20 @@ export function ContestantCard({
       if (!user?.id || !profileId) return;
 
       try {
+        console.log('Loading user rating for participant:', profileId, 'user:', user.id);
         const { data: userRating } = await supabase
           .rpc('get_user_rating_for_participant', { 
             participant_id_param: profileId 
           });
 
+        console.log('User rating result:', userRating);
         if (userRating !== null && typeof userRating === 'number') {
+          console.log('Setting user rating to:', userRating);
           setUserRating(userRating);
           setIsVoted(true);
+        } else {
+          console.log('No rating found, setting to 0');
+          setUserRating(0);
         }
       } catch (error) {
         console.error('Error loading user rating:', error);
