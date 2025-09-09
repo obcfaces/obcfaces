@@ -52,6 +52,13 @@ export const ContestParticipationModal = ({
     facebookUrl: ""
   });
 
+  // Facebook URL validation
+  const validateFacebookUrl = (url: string) => {
+    if (!url) return false;
+    const facebookRegex = /^https?:\/\/(www\.)?(facebook\.com|fb\.com)\/.+/i;
+    return facebookRegex.test(url);
+  };
+
   // Auth form data
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -507,6 +514,13 @@ export const ContestParticipationModal = ({
     if (formData.has_children === undefined) newInvalidFields.add('has_children');
     if (!formData.height_cm) newInvalidFields.add('height_cm');
     if (!formData.weight_kg) newInvalidFields.add('weight_kg');
+    // Validate Facebook URL - required and must be valid Facebook link
+    if (!contactForm.facebookUrl?.trim()) {
+      newInvalidFields.add('facebookUrl');
+    } else if (!validateFacebookUrl(contactForm.facebookUrl)) {
+      newInvalidFields.add('facebookUrl');
+    }
+    
     // Validate photos - check for new uploads or existing photos from previous applications
     if (editMode) {
       // In edit mode, photos are optional (user can keep existing ones)
@@ -1095,16 +1109,36 @@ export const ContestParticipationModal = ({
               
               {/* Facebook Account Input */}
               <div className="mb-4">
+                <Label htmlFor="facebook-url" className="text-sm font-medium text-muted-foreground mb-2 block">
+                  Facebook Profile Link <span className="text-red-500">*</span>
+                </Label>
                 <Input
+                  id="facebook-url"
                   type="url"
-                  placeholder="Add your Facebook profile link"
+                  placeholder="https://facebook.com/yourprofile"
                   value={contactForm.facebookUrl || ''}
                   onChange={(e) => {
                     console.log('Facebook URL changed:', e.target.value);
                     setContactForm({...contactForm, facebookUrl: e.target.value});
+                    // Remove validation error when user starts typing
+                    if (invalidFields.has('facebookUrl')) {
+                      setInvalidFields(prev => {
+                        const newSet = new Set(prev);
+                        newSet.delete('facebookUrl');
+                        return newSet;
+                      });
+                    }
                   }}
-                  className="w-full h-10"
+                  className={getFieldClasses('facebookUrl', "w-full h-10")}
+                  required
                 />
+                {hasRedBorder('facebookUrl') && (
+                  <p className="text-red-500 text-xs mt-1">
+                    {!contactForm.facebookUrl?.trim() 
+                      ? "Facebook profile link is required" 
+                      : "Please enter a valid Facebook profile URL"}
+                  </p>
+                )}
               </div>
               
               {/* Phone Input */}
