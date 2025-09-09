@@ -11,6 +11,8 @@ interface VoterData {
   user_id: string;
   rating: number;
   created_at: string;
+  email?: string;
+  registration_date?: string;
   profile?: {
     display_name?: string;
     first_name?: string;
@@ -22,6 +24,7 @@ interface VoterData {
     gender?: string;
     bio?: string;
     is_contest_participant?: boolean;
+    created_at?: string;
   };
 }
 
@@ -90,19 +93,33 @@ export const VotersModal = ({ isOpen, onClose, participantId, participantName }:
       const userIds = ratings.map(r => r.user_id);
       const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
-        .select('id, display_name, first_name, last_name, avatar_url, country, city, age, gender, bio, is_contest_participant')
+        .select('id, display_name, first_name, last_name, avatar_url, country, city, age, gender, bio, is_contest_participant, created_at')
         .in('id', userIds);
+
+      // Get auth data for emails
+      const { data: authData, error: authError } = await supabase
+        .rpc('get_user_auth_data_admin');
+
+      if (authError) {
+        console.error('Error fetching auth data:', authError);
+      }
 
       if (profilesError) {
         console.error('Error fetching profiles:', profilesError);
         return;
       }
 
-      // Combine ratings with profiles
-      const votersWithProfiles = ratings.map(rating => ({
-        ...rating,
-        profile: profiles?.find(p => p.id === rating.user_id)
-      }));
+      // Combine ratings with profiles and auth data
+      const votersWithProfiles = ratings.map(rating => {
+        const profile = profiles?.find(p => p.id === rating.user_id);
+        const auth = authData?.find(a => a.user_id === rating.user_id);
+        return {
+          ...rating,
+          profile,
+          email: auth?.email,
+          registration_date: auth?.created_at || profile?.created_at
+        };
+      });
 
       setVoters(votersWithProfiles);
     } catch (error) {
@@ -136,14 +153,14 @@ export const VotersModal = ({ isOpen, onClose, participantId, participantName }:
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[80vh] flex flex-col">
+      <DialogContent className="max-w-5xl max-h-[85vh] flex flex-col">
         <DialogHeader>
           <DialogTitle className="text-xl">
             Voters for {participantName} ({voters.length} total)
           </DialogTitle>
         </DialogHeader>
         
-        <ScrollArea className="flex-1 mt-4">
+        <ScrollArea className="flex-1 mt-4 pr-4">
           {loading ? (
             <div className="flex items-center justify-center py-8">
               <div className="text-muted-foreground">Loading voters...</div>
@@ -198,8 +215,22 @@ export const VotersModal = ({ isOpen, onClose, participantId, participantName }:
                               </p>
                             )}
                             
+                            {/* Email */}
+                            {voter.email && (
+                              <p className="text-sm text-muted-foreground mt-2 break-all">
+                                📧 {voter.email}
+                              </p>
+                            )}
+                            
+                            {/* Registration Date */}
+                            {voter.registration_date && (
+                              <p className="text-xs text-muted-foreground mt-1">
+                                Registered: {new Date(voter.registration_date).toLocaleDateString()}
+                              </p>
+                            )}
+                            
                             {/* Vote Date */}
-                            <p className="text-xs text-muted-foreground mt-2">
+                            <p className="text-xs text-muted-foreground mt-1">
                               Voted on {new Date(voter.created_at).toLocaleString()}
                             </p>
                           </div>
