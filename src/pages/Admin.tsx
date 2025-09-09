@@ -19,6 +19,7 @@ import { Switch } from "@/components/ui/switch";
 import { useNavigate } from "react-router-dom";
 import { useApplicationHistory } from "@/hooks/useApplicationHistory";
 import { Clock } from "lucide-react";
+import { VotersModal } from "@/components/voters-modal";
 
 interface ProfileData {
   id: string;
@@ -126,6 +127,8 @@ const Admin = () => {
   const [applicationHistoryOpen, setApplicationHistoryOpen] = useState(false);
   const [rejectModalOpen, setRejectModalOpen] = useState(false);
   const [applicationToReject, setApplicationToReject] = useState<{ id: string; name: string } | null>(null);
+  const [votersModalOpen, setVotersModalOpen] = useState(false);
+  const [selectedParticipantForVoters, setSelectedParticipantForVoters] = useState<{ id: string; name: string } | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -446,6 +449,11 @@ const Admin = () => {
     });
 
     await fetchWeeklyParticipants();
+  };
+
+  const openVotersModal = (participantId: string, participantName: string) => {
+    setSelectedParticipantForVoters({ id: participantId, name: participantName });
+    setVotersModalOpen(true);
   };
 
   const deleteParticipant = async (participantId: string, participantName: string) => {
@@ -1635,9 +1643,13 @@ const getApplicationStatusBadge = (status: string) => {
                                   <Badge variant="default" className="bg-contest-blue text-xs px-2 py-0">
                                     Rating: {participant.average_rating.toFixed(1)}
                                   </Badge>
-                                  <Badge variant="secondary" className="text-xs px-2 py-0">
-                                    Votes: {participant.total_votes || 0}
-                                  </Badge>
+                                   <Badge 
+                                     variant="secondary" 
+                                     className="text-xs px-2 py-0 cursor-pointer hover:bg-muted-foreground/20 transition-colors"
+                                     onClick={() => openVotersModal(participant.id, `${participant.first_name} ${participant.last_name}`)}
+                                   >
+                                     Votes: {participant.total_votes || 0}
+                                   </Badge>
                                 </>
                               ) : (
                                 <Badge variant="secondary" className="text-xs px-2 py-0">No Rating</Badge>
@@ -2614,6 +2626,17 @@ const getApplicationStatusBadge = (status: string) => {
           setApplicationToReject(null);
         }}
         onConfirm={handleRejectConfirm}
+      />
+
+      {/* Voters Modal */}
+      <VotersModal
+        isOpen={votersModalOpen}
+        onClose={() => {
+          setVotersModalOpen(false);
+          setSelectedParticipantForVoters(null);
+        }}
+        participantId={selectedParticipantForVoters?.id || ''}
+        participantName={selectedParticipantForVoters?.name || ''}
       />
     </>
   );
