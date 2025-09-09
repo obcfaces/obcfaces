@@ -92,12 +92,16 @@ export const ContestParticipationModal = ({
 
       // Load existing contact data for the contact form
       if (applicationData.phone || applicationData.facebook_url) {
+        // Validate existing Facebook URL - only load if it's valid
+        const existingFacebookUrl = applicationData.facebook_url || '';
+        const validFacebookUrl = validateFacebookUrl(existingFacebookUrl) ? existingFacebookUrl : '';
+        
         setContactForm({
           name: `${applicationData.first_name || ''} ${applicationData.last_name || ''}`.trim(),
           contact: applicationData.phone?.number || '',
           message: '',
           countryCode: applicationData.phone?.country_code || applicationData.country || '',
-          facebookUrl: applicationData.facebook_url || ''
+          facebookUrl: validFacebookUrl
         });
       }
       
@@ -196,12 +200,16 @@ export const ContestParticipationModal = ({
 
         // Load contact information if available
         if (applicationData.phone || applicationData.facebook_url) {
+          // Validate existing Facebook URL - only load if it's valid
+          const existingFacebookUrl = applicationData.facebook_url || '';
+          const validFacebookUrl = validateFacebookUrl(existingFacebookUrl) ? existingFacebookUrl : '';
+          
           setContactForm({
             name: `${applicationData.first_name || ''} ${applicationData.last_name || ''}`.trim(),
             contact: applicationData.phone?.number || '',
             message: '',
             countryCode: applicationData.phone?.country_code || applicationData.country || '',
-            facebookUrl: applicationData.facebook_url || ''
+            facebookUrl: validFacebookUrl
           });
         }
         
