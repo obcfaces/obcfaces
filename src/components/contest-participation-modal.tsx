@@ -1132,16 +1132,9 @@ export const ContestParticipationModal = ({
                       });
                     }
                   }}
-                  className={getFieldClasses('facebookUrl', "w-full h-10")}
+                  className="w-full h-10"
                   required
                 />
-                {hasRedBorder('facebookUrl') && (
-                  <p className="text-red-500 text-xs mt-1">
-                    {!contactForm.facebookUrl?.trim() 
-                      ? "Facebook profile link is required" 
-                      : "Please enter a valid Facebook profile URL"}
-                  </p>
-                )}
               </div>
               
               {/* Phone Input */}
