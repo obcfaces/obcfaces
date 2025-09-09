@@ -84,12 +84,18 @@ export default function WeightFilterDropdown({ onSelect, value, className }: Pro
         </Button>
       </PopoverTrigger>
       <PopoverContent 
-        className="w-auto min-w-[200px] p-0 bg-popover border z-[9999]" 
+        className="w-auto min-w-[200px] p-0 bg-popover border z-[9999] pointer-events-auto" 
         side="bottom" 
         align="center"
+        onInteractOutside={(e) => {
+          // Prevent closing on scroll
+          if (e.target instanceof Element && e.target.closest('[data-radix-popper-content-wrapper]')) {
+            e.preventDefault();
+          }
+        }}
       >
         <div 
-          className="max-h-[400px] overflow-y-auto overscroll-contain" 
+          className="max-h-[400px] overflow-y-auto overscroll-contain pointer-events-auto" 
           style={{ 
             WebkitOverflowScrolling: 'touch',
             touchAction: 'pan-y',
@@ -100,6 +106,9 @@ export default function WeightFilterDropdown({ onSelect, value, className }: Pro
             e.stopPropagation();
           }}
           onTouchMove={(e) => {
+            e.stopPropagation();
+          }}
+          onWheel={(e) => {
             e.stopPropagation();
           }}
         >
