@@ -186,6 +186,17 @@ export const ContestParticipationModal = ({
         } else if (applicationData.birth_year && applicationData.birth_month && applicationData.birth_day) {
           birthdate = new Date(applicationData.birth_year, applicationData.birth_month - 1, applicationData.birth_day);
         }
+
+        // Load contact information if available
+        if (applicationData.phone || applicationData.facebook_url) {
+          setContactForm({
+            name: `${applicationData.first_name || ''} ${applicationData.last_name || ''}`.trim(),
+            contact: applicationData.phone?.number || '',
+            message: '',
+            countryCode: applicationData.phone?.country_code || applicationData.country || '',
+            facebookUrl: applicationData.facebook_url || ''
+          });
+        }
         
         return {
           first_name: applicationData.first_name || "",
@@ -205,6 +216,9 @@ export const ContestParticipationModal = ({
           height_ft: "",
           weight_kg: applicationData.weight_kg ? applicationData.weight_kg.toString() : "",
           measurement_system: "metric",
+          // Include photo URLs for display
+          photo1_url: applicationData.photo1_url || applicationData.photo_1_url || null,
+          photo2_url: applicationData.photo2_url || applicationData.photo_2_url || null,
         };
       }
     } catch (error) {
@@ -493,7 +507,7 @@ export const ContestParticipationModal = ({
     if (formData.has_children === undefined) newInvalidFields.add('has_children');
     if (!formData.height_cm) newInvalidFields.add('height_cm');
     if (!formData.weight_kg) newInvalidFields.add('weight_kg');
-    // Validate photos - in edit mode, check if existing photos exist, not new uploads
+    // Validate photos - check for new uploads or existing photos from previous applications
     if (editMode) {
       // In edit mode, photos are optional (user can keep existing ones)
       // Only validate if there are no existing photos and no new photos
@@ -503,9 +517,12 @@ export const ContestParticipationModal = ({
       if (!photo1File && !hasExistingPhoto1) newInvalidFields.add('photo1');
       if (!photo2File && !hasExistingPhoto2) newInvalidFields.add('photo2');
     } else {
-      // In new application mode, photos are required
-      if (!photo1File) newInvalidFields.add('photo1');
-      if (!photo2File) newInvalidFields.add('photo2');
+      // In new application mode, check for new uploads or photos from previous applications
+      const hasPhoto1 = photo1File || (formData as any)?.photo1_url;
+      const hasPhoto2 = photo2File || (formData as any)?.photo2_url;
+      
+      if (!hasPhoto1) newInvalidFields.add('photo1');
+      if (!hasPhoto2) newInvalidFields.add('photo2');
     }
 
     console.log('Validation completed', { 
@@ -584,9 +601,13 @@ export const ContestParticipationModal = ({
       if (editMode && existingData) {
         photo1Url = (existingData?.application_data as any)?.photo1_url || null;
         photo2Url = (existingData?.application_data as any)?.photo2_url || null;
+      } else {
+        // For new applications, start with photos from previous application if available
+        photo1Url = (formData as any)?.photo1_url || null;
+        photo2Url = (formData as any)?.photo2_url || null;
       }
 
-      // Upload new photos if provided
+      // Upload new photos if provided (they will override existing ones)
       if (photo1File) {
         photo1Url = await uploadPhoto(photo1File, 1);
       }
@@ -1482,10 +1503,14 @@ export const ContestParticipationModal = ({
                         id="photo1-upload"
                       />
                       <label htmlFor="photo1-upload" className="cursor-pointer block">
-                        {photo1File || (editMode && (existingData?.application_data as any)?.photo1_url) ? (
+                        {photo1File || (editMode && (existingData?.application_data as any)?.photo1_url) || (formData as any)?.photo1_url ? (
                           <div className="p-2 relative">
                             <img
-                              src={photo1File ? URL.createObjectURL(photo1File) : (existingData?.application_data as any)?.photo1_url}
+                              src={
+                                photo1File ? URL.createObjectURL(photo1File) : 
+                                (editMode && (existingData?.application_data as any)?.photo1_url) ? (existingData?.application_data as any)?.photo1_url :
+                                (formData as any)?.photo1_url
+                              }
                               alt="Portrait photo preview"
                               className="w-full aspect-[4/5] object-cover rounded bg-white"
                             />
@@ -1543,10 +1568,14 @@ export const ContestParticipationModal = ({
                         id="photo2-upload"
                       />
                       <label htmlFor="photo2-upload" className="cursor-pointer block">
-                        {photo2File || (editMode && (existingData?.application_data as any)?.photo2_url) ? (
+                        {photo2File || (editMode && (existingData?.application_data as any)?.photo2_url) || (formData as any)?.photo2_url ? (
                           <div className="p-2 relative">
                             <img
-                              src={photo2File ? URL.createObjectURL(photo2File) : (existingData?.application_data as any)?.photo2_url}
+                              src={
+                                photo2File ? URL.createObjectURL(photo2File) : 
+                                (editMode && (existingData?.application_data as any)?.photo2_url) ? (existingData?.application_data as any)?.photo2_url :
+                                (formData as any)?.photo2_url
+                              }
                               alt="Full length photo preview"
                               className="w-full aspect-[4/5] object-cover rounded bg-white"
                             />
