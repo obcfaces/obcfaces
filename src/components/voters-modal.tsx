@@ -45,12 +45,36 @@ export const VotersModal = ({ isOpen, onClose, participantId, participantName }:
   const fetchVoters = async () => {
     setLoading(true);
     try {
-      // Get ratings for this participant
+      console.log('Fetching voters for participant ID:', participantId);
+      
+      // First get the participant's user_id from weekly_contest_participants
+      const { data: participantData, error: participantError } = await supabase
+        .from('weekly_contest_participants')
+        .select('user_id')
+        .eq('id', participantId)
+        .single();
+
+      console.log('Participant data:', { participantData, participantError });
+
+      if (participantError) {
+        console.error('Error fetching participant:', participantError);
+        return;
+      }
+
+      if (!participantData) {
+        console.log('No participant found for ID:', participantId);
+        setVoters([]);
+        return;
+      }
+
+      // Get ratings for this participant using both participant_id and user_id
       const { data: ratings, error: ratingsError } = await supabase
         .from('contestant_ratings')
         .select('user_id, rating, created_at')
-        .or(`participant_id.eq.${participantId},contestant_user_id.eq.${participantId}`)
+        .or(`participant_id.eq.${participantId},contestant_user_id.eq.${participantData.user_id}`)
         .order('created_at', { ascending: false });
+
+      console.log('Ratings query result:', { ratings, ratingsError });
 
       if (ratingsError) {
         console.error('Error fetching ratings:', ratingsError);
