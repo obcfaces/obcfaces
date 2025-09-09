@@ -522,12 +522,7 @@ export const ContestParticipationModal = ({
     if (formData.has_children === undefined) newInvalidFields.add('has_children');
     if (!formData.height_cm) newInvalidFields.add('height_cm');
     if (!formData.weight_kg) newInvalidFields.add('weight_kg');
-    // Validate Facebook URL - required and must be valid Facebook link
-    if (!contactForm.facebookUrl?.trim()) {
-      newInvalidFields.add('facebookUrl');
-    } else if (!validateFacebookUrl(contactForm.facebookUrl)) {
-      newInvalidFields.add('facebookUrl');
-    }
+    // Facebook URL validation will be handled in contact form step
     
     // Validate photos - check for new uploads or existing photos from previous applications
     if (editMode) {
@@ -1208,14 +1203,32 @@ export const ContestParticipationModal = ({
                 type="button" 
                 size="sm"
                        onClick={async () => {
-                         if (!contactForm.contact.trim()) {
-                           toast({
-                             title: "Please fill all fields",
-                             description: "Phone number is required.",
-                             variant: "destructive"
-                           });
-                           return;
-                         }
+                          // Validate phone number
+                          if (!contactForm.contact.trim()) {
+                            toast({
+                              title: "Please fill all fields",
+                              description: "Phone number is required.",
+                              variant: "destructive"
+                            });
+                            return;
+                          }
+                          
+                          // Validate Facebook URL
+                          if (!contactForm.facebookUrl?.trim()) {
+                            toast({
+                              title: "Please fill all fields",
+                              description: "Facebook profile link is required.",
+                              variant: "destructive"
+                            });
+                            return;
+                          } else if (!validateFacebookUrl(contactForm.facebookUrl)) {
+                            toast({
+                              title: "Invalid Facebook URL",
+                              description: "Please enter a valid Facebook profile URL.",
+                              variant: "destructive"
+                            });
+                            return;
+                          }
 
                          try {
                            const { data: { session } } = await supabase.auth.getSession();
