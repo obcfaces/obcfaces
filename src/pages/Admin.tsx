@@ -1260,13 +1260,15 @@ const ApplicationHistoryModal = ({ applicationId, isOpen, onClose }: Application
                   {appData.first_name} {appData.last_name} - Версия {history.length - index}
                 </h3>
                 <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                  <span>{new Date().getFullYear() - appData.birth_year}yo</span>
+                  <span>•</span>
+                  <span>{appData.weight_kg}kg</span>
+                  <span>•</span>
+                  <span>{appData.height_cm}cm</span>
+                  <span>•</span>
                   <span>{appData.gender}</span>
                   <span>•</span>
-                  <span>{new Date().getFullYear() - appData.birth_year} years old</span>
-                  <span>•</span>
                   <span className="truncate">{appData.city}, {appData.country}</span>
-                  <span>•</span>
-                  <span>{appData.height_cm}cm, {appData.weight_kg}kg</span>
                 </div>
                 <div className="flex items-center gap-3 text-xs text-muted-foreground mt-0.5">
                   <span>Born: {appData.birth_day}/{appData.birth_month}/{appData.birth_year}</span>
@@ -1583,11 +1585,13 @@ const getApplicationStatusBadge = (status: string) => {
                                 {participant.first_name} {participant.last_name}
                               </h3>
                                <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                                 <span>{participant.age} years old</span>
+                                 <span>{participant.age}yo</span>
+                                 <span>•</span>
+                                 <span>{participant.weight_kg}kg</span>
+                                 <span>•</span>
+                                 <span>{participant.height_cm}cm</span>
                                  <span>•</span>
                                  <span className="truncate">{participant.city}, {participant.country}</span>
-                                 <span>•</span>
-                                 <span>{participant.height_cm}cm, {participant.weight_kg}kg</span>
                                 </div>
                                 {/* Contact Information - Always show section with status */}
                                 <div className="flex items-center gap-3 text-xs text-muted-foreground mt-1">
@@ -1863,13 +1867,15 @@ const getApplicationStatusBadge = (status: string) => {
                                 </div>
                               )}
                               <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                                <span>{new Date().getFullYear() - appData.birth_year}yo</span>
+                                <span>•</span>
+                                <span>{appData.weight_kg}kg</span>
+                                <span>•</span>
+                                <span>{appData.height_cm}cm</span>
+                                <span>•</span>
                                 <span>{appData.gender}</span>
                                 <span>•</span>
-                                <span>{new Date().getFullYear() - appData.birth_year} years old</span>
-                                <span>•</span>
                                 <span className="truncate">{appData.city}, {appData.country}</span>
-                                <span>•</span>
-                                <span>{appData.height_cm}cm, {appData.weight_kg}kg</span>
                               </div>
                               <div className="flex items-center gap-3 text-xs text-muted-foreground mt-0.5">
                                 <span>Born: {appData.birth_day}/{appData.birth_month}/{appData.birth_year}</span>
