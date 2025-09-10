@@ -468,17 +468,18 @@ export function ContestantCard({
               {/* Example text area with photo requirements */}
               {isExample && (
                 <div className="bg-yellow-400 text-black px-4 py-2">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div></div>
-                    <div>
-                      <div className="text-sm font-semibold mb-1">How your photos should look:</div>
-                      <div className="text-xs space-y-0.5">
-                        <div>• No makeup</div>
-                        <div>• No filter</div>
-                        <div>• No photo editing</div>
-                        <div>• No glasses</div>
-                        <div>• Tight-fitting clothes</div>
-                      </div>
+                  <div className="text-sm font-semibold mb-2 text-center">How your photos should look:</div>
+                  <div className="grid grid-cols-2 gap-4 text-xs">
+                    <div className="space-y-0.5">
+                      <div>• Look like an ID photo</div>
+                      <div>• No makeup</div>
+                      <div>• No filters</div>
+                      <div>• No glasses allowed.</div>
+                    </div>
+                    <div className="space-y-0.5">
+                      <div>• Whole body from head to toe.</div>
+                      <div>• Wear tight/fitted clothes. No dresses, skirts, heels.</div>
+                      <div>• No bags or backpacks.</div>
                     </div>
                   </div>
                 </div>
