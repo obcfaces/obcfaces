@@ -78,9 +78,31 @@ export function ContestantCard({
   const [hasCommented, setHasCommented] = useState(false);
   const [user, setUser] = useState<any>(null);
   const [dislikesCount, setDislikesCount] = useState<number>(0);
+  const [isAdmin, setIsAdmin] = useState(false);
   
   // Use unified card data hook
   const { data: cardData, loading: cardDataLoading } = useCardData(name, user?.id, profileId);
+
+  // Check if user is admin
+  useEffect(() => {
+    const checkAdminStatus = async () => {
+      if (!user?.id) return;
+      
+      try {
+        const { data: roles } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', user.id);
+        
+        setIsAdmin(roles?.some(r => r.role === 'admin' || r.role === 'moderator') || false);
+      } catch (error) {
+        console.error('Error checking admin status:', error);
+        setIsAdmin(false);
+      }
+    };
+
+    checkAdminStatus();
+  }, [user?.id]);
 
   // Load user's current rating using secure function with user_id
   useEffect(() => {
@@ -366,7 +388,10 @@ export function ContestantCard({
                 #{rank}
               </div>
               <div className="bg-contest-blue text-white px-2 py-1.5 rounded-bl-lg text-lg font-bold">
-                {averageRating > 0 ? averageRating.toFixed(1) : userRating.toFixed(1)}
+                {isAdmin ? 
+                  (userRating > 0 ? userRating.toFixed(1) : (averageRating > 0 ? averageRating.toFixed(1) : '0.0')) :
+                  (averageRating > 0 ? averageRating.toFixed(1) : '0.0')
+                }
               </div>
             </div>
           )}
@@ -610,12 +635,15 @@ export function ContestantCard({
             <Popover>
               <PopoverTrigger asChild>
                 <div className="bg-contest-blue text-white px-2 py-1.5 rounded-bl-lg text-base sm:text-lg font-bold shadow-sm cursor-pointer hover:bg-contest-blue/90 transition-colors">
-                  {rating.toFixed(1)}
+                  {isAdmin ? 
+                    (userRating > 0 ? userRating.toFixed(1) : (averageRating > 0 ? averageRating.toFixed(1) : '0.0')) :
+                    (averageRating > 0 ? averageRating.toFixed(1) : '0.0')
+                  }
                 </div>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-3">
                 <div className="text-sm">
-                  You rated {userRating.toFixed(0)} — <button 
+                  {isAdmin ? `You rated ${userRating.toFixed(0)} — ` : `Average: ${averageRating.toFixed(1)} — `}<button 
                     className="text-contest-blue hover:underline" 
                     onClick={() => setIsEditing(true)}
                   >
