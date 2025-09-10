@@ -110,7 +110,7 @@ export function ContestantCard({
       if (!user?.id || !profileId) return;
 
       try {
-        console.log('Loading user rating for participant:', profileId, 'user:', user.id);
+        console.log('Loading user rating for participant:', profileId, 'user:', user.id, 'isAdmin:', isAdmin);
         const { data: userRating } = await supabase
           .rpc('get_user_rating_for_participant', { 
             participant_id_param: profileId 
@@ -131,7 +131,7 @@ export function ContestantCard({
     };
 
     loadUserRating();
-  }, [user?.id, profileId]);
+  }, [user?.id, profileId, isAdmin]);
   // Initialize isVoted state synchronously by checking localStorage
   const [isVoted, setIsVoted] = useState(() => {
     if (propIsVoted) return true;
@@ -388,10 +388,13 @@ export function ContestantCard({
                 #{rank}
               </div>
               <div className="bg-contest-blue text-white px-2 py-1.5 rounded-bl-lg text-lg font-bold">
-                {isAdmin ? 
-                  (userRating > 0 ? userRating.toFixed(1) : (averageRating > 0 ? averageRating.toFixed(1) : '0.0')) :
-                  (averageRating > 0 ? averageRating.toFixed(1) : '0.0')
-                }
+                {(() => {
+                  console.log('Rating display - isAdmin:', isAdmin, 'userRating:', userRating, 'averageRating:', averageRating);
+                  if (isAdmin && userRating > 0) {
+                    return userRating.toFixed(1);
+                  }
+                  return averageRating > 0 ? averageRating.toFixed(1) : '0.0';
+                })()}
               </div>
             </div>
           )}
@@ -635,15 +638,21 @@ export function ContestantCard({
             <Popover>
               <PopoverTrigger asChild>
                 <div className="bg-contest-blue text-white px-2 py-1.5 rounded-bl-lg text-base sm:text-lg font-bold shadow-sm cursor-pointer hover:bg-contest-blue/90 transition-colors">
-                  {isAdmin ? 
-                    (userRating > 0 ? userRating.toFixed(1) : (averageRating > 0 ? averageRating.toFixed(1) : '0.0')) :
-                    (averageRating > 0 ? averageRating.toFixed(1) : '0.0')
-                  }
+                  {(() => {
+                    console.log('Compact rating display - isAdmin:', isAdmin, 'userRating:', userRating, 'averageRating:', averageRating);
+                    if (isAdmin && userRating > 0) {
+                      return userRating.toFixed(1);
+                    }
+                    return averageRating > 0 ? averageRating.toFixed(1) : '0.0';
+                  })()}
                 </div>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-3">
                 <div className="text-sm">
-                  {isAdmin ? `You rated ${userRating.toFixed(0)} — ` : `Average: ${averageRating.toFixed(1)} — `}<button 
+                  {isAdmin && userRating > 0 ? 
+                    `You rated ${userRating.toFixed(0)} — ` : 
+                    `Average: ${averageRating.toFixed(1)} (${totalVotes} votes) — `
+                  }<button 
                     className="text-contest-blue hover:underline" 
                     onClick={() => setIsEditing(true)}
                   >
