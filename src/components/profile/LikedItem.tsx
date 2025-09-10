@@ -831,7 +831,7 @@ const LikedItem = ({
               </Link>
             ) : (
               authorName
-            )}, {candidateAge}yo <span className="text-sm text-muted-foreground font-normal">({candidateWeight} kg · {candidateHeight} cm)</span>
+            )}, {candidateAge} yo <span className="text-sm text-muted-foreground font-normal">({candidateWeight} kg · {candidateHeight} cm)</span>
           </h3>
           <div className="text-contest-blue text-sm">{getCountryDisplayName(candidateCountry)}{candidateCity !== "Unknown" && candidateCity !== candidateCountry ? ` · ${candidateCity}` : ''}</div>
         </div>
