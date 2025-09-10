@@ -18,7 +18,7 @@ import { PhotoModal } from "@/components/photo-modal";
 import { ProfilePhotoModal } from "@/components/profile-photo-modal";
 import { ContestParticipationModal } from "@/components/contest-participation-modal";
 import CreatePostModal from "@/components/create-post-modal";
-import { REJECTION_REASONS } from "@/components/reject-reason-modal";
+import { REJECTION_REASONS, RejectReasonModal, RejectionReasonType } from "@/components/reject-reason-modal";
 import c1 from "@/assets/contestant-1.jpg";
 import c2 from "@/assets/contestant-2.jpg";
 import c3 from "@/assets/contestant-3.jpg";
@@ -112,6 +112,10 @@ const Profile = () => {
   const [postsViewMode, setPostsViewMode] = useState<'compact' | 'full'>('full');
   const [profilePhotos, setProfilePhotos] = useState<string[]>([]);
   const [loadingPhotos, setLoadingPhotos] = useState(true);
+  
+  // Rejection reason modal states
+  const [showRejectReasonModal, setShowRejectReasonModal] = useState(false);
+  const [updatingRejection, setUpdatingRejection] = useState(false);
 
   // Demo profile for fallback
   const demoProfile: ProfileRow = {
@@ -314,6 +318,38 @@ const Profile = () => {
     }
     // Navigate to messages page with recipient parameter using React Router
     navigate(`/messages?recipient=${id}`);
+  };
+
+  const handleUpdateRejectionReason = async (reasonType: RejectionReasonType, notes: string) => {
+    if (!contestApplication?.id) return;
+
+    setUpdatingRejection(true);
+    try {
+      const { error } = await supabase
+        .from('contest_applications')
+        .update({
+          rejection_reason_type: reasonType as string,
+          rejection_reason: notes || null
+        })
+        .eq('id', contestApplication.id);
+
+      if (error) throw error;
+
+      // Update local state
+      setContestApplication(prev => prev ? {
+        ...prev,
+        rejection_reason_type: reasonType,
+        rejection_reason: notes || null
+      } : null);
+
+      setShowRejectReasonModal(false);
+      toast({ description: "Rejection reason updated successfully" });
+    } catch (error) {
+      console.error('Error updating rejection reason:', error);
+      toast({ description: "Error updating rejection reason" });
+    } finally {
+      setUpdatingRejection(false);
+    }
   };
 
   const handleBioSave = async () => {
@@ -1339,20 +1375,28 @@ const Profile = () => {
                           <h3 className="font-semibold text-destructive">Application Rejected</h3>
                         </div>
                         <div className="space-y-2">
-                          {contestApplication.rejection_reason_type && (
-                            <p className="text-sm text-destructive/80">
-                              <span className="font-medium">Reason:</span> {REJECTION_REASONS[contestApplication.rejection_reason_type as keyof typeof REJECTION_REASONS]}
-                            </p>
-                          )}
-                          {contestApplication.rejection_reason && (
-                            <p className="text-sm text-destructive/80">
-                              <span className="font-medium">Comment:</span> {contestApplication.rejection_reason}
-                            </p>
-                          )}
-                        </div>
-                        <p className="text-sm text-muted-foreground mt-3">
-                          Please address the issues mentioned above and resubmit your application.
-                        </p>
+                           {contestApplication.rejection_reason_type && (
+                             <p className="text-sm text-destructive/80">
+                               <span className="font-medium">Reason:</span> {REJECTION_REASONS[contestApplication.rejection_reason_type as keyof typeof REJECTION_REASONS]}
+                               {isOwner && (
+                                 <button 
+                                   onClick={() => setShowRejectReasonModal(true)}
+                                   className="ml-2 text-primary hover:text-primary/80 underline text-sm"
+                                 >
+                                   change
+                                 </button>
+                               )}
+                             </p>
+                           )}
+                           {contestApplication.rejection_reason && (
+                             <p className="text-sm text-destructive/80">
+                               <span className="font-medium">Comment:</span> {contestApplication.rejection_reason}
+                             </p>
+                           )}
+                         </div>
+                         <p className="text-sm text-muted-foreground mt-3">
+                           Please address the issues mentioned above and resubmit your application.
+                         </p>
                       </div>
                     )}
                    
@@ -2296,6 +2340,14 @@ const Profile = () => {
         currentIndex={selectedPhotoIndex}
         profileId={id || ""}
         profileName={profile.display_name || "Пользователь"}
+      />
+
+      {/* Rejection Reason Modal */}
+      <RejectReasonModal
+        isOpen={showRejectReasonModal}
+        onClose={() => setShowRejectReasonModal(false)}
+        onConfirm={handleUpdateRejectionReason}
+        isLoading={updatingRejection}
       />
 
     </div>

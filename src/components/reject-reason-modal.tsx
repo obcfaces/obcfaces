@@ -19,34 +19,26 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 
 export type RejectionReasonType = 
-  | 'inappropriate_photos'
-  | 'incomplete_information'
-  | 'age_requirements'
-  | 'duplicate_application'
-  | 'quality_standards'
-  | 'terms_violation'
-  | 'makeup_not_allowed'
-  | 'incorrect_pose'
-  | 'poor_photo_quality'
-  | 'clothing_not_form_fitting'
-  | 'filters_not_allowed'
-  | 'without_signature'
-  | 'other';
+  | 'first_photo_makeup'
+  | 'first_photo_id_style'
+  | 'first_photo_blurry'
+  | 'first_photo_filters'
+  | 'second_photo_makeup'
+  | 'second_photo_pose'
+  | 'second_photo_clothing'
+  | 'second_photo_accessories'
+  | 'both_photos_quality';
 
 const REJECTION_REASONS = {
-  inappropriate_photos: "Inappropriate photos",
-  incomplete_information: "Incomplete information",
-  age_requirements: "Does not meet age requirements",
-  duplicate_application: "Duplicate application",
-  quality_standards: "Does not meet quality standards",
-  terms_violation: "Terms violation",
-  makeup_not_allowed: "Makeup is not allowed",
-  incorrect_pose: "Incorrect body position or pose",
-  poor_photo_quality: "Poor photo quality",
-  clothing_not_form_fitting: "Clothing must be form-fitting",
-  filters_not_allowed: "Filters are not allowed",
-  without_signature: "Without signature",
-  other: "Other reason"
+  first_photo_makeup: "First photo – No makeup allowed.",
+  first_photo_id_style: "First photo – Must look like an ID photo: face straight to the camera, hands together in front.",
+  first_photo_blurry: "First photo – Photo is too blurry/low quality.",
+  first_photo_filters: "First photo – No filters allowed.",
+  second_photo_makeup: "Second photo – No makeup allowed.",
+  second_photo_pose: "Second photo – Must show the whole body from head to toe, standing straight, arms at the sides.",
+  second_photo_clothing: "Second photo – Wear tight/fitted clothes (swimsuit, fitted shorts, or top). Dresses, skirts, loose tops, or high heels are not allowed.",
+  second_photo_accessories: "Second photo – No bags or backpacks.",
+  both_photos_quality: "Both photos – The quality is too low."
 };
 
 interface RejectReasonModalProps {
