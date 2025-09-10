@@ -338,7 +338,7 @@ const Profile = () => {
       // Update local state
       setContestApplication(prev => prev ? {
         ...prev,
-        rejection_reason_type: reasonType,
+        rejection_reason_type: reasonType as any, // Cast to any since enum was updated
         rejection_reason: notes || null
       } : null);
 
