@@ -1260,7 +1260,7 @@ const ApplicationHistoryModal = ({ applicationId, isOpen, onClose }: Application
                   {appData.first_name} {appData.last_name} - Версия {history.length - index}
                 </h3>
                 <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                  <span>{new Date().getFullYear() - appData.birth_year}yo</span>
+                  <span>{new Date().getFullYear() - appData.birth_year} yo</span>
                   <span>•</span>
                   <span>{appData.weight_kg}kg</span>
                   <span>•</span>
@@ -1585,7 +1585,7 @@ const getApplicationStatusBadge = (status: string) => {
                                 {participant.first_name} {participant.last_name}
                               </h3>
                                <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                                 <span>{participant.age}yo</span>
+                                 <span>{participant.age} yo</span>
                                  <span>•</span>
                                  <span>{participant.weight_kg}kg</span>
                                  <span>•</span>
@@ -1867,7 +1867,7 @@ const getApplicationStatusBadge = (status: string) => {
                                 </div>
                               )}
                               <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                                <span>{new Date().getFullYear() - appData.birth_year}yo</span>
+                                <span>{new Date().getFullYear() - appData.birth_year} yo</span>
                                 <span>•</span>
                                 <span>{appData.weight_kg}kg</span>
                                 <span>•</span>
