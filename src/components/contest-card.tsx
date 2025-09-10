@@ -270,7 +270,11 @@ export function ContestantCard({
           });
       }
       
+      // Refresh card data to update like count
+      refresh();
+      
     } catch (error) {
+      console.error('Error handling like:', error);
       // Revert optimistic update on error
       setIsLiked([wasLiked, wasLiked]);
       toast({ description: "Failed to perform action" });
