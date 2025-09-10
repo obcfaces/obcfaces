@@ -157,57 +157,108 @@ export const useCardData = (participantName: string, userId?: string, profileId?
     loadCardData();
   }, [participantName, userId, profileId]);
 
-  return { data, loading, refresh: () => {
-    if (participantName) {
-      const loadCardData = async () => {
-        setLoading(true);
+  const refresh = async () => {
+    if (!participantName) return;
+    
+    setLoading(true);
+    
+    try {
+      console.log('Refreshing card data for:', participantName, 'profileId:', profileId, 'userId:', userId);
+      
+      // Use the same logic as the main useEffect
+      if (profileId) {
+        // Use new user_id based system
+        const baseContentId = `contestant-user-${profileId}`;
+        const photoContentPattern = `contestant-user-${profileId}-%`;
         
-        try {
-          const normalizedName = participantName.trim();
-          
-          const { data: allLikes } = await supabase
-            .from("likes")
-            .select("content_id, user_id")
-            .eq("content_type", "contest")
-            .or(`content_id.ilike.%${normalizedName}%`);
+        // Load likes using new format
+        const { data: likesData, error: likesError } = await supabase
+          .from('likes')
+          .select('user_id')
+          .eq('content_type', 'contest')
+          .or(`content_id.eq.${baseContentId},content_id.like.${photoContentPattern}`);
 
-          const participantLikes = allLikes?.filter(like => 
-            like.content_id.includes(normalizedName) &&
-            (like.content_id.includes('contestant-card-') || like.content_id.includes('contestant-photo-'))
-          ) || [];
+        console.log('Refresh - Likes data:', likesData, 'error:', likesError);
 
-          const totalLikes = participantLikes.length;
-          const isUserLiked = userId ? participantLikes.some(like => like.user_id === userId) : false;
+        const totalLikes = likesData?.length || 0;
+        const isUserLiked = userId ? likesData?.some(like => like.user_id === userId) || false : false;
 
-          const { data: allComments } = await supabase
-            .from("photo_comments")
-            .select("content_id, user_id")
-            .eq("content_type", "contest")
-            .or(`content_id.ilike.%${normalizedName}%`);
+        // Load comments using new format
+        const { data: commentsData, error: commentsError } = await supabase
+          .from('photo_comments')
+          .select('user_id')
+          .eq('content_type', 'contest')
+          .or(`content_id.eq.${baseContentId},content_id.like.${photoContentPattern}`);
 
-          const participantComments = allComments?.filter(comment => 
-            comment.content_id.includes(normalizedName)
-          ) || [];
+        const totalComments = commentsData?.length || 0;
+        const hasUserCommented = userId ? commentsData?.some(comment => comment.user_id === userId) || false : false;
+        
+        // Load shares using new format  
+        const { data: sharesData, error: sharesError } = await supabase
+          .from('shares')
+          .select('user_id')
+          .eq('content_type', 'contest')
+          .or(`content_id.eq.${baseContentId},content_id.like.${photoContentPattern}`);
 
-          const totalComments = participantComments.length;
-          const hasUserCommented = userId ? participantComments.some(comment => comment.user_id === userId) : false;
+        const totalShares = sharesData?.length || 0;
+        const hasUserShared = userId ? sharesData?.some(share => share.user_id === userId) || false : false;
 
-          setData({
-            likes: totalLikes,
-            comments: totalComments,
-            shares: 0,
-            isLiked: isUserLiked,
-            hasCommented: hasUserCommented,
-            hasShared: false
-          });
-        } catch (error) {
-          console.error('Error refreshing card data:', error);
-        } finally {
-          setLoading(false);
-        }
-      };
+        console.log('Refresh - Final card data:', { likes: totalLikes, comments: totalComments, shares: totalShares, isLiked: isUserLiked, hasCommented: hasUserCommented, hasShared: hasUserShared });
 
-      loadCardData();
+        setData({
+          likes: totalLikes,
+          comments: totalComments,
+          shares: totalShares,
+          isLiked: isUserLiked,
+          hasCommented: hasUserCommented,
+          hasShared: hasUserShared
+        });
+      } else {
+        // Fallback to name-based system for older data
+        const normalizedName = participantName.trim();
+        
+        const { data: allLikes } = await supabase
+          .from("likes")
+          .select("content_id, user_id")
+          .eq("content_type", "contest")
+          .or(`content_id.ilike.%${normalizedName}%`);
+
+        const participantLikes = allLikes?.filter(like => 
+          like.content_id.includes(normalizedName) &&
+          (like.content_id.includes('contestant-card-') || like.content_id.includes('contestant-photo-'))
+        ) || [];
+
+        const totalLikes = participantLikes.length;
+        const isUserLiked = userId ? participantLikes.some(like => like.user_id === userId) : false;
+
+        const { data: allComments } = await supabase
+          .from("photo_comments")
+          .select("content_id, user_id")
+          .eq("content_type", "contest")
+          .or(`content_id.ilike.%${normalizedName}%`);
+
+        const participantComments = allComments?.filter(comment => 
+          comment.content_id.includes(normalizedName)
+        ) || [];
+
+        const totalComments = participantComments.length;
+        const hasUserCommented = userId ? participantComments.some(comment => comment.user_id === userId) : false;
+
+        setData({
+          likes: totalLikes,
+          comments: totalComments,
+          shares: 0,
+          isLiked: isUserLiked,
+          hasCommented: hasUserCommented,
+          hasShared: false
+        });
+      }
+    } catch (error) {
+      console.error('Error refreshing card data:', error);
+    } finally {
+      setLoading(false);
     }
-  }};
+  };
+
+  return { data, loading, refresh };
 };
