@@ -432,8 +432,8 @@ export function ContestantCard({
             <div className="absolute inset-0 bg-gray-300 flex items-center justify-center h-full">
               <div className="-translate-x-2 flex items-center gap-6">
                 <span className="text-2xl font-medium text-gray-800 mr-8">Vote</span>
-                <div className="scale-[2]">
-                  <StarRating 
+                <div className="scale-[1.5]">
+                  <StarRating
                     rating={rating}
                     isVoted={false}
                     variant="white"
@@ -715,8 +715,8 @@ export function ContestantCard({
           {!isVoted && !isEditing && !showThanks && !isExample && (
             <div className="absolute inset-0 bg-gray-300 rounded-r flex flex-col items-center justify-center gap-3">
               <span className="text-lg sm:text-xl font-medium text-gray-800">Vote</span>
-               <div className="scale-[1.5] sm:scale-[1.8]">
-                <StarRating 
+               <div className="scale-[1.2] sm:scale-[1.4]">
+                <StarRating
                   rating={0} 
                   isVoted={false}
                   variant="white"
@@ -745,8 +745,8 @@ export function ContestantCard({
           {isVoted && isEditing && !showThanks && !isExample && (
             <div className="absolute inset-0 bg-gray-300 rounded-r flex flex-col items-center justify-center gap-3">
               <span className="text-lg sm:text-xl font-medium text-gray-800">Vote</span>
-              <div className="scale-[1.5] sm:scale-[1.8]">
-                <StarRating 
+              <div className="scale-[1.2] sm:scale-[1.4]">
+                <StarRating
                   rating={0} 
                   isVoted={false}
                   variant="white"
