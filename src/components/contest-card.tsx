@@ -243,9 +243,11 @@ export function ContestantCard({
       return;
     }
     
-    // Use card content_id instead of photo content_id for card likes
-    const contentId = `contestant-card-${name}`;
+    // Use profileId-based content_id if available, fallback to name-based for older system
+    const contentId = profileId ? `contestant-user-${profileId}` : `contestant-card-${name}`;
     const wasLiked = isLiked[0]; // Card likes are stored in first index
+    
+    console.log('Handling like with contentId:', contentId, 'profileId:', profileId, 'wasLiked:', wasLiked);
     
     // Optimistic UI update
     setIsLiked([!wasLiked, !wasLiked]);
@@ -253,21 +255,33 @@ export function ContestantCard({
     try {
       if (wasLiked) {
         // Unlike
-        await supabase
+        const { error } = await supabase
           .from("likes")
           .delete()
           .eq("user_id", user.id)
           .eq("content_type", "contest")
           .eq("content_id", contentId);
+          
+        if (error) {
+          console.error('Error deleting like:', error);
+          throw error;
+        }
+        console.log('Successfully deleted like');
       } else {
         // Like
-        await supabase
+        const { error } = await supabase
           .from("likes")
           .insert({
             user_id: user.id,
             content_type: "contest",
             content_id: contentId,
           });
+          
+        if (error) {
+          console.error('Error inserting like:', error);
+          throw error;
+        }
+        console.log('Successfully inserted like');
       }
       
       // Refresh card data to update like count
