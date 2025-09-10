@@ -539,7 +539,7 @@ export function ContestantCard({
                >
                   <ThumbsUp className={cn("w-4 h-4", (isLiked[0] || isLiked[1]) ? "text-blue-500" : "text-gray-500")} strokeWidth={1} />
                    <span className={cn("hidden sm:inline", (isLiked[0] || isLiked[1]) ? "text-blue-500" : "text-gray-500")}>Like</span>
-                    <span className={cn((isLiked[0] || isLiked[1]) ? "text-blue-500" : "text-gray-500")}>{cardData.likes}</span>
+                    <span className={cn("font-normal", (isLiked[0] || isLiked[1]) ? "text-blue-500" : "text-gray-500")}>{cardData.likes}</span>
                </button>
                {showDislike && (
                  <button
@@ -567,7 +567,7 @@ export function ContestantCard({
                >
                   <MessageCircle className={cn("w-4 h-4", cardData.comments > 0 ? "text-primary" : "text-gray-500")} strokeWidth={1} />
                   <span className="hidden sm:inline">Comment</span>
-                   <span>{cardData.comments}</span>
+                  <span className={cn("font-normal", hasCommented ? "text-blue-500" : "text-gray-500")}>{cardData.comments}</span>
                </button>
                <button
                  type="button"
@@ -599,7 +599,7 @@ export function ContestantCard({
                 >
                    <Share2 className="w-4 h-4" strokeWidth={1} />
                    <span className="hidden sm:inline">Share</span>
-                   <span>{cardData.shares}</span>
+                   <span className="font-normal">{cardData.shares}</span>
                </button>
             </div>
            )}
@@ -829,7 +829,7 @@ export function ContestantCard({
                    >
                        <ThumbsUp className={cn("w-3.5 h-3.5", (isLiked[0] || isLiked[1]) ? "text-blue-500" : "text-gray-500")} strokeWidth={1} />
                        <span className={cn("hidden xl:inline", (isLiked[0] || isLiked[1]) ? "text-blue-500" : "text-gray-500")}>Like</span>
-                        <span className={cn((isLiked[0] || isLiked[1]) ? "text-blue-500" : "text-gray-500")}>{cardData.likes}</span>
+                        <span className={cn("font-normal", (isLiked[0] || isLiked[1]) ? "text-blue-500" : "text-gray-500")}>{cardData.likes}</span>
                    </button>
                   {showDislike && (
                     <button
@@ -843,7 +843,7 @@ export function ContestantCard({
                     >
                       <ThumbsDown className="w-3.5 h-3.5" />
                       <span className="hidden xl:inline">Dislike</span>
-                      <span>{dislikesCount}</span>
+                       <span className="font-normal">{dislikesCount}</span>
                     </button>
                   )}
                    <button
@@ -857,7 +857,7 @@ export function ContestantCard({
                    >
                        <MessageCircle className={cn("w-3.5 h-3.5", cardData.comments > 0 ? "text-primary" : "text-gray-500")} strokeWidth={1} />
                        <span className="hidden xl:inline">Comment</span>
-                       <span>{cardData.comments}</span>
+                       <span className={cn("font-normal", hasCommented ? "text-blue-500" : "text-gray-500")}>{cardData.comments}</span>
                    </button>
                    <button
                      type="button"
@@ -889,7 +889,7 @@ export function ContestantCard({
                     >
                       <Share2 className="w-3.5 h-3.5" strokeWidth={1} />
                       <span className="hidden xl:inline">Share</span>
-                      <span>{cardData.shares}</span>
+                      <span className="font-normal">{cardData.shares}</span>
                    </button>
                 </div>
               )}
