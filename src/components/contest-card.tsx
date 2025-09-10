@@ -538,8 +538,8 @@ export function ContestantCard({
                  aria-label="Like"
                >
                   <ThumbsUp className={cn("w-4 h-4", (isLiked[0] || isLiked[1]) ? "text-blue-500 fill-blue-500" : "text-gray-500")} strokeWidth={1} />
-                  <span className={cn("hidden sm:inline", (isLiked[0] || isLiked[1]) ? "text-blue-500" : "text-gray-500")}>Like</span>
-                   {cardData.likes > 0 && <span className={cn((isLiked[0] || isLiked[1]) ? "text-blue-500" : "text-gray-500")}>{cardData.likes}</span>}
+                   <span className={cn("hidden sm:inline", (isLiked[0] || isLiked[1]) ? "text-blue-500" : "text-gray-500")}>Like</span>
+                    <span className={cn((isLiked[0] || isLiked[1]) ? "text-blue-500" : "text-gray-500")}>{cardData.likes}</span>
                </button>
                {showDislike && (
                  <button
@@ -565,9 +565,9 @@ export function ContestantCard({
                  onClick={handleComment}
                  aria-label="Comments"
                >
-                 <MessageCircle className="w-4 h-4 text-primary" strokeWidth={1} />
-                 <span className="hidden sm:inline">Comment</span>
-                  <span>{cardData.comments}</span>
+                  <MessageCircle className={cn("w-4 h-4", cardData.comments > 0 ? "text-primary" : "text-gray-500")} strokeWidth={1} />
+                  <span className="hidden sm:inline">Comment</span>
+                   <span>{cardData.comments}</span>
                </button>
                <button
                  type="button"
@@ -579,8 +579,8 @@ export function ContestantCard({
                  })}
                  aria-label="Share"
                >
-                  <Share2 className="w-4 h-4" strokeWidth={1} />
-                  <span className="hidden sm:inline">Share</span>
+                   <Share2 className="w-4 h-4" strokeWidth={1} />
+                   <span className="hidden sm:inline">Share</span>
                </button>
             </div>
            )}
@@ -808,9 +808,9 @@ export function ContestantCard({
                      onClick={() => handleLike(0)}
                      aria-label="Like"
                    >
-                      <ThumbsUp className={cn("w-3.5 h-3.5", (isLiked[0] || isLiked[1]) ? "text-blue-500 fill-blue-500" : "text-gray-500")} strokeWidth={1} />
-                      <span className={cn("hidden xl:inline", (isLiked[0] || isLiked[1]) ? "text-blue-500" : "text-gray-500")}>Like</span>
-                       {cardData.likes > 0 && <span className={cn((isLiked[0] || isLiked[1]) ? "text-blue-500" : "text-gray-500")}>{cardData.likes}</span>}
+                       <ThumbsUp className={cn("w-3.5 h-3.5", (isLiked[0] || isLiked[1]) ? "text-blue-500 fill-blue-500" : "text-gray-500")} strokeWidth={1} />
+                       <span className={cn("hidden xl:inline", (isLiked[0] || isLiked[1]) ? "text-blue-500" : "text-gray-500")}>Like</span>
+                        <span className={cn((isLiked[0] || isLiked[1]) ? "text-blue-500" : "text-gray-500")}>{cardData.likes}</span>
                    </button>
                   {showDislike && (
                     <button
@@ -836,9 +836,9 @@ export function ContestantCard({
                      onClick={handleComment}
                      aria-label="Comments"
                    >
-                      <MessageCircle className="w-3.5 h-3.5 text-primary" strokeWidth={1} />
-                      <span className="hidden xl:inline">Comment</span>
-                      <span>{cardData.comments}</span>
+                       <MessageCircle className={cn("w-3.5 h-3.5", cardData.comments > 0 ? "text-primary" : "text-gray-500")} strokeWidth={1} />
+                       <span className="hidden xl:inline">Comment</span>
+                       <span>{cardData.comments}</span>
                    </button>
                    <button
                      type="button"
@@ -850,8 +850,8 @@ export function ContestantCard({
                      })}
                      aria-label="Share"
                    >
-                     <Share2 className="w-3.5 h-3.5" strokeWidth={1} />
-                     <span className="hidden sm:inline">Share</span>
+                      <Share2 className="w-3.5 h-3.5" strokeWidth={1} />
+                      <span className="hidden xl:inline">Share</span>
                    </button>
                 </div>
               )}
