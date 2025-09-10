@@ -4,16 +4,20 @@ import { supabase } from '@/integrations/supabase/client';
 export interface CardData {
   likes: number;
   comments: number;
+  shares: number;
   isLiked: boolean;
   hasCommented: boolean;
+  hasShared: boolean;
 }
 
 export const useCardData = (participantName: string, userId?: string, profileId?: string) => {
   const [data, setData] = useState<CardData>({
     likes: 0,
     comments: 0,
+    shares: 0,
     isLiked: false,
-    hasCommented: false
+    hasCommented: false,
+    hasShared: false
   });
   const [loading, setLoading] = useState(true);
 
@@ -61,13 +65,27 @@ export const useCardData = (participantName: string, userId?: string, profileId?
           const totalComments = commentsData?.length || 0;
           const hasUserCommented = userId ? commentsData?.some(comment => comment.user_id === userId) || false : false;
 
-          console.log('Final card data:', { likes: totalLikes, comments: totalComments, isLiked: isUserLiked, hasCommented: hasUserCommented });
+          // Load shares using new format  
+          const { data: sharesData, error: sharesError } = await supabase
+            .from('shares')
+            .select('user_id')
+            .eq('content_type', 'contest')
+            .or(`content_id.eq.${baseContentId},content_id.like.${photoContentPattern}`);
+
+          console.log('Shares data:', sharesData, 'error:', sharesError);
+
+          const totalShares = sharesData?.length || 0;
+          const hasUserShared = userId ? sharesData?.some(share => share.user_id === userId) || false : false;
+
+          console.log('Final card data:', { likes: totalLikes, comments: totalComments, shares: totalShares, isLiked: isUserLiked, hasCommented: hasUserCommented, hasShared: hasUserShared });
 
           setData({
             likes: totalLikes,
             comments: totalComments,
+            shares: totalShares,
             isLiked: isUserLiked,
-            hasCommented: hasUserCommented
+            hasCommented: hasUserCommented,
+            hasShared: hasUserShared
           });
         } else {
           // Fallback to name-based system for older data
@@ -115,8 +133,10 @@ export const useCardData = (participantName: string, userId?: string, profileId?
           setData({
             likes: totalLikes,
             comments: totalComments,
+            shares: 0,
             isLiked: isUserLiked,
-            hasCommented: hasUserCommented
+            hasCommented: hasUserCommented,
+            hasShared: false
           });
         }
       } catch (error) {
@@ -124,8 +144,10 @@ export const useCardData = (participantName: string, userId?: string, profileId?
         setData({
           likes: 0,
           comments: 0,
+          shares: 0,
           isLiked: false,
-          hasCommented: false
+          hasCommented: false,
+          hasShared: false
         });
       } finally {
         setLoading(false);
@@ -173,8 +195,10 @@ export const useCardData = (participantName: string, userId?: string, profileId?
           setData({
             likes: totalLikes,
             comments: totalComments,
+            shares: 0,
             isLiked: isUserLiked,
-            hasCommented: hasUserCommented
+            hasCommented: hasUserCommented,
+            hasShared: false
           });
         } catch (error) {
           console.error('Error refreshing card data:', error);
