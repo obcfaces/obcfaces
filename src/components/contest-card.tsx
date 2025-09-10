@@ -467,14 +467,12 @@ export function ContestantCard({
            <div className="relative">
               {/* Example text area with photo requirements */}
               {isExample && (
-                <div className="bg-yellow-400 text-black px-4 py-3">
-                  <div className="text-lg font-semibold text-center mb-2">Example Card</div>
-                  <div className="text-sm opacity-80 text-center mb-3">This is how your card will look</div>
+                <div className="bg-yellow-400 text-black px-4 py-2">
                   <div className="grid grid-cols-2 gap-4">
                     <div></div>
                     <div>
-                      <div className="text-sm font-semibold mb-2">How your photos should look:</div>
-                      <div className="text-xs space-y-1">
+                      <div className="text-sm font-semibold mb-1">How your photos should look:</div>
+                      <div className="text-xs space-y-0.5">
                         <div>• No makeup</div>
                         <div>• No filter</div>
                         <div>• No photo editing</div>
