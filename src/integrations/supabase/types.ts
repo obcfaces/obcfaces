@@ -1126,18 +1126,15 @@ export type Database = {
     Enums: {
       app_role: "admin" | "moderator" | "user"
       rejection_reason_type:
-        | "inappropriate_photos"
-        | "incomplete_information"
-        | "age_requirements"
-        | "duplicate_application"
-        | "quality_standards"
-        | "terms_violation"
-        | "other"
-        | "makeup_not_allowed"
-        | "incorrect_pose"
-        | "poor_photo_quality"
-        | "clothing_not_form_fitting"
-        | "filters_not_allowed"
+        | "first_photo_makeup"
+        | "first_photo_id_style"
+        | "first_photo_blurry"
+        | "first_photo_filters"
+        | "second_photo_makeup"
+        | "second_photo_pose"
+        | "second_photo_clothing"
+        | "second_photo_accessories"
+        | "both_photos_quality"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1267,18 +1264,15 @@ export const Constants = {
     Enums: {
       app_role: ["admin", "moderator", "user"],
       rejection_reason_type: [
-        "inappropriate_photos",
-        "incomplete_information",
-        "age_requirements",
-        "duplicate_application",
-        "quality_standards",
-        "terms_violation",
-        "other",
-        "makeup_not_allowed",
-        "incorrect_pose",
-        "poor_photo_quality",
-        "clothing_not_form_fitting",
-        "filters_not_allowed",
+        "first_photo_makeup",
+        "first_photo_id_style",
+        "first_photo_blurry",
+        "first_photo_filters",
+        "second_photo_makeup",
+        "second_photo_pose",
+        "second_photo_clothing",
+        "second_photo_accessories",
+        "both_photos_quality",
       ],
     },
   },
