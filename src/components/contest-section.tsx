@@ -8,7 +8,7 @@ import contestant2Face from "@/assets/contestant-2-face.jpg";
 import contestant2Full from "@/assets/contestant-2-full.jpg";
 import contestant3Face from "@/assets/contestant-3-face.jpg";
 import contestant3Full from "@/assets/contestant-3-full.jpg";
-import testContestantFace from "/lovable-uploads/0db6ac53-7148-4ae3-9622-f3af6675c364.png";
+import testContestantFace from "/lovable-uploads/bb922670-95e7-4304-85b3-a23b7463e266.png";
 import testContestantFull from "/lovable-uploads/eecb29a9-eb9b-47c0-acad-9666f450ccc7.png";
 
 interface ContestSectionProps {
