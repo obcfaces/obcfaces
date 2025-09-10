@@ -384,10 +384,10 @@ export function ContestantCard({
           {/* Rank and rating in top right corner - hidden for example cards */}
           {rank > 0 && isVoted && !isExample && (
             <div className="absolute top-0 right-0 z-20 flex items-center">
-              <div className="text-xl font-bold text-contest-blue bg-white px-2 py-1.5 rounded-bl-lg shadow-sm">
+              <div className="text-lg font-bold text-contest-blue bg-white px-1.5 py-1 rounded-bl-lg shadow-sm">
                 #{rank}
               </div>
-              <div className="bg-contest-blue text-white px-2 py-1.5 rounded-bl-lg text-lg font-bold">
+              <div className="bg-contest-blue text-white px-1.5 py-1 rounded-bl-lg text-base font-bold">
                 {(() => {
                   console.log('Rating display - isAdmin:', isAdmin, 'userRating:', userRating, 'averageRating:', averageRating);
                   // ВСЕМ показываем средний рейтинг
@@ -643,7 +643,7 @@ export function ContestantCard({
     <>
       <Card className={`${isExample ? 'border-yellow-400 border-2 bg-yellow-50/50' : 'bg-card border-contest-border'} relative overflow-hidden flex h-36 sm:h-40 md:h-44`}>
         {isWinner && (
-          <div className="absolute bottom-0 left-0 w-[193px] sm:w-[225px] md:w-[257px] bg-blue-100 text-blue-700 pl-2 pr-2 py-1 text-xs font-semibold flex items-center justify-start z-20">
+          <div className="absolute bottom-0 left-0 w-[175px] sm:w-[203px] md:w-[232px] bg-blue-100 text-blue-700 pl-1.5 pr-1.5 py-0.5 text-xs font-semibold flex items-center justify-start z-20">
             <span>🏆 WINNER   + 5000 PHP</span>
           </div>
         )}
@@ -653,7 +653,7 @@ export function ContestantCard({
           <div className="absolute top-0 right-0 z-10 flex flex-col items-end">
             <Popover>
               <PopoverTrigger asChild>
-                <div className="bg-contest-blue text-white px-2 py-1.5 rounded-bl-lg text-base sm:text-lg font-bold shadow-sm cursor-pointer hover:bg-contest-blue/90 transition-colors">
+                <div className="bg-contest-blue text-white px-1.5 py-1 rounded-bl-lg text-sm sm:text-base font-bold shadow-sm cursor-pointer hover:bg-contest-blue/90 transition-colors">
                   {(() => {
                     console.log('Compact rating display - isAdmin:', isAdmin, 'userRating:', userRating, 'averageRating:', averageRating);
                     // ВСЕМ показываем средний рейтинг
