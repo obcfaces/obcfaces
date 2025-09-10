@@ -81,7 +81,7 @@ export function ContestantCard({
   const [isAdmin, setIsAdmin] = useState(false);
   
   // Use unified card data hook
-  const { data: cardData, loading: cardDataLoading } = useCardData(name, user?.id, profileId);
+  const { data: cardData, loading: cardDataLoading, refresh } = useCardData(name, user?.id, profileId);
 
   // Check if user is admin
   useEffect(() => {
@@ -363,6 +363,8 @@ export function ContestantCard({
     if (user) {
       localStorage.setItem(`commented-${name}-${user.id}`, 'true');
       setHasCommented(true);
+      // Refresh card data to update comment count and state
+      refresh();
     }
   };
 
