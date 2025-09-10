@@ -328,9 +328,9 @@ const Profile = () => {
       const { error } = await supabase
         .from('contest_applications')
         .update({
-          rejection_reason_type: reasonType as string,
+          rejection_reason_type: reasonType,
           rejection_reason: notes || null
-        })
+        } as any)
         .eq('id', contestApplication.id);
 
       if (error) throw error;
