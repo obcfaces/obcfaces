@@ -83,7 +83,7 @@ export const RejectReasonModal = ({
         <DialogHeader>
           <DialogTitle>Rejection Reason</DialogTitle>
           <DialogDescription>
-            Select the reasons for rejecting the application and add a comment if necessary.
+            Select the reason for rejecting the application and add a comment if necessary.
           </DialogDescription>
         </DialogHeader>
         

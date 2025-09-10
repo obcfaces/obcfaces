@@ -23,6 +23,7 @@ export type Database = {
           created_at: string
           id: string
           notes: string | null
+          rejection_reason_types: string[] | null
           status: string
         }
         Insert: {
@@ -33,6 +34,7 @@ export type Database = {
           created_at?: string
           id?: string
           notes?: string | null
+          rejection_reason_types?: string[] | null
           status: string
         }
         Update: {
@@ -43,6 +45,7 @@ export type Database = {
           created_at?: string
           id?: string
           notes?: string | null
+          rejection_reason_types?: string[] | null
           status?: string
         }
         Relationships: [
@@ -65,9 +68,7 @@ export type Database = {
           last_participation_date: string | null
           notes: string | null
           rejection_reason: string | null
-          rejection_reason_type:
-            | Database["public"]["Enums"]["rejection_reason_type"]
-            | null
+          rejection_reason_types: string[] | null
           reviewed_at: string | null
           reviewed_by: string | null
           status: string
@@ -84,9 +85,7 @@ export type Database = {
           last_participation_date?: string | null
           notes?: string | null
           rejection_reason?: string | null
-          rejection_reason_type?:
-            | Database["public"]["Enums"]["rejection_reason_type"]
-            | null
+          rejection_reason_types?: string[] | null
           reviewed_at?: string | null
           reviewed_by?: string | null
           status?: string
@@ -103,9 +102,7 @@ export type Database = {
           last_participation_date?: string | null
           notes?: string | null
           rejection_reason?: string | null
-          rejection_reason_type?:
-            | Database["public"]["Enums"]["rejection_reason_type"]
-            | null
+          rejection_reason_types?: string[] | null
           reviewed_at?: string | null
           reviewed_by?: string | null
           status?: string
