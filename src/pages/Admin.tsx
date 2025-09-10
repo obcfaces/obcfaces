@@ -58,7 +58,7 @@ interface ContestApplication {
   notes: string | null;
   is_active: boolean;
   rejection_reason?: string | null;
-  rejection_reason_type?: string | null; // Allow any string type for backward compatibility
+  rejection_reason_types?: string[] | null;
 }
 
 interface WeeklyContest {
