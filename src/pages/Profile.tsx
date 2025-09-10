@@ -2356,10 +2356,9 @@ const Profile = () => {
         isOpen={showRejectReasonModal}
         onClose={() => setShowRejectReasonModal(false)}
         onConfirm={handleUpdateRejectionReason}
-        initialReasons={contestApplication?.rejection_reason_types as RejectionReasonType[] || []}
+        initialReasons={(contestApplication?.rejection_reason_types as RejectionReasonType[]) || []}
         isLoading={updatingRejection}
       />
-
     </div>
   );
 };
