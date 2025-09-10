@@ -64,7 +64,7 @@ export const useCardData = (participantName: string, userId?: string, profileId?
 
           const totalComments = commentsData?.length || 0;
           const hasUserCommented = userId ? commentsData?.some(comment => comment.user_id === userId) || false : false;
-
+          
           // Load shares using new format  
           const { data: sharesData, error: sharesError } = await supabase
             .from('shares')
