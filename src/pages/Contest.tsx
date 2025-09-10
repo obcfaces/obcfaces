@@ -140,7 +140,7 @@ const Contest = () => {
                   <PostCard
                     authorName={e.authorName}
                     time={formatTimeForCard(e.createdAt, week.label)}
-                    content={`${e.participantData?.age} years old · ${e.participantData?.weight_kg} kg · ${e.participantData?.height_cm} cm · ${e.participantData?.country}`}
+                    content={`${e.participantData?.age}yo · ${e.participantData?.weight_kg} kg · ${e.participantData?.height_cm} cm · ${e.participantData?.country}`}
                     imageSrc={e.imageSrc}
                     likes={0}
                     comments={0}
