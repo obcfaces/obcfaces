@@ -2015,7 +2015,7 @@ const getApplicationStatusBadge = (status: string) => {
                         </div>
                         
                         {/* Timestamps and notes section - collapsed */}
-                        {(application.notes || application.reviewed_at || (application.status === 'rejected' && (application.rejection_reason || application.rejection_reason_type))) && (
+                        {(application.notes || application.reviewed_at || (application.status === 'rejected' && (application.rejection_reason || application.rejection_reason_types))) && (
                           <div className="mt-3 pt-3 border-t border-border/50">
                             <div className="flex justify-between items-start text-xs text-muted-foreground">
                               <div className="flex gap-4">
