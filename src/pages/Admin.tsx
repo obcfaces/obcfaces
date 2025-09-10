@@ -1106,7 +1106,7 @@ const Admin = () => {
     setPhotoModalOpen(true);
   };
 
-  const reviewApplication = async (applicationId: string, status: 'approved' | 'rejected' | 'pending', notes?: string, rejectionReason?: string, rejectionReasonType?: RejectionReasonType) => {
+  const reviewApplication = async (applicationId: string, status: 'approved' | 'rejected' | 'pending', notes?: string, rejectionReason?: string, rejectionReasonTypes?: RejectionReasonType[]) => {
     const updateData: any = {
       status,
       notes: notes || null,
@@ -1116,8 +1116,8 @@ const Admin = () => {
 
     if (status === 'rejected') {
       updateData.rejection_reason = rejectionReason;
-      if (rejectionReasonType) {
-        updateData.rejection_reason_type = rejectionReasonType;
+      if (rejectionReasonTypes && rejectionReasonTypes.length > 0) {
+        updateData.rejection_reason_types = rejectionReasonTypes;
       }
     }
 
@@ -1222,9 +1222,9 @@ const Admin = () => {
     fetchContestApplications();
   };
 
-  const handleRejectConfirm = async (reasonType: RejectionReasonType, notes: string) => {
+  const handleRejectConfirm = async (reasonTypes: RejectionReasonType[], notes: string) => {
     if (applicationToReject) {
-      await reviewApplication(applicationToReject.id, 'rejected', notes, notes, reasonType);
+      await reviewApplication(applicationToReject.id, 'rejected', notes, notes, reasonTypes);
       setApplicationToReject(null);
       setRejectModalOpen(false);
     }
@@ -2030,16 +2030,20 @@ const getApplicationStatusBadge = (status: string) => {
                               )}
                             </div>
                             {/* Rejection reason display */}
-                            {application.status === 'rejected' && (application.rejection_reason || application.rejection_reason_type) && (
+                            {application.status === 'rejected' && (application.rejection_reason || application.rejection_reason_types) && (
                               <div className="mt-2 p-2 bg-destructive/10 border border-destructive/20 rounded text-xs">
                                 <div className="flex items-center gap-2 text-destructive font-medium mb-1">
                                   <AlertCircle className="h-3 w-3" />
-                                  <span>Rejection Reason:</span>
+                                  <span>Rejection Reasons:</span>
                                 </div>
-                                {application.rejection_reason_type && (
-                                  <p className="text-destructive/80 mb-1">
-                                    {REJECTION_REASONS[application.rejection_reason_type as keyof typeof REJECTION_REASONS]}
-                                  </p>
+                                {application.rejection_reason_types && application.rejection_reason_types.length > 0 && (
+                                  <ul className="text-destructive/80 mb-1 ml-3 space-y-1">
+                                    {application.rejection_reason_types.map((reasonType: string, index: number) => (
+                                      <li key={index} className="list-disc">
+                                        {REJECTION_REASONS[reasonType as keyof typeof REJECTION_REASONS]}
+                                      </li>
+                                    ))}
+                                  </ul>
                                 )}
                                 {application.rejection_reason && (
                                   <p className="text-destructive/70">

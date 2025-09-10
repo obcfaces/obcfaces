@@ -320,7 +320,7 @@ const Profile = () => {
     navigate(`/messages?recipient=${id}`);
   };
 
-  const handleUpdateRejectionReason = async (reasonType: RejectionReasonType, notes: string) => {
+  const handleUpdateRejectionReason = async (reasonTypes: RejectionReasonType[], notes: string) => {
     if (!contestApplication?.id) return;
 
     setUpdatingRejection(true);
@@ -328,7 +328,7 @@ const Profile = () => {
       const { error } = await supabase
         .from('contest_applications')
         .update({
-          rejection_reason_type: reasonType,
+          rejection_reason_types: reasonTypes,
           rejection_reason: notes || null
         } as any)
         .eq('id', contestApplication.id);
@@ -338,7 +338,7 @@ const Profile = () => {
       // Update local state
       setContestApplication(prev => prev ? {
         ...prev,
-        rejection_reason_type: reasonType as any, // Cast to any since enum was updated
+        rejection_reason_types: reasonTypes as any,
         rejection_reason: notes || null
       } : null);
 
@@ -348,6 +348,8 @@ const Profile = () => {
       console.error('Error updating rejection reason:', error);
       toast({ description: "Error updating rejection reason" });
     } finally {
+      setUpdatingRejection(false);
+    }
       setUpdatingRejection(false);
     }
   };
@@ -751,7 +753,7 @@ const Profile = () => {
       // Также проверяем наличие заявки на участие (исключаем удалённые)
       const { data: contestApplication } = await supabase
         .from('contest_applications')
-        .select('id, status, created_at, application_data, rejection_reason, rejection_reason_type')
+        .select('id, status, created_at, application_data, rejection_reason, rejection_reason_types')
         .eq('user_id', id)
         .is('deleted_at', null)  // Исключаем удалённые заявки
         .order('created_at', { ascending: false })
@@ -1367,27 +1369,34 @@ const Profile = () => {
                     </div>
                    </div>
                    
-                    {/* Rejection reason notice */}
-                    {isOwner && contestApplication?.status === 'rejected' && (contestApplication?.rejection_reason || contestApplication?.rejection_reason_type) && contestApplication?.rejection_reason_type !== 'without_signature' && (
-                      <div className="mx-6 sm:mx-0 mb-6 p-4 bg-destructive/10 border border-destructive/20 rounded-lg">
-                        <div className="flex items-center gap-2 mb-2">
-                          <AlertCircle className="h-5 w-5 text-destructive" />
-                          <h3 className="font-semibold text-destructive">Application Rejected</h3>
-                        </div>
-                        <div className="space-y-2">
-                           {contestApplication.rejection_reason_type && (
-                             <p className="text-sm text-destructive/80">
-                               <span className="font-medium">Reason:</span> {REJECTION_REASONS[contestApplication.rejection_reason_type as keyof typeof REJECTION_REASONS]}
-                               {isOwner && (
-                                 <button 
-                                   onClick={() => setShowRejectReasonModal(true)}
-                                   className="ml-2 text-primary hover:text-primary/80 underline text-sm"
-                                 >
-                                   change
-                                 </button>
-                               )}
-                             </p>
-                           )}
+                     {/* Rejection reason notice */}
+                     {isOwner && contestApplication?.status === 'rejected' && (contestApplication?.rejection_reason || contestApplication?.rejection_reason_types) && (
+                       <div className="mx-6 sm:mx-0 mb-6 p-4 bg-destructive/10 border border-destructive/20 rounded-lg">
+                         <div className="flex items-center gap-2 mb-2">
+                           <AlertCircle className="h-5 w-5 text-destructive" />
+                           <h3 className="font-semibold text-destructive">Application Rejected</h3>
+                         </div>
+                         <div className="space-y-2">
+                            {contestApplication.rejection_reason_types && contestApplication.rejection_reason_types.length > 0 && (
+                              <div className="text-sm text-destructive/80">
+                                <span className="font-medium">Reasons:</span>
+                                <ul className="mt-1 ml-4 space-y-1">
+                                  {contestApplication.rejection_reason_types.map((reasonType: string, index: number) => (
+                                    <li key={index} className="list-disc">
+                                      {REJECTION_REASONS[reasonType as keyof typeof REJECTION_REASONS]}
+                                    </li>
+                                  ))}
+                                </ul>
+                                {isOwner && (
+                                  <button 
+                                    onClick={() => setShowRejectReasonModal(true)}
+                                    className="ml-2 text-primary hover:text-primary/80 underline text-sm"
+                                  >
+                                    change
+                                  </button>
+                                )}
+                              </div>
+                            )}
                            {contestApplication.rejection_reason && (
                              <p className="text-sm text-destructive/80">
                                <span className="font-medium">Comment:</span> {contestApplication.rejection_reason}
@@ -2347,6 +2356,7 @@ const Profile = () => {
         isOpen={showRejectReasonModal}
         onClose={() => setShowRejectReasonModal(false)}
         onConfirm={handleUpdateRejectionReason}
+        initialReasons={contestApplication?.rejection_reason_types as RejectionReasonType[] || []}
         isLoading={updatingRejection}
       />
 
