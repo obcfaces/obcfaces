@@ -183,18 +183,21 @@ export function ContestantCard({
     const loadUserVotingData = async () => {
       if (!user) return;
 
-      // Load user's likes status for photos
+      // Load user's likes status - use same content_id logic as in handleLike
+      const contentIdCard = profileId ? `contestant-user-${profileId}` : `contestant-card-${name}`;
+      const contentIdPhoto = profileId ? `contestant-user-${profileId}` : `contestant-photo-${name}-1`;
+      
       const { data: userLikes } = await supabase
         .from("likes")
         .select("content_id")
         .eq("content_type", "contest")
         .eq("user_id", user.id)
-        .in("content_id", [`contestant-photo-${name}-0`, `contestant-photo-${name}-1`]);
+        .in("content_id", [contentIdCard, contentIdPhoto]);
       
       if (userLikes) {
         setIsLiked([
-          userLikes.some(like => like.content_id === `contestant-photo-${name}-0`),
-          userLikes.some(like => like.content_id === `contestant-photo-${name}-1`)
+          userLikes.some(like => like.content_id === contentIdCard),
+          userLikes.some(like => like.content_id === contentIdPhoto)
         ]);
       }
 
