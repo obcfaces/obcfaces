@@ -645,17 +645,16 @@ export function ContestantCard({
               </PopoverTrigger>
               <PopoverContent className="w-auto p-3">
                 <div className="text-sm">
-                  Average: {averageRating.toFixed(1)} ({totalVotes} votes)
                   {userRating > 0 && isAdmin && (
-                    <span> — You rated {userRating.toFixed(0)}</span>
+                    <>
+                      You rated {userRating.toFixed(0)} — <button 
+                        className="text-contest-blue hover:underline" 
+                        onClick={() => setIsEditing(true)}
+                      >
+                        change
+                      </button>
+                    </>
                   )}
-                  {" — "}
-                  <button 
-                    className="text-contest-blue hover:underline" 
-                    onClick={() => setIsEditing(true)}
-                  >
-                    change
-                  </button>
                 </div>
               </PopoverContent>
             </Popover>
