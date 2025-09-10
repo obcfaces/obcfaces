@@ -390,10 +390,12 @@ export function ContestantCard({
               <div className="bg-contest-blue text-white px-2 py-1.5 rounded-bl-lg text-lg font-bold">
                 {(() => {
                   console.log('Rating display - isAdmin:', isAdmin, 'userRating:', userRating, 'averageRating:', averageRating);
-                  if (isAdmin && userRating > 0) {
-                    return userRating.toFixed(1);
+                  // Обычные пользователи всегда видят средний рейтинг
+                  if (!isAdmin) {
+                    return averageRating > 0 ? averageRating.toFixed(1) : '0.0';
                   }
-                  return averageRating > 0 ? averageRating.toFixed(1) : '0.0';
+                  // Админы видят свой рейтинг, если проголосовали, иначе средний
+                  return userRating > 0 ? userRating.toFixed(1) : (averageRating > 0 ? averageRating.toFixed(1) : '0.0');
                 })()}
               </div>
             </div>
@@ -640,18 +642,20 @@ export function ContestantCard({
                 <div className="bg-contest-blue text-white px-2 py-1.5 rounded-bl-lg text-base sm:text-lg font-bold shadow-sm cursor-pointer hover:bg-contest-blue/90 transition-colors">
                   {(() => {
                     console.log('Compact rating display - isAdmin:', isAdmin, 'userRating:', userRating, 'averageRating:', averageRating);
-                    if (isAdmin && userRating > 0) {
-                      return userRating.toFixed(1);
+                    // Обычные пользователи всегда видят средний рейтинг  
+                    if (!isAdmin) {
+                      return averageRating > 0 ? averageRating.toFixed(1) : '0.0';
                     }
-                    return averageRating > 0 ? averageRating.toFixed(1) : '0.0';
+                    // Админы видят свой рейтинг, если проголосовали, иначе средний
+                    return userRating > 0 ? userRating.toFixed(1) : (averageRating > 0 ? averageRating.toFixed(1) : '0.0');
                   })()}
                 </div>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-3">
                 <div className="text-sm">
-                  {isAdmin && userRating > 0 ? 
-                    `You rated ${userRating.toFixed(0)} — ` : 
-                    `Average: ${averageRating.toFixed(1)} (${totalVotes} votes) — `
+                  {!isAdmin ? 
+                    `Average: ${averageRating.toFixed(1)} (${totalVotes} votes) — ` : 
+                    (userRating > 0 ? `You rated ${userRating.toFixed(0)} — ` : `Average: ${averageRating.toFixed(1)} (${totalVotes} votes) — `)
                   }<button 
                     className="text-contest-blue hover:underline" 
                     onClick={() => setIsEditing(true)}
