@@ -572,15 +572,34 @@ export function ContestantCard({
                <button
                  type="button"
                  className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
-                 onClick={() => openShareModal({
-                   title: `${name} - Beauty Contest`,
-                   url: profileId ? `https://obcface.com/u/${profileId}` : `https://obcface.com`,
-                   description: `Check out ${name}, ${age} from ${city}, ${country} in this beauty contest!`
-                 })}
-                 aria-label="Share"
-               >
+                  onClick={async () => {
+                    // Record the share in database
+                    if (profileId && user?.id) {
+                      const { error } = await supabase
+                        .from('shares')
+                        .insert({
+                          user_id: user.id,
+                          content_id: `contestant-user-${profileId}`,
+                          content_type: 'contest'
+                        });
+                      
+                      if (!error) {
+                        // Refresh card data to show updated share count
+                        window.location.reload();
+                      }
+                    }
+                    
+                    openShareModal({
+                      title: `${name} - Beauty Contest`,
+                      url: profileId ? `https://obcface.com/u/${profileId}` : `https://obcface.com`,
+                      description: `Check out ${name}, ${age} from ${city}, ${country} in this beauty contest!`
+                    });
+                  }}
+                  aria-label="Share"
+                >
                    <Share2 className="w-4 h-4" strokeWidth={1} />
                    <span className="hidden sm:inline">Share</span>
+                   <span>{cardData.shares}</span>
                </button>
             </div>
            )}
@@ -843,15 +862,34 @@ export function ContestantCard({
                    <button
                      type="button"
                      className="inline-flex items-center gap-1 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors"
-                     onClick={() => openShareModal({
-                       title: `${name} - Beauty Contest`,
-                       url: profileId ? `https://obcface.com/u/${profileId}` : `https://obcface.com`,
-                       description: `Check out ${name}, ${age} from ${city}, ${country} in this beauty contest!`
-                     })}
-                     aria-label="Share"
-                   >
+                      onClick={async () => {
+                        // Record the share in database
+                        if (profileId && user?.id) {
+                          const { error } = await supabase
+                            .from('shares')
+                            .insert({
+                              user_id: user.id,
+                              content_id: `contestant-user-${profileId}`,
+                              content_type: 'contest'
+                            });
+                          
+                          if (!error) {
+                            // Refresh card data to show updated share count
+                            window.location.reload();
+                          }
+                        }
+                        
+                        openShareModal({
+                          title: `${name} - Beauty Contest`,
+                          url: profileId ? `https://obcface.com/u/${profileId}` : `https://obcface.com`,
+                          description: `Check out ${name}, ${age} from ${city}, ${country} in this beauty contest!`
+                        });
+                      }}
+                      aria-label="Share"
+                    >
                       <Share2 className="w-3.5 h-3.5" strokeWidth={1} />
                       <span className="hidden xl:inline">Share</span>
+                      <span>{cardData.shares}</span>
                    </button>
                 </div>
               )}
