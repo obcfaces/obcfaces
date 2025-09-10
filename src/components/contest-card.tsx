@@ -469,17 +469,17 @@ export function ContestantCard({
               {isExample && (
                 <div className="bg-yellow-400 text-black px-4 py-2">
                   <div className="text-sm font-semibold mb-2 text-center">How your photos should look:</div>
-                  <div className="grid grid-cols-2 gap-4 text-xs">
+                  <div className="grid grid-cols-2 gap-2 text-xs">
                     <div className="space-y-0.5">
-                      <div>• Look like an ID photo</div>
-                      <div>• No makeup</div>
-                      <div>• No filters</div>
-                      <div>• No glasses allowed.</div>
+                      <div className="flex"><span>•</span><span className="ml-1">Look like an ID photo</span></div>
+                      <div className="flex"><span>•</span><span className="ml-1">No makeup</span></div>
+                      <div className="flex"><span>•</span><span className="ml-1">No filters</span></div>
+                      <div className="flex"><span>•</span><span className="ml-1">No glasses allowed.</span></div>
                     </div>
                     <div className="space-y-0.5">
-                      <div>• Whole body from head to toe.</div>
-                      <div>• Wear tight/fitted clothes. No dresses, skirts, heels.</div>
-                      <div>• No bags or backpacks.</div>
+                      <div className="flex"><span>•</span><span className="ml-1">Whole body from head to toe.</span></div>
+                      <div className="flex"><span>•</span><span className="ml-1">Wear tight/fitted clothes. No dresses, skirts, heels.</span></div>
+                      <div className="flex"><span>•</span><span className="ml-1">No bags or backpacks.</span></div>
                     </div>
                   </div>
                 </div>
