@@ -589,7 +589,7 @@ export function ContestantCard({
                >
                   <MessageCircle className={cn("w-4 h-4", cardData.comments > 0 ? "text-primary" : "text-gray-500")} strokeWidth={1} />
                   <span className="hidden sm:inline">Comment</span>
-                  {cardData.comments > 0 && <span className={cn("font-normal", hasCommented ? "text-blue-500" : "text-gray-500")}>{cardData.comments}</span>}
+                   {cardData.comments > 0 && <span className={cn("font-normal", hasCommented ? "text-contest-blue" : "text-gray-500")}>{cardData.comments}</span>}
                </button>
                <button
                  type="button"
@@ -879,7 +879,7 @@ export function ContestantCard({
                    >
                        <MessageCircle className={cn("w-3.5 h-3.5", cardData.comments > 0 ? "text-primary" : "text-gray-500")} strokeWidth={1} />
                        <span className="hidden xl:inline">Comment</span>
-                       {cardData.comments > 0 && <span className={cn("font-normal", hasCommented ? "text-blue-500" : "text-gray-500")}>{cardData.comments}</span>}
+                       {cardData.comments > 0 && <span className={cn("font-normal", hasCommented ? "text-contest-blue" : "text-gray-500")}>{cardData.comments}</span>}
                    </button>
                    <button
                      type="button"
