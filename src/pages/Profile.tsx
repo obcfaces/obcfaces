@@ -47,7 +47,7 @@ interface ProfileRow {
 }
 
 const Profile = () => {
-  const { userId } = useParams();
+  const { id: userId } = useParams();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [profile, setProfile] = useState<ProfileRow | null>(null);
