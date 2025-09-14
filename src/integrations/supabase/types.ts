@@ -23,7 +23,6 @@ export type Database = {
           created_at: string
           id: string
           notes: string | null
-          rejection_reason_types: string[] | null
           status: string
         }
         Insert: {
@@ -34,7 +33,6 @@ export type Database = {
           created_at?: string
           id?: string
           notes?: string | null
-          rejection_reason_types?: string[] | null
           status: string
         }
         Update: {
@@ -45,7 +43,6 @@ export type Database = {
           created_at?: string
           id?: string
           notes?: string | null
-          rejection_reason_types?: string[] | null
           status?: string
         }
         Relationships: [
@@ -68,7 +65,9 @@ export type Database = {
           last_participation_date: string | null
           notes: string | null
           rejection_reason: string | null
-          rejection_reason_types: string[] | null
+          rejection_reason_type:
+            | Database["public"]["Enums"]["rejection_reason_type"]
+            | null
           reviewed_at: string | null
           reviewed_by: string | null
           status: string
@@ -85,7 +84,9 @@ export type Database = {
           last_participation_date?: string | null
           notes?: string | null
           rejection_reason?: string | null
-          rejection_reason_types?: string[] | null
+          rejection_reason_type?:
+            | Database["public"]["Enums"]["rejection_reason_type"]
+            | null
           reviewed_at?: string | null
           reviewed_by?: string | null
           status?: string
@@ -102,7 +103,9 @@ export type Database = {
           last_participation_date?: string | null
           notes?: string | null
           rejection_reason?: string | null
-          rejection_reason_types?: string[] | null
+          rejection_reason_type?:
+            | Database["public"]["Enums"]["rejection_reason_type"]
+            | null
           reviewed_at?: string | null
           reviewed_by?: string | null
           status?: string
@@ -591,30 +594,6 @@ export type Database = {
           state?: string | null
           updated_at?: string
           weight_kg?: number | null
-        }
-        Relationships: []
-      }
-      shares: {
-        Row: {
-          content_id: string
-          content_type: string
-          created_at: string
-          id: string
-          user_id: string
-        }
-        Insert: {
-          content_id: string
-          content_type?: string
-          created_at?: string
-          id?: string
-          user_id: string
-        }
-        Update: {
-          content_id?: string
-          content_type?: string
-          created_at?: string
-          id?: string
-          user_id?: string
         }
         Relationships: []
       }
