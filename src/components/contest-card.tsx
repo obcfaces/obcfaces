@@ -183,19 +183,18 @@ export function ContestantCard({
     const loadUserVotingData = async () => {
       if (!user) return;
 
-      // Load user's likes status for photos
+      // Load user's likes status for card
       const { data: userLikes } = await supabase
         .from("likes")
         .select("content_id")
         .eq("content_type", "contest")
         .eq("user_id", user.id)
-        .in("content_id", [`contestant-photo-${name}-0`, `contestant-photo-${name}-1`]);
+        .eq("content_id", `contestant-card-${name}`);
       
-      if (userLikes) {
-        setIsLiked([
-          userLikes.some(like => like.content_id === `contestant-photo-${name}-0`),
-          userLikes.some(like => like.content_id === `contestant-photo-${name}-1`)
-        ]);
+      if (userLikes && userLikes.length > 0) {
+        setIsLiked([true, true]); // Set both to true if user liked the card
+      } else {
+        setIsLiked([false, false]);
       }
 
       // Load user's comments status
