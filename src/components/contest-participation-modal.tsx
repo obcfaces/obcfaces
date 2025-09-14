@@ -1601,7 +1601,7 @@ export const ContestParticipationModal = ({
                   <div className="flex flex-col items-center gap-1 flex-1 min-w-0">
                     <p className="text-xs text-muted-foreground">full length</p>
                     <div className="text-xs text-red-500 space-y-1 text-center mb-2">
-                      <div>Whole body from head to toe.</div>
+                      <div className="whitespace-nowrap">Whole body from head to toe.</div>
                       <div>Tight-clothed.</div>
                       <div>No dresses, no skirts.</div>
                     </div>
