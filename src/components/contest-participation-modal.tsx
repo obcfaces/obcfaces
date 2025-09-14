@@ -1329,7 +1329,7 @@ export const ContestParticipationModal = ({
                          }
                        }}
                      >
-                       Add Contact
+                       Submit
                      </Button>
             </div>
           </div>
