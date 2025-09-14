@@ -200,7 +200,7 @@ const Profile = () => {
         <div className="max-w-4xl mx-auto px-4 py-6">
           {/* Profile Header */}
           <div className="bg-card rounded-lg p-6 mb-6">
-            <div className="flex items-start gap-6">
+            <div className="flex items-start gap-6 mb-6">
               {/* Avatar */}
               <div className="flex-shrink-0">
                 <Avatar className="w-24 h-24 md:w-32 md:h-32">
@@ -212,47 +212,42 @@ const Profile = () => {
               </div>
 
               {/* Profile Info */}
-              <div className="flex-1 min-w-0">
-                <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4 mb-4">
+              <div className="flex-1">
+                <div className="flex items-center gap-4 mb-4">
                   <h1 className="text-2xl md:text-3xl font-bold text-foreground">{displayName}</h1>
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    className="w-fit"
-                  >
-                    <Share2 className="w-4 h-4 mr-2" />
-                    Share
+                  <Button variant="ghost" size="sm">
+                    <Share2 className="w-4 h-4" />
                   </Button>
                 </div>
 
                 {/* Stats */}
-                <div className="flex gap-6 text-sm mb-4">
+                <div className="flex gap-8 text-sm mb-4">
                   <div className="text-center">
-                    <div className="font-bold text-lg">{postsCount}</div>
+                    <div className="font-bold text-base">{postsCount}</div>
                     <div className="text-muted-foreground">posts</div>
                   </div>
                   <div className="text-center">
-                    <div className="font-bold text-lg">{followersCount}</div>
+                    <div className="font-bold text-base">{followersCount}</div>
                     <div className="text-muted-foreground">followers</div>
                   </div>
                   <div className="text-center">
-                    <div className="font-bold text-lg">{followingCount}</div>
+                    <div className="font-bold text-base">{followingCount}</div>
                     <div className="text-muted-foreground">following</div>
                   </div>
                 </div>
 
                 {/* Bio */}
                 {profile.bio && (
-                  <p className="text-sm text-muted-foreground mb-4">{profile.bio}</p>
+                  <p className="text-sm text-muted-foreground italic">{profile.bio}</p>
                 )}
               </div>
             </div>
 
             {/* Action Buttons */}
-            <div className="flex gap-3 mt-6">
+            <div className="flex gap-3">
               <Button 
                 onClick={() => setIsContestModalOpen(true)}
-                className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white flex-1"
+                className="bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 text-white px-6 py-2 rounded-lg font-medium"
               >
                 <Trophy className="w-4 h-4 mr-2" />
                 Join & Win 5,000 PHP
@@ -261,13 +256,12 @@ const Profile = () => {
               {isCurrentUser && (
                 <CreatePostModal 
                   onPostCreated={() => {
-                    // Refresh posts after creating
                     window.location.reload();
                   }}
                 >
                   <Button 
                     variant="outline" 
-                    className="flex-1"
+                    className="px-6 py-2 rounded-lg font-medium border-gray-300"
                   >
                     Add Post
                   </Button>
@@ -277,20 +271,40 @@ const Profile = () => {
           </div>
 
           {/* Tabs */}
-          <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <div className="bg-card rounded-lg">
-              <TabsList className="w-full grid grid-cols-4">
-                <TabsTrigger value="posts">Posts</TabsTrigger>
-                <TabsTrigger value="photos">Photos</TabsTrigger>
-                <TabsTrigger value="participation">Participation</TabsTrigger>
-                <TabsTrigger value="about">About</TabsTrigger>
+          <div className="bg-card rounded-lg">
+            <Tabs value={activeTab} onValueChange={setActiveTab}>
+              <TabsList className="w-full grid grid-cols-4 bg-transparent border-b border-border rounded-none h-auto p-0">
+                <TabsTrigger 
+                  value="posts"
+                  className="data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-blue-500 data-[state=active]:text-blue-600 rounded-none py-4 font-medium"
+                >
+                  Posts
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="photos"
+                  className="data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-blue-500 data-[state=active]:text-blue-600 rounded-none py-4 font-medium"
+                >
+                  Photos
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="participation"
+                  className="data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-blue-500 data-[state=active]:text-blue-600 rounded-none py-4 font-medium"
+                >
+                  Participation
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="about"
+                  className="data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-blue-500 data-[state=active]:text-blue-600 rounded-none py-4 font-medium"
+                >
+                  About
+                </TabsTrigger>
               </TabsList>
 
               <div className="p-6">
                 <TabsContent value="posts" className="mt-0">
                   {posts.length === 0 ? (
                     <div className="text-center py-16 text-muted-foreground">
-                      <div className="mb-4 text-lg">У вас пока нет постов</div>
+                      <div className="mb-2 text-lg">У вас пока нет постов</div>
                       <div className="text-sm">Создайте свой первый пост, нажав "Add Post"</div>
                     </div>
                   ) : (
@@ -378,8 +392,8 @@ const Profile = () => {
                   </div>
                 </TabsContent>
               </div>
-            </div>
-          </Tabs>
+            </Tabs>
+          </div>
         </div>
 
         {/* Photo Modal */}
