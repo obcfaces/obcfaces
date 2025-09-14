@@ -1,17 +1,31 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Helmet } from "react-helmet-async";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, Link, useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { Share2, Trophy, Camera, MessageCircle, AlertCircle, Grid2X2, AlignJustify, MapPin, Pencil } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import SearchableSelect from "@/components/ui/searchable-select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { LogOut, Eye, EyeOff, UserIcon, MapPin, Pencil, Lock, MessageCircle, AlertCircle } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import PostCard from "@/components/profile/PostCard";
 import LikedItem from "@/components/profile/LikedItem";
 import { PhotoModal } from "@/components/photo-modal";
+import { ProfilePhotoModal } from "@/components/profile-photo-modal";
 import { ContestParticipationModal } from "@/components/contest-participation-modal";
 import CreatePostModal from "@/components/create-post-modal";
+import { REJECTION_REASONS, RejectReasonModal, RejectionReasonType } from "@/components/reject-reason-modal";
+import c1 from "@/assets/contestant-1.jpg";
+import c2 from "@/assets/contestant-2.jpg";
+import c3 from "@/assets/contestant-3.jpg";
+import c1face from "@/assets/contestant-1-face.jpg";
+import c2face from "@/assets/contestant-2-face.jpg";
+import c3face from "@/assets/contestant-3-face.jpg";
+import { AlignJustify, Grid2X2, Edit } from "lucide-react";
 
 interface ProfileRow {
   id: string;
@@ -33,8 +47,9 @@ interface ProfileRow {
 }
 
 const Profile = () => {
-  const { id: userId } = useParams();
+  const { userId } = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [profile, setProfile] = useState<ProfileRow | null>(null);
   const [posts, setPosts] = useState<any[]>([]);
   const [likedPosts, setLikedPosts] = useState<any[]>([]);
@@ -45,77 +60,122 @@ const Profile = () => {
   const [isPhotoModalOpen, setIsPhotoModalOpen] = useState(false);
   const [selectedPhotos, setSelectedPhotos] = useState<string[]>([]);
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState(0);
+  const [isProfilePhotoModalOpen, setIsProfilePhotoModalOpen] = useState(false);
   const [displayStyle, setDisplayStyle] = useState<'grid' | 'list'>('grid');
-  const [isContestModalOpen, setIsContestModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchProfile = async () => {
+      console.log('Profile component mounted - checking userId:', userId);
+      console.log('Current window location:', window.location.pathname);
+      
       if (!userId) {
+        console.error('No userId provided - URL params might be broken');
         setLoading(false);
         return;
       }
       
       setLoading(true);
       try {
-        const { data: { session } } = await supabase.auth.getSession();
+        console.log('Fetching profile for userId:', userId);
+        
+        // Force a fresh session check and profile fetch
+        await supabase.auth.refreshSession();
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        
+        console.log('Fresh session check:', { 
+          hasSession: !!session, 
+          userId: session?.user?.id,
+          targetUserId: userId,
+          sessionError,
+          isOwnProfile: session?.user?.id === userId
+        });
+        
         setUser(session?.user || null);
         setIsCurrentUser(session?.user?.id === userId);
         
+        // Fetch profile data with fresh session
         const { data: profileData, error: profileError } = await supabase
           .from('profiles')
           .select('*')
           .eq('id', userId)
           .maybeSingle();
 
-        if (profileError || !profileData) {
+        console.log('Profile query result:', { profileData, profileError, isAuthenticated: !!session?.user });
+
+        if (profileError) {
+          console.error('Error fetching profile:', profileError);
+          console.log('RLS Policy might be blocking access. Error details:', {
+            message: profileError.message,
+            code: profileError.code,
+            details: profileError.details,
+            hint: profileError.hint
+          });
+          setLoading(false);
+          return;
+        }
+
+        if (!profileData) {
+          console.log('No profile data returned. This could be due to RLS policies.', {
+            userId, 
+            isAuthenticated: !!session?.user,
+            currentUserId: session?.user?.id
+          });
           setLoading(false);
           return;
         }
 
         setProfile(profileData);
+        console.log('Profile loaded successfully:', profileData.display_name);
 
-        // Fetch user posts
-        const { data: postsData, error: postsError } = await supabase
-          .from('posts')
-          .select(`
-            *,
-            profiles!posts_user_id_fkey(display_name, avatar_url)
-          `)
-          .eq('user_id', userId)
-          .order('created_at', { ascending: false });
-
-        if (!postsError) {
-          setPosts(postsData || []);
-        }
-
-        // Fetch liked posts if current user
-        if (session?.user?.id === userId) {
-          const { data: likedData, error: likedError } = await supabase
-            .from('post_likes')
+        // Fetch user posts only if we have a profile
+        if (profileData) {
+          console.log('Fetching posts for user:', userId);
+          const { data: postsData, error: postsError } = await supabase
+            .from('posts')
             .select(`
-              post_id,
-              posts(
-                *,
-                profiles!posts_user_id_fkey(display_name, avatar_url)
-              )
+              *,
+              profiles!posts_user_id_fkey(display_name, avatar_url)
             `)
             .eq('user_id', userId)
             .order('created_at', { ascending: false });
 
-          if (!likedError && likedData) {
-            setLikedPosts(likedData.map(item => item.posts).filter(Boolean));
+          console.log('Posts query result:', { postsCount: postsData?.length, postsError });
+
+          if (!postsError) {
+            setPosts(postsData || []);
+          }
+
+          // Fetch liked posts if current user
+          if (session?.user?.id === userId) {
+            console.log('Fetching liked posts for current user');
+            const { data: likedData, error: likedError } = await supabase
+              .from('post_likes')
+              .select(`
+                post_id,
+                posts(
+                  *,
+                  profiles!posts_user_id_fkey(display_name, avatar_url)
+                )
+              `)
+              .eq('user_id', userId)
+              .order('created_at', { ascending: false });
+
+            console.log('Liked posts query result:', { likedCount: likedData?.length, likedError });
+
+            if (!likedError && likedData) {
+              setLikedPosts(likedData.map(item => item.posts).filter(Boolean));
+            }
           }
         }
-
       } catch (error) {
-        console.error('Error fetching profile:', error);
+        console.error('Unexpected error in fetchProfile:', error);
       } finally {
         setLoading(false);
       }
     };
 
     fetchProfile();
-  }, [userId]);
+  }, [userId, navigate]);
 
   const handlePhotoClick = (photos: string[], index: number) => {
     setSelectedPhotos(photos);
@@ -185,7 +245,10 @@ const Profile = () => {
             <div className="flex flex-col md:flex-row gap-6">
               {/* Avatar */}
               <div className="flex-shrink-0">
-                <Avatar className="w-32 h-32">
+                <Avatar 
+                  className="w-32 h-32 cursor-pointer"
+                  onClick={() => profile.avatar_url && setIsProfilePhotoModalOpen(true)}
+                >
                   <AvatarImage src={profile.avatar_url || undefined} />
                   <AvatarFallback className="text-2xl">
                     {displayName.slice(0, 2).toUpperCase()}
@@ -352,26 +415,21 @@ const Profile = () => {
           city={profile.city || ''}
         />
 
-        {/* Contest Participation Modal */}
-        <ContestParticipationModal 
-          isOpen={isContestModalOpen}
-          onOpenChange={setIsContestModalOpen}
-        />
-
-        {/* Create Post Modal */}
-        <CreatePostModal 
-          onPostCreated={() => {
-            window.location.reload();
-          }}
-        >
-          <Button 
-            variant="outline" 
-            className="w-full mt-4"
-          >
-            <Camera className="w-4 h-4 mr-2" />
-            Create Post
-          </Button>
-        </CreatePostModal>
+        {/* Profile Photo Modal */}
+        {profile.avatar_url && (
+          <PhotoModal
+            isOpen={isProfilePhotoModalOpen}
+            onClose={() => setIsProfilePhotoModalOpen(false)}
+            photos={[profile.avatar_url]}
+            currentIndex={0}
+            contestantName={displayName}
+            age={profile.age || 0}
+            weight={profile.weight_kg || 0}
+            height={profile.height_cm || 0}
+            country={profile.country || ''}
+            city={profile.city || ''}
+          />
+        )}
       </div>
     </>
   );
