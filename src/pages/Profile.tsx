@@ -78,31 +78,27 @@ const Profile = () => {
       try {
         console.log('Fetching profile for userId:', userId);
         
-        // Get current user session with detailed logging
+        // Force a fresh session check and profile fetch
+        await supabase.auth.refreshSession();
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-        console.log('Session check:', { 
+        
+        console.log('Fresh session check:', { 
           hasSession: !!session, 
           userId: session?.user?.id,
           targetUserId: userId,
-          sessionError 
+          sessionError,
+          isOwnProfile: session?.user?.id === userId
         });
+        
         setUser(session?.user || null);
         setIsCurrentUser(session?.user?.id === userId);
-
-        // Fetch profile data - try direct query first since we have proper RLS policies
+        
+        // Fetch profile data with fresh session
         const { data: profileData, error: profileError } = await supabase
           .from('profiles')
           .select('*')
           .eq('id', userId)
           .maybeSingle();
-          
-        console.log('Profile query result:', { 
-          profileData, 
-          profileError, 
-          userId, 
-          currentUserId: session?.user?.id,
-          isOwnProfile: session?.user?.id === userId 
-        });
 
         console.log('Profile query result:', { profileData, profileError, isAuthenticated: !!session?.user });
 
