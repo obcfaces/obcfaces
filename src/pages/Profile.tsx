@@ -751,7 +751,7 @@ const Profile = () => {
       // Также проверяем наличие заявки на участие (исключаем удалённые)
       const { data: contestApplication } = await supabase
         .from('contest_applications')
-        .select('id, status, created_at, application_data, rejection_reason, rejection_reason_type')
+        .select('id, status, created_at, application_data, rejection_reason')
         .eq('user_id', id)
         .is('deleted_at', null)  // Исключаем удалённые заявки
         .order('created_at', { ascending: false })
@@ -763,8 +763,8 @@ const Profile = () => {
       // Store contest application data
       setContestApplication(contestApplication);
 
-      // Показываем карточку только если пользователь является участником конкурса И имеет активную заявку
-      const shouldShowParticipation = profileData.is_contest_participant && contestApplication;
+      // Показываем карточку если есть активная заявка на участие (любого статуса)
+      const shouldShowParticipation = contestApplication;
 
       if (!shouldShowParticipation) {
         console.log('User has no contest participation');
@@ -773,28 +773,29 @@ const Profile = () => {
         return;
       }
 
-      // Создаем карточку участия пользователя на основе его профиля
+      // Создаем карточку участия пользователя на основе данных заявки
+      const appData = contestApplication.application_data as any;
       const participationCard = {
         likeId: `participation-${id}`,
         contentType: 'contest' as const,
         contentId: id,
-        authorName: `${profileData.first_name || ''} ${profileData.last_name || ''}`.trim() || 'Участник',
-        authorProfileId: id, // Используем ID владельца профиля, а не currentUserId
-        time: new Date(profileData.created_at).toLocaleString('ru-RU'),
+        authorName: `${appData?.first_name || ''} ${appData?.last_name || ''}`.trim() || 'Участник',
+        authorProfileId: id,
+        time: new Date(contestApplication.created_at).toLocaleString('ru-RU'),
         likes: Math.floor(Math.random() * 200) + 50, // Mock likes
         comments: Math.floor(Math.random() * 40) + 5, // Mock comments
-        imageSrc: profileData.photo_1_url || c1face, // Use first photo as main display
-        participantType: (profileData.participant_type as 'under_review' | 'candidate' | 'finalist' | 'winner') || 'candidate',
+        imageSrc: appData?.photo1_url || appData?.photo_1_url || c1face,
+        participantType: contestApplication.status === 'approved' ? 'candidate' : 'under_review',
         candidateData: {
-          name: `${profileData.first_name || ''} ${profileData.last_name || ''}`.trim() || 'Участник',
-          age: profileData.age || 25,
-          weight: profileData.weight_kg || 55,
-          height: profileData.height_cm || 165,
-          country: profileData.country || 'Philippines',
-          city: profileData.city || 'Manila',
-          faceImage: profileData.photo_1_url || c1face, // Formal photo (first image)
-          fullBodyImage: profileData.photo_2_url || c1, // Casual photo (second image)
-          participantType: (profileData.participant_type as 'under_review' | 'candidate' | 'finalist' | 'winner') || 'candidate'
+          name: `${appData?.first_name || ''} ${appData?.last_name || ''}`.trim() || 'Участник',
+          age: appData?.birth_year ? new Date().getFullYear() - appData.birth_year : 25,
+          weight: appData?.weight_kg || 55,
+          height: appData?.height_cm || 165,
+          country: appData?.country === 'PH' ? 'Philippines' : (appData?.country || 'Philippines'),
+          city: appData?.city || 'Manila',
+          faceImage: appData?.photo1_url || appData?.photo_1_url || c1face,
+          fullBodyImage: appData?.photo2_url || appData?.photo_2_url || c1,
+          participantType: contestApplication.status === 'approved' ? 'candidate' : 'under_review'
         }
       };
 
