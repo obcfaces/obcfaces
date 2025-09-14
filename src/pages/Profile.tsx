@@ -64,64 +64,90 @@ const Profile = () => {
 
   useEffect(() => {
     const fetchProfile = async () => {
-      if (!userId) return;
+      if (!userId) {
+        console.error('No userId provided');
+        setLoading(false);
+        return;
+      }
       
       setLoading(true);
       try {
+        console.log('Fetching profile for userId:', userId);
+        
         // Get current user session
         const { data: { session } } = await supabase.auth.getSession();
+        console.log('Current session:', session?.user?.id);
         setUser(session?.user || null);
         setIsCurrentUser(session?.user?.id === userId);
 
-        // Fetch profile data
+        // Fetch profile data with proper error handling
         const { data: profileData, error: profileError } = await supabase
           .from('profiles')
           .select('*')
           .eq('id', userId)
-          .single();
+          .maybeSingle();
+
+        console.log('Profile query result:', { profileData, profileError });
 
         if (profileError) {
           console.error('Error fetching profile:', profileError);
-          navigate('/404');
+          // Don't navigate away - just show error state
+          setLoading(false);
+          return;
+        }
+
+        if (!profileData) {
+          console.log('No profile found for user:', userId);
+          // Don't navigate away - just show error state  
+          setLoading(false);
           return;
         }
 
         setProfile(profileData);
+        console.log('Profile loaded successfully:', profileData.display_name);
 
-        // Fetch user posts
-        const { data: postsData, error: postsError } = await supabase
-          .from('posts')
-          .select(`
-            *,
-            profiles!posts_user_id_fkey(display_name, avatar_url)
-          `)
-          .eq('user_id', userId)
-          .order('created_at', { ascending: false });
-
-        if (!postsError) {
-          setPosts(postsData || []);
-        }
-
-        // Fetch liked posts if current user
-        if (session?.user?.id === userId) {
-          const { data: likedData, error: likedError } = await supabase
-            .from('post_likes')
+        // Fetch user posts only if we have a profile
+        if (profileData) {
+          console.log('Fetching posts for user:', userId);
+          const { data: postsData, error: postsError } = await supabase
+            .from('posts')
             .select(`
-              post_id,
-              posts(
-                *,
-                profiles!posts_user_id_fkey(display_name, avatar_url)
-              )
+              *,
+              profiles!posts_user_id_fkey(display_name, avatar_url)
             `)
             .eq('user_id', userId)
             .order('created_at', { ascending: false });
 
-          if (!likedError && likedData) {
-            setLikedPosts(likedData.map(item => item.posts).filter(Boolean));
+          console.log('Posts query result:', { postsCount: postsData?.length, postsError });
+
+          if (!postsError) {
+            setPosts(postsData || []);
+          }
+
+          // Fetch liked posts if current user
+          if (session?.user?.id === userId) {
+            console.log('Fetching liked posts for current user');
+            const { data: likedData, error: likedError } = await supabase
+              .from('post_likes')
+              .select(`
+                post_id,
+                posts(
+                  *,
+                  profiles!posts_user_id_fkey(display_name, avatar_url)
+                )
+              `)
+              .eq('user_id', userId)
+              .order('created_at', { ascending: false });
+
+            console.log('Liked posts query result:', { likedCount: likedData?.length, likedError });
+
+            if (!likedError && likedData) {
+              setLikedPosts(likedData.map(item => item.posts).filter(Boolean));
+            }
           }
         }
       } catch (error) {
-        console.error('Error:', error);
+        console.error('Unexpected error in fetchProfile:', error);
       } finally {
         setLoading(false);
       }
@@ -139,7 +165,10 @@ const Profile = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">Loading profile...</div>
+        <div className="text-center">
+          <div className="text-lg mb-2">Loading profile...</div>
+          <div className="text-sm text-muted-foreground">User ID: {userId}</div>
+        </div>
       </div>
     );
   }
@@ -147,7 +176,17 @@ const Profile = () => {
   if (!profile) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">Profile not found</div>
+        <div className="text-center">
+          <div className="text-lg mb-2">Profile not found</div>
+          <div className="text-sm text-muted-foreground">User ID: {userId}</div>
+          <Button 
+            onClick={() => navigate('/')} 
+            className="mt-4"
+            variant="outline"
+          >
+            Go back to home
+          </Button>
+        </div>
       </div>
     );
   }
