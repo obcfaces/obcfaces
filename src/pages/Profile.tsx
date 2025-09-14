@@ -47,7 +47,8 @@ interface ProfileRow {
 }
 
 const Profile = () => {
-  const { id: userId } = useParams();
+  const params = useParams();
+  const userId = params.id;
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [profile, setProfile] = useState<ProfileRow | null>(null);
@@ -67,11 +68,11 @@ const Profile = () => {
     const fetchProfile = async () => {
       console.log('Profile component mounted - checking userId:', userId);
       console.log('Current window location:', window.location.pathname);
-      console.log('All URL params:', useParams());
+      console.log('All URL params:', params);
       
       if (!userId) {
         console.error('No userId provided - URL params might be broken');
-        console.log('All available params:', useParams());
+        console.log('All available params:', params);
         setLoading(false);
         return;
       }
