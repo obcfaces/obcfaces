@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { Share2, Trophy, Camera, MessageCircle, AlertCircle, Grid2X2, AlignJustify } from "lucide-react";
+import { Share2, Trophy, Camera, MessageCircle, AlertCircle, Grid2X2, AlignJustify, MapPin, Pencil } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import PostCard from "@/components/profile/PostCard";
 import LikedItem from "@/components/profile/LikedItem";
@@ -47,9 +47,6 @@ const Profile = () => {
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState(0);
   const [displayStyle, setDisplayStyle] = useState<'grid' | 'list'>('grid');
   const [isContestModalOpen, setIsContestModalOpen] = useState(false);
-  const [postsCount, setPostsCount] = useState(0);
-  const [followersCount, setFollowersCount] = useState(0);
-  const [followingCount, setFollowingCount] = useState(0);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -89,7 +86,6 @@ const Profile = () => {
 
         if (!postsError) {
           setPosts(postsData || []);
-          setPostsCount(postsData?.length || 0);
         }
 
         // Fetch liked posts if current user
@@ -110,20 +106,6 @@ const Profile = () => {
             setLikedPosts(likedData.map(item => item.posts).filter(Boolean));
           }
         }
-
-        // Fetch followers/following counts
-        const { count: followersCount } = await supabase
-          .from('follows')
-          .select('*', { count: 'exact', head: true })
-          .eq('followee_id', userId);
-
-        const { count: followingCount } = await supabase
-          .from('follows')
-          .select('*', { count: 'exact', head: true })
-          .eq('follower_id', userId);
-
-        setFollowersCount(followersCount || 0);
-        setFollowingCount(followingCount || 0);
 
       } catch (error) {
         console.error('Error fetching profile:', error);
@@ -197,13 +179,13 @@ const Profile = () => {
       </Helmet>
       
       <div className="min-h-screen bg-background">
-        <div className="max-w-4xl mx-auto px-4 py-6">
+        <div className="max-w-6xl mx-auto px-4 py-8">
           {/* Profile Header */}
-          <div className="bg-card rounded-lg p-6 mb-6">
-            <div className="flex items-start gap-6 mb-6">
+          <div className="bg-card rounded-lg p-6 mb-6 shadow-sm">
+            <div className="flex flex-col md:flex-row gap-6">
               {/* Avatar */}
               <div className="flex-shrink-0">
-                <Avatar className="w-24 h-24 md:w-32 md:h-32">
+                <Avatar className="w-32 h-32">
                   <AvatarImage src={profile.avatar_url || undefined} />
                   <AvatarFallback className="text-2xl">
                     {displayName.slice(0, 2).toUpperCase()}
@@ -213,187 +195,147 @@ const Profile = () => {
 
               {/* Profile Info */}
               <div className="flex-1">
-                <div className="flex items-center gap-4 mb-4">
-                  <h1 className="text-2xl md:text-3xl font-bold text-foreground">{displayName}</h1>
-                  <Button variant="ghost" size="sm">
-                    <Share2 className="w-4 h-4" />
-                  </Button>
+                <div className="flex flex-col md:flex-row md:items-center gap-4 mb-4">
+                  <h1 className="text-3xl font-bold">{displayName}</h1>
+                  {isCurrentUser && (
+                    <Button variant="outline" size="sm">
+                      <Pencil className="w-4 h-4 mr-2" />
+                      Edit Profile
+                    </Button>
+                  )}
                 </div>
 
-                {/* Stats */}
-                <div className="flex gap-8 text-sm mb-4">
-                  <div className="text-center">
-                    <div className="font-bold text-base">{postsCount}</div>
-                    <div className="text-muted-foreground">posts</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="font-bold text-base">{followersCount}</div>
-                    <div className="text-muted-foreground">followers</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="font-bold text-base">{followingCount}</div>
-                    <div className="text-muted-foreground">following</div>
-                  </div>
-                </div>
-
-                {/* Bio */}
-                {profile.bio && (
-                  <p className="text-sm text-muted-foreground italic">{profile.bio}</p>
-                )}
-              </div>
-            </div>
-
-            {/* Action Buttons */}
-            <div className="flex gap-3">
-              <Button 
-                onClick={() => setIsContestModalOpen(true)}
-                className="bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 text-white px-6 py-2 rounded-lg font-medium"
-              >
-                <Trophy className="w-4 h-4 mr-2" />
-                Join & Win 5,000 PHP
-              </Button>
-              
-              {isCurrentUser && (
-                <CreatePostModal 
-                  onPostCreated={() => {
-                    window.location.reload();
-                  }}
-                >
-                  <Button 
-                    variant="outline" 
-                    className="px-6 py-2 rounded-lg font-medium border-gray-300"
-                  >
-                    Add Post
-                  </Button>
-                </CreatePostModal>
-              )}
-            </div>
-          </div>
-
-          {/* Tabs */}
-          <div className="bg-card rounded-lg">
-            <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <TabsList className="w-full grid grid-cols-4 bg-transparent border-b border-border rounded-none h-auto p-0">
-                <TabsTrigger 
-                  value="posts"
-                  className="data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-blue-500 data-[state=active]:text-blue-600 rounded-none py-4 font-medium"
-                >
-                  Posts
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="photos"
-                  className="data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-blue-500 data-[state=active]:text-blue-600 rounded-none py-4 font-medium"
-                >
-                  Photos
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="participation"
-                  className="data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-blue-500 data-[state=active]:text-blue-600 rounded-none py-4 font-medium"
-                >
-                  Participation
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="about"
-                  className="data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-blue-500 data-[state=active]:text-blue-600 rounded-none py-4 font-medium"
-                >
-                  About
-                </TabsTrigger>
-              </TabsList>
-
-              <div className="p-6">
-                <TabsContent value="posts" className="mt-0">
-                  {posts.length === 0 ? (
-                    <div className="text-center py-16 text-muted-foreground">
-                      <div className="mb-2 text-lg">У вас пока нет постов</div>
-                      <div className="text-sm">Создайте свой первый пост, нажав "Add Post"</div>
-                    </div>
-                  ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {posts.map((post) => (
-                        <PostCard
-                          key={post.id}
-                          id={post.id}
-                          authorName={displayName}
-                          authorAvatarUrl={profile.avatar_url}
-                          authorProfileId={profile.id}
-                          time={new Date(post.created_at).toLocaleDateString()}
-                          content={post.caption || ''}
-                          mediaUrls={post.media_urls}
-                          mediaTypes={post.media_types}
-                          likes={post.likes_count}
-                          comments={post.comments_count}
-                          isOwnPost={isCurrentUser}
-                        />
-                      ))}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-muted-foreground">
+                  {profile.city && profile.country && (
+                    <div className="flex items-center gap-2">
+                      <MapPin className="w-4 h-4" />
+                      {profile.city}, {profile.country}
                     </div>
                   )}
-                </TabsContent>
+                  {profile.age && (
+                    <div>Age: {profile.age}</div>
+                  )}
+                  {profile.gender && (
+                    <div>Gender: {profile.gender}</div>
+                  )}
+                  {profile.height_cm && (
+                    <div>Height: {profile.height_cm} cm</div>
+                  )}
+                </div>
 
-                <TabsContent value="photos" className="mt-0">
-                  {profilePhotos.length === 0 ? (
-                    <div className="text-center py-16 text-muted-foreground">
-                      <div className="mb-4 text-lg">No photos</div>
-                      <div className="text-sm">Add photos to your profile</div>
-                    </div>
-                  ) : (
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {profile.bio && (
+                  <p className="mt-4 text-sm">{profile.bio}</p>
+                )}
+
+                {/* Profile Photos */}
+                {profilePhotos.length > 0 && (
+                  <div className="mt-4">
+                    <h3 className="font-semibold mb-2">Photos</h3>
+                    <div className="flex gap-2">
                       {profilePhotos.map((photo, index) => (
                         <img
                           key={index}
                           src={photo}
                           alt={`${displayName} photo ${index + 1}`}
-                          className="aspect-square object-cover rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
+                          className="w-16 h-16 object-cover rounded-lg cursor-pointer"
                           onClick={() => handlePhotoClick(profilePhotos, index)}
                         />
                       ))}
                     </div>
-                  )}
-                </TabsContent>
-
-                <TabsContent value="participation" className="mt-0">
-                  <div className="text-center py-16 text-muted-foreground">
-                    <div className="mb-4 text-lg">Contest Participation</div>
-                    <div className="text-sm">Your contest history will appear here</div>
                   </div>
-                </TabsContent>
-
-                <TabsContent value="about" className="mt-0">
-                  <div className="space-y-4">
-                    {profile.gender && (
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Gender:</span>
-                        <span>{profile.gender}</span>
-                      </div>
-                    )}
-                    {profile.age && (
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Age:</span>
-                        <span>{profile.age}</span>
-                      </div>
-                    )}
-                    {profile.city && profile.country && (
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Location:</span>
-                        <span>{profile.city}, {profile.country}</span>
-                      </div>
-                    )}
-                    {profile.height_cm && (
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Height:</span>
-                        <span>{profile.height_cm} cm</span>
-                      </div>
-                    )}
-                    {profile.weight_kg && (
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Weight:</span>
-                        <span>{profile.weight_kg} kg</span>
-                      </div>
-                    )}
-                  </div>
-                </TabsContent>
+                )}
               </div>
-            </Tabs>
+            </div>
           </div>
+
+          {/* Tabs */}
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
+            <div className="flex justify-between items-center mb-6">
+              <TabsList>
+                <TabsTrigger value="posts">Posts ({posts.length})</TabsTrigger>
+                {isCurrentUser && (
+                  <TabsTrigger value="liked">Liked ({likedPosts.length})</TabsTrigger>
+                )}
+              </TabsList>
+
+              {activeTab === "posts" && posts.length > 0 && (
+                <div className="flex gap-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setDisplayStyle('grid')}
+                    className={displayStyle === 'grid' ? 'bg-muted' : ''}
+                  >
+                    <Grid2X2 className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setDisplayStyle('list')}
+                    className={displayStyle === 'list' ? 'bg-muted' : ''}
+                  >
+                    <AlignJustify className="w-4 h-4" />
+                  </Button>
+                </div>
+              )}
+            </div>
+
+            <TabsContent value="posts">
+              {posts.length === 0 ? (
+                <div className="text-center py-12 text-muted-foreground">
+                  {isCurrentUser ? "You haven't posted anything yet" : "No posts yet"}
+                </div>
+              ) : (
+                <div className={displayStyle === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4' : 'space-y-4'}>
+                  {posts.map((post) => (
+                    <PostCard
+                      key={post.id}
+                      id={post.id}
+                      authorName={displayName}
+                      authorAvatarUrl={profile.avatar_url}
+                      authorProfileId={profile.id}
+                      time={new Date(post.created_at).toLocaleDateString()}
+                      content={post.caption || ''}
+                      mediaUrls={post.media_urls}
+                      mediaTypes={post.media_types}
+                      likes={post.likes_count}
+                      comments={post.comments_count}
+                      isOwnPost={isCurrentUser}
+                    />
+                  ))}
+                </div>
+              )}
+            </TabsContent>
+
+            {isCurrentUser && (
+              <TabsContent value="liked">
+                {likedPosts.length === 0 ? (
+                  <div className="text-center py-12 text-muted-foreground">
+                    You haven't liked any posts yet
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {likedPosts.map((post) => (
+                      <LikedItem
+                        key={post.id}
+                        likeId={`like-${post.id}`}
+                        contentType="post"
+                        contentId={post.id}
+                        authorName={post.profiles?.display_name || 'User'}
+                        authorAvatarUrl={post.profiles?.avatar_url}
+                        authorProfileId={post.user_id}
+                        time={new Date(post.created_at).toLocaleDateString()}
+                        content={post.caption}
+                        imageSrc={post.media_urls?.[0]}
+                        likes={post.likes_count}
+                        comments={post.comments_count}
+                      />
+                    ))}
+                  </div>
+                )}
+              </TabsContent>
+            )}
+          </Tabs>
         </div>
 
         {/* Photo Modal */}
@@ -416,6 +358,20 @@ const Profile = () => {
           onOpenChange={setIsContestModalOpen}
         />
 
+        {/* Create Post Modal */}
+        <CreatePostModal 
+          onPostCreated={() => {
+            window.location.reload();
+          }}
+        >
+          <Button 
+            variant="outline" 
+            className="w-full mt-4"
+          >
+            <Camera className="w-4 h-4 mr-2" />
+            Create Post
+          </Button>
+        </CreatePostModal>
       </div>
     </>
   );
