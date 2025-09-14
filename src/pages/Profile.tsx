@@ -67,9 +67,11 @@ const Profile = () => {
     const fetchProfile = async () => {
       console.log('Profile component mounted - checking userId:', userId);
       console.log('Current window location:', window.location.pathname);
+      console.log('All URL params:', useParams());
       
       if (!userId) {
         console.error('No userId provided - URL params might be broken');
+        console.log('All available params:', useParams());
         setLoading(false);
         return;
       }
