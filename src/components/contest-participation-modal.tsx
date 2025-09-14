@@ -1525,23 +1525,16 @@ export const ContestParticipationModal = ({
 
             <div className="space-y-4 mt-4">
               <div className="flex flex-row items-start">
-                {/* Left text column */}
-                <div className="flex flex-col justify-center items-start space-y-2 text-sm text-muted-foreground flex-shrink-0 mt-2">
-                  <span className="font-bold">Upload Photos</span>
-                  <span className="text-red-600">no makeup</span>
-                  <span className="text-red-600">no filters</span>
-                  <span className="text-red-600">no nudes</span>
-                  <span className="text-red-600">no color correction</span>
-                </div>
-
-                {/* Minimal spacing after text */}
-                <div className="w-1 flex-shrink-0"></div>
-
                 {/* Fixed photo upload areas */}
-                <div className="flex flex-row gap-0 items-start">
+                <div className="flex flex-row gap-4 items-start w-full">
                   {/* Portrait Photo */}
                   <div className="flex flex-col items-center gap-1 flex-1 min-w-0">
-                    <p className="text-xs text-muted-foreground">portrait</p>
+                    <p className="text-xs text-muted-foreground">Portrait</p>
+                    <div className="text-xs text-red-500 space-y-1 text-center mb-2">
+                      <div>Look like an ID photo</div>
+                      <div>No makeup, no filters</div>
+                      <div>No glasses allowed.</div>
+                    </div>
                     <div className="relative w-full">
                       <input
                         type="file"
@@ -1607,6 +1600,11 @@ export const ContestParticipationModal = ({
                   {/* Full Length Photo */}
                   <div className="flex flex-col items-center gap-1 flex-1 min-w-0">
                     <p className="text-xs text-muted-foreground">full length</p>
+                    <div className="text-xs text-red-500 space-y-1 text-center mb-2">
+                      <div>Whole body from head to toe.</div>
+                      <div>Tight-clothed.</div>
+                      <div>No dresses, no skirts.</div>
+                    </div>
                     <div className="relative w-full">
                       <input
                         type="file"
