@@ -64,8 +64,11 @@ const Profile = () => {
 
   useEffect(() => {
     const fetchProfile = async () => {
+      console.log('Profile component mounted - checking userId:', userId);
+      console.log('Current window location:', window.location.pathname);
+      
       if (!userId) {
-        console.error('No userId provided');
+        console.error('No userId provided - URL params might be broken');
         setLoading(false);
         return;
       }
@@ -178,7 +181,12 @@ const Profile = () => {
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <div className="text-lg mb-2">Profile not found</div>
-          <div className="text-sm text-muted-foreground">User ID: {userId}</div>
+          <div className="text-sm text-muted-foreground">
+            User ID: {userId || 'No userId found'}
+          </div>
+          <div className="text-xs text-muted-foreground mt-2">
+            Current URL: {window.location.pathname}
+          </div>
           <Button 
             onClick={() => navigate('/')} 
             className="mt-4"
