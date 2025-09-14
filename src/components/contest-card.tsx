@@ -81,7 +81,7 @@ export function ContestantCard({
   const [isAdmin, setIsAdmin] = useState(false);
   
   // Use unified card data hook
-  const { data: cardData, loading: cardDataLoading } = useCardData(name, user?.id, profileId);
+  const { data: cardData, loading: cardDataLoading, refresh: refreshCardData } = useCardData(name, user?.id, profileId);
 
   // Check if user is admin
   useEffect(() => {
@@ -242,8 +242,8 @@ export function ContestantCard({
       return;
     }
     
-    // Use card content_id instead of photo content_id for card likes
-    const contentId = `contestant-card-${name}`;
+    // Use consistent content_id format for both saving and loading
+    const contentId = profileId ? `contestant-user-${profileId}` : `contestant-card-${name}`;
     const wasLiked = isLiked[0]; // Card likes are stored in first index
     
     // Optimistic UI update
@@ -267,6 +267,11 @@ export function ContestantCard({
             content_type: "contest",
             content_id: contentId,
           });
+      }
+      
+      // Refresh card data to update counters
+      if (refreshCardData) {
+        refreshCardData();
       }
       
     } catch (error) {
@@ -537,7 +542,7 @@ export function ContestantCard({
                >
                   <ThumbsUp className={cn("w-4 h-4", (isLiked[0] || isLiked[1]) ? "text-blue-500" : "text-gray-500")} strokeWidth={1} />
                   <span className={cn("hidden sm:inline", (isLiked[0] || isLiked[1]) ? "text-blue-500" : "text-gray-500")}>Like</span>
-                   {cardData.likes > 0 && <span className={cn((isLiked[0] || isLiked[1]) ? "text-blue-500" : "text-gray-500")}>{cardData.likes}</span>}
+                    <span className={cn((isLiked[0] || isLiked[1]) ? "text-blue-500" : "text-gray-500")}>{cardData.likes}</span>
                </button>
                {showDislike && (
                  <button
@@ -807,7 +812,7 @@ export function ContestantCard({
                    >
                       <ThumbsUp className={cn("w-3.5 h-3.5", (isLiked[0] || isLiked[1]) ? "text-blue-500" : "text-gray-500")} strokeWidth={1} />
                       <span className={cn("hidden xl:inline", (isLiked[0] || isLiked[1]) ? "text-blue-500" : "text-gray-500")}>Like</span>
-                       {cardData.likes > 0 && <span className={cn((isLiked[0] || isLiked[1]) ? "text-blue-500" : "text-gray-500")}>{cardData.likes}</span>}
+                       <span className={cn((isLiked[0] || isLiked[1]) ? "text-blue-500" : "text-gray-500")}>{cardData.likes}</span>
                    </button>
                   {showDislike && (
                     <button
