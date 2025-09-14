@@ -1054,8 +1054,27 @@ const Profile = () => {
           description: "Photos updated successfully",
         });
 
-        // Refresh participation items
-        loadParticipationItems();
+        // Refresh participation items and update local state immediately
+        await loadParticipationItems();
+        
+        // Update local participation items immediately for real-time display
+        if (participationItems.length > 0) {
+          const updatedItems = participationItems.map(item => {
+            if (item.contentType === 'contest') {
+              return {
+                ...item,
+                imageSrc: updates.photo_1_url || item.imageSrc,
+                candidateData: {
+                  ...item.candidateData,
+                  faceImage: updates.photo_1_url || item.candidateData.faceImage,
+                  fullBodyImage: updates.photo_2_url || item.candidateData.fullBodyImage
+                }
+              };
+            }
+            return item;
+          });
+          setParticipationItems(updatedItems);
+        }
       }
 
       cancelParticipationEdit();
