@@ -30,11 +30,11 @@ import { AlignJustify, Grid2X2, Edit } from "lucide-react";
 interface ProfileRow {
   id: string;
   display_name: string | null;
-  first_name: string | null;
-  last_name: string | null;
-  birthdate: string | null;
-  height_cm: number | null;
-  weight_kg: number | null;
+  first_name?: string | null;
+  last_name?: string | null;
+  birthdate?: string | null;
+  height_cm?: number | null;
+  weight_kg?: number | null;
   avatar_url?: string | null;
   city?: string | null;
   country?: string | null;
@@ -43,6 +43,7 @@ interface ProfileRow {
   age?: number | null;
   photo_1_url?: string | null;
   photo_2_url?: string | null;
+  is_contest_participant?: boolean;
 }
 
 const Profile = () => {
@@ -83,14 +84,12 @@ const Profile = () => {
         setUser(session?.user || null);
         setIsCurrentUser(session?.user?.id === userId);
 
-        // Fetch profile data with proper error handling
+        // Fetch profile data using the secure function designed for profile access
         const { data: profileData, error: profileError } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', userId)
+          .rpc('get_detailed_profile', { profile_user_id: userId })
           .maybeSingle();
 
-        console.log('Profile query result:', { profileData, profileError });
+        console.log('Profile query result:', { profileData, profileError, isAuthenticated: !!session?.user });
 
         if (profileError) {
           console.error('Error fetching profile:', profileError);
@@ -100,7 +99,7 @@ const Profile = () => {
         }
 
         if (!profileData) {
-          console.log('No profile found for user:', userId);
+          console.log('No profile found for user:', userId, 'Session exists:', !!session?.user);
           // Don't navigate away - just show error state  
           setLoading(false);
           return;
@@ -180,20 +179,31 @@ const Profile = () => {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
+          <AlertCircle className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
           <div className="text-lg mb-2">Profile not found</div>
-          <div className="text-sm text-muted-foreground">
-            User ID: {userId || 'No userId found'}
+          <div className="text-sm text-muted-foreground mb-4">
+            {!user ? (
+              <>This profile may require authentication to view. Please log in to continue.</>
+            ) : (
+              <>This profile is private or doesn't exist.</>
+            )}
           </div>
-          <div className="text-xs text-muted-foreground mt-2">
-            Current URL: {window.location.pathname}
+          <div className="space-y-2">
+            {!user ? (
+              <Button 
+                onClick={() => navigate('/auth')} 
+                className="mr-2"
+              >
+                Log In
+              </Button>
+            ) : null}
+            <Button 
+              onClick={() => navigate('/')} 
+              variant="outline"
+            >
+              Go back to home
+            </Button>
           </div>
-          <Button 
-            onClick={() => navigate('/')} 
-            className="mt-4"
-            variant="outline"
-          >
-            Go back to home
-          </Button>
         </div>
       </div>
     );
