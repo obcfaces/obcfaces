@@ -638,27 +638,27 @@ export function ContestantCard({
           <div className="absolute top-0 right-0 z-10 flex flex-col items-end">
             <Popover>
               <PopoverTrigger asChild>
-                <div className="bg-contest-blue text-white px-2 py-1.5 rounded-bl-lg text-base sm:text-lg font-bold shadow-sm cursor-pointer hover:bg-contest-blue/90 transition-colors">
-                  {(() => {
-                    console.log('Compact rating display - isAdmin:', isAdmin, 'userRating:', userRating, 'averageRating:', averageRating);
-                    // Всегда показываем общий рейтинг для всех пользователей
-                    return averageRating > 0 ? averageRating.toFixed(1) : '0.0';
-                  })()}
-                </div>
+                 <div className="bg-contest-blue text-white px-2 py-1.5 rounded-bl-lg text-base sm:text-lg font-bold shadow-sm cursor-pointer hover:bg-contest-blue/90 transition-colors">
+                   {(() => {
+                     console.log('Compact rating display - isAdmin:', isAdmin, 'userRating:', userRating, 'averageRating:', averageRating);
+                     // Для всех пользователей (включая админов) показываем средний рейтинг
+                     return averageRating > 0 ? averageRating.toFixed(1) : '0.0';
+                   })()}
+                 </div>
               </PopoverTrigger>
-              <PopoverContent className="w-auto p-3">
-                <div className="text-sm">
-                  {!isAdmin ? 
-                    `Average: ${averageRating.toFixed(1)} (${totalVotes} votes) — ` : 
-                    (userRating > 0 ? `You rated ${userRating.toFixed(0)} — ` : `Average: ${averageRating.toFixed(1)} (${totalVotes} votes) — `)
-                  }<button 
-                    className="text-contest-blue hover:underline" 
-                    onClick={() => setIsEditing(true)}
-                  >
-                    change
-                  </button>
-                </div>
-              </PopoverContent>
+               <PopoverContent className="w-auto p-3">
+                 <div className="text-sm">
+                   {userRating > 0 ? 
+                     `Your rating: ${userRating} • Average: ${averageRating.toFixed(1)} (${totalVotes} votes) — ` : 
+                     `Average: ${averageRating.toFixed(1)} (${totalVotes} votes) — `
+                   }<button 
+                     className="text-contest-blue hover:underline" 
+                     onClick={() => setIsEditing(true)}
+                   >
+                     change
+                   </button>
+                 </div>
+               </PopoverContent>
             </Popover>
           </div>
         )}
