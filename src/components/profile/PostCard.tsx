@@ -358,7 +358,7 @@ const PostCard = ({
             disabled={loading}
             aria-label="Like"
           >
-            <ThumbsUp className={cn("w-4 h-4", isLiked ? "text-blue-500 fill-blue-500" : "text-gray-500")} strokeWidth={1} />
+            <ThumbsUp className={cn("w-4 h-4", isLiked ? "text-blue-500" : "text-gray-500")} strokeWidth={1} />
             <span className={cn("hidden sm:inline", isLiked ? "text-blue-500" : "text-gray-500")}>Like</span>
             <span className={cn(isLiked ? "text-blue-500" : "text-gray-500")}>{cardData.likes}</span>
           </button>

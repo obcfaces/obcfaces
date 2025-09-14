@@ -874,7 +874,7 @@ const LikedItem = ({
             onClick={handleUnlike}
             disabled={isUnliking}
           >
-            <ThumbsUp className="w-4 h-4 text-blue-500 fill-blue-500" strokeWidth={1} />
+            <ThumbsUp className="w-4 h-4 text-blue-500" strokeWidth={1} />
              <span className="hidden sm:inline text-blue-500">Unlike</span>
              <span className="text-blue-500">{cardData.likes}</span>
           </button>

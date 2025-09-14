@@ -540,10 +540,10 @@ export function PhotoModal({
                       )}
                       onClick={handleLike}
                     >
-                       <ThumbsUp className={cn(
-                         "w-5 h-5",
-                         photoLikes[activeIndex]?.isLiked ? "text-blue-500 fill-blue-500" : "text-gray-500"
-                       )} strokeWidth={1} />
+                        <ThumbsUp className={cn(
+                          "w-5 h-5",
+                          photoLikes[activeIndex]?.isLiked ? "text-blue-500" : "text-gray-500"
+                        )} strokeWidth={1} />
                       <span className={cn(photoLikes[activeIndex]?.isLiked ? "text-blue-500" : "text-gray-500")}>{currentPhotoLikes.count}</span>
                     </button>
                     <button
