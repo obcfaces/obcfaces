@@ -84,6 +84,19 @@ export const ShareModal = ({
 
   const shareOptions = [
     {
+      id: "native",
+      name: "Share",
+      icon: Share2,
+      color: "text-primary",
+      action: async () => {
+        if ('share' in navigator) {
+          await navigator.share({ title, url, text: description });
+        } else {
+          await copyToClipboard();
+        }
+      }
+    },
+    {
       id: "copy",
       name: "Copy Link",
       icon: Copy,

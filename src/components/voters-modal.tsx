@@ -275,7 +275,7 @@ export const VotersModal = ({ isOpen, onClose, participantId, participantName }:
           </DialogTitle>
         </DialogHeader>
         
-        <ScrollArea className="flex-1 mt-4 pr-4 max-h-[65vh]">
+        <ScrollArea className="flex-1 mt-4 pr-4">
           {loading ? (
             <div className="flex items-center justify-center py-8">
               <div className="text-muted-foreground">Loading voters...</div>

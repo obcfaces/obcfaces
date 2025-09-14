@@ -81,7 +81,7 @@ export function ContestantCard({
   const [isAdmin, setIsAdmin] = useState(false);
   
   // Use unified card data hook
-  const { data: cardData, loading: cardDataLoading, refresh } = useCardData(name, user?.id, profileId);
+  const { data: cardData, loading: cardDataLoading } = useCardData(name, user?.id, profileId);
 
   // Check if user is admin
   useEffect(() => {
@@ -183,21 +183,18 @@ export function ContestantCard({
     const loadUserVotingData = async () => {
       if (!user) return;
 
-      // Load user's likes status - use same content_id logic as in handleLike
-      const contentIdCard = profileId ? `contestant-user-${profileId}` : `contestant-card-${name}`;
-      const contentIdPhoto = profileId ? `contestant-user-${profileId}` : `contestant-photo-${name}-1`;
-      
+      // Load user's likes status for photos
       const { data: userLikes } = await supabase
         .from("likes")
         .select("content_id")
         .eq("content_type", "contest")
         .eq("user_id", user.id)
-        .in("content_id", [contentIdCard, contentIdPhoto]);
+        .in("content_id", [`contestant-photo-${name}-0`, `contestant-photo-${name}-1`]);
       
       if (userLikes) {
         setIsLiked([
-          userLikes.some(like => like.content_id === contentIdCard),
-          userLikes.some(like => like.content_id === contentIdPhoto)
+          userLikes.some(like => like.content_id === `contestant-photo-${name}-0`),
+          userLikes.some(like => like.content_id === `contestant-photo-${name}-1`)
         ]);
       }
 
@@ -246,11 +243,9 @@ export function ContestantCard({
       return;
     }
     
-    // Use profileId-based content_id if available, fallback to name-based for older system
-    const contentId = profileId ? `contestant-user-${profileId}` : `contestant-card-${name}`;
+    // Use card content_id instead of photo content_id for card likes
+    const contentId = `contestant-card-${name}`;
     const wasLiked = isLiked[0]; // Card likes are stored in first index
-    
-    console.log('Handling like with contentId:', contentId, 'profileId:', profileId, 'wasLiked:', wasLiked);
     
     // Optimistic UI update
     setIsLiked([!wasLiked, !wasLiked]);
@@ -258,40 +253,24 @@ export function ContestantCard({
     try {
       if (wasLiked) {
         // Unlike
-        const { error } = await supabase
+        await supabase
           .from("likes")
           .delete()
           .eq("user_id", user.id)
           .eq("content_type", "contest")
           .eq("content_id", contentId);
-          
-        if (error) {
-          console.error('Error deleting like:', error);
-          throw error;
-        }
-        console.log('Successfully deleted like');
       } else {
         // Like
-        const { error } = await supabase
+        await supabase
           .from("likes")
           .insert({
             user_id: user.id,
             content_type: "contest",
             content_id: contentId,
           });
-          
-        if (error) {
-          console.error('Error inserting like:', error);
-          throw error;
-        }
-        console.log('Successfully inserted like');
       }
       
-      // Refresh card data to update like count
-      refresh();
-      
     } catch (error) {
-      console.error('Error handling like:', error);
       // Revert optimistic update on error
       setIsLiked([wasLiked, wasLiked]);
       toast({ description: "Failed to perform action" });
@@ -384,8 +363,6 @@ export function ContestantCard({
     if (user) {
       localStorage.setItem(`commented-${name}-${user.id}`, 'true');
       setHasCommented(true);
-      // Refresh card data to update comment count and state
-      refresh();
     }
   };
 
@@ -407,14 +384,18 @@ export function ContestantCard({
           {/* Rank and rating in top right corner - hidden for example cards */}
           {rank > 0 && isVoted && !isExample && (
             <div className="absolute top-0 right-0 z-20 flex items-center">
-              <div className="text-lg font-bold text-contest-blue bg-white px-1.5 py-1 rounded-bl-lg shadow-sm">
+              <div className="text-xl font-bold text-contest-blue bg-white px-2 py-1.5 rounded-bl-lg shadow-sm">
                 #{rank}
               </div>
-              <div className={cn("text-white px-1.5 py-1 rounded-bl-lg text-base font-bold", hasCommented ? "bg-contest-blue" : "bg-contest-blue")}>
+              <div className="bg-contest-blue text-white px-2 py-1.5 rounded-bl-lg text-lg font-bold">
                 {(() => {
                   console.log('Rating display - isAdmin:', isAdmin, 'userRating:', userRating, 'averageRating:', averageRating);
-                  // ВСЕМ показываем средний рейтинг
-                  return averageRating > 0 ? averageRating.toFixed(1) : '0.0';
+                  // Обычные пользователи всегда видят средний рейтинг
+                  if (!isAdmin) {
+                    return averageRating > 0 ? averageRating.toFixed(1) : '0.0';
+                  }
+                  // Админы видят свой рейтинг, если проголосовали, иначе средний
+                  return userRating > 0 ? userRating.toFixed(1) : (averageRating > 0 ? averageRating.toFixed(1) : '0.0');
                 })()}
               </div>
             </div>
@@ -455,8 +436,8 @@ export function ContestantCard({
             <div className="absolute inset-0 bg-gray-300 flex items-center justify-center h-full">
               <div className="-translate-x-2 flex items-center gap-6">
                 <span className="text-2xl font-medium text-gray-800 mr-8">Vote</span>
-                <div className="scale-[1.5]">
-                  <StarRating
+                <div className="scale-[2]">
+                  <StarRating 
                     rating={rating}
                     isVoted={false}
                     variant="white"
@@ -490,19 +471,20 @@ export function ContestantCard({
            <div className="relative">
               {/* Example text area with photo requirements */}
               {isExample && (
-                <div className="bg-yellow-400 text-black px-4 py-2">
-                  <div className="text-sm font-semibold mb-2 text-center">How your photos should look:</div>
-                  <div className="grid grid-cols-2 gap-2 text-xs">
-                    <div className="space-y-0.5">
-                      <div className="flex"><span>•</span><span className="ml-1">Look like an ID photo</span></div>
-                      <div className="flex"><span>•</span><span className="ml-1">No makeup</span></div>
-                      <div className="flex"><span>•</span><span className="ml-1">No filters</span></div>
-                      <div className="flex"><span>•</span><span className="ml-1">No glasses allowed.</span></div>
-                    </div>
-                    <div className="space-y-0.5">
-                      <div className="flex"><span>•</span><span className="ml-1">Whole body from head to toe.</span></div>
-                      <div className="flex"><span>•</span><span className="ml-1">Wear tight/fitted clothes. No dresses, skirts, heels.</span></div>
-                      <div className="flex"><span>•</span><span className="ml-1">No bags or backpacks.</span></div>
+                <div className="bg-yellow-400 text-black px-4 py-3">
+                  <div className="text-lg font-semibold text-center mb-2">Example Card</div>
+                  <div className="text-sm opacity-80 text-center mb-3">This is how your card will look</div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div></div>
+                    <div>
+                      <div className="text-sm font-semibold mb-2">How your photos should look:</div>
+                      <div className="text-xs space-y-1">
+                        <div>• No makeup</div>
+                        <div>• No filter</div>
+                        <div>• No photo editing</div>
+                        <div>• No glasses</div>
+                        <div>• Tight-fitting clothes</div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -559,9 +541,9 @@ export function ContestantCard({
                  onClick={() => handleLike(0)}
                  aria-label="Like"
                >
-                  <ThumbsUp className={cn("w-4 h-4", (isLiked[0] || isLiked[1]) ? "text-blue-500" : "text-gray-500")} strokeWidth={1} />
-                   <span className={cn("hidden sm:inline", (isLiked[0] || isLiked[1]) ? "text-blue-500" : "text-gray-500")}>Like</span>
-                    {cardData.likes > 0 && <span className={cn("font-normal", (isLiked[0] || isLiked[1]) ? "text-blue-500" : "text-gray-500")}>{cardData.likes}</span>}
+                  <ThumbsUp className={cn("w-4 h-4", (isLiked[0] || isLiked[1]) ? "text-blue-500 fill-blue-500" : "text-gray-500")} strokeWidth={1} />
+                  <span className={cn("hidden sm:inline", (isLiked[0] || isLiked[1]) ? "text-blue-500" : "text-gray-500")}>Like</span>
+                   {cardData.likes > 0 && <span className={cn((isLiked[0] || isLiked[1]) ? "text-blue-500" : "text-gray-500")}>{cardData.likes}</span>}
                </button>
                {showDislike && (
                  <button
@@ -587,41 +569,22 @@ export function ContestantCard({
                  onClick={handleComment}
                  aria-label="Comments"
                >
-                  <MessageCircle className={cn("w-4 h-4", cardData.comments > 0 ? "text-primary" : "text-gray-500")} strokeWidth={1} />
-                  <span className="hidden sm:inline">Comment</span>
-                   {cardData.comments > 0 && <span className={cn("font-normal", hasCommented ? "text-contest-blue" : "text-gray-500")}>{cardData.comments}</span>}
+                 <MessageCircle className="w-4 h-4 text-primary" strokeWidth={1} />
+                 <span className="hidden sm:inline">Comment</span>
+                  <span>{cardData.comments}</span>
                </button>
                <button
                  type="button"
                  className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
-                  onClick={async () => {
-                    // Record the share in database
-                    if (profileId && user?.id) {
-                      const { error } = await supabase
-                        .from('shares')
-                        .insert({
-                          user_id: user.id,
-                          content_id: `contestant-user-${profileId}`,
-                          content_type: 'contest'
-                        });
-                      
-                      if (!error) {
-                        // Refresh card data to show updated share count
-                        window.location.reload();
-                      }
-                    }
-                    
-                    openShareModal({
-                      title: `${name} - Beauty Contest`,
-                      url: profileId ? `https://obcface.com/u/${profileId}` : `https://obcface.com`,
-                      description: `Check out ${name}, ${age} from ${city}, ${country} in this beauty contest!`
-                    });
-                  }}
-                  aria-label="Share"
-                >
-                   <Share2 className="w-4 h-4" strokeWidth={1} />
-                   <span className="hidden sm:inline">Share</span>
-                   {cardData.shares > 0 && <span className="font-normal">{cardData.shares}</span>}
+                 onClick={() => openShareModal({
+                   title: `${name} - Beauty Contest`,
+                   url: profileId ? `https://obcface.com/u/${profileId}` : `https://obcface.com`,
+                   description: `Check out ${name}, ${age} from ${city}, ${country} in this beauty contest!`
+                 })}
+                 aria-label="Share"
+               >
+                  <Share2 className="w-4 h-4" strokeWidth={1} />
+                  <span className="hidden sm:inline">Share</span>
                </button>
             </div>
            )}
@@ -666,7 +629,7 @@ export function ContestantCard({
     <>
       <Card className={`${isExample ? 'border-yellow-400 border-2 bg-yellow-50/50' : 'bg-card border-contest-border'} relative overflow-hidden flex h-36 sm:h-40 md:h-44`}>
         {isWinner && (
-          <div className="absolute bottom-0 left-0 w-[175px] sm:w-[203px] md:w-[232px] bg-blue-100 text-blue-700 pl-1.5 pr-1.5 py-0.5 text-xs font-semibold flex items-center justify-start z-20">
+          <div className="absolute bottom-0 left-0 w-[193px] sm:w-[225px] md:w-[257px] bg-blue-100 text-blue-700 pl-2 pr-2 py-1 text-xs font-semibold flex items-center justify-start z-20">
             <span>🏆 WINNER   + 5000 PHP</span>
           </div>
         )}
@@ -676,26 +639,29 @@ export function ContestantCard({
           <div className="absolute top-0 right-0 z-10 flex flex-col items-end">
             <Popover>
               <PopoverTrigger asChild>
-                <div className={cn("text-white px-1.5 py-1 rounded-bl-lg text-sm sm:text-base font-bold shadow-sm cursor-pointer transition-colors", hasCommented ? "bg-contest-blue hover:bg-contest-blue/90" : "bg-contest-blue hover:bg-contest-blue/90")}>
+                <div className="bg-contest-blue text-white px-2 py-1.5 rounded-bl-lg text-base sm:text-lg font-bold shadow-sm cursor-pointer hover:bg-contest-blue/90 transition-colors">
                   {(() => {
                     console.log('Compact rating display - isAdmin:', isAdmin, 'userRating:', userRating, 'averageRating:', averageRating);
-                    // ВСЕМ показываем средний рейтинг
-                    return averageRating > 0 ? averageRating.toFixed(1) : '0.0';
+                    // Обычные пользователи всегда видят средний рейтинг  
+                    if (!isAdmin) {
+                      return averageRating > 0 ? averageRating.toFixed(1) : '0.0';
+                    }
+                    // Админы видят свой рейтинг, если проголосовали, иначе средний
+                    return userRating > 0 ? userRating.toFixed(1) : (averageRating > 0 ? averageRating.toFixed(1) : '0.0');
                   })()}
                 </div>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-3">
                 <div className="text-sm">
-                  {userRating > 0 && isAdmin && (
-                    <>
-                      You rated {userRating.toFixed(0)} — <button 
-                        className="text-contest-blue hover:underline" 
-                        onClick={() => setIsEditing(true)}
-                      >
-                        change
-                      </button>
-                    </>
-                  )}
+                  {!isAdmin ? 
+                    `Average: ${averageRating.toFixed(1)} (${totalVotes} votes) — ` : 
+                    (userRating > 0 ? `You rated ${userRating.toFixed(0)} — ` : `Average: ${averageRating.toFixed(1)} (${totalVotes} votes) — `)
+                  }<button 
+                    className="text-contest-blue hover:underline" 
+                    onClick={() => setIsEditing(true)}
+                  >
+                    change
+                  </button>
                 </div>
               </PopoverContent>
             </Popover>
@@ -755,8 +721,8 @@ export function ContestantCard({
           {!isVoted && !isEditing && !showThanks && !isExample && (
             <div className="absolute inset-0 bg-gray-300 rounded-r flex flex-col items-center justify-center gap-3">
               <span className="text-lg sm:text-xl font-medium text-gray-800">Vote</span>
-               <div className="scale-[1.2] sm:scale-[1.4]">
-                <StarRating
+               <div className="scale-[1.5] sm:scale-[1.8]">
+                <StarRating 
                   rating={0} 
                   isVoted={false}
                   variant="white"
@@ -785,8 +751,8 @@ export function ContestantCard({
           {isVoted && isEditing && !showThanks && !isExample && (
             <div className="absolute inset-0 bg-gray-300 rounded-r flex flex-col items-center justify-center gap-3">
               <span className="text-lg sm:text-xl font-medium text-gray-800">Vote</span>
-              <div className="scale-[1.2] sm:scale-[1.4]">
-                <StarRating
+              <div className="scale-[1.5] sm:scale-[1.8]">
+                <StarRating 
                   rating={0} 
                   isVoted={false}
                   variant="white"
@@ -849,9 +815,9 @@ export function ContestantCard({
                      onClick={() => handleLike(0)}
                      aria-label="Like"
                    >
-                       <ThumbsUp className={cn("w-3.5 h-3.5", (isLiked[0] || isLiked[1]) ? "text-blue-500" : "text-gray-500")} strokeWidth={1} />
-                       <span className={cn("hidden xl:inline", (isLiked[0] || isLiked[1]) ? "text-blue-500" : "text-gray-500")}>Like</span>
-                        {cardData.likes > 0 && <span className={cn("font-normal", (isLiked[0] || isLiked[1]) ? "text-blue-500" : "text-gray-500")}>{cardData.likes}</span>}
+                      <ThumbsUp className={cn("w-3.5 h-3.5", (isLiked[0] || isLiked[1]) ? "text-blue-500 fill-blue-500" : "text-gray-500")} strokeWidth={1} />
+                      <span className={cn("hidden xl:inline", (isLiked[0] || isLiked[1]) ? "text-blue-500" : "text-gray-500")}>Like</span>
+                       {cardData.likes > 0 && <span className={cn((isLiked[0] || isLiked[1]) ? "text-blue-500" : "text-gray-500")}>{cardData.likes}</span>}
                    </button>
                   {showDislike && (
                     <button
@@ -865,7 +831,7 @@ export function ContestantCard({
                     >
                       <ThumbsDown className="w-3.5 h-3.5" />
                       <span className="hidden xl:inline">Dislike</span>
-                       {dislikesCount > 0 && <span className="font-normal">{dislikesCount}</span>}
+                      <span>{dislikesCount}</span>
                     </button>
                   )}
                    <button
@@ -877,41 +843,22 @@ export function ContestantCard({
                      onClick={handleComment}
                      aria-label="Comments"
                    >
-                       <MessageCircle className={cn("w-3.5 h-3.5", cardData.comments > 0 ? "text-primary" : "text-gray-500")} strokeWidth={1} />
-                       <span className="hidden xl:inline">Comment</span>
-                       {cardData.comments > 0 && <span className={cn("font-normal", hasCommented ? "text-contest-blue" : "text-gray-500")}>{cardData.comments}</span>}
+                      <MessageCircle className="w-3.5 h-3.5 text-primary" strokeWidth={1} />
+                      <span className="hidden xl:inline">Comment</span>
+                      <span>{cardData.comments}</span>
                    </button>
                    <button
                      type="button"
                      className="inline-flex items-center gap-1 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors"
-                      onClick={async () => {
-                        // Record the share in database
-                        if (profileId && user?.id) {
-                          const { error } = await supabase
-                            .from('shares')
-                            .insert({
-                              user_id: user.id,
-                              content_id: `contestant-user-${profileId}`,
-                              content_type: 'contest'
-                            });
-                          
-                          if (!error) {
-                            // Refresh card data to show updated share count
-                            window.location.reload();
-                          }
-                        }
-                        
-                        openShareModal({
-                          title: `${name} - Beauty Contest`,
-                          url: profileId ? `https://obcface.com/u/${profileId}` : `https://obcface.com`,
-                          description: `Check out ${name}, ${age} from ${city}, ${country} in this beauty contest!`
-                        });
-                      }}
-                      aria-label="Share"
-                    >
-                      <Share2 className="w-3.5 h-3.5" strokeWidth={1} />
-                      <span className="hidden xl:inline">Share</span>
-                      {cardData.shares > 0 && <span className="font-normal">{cardData.shares}</span>}
+                     onClick={() => openShareModal({
+                       title: `${name} - Beauty Contest`,
+                       url: profileId ? `https://obcface.com/u/${profileId}` : `https://obcface.com`,
+                       description: `Check out ${name}, ${age} from ${city}, ${country} in this beauty contest!`
+                     })}
+                     aria-label="Share"
+                   >
+                     <Share2 className="w-3.5 h-3.5" strokeWidth={1} />
+                     <span className="hidden sm:inline">Share</span>
                    </button>
                 </div>
               )}
