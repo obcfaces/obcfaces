@@ -78,29 +78,52 @@ const Profile = () => {
       try {
         console.log('Fetching profile for userId:', userId);
         
-        // Get current user session
-        const { data: { session } } = await supabase.auth.getSession();
-        console.log('Current session:', session?.user?.id);
+        // Get current user session with detailed logging
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        console.log('Session check:', { 
+          hasSession: !!session, 
+          userId: session?.user?.id,
+          targetUserId: userId,
+          sessionError 
+        });
         setUser(session?.user || null);
         setIsCurrentUser(session?.user?.id === userId);
 
-        // Fetch profile data using the secure function designed for profile access
+        // Fetch profile data - try direct query first since we have proper RLS policies
         const { data: profileData, error: profileError } = await supabase
-          .rpc('get_detailed_profile', { profile_user_id: userId })
+          .from('profiles')
+          .select('*')
+          .eq('id', userId)
           .maybeSingle();
+          
+        console.log('Profile query result:', { 
+          profileData, 
+          profileError, 
+          userId, 
+          currentUserId: session?.user?.id,
+          isOwnProfile: session?.user?.id === userId 
+        });
 
         console.log('Profile query result:', { profileData, profileError, isAuthenticated: !!session?.user });
 
         if (profileError) {
           console.error('Error fetching profile:', profileError);
-          // Don't navigate away - just show error state
+          console.log('RLS Policy might be blocking access. Error details:', {
+            message: profileError.message,
+            code: profileError.code,
+            details: profileError.details,
+            hint: profileError.hint
+          });
           setLoading(false);
           return;
         }
 
         if (!profileData) {
-          console.log('No profile found for user:', userId, 'Session exists:', !!session?.user);
-          // Don't navigate away - just show error state  
+          console.log('No profile data returned. This could be due to RLS policies.', {
+            userId, 
+            isAuthenticated: !!session?.user,
+            currentUserId: session?.user?.id
+          });
           setLoading(false);
           return;
         }
