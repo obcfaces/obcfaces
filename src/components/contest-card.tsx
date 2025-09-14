@@ -649,8 +649,8 @@ export function ContestantCard({
                <PopoverContent className="w-auto p-3">
                  <div className="text-sm">
                    {userRating > 0 ? 
-                     `Your rating: ${userRating} • Average: ${averageRating.toFixed(1)} (${totalVotes} votes) — ` : 
-                     `Average: ${averageRating.toFixed(1)} (${totalVotes} votes) — `
+                     `Your rating: ${userRating} — ` : 
+                     `No rating — `
                    }<button 
                      className="text-contest-blue hover:underline" 
                      onClick={() => setIsEditing(true)}
