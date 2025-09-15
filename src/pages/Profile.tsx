@@ -1410,7 +1410,7 @@ const Profile = () => {
                            )}
                             {contestApplication.rejection_reason && (
                               <p className="text-sm text-destructive/80">
-                                <span className="font-medium">Comment:</span> {contestApplication.rejection_reason}
+                                <span className="font-medium"></span> {contestApplication.rejection_reason}
                                 <button 
                                   onClick={() => setIsEditModalOpen(true)}
                                   className="ml-2 text-primary hover:text-primary/80 underline text-sm"
