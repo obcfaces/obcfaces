@@ -629,7 +629,7 @@ export function ContestantCard({
 
   return (
     <>
-      <Card className={`${isExample ? 'border-yellow-400 border-2 bg-yellow-50/50' : 'bg-card border-contest-border'} relative overflow-hidden ${isWinner ? 'flex flex-col' : 'flex h-36 sm:h-40 md:h-44'}`}>
+      <Card className={`${isExample ? 'border-yellow-400 border-2 bg-yellow-50/50' : 'bg-card border-contest-border'} relative overflow-hidden ${isWinner ? 'flex flex-col' : 'h-36 sm:h-40 md:h-44'}`}>
         {isWinner && (
           <div className="absolute top-0 left-0 w-[193px] sm:w-[225px] md:w-[257px] bg-blue-100 text-blue-700 pl-2 pr-2 py-1 text-xs font-semibold flex items-center justify-start z-20">
             <span>🏆 WINNER   + 5000 PHP</span>
@@ -667,7 +667,7 @@ export function ContestantCard({
         )}
         
         {/* First row: Main two photos with additional photos indicator */}
-        <div className={`${isWinner ? 'w-full' : 'flex-shrink-0'} flex ${isWinner ? 'h-36 sm:h-40 md:h-44' : 'h-full'} relative gap-px`}>
+        <div className={`${isWinner ? 'w-full flex h-36 sm:h-40 md:h-44' : 'flex h-full'} relative gap-px`}>
           <div className="relative">
             <img 
               src={faceImage} 
