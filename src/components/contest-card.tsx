@@ -804,65 +804,7 @@ export function ContestantCard({
                 </div>
               </div>
               
-              {/* Second row with social buttons - only if not example */}
-              {!isExample && (
-                <div className="border-t border-contest-border px-2 py-2 flex items-center justify-center gap-2 sm:gap-4">
-                  <button
-                    type="button"
-                    className={cn(
-                      "inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors",
-                      (isLiked[0] || isLiked[1]) && "text-contest-blue"
-                    )}
-                    onClick={() => handleLike(0)}
-                    aria-label="Like"
-                  >
-                    <ThumbsUp className={cn("w-3.5 h-3.5", (isLiked[0] || isLiked[1]) ? "text-blue-500" : "text-gray-500")} strokeWidth={1} />
-                    <span className={cn("hidden sm:inline", (isLiked[0] || isLiked[1]) ? "text-blue-500" : "text-gray-500")}>Like</span>
-                    <span className={cn((isLiked[0] || isLiked[1]) ? "text-blue-500" : "text-gray-500")}>{cardData.likes}</span>
-                  </button>
-                  {showDislike && (
-                    <button
-                      type="button"
-                      className={cn(
-                        "inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors",
-                        isDisliked && "text-red-500"
-                      )}
-                      onClick={handleDislike}
-                      aria-label="Dislike"
-                    >
-                      <ThumbsDown className="w-3.5 h-3.5" />
-                      <span className="hidden sm:inline">Dislike</span>
-                      <span>{dislikesCount}</span>
-                    </button>
-                  )}
-                  <button
-                    type="button"
-                    className={cn(
-                      "inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors",
-                      hasCommented && "text-contest-blue"
-                    )}
-                    onClick={handleComment}
-                    aria-label="Comments"
-                  >
-                    <MessageCircle className="w-3.5 h-3.5 text-primary" strokeWidth={1} />
-                    <span className="hidden sm:inline">Comment</span>
-                    <span>{cardData.comments}</span>
-                  </button>
-                  <button
-                    type="button"
-                    className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
-                    onClick={() => openShareModal({
-                      title: `${name} - Beauty Contest`,
-                      url: profileId ? `https://obcface.com/u/${profileId}` : `https://obcface.com`,
-                      description: `Check out ${name}, ${age} from ${city}, ${country} in this beauty contest!`
-                    })}
-                    aria-label="Share"
-                  >
-                    <Share2 className="w-3.5 h-3.5" strokeWidth={1} />
-                    <span className="hidden sm:inline">Share</span>
-                  </button>
-                </div>
-              )}
+              {/* No social buttons for winner cards */}
             </div>
           ) : (
             /* Regular cards layout */
