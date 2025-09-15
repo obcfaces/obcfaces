@@ -626,9 +626,9 @@ export function ContestantCard({
 
   return (
     <>
-      <Card className={`${isExample ? 'border-yellow-400 border-2 bg-yellow-50/50' : 'bg-card border-contest-border'} relative overflow-hidden flex h-36 sm:h-40 md:h-44`}>
+      <Card className={`${isExample ? 'border-yellow-400 border-2 bg-yellow-50/50' : 'bg-card border-contest-border'} relative overflow-hidden ${isWinner ? 'flex flex-col h-auto' : 'flex h-36 sm:h-40 md:h-44'}`}>
         {isWinner && (
-          <div className="absolute bottom-0 left-0 w-[193px] sm:w-[225px] md:w-[257px] bg-blue-100 text-blue-700 pl-2 pr-2 py-1 text-xs font-semibold flex items-center justify-start z-20">
+          <div className="absolute top-0 left-0 right-0 bg-blue-100 text-blue-700 px-2 py-1 text-xs font-semibold flex items-center justify-center z-20">
             <span>🏆 WINNER   + 5000 PHP</span>
           </div>
         )}
@@ -663,55 +663,123 @@ export function ContestantCard({
           </div>
         )}
         
-        {/* Main two photos with additional photos indicator */}
-        <div className="flex-shrink-0 flex h-full relative gap-px">
-          <div className="relative">
-            <img 
-              src={faceImage} 
-              alt={`${name} face`}
-              className="w-24 sm:w-28 md:w-32 h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
-              onClick={() => openModal(0)}
-            />
-            {/* Example Badge on photo for compact view */}
-            {isExample && (
-              <div className="absolute top-0 left-0 bg-yellow-500 text-white px-1 py-0.5 text-xs font-bold">
-                Example
+        {isWinner ? (
+          /* Winner layout with two rows of photos and testimonial */
+          <div className="w-full flex">
+            {/* Photos section */}
+            <div className="flex flex-col gap-px">
+              {/* First row of photos */}
+              <div className="flex gap-px">
+                <div className="relative">
+                  <img 
+                    src={faceImage} 
+                    alt={`${name} face`}
+                    className="w-24 sm:w-28 md:w-32 h-18 sm:h-20 md:h-22 object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                    onClick={() => openModal(0)}
+                  />
+                  {rank > 0 && isVoted && !isExample && (
+                    <div className="absolute top-0 left-0 bg-black/70 text-white text-xs font-bold px-1 py-0.5 rounded-br">
+                      {rank}
+                    </div>
+                  )}
+                </div>
+                <div className="relative">
+                  <img 
+                    src={fullBodyImage} 
+                    alt={`${name} full body`}
+                    className="w-24 sm:w-28 md:w-32 h-18 sm:h-20 md:h-22 object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                    onClick={() => openModal(1)}
+                  />
+                  {additionalPhotos.length > 0 && (
+                    <div 
+                      className="absolute bottom-0.5 right-0.5 bg-black/40 text-white/80 text-xs px-1 py-0.5 rounded cursor-pointer hover:bg-black/60 transition-colors"
+                      onClick={() => openModal(2)}
+                    >
+                      +{additionalPhotos.length}
+                    </div>
+                  )}
+                </div>
               </div>
-            )}
-            {rank > 0 && isVoted && !isExample && (
-              <div className="absolute top-0 left-0 bg-black/70 text-white text-xs font-bold px-1 py-0.5 rounded-br">
-                {rank}
+              
+              {/* Second row for winner - payment photo and video */}
+              <div className="flex gap-px">
+                <div className="relative">
+                  <img 
+                    src="/src/assets/winner-payment.jpg"
+                    alt="Payment receipt"
+                    className="w-24 sm:w-28 md:w-32 h-18 sm:h-20 md:h-22 object-cover"
+                  />
+                </div>
+                <div className="relative">
+                  <video 
+                    src="/src/assets/winner-video.mp4"
+                    className="w-24 sm:w-28 md:w-32 h-18 sm:h-20 md:h-22 object-cover"
+                    controls
+                    muted
+                  />
+                </div>
               </div>
-            )}
+            </div>
+            
+            {/* Testimonial text */}
+            <div className="flex-1 p-2 bg-blue-50 flex items-center">
+              <p className="text-gray-800 text-xs leading-relaxed italic">
+                "I never imagined this could be real. I'm so happy I won! All I had to do was fill out the form. Anyone can do it!"
+              </p>
+            </div>
           </div>
-          <div className="relative">
-            <img 
-              src={fullBodyImage} 
-              alt={`${name} full body`}
-              className="w-24 sm:w-28 md:w-32 h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
-              onClick={() => openModal(1)}
-            />
-            {additionalPhotos.length > 0 && (
-              <div 
-                className="absolute bottom-0.5 right-0.5 bg-black/40 text-white/80 text-xs px-1 py-0.5 rounded cursor-pointer hover:bg-black/60 transition-colors"
-                onClick={() => openModal(2)}
-              >
-                +{additionalPhotos.length}
-              </div>
-            )}
-            {/* Actions for full body photo in compact mode - only show when voted */}
-            {isVoted && !isEditing && !showThanks && additionalPhotos.length > 0 && (
-              <div className="absolute bottom-0.5 right-0.5 bg-black/40 text-white/80 text-xs px-1 py-0.5 rounded cursor-pointer hover:bg-black/60 transition-colors"
-                onClick={() => openModal(2)}
-              >
-                +{additionalPhotos.length}
-              </div>
-            )}
+        ) : (
+          /* Normal layout for non-winners */
+          <div className="flex-shrink-0 flex h-full relative gap-px">
+            <div className="relative">
+              <img 
+                src={faceImage} 
+                alt={`${name} face`}
+                className="w-24 sm:w-28 md:w-32 h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                onClick={() => openModal(0)}
+              />
+              {/* Example Badge on photo for compact view */}
+              {isExample && (
+                <div className="absolute top-0 left-0 bg-yellow-500 text-white px-1 py-0.5 text-xs font-bold">
+                  Example
+                </div>
+              )}
+              {rank > 0 && isVoted && !isExample && (
+                <div className="absolute top-0 left-0 bg-black/70 text-white text-xs font-bold px-1 py-0.5 rounded-br">
+                  {rank}
+                </div>
+              )}
+            </div>
+            <div className="relative">
+              <img 
+                src={fullBodyImage} 
+                alt={`${name} full body`}
+                className="w-24 sm:w-28 md:w-32 h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                onClick={() => openModal(1)}
+              />
+              {additionalPhotos.length > 0 && (
+                <div 
+                  className="absolute bottom-0.5 right-0.5 bg-black/40 text-white/80 text-xs px-1 py-0.5 rounded cursor-pointer hover:bg-black/60 transition-colors"
+                  onClick={() => openModal(2)}
+                >
+                  +{additionalPhotos.length}
+                </div>
+              )}
+              {/* Actions for full body photo in compact mode - only show when voted */}
+              {isVoted && !isEditing && !showThanks && additionalPhotos.length > 0 && (
+                <div className="absolute bottom-0.5 right-0.5 bg-black/40 text-white/80 text-xs px-1 py-0.5 rounded cursor-pointer hover:bg-black/60 transition-colors"
+                  onClick={() => openModal(2)}
+                >
+                  +{additionalPhotos.length}
+                </div>
+              )}
+            </div>
           </div>
-        </div>
+        )}
         
-        {/* Content area with potential voting overlay */}
-        <div className="flex-1 p-1 sm:p-2 md:p-3 flex flex-col relative">
+        {/* Content area with potential voting overlay - only for non-winners */}
+        {!isWinner && (
+          <div className="flex-1 p-1 sm:p-2 md:p-3 flex flex-col relative">
           {/* Voting overlay - shown by default when not voted and not editing */}
           {!isVoted && !isEditing && !showThanks && !isExample && (
             <div className="absolute inset-0 bg-gray-300 rounded-r flex flex-col items-center justify-center gap-3">
@@ -860,9 +928,10 @@ export function ContestantCard({
             </div>
           )}
           
-          {/* Normal content - completely hidden, not used anymore */}
-          <div className="hidden"></div>
-        </div>
+           {/* Normal content - completely hidden, not used anymore */}
+           <div className="hidden"></div>
+          </div>
+        )}
       </Card>
 
       <PhotoModal
