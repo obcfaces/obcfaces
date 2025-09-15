@@ -375,7 +375,9 @@ export function ContestantCard({
 
 
 
-  const allPhotos = [faceImage, fullBodyImage, ...additionalPhotos];
+  const allPhotos = isWinner 
+    ? [faceImage, fullBodyImage, ...additionalPhotos, winnerPaymentImage, winnerVideo]
+    : [faceImage, fullBodyImage, ...additionalPhotos];
 
   const openModal = (photoIndex: number) => {
     setModalStartIndex(photoIndex);
@@ -693,12 +695,12 @@ export function ContestantCard({
                     className="w-24 sm:w-28 md:w-32 h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
                     onClick={() => openModal(1)}
                   />
-                  {additionalPhotos.length > 0 && (
+                  {(additionalPhotos.length > 0 || isWinner) && (
                     <div 
                       className="absolute bottom-0.5 right-0.5 bg-black/40 text-white/80 text-xs px-1 py-0.5 rounded cursor-pointer hover:bg-black/60 transition-colors"
                       onClick={() => openModal(2)}
                     >
-                      +{additionalPhotos.length}
+                      +{additionalPhotos.length + (isWinner ? 2 : 0)}
                     </div>
                   )}
                 </div>
@@ -1077,16 +1079,18 @@ export function ContestantCard({
                   src={winnerPaymentImage} 
                   alt="Payment receipt"
                   className="w-24 sm:w-28 md:w-32 h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                  onClick={() => openModal(isWinner ? additionalPhotos.length + 2 : 2)}
                 />
               </div>
               
-              {/* Video */}
+              {/* Video - clickable */}
               <div className="relative">
                 <video 
                   src={winnerVideo}
                   className="w-24 sm:w-28 md:w-32 h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
-                  controls
+                  controls={false}
                   muted
+                  onClick={() => openModal(isWinner ? additionalPhotos.length + 3 : 3)}
                 />
               </div>
               
