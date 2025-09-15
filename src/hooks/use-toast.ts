@@ -161,6 +161,13 @@ function toast({ ...props }: Toast) {
     },
   })
 
+  // Auto-dismiss destructive/error toasts after 3 seconds
+  if (props.variant === "destructive") {
+    setTimeout(() => {
+      dismiss()
+    }, 3000)
+  }
+
   return {
     id: id,
     dismiss,
