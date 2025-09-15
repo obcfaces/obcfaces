@@ -449,12 +449,24 @@ export function PhotoModal({
                onTouchMove={onTouchMove}
                onTouchEnd={onTouchEnd}>
             
-            <img
-              src={photos[activeIndex]}
-              alt={`${contestantName} photo ${activeIndex + 1}`}
-              className="max-w-full max-h-full w-auto h-auto object-contain"
-              draggable={false}
-            />
+            {/* Check if current item is video */}
+            {photos[activeIndex].toLowerCase().includes('.mp4') || photos[activeIndex].toLowerCase().includes('.webm') || photos[activeIndex].toLowerCase().includes('.mov') ? (
+              <video
+                src={photos[activeIndex]}
+                className="max-w-full max-h-full w-auto h-auto object-contain"
+                controls
+                autoPlay={false}
+                preload="metadata"
+                style={{ outline: 'none' }}
+              />
+            ) : (
+              <img
+                src={photos[activeIndex]}
+                alt={`${contestantName} photo ${activeIndex + 1}`}
+                className="max-w-full max-h-full w-auto h-auto object-contain"
+                draggable={false}
+              />
+            )}
 
             {photos.length > 1 && (
               <>
