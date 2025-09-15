@@ -1408,15 +1408,18 @@ const Profile = () => {
                                )}
                              </p>
                            )}
-                           {contestApplication.rejection_reason && (
-                             <p className="text-sm text-destructive/80">
-                               <span className="font-medium">Comment:</span> {contestApplication.rejection_reason}
-                             </p>
-                           )}
-                         </div>
-                         <p className="text-sm text-muted-foreground mt-3">
-                           Please address the issues mentioned above and resubmit your application.
-                         </p>
+                            {contestApplication.rejection_reason && (
+                              <p className="text-sm text-destructive/80">
+                                <span className="font-medium">Comment:</span> {contestApplication.rejection_reason}
+                                <button 
+                                  onClick={() => setIsEditModalOpen(true)}
+                                  className="ml-2 text-primary hover:text-primary/80 underline text-sm"
+                                >
+                                  Edit
+                                </button>
+                              </p>
+                             )}
+                          </div>
                       </div>
                     )}
                    
