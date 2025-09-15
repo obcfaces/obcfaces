@@ -1106,7 +1106,7 @@ const Admin = () => {
     setPhotoModalOpen(true);
   };
 
-  const reviewApplication = async (applicationId: string, status: 'approved' | 'rejected' | 'pending', notes?: string, rejectionReason?: string, rejectionReasonType?: RejectionReasonType) => {
+  const reviewApplication = async (applicationId: string, status: 'approved' | 'rejected' | 'pending', notes?: string, rejectionReason?: string, rejectionReasonTypes?: RejectionReasonType | RejectionReasonType[]) => {
     const updateData: any = {
       status,
       notes: notes || null,
@@ -1116,8 +1116,10 @@ const Admin = () => {
 
     if (status === 'rejected') {
       updateData.rejection_reason = rejectionReason;
-      if (rejectionReasonType) {
-        updateData.rejection_reason_types = [rejectionReasonType];
+      if (rejectionReasonTypes) {
+        updateData.rejection_reason_types = Array.isArray(rejectionReasonTypes) 
+          ? rejectionReasonTypes 
+          : [rejectionReasonTypes];
       }
     }
 
@@ -1222,11 +1224,12 @@ const Admin = () => {
     fetchContestApplications();
   };
 
-  const handleRejectConfirm = async (reasonType: RejectionReasonType, notes: string) => {
+  const handleRejectConfirm = async (reasonTypes: RejectionReasonType[], notes: string) => {
     if (applicationToReject) {
-      // Get the rejection reason text from REJECTION_REASONS
-      const rejectionReasonText = REJECTION_REASONS[reasonType];
-      await reviewApplication(applicationToReject.id, 'rejected', notes, rejectionReasonText, reasonType);
+      // Get the rejection reason texts from REJECTION_REASONS
+      const rejectionReasonTexts = reasonTypes.map(type => REJECTION_REASONS[type]);
+      const combinedRejectionReason = rejectionReasonTexts.join("; ");
+      await reviewApplication(applicationToReject.id, 'rejected', notes, combinedRejectionReason, reasonTypes);
       setApplicationToReject(null);
       setRejectModalOpen(false);
     }

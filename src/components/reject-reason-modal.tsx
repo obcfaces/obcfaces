@@ -8,15 +8,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 
 export type RejectionReasonType = 
   | 'first_photo_makeup'
@@ -44,7 +38,7 @@ const REJECTION_REASONS = {
 interface RejectReasonModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onConfirm: (reasonType: RejectionReasonType, notes: string) => Promise<void>;
+  onConfirm: (reasonTypes: RejectionReasonType[], notes: string) => Promise<void>;
   isLoading?: boolean;
 }
 
@@ -54,53 +48,66 @@ export const RejectReasonModal = ({
   onConfirm,
   isLoading = false
 }: RejectReasonModalProps) => {
-  const [selectedReason, setSelectedReason] = useState<RejectionReasonType | "">("");
+  const [selectedReasons, setSelectedReasons] = useState<RejectionReasonType[]>([]);
   const [notes, setNotes] = useState("");
 
+  const handleReasonToggle = (reasonType: RejectionReasonType, checked: boolean) => {
+    if (checked) {
+      setSelectedReasons(prev => [...prev, reasonType]);
+    } else {
+      setSelectedReasons(prev => prev.filter(r => r !== reasonType));
+    }
+  };
+
   const handleConfirm = async () => {
-    if (!selectedReason) return;
+    if (selectedReasons.length === 0) return;
     
-    await onConfirm(selectedReason, notes);
+    await onConfirm(selectedReasons, notes);
     
     // Reset form
-    setSelectedReason("");
+    setSelectedReasons([]);
     setNotes("");
   };
 
   const handleClose = () => {
-    setSelectedReason("");
+    setSelectedReasons([]);
     setNotes("");
     onClose();
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>Rejection Reason</DialogTitle>
           <DialogDescription>
-            Select the reason for rejecting the application and add a comment if necessary.
+            Select one or more reasons for rejecting the application and add a comment if necessary.
           </DialogDescription>
         </DialogHeader>
         
         <div className="space-y-4">
           <div>
-            <Label htmlFor="rejection-reason">Rejection Reason</Label>
-            <Select 
-              value={selectedReason} 
-              onValueChange={(value: RejectionReasonType) => setSelectedReason(value)}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select a reason..." />
-              </SelectTrigger>
-              <SelectContent>
-                {Object.entries(REJECTION_REASONS).map(([key, label]) => (
-                  <SelectItem key={key} value={key}>
+            <Label>Rejection Reasons</Label>
+            <div className="space-y-3 mt-2 max-h-60 overflow-y-auto">
+              {Object.entries(REJECTION_REASONS).map(([key, label]) => (
+                <div key={key} className="flex items-start space-x-3">
+                  <Checkbox
+                    id={key}
+                    checked={selectedReasons.includes(key as RejectionReasonType)}
+                    onCheckedChange={(checked) => 
+                      handleReasonToggle(key as RejectionReasonType, checked as boolean)
+                    }
+                    className="mt-1"
+                  />
+                  <label 
+                    htmlFor={key} 
+                    className="text-sm font-medium leading-5 cursor-pointer flex-1"
+                  >
                     {label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+                  </label>
+                </div>
+              ))}
+            </div>
           </div>
           
           <div>
@@ -122,7 +129,7 @@ export const RejectReasonModal = ({
           <Button 
             variant="destructive" 
             onClick={handleConfirm} 
-            disabled={!selectedReason || isLoading}
+            disabled={selectedReasons.length === 0 || isLoading}
           >
             {isLoading ? "Rejecting..." : "Reject Application"}
           </Button>
