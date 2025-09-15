@@ -1224,7 +1224,9 @@ const Admin = () => {
 
   const handleRejectConfirm = async (reasonType: RejectionReasonType, notes: string) => {
     if (applicationToReject) {
-      await reviewApplication(applicationToReject.id, 'rejected', notes, '', reasonType);
+      // Get the rejection reason text from REJECTION_REASONS
+      const rejectionReasonText = REJECTION_REASONS[reasonType];
+      await reviewApplication(applicationToReject.id, 'rejected', notes, rejectionReasonText, reasonType);
       setApplicationToReject(null);
       setRejectModalOpen(false);
     }
