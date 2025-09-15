@@ -667,54 +667,123 @@ export function ContestantCard({
         )}
         
         {/* First row: Main two photos with additional photos indicator */}
-        <div className={`${isWinner ? 'w-full flex h-36 sm:h-40 md:h-44' : 'flex h-full'} relative gap-px`}>
-          <div className="relative">
-            <img 
-              src={faceImage} 
-              alt={`${name} face`}
-              className="w-24 sm:w-28 md:w-32 h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
-              onClick={() => openModal(0)}
-            />
-            {/* Example Badge on photo for compact view */}
-            {isExample && (
-              <div className="absolute top-0 left-0 bg-yellow-500 text-white px-1 py-0.5 text-xs font-bold">
-                Example
+        <div className={`${isWinner ? 'w-full' : 'flex h-full'} relative gap-px`}>
+          {/* Winner cards have different layout */}
+          {isWinner ? (
+            <div className="flex flex-col">
+              {/* Photos row for winner */}
+              <div className="flex h-36 sm:h-40 md:h-44 gap-px">
+                <div className="relative">
+                  <img 
+                    src={faceImage} 
+                    alt={`${name} face`}
+                    className="w-24 sm:w-28 md:w-32 h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                    onClick={() => openModal(0)}
+                  />
+                  {rank > 0 && isVoted && !isExample && (
+                    <div className="absolute top-0 left-0 bg-black/70 text-white text-xs font-bold px-1 py-0.5 rounded-br">
+                      {rank}
+                    </div>
+                  )}
+                </div>
+                <div className="relative">
+                  <img 
+                    src={fullBodyImage} 
+                    alt={`${name} full body`}
+                    className="w-24 sm:w-28 md:w-32 h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                    onClick={() => openModal(1)}
+                  />
+                  {additionalPhotos.length > 0 && (
+                    <div 
+                      className="absolute bottom-0.5 right-0.5 bg-black/40 text-white/80 text-xs px-1 py-0.5 rounded cursor-pointer hover:bg-black/60 transition-colors"
+                      onClick={() => openModal(2)}
+                    >
+                      +{additionalPhotos.length}
+                    </div>
+                  )}
+                </div>
+                
+                {/* Winner info area - next to photos */}
+                <div className="flex-1 p-1 sm:p-2 md:p-3 flex flex-col justify-center">
+                  <div className="flex justify-between items-center h-full">
+                    <div className="flex-1">
+                      <h3 className="text-base sm:text-lg font-semibold text-contest-text mb-1">
+                        {profileId ? (
+                          <Link to={`/u/${profileId}`} className="hover:text-primary underline-offset-2 hover:underline">
+                            {name}
+                          </Link>
+                        ) : name}
+                      </h3>
+                      <div className="text-xs text-muted-foreground space-y-0.5">
+                        <div>{age} yo • {weight} kg • {height} cm</div>
+                        <div className="text-contest-blue">{getCountryDisplayName(country)} • {city}</div>
+                      </div>
+                    </div>
+                    
+                    {/* Rating Badge for winner */}
+                    {rank > 0 && isVoted && !isExample && (
+                      <div className="flex items-center">
+                        <div className="bg-contest-blue text-white px-2 py-1 rounded text-sm font-bold">
+                          {(() => {
+                            // Always show average rating for all users
+                            return averageRating > 0 ? averageRating.toFixed(1) : '0.0';
+                          })()}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
-            )}
-            {rank > 0 && isVoted && !isExample && (
-              <div className="absolute top-0 left-0 bg-black/70 text-white text-xs font-bold px-1 py-0.5 rounded-br">
-                {rank}
+            </div>
+          ) : (
+            /* Regular cards layout */
+            <>
+              <div className="relative">
+                <img 
+                  src={faceImage} 
+                  alt={`${name} face`}
+                  className="w-24 sm:w-28 md:w-32 h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                  onClick={() => openModal(0)}
+                />
+                {/* Example Badge on photo for compact view */}
+                {isExample && (
+                  <div className="absolute top-0 left-0 bg-yellow-500 text-white px-1 py-0.5 text-xs font-bold">
+                    Example
+                  </div>
+                )}
+                {rank > 0 && isVoted && !isExample && (
+                  <div className="absolute top-0 left-0 bg-black/70 text-white text-xs font-bold px-1 py-0.5 rounded-br">
+                    {rank}
+                  </div>
+                )}
               </div>
-            )}
-          </div>
-          <div className="relative">
-            <img 
-              src={fullBodyImage} 
-              alt={`${name} full body`}
-              className="w-24 sm:w-28 md:w-32 h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
-              onClick={() => openModal(1)}
-            />
-            {additionalPhotos.length > 0 && (
-              <div 
-                className="absolute bottom-0.5 right-0.5 bg-black/40 text-white/80 text-xs px-1 py-0.5 rounded cursor-pointer hover:bg-black/60 transition-colors"
-                onClick={() => openModal(2)}
-              >
-                +{additionalPhotos.length}
+              <div className="relative">
+                <img 
+                  src={fullBodyImage} 
+                  alt={`${name} full body`}
+                  className="w-24 sm:w-28 md:w-32 h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                  onClick={() => openModal(1)}
+                />
+                {additionalPhotos.length > 0 && (
+                  <div 
+                    className="absolute bottom-0.5 right-0.5 bg-black/40 text-white/80 text-xs px-1 py-0.5 rounded cursor-pointer hover:bg-black/60 transition-colors"
+                    onClick={() => openModal(2)}
+                  >
+                    +{additionalPhotos.length}
+                  </div>
+                )}
+                {/* Actions for full body photo in compact mode - only show when voted */}
+                {isVoted && !isEditing && !showThanks && additionalPhotos.length > 0 && (
+                  <div className="absolute bottom-0.5 right-0.5 bg-black/40 text-white/80 text-xs px-1 py-0.5 rounded cursor-pointer hover:bg-black/60 transition-colors"
+                    onClick={() => openModal(2)}
+                  >
+                    +{additionalPhotos.length}
+                  </div>
+                )}
               </div>
-            )}
-            {/* Actions for full body photo in compact mode - only show when voted */}
-            {isVoted && !isEditing && !showThanks && additionalPhotos.length > 0 && (
-              <div className="absolute bottom-0.5 right-0.5 bg-black/40 text-white/80 text-xs px-1 py-0.5 rounded cursor-pointer hover:bg-black/60 transition-colors"
-                onClick={() => openModal(2)}
-              >
-                +{additionalPhotos.length}
-              </div>
-            )}
-          </div>
-          
-          {/* Content area for non-winner cards */}
-          {!isWinner && (
-            <div className="flex-1 p-1 sm:p-2 md:p-3 flex flex-col relative">
+              
+              {/* Content area for non-winner cards */}
+              <div className="flex-1 p-1 sm:p-2 md:p-3 flex flex-col relative">
               {/* Voting overlay - shown by default when not voted and not editing */}
               {!isVoted && !isEditing && !showThanks && !isExample && (
                 <div className="absolute inset-0 bg-gray-300 rounded-r flex flex-col items-center justify-center gap-3">
@@ -865,7 +934,8 @@ export function ContestantCard({
               
               {/* Normal content - completely hidden, not used anymore */}
               <div className="hidden"></div>
-            </div>
+              </div>
+            </>
           )}
         </div>
         
