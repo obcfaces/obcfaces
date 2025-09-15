@@ -792,7 +792,64 @@ export function ContestantCard({
                         </div>
                       </div>
                       
-                      {/* Winner cards don't show social buttons in first row */}
+                      {!isExample && (
+                        <div className="flex items-center justify-end gap-2 sm:gap-4">
+                           <button
+                             type="button"
+                             className={cn(
+                               "inline-flex items-center gap-1 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors",
+                               (isLiked[0] || isLiked[1]) && "text-contest-blue"
+                             )}
+                             onClick={() => handleLike(0)}
+                             aria-label="Like"
+                           >
+                              <ThumbsUp className={cn("w-3.5 h-3.5", (isLiked[0] || isLiked[1]) ? "text-blue-500" : "text-gray-500")} strokeWidth={1} />
+                              <span className={cn("hidden xl:inline", (isLiked[0] || isLiked[1]) ? "text-blue-500" : "text-gray-500")}>Like</span>
+                               <span className={cn((isLiked[0] || isLiked[1]) ? "text-blue-500" : "text-gray-500")}>{cardData.likes}</span>
+                           </button>
+                          {showDislike && (
+                            <button
+                              type="button"
+                              className={cn(
+                                "inline-flex items-center gap-1 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors",
+                                isDisliked && "text-red-500"
+                              )}
+                              onClick={handleDislike}
+                              aria-label="Dislike"
+                            >
+                              <ThumbsDown className="w-3.5 h-3.5" />
+                              <span className="hidden xl:inline">Dislike</span>
+                              <span>{dislikesCount}</span>
+                            </button>
+                          )}
+                           <button
+                             type="button"
+                             className={cn(
+                               "inline-flex items-center gap-1 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors",
+                               hasCommented && "text-contest-blue"
+                             )}
+                             onClick={handleComment}
+                             aria-label="Comments"
+                           >
+                              <MessageCircle className="w-3.5 h-3.5 text-primary" strokeWidth={1} />
+                              <span className="hidden xl:inline">Comment</span>
+                              <span>{cardData.comments}</span>
+                           </button>
+                           <button
+                             type="button"
+                             className="inline-flex items-center gap-1 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors"
+                             onClick={() => openShareModal({
+                               title: `${name} - Beauty Contest`,
+                               url: profileId ? `https://obcface.com/u/${profileId}` : `https://obcface.com`,
+                               description: `Check out ${name}, ${age} from ${city}, ${country} in this beauty contest!`
+                             })}
+                             aria-label="Share"
+                           >
+                             <Share2 className="w-3.5 h-3.5" strokeWidth={1} />
+                             <span className="hidden sm:inline">Share</span>
+                           </button>
+                        </div>
+                      )}
                     </div>
                   )}
                   
@@ -1100,14 +1157,7 @@ export function ContestantCard({
                 </div>
               )}
               
-              {/* No contestant info for winner cards - already shown in first row */}
-              {isVoted && !isEditing && !showThanks && (
-                <div className="bg-white rounded flex flex-col justify-between py-2">
-                  {/* Only social buttons, no duplicate contestant info */}
-                  
-                  {/* Winner cards don't show social buttons in second row either */}
-                </div>
-              )}
+              {/* No content area after second row for winner cards */}
             </div>
           </>
         )}
