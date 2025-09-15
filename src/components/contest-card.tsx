@@ -18,8 +18,6 @@ import { useParticipantData } from "@/hooks/useParticipantData";
 import LoginModalContent from "@/components/login-modal-content";
 import { ShareModal } from "@/components/share-modal";
 import { useShare } from "@/hooks/useShare";
-import winnerPayment from "../assets/winner-payment.jpg";
-import winnerVideo from "../assets/winner-video.mp4";
 
 interface ContestantCardProps {
   rank: number;
@@ -528,38 +526,9 @@ export function ContestantCard({
                     +{additionalPhotos.length}
                   </div>
                 )}
-               </div>
-             </div>
-             
-             {/* Second row for winner - payment proof, video and testimonial */}
-             {isWinner && (
-               <div className="grid grid-cols-2 gap-px mt-px">
-                 <div className="grid grid-cols-2 gap-px">
-                   <div className="relative">
-                     <img 
-                       src={winnerPayment} 
-                       alt="Winner payment proof"
-                       className="w-full aspect-[4/5] object-cover cursor-pointer hover:opacity-90 transition-opacity"
-                       onClick={() => {}}
-                     />
-                   </div>
-                   <div className="relative">
-                     <video 
-                       src={winnerVideo}
-                       className="w-full aspect-[4/5] object-cover cursor-pointer hover:opacity-90 transition-opacity"
-                       controls
-                       poster={winnerPayment}
-                     />
-                   </div>
-                 </div>
-                 <div className="flex items-center justify-center p-4 bg-blue-50">
-                   <p className="text-sm text-gray-700 italic text-center leading-relaxed">
-                     "I never imagined this could be real. I'm so happy I won! All I had to do was fill out the form. Anyone can do it!"
-                   </p>
-                 </div>
-               </div>
-             )}
+              </div>
             </div>
+           </div>
            {!isExample && (
              <div className="border-t border-contest-border px-4 py-2 flex items-center justify-evenly gap-4">
                 <button
@@ -741,28 +710,6 @@ export function ContestantCard({
           </div>
         </div>
         
-        {/* Second row for winner in compact mode - payment and video */}
-        {isWinner && (
-          <div className="flex-shrink-0 flex h-24 sm:h-28 md:h-32 relative gap-px">
-            <div className="relative">
-              <img 
-                src={winnerPayment} 
-                alt="Winner payment proof"
-                className="w-24 sm:w-28 md:w-32 h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
-                onClick={() => {}}
-              />
-            </div>
-            <div className="relative">
-              <video 
-                src={winnerVideo}
-                className="w-24 sm:w-28 md:w-32 h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
-                controls
-                poster={winnerPayment}
-              />
-            </div>
-          </div>
-        )}
-        
         {/* Content area with potential voting overlay */}
         <div className="flex-1 p-1 sm:p-2 md:p-3 flex flex-col relative">
           {/* Voting overlay - shown by default when not voted and not editing */}
@@ -916,15 +863,6 @@ export function ContestantCard({
           {/* Normal content - completely hidden, not used anymore */}
           <div className="hidden"></div>
         </div>
-        
-        {/* Testimonial text for winner - spans full width */}
-        {isWinner && (
-          <div className="px-2 py-3 bg-blue-50 border-t border-contest-border">
-            <p className="text-xs sm:text-sm text-gray-700 italic text-center leading-relaxed">
-              "I never imagined this could be real. I'm so happy I won! All I had to do was fill out the form. Anyone can do it!"
-            </p>
-          </div>
-        )}
       </Card>
 
       <PhotoModal
