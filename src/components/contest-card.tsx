@@ -671,7 +671,7 @@ export function ContestantCard({
           {/* Winner cards have different layout */}
           {isWinner ? (
             <div className="flex flex-col">
-              {/* Photos row for winner */}
+              {/* Photos row for winner - same as regular cards */}
               <div className="flex h-36 sm:h-40 md:h-44 gap-px">
                 <div className="relative">
                   <img 
@@ -703,35 +703,161 @@ export function ContestantCard({
                   )}
                 </div>
                 
-                {/* Winner info area - next to photos */}
-                <div className="flex-1 p-1 sm:p-2 md:p-3 flex flex-col justify-center">
-                  <div className="flex justify-between items-center h-full">
-                    <div className="flex-1">
-                      <h3 className="text-base sm:text-lg font-semibold text-contest-text mb-1">
-                        {profileId ? (
-                          <Link to={`/u/${profileId}`} className="hover:text-primary underline-offset-2 hover:underline">
-                            {name}
-                          </Link>
-                        ) : name}
-                      </h3>
-                      <div className="text-xs text-muted-foreground space-y-0.5">
-                        <div>{age} yo • {weight} kg • {height} cm</div>
-                        <div className="text-contest-blue">{getCountryDisplayName(country)} • {city}</div>
+                {/* Content area for winner cards - same as regular cards */}
+                <div className="flex-1 p-1 sm:p-2 md:p-3 flex flex-col relative">
+                  {/* Voting overlay - shown by default when not voted and not editing */}
+                  {!isVoted && !isEditing && !showThanks && !isExample && (
+                    <div className="absolute inset-0 bg-gray-300 rounded-r flex flex-col items-center justify-center gap-3">
+                      <span className="text-lg sm:text-xl font-medium text-gray-800">Vote</span>
+                       <div className="scale-[1.5] sm:scale-[1.8]">
+                        <StarRating 
+                          rating={0} 
+                          isVoted={false}
+                          variant="white"
+                          hideText={true}
+                          onRate={(rating) => {
+                            console.log('Compact StarRating onRate called with rating:', rating);
+                            console.log('User state:', user);
+                            handleRate(rating);
+                          }}
+                        />
                       </div>
                     </div>
-                    
-                    {/* Rating Badge for winner */}
-                    {rank > 0 && isVoted && !isExample && (
-                      <div className="flex items-center">
-                        <div className="bg-contest-blue text-white px-2 py-1 rounded text-sm font-bold">
-                          {(() => {
-                            // Always show average rating for all users
-                            return averageRating > 0 ? averageRating.toFixed(1) : '0.0';
-                          })()}
+                  )}
+                  
+                  {/* Thank you message - shown for 1 second after voting */}
+                  {showThanks && (
+                    <div className="absolute inset-0 bg-gray-200 rounded-r flex items-center justify-center px-4">
+                      <div className="text-center">
+                        <div className="text-base font-medium text-gray-800 mb-1">Thank you. Rated</div>
+                        <div className="text-xl font-bold text-gray-800">{userRating.toFixed(0)}</div>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Re-voting overlay - shown when editing existing vote */}
+                  {isVoted && isEditing && !showThanks && !isExample && (
+                    <div className="absolute inset-0 bg-gray-300 rounded-r flex flex-col items-center justify-center gap-3">
+                      <span className="text-lg sm:text-xl font-medium text-gray-800">Vote</span>
+                      <div className="scale-[1.5] sm:scale-[1.8]">
+                        <StarRating 
+                          rating={0} 
+                          isVoted={false}
+                          variant="white"
+                          hideText={true}
+                          onRate={(rating) => {
+                            console.log('Compact edit mode StarRating onRate called with rating:', rating);
+                            console.log('User state:', user);
+                            if (!user) {
+                              setShowLoginModal(true);
+                              return;
+                            }
+                            setUserRating(rating);
+                            localStorage.setItem(`rating-${name}-${user.id}`, rating.toString());
+                            setIsEditing(false);
+                            handleRate(rating);
+                          }}
+                        />
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Contestant info - shown after voting instead of normal content */}
+                  {isVoted && !isEditing && !showThanks && (
+                    <div className="absolute inset-0 bg-white rounded-r flex flex-col justify-between p-1 sm:p-2 md:p-3">
+                      <div className="flex items-start justify-between">
+                        <div className="min-w-0 flex-1 mr-2">
+                           <h3 className="font-semibold text-contest-text text-base sm:text-lg truncate">{profileId ? (<Link to={`/u/${profileId}`} className="hover:text-primary underline-offset-2 hover:underline">{name}</Link>) : name}</h3>
+                           <div className="text-xs sm:text-sm text-muted-foreground font-normal">{age} yo · {weight} kg · {height} cm</div>
+                           <div className="text-sm sm:text-base text-contest-blue truncate">
+                             {getCountryDisplayName(country)} · {city}
+                           </div>
+                           {isExample && (
+                              <div className="absolute inset-0 bg-yellow-100 border-2 border-yellow-300 rounded-lg flex items-start justify-start z-10 pt-2 pl-2">
+                                <div className="text-left text-gray-800">
+                                  <h4 className="font-bold text-sm mb-1">How your photos should look:</h4>
+                                  <div className="text-xs space-y-0.5">
+                                    <div>• No makeup</div>
+                                    <div>• No filter</div>
+                                    <div>• No photo editing</div>
+                                    <div>• No glasses</div>
+                                    <div>• Tight-fitting clothes</div>
+                                  </div>
+                                </div>
+                              </div>
+                           )}
+                        </div>
+                        
+                        <div className="text-right flex-shrink-0">
                         </div>
                       </div>
-                    )}
-                  </div>
+                      
+                      {!isExample && (
+                        <div className="flex items-center justify-end gap-2 sm:gap-4">
+                           <button
+                             type="button"
+                             className={cn(
+                               "inline-flex items-center gap-1 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors",
+                               (isLiked[0] || isLiked[1]) && "text-contest-blue"
+                             )}
+                             onClick={() => handleLike(0)}
+                             aria-label="Like"
+                           >
+                              <ThumbsUp className={cn("w-3.5 h-3.5", (isLiked[0] || isLiked[1]) ? "text-blue-500" : "text-gray-500")} strokeWidth={1} />
+                              <span className={cn("hidden xl:inline", (isLiked[0] || isLiked[1]) ? "text-blue-500" : "text-gray-500")}>Like</span>
+                               <span className={cn((isLiked[0] || isLiked[1]) ? "text-blue-500" : "text-gray-500")}>{cardData.likes}</span>
+                           </button>
+                          {showDislike && (
+                            <button
+                              type="button"
+                              className={cn(
+                                "inline-flex items-center gap-1 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors",
+                                isDisliked && "text-red-500"
+                              )}
+                              onClick={handleDislike}
+                              aria-label="Dislike"
+                            >
+                              <ThumbsDown className="w-3.5 h-3.5" />
+                              <span className="hidden xl:inline">Dislike</span>
+                              <span>{dislikesCount}</span>
+                            </button>
+                          )}
+                           <button
+                             type="button"
+                             className={cn(
+                               "inline-flex items-center gap-1 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors",
+                               hasCommented && "text-contest-blue"
+                             )}
+                             onClick={handleComment}
+                             aria-label="Comments"
+                           >
+                              <MessageCircle className="w-3.5 h-3.5 text-primary" strokeWidth={1} />
+                              <span className="hidden xl:inline">Comment</span>
+                              <span>{cardData.comments}</span>
+                           </button>
+                           <button
+                             type="button"
+                             className="inline-flex items-center gap-1 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors"
+                             onClick={() => openShareModal({
+                               title: `${name} - Beauty Contest`,
+                               url: profileId ? `https://obcface.com/u/${profileId}` : `https://obcface.com`,
+                               description: `Check out ${name}, ${age} from ${city}, ${country} in this beauty contest!`
+                             })}
+                             aria-label="Share"
+                           >
+                             <Share2 className="w-3.5 h-3.5" strokeWidth={1} />
+                             <span className="hidden sm:inline">Share</span>
+                           </button>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  
+                  {/* Empty space after voting */}
+                  {isVoted && !isEditing && !showThanks && (
+                    <div className="h-full">
+                    </div>
+                  )}
                 </div>
               </div>
               
