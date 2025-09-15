@@ -450,14 +450,16 @@ export function PhotoModal({
                onTouchEnd={onTouchEnd}>
             
             {/* Check if current item is video */}
-            {photos[activeIndex].toLowerCase().includes('.mp4') || photos[activeIndex].toLowerCase().includes('.webm') || photos[activeIndex].toLowerCase().includes('.mov') ? (
+            {photos[activeIndex]?.includes('winner-video.mp4') || photos[activeIndex]?.toLowerCase().includes('.mp4') || photos[activeIndex]?.toLowerCase().includes('.webm') || photos[activeIndex]?.toLowerCase().includes('.mov') ? (
               <video
                 src={photos[activeIndex]}
+                poster={photos[activeIndex]?.includes('winner-video.mp4') ? '/lovable-uploads/0db6ac53-7148-4ae3-9622-f3af6675c364.png' : undefined}
                 className="max-w-full max-h-full w-auto h-auto object-contain"
                 controls
                 autoPlay={false}
                 preload="metadata"
                 style={{ outline: 'none' }}
+                controlsList="nodownload"
               />
             ) : (
               <img
