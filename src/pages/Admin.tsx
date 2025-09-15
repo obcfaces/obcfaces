@@ -1117,7 +1117,7 @@ const Admin = () => {
     if (status === 'rejected') {
       updateData.rejection_reason = rejectionReason;
       if (rejectionReasonType) {
-        updateData.rejection_reason_type = rejectionReasonType;
+        updateData.rejection_reason_types = [rejectionReasonType];
       }
     }
 
