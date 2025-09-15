@@ -320,7 +320,7 @@ const Profile = () => {
     navigate(`/messages?recipient=${id}`);
   };
 
-  const handleUpdateRejectionReason = async (reasonType: RejectionReasonType, notes: string) => {
+  const handleUpdateRejectionReason = async (reasonTypes: RejectionReasonType[], notes: string) => {
     if (!contestApplication?.id) return;
 
     setUpdatingRejection(true);
@@ -328,7 +328,7 @@ const Profile = () => {
       const { error } = await supabase
         .from('contest_applications')
         .update({
-          rejection_reason_type: reasonType,
+          rejection_reason_types: reasonTypes,
           rejection_reason: notes || null
         } as any)
         .eq('id', contestApplication.id);
@@ -338,7 +338,7 @@ const Profile = () => {
       // Update local state
       setContestApplication(prev => prev ? {
         ...prev,
-        rejection_reason_type: reasonType as any, // Cast to any since enum was updated
+        rejection_reason_types: reasonTypes,
         rejection_reason: notes || null
       } : null);
 
