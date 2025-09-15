@@ -458,7 +458,6 @@ export function PhotoModal({
                 autoPlay={false}
                 preload="metadata"
                 style={{ outline: 'none' }}
-                controlsList="nodownload"
               />
             ) : (
               <img
