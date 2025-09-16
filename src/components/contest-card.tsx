@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { ThumbsUp, MessageCircle, Star, Pencil, Send, Share, Share2, ExternalLink, Upload, ArrowUpRight, ThumbsDown } from "lucide-react";
+import { ThumbsUp, MessageCircle, Star, Pencil, Send, Share, Share2, ExternalLink, Upload, ArrowUpRight, ThumbsDown, Crown } from "lucide-react";
 
 import winnerPaymentImage from "@/assets/winner-payment.jpg";
 import winnerVideo from "@/assets/winner-video.mp4";
@@ -668,7 +668,7 @@ export function ContestantCard({
 
   return (
     <>
-      <Card className={`${isExample ? 'border-yellow-400 border-2 bg-yellow-50/50' : 'bg-card border-contest-border'} relative overflow-hidden ${isWinner ? 'flex flex-col' : 'h-36 sm:h-40 md:h-44'}`}>
+      <Card className={`${isExample ? 'border-yellow-400 border-2 bg-yellow-50/50' : isWinner ? 'bg-card border-contest-blue border-2' : 'bg-card border-contest-border'} relative overflow-hidden ${isWinner ? 'flex flex-col' : 'h-36 sm:h-40 md:h-44'}`}>
         {isWinner && (
           <div className="absolute top-0 left-0 w-[193px] sm:w-[225px] md:w-[257px] bg-blue-100 text-blue-700 pl-2 pr-2 py-1 text-xs font-semibold flex items-center justify-start z-20">
             <span>🏆 WINNER   + 5000 PHP</span>
@@ -680,7 +680,8 @@ export function ContestantCard({
           <div className="absolute top-0 right-0 z-10 flex flex-col items-end">
             <Popover>
               <PopoverTrigger asChild>
-                 <div className="bg-contest-blue text-white px-1.5 py-1 rounded-bl-lg text-sm sm:text-base font-bold shadow-sm cursor-pointer hover:bg-contest-blue/90 transition-colors">
+                 <div className="bg-contest-blue text-white px-1.5 py-1 rounded-bl-lg text-sm sm:text-base font-bold shadow-sm cursor-pointer hover:bg-contest-blue/90 transition-colors flex items-center gap-1">
+                    {isWinner && <Crown className="w-3 h-3 text-yellow-400" />}
                     {(() => {
                       console.log('Compact rating display - isAdmin:', isAdmin, 'userRating:', userRating, 'localAverageRating:', localAverageRating);
                       // Для всех пользователей (включая админов) показываем средний рейтинг
