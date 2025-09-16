@@ -1074,20 +1074,22 @@ export function ContestantCard({
               
               {/* Contestant info - shown after voting instead of normal content */}
               {isVoted && !isEditing && !showThanks && (
-                <div className="absolute inset-0 bg-white rounded-r flex flex-col justify-between p-1 sm:p-2 md:p-3">
+                <div className={`absolute inset-0 rounded-r flex flex-col justify-between p-1 sm:p-2 md:p-3 ${isExample ? 'bg-yellow-100' : 'bg-white'}`}>
                   <div className="flex items-start justify-between">
-                    <div className="min-w-0 flex-1 mr-2">
-                       <h3 className="font-semibold text-contest-text text-base sm:text-lg truncate">{profileId ? (<Link to={`/u/${profileId}`} className="hover:text-primary underline-offset-2 hover:underline">{name}</Link>) : name}</h3>
-                       <div className="text-xs sm:text-sm text-muted-foreground font-normal">{age} yo · {weight} kg · {height} cm</div>
-                       <div className="text-sm sm:text-base text-contest-blue truncate">
-                         {getCountryDisplayName(country)} · {city}
-                       </div>
-                    </div>
+                    {!isExample && (
+                      <div className="min-w-0 flex-1 mr-2">
+                         <h3 className="font-semibold text-contest-text text-base sm:text-lg truncate">{profileId ? (<Link to={`/u/${profileId}`} className="hover:text-primary underline-offset-2 hover:underline">{name}</Link>) : name}</h3>
+                         <div className="text-xs sm:text-sm text-muted-foreground font-normal">{age} yo · {weight} kg · {height} cm</div>
+                         <div className="text-sm sm:text-base text-contest-blue truncate">
+                           {getCountryDisplayName(country)} · {city}
+                         </div>
+                      </div>
+                    )}
                     
                     {/* Example bullet points - positioned to the right for compact example cards */}
                     {isExample && (
-                      <div className="text-right flex-shrink-0 ml-2">
-                        <div className="text-xs text-gray-700 space-y-0.5">
+                      <div className="flex-1 flex items-center justify-center">
+                        <div className="text-sm text-gray-700 space-y-1">
                           <div>• Portrait and whole body</div>
                           <div>• No makeup, no filters</div>
                           <div>• Wear tight/fitted clothes.</div>
