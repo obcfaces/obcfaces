@@ -752,7 +752,7 @@ export function ContestantCard({
                 </div>
                 
                 {/* Content area for winner cards - same as regular cards */}
-                <div className={`flex-1 p-1 sm:p-2 md:p-3 flex flex-col relative ${isWinner ? 'bg-blue-50' : ''}`}>
+                <div className={`flex-1 p-1 sm:p-2 md:p-3 flex flex-col relative ${isWinner ? 'bg-blue-100' : ''}`}>
                   {/* Voting overlay - shown by default when not voted and not editing */}
                   {!isVoted && !isEditing && !showThanks && !isExample && (
                     <div className="absolute inset-0 bg-gray-300 rounded-r flex flex-col items-center justify-center gap-3">
@@ -835,7 +835,7 @@ export function ContestantCard({
                   
                   {/* Contestant info - shown after voting instead of normal content */}
                   {isVoted && !isEditing && !showThanks && (
-                    <div className={`absolute inset-0 rounded-r flex flex-col justify-between p-1 sm:p-2 md:p-3 ${isWinner ? 'bg-blue-50' : 'bg-white'}`}>
+                    <div className={`absolute inset-0 rounded-r flex flex-col justify-between p-1 sm:p-2 md:p-3 ${isWinner ? 'bg-blue-100' : 'bg-white'}`}>
                       <div className="flex items-start justify-between">
                         <div className="min-w-0 flex-1 mr-2">
                            <h3 className="font-semibold text-contest-text text-base sm:text-lg truncate">{profileId ? (<Link to={`/u/${profileId}`} className="hover:text-primary underline-offset-2 hover:underline">{name}</Link>) : name}</h3>
@@ -1186,11 +1186,15 @@ export function ContestantCard({
                 />
               </div>
               
+              {/* Divider line */}
+              <div className="border-t border-gray-300"></div>
+              
               {/* Testimonial text */}
-              <div className="flex-1 p-3 flex items-center justify-center bg-blue-100">
-                <p className="text-sm text-gray-700 italic text-center">
+              <div className="flex-1 p-3 flex flex-col items-center justify-center bg-blue-100">
+                <p className="text-sm text-gray-700 italic text-center mb-2">
                   "I never imagined this could be real. I'm so happy I won! All I had to do was fill out the form. Anyone can do it!"
                 </p>
+                <p className="text-xs text-gray-600 font-medium">— {name}</p>
               </div>
             </div>
             
