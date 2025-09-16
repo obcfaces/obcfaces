@@ -1197,7 +1197,7 @@ export function ContestantCard({
                 <p className="text-sm text-gray-700 italic text-center mb-3">
                   "I never imagined this could be real. I'm so happy I won! All I had to do was fill out the form. Anyone can do it!"
                 </p>
-                <p className="text-xs text-gray-600 font-medium self-end lowercase">winner</p>
+                <p className="text-xs text-gray-600 font-bold italic self-end uppercase">{name}</p>
               </div>
             </div>
             
