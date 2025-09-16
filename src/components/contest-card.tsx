@@ -688,15 +688,15 @@ export function ContestantCard({
           <div className="font-bold mb-2">How your photos should look:</div>
           <div className="grid grid-cols-2 gap-4 text-xs font-normal">
             <div className="space-y-1">
-              <div>• Look like an ID photo</div>
-              <div>• No makeup</div>
-              <div>• No filters</div>
-              <div>• No glasses allowed</div>
+              <div className="flex items-start">• Look like an ID photo</div>
+              <div className="flex items-start">• No makeup</div>
+              <div className="flex items-start">• No filters</div>
+              <div className="flex items-start">• No glasses allowed</div>
             </div>
             <div className="space-y-1">
-              <div>• Whole body from head to toe</div>
-              <div>• Wear tight/fitted clothes. No dresses, skirts, heels</div>
-              <div>• No bags or backpacks</div>
+              <div className="flex items-start">• Whole body from head to toe</div>
+              <div className="flex items-start">• Wear tight/fitted clothes. No dresses, skirts, heels</div>
+              <div className="flex items-start">• No bags or backpacks</div>
             </div>
           </div>
         </div>
