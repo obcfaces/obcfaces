@@ -684,8 +684,8 @@ export function ContestantCard({
     <>
       {/* Example instructions - yellow bar above card */}
       {isExample && viewMode === 'compact' && (
-        <div className="bg-yellow-200 text-black px-4 py-3 text-sm rounded-t-lg">
-          <div className="font-normal mb-2">How your photos should look:</div>
+        <div className="bg-yellow-200 text-black px-4 py-3 text-sm">
+          <div className="font-bold mb-2">How your photos should look:</div>
           <div className="grid grid-cols-2 gap-4 text-xs font-normal">
             <div className="space-y-1">
               <div>• Look like an ID photo</div>
@@ -702,7 +702,7 @@ export function ContestantCard({
         </div>
       )}
       
-      <Card className={`${isExample ? 'border-yellow-400 border-2 bg-yellow-200 rounded-t-none border-t-0' : isWinner ? 'bg-blue-50 border-contest-blue border-2' : 'bg-card border-contest-border'} relative overflow-hidden ${isWinner ? 'flex flex-col' : 'h-36 sm:h-40 md:h-44'}`}>
+      <Card className={`${isExample ? 'border-yellow-400 border-2 bg-yellow-50/50 rounded-t-none' : isWinner ? 'bg-blue-50 border-contest-blue border-2' : 'bg-card border-contest-border'} relative overflow-hidden ${isWinner ? 'flex flex-col' : 'h-36 sm:h-40 md:h-44'}`}>
         {isWinner && (
           <div className="absolute top-0 left-0 w-[193px] sm:w-[225px] md:w-[257px] bg-blue-100 text-blue-700 pl-2 pr-2 py-1 text-xs font-semibold flex items-center justify-start z-20">
             <span>🏆 WINNER   + 5000 PHP</span>
