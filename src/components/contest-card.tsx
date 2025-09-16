@@ -1187,7 +1187,7 @@ export function ContestantCard({
               </div>
               
               {/* Testimonial text */}
-              <div className="flex-1 p-3 flex items-center justify-center bg-gray-50">
+              <div className="flex-1 p-3 flex items-center justify-center bg-blue-100">
                 <p className="text-sm text-gray-700 italic text-center">
                   "I never imagined this could be real. I'm so happy I won! All I had to do was fill out the form. Anyone can do it!"
                 </p>
