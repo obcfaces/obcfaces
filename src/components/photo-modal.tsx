@@ -526,19 +526,12 @@ export function PhotoModal({
                   <div className="flex-1">
                     <h3 className="font-semibold text-lg text-black">
                       {contestantName}
-                      {age ? `, ${age}` : ""}
-                      {(weight || height) ? (
-                        <span className="ml-1 text-sm text-gray-600 font-normal">
-                          (
-                          {weight ? `${weight} kg` : ""}
-                          {(weight && height) ? " · " : ""}
-                          {height ? `${height} cm` : ""}
-                          )
-                        </span>
-                      ) : null}
                     </h3>
+                    <div className="text-sm text-gray-600">
+                      {age} yo · {weight} kg · {height} cm
+                    </div>
                     <div className="text-sm text-blue-600">
-                      {country}
+                      {country} · {city}
                     </div>
                   </div>
                   
