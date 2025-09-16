@@ -85,8 +85,19 @@ export function ContestantCard({
   const [dislikesCount, setDislikesCount] = useState<number>(0);
   const [isAdmin, setIsAdmin] = useState(false);
   
+  // Local state for immediate rating updates
+  const [localAverageRating, setLocalAverageRating] = useState(averageRating);
+  const [localTotalVotes, setLocalTotalVotes] = useState(totalVotes);
+  const [previousUserRating, setPreviousUserRating] = useState(0);
+  
   // Use unified card data hook
   const { data: cardData, loading: cardDataLoading, refresh: refreshCardData } = useCardData(name, user?.id, profileId);
+
+  // Update local state when props change
+  useEffect(() => {
+    setLocalAverageRating(averageRating);
+    setLocalTotalVotes(totalVotes);
+  }, [averageRating, totalVotes]);
 
   // Check if user is admin
   useEffect(() => {
@@ -125,10 +136,12 @@ export function ContestantCard({
         if (userRating !== null && typeof userRating === 'number') {
           console.log('Setting user rating to:', userRating);
           setUserRating(userRating);
+          setPreviousUserRating(userRating); // Store the current rating as previous
           setIsVoted(true);
         } else {
           console.log('No rating found, setting to 0');
           setUserRating(0);
+          setPreviousUserRating(0);
         }
       } catch (error) {
         console.error('Error loading user rating:', error);
@@ -345,6 +358,28 @@ export function ContestantCard({
       
       console.log('Rating saved successfully, calling onRate callback');
       
+      // Update local rating immediately
+      const oldUserRating = previousUserRating;
+      const isFirstVote = oldUserRating === 0;
+      
+      // Calculate new average rating
+      let newTotalVotes = localTotalVotes;
+      let newAverageRating = localAverageRating;
+      
+      if (isFirstVote) {
+        // First vote - add to total
+        newTotalVotes = localTotalVotes + 1;
+        newAverageRating = ((localAverageRating * localTotalVotes) + rating) / newTotalVotes;
+      } else {
+        // Changing existing vote - update the average
+        newAverageRating = ((localAverageRating * localTotalVotes) - oldUserRating + rating) / localTotalVotes;
+      }
+      
+      // Update local state immediately
+      setLocalAverageRating(newAverageRating);
+      setLocalTotalVotes(newTotalVotes);
+      setPreviousUserRating(rating);
+      
       setUserRating(rating);
       setIsVoted(true);
       setShowThanks(true);
@@ -400,9 +435,9 @@ export function ContestantCard({
               </div>
               <div className="bg-contest-blue text-white px-2 py-1.5 rounded-bl-lg text-lg font-bold">
                 {(() => {
-                  console.log('Rating display - isAdmin:', isAdmin, 'userRating:', userRating, 'averageRating:', averageRating);
+                  console.log('Rating display - isAdmin:', isAdmin, 'userRating:', userRating, 'localAverageRating:', localAverageRating);
                   // Всегда показываем общий рейтинг для всех пользователей
-                  return averageRating > 0 ? averageRating.toFixed(1) : '0.0';
+                  return localAverageRating > 0 ? localAverageRating.toFixed(1) : '0.0';
                 })()}
               </div>
             </div>
@@ -646,11 +681,11 @@ export function ContestantCard({
             <Popover>
               <PopoverTrigger asChild>
                  <div className="bg-contest-blue text-white px-2 py-1.5 rounded-bl-lg text-base sm:text-lg font-bold shadow-sm cursor-pointer hover:bg-contest-blue/90 transition-colors">
-                   {(() => {
-                     console.log('Compact rating display - isAdmin:', isAdmin, 'userRating:', userRating, 'averageRating:', averageRating);
-                     // Для всех пользователей (включая админов) показываем средний рейтинг
-                     return averageRating > 0 ? averageRating.toFixed(1) : '0.0';
-                   })()}
+                    {(() => {
+                      console.log('Compact rating display - isAdmin:', isAdmin, 'userRating:', userRating, 'localAverageRating:', localAverageRating);
+                      // Для всех пользователей (включая админов) показываем средний рейтинг
+                      return localAverageRating > 0 ? localAverageRating.toFixed(1) : '0.0';
+                    })()}
                  </div>
               </PopoverTrigger>
                <PopoverContent className="w-auto p-3">
