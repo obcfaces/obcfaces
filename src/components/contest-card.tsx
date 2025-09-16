@@ -848,7 +848,7 @@ export function ContestantCard({
                            </div>
                            {isWinner && (
                              <div className="text-xs text-muted-foreground italic font-bold mt-1">
-                               Pisao Justine May
+                               PISAO JUSTINE MAY
                              </div>
                            )}
                            {isExample && (
