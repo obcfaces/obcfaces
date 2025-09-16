@@ -525,6 +525,25 @@ export function ContestantCard({
           
            {/* Photos section */}
            <div className="relative">
+              {/* Example text area with photo requirements */}
+              {isExample && (
+                <div className="bg-yellow-400 text-black px-4 py-3">
+                  <div className="text-sm font-semibold mb-3">How your photos should look:</div>
+                  <div className="grid grid-cols-2 gap-6 text-xs">
+                    <div className="space-y-1">
+                      <div>• Look like an ID photo</div>
+                      <div>• No makeup</div>
+                      <div>• No filters</div>
+                      <div>• No glasses allowed</div>
+                    </div>
+                    <div className="space-y-1">
+                      <div>• Whole body from head to toe</div>
+                      <div>• Wear tight/fitted clothes. No dresses, skirts, heels</div>
+                      <div>• No bags or backpacks</div>
+                    </div>
+                  </div>
+                </div>
+              )}
              
              <div className="grid grid-cols-2 gap-px">
                {/* Winner Badge - overlaid on photos like in profile */}
@@ -665,12 +684,25 @@ export function ContestantCard({
     <>
       {/* Example instructions - yellow bar above card */}
       {isExample && viewMode === 'compact' && (
-        <div className="bg-yellow-400 text-black px-6 py-4 text-center font-semibold rounded-lg mb-0">
-          <div className="font-bold text-lg mb-0">How your photos should look:</div>
+        <div className="bg-yellow-200 text-black px-4 py-3 text-sm">
+          <div className="font-bold mb-2">How your photos should look:</div>
+          <div className="grid grid-cols-2 gap-4 text-xs font-normal">
+            <div className="space-y-1">
+              <div>• Look like an ID photo</div>
+              <div>• No makeup</div>
+              <div>• No filters</div>
+              <div>• No glasses allowed</div>
+            </div>
+            <div className="space-y-1">
+              <div>• Whole body from head to toe</div>
+              <div>• Wear tight/fitted clothes. No dresses, skirts, heels</div>
+              <div>• No bags or backpacks</div>
+            </div>
+          </div>
         </div>
       )}
       
-      <Card className={`${isExample ? 'border-yellow-400 border-2 bg-yellow-50/50 rounded-t-none border-t-0' : isWinner ? 'bg-blue-50 border-contest-blue border-2' : 'bg-card border-contest-border'} relative overflow-hidden ${isWinner ? 'flex flex-col' : 'h-36 sm:h-40 md:h-44'}`}>
+      <Card className={`${isExample ? 'border-yellow-400 border-2 bg-yellow-50/50 rounded-t-none' : isWinner ? 'bg-blue-50 border-contest-blue border-2' : 'bg-card border-contest-border'} relative overflow-hidden ${isWinner ? 'flex flex-col' : 'h-36 sm:h-40 md:h-44'}`}>
         {isWinner && (
           <div className="absolute top-0 left-0 w-[193px] sm:w-[225px] md:w-[257px] bg-blue-100 text-blue-700 pl-2 pr-2 py-1 text-xs font-semibold flex items-center justify-start z-20">
             <span>🏆 WINNER   + 5000 PHP</span>
@@ -833,49 +865,26 @@ export function ContestantCard({
                   {isVoted && !isEditing && !showThanks && (
                     <div className={`absolute inset-0 rounded-r flex flex-col justify-between p-1 sm:p-2 md:p-3 ${isWinner ? 'bg-blue-100' : 'bg-white'}`}>
                       <div className="flex items-start justify-between">
-                       <div className="min-w-0 flex-1 mr-2 relative">
-                          <h3 className="font-semibold text-contest-text text-base sm:text-lg truncate">{profileId ? (<Link to={`/u/${profileId}`} className="hover:text-primary underline-offset-2 hover:underline">{name}</Link>) : name}</h3>
-                          <div className="text-xs sm:text-sm text-muted-foreground font-normal">{age} yo · {weight} kg · {height} cm</div>
-                          <div className="text-sm sm:text-base text-contest-blue truncate">
-                            {getCountryDisplayName(country)} · {city}
-                          </div>
-                          
-                          {isExample && (
-                            <div className="mt-2">
-                              <div className="text-xs space-y-1">
-                                <div className="grid grid-cols-1 gap-1">
-                                  <div className="flex items-start gap-1">
-                                    <span className="text-sm">•</span>
-                                    <span>Look like an ID photo</span>
-                                  </div>
-                                  <div className="flex items-start gap-1">
-                                    <span className="text-sm">•</span>
-                                    <span>No makeup</span>
-                                  </div>
-                                  <div className="flex items-start gap-1">
-                                    <span className="text-sm">•</span>
-                                    <span>No filters</span>
-                                  </div>
-                                  <div className="flex items-start gap-1">
-                                    <span className="text-sm">•</span>
-                                    <span>No glasses allowed</span>
-                                  </div>
-                                  <div className="flex items-start gap-1">
-                                    <span className="text-sm">•</span>
-                                    <span>Whole body from head to toe</span>
-                                  </div>
-                                  <div className="flex items-start gap-1">
-                                    <span className="text-sm">•</span>
-                                    <span>Wear tight/fitted clothes. No dresses, skirts, heels</span>
-                                  </div>
-                                  <div className="flex items-start gap-1">
-                                    <span className="text-sm">•</span>
-                                    <span>No bags or backpacks</span>
+                        <div className="min-w-0 flex-1 mr-2">
+                           <h3 className="font-semibold text-contest-text text-base sm:text-lg truncate">{profileId ? (<Link to={`/u/${profileId}`} className="hover:text-primary underline-offset-2 hover:underline">{name}</Link>) : name}</h3>
+                           <div className="text-xs sm:text-sm text-muted-foreground font-normal">{age} yo · {weight} kg · {height} cm</div>
+                           <div className="text-sm sm:text-base text-contest-blue truncate">
+                             {getCountryDisplayName(country)} · {city}
+                           </div>
+                           {isExample && (
+                              <div className="absolute inset-0 bg-yellow-100 border-2 border-yellow-300 rounded-lg flex items-start justify-start z-10 pt-2 pl-2">
+                                <div className="text-left text-gray-800">
+                                  <h4 className="font-bold text-sm mb-1">How your photos should look:</h4>
+                                  <div className="text-xs space-y-0.5">
+                                    <div>• No makeup</div>
+                                    <div>• No filter</div>
+                                    <div>• No photo editing</div>
+                                    <div>• No glasses</div>
+                                    <div>• Tight-fitting clothes</div>
                                   </div>
                                 </div>
                               </div>
-                            </div>
-                          )}
+                           )}
                         </div>
                         
                         <div className="text-right flex-shrink-0">
