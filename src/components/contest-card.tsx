@@ -1093,7 +1093,7 @@ export function ContestantCard({
                           <div>• Portrait and whole body</div>
                           <div>• No makeup, no filters</div>
                           <div>• Wear tight/fitted clothes.</div>
-                          <div>• No dresses, glasses, bags</div>
+                          <div>• No dresses, glasses</div>
                         </div>
                       </div>
                     )}
