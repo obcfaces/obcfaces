@@ -434,7 +434,14 @@ export function ContestantCard({
   if (viewMode === 'full') {
     return (
       <>
-        <Card className={`${isExample ? 'border-yellow-400 border-2 bg-yellow-50/50' : isWinner ? 'bg-blue-50 border-contest-blue border-2' : 'bg-card border-contest-border'} relative overflow-hidden`}>
+        {/* Show instruction block for example card */}
+        {isExample && (
+          <div className="bg-yellow-400 text-black p-6 rounded-lg mb-0 text-center font-semibold">
+            <h3 className="text-xl font-bold mb-0">How your photos should look:</h3>
+          </div>
+        )}
+        
+        <Card className={`${isExample ? 'border-yellow-400 border-2 bg-yellow-50/50 rounded-t-none border-t-0' : isWinner ? 'bg-blue-50 border-contest-blue border-2' : 'bg-card border-contest-border'} relative overflow-hidden`}>
           {/* Rank number in top left corner - hidden for example cards */}
           {rank > 0 && !isExample && (
             <div className="absolute top-0 left-0 z-20 flex items-center">
@@ -459,10 +466,10 @@ export function ContestantCard({
           
           
           {/* Header with content or voting overlay */}
-          <div className="relative px-6 py-3 border-b border-contest-border h-[80px]">
+          <div className={`relative px-6 py-3 border-b border-contest-border ${isExample ? 'h-auto' : 'h-[80px]'}`}>
             {/* Default content - name and rating info */}
             {!isEditing && !showThanks && (
-              <div className="flex items-center justify-between h-full">
+              <div className={`flex items-${isExample ? 'start' : 'center'} justify-between h-full ${isExample ? 'gap-6' : ''}`}>
                 <div>
                   <h3 className="text-xl font-semibold text-contest-text">
                     {profileId ? (
@@ -476,6 +483,43 @@ export function ContestantCard({
                   </div>
                   <div className="text-contest-blue text-sm">{getCountryDisplayName(country)} · {city}</div>
                 </div>
+                
+                {isExample && (
+                  <div className="flex-1 max-w-md">
+                    <div className="space-y-1 text-sm">
+                      <div className="grid grid-cols-1 gap-1">
+                        <div className="flex items-start gap-2">
+                          <span className="text-lg">•</span>
+                          <span>Look like an ID photo</span>
+                        </div>
+                        <div className="flex items-start gap-2">
+                          <span className="text-lg">•</span>
+                          <span>No makeup</span>
+                        </div>
+                        <div className="flex items-start gap-2">
+                          <span className="text-lg">•</span>
+                          <span>No filters</span>
+                        </div>
+                        <div className="flex items-start gap-2">
+                          <span className="text-lg">•</span>
+                          <span>No glasses allowed</span>
+                        </div>
+                        <div className="flex items-start gap-2">
+                          <span className="text-lg">•</span>
+                          <span>Whole body from head to toe</span>
+                        </div>
+                        <div className="flex items-start gap-2">
+                          <span className="text-lg">•</span>
+                          <span>Wear tight/fitted clothes. No dresses, skirts, heels</span>
+                        </div>
+                        <div className="flex items-start gap-2">
+                          <span className="text-lg">•</span>
+                          <span>No bags or backpacks</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
                 {/* Remove rating display from header since it's now in corner */}
               </div>
             )}
@@ -525,25 +569,6 @@ export function ContestantCard({
           
            {/* Photos section */}
            <div className="relative">
-              {/* Example text area with photo requirements */}
-              {isExample && (
-                <div className="bg-yellow-400 text-black px-4 py-3">
-                  <div className="text-sm font-semibold mb-3">How your photos should look:</div>
-                  <div className="grid grid-cols-2 gap-6 text-xs">
-                    <div className="space-y-1">
-                      <div>• Look like an ID photo</div>
-                      <div>• No makeup</div>
-                      <div>• No filters</div>
-                      <div>• No glasses allowed</div>
-                    </div>
-                    <div className="space-y-1">
-                      <div>• Whole body from head to toe</div>
-                      <div>• Wear tight/fitted clothes. No dresses, skirts, heels</div>
-                      <div>• No bags or backpacks</div>
-                    </div>
-                  </div>
-                </div>
-              )}
              
              <div className="grid grid-cols-2 gap-px">
                {/* Winner Badge - overlaid on photos like in profile */}
