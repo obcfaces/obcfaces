@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Camera, Eye, EyeOff, Phone, Mail, Facebook, Instagram } from "lucide-react";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import SearchableSelect from "@/components/ui/searchable-select";
@@ -988,15 +989,19 @@ export const ContestParticipationModal = ({
           {children}
         </DialogTrigger>
       )}
-      <DialogContent className="w-full max-w-4xl mx-auto max-h-[95vh] overflow-y-auto bg-background">
-        <DialogHeader>
-          <DialogTitle>
-            {currentStep === 'auth' ? 'Sign in' : ''}
-          </DialogTitle>
-        </DialogHeader>
-
-        {currentStep === 'auth' ? (
-          <form onSubmit={handleAuth} className="space-y-3 max-w-xs mx-auto">
+      <DialogContent className="w-full max-w-4xl mx-auto max-h-[95vh] bg-background p-0 overflow-hidden">
+        <div className="px-6 py-4 border-b">
+          <DialogHeader>
+            <DialogTitle>
+              {currentStep === 'auth' ? 'Sign in' : ''}
+            </DialogTitle>
+          </DialogHeader>
+        </div>
+        
+        <ScrollArea className="flex-1 max-h-[calc(95vh-100px)]">
+          <div className="px-6 py-4">
+            {currentStep === 'auth' ? (
+              <form onSubmit={handleAuth} className="space-y-3 max-w-xs mx-auto">
             {authError && (
               <div className="text-destructive text-sm font-medium">
                 {authError}
@@ -1679,6 +1684,8 @@ export const ContestParticipationModal = ({
             </Button>
           </form>
         )}
+          </div>
+        </ScrollArea>
       </DialogContent>
     </Dialog>
   );
