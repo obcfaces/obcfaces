@@ -468,8 +468,8 @@ export function ContestantCard({
                   </h3>
                   <div className="text-contest-blue text-sm">{getCountryDisplayName(country)} · {city}</div>
                   {isWinner && (
-                    <div className="text-xs text-muted-foreground italic mt-1 uppercase">
-                      PISAO JUSTINE MAY
+                    <div className="text-xs text-muted-foreground italic font-bold mt-1">
+                      Pisao Justine May
                     </div>
                   )}
                 </div>
