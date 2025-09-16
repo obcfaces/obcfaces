@@ -112,7 +112,7 @@ const Index = () => {
             <ContestSection
               title="THIS WEEK"
               subtitle={getWeekRange(0)}
-              description="Choose the winner of the week."
+              description="Choose the winner."
               isActive={true}
               noWrapTitle
               viewMode={viewMode}
