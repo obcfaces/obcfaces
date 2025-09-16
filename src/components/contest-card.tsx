@@ -434,7 +434,7 @@ export function ContestantCard({
           {/* Rank number in top left corner - hidden for example cards */}
           {rank > 0 && !isExample && (
             <div className="absolute top-0 left-0 z-20 flex items-center">
-              <div className="bg-black/70 text-white px-2 py-1.5 rounded-br-lg text-lg font-bold">
+              <div className="bg-black/70 text-white px-1 py-0.5 rounded-br text-xs font-bold">
                 {rank}
               </div>
             </div>
