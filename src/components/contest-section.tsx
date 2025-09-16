@@ -364,13 +364,13 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
           <div className="flex items-baseline gap-3 mb-1">
             <div className={`inline-flex flex-col w-fit ${centerSubtitle ? "items-center" : "items-start"}`}>
               <h2 className={`text-3xl font-bold text-contest-text ${noWrapTitle ? "whitespace-nowrap" : ""}`}>{title}</h2>
-              <p className="text-muted-foreground italic -mt-1">{subtitle}</p>
+              <p className="text-sm text-muted-foreground/70 italic -mt-1">{subtitle}</p>
             </div>
             {titleSuffix && (
               <span className="text-2xl font-normal text-muted-foreground">{titleSuffix}</span>
             )}
             {isActive && description && (
-              <span className="text-lg font-normal text-contest-text">
+              <span className="text-base font-normal text-contest-text">
                 {description}
               </span>
             )}
