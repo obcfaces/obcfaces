@@ -844,13 +844,14 @@ export function ContestantCard({
                            <h3 className="font-semibold text-contest-text text-base sm:text-lg truncate">{profileId ? (<Link to={`/u/${profileId}`} className="hover:text-primary underline-offset-2 hover:underline">{name}</Link>) : name}</h3>
                            <div className="text-xs sm:text-sm text-muted-foreground font-normal">{age} yo · {weight} kg · {height} cm</div>
                            <div className="text-sm sm:text-base text-contest-blue truncate">
-                             {getCountryDisplayName(country)} · {city}
+                             {isWinner ? (
+                               <div className="text-xs text-muted-foreground italic font-bold uppercase">
+                                 PISAO JUSTINE MAY
+                               </div>
+                             ) : (
+                               <>{getCountryDisplayName(country)} · {city}</>
+                             )}
                            </div>
-                           {isWinner && (
-                             <div className="text-xs text-muted-foreground italic font-bold mt-1">
-                               Pisao Justine May
-                             </div>
-                           )}
                            {isExample && (
                               <div className="absolute inset-0 bg-yellow-100 border-2 border-yellow-300 rounded-lg flex items-start justify-start z-10 pt-2 pl-2">
                                 <div className="text-left text-gray-800">
