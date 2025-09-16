@@ -358,7 +358,7 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
   const getContestants = () => getContestantsSync();
 
   return (
-    <section className="max-w-6xl mx-auto py-8 mb-2 bg-background rounded-lg shadow-lg shadow-foreground/15">
+    <section className={`max-w-6xl mx-auto py-8 mb-2 rounded-lg shadow-lg shadow-foreground/15 ${title === "THIS WEEK" ? "bg-green-50" : "bg-background"}`}>
       <div className="mb-8 px-6">
         <div className="mb-4">
           <div className="flex items-baseline gap-3 mb-1">
