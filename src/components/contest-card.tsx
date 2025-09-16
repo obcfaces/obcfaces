@@ -1191,10 +1191,10 @@ export function ContestantCard({
               
               {/* Testimonial text */}
               <div className="flex-1 p-3 flex flex-col items-center justify-center bg-blue-100">
-                <p className="text-sm text-gray-700 italic text-center mb-2">
+                <p className="text-sm text-gray-700 italic text-center mb-3">
                   "I never imagined this could be real. I'm so happy I won! All I had to do was fill out the form. Anyone can do it!"
                 </p>
-                <p className="text-xs text-gray-600 font-medium">— {name}</p>
+                <p className="text-xs text-gray-600 font-medium self-end lowercase">{name}</p>
               </div>
             </div>
             
