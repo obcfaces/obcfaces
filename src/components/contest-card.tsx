@@ -136,7 +136,7 @@ export function ContestantCard({
     };
 
     loadUserRating();
-  }, [user?.id, profileId, isAdmin]);
+  }, [user?.id, profileId]);
   // Initialize isVoted state synchronously by checking localStorage
   const [isVoted, setIsVoted] = useState(() => {
     if (propIsVoted) return true;
