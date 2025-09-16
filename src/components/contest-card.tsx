@@ -934,20 +934,25 @@ export function ContestantCard({
               
               {/* Content area for non-winner cards */}
               <div className="flex-1 p-1 sm:p-2 md:p-3 flex flex-col relative">
-              {/* Voting overlay - shown by default when not voted and not editing */}
-              {!isVoted && !isEditing && !showThanks && !isExample && (
-                <div className="absolute inset-0 bg-gray-300 rounded-r flex flex-col items-center justify-center gap-3">
-                  {/* Show only stars for unauthenticated users in THIS WEEK, otherwise show full voting UI */}
-                  {(!user && isThisWeek) ? (
-                    <div className="scale-[1.5] sm:scale-[1.8]">
-                      <StarRating 
-                        rating={0} 
-                        isVoted={false}
-                        variant="white"
-                        hideText={true}
-                        onRate={(rating) => {
-                          console.log('Unauthenticated user voting in THIS WEEK, showing login modal');
-                          setShowLoginModal(true);
+               {/* Voting overlay - shown by default when not voted and not editing */}
+               {!isVoted && !isEditing && !showThanks && !isExample && (
+                 <div className="absolute inset-0 bg-gray-300 rounded-r flex flex-col items-center justify-center gap-3">
+                   {/* Show stars for THIS WEEK section always, login modal for unauthenticated users */}
+                   {isThisWeek ? (
+                     <div className="scale-[1.5] sm:scale-[1.8]">
+                       <StarRating 
+                         rating={0} 
+                         isVoted={false}
+                         variant="white"
+                         hideText={true}
+                         onRate={(rating) => {
+                           if (!user) {
+                             console.log('Unauthenticated user voting in THIS WEEK, showing login modal');
+                             setShowLoginModal(true);
+                             return;
+                           }
+                           console.log('Authenticated user voting in THIS WEEK with rating:', rating);
+                           handleRate(rating);
                         }}
                       />
                     </div>
