@@ -689,13 +689,12 @@ export function ContestantCard({
         {/* Rating badge in top right corner - hidden for example cards */}
         {isVoted && !isEditing && !showThanks && rank > 0 && !isExample && (
           <div className="absolute top-0 right-0 z-10 flex flex-col items-end">
-            {/* Crown above rating badge for winners */}
-            {isWinner && (
-              <Crown className="w-5 h-5 text-yellow-400 mb-1" />
-            )}
             <Popover>
               <PopoverTrigger asChild>
-                 <div className="bg-contest-blue text-white px-1.5 py-1 rounded-bl-lg text-sm sm:text-base font-bold shadow-sm cursor-pointer hover:bg-contest-blue/90 transition-colors">
+                 <div className="bg-contest-blue text-white px-1.5 py-1 rounded-bl-lg text-sm sm:text-base font-bold shadow-sm cursor-pointer hover:bg-contest-blue/90 transition-colors relative">
+                    {isWinner && (
+                      <Crown className="w-4 h-4 text-yellow-400 absolute -top-5 left-1/2 transform -translate-x-1/2" />
+                    )}
                     {(() => {
                       console.log('Compact rating display - isAdmin:', isAdmin, 'userRating:', userRating, 'localAverageRating:', localAverageRating);
                       // Для всех пользователей (включая админов) показываем средний рейтинг
