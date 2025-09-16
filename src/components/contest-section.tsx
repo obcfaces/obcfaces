@@ -407,12 +407,13 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
           {contestants.some(c => c.isExample) && (
             <>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-1 sm:gap-3 max-w-full overflow-hidden mb-6">
-                {contestants.filter(c => c.isExample).map((contestant) => (
+                 {contestants.filter(c => c.isExample).map((contestant) => (
                   <ContestantCard
                     key={contestant.rank}
                     {...contestant}
                     viewMode={viewMode}
                     onRate={(rating) => handleRate(contestant.rank, rating)}
+                    isThisWeek={title === "THIS WEEK"}
                   />
                 ))}
               </div>
@@ -435,6 +436,7 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
                   {...contestant}
                   viewMode={viewMode}
                   onRate={(rating) => handleRate(contestant.rank, rating)}
+                  isThisWeek={title === "THIS WEEK"}
                 />
               ))}
             </div>
