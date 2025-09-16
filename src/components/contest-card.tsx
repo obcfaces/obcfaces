@@ -846,11 +846,6 @@ export function ContestantCard({
                            <div className="text-sm sm:text-base text-contest-blue truncate">
                              {getCountryDisplayName(country)} · {city}
                            </div>
-                           {isWinner && (
-                             <div className="text-xs text-muted-foreground italic font-bold mt-1">
-                               Pisao Justine May
-                             </div>
-                           )}
                            {isExample && (
                               <div className="absolute inset-0 bg-yellow-100 border-2 border-yellow-300 rounded-lg flex items-start justify-start z-10 pt-2 pl-2">
                                 <div className="text-left text-gray-800">
