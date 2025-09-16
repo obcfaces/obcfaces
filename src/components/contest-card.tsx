@@ -454,11 +454,15 @@ export function ContestantCard({
               <div className="flex items-center justify-between h-full">
                 <div>
                   <h3 className="text-xl font-semibold text-contest-text">
-                    {profileId ? (
-                      <Link to={`/u/${profileId}`} className="hover:text-primary underline-offset-2 hover:underline">
-                        {name}
-                      </Link>
-                    ) : name}
+                    {!isWinner ? (
+                      profileId ? (
+                        <Link to={`/u/${profileId}`} className="hover:text-primary underline-offset-2 hover:underline">
+                          {name}
+                        </Link>
+                      ) : name
+                    ) : (
+                      "Winner"
+                    )}
                     <span className="text-sm text-muted-foreground font-normal ml-2">
                       ({age} yo · {weight} kg · {height} cm)
                     </span>
