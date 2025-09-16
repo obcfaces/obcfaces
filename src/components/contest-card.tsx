@@ -467,6 +467,11 @@ export function ContestantCard({
                     </span>
                   </h3>
                   <div className="text-contest-blue text-sm">{getCountryDisplayName(country)} · {city}</div>
+                  {isWinner && (
+                    <div className="text-xs text-muted-foreground italic mt-1 uppercase">
+                      PISAO JUSTINE MAY
+                    </div>
+                  )}
                 </div>
                 {/* Remove rating display from header since it's now in corner */}
               </div>
