@@ -466,10 +466,10 @@ export function ContestantCard({
                         {name}
                       </Link>
                     ) : name}
-                    <span className="text-sm text-muted-foreground font-normal ml-2">
-                      ({age} yo · {weight} kg · {height} cm)
-                    </span>
                   </h3>
+                  <div className="text-sm text-muted-foreground">
+                    ({age} yo · {weight} kg · {height} cm)
+                  </div>
                   <div className="text-contest-blue text-sm">{getCountryDisplayName(country)} · {city}</div>
                 </div>
                 {/* Remove rating display from header since it's now in corner */}
