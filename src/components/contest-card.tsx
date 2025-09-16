@@ -1088,7 +1088,7 @@ export function ContestantCard({
                     
                     {/* Example bullet points - positioned to the right for compact example cards */}
                     {isExample && (
-                      <div className="flex-1 flex items-center justify-center">
+                      <div className="flex-1 flex items-center justify-start pl-2">
                         <div className="text-xs text-gray-700 space-y-1">
                           <div className="font-bold mb-2">Photo Requirements</div>
                           <div>• Portrait and whole body</div>
