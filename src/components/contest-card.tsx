@@ -1090,6 +1090,7 @@ export function ContestantCard({
                     {isExample && (
                       <div className="flex-1 flex items-center justify-center">
                         <div className="text-xs text-gray-700 space-y-1">
+                          <div className="font-bold mb-2">Photo Requirements</div>
                           <div>• Portrait and whole body</div>
                           <div>• No makeup, no filters</div>
                           <div>• Wear tight/fitted clothes.</div>
