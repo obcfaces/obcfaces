@@ -216,12 +216,16 @@ export function ContestantCard({
       }
 
       // Load user's comments status
+      const contentIds = profileId 
+        ? [`contestant-user-${profileId}-0`, `contestant-user-${profileId}-1`]
+        : [`contestant-photo-${name}-0`, `contestant-photo-${name}-1`];
+        
       const { data: userComments } = await supabase
         .from("photo_comments")
         .select("content_id")
         .eq("content_type", "contest")
         .eq("user_id", user.id)
-        .in("content_id", [`contestant-photo-${name}-0`, `contestant-photo-${name}-1`]);
+        .in("content_id", contentIds);
       
       if (userComments && userComments.length > 0) {
         setHasCommented(true);
@@ -620,7 +624,7 @@ export function ContestantCard({
                  onClick={handleComment}
                  aria-label="Comments"
                >
-                 <MessageCircle className="w-4 h-4 text-primary" strokeWidth={1} />
+                 <MessageCircle className={cn("w-4 h-4", hasCommented ? "text-contest-blue" : "text-gray-500")} strokeWidth={1} />
                  <span className="hidden sm:inline">Comment</span>
                   <span>{cardData.comments}</span>
                </button>
