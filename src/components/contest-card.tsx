@@ -853,7 +853,7 @@ export function ContestantCard({
                              onClick={handleComment}
                              aria-label="Comments"
                            >
-                              <MessageCircle className="w-3.5 h-3.5 text-primary" strokeWidth={1} />
+                               <MessageCircle className={cn("w-3.5 h-3.5", hasCommented ? "text-contest-blue" : "text-gray-500")} strokeWidth={1} />
                               <span className="hidden xl:inline">Comment</span>
                               <span>{cardData.comments}</span>
                            </button>
