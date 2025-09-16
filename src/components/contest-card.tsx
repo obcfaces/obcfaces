@@ -1162,7 +1162,7 @@ export function ContestantCard({
         </div>
         
         {/* Divider line between rows */}
-        {isWinner && <div className="border-t-2 border-gray-400 w-full"></div>}
+        {isWinner && <div className="border-t border-gray-400 w-full"></div>}
         
         {/* Second row for winner cards only */}
         {isWinner && (
