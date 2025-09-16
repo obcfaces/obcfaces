@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { cn } from "@/lib/utils";
+import { cn, getCountryDisplayName } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import LoginModalContent from "@/components/login-modal-content";
 import { useCardData } from "@/hooks/useCardData";
@@ -531,7 +531,7 @@ export function PhotoModal({
                       {age} yo · {weight} kg · {height} cm
                     </div>
                     <div className="text-sm text-blue-600">
-                      {country} · {city}
+                      {getCountryDisplayName(country)} · {city}
                     </div>
                   </div>
                   
