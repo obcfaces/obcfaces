@@ -712,8 +712,8 @@ export function ContestantCard({
                   {/* Voting overlay - shown by default when not voted and not editing */}
                   {!isVoted && !isEditing && !showThanks && !isExample && (
                     <div className="absolute inset-0 bg-gray-300 rounded-r flex flex-col items-center justify-center gap-3">
-                      {/* Show only stars for unauthenticated users in THIS WEEK, otherwise show full voting UI */}
-                      {(!user && isThisWeek) ? (
+                      {/* Show only stars for all users in THIS WEEK, full voting UI for other sections */}
+                      {isThisWeek ? (
                         <div className="scale-[1.5] sm:scale-[1.8]">
                           <StarRating 
                             rating={0} 
@@ -721,8 +721,13 @@ export function ContestantCard({
                             variant="white"
                             hideText={true}
                             onRate={(rating) => {
-                              console.log('Unauthenticated user voting in THIS WEEK, showing login modal');
-                              setShowLoginModal(true);
+                              if (!user) {
+                                console.log('Unauthenticated user voting in THIS WEEK, showing login modal');
+                                setShowLoginModal(true);
+                              } else {
+                                console.log('Authenticated user voting in THIS WEEK');
+                                handleRate(rating);
+                              }
                             }}
                           />
                         </div>
@@ -814,7 +819,7 @@ export function ContestantCard({
                         </div>
                       </div>
                       
-                      {!isExample && (
+                      {!isExample && !(isThisWeek && !isVoted) && (
                         <div className="flex items-center justify-end gap-2 sm:gap-4">
                            <button
                              type="button"
