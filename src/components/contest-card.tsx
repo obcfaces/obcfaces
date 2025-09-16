@@ -433,21 +433,18 @@ export function ContestantCard({
         <Card className={`${isExample ? 'border-yellow-400 border-2 bg-yellow-50/50' : 'bg-card border-contest-border'} relative overflow-hidden`}>
           
           
-          {/* Rank and rating in top right corner - hidden for example cards */}
-          {rank > 0 && isVoted && !isExample && (
-            <div className="absolute top-0 right-0 z-20 flex items-center">
-              <div className="text-xl font-bold text-contest-blue bg-white px-2 py-1.5 rounded-bl-lg shadow-sm">
-                #{rank}
-              </div>
-              <div className="bg-contest-blue text-white px-2 py-1.5 rounded-bl-lg text-lg font-bold">
-                {(() => {
-                  console.log('Rating display - isAdmin:', isAdmin, 'userRating:', userRating, 'localAverageRating:', localAverageRating);
-                  // Всегда показываем общий рейтинг для всех пользователей
-                  return localAverageRating > 0 ? localAverageRating.toFixed(1) : '0.0';
-                })()}
-              </div>
-            </div>
-          )}
+           {/* Rating in top right corner - hidden for example cards */}
+           {rank > 0 && isVoted && !isExample && (
+             <div className="absolute top-0 right-0 z-20 flex items-center">
+               <div className="bg-contest-blue text-white px-2 py-1.5 rounded-bl-lg text-lg font-bold">
+                 {(() => {
+                   console.log('Rating display - isAdmin:', isAdmin, 'userRating:', userRating, 'localAverageRating:', localAverageRating);
+                   // Всегда показываем общий рейтинг для всех пользователей
+                   return localAverageRating > 0 ? localAverageRating.toFixed(1) : '0.0';
+                 })()}
+               </div>
+             </div>
+           )}
           
           
           {/* Header with content or voting overlay */}
@@ -545,20 +542,26 @@ export function ContestantCard({
                  </div>
                )}
                
-               <div className="relative">
-                 <img 
-                   src={faceImage} 
-                   alt={`${name} face`}
-                   className="w-full aspect-[4/5] object-cover cursor-pointer hover:opacity-90 transition-opacity"
-                   onClick={() => openModal(0)}
-                 />
-                 {/* Example Badge in corner of first photo */}
-                 {isExample && (
-                   <div className="absolute top-1 left-1 bg-yellow-500 text-white px-1.5 py-0.5 text-xs font-bold rounded">
-                     Example
-                   </div>
-                 )}
-               </div>
+                <div className="relative">
+                  <img 
+                    src={faceImage} 
+                    alt={`${name} face`}
+                    className="w-full aspect-[4/5] object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                    onClick={() => openModal(0)}
+                  />
+                  {/* Rank number on first photo */}
+                  {rank > 0 && isVoted && !isExample && (
+                    <div className="absolute top-0 left-0 bg-black/70 text-white text-xs font-bold px-1 py-0.5 rounded-br">
+                      {rank}
+                    </div>
+                  )}
+                  {/* Example Badge in corner of first photo */}
+                  {isExample && (
+                    <div className="absolute top-1 left-1 bg-yellow-500 text-white px-1.5 py-0.5 text-xs font-bold rounded">
+                      Example
+                    </div>
+                  )}
+                </div>
               <div className="relative">
                 <img 
                   src={fullBodyImage} 
