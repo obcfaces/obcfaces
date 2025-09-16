@@ -45,6 +45,7 @@ interface ContestantCardProps {
   averageRating?: number; // Add average rating prop
   totalVotes?: number; // Add total votes prop
   isExample?: boolean; // Add example flag prop
+  isThisWeek?: boolean; // Add prop to identify THIS WEEK contests
 }
 
 export function ContestantCard({
@@ -69,7 +70,8 @@ export function ContestantCard({
   isRealContestant = false,
   averageRating = 0,
   totalVotes = 0,
-  isExample = false
+  isExample = false,
+  isThisWeek = false
 }: ContestantCardProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalStartIndex, setModalStartIndex] = useState(0);
@@ -710,20 +712,38 @@ export function ContestantCard({
                   {/* Voting overlay - shown by default when not voted and not editing */}
                   {!isVoted && !isEditing && !showThanks && !isExample && (
                     <div className="absolute inset-0 bg-gray-300 rounded-r flex flex-col items-center justify-center gap-3">
-                      <span className="text-lg sm:text-xl font-medium text-gray-800">Vote</span>
-                       <div className="scale-[1.5] sm:scale-[1.8]">
-                        <StarRating 
-                          rating={0} 
-                          isVoted={false}
-                          variant="white"
-                          hideText={true}
-                          onRate={(rating) => {
-                            console.log('Compact StarRating onRate called with rating:', rating);
-                            console.log('User state:', user);
-                            handleRate(rating);
-                          }}
-                        />
-                      </div>
+                      {/* Show only stars for unauthenticated users in THIS WEEK, otherwise show full voting UI */}
+                      {(!user && isThisWeek) ? (
+                        <div className="scale-[1.5] sm:scale-[1.8]">
+                          <StarRating 
+                            rating={0} 
+                            isVoted={false}
+                            variant="white"
+                            hideText={true}
+                            onRate={(rating) => {
+                              console.log('Unauthenticated user voting in THIS WEEK, showing login modal');
+                              setShowLoginModal(true);
+                            }}
+                          />
+                        </div>
+                      ) : (
+                        <>
+                          <span className="text-lg sm:text-xl font-medium text-gray-800">Vote</span>
+                          <div className="scale-[1.5] sm:scale-[1.8]">
+                            <StarRating 
+                              rating={0} 
+                              isVoted={false}
+                              variant="white"
+                              hideText={true}
+                              onRate={(rating) => {
+                                console.log('Compact StarRating onRate called with rating:', rating);
+                                console.log('User state:', user);
+                                handleRate(rating);
+                              }}
+                            />
+                          </div>
+                        </>
+                      )}
                     </div>
                   )}
                   
@@ -917,20 +937,38 @@ export function ContestantCard({
               {/* Voting overlay - shown by default when not voted and not editing */}
               {!isVoted && !isEditing && !showThanks && !isExample && (
                 <div className="absolute inset-0 bg-gray-300 rounded-r flex flex-col items-center justify-center gap-3">
-                  <span className="text-lg sm:text-xl font-medium text-gray-800">Vote</span>
-                   <div className="scale-[1.5] sm:scale-[1.8]">
-                    <StarRating 
-                      rating={0} 
-                      isVoted={false}
-                      variant="white"
-                      hideText={true}
-                      onRate={(rating) => {
-                        console.log('Compact StarRating onRate called with rating:', rating);
-                        console.log('User state:', user);
-                        handleRate(rating);
-                      }}
-                    />
-                  </div>
+                  {/* Show only stars for unauthenticated users in THIS WEEK, otherwise show full voting UI */}
+                  {(!user && isThisWeek) ? (
+                    <div className="scale-[1.5] sm:scale-[1.8]">
+                      <StarRating 
+                        rating={0} 
+                        isVoted={false}
+                        variant="white"
+                        hideText={true}
+                        onRate={(rating) => {
+                          console.log('Unauthenticated user voting in THIS WEEK, showing login modal');
+                          setShowLoginModal(true);
+                        }}
+                      />
+                    </div>
+                  ) : (
+                    <>
+                      <span className="text-lg sm:text-xl font-medium text-gray-800">Vote</span>
+                      <div className="scale-[1.5] sm:scale-[1.8]">
+                        <StarRating 
+                          rating={0} 
+                          isVoted={false}
+                          variant="white"
+                          hideText={true}
+                          onRate={(rating) => {
+                            console.log('Compact StarRating onRate called with rating:', rating);
+                            console.log('User state:', user);
+                            handleRate(rating);
+                          }}
+                        />
+                      </div>
+                    </>
+                  )}
                 </div>
               )}
               
