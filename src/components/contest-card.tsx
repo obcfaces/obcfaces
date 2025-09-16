@@ -455,7 +455,7 @@ export function ContestantCard({
           
           
           {/* Header with content or voting overlay */}
-          <div className="relative px-6 py-2 border-b border-contest-border h-[64px]">
+          <div className="relative px-6 py-1 border-b border-contest-border h-[56px]">
             {/* Default content - name and rating info */}
             {!isEditing && !showThanks && (
               <div className="flex items-center justify-between h-full">
