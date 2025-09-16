@@ -468,7 +468,7 @@ export function ContestantCard({
                     ) : name}
                   </h3>
                   <div className="text-sm text-muted-foreground">
-                    ({age} yo · {weight} kg · {height} cm)
+                    {age} yo · {weight} kg · {height} cm
                   </div>
                   <div className="text-contest-blue text-sm">{getCountryDisplayName(country)} · {city}</div>
                 </div>
