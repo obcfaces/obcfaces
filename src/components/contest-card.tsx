@@ -322,6 +322,12 @@ export function ContestantCard({
       toast({ description: "Cannot rate example cards" });
       return;
     }
+
+    // Prevent rating past weeks (только THIS WEEK можно голосовать)
+    if (!isThisWeek) {
+      toast({ description: "Voting is only allowed for current week contests" });
+      return;
+    }
     
     setUserRating(rating);
     setIsVoted(true); // Mark as voted
