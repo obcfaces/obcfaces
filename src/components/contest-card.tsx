@@ -430,21 +430,28 @@ export function ContestantCard({
   if (viewMode === 'full') {
     return (
       <>
-        <Card className={`${isExample ? 'border-yellow-400 border-2 bg-yellow-50/50' : 'bg-card border-contest-border'} relative overflow-hidden`}>
-          
-          
-           {/* Rating in top right corner - hidden for example cards */}
-           {rank > 0 && isVoted && !isExample && (
-             <div className="absolute top-0 right-0 z-20 flex items-center">
-               <div className="bg-contest-blue text-white px-2 py-1.5 rounded-bl-lg text-lg font-bold">
-                 {(() => {
-                   console.log('Rating display - isAdmin:', isAdmin, 'userRating:', userRating, 'localAverageRating:', localAverageRating);
-                   // Всегда показываем общий рейтинг для всех пользователей
-                   return localAverageRating > 0 ? localAverageRating.toFixed(1) : '0.0';
-                 })()}
-               </div>
-             </div>
-           )}
+        <Card className={`${isExample ? 'border-yellow-400 border-2 bg-yellow-50/50' : isWinner ? 'bg-blue-50 border-contest-blue border-2' : 'bg-card border-contest-border'} relative overflow-hidden`}>
+          {/* Rank number in top left corner - hidden for example cards */}
+          {rank > 0 && !isExample && (
+            <div className="absolute top-0 left-0 z-20 flex items-center">
+              <div className="bg-black/70 text-white px-2 py-1.5 rounded-br-lg text-lg font-bold">
+                {rank}
+              </div>
+            </div>
+          )}
+           
+            {/* Rating in top right corner - hidden for example cards */}
+            {rank > 0 && isVoted && !isExample && (
+              <div className="absolute top-0 right-0 z-20 flex items-center">
+                <div className="bg-contest-blue text-white px-2 py-1.5 rounded-bl-lg text-lg font-bold">
+                  {(() => {
+                    console.log('Rating display - isAdmin:', isAdmin, 'userRating:', userRating, 'localAverageRating:', localAverageRating);
+                    // Всегда показываем общий рейтинг для всех пользователей
+                    return localAverageRating > 0 ? localAverageRating.toFixed(1) : '0.0';
+                  })()}
+                </div>
+              </div>
+            )}
           
           
           {/* Header with content or voting overlay */}
@@ -549,12 +556,6 @@ export function ContestantCard({
                     className="w-full aspect-[4/5] object-cover cursor-pointer hover:opacity-90 transition-opacity"
                     onClick={() => openModal(0)}
                   />
-                  {/* Rank number on first photo */}
-                  {rank > 0 && isVoted && !isExample && (
-                    <div className="absolute top-0 left-0 bg-black/70 text-white text-xs font-bold px-1 py-0.5 rounded-br">
-                      {rank}
-                    </div>
-                  )}
                   {/* Example Badge in corner of first photo */}
                   {isExample && (
                     <div className="absolute top-1 left-1 bg-yellow-500 text-white px-1.5 py-0.5 text-xs font-bold rounded">
