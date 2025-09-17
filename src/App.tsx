@@ -20,10 +20,11 @@ import TopBar from "@/components/top-bar";
 import { Footer } from "@/components/footer";
 import { SocialWidgets } from "@/components/social-widgets";
 
+
 const queryClient = new QueryClient();
 
 const App = () => {
-  console.log("App component rendering - full site restored");
+  console.log("App component rendering");
   
   return (
     <div className="min-h-screen w-full flex flex-col">
@@ -47,6 +48,7 @@ const App = () => {
                   <Route path="/terms" element={<Terms />} />
                   <Route path="/privacy" element={<Privacy />} />
                   <Route path="/likes" element={<Likes />} />
+                  {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </main>
