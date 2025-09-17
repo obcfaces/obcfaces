@@ -457,9 +457,14 @@ export function ContestantCard({
           {/* Header with content or voting overlay */}
           <div className="relative px-6 py-3 border-b border-contest-border h-[80px]">
             {/* Show different content based on user auth status and contest type */}
+            {/* Debug: показываем состояние прямо в UI */}
+            <div className="absolute top-2 right-2 bg-red-500 text-white text-xs p-1 z-50 rounded">
+              user: {user ? 'YES' : 'NO'} | thisWeek: {isThisWeek ? 'YES' : 'NO'} | condition: {(isThisWeek && !user) ? 'TRUE' : 'FALSE'}
+            </div>
+            
             {isThisWeek && !user ? (
               /* Unauthorized users in THIS WEEK section only see voting */
-              <div className="flex items-center justify-center h-full">
+              <div className="flex items-center justify-center h-full bg-green-100 border-2 border-green-500">
                 <div className="flex items-center gap-6">
                   <span className="text-lg font-medium text-gray-800">Rate this contestant</span>
                   <div className="scale-125">
