@@ -992,7 +992,7 @@ export function ContestantCard({
                {/* Voting overlay - shown by default when not voted and not editing */}
                {!isVoted && !isEditing && !showThanks && !isExample && (
                  <div className="absolute inset-0 bg-gray-300 rounded-r flex flex-col items-center justify-center gap-3">
-                   {/* Show stars for THIS WEEK section always, login modal for unauthenticated users */}
+                   {/* Show stars for ALL cards in compact mode */}
                    {isThisWeek ? (
                      <div className="scale-[1.5] sm:scale-[1.8]">
                        <StarRating 
@@ -1023,6 +1023,10 @@ export function ContestantCard({
                           onRate={(rating) => {
                             console.log('Compact StarRating onRate called with rating:', rating);
                             console.log('User state:', user);
+                            if (!user) {
+                              setShowLoginModal(true);
+                              return;
+                            }
                             handleRate(rating);
                           }}
                         />
