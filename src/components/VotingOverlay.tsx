@@ -24,15 +24,17 @@ export function VotingOverlay({
   isExample,
   propUser,
   userRating,
+  handleRate,
   setShowLoginModal,
   setUserRating,
   setIsEditing,
-  handleRate,
   name,
   compact = false
 }: VotingOverlayProps) {
-  // Voting overlay - shown by default when not voted and not editing, OR for unauthenticated users in THIS WEEK
-  if ((!isVoted && !isEditing && !showThanks && !isExample) || (isThisWeek && !propUser && !isExample)) {
+  
+  // ТОЧНАЯ КОПИЯ ЛОГИКИ ПОЛНОГО РЕЖИМА + дополнительное условие для компактного режима  
+  // Voting overlay - shown by default when not voted and not editing, OR for unauthenticated users in THIS WEEK for compact mode
+  if ((!isVoted && !isEditing && !showThanks && !isExample) || (compact && isThisWeek && !propUser && !isExample)) {
     return (
       <div className="absolute inset-0 bg-gray-300 rounded-r flex flex-col items-center justify-center gap-3">
         {/* Show only stars for all users in THIS WEEK, full voting UI for other sections */}
