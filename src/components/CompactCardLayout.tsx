@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { ThumbsUp, MessageCircle, Share2, ThumbsDown } from "lucide-react";
 import { Link } from "react-router-dom";
 import { cn, getCountryDisplayName } from "@/lib/utils";
