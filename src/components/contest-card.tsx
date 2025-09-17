@@ -143,56 +143,25 @@ export function ContestantCard({
 
     loadUserRating();
   }, [user?.id, profileId]);
-  // Initialize isVoted state synchronously by checking localStorage
-  const [isVoted, setIsVoted] = useState(() => {
-    if (propIsVoted) return true;
-    try {
-      // Check for current user ID first
-      const currentUserId = localStorage.getItem('currentUserId');
-      if (!currentUserId) return false;
-      
-      // Check for saved rating
-      const savedRating = localStorage.getItem(`rating-${name}-${currentUserId}`);
-      return !!savedRating && parseFloat(savedRating) > 0;
-    } catch {
-      return false;
-    }
-  });
+  // Initialize isVoted state without complex initialization
+  const [isVoted, setIsVoted] = useState(propIsVoted || false);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const { isShareModalOpen, shareData, openShareModal, closeShareModal } = useShare();
 
   useEffect(() => {
-    // Get current session first (synchronous)
+    // Simple auth state management without throttling
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
+      const newUser = session?.user ?? null;
+      setUser(newUser);
+    });
+
+    // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       const newUser = session?.user ?? null;
       setUser(newUser);
-      // Store current user ID for synchronous access
-      if (newUser?.id) {
-        localStorage.setItem('currentUserId', newUser.id);
-      } else {
-        localStorage.removeItem('currentUserId');
-      }
-    });
-
-    // Set up auth state listener with throttling
-    let timeoutId: NodeJS.Timeout;
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
-      // Throttle auth state changes to prevent rapid updates
-      clearTimeout(timeoutId);
-      timeoutId = setTimeout(() => {
-        const newUser = session?.user ?? null;
-        setUser(newUser);
-        // Store current user ID for synchronous access
-        if (newUser?.id) {
-          localStorage.setItem('currentUserId', newUser.id);
-        } else {
-          localStorage.removeItem('currentUserId');
-        }
-      }, 100);
     });
 
     return () => {
-      clearTimeout(timeoutId);
       subscription.unsubscribe();
     };
   }, []);
