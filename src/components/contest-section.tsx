@@ -67,13 +67,21 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
   const [isLoading, setIsLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
 
-  // Get user session once for the entire section
+  // Get user session once for the entire section and listen for changes
   useEffect(() => {
     const getCurrentUser = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       setUser(session?.user ?? null);
     };
+    
     getCurrentUser();
+    
+    // Listen for auth state changes (login/logout)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setUser(session?.user ?? null);
+    });
+    
+    return () => subscription.unsubscribe();
   }, []);
 
   const loadContestParticipants = async (weekOffset: number = 0) => {

@@ -163,10 +163,43 @@ export function ContestantCard({
   const [showLoginModal, setShowLoginModal] = useState(false);
   const { isShareModalOpen, shareData, openShareModal, closeShareModal } = useShare();
 
-  // Update user state when prop changes
+  // Update user state when prop changes and load existing rating
   useEffect(() => {
     setUser(propUser);
+    
+    // When user logs in, check if they already have a rating for this contestant
+    if (propUser && propUser.id && profileId && !user) {
+      loadUserExistingRating(propUser.id);
+    }
   }, [propUser]);
+
+  const loadUserExistingRating = async (userId: string) => {
+    if (!profileId) return;
+    
+    try {
+      // Check if user has already rated this participant
+      const { data: existingRating } = await supabase
+        .rpc('get_user_rating_for_participant', { 
+          participant_id_param: profileId 
+        });
+
+      if (existingRating && typeof existingRating === 'number' && existingRating > 0) {
+        setUserRating(existingRating);
+        setIsVoted(true);
+        console.log(`Loaded existing rating ${existingRating} for user ${userId} and participant ${profileId}`);
+      } else {
+        // Also check localStorage as fallback
+        const localRating = localStorage.getItem(`rating-${name}-${userId}`);
+        if (localRating && parseInt(localRating) > 0) {
+          setUserRating(parseInt(localRating));
+          setIsVoted(true);
+          console.log(`Loaded existing rating ${localRating} from localStorage for ${name}`);
+        }
+      }
+    } catch (error) {
+      console.error('Error loading user existing rating:', error);
+    }
+  };
 
   // Login modal removed auto-close
 
