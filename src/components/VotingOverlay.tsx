@@ -31,7 +31,7 @@ export function VotingOverlay({
   name,
   compact = false
 }: VotingOverlayProps) {
-  // Voting overlay - shown by default when not voted and not editing, OR for unauthenticated users in THIS WEEK
+  // Voting overlay - shown by default when not voted and not editing, OR for ALL unauthenticated users in THIS WEEK
   if ((!isVoted && !isEditing && !showThanks && !isExample) || (isThisWeek && !propUser && !isExample)) {
     return (
       <div className="absolute inset-0 bg-gray-300 rounded-r flex flex-col items-center justify-center gap-3">
