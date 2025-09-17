@@ -307,8 +307,15 @@ export function ContestantCard({
       return;
     }
     
+    // Update local state immediately for instant feedback
     setUserRating(rating);
-    setIsVoted(true); // Mark as voted
+    setIsVoted(true);
+    
+    // Show thanks message briefly
+    setShowThanks(true);
+    setTimeout(() => {
+      setShowThanks(false);
+    }, 1500);
     
     try {
       const ratingData = {
@@ -334,48 +341,29 @@ export function ContestantCard({
       if (error) {
         console.error('Upsert failed with error:', error);
         toast({ description: "Error saving rating: " + error.message });
+        // Revert local state on error
+        setUserRating(0);
+        setIsVoted(false);
+        setShowThanks(false);
         return;
       }
       
-      // Also keep in localStorage for immediate feedback
+      // Store in localStorage for persistence
       localStorage.setItem(`rating-${name}-${user.id}`, rating.toString());
       
-      console.log('Rating saved successfully, calling onRate callback');
+      // Call onRate callback if provided (for parent component to refresh rankings)
+      if (onRate) {
+        onRate(rating);
+      }
       
-      // TEMPORARILY DISABLED RATING CALCULATIONS TO PREVENT RECURSION
-      // Update local rating immediately
-      // const oldUserRating = previousUserRating;
-      // const isFirstVote = oldUserRating === 0;
-      
-      // Calculate new average rating
-      // let newTotalVotes = localTotalVotes;
-      // let newAverageRating = localAverageRating;
-      
-      // if (isFirstVote) {
-      //   // First vote - add to total
-      //   newTotalVotes = localTotalVotes + 1;
-      //   newAverageRating = ((localAverageRating * localTotalVotes) + rating) / newTotalVotes;
-      // } else {
-      //   // Changing existing vote - update the average
-      //   newAverageRating = ((localAverageRating * localTotalVotes) - oldUserRating + rating) / localTotalVotes;
-      // }
-      
-      // TEMPORARILY REMOVED LOCAL STATE UPDATES TO PREVENT RECURSION
-      // Update local state immediately
-      // setLocalAverageRating(newAverageRating);
-      // setLocalTotalVotes(newTotalVotes);
-      // setPreviousUserRating(rating);
-      
-      setUserRating(rating);
-      setIsVoted(true);
-      setShowThanks(true);
-      setTimeout(() => {
-        setShowThanks(false);
-        // Remove onRate callback to prevent infinite recursion
-      }, 1000);
+      console.log('Rating saved successfully');
     } catch (error) {
       console.error('Error saving rating:', error);
       toast({ description: "Error saving rating" });
+      // Revert local state on error
+      setUserRating(0);
+      setIsVoted(false);
+      setShowThanks(false);
     }
   };
 
@@ -682,8 +670,8 @@ export function ContestantCard({
           </div>
         )}
         
-        {/* Rating badge in top right corner - hidden for example cards */}
-        {isVoted && !isEditing && !showThanks && rank > 0 && !isExample && !(isThisWeek && !user) && (
+        {/* Rating badge in top right corner - show immediately after voting */}
+        {isVoted && !isEditing && !showThanks && !isExample && !(isThisWeek && !user) && (
           <div className="absolute top-0 right-0 z-10 flex flex-col items-end">
             <Popover>
               <PopoverTrigger asChild>
@@ -728,9 +716,9 @@ export function ContestantCard({
                     className="w-24 sm:w-28 md:w-32 h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
                     onClick={() => openModal(0)}
                   />
-                  {rank > 0 && isVoted && !isExample && (
+                  {isVoted && !isExample && (
                     <div className="absolute top-0 left-0 bg-black/70 text-white text-xs font-bold px-1 py-0.5 rounded-br">
-                      {rank}
+                      {rank > 0 ? rank : '★'}
                     </div>
                   )}
                 </div>
@@ -950,9 +938,9 @@ export function ContestantCard({
                     Example
                   </div>
                 )}
-                {rank > 0 && isVoted && !isExample && (
+                {isVoted && !isExample && (
                   <div className="absolute top-0 left-0 bg-black/70 text-white text-xs font-bold px-1 py-0.5 rounded-br">
-                    {rank}
+                    {rank > 0 ? rank : '★'}
                   </div>
                 )}
               </div>
