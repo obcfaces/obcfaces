@@ -557,6 +557,17 @@ export const ContestParticipationModal = ({
         description: "Please fill in all required fields marked in red.",
         variant: "destructive"
       });
+      
+      // Scroll to the first invalid field
+      const firstInvalidField = Array.from(newInvalidFields)[0];
+      setTimeout(() => {
+        const element = document.getElementById(firstInvalidField);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          element.focus();
+        }
+      }, 100);
+      
       return;
     }
 
@@ -989,17 +1000,20 @@ export const ContestParticipationModal = ({
           {children}
         </DialogTrigger>
       )}
-      <DialogContent className="w-full max-w-4xl mx-auto max-h-[95vh] bg-background p-0 overflow-hidden">
-        <div className="px-6 py-4 border-b">
+      <DialogContent className="w-full max-w-4xl mx-auto max-h-[95vh] bg-background p-0 flex flex-col">
+        <div className="px-6 py-4 border-b flex-shrink-0">
           <DialogHeader>
             <DialogTitle>
-              {currentStep === 'auth' ? 'Sign in' : ''}
+              {editMode ? "Edit Application" : 
+               currentStep === 'auth' ? (mode === 'login' ? "Login" : "Sign Up") : 
+               submissionSuccess ? "Contact Information" : 
+               "Contest Application"}
             </DialogTitle>
           </DialogHeader>
         </div>
         
-        <ScrollArea className="flex-1 max-h-[calc(95vh-100px)]">
-          <div className="px-6 py-4">
+        <ScrollArea className="flex-1 max-h-[calc(95vh-120px)] overflow-y-auto">
+          <div className="px-6 py-4 space-y-4">
             {currentStep === 'auth' ? (
               <form onSubmit={handleAuth} className="space-y-3 max-w-xs mx-auto">
             {authError && (
