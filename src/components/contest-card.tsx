@@ -428,8 +428,8 @@ export function ContestantCard({
     return (
       <>
         <Card className={`${isExample ? 'border-yellow-400 border-2 bg-yellow-50/50' : isWinner ? 'bg-blue-50 border-contest-blue border-2' : 'bg-card border-contest-border'} relative overflow-hidden`}>
-          {/* Rank number in top left corner - only show if contestant has votes */}
-          {rank > 0 && !isExample && totalVotes > 0 && (
+          {/* Rank number in top left corner - only show if contestant has votes and user is authenticated */}
+          {rank > 0 && !isExample && totalVotes > 0 && user && (
             <div className="absolute top-0 left-0 z-20 flex items-center">
               <div className="bg-black/70 text-white px-1 py-0.5 rounded-br text-xs font-bold">
                 {rank}
