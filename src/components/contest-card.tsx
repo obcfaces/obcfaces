@@ -438,15 +438,16 @@ export function ContestantCard({
             {isThisWeek && !user && !isExample ? (
               /* Unauthorized users in THIS WEEK section only see voting (but not for test cards) */
               <div className="absolute inset-0 bg-gray-200 flex items-center justify-center h-full">
-                <div className="flex items-center gap-6">
+                <div className="flex items-center gap-8">
                   <span className="text-lg font-medium text-gray-800">Vote</span>
-                  <div className="scale-150">
+                  <div className="scale-[2]">
                     <StarRating 
                       rating={userRating}
                       isVoted={false}
                       onRate={handleRate}
                       readonly={false}
                       hideText={true}
+                      variant="white"
                     />
                   </div>
                 </div>
