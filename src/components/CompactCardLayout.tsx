@@ -25,6 +25,7 @@ interface CompactCardLayoutProps {
   showThanks: boolean;
   isExample: boolean;
   isThisWeek: boolean;
+  isWinner: boolean;
   rank: number;
   userRating: number;
   
@@ -67,6 +68,7 @@ export function CompactCardLayout({
   showThanks,
   isExample,
   isThisWeek,
+  isWinner,
   rank,
   userRating,
   cardData,
@@ -101,7 +103,7 @@ export function CompactCardLayout({
             Example
           </div>
         )}
-        {isVoted && !isExample && (
+        {isVoted && !isExample && (propUser || !isThisWeek) && (
           <div className="absolute top-0 left-0 bg-black/70 text-white text-xs font-bold px-1 py-0.5 rounded-br">
             {rank > 0 ? rank : '★'}
           </div>
