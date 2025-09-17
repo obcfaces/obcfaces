@@ -251,7 +251,7 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
               faceImage: contestant.photo_1_url || contestant1Face,
               fullBodyImage: contestant.photo_2_url || contestant1Full,
               additionalPhotos: [],
-              isVoted: showWinner ? true : averageRating > 0,
+              isVoted: averageRating > 0 || totalVotes > 0, // Show as voted if has any rating or votes
               isWinner: false, // Will be set after sorting
               prize: undefined, // Will be set after sorting
               isRealContestant: true // Mark as real contestant to disable fake likes/comments
@@ -330,7 +330,7 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
             faceImage: contestant.photo_1_url || contestant1Face,
             fullBodyImage: contestant.photo_2_url || contestant1Full,
             additionalPhotos: [],
-            isVoted: showWinner ? true : averageRating > 0,
+            isVoted: averageRating > 0 || totalVotes > 0, // Show as voted if has any rating or votes
             isWinner: false, // Will be set after sorting
             prize: undefined, // Will be set after sorting
             isRealContestant: true // Mark as real contestant to disable fake likes/comments
