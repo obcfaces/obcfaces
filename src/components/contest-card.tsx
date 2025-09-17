@@ -437,8 +437,8 @@ export function ContestantCard({
             {/* Show different content based on user auth status and contest type */}
             {isThisWeek && !user && !isExample ? (
               /* Unauthorized users in THIS WEEK section only see voting (but not for test cards) */
-              <div className="flex items-center justify-center h-full">
-                <div className="flex items-center gap-6 bg-gray-100 px-6 py-3 rounded-lg">
+              <div className="absolute inset-0 bg-gray-200 flex items-center justify-center h-full">
+                <div className="flex items-center gap-6">
                   <span className="text-lg font-medium text-gray-800">Vote</span>
                   <div className="scale-150">
                     <StarRating 
