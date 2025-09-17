@@ -269,10 +269,8 @@ export function ContestantCard({
           });
       }
       
-      // Refresh card data to update counters
-      if (refreshCardData) {
-        refreshCardData();
-      }
+      // Don't refresh card data immediately to prevent recursion
+      // The UI updates optimistically already
       
     } catch (error) {
       // Revert optimistic update on error
@@ -373,7 +371,7 @@ export function ContestantCard({
       setShowThanks(true);
       setTimeout(() => {
         setShowThanks(false);
-        onRate?.(rating);
+        // Remove onRate callback to prevent infinite recursion
       }, 1000);
     } catch (error) {
       console.error('Error saving rating:', error);
