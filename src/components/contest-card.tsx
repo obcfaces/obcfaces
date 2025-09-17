@@ -387,6 +387,16 @@ export function ContestantCard({
         onRate(rating);
       }
       
+      // Trigger immediate update of average rating in the UI by calling parent refresh
+      setTimeout(() => {
+        if (window.location.reload) {
+          // Force component re-render to show updated rating
+          window.dispatchEvent(new CustomEvent('rating-updated', { 
+            detail: { profileId, newRating: rating }
+          }));
+        }
+      }, 100);
+      
       console.log('Rating saved successfully');
     } catch (error) {
       console.error('Error saving rating:', error);
@@ -439,14 +449,31 @@ export function ContestantCard({
             </div>
           )}
            
-            {/* Rating in top right corner - only show for authorized users */}
-            {rank > 0 && isVoted && !isExample && user && (
-              <div className="absolute top-0 right-0 z-20 flex items-center">
-                <div className="bg-contest-blue text-white px-2 py-1.5 rounded-bl-lg text-lg font-bold">
-                  {averageRating > 0 ? averageRating.toFixed(1) : '0.0'}
-                </div>
-              </div>
-            )}
+             {/* Rating in top right corner - only show for authorized users */}
+             {rank > 0 && isVoted && !isExample && user && (
+               <div className="absolute top-0 right-0 z-20 flex items-center">
+                 <Popover>
+                   <PopoverTrigger asChild>
+                     <div className="bg-contest-blue text-white px-2 py-1.5 rounded-bl-lg text-lg font-bold cursor-pointer hover:bg-contest-blue/90 transition-colors">
+                       {averageRating > 0 ? averageRating.toFixed(1) : '0.0'}
+                     </div>
+                   </PopoverTrigger>
+                   <PopoverContent className="w-auto p-3">
+                     <div className="text-sm">
+                       {userRating > 0 ? 
+                         `Your rating: ${userRating}` : 
+                         `No rating`
+                       }{isThisWeek && ` — `}<button 
+                         className={`text-contest-blue hover:underline ${!isThisWeek ? 'hidden' : ''}`}
+                         onClick={() => setIsEditing(true)}
+                       >
+                         change
+                       </button>
+                     </div>
+                   </PopoverContent>
+                 </Popover>
+               </div>
+             )}
           
           
           {/* Header with content or voting overlay */}
@@ -716,19 +743,19 @@ export function ContestantCard({
                      })()}
                  </div>
               </PopoverTrigger>
-               <PopoverContent className="w-auto p-3">
-                 <div className="text-sm">
-                   {userRating > 0 ? 
-                     `Your rating: ${userRating}` : 
-                     `No rating`
-                   }{isThisWeek && ` — `}<button 
-                     className={`text-contest-blue hover:underline ${!isThisWeek ? 'hidden' : ''}`}
-                     onClick={() => setIsEditing(true)}
-                   >
-                     change
-                   </button>
-                 </div>
-               </PopoverContent>
+                <PopoverContent className="w-auto p-3">
+                  <div className="text-sm">
+                    {userRating > 0 ? 
+                      `Your rating: ${userRating}` : 
+                      `No rating`
+                    }{isThisWeek && ` — `}<button 
+                      className={`text-contest-blue hover:underline ${!isThisWeek ? 'hidden' : ''}`}
+                      onClick={() => setIsEditing(true)}
+                    >
+                      change
+                    </button>
+                  </div>
+                </PopoverContent>
             </Popover>
           </div>
         )}
