@@ -32,9 +32,9 @@ export function VotingOverlay({
   compact = false
 }: VotingOverlayProps) {
   // For THIS WEEK section - always show voting stars for unauthenticated users, regardless of previous votes
-  // For other sections - show voting overlay only if not voted and not editing
+  // For other sections - show voting overlay only if not voted and not editing AND user is authenticated
   if (isThisWeek && !propUser && !isExample) {
-    // Always show stars for unauthenticated users in THIS WEEK
+    // Always show stars for unauthenticated users in THIS WEEK ONLY
     return (
       <div className="absolute inset-0 bg-gray-300 rounded-r flex flex-col items-center justify-center gap-3">
         <div className="scale-[1.5] sm:scale-[1.8]">
@@ -51,8 +51,8 @@ export function VotingOverlay({
         </div>
       </div>
     );
-  } else if (!isVoted && !isEditing && !showThanks && !isExample) {
-    // Show voting overlay for other cases
+  } else if (!isVoted && !isEditing && !showThanks && !isExample && propUser) {
+    // Show voting overlay only for authenticated users in all sections
     return (
       <div className="absolute inset-0 bg-gray-300 rounded-r flex flex-col items-center justify-center gap-3">
         {/* Show only stars for all users in THIS WEEK, full voting UI for other sections */}
@@ -64,13 +64,8 @@ export function VotingOverlay({
               variant="white"
               hideText={true}
               onRate={(rating) => {
-                if (!propUser) {
-                  console.log('Unauthenticated user voting in THIS WEEK, showing login modal');
-                  setShowLoginModal(true);
-                } else {
-                  console.log('Authenticated user voting in THIS WEEK');
-                  handleRate(rating);
-                }
+                console.log('Authenticated user voting in THIS WEEK');
+                handleRate(rating);
               }}
             />
           </div>
@@ -86,12 +81,7 @@ export function VotingOverlay({
                 onRate={(rating) => {
                   console.log('StarRating onRate called with rating:', rating);
                   console.log('User state:', propUser);
-                  if (!propUser) {
-                    console.log('Unauthenticated user voting, showing login modal');
-                    setShowLoginModal(true);
-                  } else {
-                    handleRate(rating);
-                  }
+                  handleRate(rating);
                 }}
               />
             </div>
