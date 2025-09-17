@@ -737,7 +737,7 @@ export function ContestantCard({
           </div>
         )}
         
-        {/* Rating badge in top right corner - show immediately after voting - hide when editing in full cards */}
+        {/* Rating badge in top right corner - hide when editing */}
         {isVoted && !isEditing && !showThanks && !isExample && !(isThisWeek && !user) && (
           <div className="absolute top-0 right-0 z-10 flex flex-col items-end">
              <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
