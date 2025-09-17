@@ -144,7 +144,7 @@ export function CompactCardLayout({
           compact={true}
         />
         
-        {/* Contestant info - shown after voting instead of normal content (EXACT same logic as FullCardLayout) */}
+        {/* Contestant info - shown after voting instead of normal content (SAME LOGIC AS FULLCARDLAYOUT) */}
         {isVoted && !isEditing && !showThanks && (
           <div className={`absolute inset-0 rounded-r flex flex-col justify-between p-1 sm:p-2 md:p-3 ${isExample ? 'bg-yellow-100' : 'bg-white'}`}>
             <div className="flex items-start justify-between">
