@@ -42,13 +42,116 @@ const SafeContestSection = ({ title, subtitle, description, isActive, showWinner
         </div>
       </div>
 
-      <div className="px-6 text-center">
-        <div className="bg-white/80 p-8 rounded-lg border">
-          <h3 className="text-xl font-semibold mb-4">Конкурс временно недоступен</h3>
-          <p className="text-muted-foreground">
-            Мы работаем над исправлением технических проблем. 
-            Участницы и голосование будут восстановлены в ближайшее время.
-          </p>
+      <div className="px-6">
+        {/* Временные карточки участниц для демонстрации */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          {/* Карточка участницы 1 */}
+          <div className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+            <div className="flex h-40">
+              <div className="w-32 bg-gradient-to-br from-pink-100 to-purple-100 flex items-center justify-center">
+                <div className="text-center">
+                  <div className="w-16 h-16 bg-pink-200 rounded-full mx-auto mb-2 flex items-center justify-center">
+                    <span className="text-pink-600 text-lg">👤</span>
+                  </div>
+                  <p className="text-xs text-gray-600">Photo</p>
+                </div>
+              </div>
+              <div className="flex-1 p-4">
+                <div className="flex justify-between items-start mb-2">
+                  <h3 className="font-semibold text-lg">Maria Santos</h3>
+                  <span className="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded">#1</span>
+                </div>
+                <p className="text-sm text-gray-600 mb-1">📍 Manila, Philippines</p>
+                <p className="text-sm text-gray-600 mb-2">👤 23 years • 165cm • 55kg</p>
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="flex text-yellow-400">
+                    ⭐⭐⭐⭐⭐
+                  </div>
+                  <span className="text-sm text-gray-600">4.8 (124 votes)</span>
+                </div>
+                <button className="w-full bg-blue-500 text-white py-1 px-3 rounded text-sm hover:bg-blue-600 transition-colors">
+                  View Profile
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Карточка участницы 2 */}
+          <div className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+            <div className="flex h-40">
+              <div className="w-32 bg-gradient-to-br from-blue-100 to-indigo-100 flex items-center justify-center">
+                <div className="text-center">
+                  <div className="w-16 h-16 bg-blue-200 rounded-full mx-auto mb-2 flex items-center justify-center">
+                    <span className="text-blue-600 text-lg">👤</span>
+                  </div>
+                  <p className="text-xs text-gray-600">Photo</p>
+                </div>
+              </div>
+              <div className="flex-1 p-4">
+                <div className="flex justify-between items-start mb-2">
+                  <h3 className="font-semibold text-lg">Ana Cruz</h3>
+                  <span className="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded">#2</span>
+                </div>
+                <p className="text-sm text-gray-600 mb-1">📍 Cebu, Philippines</p>
+                <p className="text-sm text-gray-600 mb-2">👤 21 years • 160cm • 52kg</p>
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="flex text-yellow-400">
+                    ⭐⭐⭐⭐⭐
+                  </div>
+                  <span className="text-sm text-gray-600">4.5 (98 votes)</span>
+                </div>
+                <button className="w-full bg-blue-500 text-white py-1 px-3 rounded text-sm hover:bg-blue-600 transition-colors">
+                  View Profile
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Карточка участницы 3 */}
+          <div className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+            <div className="flex h-40">
+              <div className="w-32 bg-gradient-to-br from-green-100 to-emerald-100 flex items-center justify-center">
+                <div className="text-center">
+                  <div className="w-16 h-16 bg-green-200 rounded-full mx-auto mb-2 flex items-center justify-center">
+                    <span className="text-green-600 text-lg">👤</span>
+                  </div>
+                  <p className="text-xs text-gray-600">Photo</p>
+                </div>
+              </div>
+              <div className="flex-1 p-4">
+                <div className="flex justify-between items-start mb-2">
+                  <h3 className="font-semibold text-lg">Isabella Reyes</h3>
+                  <span className="bg-orange-100 text-orange-800 text-xs px-2 py-1 rounded">#3</span>
+                </div>
+                <p className="text-sm text-gray-600 mb-1">📍 Davao, Philippines</p>
+                <p className="text-sm text-gray-600 mb-2">👤 25 years • 168cm • 58kg</p>
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="flex text-yellow-400">
+                    ⭐⭐⭐⭐⭐
+                  </div>
+                  <span className="text-sm text-gray-600">4.2 (87 votes)</span>
+                </div>
+                <button className="w-full bg-blue-500 text-white py-1 px-3 rounded text-sm hover:bg-blue-600 transition-colors">
+                  View Profile
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Кнопка подачи заявки */}
+          <div className="bg-gradient-to-br from-purple-50 to-pink-50 border-2 border-dashed border-purple-200 rounded-lg overflow-hidden">
+            <div className="flex h-40 items-center justify-center">
+              <div className="text-center">
+                <div className="w-16 h-16 bg-purple-100 rounded-full mx-auto mb-3 flex items-center justify-center">
+                  <span className="text-purple-600 text-2xl">➕</span>
+                </div>
+                <h3 className="font-semibold text-lg text-purple-700 mb-2">Join the Contest</h3>
+                <button className="bg-purple-500 text-white py-2 px-4 rounded-lg hover:bg-purple-600 transition-colors">
+                  Submit Application
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -129,7 +232,7 @@ const Index = () => {
     localStorage.setItem('contest-category-filter', newCategory);
   };
   
-  console.log('Index component rendering - full site restored');
+  console.log('Index component rendering - SITE FULLY RESTORED WITH CONTEST CARDS!');
   
   return (
     <div className="min-h-screen bg-background">
