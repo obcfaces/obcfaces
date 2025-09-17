@@ -174,11 +174,11 @@ export function ContestantCard({
 
   // Login modal removed auto-close
 
-  // Load user voting status and setup dislikes
+  // Load user voting status and setup dislikes - only run when we have a stable user
   useEffect(() => {
+    if (!user?.id) return; // Exit early if no user
+    
     const loadUserVotingData = async () => {
-      if (!user) return;
-
       // Load user's likes status for card
       const { data: userLikes } = await supabase
         .from("likes")
@@ -234,7 +234,7 @@ export function ContestantCard({
     };
 
     loadUserVotingData();
-  }, [name, user]);
+  }, [user?.id, name, profileId]); // Only depend on user.id, not the full user object
 
   const handleLike = async (index: number) => {
     if (!user) {
