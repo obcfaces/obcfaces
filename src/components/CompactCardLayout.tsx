@@ -126,7 +126,7 @@ export function CompactCardLayout({
         )}
       </div>
       
-      {/* Content area for non-winner cards */}
+      {/* Content area */}
       <div className="flex-1 p-1 sm:p-2 md:p-3 flex flex-col relative">
         <VotingOverlay
           isThisWeek={isThisWeek}
