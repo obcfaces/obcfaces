@@ -105,8 +105,8 @@ export function FullCardLayout({
         </div>
       )}
       
-      {/* Rating badge in top right corner - hide when editing */}
-      {isVoted && !isEditing && !showThanks && !isExample && !(isThisWeek && !propUser) && (
+      {/* Rating badge in top right corner - show for everyone except unauthenticated users in THIS WEEK */}
+      {isVoted && !isEditing && !showThanks && !isExample && (propUser || !isThisWeek) && (
         <div className="absolute top-0 right-0 z-10 flex flex-col items-end">
            <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
              <PopoverTrigger asChild>
