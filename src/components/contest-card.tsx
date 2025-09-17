@@ -83,7 +83,7 @@ export function ContestantCard({
   const [isLiked, setIsLiked] = useState<boolean[]>([false, false]);
   const [isDisliked, setIsDisliked] = useState(false);
   const [hasCommented, setHasCommented] = useState(false);
-  const [user, setUser] = useState<any>(propUser);
+  // Use propUser directly instead of local state to prevent recursion
   const [dislikesCount, setDislikesCount] = useState<number>(0);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -169,15 +169,7 @@ export function ContestantCard({
   const [showLoginModal, setShowLoginModal] = useState(false);
   const { isShareModalOpen, shareData, openShareModal, closeShareModal } = useShare();
 
-  // Update user state when prop changes and load existing rating
-  useEffect(() => {
-    setUser(propUser);
-    
-    // When user logs in, check if they already have a rating for this contestant
-    if (propUser && propUser.id && profileId && !user) {
-      loadUserExistingRating(propUser.id);
-    }
-  }, [propUser]);
+  // Remove problematic useEffect that was causing infinite recursion
 
   const loadUserExistingRating = async (userId: string) => {
     if (!profileId) return;
@@ -272,7 +264,7 @@ export function ContestantCard({
   // }, [user?.id, name, profileId]); // Only depend on user.id, not the full user object
 
   const handleLike = async (index: number) => {
-    if (!user) {
+    if (!propUser) {
       setShowLoginModal(true);
       return;
     }
@@ -290,7 +282,7 @@ export function ContestantCard({
         await supabase
           .from("likes")
           .delete()
-          .eq("user_id", user.id)
+          .eq("user_id", propUser.id)
           .eq("content_type", "contest")
           .eq("content_id", contentId);
       } else {
@@ -298,7 +290,7 @@ export function ContestantCard({
         await supabase
           .from("likes")
           .insert({
-            user_id: user.id,
+            user_id: propUser.id,
             content_type: "contest",
             content_id: contentId,
           });
@@ -315,7 +307,7 @@ export function ContestantCard({
   };
 
   const handleDislike = () => {
-    if (!user) {
+    if (!propUser) {
       setShowLoginModal(true);
       return;
     }
@@ -325,9 +317,9 @@ export function ContestantCard({
   };
 
   const handleRate = async (rating: number) => {
-    console.log('handleRate called with:', { rating, name, userId: user?.id, profileId });
+    console.log('handleRate called with:', { rating, name, userId: propUser?.id, profileId });
     
-    if (!user) {
+    if (!propUser) {
       setShowLoginModal(true);
       return;
     }
@@ -366,7 +358,7 @@ export function ContestantCard({
     
     try {
       const ratingData = {
-        user_id: user.id,
+        user_id: propUser.id,
         contestant_name: name,
         contestant_user_id: profileId || null,
         rating: rating
@@ -396,7 +388,7 @@ export function ContestantCard({
       }
       
       // Store in localStorage for persistence
-      localStorage.setItem(`rating-${name}-${user.id}`, rating.toString());
+      localStorage.setItem(`rating-${name}-${propUser.id}`, rating.toString());
       
       // Call onRate callback if provided (for parent component to refresh rankings)
       if (onRate) {
@@ -415,7 +407,7 @@ export function ContestantCard({
   };
 
   const handleComment = () => {
-    if (!user) {
+    if (!propUser) {
       setShowLoginModal(true);
       return;
     }
@@ -425,8 +417,8 @@ export function ContestantCard({
 
   // Function to mark as commented (called from PhotoModal when comment is submitted)
   const markAsCommented = () => {
-    if (user) {
-      localStorage.setItem(`commented-${name}-${user.id}`, 'true');
+    if (propUser) {
+      localStorage.setItem(`commented-${name}-${propUser.id}`, 'true');
       setHasCommented(true);
     }
   };
@@ -447,7 +439,7 @@ export function ContestantCard({
       <>
         <Card className={`${isExample ? 'border-yellow-400 border-2 bg-yellow-50/50' : isWinner ? 'bg-blue-50 border-contest-blue border-2' : 'bg-card border-contest-border'} relative overflow-hidden`}>
           {/* Rank number in top left corner - only show if contestant has votes and user is authenticated */}
-          {rank > 0 && !isExample && totalVotes > 0 && user && (
+          {rank > 0 && !isExample && totalVotes > 0 && propUser && (
             <div className="absolute top-0 left-0 z-20 flex items-center">
               <div className="bg-black/70 text-white px-1 py-0.5 rounded-br text-xs font-bold">
                 {rank}
@@ -456,7 +448,7 @@ export function ContestantCard({
           )}
            
              {/* Rating in top right corner - only show for authorized users */}
-             {rank > 0 && isVoted && !isExample && user && (
+             {rank > 0 && isVoted && !isExample && propUser && (
                <div className="absolute top-0 right-0 z-20 flex items-center">
                  <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
                    <PopoverTrigger asChild>
@@ -488,7 +480,7 @@ export function ContestantCard({
           {/* Header with content or voting overlay */}
           <div className="relative px-6 py-3 border-b border-contest-border h-[80px]">
             {/* Show different content based on user auth status and contest type */}
-            {isThisWeek && !user && !isExample ? (
+            {isThisWeek && !propUser && !isExample ? (
               /* Unauthorized users in THIS WEEK section only see voting (but not for test cards) */
               <div className="absolute inset-0 bg-gray-200 flex items-center justify-center h-full">
                 <div className="flex items-center gap-12">
@@ -547,13 +539,13 @@ export function ContestantCard({
                     hideText={true}
                     onRate={(rating) => {
                       console.log('Edit mode StarRating onRate called with rating:', rating);
-                      console.log('User state:', user);
-                      if (!user) {
+                      console.log('User state:', propUser);
+                      if (!propUser) {
                         setShowLoginModal(true);
                         return;
                       }
                       setUserRating(rating);
-                      localStorage.setItem(`rating-${name}-${user.id}`, rating.toString());
+                      localStorage.setItem(`rating-${name}-${propUser.id}`, rating.toString());
                       setIsEditing(false);
                       handleRate(rating); // ИСПРАВЛЕНО: вызываем handleRate для сохранения в БД
                     }}
@@ -738,7 +730,7 @@ export function ContestantCard({
         )}
         
         {/* Rating badge in top right corner - hide when editing */}
-        {isVoted && !isEditing && !showThanks && !isExample && !(isThisWeek && !user) && (
+        {isVoted && !isEditing && !showThanks && !isExample && !(isThisWeek && !propUser) && (
           <div className="absolute top-0 right-0 z-10 flex flex-col items-end">
              <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
                <PopoverTrigger asChild>
@@ -823,7 +815,7 @@ export function ContestantCard({
                             variant="white"
                             hideText={true}
                             onRate={(rating) => {
-                              if (!user) {
+                              if (!propUser) {
                                 console.log('Unauthenticated user voting in THIS WEEK, showing login modal');
                                 setShowLoginModal(true);
                               } else {
@@ -844,8 +836,8 @@ export function ContestantCard({
                               hideText={true}
                               onRate={(rating) => {
                                 console.log('Compact StarRating onRate called with rating:', rating);
-                                console.log('User state:', user);
-                                if (!user) {
+                                console.log('User state:', propUser);
+                                if (!propUser) {
                                   console.log('Unauthenticated user voting, showing login modal');
                                   setShowLoginModal(true);
                                 } else {
@@ -881,13 +873,13 @@ export function ContestantCard({
                           hideText={true}
                           onRate={(rating) => {
                             console.log('Compact edit mode StarRating onRate called with rating:', rating);
-                            console.log('User state:', user);
-                            if (!user) {
+                            console.log('User state:', propUser);
+                            if (!propUser) {
                               setShowLoginModal(true);
                               return;
                             }
                             setUserRating(rating);
-                            localStorage.setItem(`rating-${name}-${user.id}`, rating.toString());
+                            localStorage.setItem(`rating-${name}-${propUser.id}`, rating.toString());
                             setIsEditing(false);
                             handleRate(rating);
                           }}
@@ -1061,7 +1053,7 @@ export function ContestantCard({
                         variant="white"
                         hideText={true}
                         onRate={(rating) => {
-                          if (!user) {
+                          if (!propUser) {
                             console.log('Unauthenticated user voting, showing login modal');
                             setShowLoginModal(true);
                             return;
@@ -1096,13 +1088,13 @@ export function ContestantCard({
                       hideText={true}
                       onRate={(rating) => {
                         console.log('Compact edit mode StarRating onRate called with rating:', rating);
-                        console.log('User state:', user);
-                        if (!user) {
+                        console.log('User state:', propUser);
+                        if (!propUser) {
                           setShowLoginModal(true);
                           return;
                         }
                         setUserRating(rating);
-                        localStorage.setItem(`rating-${name}-${user.id}`, rating.toString());
+                        localStorage.setItem(`rating-${name}-${propUser.id}`, rating.toString());
                         setIsEditing(false);
                         handleRate(rating); // ИСПРАВЛЕНО: вызываем handleRate для сохранения в БД
                       }}
