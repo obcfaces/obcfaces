@@ -144,9 +144,9 @@ export function CompactCardLayout({
           compact={true}
         />
         
-        {/* Contestant info - shown after voting OR for unauthenticated users in past weeks (SAME AS FULLCARDLAYOUT) */}
-        {((isVoted && !isEditing && !showThanks) || (!propUser && !isThisWeek)) && (
-          <div className={`absolute inset-0 rounded-r flex flex-col justify-between p-1 sm:p-2 md:p-3 ${isExample ? 'bg-yellow-100' : 'bg-white'}`}>
+        {/* Contestant info - EXACT COPY from FullCardLayout - no special conditions */}
+        {isVoted && !isEditing && !showThanks && (
+          <div className={`absolute inset-0 rounded-r flex flex-col justify-between p-1 sm:p-2 md:p-3 ${isExample ? 'bg-yellow-100' : isWinner ? 'bg-blue-100' : 'bg-white'}`}>
             <div className="flex items-start justify-between">
               {!isExample && (
                 <div className="min-w-0 flex-1 mr-2">
