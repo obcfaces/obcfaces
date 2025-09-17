@@ -735,8 +735,8 @@ export function ContestantCard({
           </div>
         )}
         
-        {/* Rating badge in top right corner - hide when editing */}
-        {isVoted && !isEditing && !showThanks && !isExample && !(isThisWeek && !propUser) && (
+        {/* Rating badge in top right corner - hide when editing - show for all voted cards */}
+        {isVoted && !isEditing && !showThanks && (
           <div className="absolute top-0 right-0 z-10 flex flex-col items-end">
              <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
                <PopoverTrigger asChild>
@@ -784,7 +784,7 @@ export function ContestantCard({
                     className="w-24 sm:w-28 md:w-32 h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
                     onClick={() => openModal(0)}
                   />
-                  {isVoted && !isExample && (
+                  {isVoted && (
                     <div className="absolute top-0 left-0 bg-black/70 text-white text-xs font-bold px-1 py-0.5 rounded-br">
                       {rank > 0 ? rank : '★'}
                     </div>
@@ -842,7 +842,7 @@ export function ContestantCard({
                   className="w-24 sm:w-28 md:w-32 h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
                   onClick={() => openModal(0)}
                 />
-                {isVoted && !isExample && (
+                {isVoted && (
                   <div className="absolute top-0 left-0 bg-black/70 text-white text-xs font-bold px-1 py-0.5 rounded-br">
                     {rank > 0 ? rank : '★'}
                   </div>
