@@ -387,16 +387,6 @@ export function ContestantCard({
         onRate(rating);
       }
       
-      // Trigger immediate update of average rating in the UI by calling parent refresh
-      setTimeout(() => {
-        if (window.location.reload) {
-          // Force component re-render to show updated rating
-          window.dispatchEvent(new CustomEvent('rating-updated', { 
-            detail: { profileId, newRating: rating }
-          }));
-        }
-      }, 100);
-      
       console.log('Rating saved successfully');
     } catch (error) {
       console.error('Error saving rating:', error);
