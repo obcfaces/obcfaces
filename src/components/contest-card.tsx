@@ -161,24 +161,24 @@ export function ContestantCard({
   const [showLoginModal, setShowLoginModal] = useState(false);
   const { isShareModalOpen, shareData, openShareModal, closeShareModal } = useShare();
 
-  // TEMPORARILY DISABLED - auth state listener
-  // useEffect(() => {
-  //   // Simple auth state management without throttling
-  //   const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
-  //     const newUser = session?.user ?? null;
-  //     setUser(newUser);
-  //   });
+  // Auth state listener
+  useEffect(() => {
+    // Simple auth state management without throttling
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
+      const newUser = session?.user ?? null;
+      setUser(newUser);
+    });
 
-  //   // Get initial session
-  //   supabase.auth.getSession().then(({ data: { session } }) => {
-  //     const newUser = session?.user ?? null;
-  //     setUser(newUser);
-  //   });
+    // Get initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      const newUser = session?.user ?? null;
+      setUser(newUser);
+    });
 
-  //   return () => {
-  //     subscription.unsubscribe();
-  //   };
-  // }, []);
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
 
   // Login modal removed auto-close
 
