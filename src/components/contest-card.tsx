@@ -93,8 +93,8 @@ export function ContestantCard({
   // Use unified card data hook
   const { data: cardData, loading: cardDataLoading, refresh: refreshCardData } = useCardData(name, user?.id, profileId);
 
-  // Initialize local state from props only once
-  // Remove problematic useEffect that was causing infinite recursion
+  // Local state should only be updated through user interactions, not props changes
+  // This prevents infinite recursion from prop updates
 
   // Check if user is admin
   useEffect(() => {
@@ -162,17 +162,7 @@ export function ContestantCard({
   const { isShareModalOpen, shareData, openShareModal, closeShareModal } = useShare();
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
-      const newUser = session?.user ?? null;
-      setUser(newUser);
-      // Store current user ID for synchronous access
-      if (newUser?.id) {
-        localStorage.setItem('currentUserId', newUser.id);
-      } else {
-        localStorage.removeItem('currentUserId');
-      }
-    });
-
+    // Get current session first (synchronous)
     supabase.auth.getSession().then(({ data: { session } }) => {
       const newUser = session?.user ?? null;
       setUser(newUser);
@@ -184,7 +174,27 @@ export function ContestantCard({
       }
     });
 
-    return () => subscription.unsubscribe();
+    // Set up auth state listener with throttling
+    let timeoutId: NodeJS.Timeout;
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
+      // Throttle auth state changes to prevent rapid updates
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        const newUser = session?.user ?? null;
+        setUser(newUser);
+        // Store current user ID for synchronous access
+        if (newUser?.id) {
+          localStorage.setItem('currentUserId', newUser.id);
+        } else {
+          localStorage.removeItem('currentUserId');
+        }
+      }, 100);
+    });
+
+    return () => {
+      clearTimeout(timeoutId);
+      subscription.unsubscribe();
+    };
   }, []);
 
   // Login modal removed auto-close
