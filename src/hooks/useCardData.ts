@@ -23,6 +23,14 @@ export const useCardData = (participantName: string, userId?: string, profileId?
       return;
     }
 
+    // Reset data to avoid stale cache
+    setData({
+      likes: 0,
+      comments: 0,
+      isLiked: false,
+      hasCommented: false
+    });
+
     const loadCardData = async () => {
       setLoading(true);
       
