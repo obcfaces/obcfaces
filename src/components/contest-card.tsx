@@ -461,6 +461,10 @@ export function ContestantCard({
           {/* Header with content or voting overlay */}
           <div className="relative px-6 py-3 border-b border-contest-border h-[80px]">
             {/* Show different content based on user auth status and contest type */}
+            {(() => {
+              console.log('Contest Card Debug:', { isThisWeek, user: !!user, name, userRating });
+              return null;
+            })()}
             {isThisWeek && !user ? (
               /* Unauthorized users in THIS WEEK section only see voting */
               <div className="flex items-center justify-center h-full">
@@ -475,6 +479,10 @@ export function ContestantCard({
                       hideText={true}
                     />
                   </div>
+                </div>
+                {/* Debug info in UI */}
+                <div className="absolute bottom-0 left-0 text-xs bg-red-100 p-1">
+                  Debug: user={user ? 'YES' : 'NO'}, thisWeek={isThisWeek ? 'YES' : 'NO'}
                 </div>
               </div>
             ) : (
