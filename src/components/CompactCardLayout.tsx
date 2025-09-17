@@ -144,12 +144,8 @@ export function CompactCardLayout({
           compact={true}
         />
         
-        {/* Contestant info - always show for unauthenticated users in past weeks, or for authenticated voted users */}
-        {(() => {
-          const shouldShow = (!propUser && !isThisWeek) || (propUser && isVoted && !isEditing && !showThanks);
-          console.log(`CompactCard ${name}: propUser=${!!propUser}, isThisWeek=${isThisWeek}, isVoted=${isVoted}, isEditing=${isEditing}, showThanks=${showThanks}, shouldShow=${shouldShow}`);
-          return shouldShow;
-        })() && (
+        {/* Contestant info - show for unauthenticated users in past weeks or authenticated users after voting */}
+        {((!propUser && !isThisWeek) || (isVoted && !isEditing && !showThanks)) && (
           <div className={`absolute inset-0 rounded-r flex flex-col justify-between p-1 sm:p-2 md:p-3 ${isExample ? 'bg-yellow-100' : 'bg-white'}`}>
             <div className="flex items-start justify-between">
               {!isExample && (
