@@ -31,8 +31,28 @@ export function VotingOverlay({
   name,
   compact = false
 }: VotingOverlayProps) {
-  // Voting overlay - shown by default when not voted and not editing, OR for ALL unauthenticated users in THIS WEEK
-  if ((!isVoted && !isEditing && !showThanks && !isExample) || (isThisWeek && !propUser && !isExample)) {
+  // For THIS WEEK section - always show voting stars for unauthenticated users, regardless of previous votes
+  // For other sections - show voting overlay only if not voted and not editing
+  if (isThisWeek && !propUser && !isExample) {
+    // Always show stars for unauthenticated users in THIS WEEK
+    return (
+      <div className="absolute inset-0 bg-gray-300 rounded-r flex flex-col items-center justify-center gap-3">
+        <div className="scale-[1.5] sm:scale-[1.8]">
+          <StarRating 
+            rating={0} 
+            isVoted={false}
+            variant="white"
+            hideText={true}
+            onRate={(rating) => {
+              console.log('Unauthenticated user voting in THIS WEEK, showing login modal');
+              setShowLoginModal(true);
+            }}
+          />
+        </div>
+      </div>
+    );
+  } else if (!isVoted && !isEditing && !showThanks && !isExample) {
+    // Show voting overlay for other cases
     return (
       <div className="absolute inset-0 bg-gray-300 rounded-r flex flex-col items-center justify-center gap-3">
         {/* Show only stars for all users in THIS WEEK, full voting UI for other sections */}
