@@ -32,9 +32,9 @@ export function VotingOverlay({
   compact = false
 }: VotingOverlayProps) {
   // For THIS WEEK section - always show voting stars for unauthenticated users, regardless of previous votes
-  // For other sections with unauthenticated users - don't show overlay at all (show full card info)
+  // For other sections with unauthenticated users - don't show overlay at all (show full card info) - ONLY IN COMPACT MODE
   // For authenticated users - show voting overlay only if not voted and not editing
-  if (isThisWeek && !propUser && !isExample) {
+  if (compact && isThisWeek && !propUser && !isExample) {
     // Show stars for unauthenticated users in THIS WEEK ONLY
     return (
       <div className="absolute inset-0 bg-gray-300 rounded-r flex flex-col items-center justify-center gap-3">
@@ -52,10 +52,10 @@ export function VotingOverlay({
         </div>
       </div>
     );
-  } else if (!isThisWeek && !propUser && !isExample) {
+  } else if (compact && !isThisWeek && !propUser && !isExample) {
     // For unauthenticated users in other blocks - don't show overlay, show full card info
     return null;
-  } else if (!isVoted && !isEditing && !showThanks && !isExample && propUser) {
+  } else if (!isVoted && !isEditing && !showThanks && !isExample) {
     // Show voting overlay only for authenticated users in all sections
     return (
       <div className="absolute inset-0 bg-gray-300 rounded-r flex flex-col items-center justify-center gap-3">
