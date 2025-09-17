@@ -8,11 +8,10 @@ interface VotingOverlayProps {
   isExample: boolean;
   propUser: any;
   userRating: number;
-  onRate: (rating: number) => void;
+  handleRate: (rating: number) => void;
   setShowLoginModal: (show: boolean) => void;
   setUserRating: (rating: number) => void;
   setIsEditing: (editing: boolean) => void;
-  handleRate: (rating: number) => void;
   name: string;
   compact?: boolean;
 }
@@ -25,7 +24,6 @@ export function VotingOverlay({
   isExample,
   propUser,
   userRating,
-  onRate,
   setShowLoginModal,
   setUserRating,
   setIsEditing,
