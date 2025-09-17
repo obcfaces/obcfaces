@@ -485,17 +485,22 @@ export function ContestantCard({
           
           {/* Header with content or voting overlay */}
           <div className="relative px-6 py-3 border-b border-contest-border h-[80px]">
-            {/* Show different content based on user auth status and contest type */}
-            {isThisWeek && !propUser && !isExample ? (
-              /* Unauthorized users in THIS WEEK section only see voting (but not for test cards) */
+            {/* Unified voting logic for all modes */}
+            {!isVoted && !isEditing && !showThanks && !isExample && (
               <div className="absolute inset-0 bg-gray-200 flex items-center justify-center h-full">
                 <div className="flex items-center gap-12">
                   <span className="text-lg font-medium text-gray-800">Vote</span>
                   <div className="scale-[2]">
                     <StarRating 
-                      rating={userRating}
+                      rating={0}
                       isVoted={false}
-                      onRate={handleRate}
+                      onRate={(rating) => {
+                        if (!propUser) {
+                          setShowLoginModal(true);
+                        } else {
+                          handleRate(rating);
+                        }
+                      }}
                       readonly={false}
                       hideText={true}
                       variant="white"
@@ -503,11 +508,12 @@ export function ContestantCard({
                   </div>
                 </div>
               </div>
-            ) : (
-              /* Authorized users or non-THIS WEEK sections see full content */
-              !isEditing && !showThanks && (
-                <div className="flex items-center justify-between h-full">
-                  <div>
+            )}
+            
+            {/* Show content when voted or when not voting */}
+            {(isVoted || isExample) && !isEditing && !showThanks && (
+              <div className="flex items-center justify-between h-full">
+                <div>
                     <h3 className="text-xl font-semibold text-contest-text">
                       {profileId ? (
                         <Link to={`/u/${profileId}`} className="hover:text-primary underline-offset-2 hover:underline">
@@ -522,8 +528,7 @@ export function ContestantCard({
                   </div>
                   {/* Remove rating display from header since it's now in corner */}
                 </div>
-              )
-            )}
+              )}
             
             {/* Thank you message - shown for 1 second after voting */}
             {showThanks && (
@@ -867,7 +872,7 @@ export function ContestantCard({
               
               {/* Content area - SAME UNIFIED LOGIC */}
               <div className="flex-1 p-1 sm:p-2 md:p-3 flex flex-col relative">
-                {/* Voting overlay - UNIFIED LOGIC FOR ALL MODES */}
+                {/* Unified voting overlay - same logic as full mode */}
                 {!isVoted && !isEditing && !showThanks && !isExample && (
                   <div className="absolute inset-0 bg-gray-300 rounded-r flex flex-col items-center justify-center gap-3">
                     <div className="scale-[1.5] sm:scale-[1.8]">
