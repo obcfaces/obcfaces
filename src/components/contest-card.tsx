@@ -85,10 +85,11 @@ export function ContestantCard({
   const [dislikesCount, setDislikesCount] = useState<number>(0);
   const [isAdmin, setIsAdmin] = useState(false);
   
+  // TEMPORARILY DISABLED LOCAL STATE TO PREVENT RECURSION
   // Local state for immediate rating updates - initialize with static values to prevent recursion
-  const [localAverageRating, setLocalAverageRating] = useState(0);
-  const [localTotalVotes, setLocalTotalVotes] = useState(0);
-  const [previousUserRating, setPreviousUserRating] = useState(0);
+  // const [localAverageRating, setLocalAverageRating] = useState(0);
+  // const [localTotalVotes, setLocalTotalVotes] = useState(0);
+  // const [previousUserRating, setPreviousUserRating] = useState(0);
   
   // TEMPORARILY DISABLED - Use unified card data hook with stable dependencies
   // const { data: cardData, loading: cardDataLoading, refresh: refreshCardData } = useCardData(name, user?.id, profileId);
@@ -98,11 +99,12 @@ export function ContestantCard({
   const cardDataLoading = false;
   const refreshCardData = () => {};
   
+  // TEMPORARILY DISABLED ALL EFFECTS AND PROP SYNC TO STOP RECURSION
   // Sync local state with props only once on mount to prevent recursion
-  useEffect(() => {
-    setLocalAverageRating(averageRating);
-    setLocalTotalVotes(totalVotes);
-  }, []); // Empty dependency array - only run once on mount
+  // useEffect(() => {
+  //   setLocalAverageRating(averageRating);
+  //   setLocalTotalVotes(totalVotes);
+  // }, []); // Empty dependency array - only run once on mount
 
   // Local state should only be updated through user interactions, not props changes
   // This prevents infinite recursion from prop updates
@@ -350,27 +352,29 @@ export function ContestantCard({
       
       console.log('Rating saved successfully, calling onRate callback');
       
+      // TEMPORARILY DISABLED RATING CALCULATIONS TO PREVENT RECURSION
       // Update local rating immediately
-      const oldUserRating = previousUserRating;
-      const isFirstVote = oldUserRating === 0;
+      // const oldUserRating = previousUserRating;
+      // const isFirstVote = oldUserRating === 0;
       
       // Calculate new average rating
-      let newTotalVotes = localTotalVotes;
-      let newAverageRating = localAverageRating;
+      // let newTotalVotes = localTotalVotes;
+      // let newAverageRating = localAverageRating;
       
-      if (isFirstVote) {
-        // First vote - add to total
-        newTotalVotes = localTotalVotes + 1;
-        newAverageRating = ((localAverageRating * localTotalVotes) + rating) / newTotalVotes;
-      } else {
-        // Changing existing vote - update the average
-        newAverageRating = ((localAverageRating * localTotalVotes) - oldUserRating + rating) / localTotalVotes;
-      }
+      // if (isFirstVote) {
+      //   // First vote - add to total
+      //   newTotalVotes = localTotalVotes + 1;
+      //   newAverageRating = ((localAverageRating * localTotalVotes) + rating) / newTotalVotes;
+      // } else {
+      //   // Changing existing vote - update the average
+      //   newAverageRating = ((localAverageRating * localTotalVotes) - oldUserRating + rating) / localTotalVotes;
+      // }
       
+      // TEMPORARILY REMOVED LOCAL STATE UPDATES TO PREVENT RECURSION
       // Update local state immediately
-      setLocalAverageRating(newAverageRating);
-      setLocalTotalVotes(newTotalVotes);
-      setPreviousUserRating(rating);
+      // setLocalAverageRating(newAverageRating);
+      // setLocalTotalVotes(newTotalVotes);
+      // setPreviousUserRating(rating);
       
       setUserRating(rating);
       setIsVoted(true);
@@ -430,7 +434,7 @@ export function ContestantCard({
             {rank > 0 && isVoted && !isExample && user && (
               <div className="absolute top-0 right-0 z-20 flex items-center">
                 <div className="bg-contest-blue text-white px-2 py-1.5 rounded-bl-lg text-lg font-bold">
-                  {localAverageRating > 0 ? localAverageRating.toFixed(1) : '0.0'}
+                  {averageRating > 0 ? averageRating.toFixed(1) : '0.0'}
                 </div>
               </div>
             )}
@@ -699,7 +703,7 @@ export function ContestantCard({
                     )}
                      {(() => {
                        // Для всех пользователей (включая админов) показываем средний рейтинг
-                       return localAverageRating > 0 ? localAverageRating.toFixed(1) : '0.0';
+                       return averageRating > 0 ? averageRating.toFixed(1) : '0.0';
                      })()}
                  </div>
               </PopoverTrigger>
