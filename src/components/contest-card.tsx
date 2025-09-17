@@ -444,15 +444,11 @@ export function ContestantCard({
             </div>
           )}
            
-            {/* Rating in top right corner - hidden for example cards */}
-            {rank > 0 && isVoted && !isExample && (
+            {/* Rating in top right corner - only show for authorized users */}
+            {rank > 0 && isVoted && !isExample && user && (
               <div className="absolute top-0 right-0 z-20 flex items-center">
                 <div className="bg-contest-blue text-white px-2 py-1.5 rounded-bl-lg text-lg font-bold">
-                  {(() => {
-                    console.log('Rating display - isAdmin:', isAdmin, 'userRating:', userRating, 'localAverageRating:', localAverageRating);
-                    // Всегда показываем общий рейтинг для всех пользователей
-                    return localAverageRating > 0 ? localAverageRating.toFixed(1) : '0.0';
-                  })()}
+                  {localAverageRating > 0 ? localAverageRating.toFixed(1) : '0.0'}
                 </div>
               </div>
             )}
