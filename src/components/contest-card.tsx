@@ -126,20 +126,16 @@ export function ContestantCard({
       if (!user?.id || !profileId) return;
 
       try {
-        console.log('Loading user rating for participant:', profileId, 'user:', user.id, 'isAdmin:', isAdmin);
         const { data: userRating } = await supabase
           .rpc('get_user_rating_for_participant', { 
             participant_id_param: profileId 
           });
 
-        console.log('User rating result:', userRating);
         if (userRating !== null && typeof userRating === 'number') {
-          console.log('Setting user rating to:', userRating);
           setUserRating(userRating);
           setPreviousUserRating(userRating); // Store the current rating as previous
           setIsVoted(true);
         } else {
-          console.log('No rating found, setting to 0');
           setUserRating(0);
           setPreviousUserRating(0);
         }
@@ -149,7 +145,7 @@ export function ContestantCard({
     };
 
     loadUserRating();
-  }, [user?.id, profileId]);
+  }, [user?.id, profileId]); // Убрали isAdmin из зависимостей
   // Initialize isVoted state synchronously by checking localStorage
   const [isVoted, setIsVoted] = useState(() => {
     if (propIsVoted) return true;
@@ -461,20 +457,9 @@ export function ContestantCard({
           {/* Header with content or voting overlay */}
           <div className="relative px-6 py-3 border-b border-contest-border h-[80px]">
             {/* Show different content based on user auth status and contest type */}
-            {(() => {
-              console.log('Contest Card Debug:', { 
-                isThisWeek, 
-                user: !!user, 
-                name, 
-                userRating,
-                condition: isThisWeek && !user,
-                showingStars: isThisWeek && !user
-              });
-              return null;
-            })()}
             {isThisWeek && !user ? (
               /* Unauthorized users in THIS WEEK section only see voting */
-              <div className="flex items-center justify-center h-full bg-yellow-100 border-2 border-yellow-400">
+              <div className="flex items-center justify-center h-full">
                 <div className="flex items-center gap-6">
                   <span className="text-lg font-medium text-gray-800">Rate this contestant</span>
                   <div className="scale-125">
@@ -486,10 +471,6 @@ export function ContestantCard({
                       hideText={true}
                     />
                   </div>
-                </div>
-                {/* Debug info in UI */}
-                <div className="absolute bottom-0 left-0 text-xs bg-red-100 p-1 z-30">
-                  Debug: user={user ? 'YES' : 'NO'}, thisWeek={isThisWeek ? 'YES' : 'NO'}
                 </div>
               </div>
             ) : (
