@@ -144,10 +144,11 @@ export function CompactCardLayout({
           compact={true}
         />
         
-        {/* Contestant info - always show for past weeks, or after voting for current week */}
+        {/* Contestant info - always show for past weeks (including examples and winners), or after voting for current week */}
         {(!isThisWeek || (isVoted && !isEditing && !showThanks)) && (
           <div className={`absolute inset-0 rounded-r flex flex-col justify-between p-1 sm:p-2 md:p-3 ${isExample ? 'bg-yellow-100' : 'bg-white'}`}>
             <div className="flex items-start justify-between">
+              {/* Show contestant info for all non-example cards */}
               {!isExample && (
                 <div className="min-w-0 flex-1 mr-2">
                    <h3 className="font-semibold text-contest-text text-base sm:text-lg truncate">{profileId ? (<Link to={`/u/${profileId}`} className="hover:text-primary underline-offset-2 hover:underline">{name}</Link>) : name}</h3>
@@ -171,13 +172,14 @@ export function CompactCardLayout({
                 </div>
               )}
               
-              {!isExample && (
-                <div className="text-right flex-shrink-0">
-                </div>
-              )}
-            </div>
-            
-            {!isExample && (
+               {!isExample && (
+                 <div className="text-right flex-shrink-0">
+                 </div>
+               )}
+             </div>
+             
+             {/* Show action buttons for all cards except examples */}
+             {!isExample && (
               <div className="flex items-center justify-end gap-2 sm:gap-4">
                  <button
                    type="button"
