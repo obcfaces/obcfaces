@@ -142,8 +142,8 @@ export function CompactCardLayout({
           compact={true}
         />
         
-        {/* Contestant info - shown after voting instead of normal content */}
-        {isVoted && !isEditing && !showThanks && (
+        {/* Contestant info - shown after voting, for editing, OR for unauthenticated users in past weeks */}
+        {(isVoted && !isEditing && !showThanks) || (!propUser && !isThisWeek && !isExample) && (
           <div className={`absolute inset-0 rounded-r flex flex-col justify-between p-1 sm:p-2 md:p-3 ${isExample ? 'bg-yellow-100' : 'bg-white'}`}>
             <div className="flex items-start justify-between">
               {!isExample && (
