@@ -144,11 +144,10 @@ export function CompactCardLayout({
           compact={true}
         />
         
-        {/* Contestant info - FORCE show for ALL past weeks cards (examples, winners, regular) */}
-        {!isThisWeek && (
+        {/* Contestant info - shown after voting instead of normal content (EXACT same logic as FullCardLayout) */}
+        {isVoted && !isEditing && !showThanks && (
           <div className={`absolute inset-0 rounded-r flex flex-col justify-between p-1 sm:p-2 md:p-3 ${isExample ? 'bg-yellow-100' : 'bg-white'}`}>
             <div className="flex items-start justify-between">
-              {/* Show contestant info for all non-example cards */}
               {!isExample && (
                 <div className="min-w-0 flex-1 mr-2">
                    <h3 className="font-semibold text-contest-text text-base sm:text-lg truncate">{profileId ? (<Link to={`/u/${profileId}`} className="hover:text-primary underline-offset-2 hover:underline">{name}</Link>) : name}</h3>
@@ -172,110 +171,13 @@ export function CompactCardLayout({
                 </div>
               )}
               
-               {!isExample && (
-                 <div className="text-right flex-shrink-0">
-                 </div>
-               )}
-             </div>
-             
-             {/* Show action buttons for all cards except examples */}
-             {!isExample && (
-              <div className="flex items-center justify-end gap-2 sm:gap-4">
-                 <button
-                   type="button"
-                   className={cn(
-                     "inline-flex items-center gap-1 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors",
-                     (isLiked[0] || isLiked[1]) && "text-contest-blue"
-                   )}
-                   onClick={() => handleLike(0)}
-                   aria-label="Like"
-                 >
-                    <ThumbsUp className={cn("w-3.5 h-3.5", (isLiked[0] || isLiked[1]) ? "text-blue-500" : "text-gray-500")} strokeWidth={1} />
-                    <span className={cn("hidden xl:inline", (isLiked[0] || isLiked[1]) ? "text-blue-500" : "text-gray-500")}>Like</span>
-                     <span className={cn((isLiked[0] || isLiked[1]) ? "text-blue-500" : "text-gray-500")}>{cardData.likes}</span>
-                 </button>
-                {showDislike && (
-                  <button
-                    type="button"
-                    className={cn(
-                      "inline-flex items-center gap-1 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors",
-                      isDisliked && "text-red-500"
-                    )}
-                    onClick={handleDislike}
-                    aria-label="Dislike"
-                  >
-                    <ThumbsDown className="w-3.5 h-3.5" />
-                    <span className="hidden xl:inline">Dislike</span>
-                    <span>{dislikesCount}</span>
-                  </button>
-                )}
-                 <button
-                   type="button"
-                   className={cn(
-                     "inline-flex items-center gap-1 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors",
-                     hasCommented && "text-contest-blue"
-                   )}
-                   onClick={handleComment}
-                   aria-label="Comments"
-                 >
-                    <MessageCircle className={cn("w-3.5 h-3.5", hasCommented ? "text-contest-blue" : "text-gray-500")} strokeWidth={1} />
-                    <span className="hidden xl:inline">Comment</span>
-                    <span>{cardData.comments}</span>
-                 </button>
-                 <button
-                   type="button"
-                   className="inline-flex items-center gap-1 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors"
-                   onClick={() => openShareModal({
-                     title: `${name} - Beauty Contest`,
-                     url: profileId ? `https://obcface.com/u/${profileId}` : `https://obcface.com`,
-                     description: `Check out ${name}, ${age} from ${city}, ${country} in this beauty contest!`
-                   })}
-                   aria-label="Share"
-                 >
-                   <Share2 className="w-3.5 h-3.5" strokeWidth={1} />
-                   <span className="hidden sm:inline">Share</span>
-                 </button>
-              </div>
-            )}
-          </div>
-        )}
-        
-        {/* Contestant info for current week - only after voting */}
-        {isThisWeek && isVoted && !isEditing && !showThanks && (
-          <div className={`absolute inset-0 rounded-r flex flex-col justify-between p-1 sm:p-2 md:p-3 ${isExample ? 'bg-yellow-100' : 'bg-white'}`}>
-            <div className="flex items-start justify-between">
-              {/* Show contestant info for all non-example cards */}
               {!isExample && (
-                <div className="min-w-0 flex-1 mr-2">
-                   <h3 className="font-semibold text-contest-text text-base sm:text-lg truncate">{profileId ? (<Link to={`/u/${profileId}`} className="hover:text-primary underline-offset-2 hover:underline">{name}</Link>) : name}</h3>
-                   <div className="text-xs sm:text-sm text-muted-foreground font-normal">{age} yo · {weight} kg · {height} cm</div>
-                   <div className="text-sm sm:text-base text-contest-blue truncate">
-                     {getCountryDisplayName(country)} · {city}
-                   </div>
+                <div className="text-right flex-shrink-0">
                 </div>
               )}
-              
-              {/* Example bullet points - positioned to the right for compact example cards */}
-              {isExample && (
-                <div className="flex-1 flex items-center justify-start pl-2">
-                  <div className="text-xs text-gray-700 space-y-1">
-                    <div className="font-bold mb-2">Photo Requirements</div>
-                    <div>• Portrait and whole body</div>
-                    <div>• No makeup, no filters</div>
-                    <div>• Wear tight/fitted clothes.</div>
-                    <div>• No dresses, glasses</div>
-                  </div>
-                </div>
-              )}
-              
-               {!isExample && (
-                 <div className="text-right flex-shrink-0">
-                 </div>
-               )}
-             </div>
-             
-             {/* Show action buttons for all cards except examples */}
-             {!isExample && (
+            </div>
+            
+            {!isExample && (
               <div className="flex items-center justify-end gap-2 sm:gap-4">
                  <button
                    type="button"
