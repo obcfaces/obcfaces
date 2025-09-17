@@ -1046,8 +1046,8 @@ export function ContestantCard({
               
               {/* Content area for non-winner cards */}
               <div className="flex-1 p-1 sm:p-2 md:p-3 flex flex-col relative">
-                {/* Voting overlay - shown by default when not voted and not editing, or for unauthenticated users */}
-               {((!isVoted && !isEditing && !showThanks && !isExample) || (!user && !isExample)) && (
+                {/* Voting overlay - shown for not voted users, or for unauthenticated users in THIS WEEK only */}
+               {((!isVoted && !isEditing && !showThanks && !isExample) || (isThisWeek && !user && !isExample)) && (
                   <div className="absolute inset-0 bg-gray-300 rounded-r flex flex-col items-center justify-center gap-3">
                     {/* Show vote text only for non-current week */}
                     {!isThisWeek && (
