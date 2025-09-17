@@ -86,6 +86,7 @@ export function ContestantCard({
   const [user, setUser] = useState<any>(propUser);
   const [dislikesCount, setDislikesCount] = useState<number>(0);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   
   // TEMPORARILY DISABLED LOCAL STATE TO PREVENT RECURSION
   // Local state for immediate rating updates - initialize with static values to prevent recursion
@@ -442,7 +443,7 @@ export function ContestantCard({
              {/* Rating in top right corner - only show for authorized users */}
              {rank > 0 && isVoted && !isExample && user && (
                <div className="absolute top-0 right-0 z-20 flex items-center">
-                 <Popover>
+                 <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
                    <PopoverTrigger asChild>
                      <div className="bg-contest-blue text-white px-2 py-1.5 rounded-bl-lg text-lg font-bold cursor-pointer hover:bg-contest-blue/90 transition-colors">
                        {averageRating > 0 ? averageRating.toFixed(1) : '0.0'}
@@ -455,7 +456,10 @@ export function ContestantCard({
                          `No rating`
                        }{isThisWeek && ` — `}<button 
                          className={`text-contest-blue hover:underline ${!isThisWeek ? 'hidden' : ''}`}
-                         onClick={() => setIsEditing(true)}
+                         onClick={() => {
+                           setIsEditing(true);
+                           setIsPopoverOpen(false);
+                         }}
                        >
                          change
                        </button>
@@ -521,9 +525,9 @@ export function ContestantCard({
               <div className="-translate-x-2 flex items-center gap-6">
                 <span className="text-2xl font-medium text-gray-800 mr-8">Vote</span>
                 <div className="scale-[2]">
-                  <StarRating 
-                    rating={rating}
-                    isVoted={false}
+                   <StarRating 
+                     rating={0}
+                     isVoted={false}
                     variant="white"
                     hideText={true}
                     onRate={(rating) => {
@@ -721,18 +725,18 @@ export function ContestantCard({
         {/* Rating badge in top right corner - show immediately after voting */}
         {isVoted && !isEditing && !showThanks && !isExample && !(isThisWeek && !user) && (
           <div className="absolute top-0 right-0 z-10 flex flex-col items-end">
-            <Popover>
-              <PopoverTrigger asChild>
-                 <div className="bg-contest-blue text-white px-1.5 py-1 rounded-bl-lg text-sm sm:text-base font-bold shadow-sm cursor-pointer hover:bg-contest-blue/90 transition-colors relative">
-                    {isWinner && (
-                      <Crown className="w-4 h-4 text-yellow-400 absolute -top-5 left-1/2 transform -translate-x-1/2" />
-                    )}
-                     {(() => {
-                       // Для всех пользователей (включая админов) показываем средний рейтинг
-                       return averageRating > 0 ? averageRating.toFixed(1) : '0.0';
-                     })()}
-                 </div>
-              </PopoverTrigger>
+             <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
+               <PopoverTrigger asChild>
+                  <div className="bg-contest-blue text-white px-1.5 py-1 rounded-bl-lg text-sm sm:text-base font-bold shadow-sm cursor-pointer hover:bg-contest-blue/90 transition-colors relative">
+                     {isWinner && (
+                       <Crown className="w-4 h-4 text-yellow-400 absolute -top-5 left-1/2 transform -translate-x-1/2" />
+                     )}
+                      {(() => {
+                        // Для всех пользователей (включая админов) показываем средний рейтинг
+                        return averageRating > 0 ? averageRating.toFixed(1) : '0.0';
+                      })()}
+                  </div>
+               </PopoverTrigger>
                 <PopoverContent className="w-auto p-3">
                   <div className="text-sm">
                     {userRating > 0 ? 
@@ -740,13 +744,16 @@ export function ContestantCard({
                       `No rating`
                     }{isThisWeek && ` — `}<button 
                       className={`text-contest-blue hover:underline ${!isThisWeek ? 'hidden' : ''}`}
-                      onClick={() => setIsEditing(true)}
+                      onClick={() => {
+                        setIsEditing(true);
+                        setIsPopoverOpen(false);
+                      }}
                     >
                       change
                     </button>
                   </div>
                 </PopoverContent>
-            </Popover>
+             </Popover>
           </div>
         )}
         
