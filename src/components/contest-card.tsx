@@ -85,13 +85,19 @@ export function ContestantCard({
   const [dislikesCount, setDislikesCount] = useState<number>(0);
   const [isAdmin, setIsAdmin] = useState(false);
   
-  // Local state for immediate rating updates
-  const [localAverageRating, setLocalAverageRating] = useState(averageRating);
-  const [localTotalVotes, setLocalTotalVotes] = useState(totalVotes);
+  // Local state for immediate rating updates - initialize with static values to prevent recursion
+  const [localAverageRating, setLocalAverageRating] = useState(0);
+  const [localTotalVotes, setLocalTotalVotes] = useState(0);
   const [previousUserRating, setPreviousUserRating] = useState(0);
   
-  // Use unified card data hook
+  // Use unified card data hook with stable dependencies
   const { data: cardData, loading: cardDataLoading, refresh: refreshCardData } = useCardData(name, user?.id, profileId);
+  
+  // Sync local state with props only once on mount to prevent recursion
+  useEffect(() => {
+    setLocalAverageRating(averageRating);
+    setLocalTotalVotes(totalVotes);
+  }, []); // Empty dependency array - only run once on mount
 
   // Local state should only be updated through user interactions, not props changes
   // This prevents infinite recursion from prop updates
