@@ -93,11 +93,8 @@ export function ContestantCard({
   // Use unified card data hook
   const { data: cardData, loading: cardDataLoading, refresh: refreshCardData } = useCardData(name, user?.id, profileId);
 
-  // Update local state when props change
-  useEffect(() => {
-    setLocalAverageRating(averageRating);
-    setLocalTotalVotes(totalVotes);
-  }, [averageRating, totalVotes]);
+  // Initialize local state from props only once
+  // Remove problematic useEffect that was causing infinite recursion
 
   // Check if user is admin
   useEffect(() => {
@@ -432,7 +429,7 @@ export function ContestantCard({
       <>
         <Card className={`${isExample ? 'border-yellow-400 border-2 bg-yellow-50/50' : isWinner ? 'bg-blue-50 border-contest-blue border-2' : 'bg-card border-contest-border'} relative overflow-hidden`}>
           {/* Rank number in top left corner - only show if contestant has votes */}
-          {rank > 0 && !isExample && localTotalVotes > 0 && (
+          {rank > 0 && !isExample && totalVotes > 0 && (
             <div className="absolute top-0 left-0 z-20 flex items-center">
               <div className="bg-black/70 text-white px-1 py-0.5 rounded-br text-xs font-bold">
                 {rank}
