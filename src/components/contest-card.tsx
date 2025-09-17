@@ -21,6 +21,8 @@ import { useParticipantData } from "@/hooks/useParticipantData";
 import LoginModalContent from "@/components/login-modal-content";
 import { ShareModal } from "@/components/share-modal";
 import { useShare } from "@/hooks/useShare";
+import { CompactCardLayout } from "@/components/CompactCardLayout";
+import { FullCardLayout } from "@/components/FullCardLayout";
 
 interface ContestantCardProps {
   rank: number;
@@ -769,438 +771,83 @@ export function ContestantCard({
           {/* Winner cards have different layout */}
           {isWinner ? (
             <div className="flex flex-col">
-              {/* Photos row for winner - same as regular cards */}
-              <div className="flex h-36 sm:h-40 md:h-44 gap-px">
-                <div className="relative">
-                  <img 
-                    src={faceImage} 
-                    alt={`${name} face`}
-                    className="w-24 sm:w-28 md:w-32 h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
-                    onClick={() => openModal(0)}
-                  />
-                  {isVoted && !isExample && (
-                    <div className="absolute top-0 left-0 bg-black/70 text-white text-xs font-bold px-1 py-0.5 rounded-br">
-                      {rank > 0 ? rank : '★'}
-                    </div>
-                  )}
-                </div>
-                <div className="relative">
-                  <img 
-                    src={fullBodyImage} 
-                    alt={`${name} full body`}
-                    className="w-24 sm:w-28 md:w-32 h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
-                    onClick={() => openModal(1)}
-                  />
-                  {(additionalPhotos.length > 0 || isWinner) && (
-                    <div 
-                      className="absolute bottom-0.5 right-0.5 bg-black/40 text-white/80 text-xs px-1 py-0.5 rounded cursor-pointer hover:bg-black/60 transition-colors"
-                      onClick={() => openModal(2)}
-                    >
-                      +{additionalPhotos.length + (isWinner ? 2 : 0)}
-                    </div>
-                  )}
-                </div>
-                
-                {/* Content area for winner cards - same as regular cards */}
-                <div className={`flex-1 p-1 sm:p-2 md:p-3 flex flex-col relative ${isWinner ? 'bg-blue-100' : ''}`}>
-                  {/* Voting overlay - shown by default when not voted and not editing */}
-                  {!isVoted && !isEditing && !showThanks && !isExample && (
-                    <div className="absolute inset-0 bg-gray-300 rounded-r flex flex-col items-center justify-center gap-3">
-                      {/* Show only stars for all users in THIS WEEK, full voting UI for other sections */}
-                      {isThisWeek ? (
-                        <div className="scale-[1.5] sm:scale-[1.8]">
-                          <StarRating 
-                            rating={0} 
-                            isVoted={false}
-                            variant="white"
-                            hideText={true}
-                            onRate={(rating) => {
-                              if (!propUser) {
-                                console.log('Unauthenticated user voting in THIS WEEK, showing login modal');
-                                setShowLoginModal(true);
-                              } else {
-                                console.log('Authenticated user voting in THIS WEEK');
-                                handleRate(rating);
-                              }
-                            }}
-                          />
-                        </div>
-                      ) : (
-                        <>
-                          <span className="text-lg sm:text-xl font-medium text-gray-800">Vote</span>
-                          <div className="scale-[1.5] sm:scale-[1.8]">
-                            <StarRating 
-                              rating={0} 
-                              isVoted={false}
-                              variant="white"
-                              hideText={true}
-                              onRate={(rating) => {
-                                console.log('Compact StarRating onRate called with rating:', rating);
-                                console.log('User state:', propUser);
-                                if (!propUser) {
-                                  console.log('Unauthenticated user voting, showing login modal');
-                                  setShowLoginModal(true);
-                                } else {
-                                  handleRate(rating);
-                                }
-                              }}
-                            />
-                          </div>
-                        </>
-                      )}
-                    </div>
-                  )}
-                  
-                  {/* Thank you message - shown for 1 second after voting */}
-                  {showThanks && (
-                    <div className="absolute inset-0 bg-gray-200 rounded-r flex items-center justify-center px-4">
-                      <div className="text-center">
-                        <div className="text-base font-medium text-gray-800 mb-1">Thank you. Rated</div>
-                        <div className="text-xl font-bold text-gray-800">{userRating.toFixed(0)}</div>
-                      </div>
-                    </div>
-                  )}
-                  
-                  {/* Re-voting overlay - shown when editing existing vote */}
-                  {isVoted && isEditing && !showThanks && !isExample && (
-                    <div className="absolute inset-0 bg-gray-300 rounded-r flex flex-col items-center justify-center gap-3">
-                      <span className="text-lg sm:text-xl font-medium text-gray-800">Vote</span>
-                      <div className="scale-[1.5] sm:scale-[1.8]">
-                        <StarRating 
-                          rating={0} 
-                          isVoted={false}
-                          variant="white"
-                          hideText={true}
-                          onRate={(rating) => {
-                            console.log('Compact edit mode StarRating onRate called with rating:', rating);
-                            console.log('User state:', propUser);
-                            if (!propUser) {
-                              setShowLoginModal(true);
-                              return;
-                            }
-                            setUserRating(rating);
-                            localStorage.setItem(`rating-${name}-${propUser.id}`, rating.toString());
-                            setIsEditing(false);
-                            handleRate(rating);
-                          }}
-                        />
-                      </div>
-                    </div>
-                  )}
-                  
-                  {/* Contestant info - shown after voting instead of normal content */}
-                  {isVoted && !isEditing && !showThanks && (
-                    <div className={`absolute inset-0 rounded-r flex flex-col justify-between p-1 sm:p-2 md:p-3 ${isWinner ? 'bg-blue-100' : 'bg-white'}`}>
-                      <div className="flex items-start justify-between">
-                        <div className="min-w-0 flex-1 mr-2">
-                           <h3 className="font-semibold text-contest-text text-base sm:text-lg truncate">{profileId ? (<Link to={`/u/${profileId}`} className="hover:text-primary underline-offset-2 hover:underline">{name}</Link>) : name}</h3>
-                           <div className="text-xs sm:text-sm text-muted-foreground font-normal">{age} yo · {weight} kg · {height} cm</div>
-                           <div className="text-sm sm:text-base text-contest-blue truncate">
-                             {getCountryDisplayName(country)} · {city}
-                           </div>
-                           {isExample && (
-                              <div className="absolute inset-0 bg-yellow-100 border-2 border-yellow-300 rounded-lg flex items-start justify-start z-10 pt-2 pl-2">
-                                <div className="text-left text-gray-800">
-                                  <h4 className="font-bold text-sm mb-1">How your photos should look:</h4>
-                                  <div className="text-xs space-y-0.5">
-                                    <div>• No makeup</div>
-                                    <div>• No filter</div>
-                                    <div>• No photo editing</div>
-                                    <div>• No glasses</div>
-                                    <div>• Tight-fitting clothes</div>
-                                  </div>
-                                </div>
-                              </div>
-                           )}
-                        </div>
-                        
-                        <div className="text-right flex-shrink-0">
-                        </div>
-                      </div>
-                      
-                      {!isExample && !(isThisWeek && !isVoted) && (
-                        <div className="flex items-center justify-end gap-2 sm:gap-4">
-                           <button
-                             type="button"
-                             className={cn(
-                               "inline-flex items-center gap-1 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors",
-                               (isLiked[0] || isLiked[1]) && "text-contest-blue"
-                             )}
-                             onClick={() => handleLike(0)}
-                             aria-label="Like"
-                           >
-                              <ThumbsUp className={cn("w-3.5 h-3.5", (isLiked[0] || isLiked[1]) ? "text-blue-500" : "text-gray-500")} strokeWidth={1} />
-                              <span className={cn("hidden xl:inline", (isLiked[0] || isLiked[1]) ? "text-blue-500" : "text-gray-500")}>Like</span>
-                               <span className={cn((isLiked[0] || isLiked[1]) ? "text-blue-500" : "text-gray-500")}>{cardData.likes}</span>
-                           </button>
-                          {showDislike && (
-                            <button
-                              type="button"
-                              className={cn(
-                                "inline-flex items-center gap-1 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors",
-                                isDisliked && "text-red-500"
-                              )}
-                              onClick={handleDislike}
-                              aria-label="Dislike"
-                            >
-                              <ThumbsDown className="w-3.5 h-3.5" />
-                              <span className="hidden xl:inline">Dislike</span>
-                              <span>{dislikesCount}</span>
-                            </button>
-                          )}
-                           <button
-                             type="button"
-                             className={cn(
-                               "inline-flex items-center gap-1 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors",
-                               hasCommented && "text-contest-blue"
-                             )}
-                             onClick={handleComment}
-                             aria-label="Comments"
-                           >
-                               <MessageCircle className={cn("w-3.5 h-3.5", hasCommented ? "text-contest-blue" : "text-gray-500")} strokeWidth={1} />
-                              <span className="hidden xl:inline">Comment</span>
-                              <span>{cardData.comments}</span>
-                           </button>
-                           <button
-                             type="button"
-                             className="inline-flex items-center gap-1 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors"
-                             onClick={() => openShareModal({
-                               title: `${name} - Beauty Contest`,
-                               url: profileId ? `https://obcface.com/u/${profileId}` : `https://obcface.com`,
-                               description: `Check out ${name}, ${age} from ${city}, ${country} in this beauty contest!`
-                             })}
-                             aria-label="Share"
-                           >
-                             <Share2 className="w-3.5 h-3.5" strokeWidth={1} />
-                             <span className="hidden sm:inline">Share</span>
-                           </button>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                  
-                  {/* Empty space after voting */}
-                  {isVoted && !isEditing && !showThanks && (
-                    <div className="h-full">
-                    </div>
-                  )}
-                </div>
-              </div>
-              
-              {/* No social buttons for winner cards */}
+              <FullCardLayout
+                name={name}
+                age={age}
+                weight={weight}
+                height={height}
+                country={country}
+                city={city}
+                profileId={profileId}
+                faceImage={faceImage}
+                fullBodyImage={fullBodyImage}
+                additionalPhotos={additionalPhotos}
+                isVoted={isVoted}
+                isEditing={isEditing}
+                showThanks={showThanks}
+                isExample={isExample}
+                isThisWeek={isThisWeek}
+                isWinner={isWinner}
+                rank={rank}
+                userRating={userRating}
+                localAverageRating={localAverageRating}
+                isPopoverOpen={isPopoverOpen}
+                setIsPopoverOpen={setIsPopoverOpen}
+                cardData={cardData}
+                isLiked={isLiked}
+                hasCommented={hasCommented}
+                isDisliked={isDisliked}
+                dislikesCount={dislikesCount}
+                showDislike={showDislike}
+                propUser={propUser}
+                openModal={openModal}
+                handleLike={handleLike}
+                handleComment={markAsCommented}
+                handleDislike={handleDislike}
+                openShareModal={openShareModal}
+                handleRate={handleRate}
+                setShowLoginModal={setShowLoginModal}
+                setUserRating={setUserRating}
+                setIsEditing={setIsEditing}
+              />
             </div>
           ) : (
             /* Regular cards layout */
-            <>
-              <div className="relative">
-                <img 
-                  src={faceImage} 
-                  alt={`${name} face`}
-                  className="w-24 sm:w-28 md:w-32 h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
-                  onClick={() => openModal(0)}
-                />
-                {/* Example Badge on photo for compact view */}
-                {isExample && (
-                  <div className="absolute top-0 left-0 bg-yellow-500 text-white px-1 py-0.5 text-xs font-bold">
-                    Example
-                  </div>
-                )}
-                {isVoted && !isExample && (
-                  <div className="absolute top-0 left-0 bg-black/70 text-white text-xs font-bold px-1 py-0.5 rounded-br">
-                    {rank > 0 ? rank : '★'}
-                  </div>
-                )}
-              </div>
-              <div className="relative">
-                <img 
-                  src={fullBodyImage} 
-                  alt={`${name} full body`}
-                  className="w-24 sm:w-28 md:w-32 h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
-                  onClick={() => openModal(1)}
-                />
-                {additionalPhotos.length > 0 && (
-                  <div 
-                    className="absolute bottom-0.5 right-0.5 bg-black/40 text-white/80 text-xs px-1 py-0.5 rounded cursor-pointer hover:bg-black/60 transition-colors"
-                    onClick={() => openModal(2)}
-                  >
-                    +{additionalPhotos.length}
-                  </div>
-                )}
-                {/* Actions for full body photo in compact mode - only show when voted */}
-                {isVoted && !isEditing && !showThanks && additionalPhotos.length > 0 && (
-                  <div className="absolute bottom-0.5 right-0.5 bg-black/40 text-white/80 text-xs px-1 py-0.5 rounded cursor-pointer hover:bg-black/60 transition-colors"
-                    onClick={() => openModal(2)}
-                  >
-                    +{additionalPhotos.length}
-                  </div>
-                )}
-              </div>
-              
-              {/* Content area for non-winner cards */}
-              <div className="flex-1 p-1 sm:p-2 md:p-3 flex flex-col relative">
-                {/* Voting overlay - shown by default when not voted and not editing */}
-               {!isVoted && !isEditing && !showThanks && !isExample && (
-                  <div className="absolute inset-0 bg-gray-300 rounded-r flex flex-col items-center justify-center gap-3">
-                    {/* Show vote text only for non-current week */}
-                    {!isThisWeek && (
-                      <span className="text-lg sm:text-xl font-medium text-gray-800">Vote</span>
-                    )}
-                    {/* Show stars for ALL cards in compact mode */}
-                    <div className="scale-[1.5] sm:scale-[1.8]">
-                      <StarRating 
-                        rating={0} 
-                        isVoted={false}
-                        variant="white"
-                        hideText={true}
-                        onRate={(rating) => {
-                          if (!propUser) {
-                            console.log('Unauthenticated user voting, showing login modal');
-                            setShowLoginModal(true);
-                            return;
-                          }
-                          console.log('Authenticated user voting with rating:', rating);
-                          handleRate(rating);
-                        }}
-                      />
-                    </div>
-                </div>
-              )}
-              
-              {/* Thank you message - shown for 1 second after voting */}
-              {showThanks && (
-                <div className="absolute inset-0 bg-gray-200 rounded-r flex items-center justify-center px-4">
-                  <div className="text-center">
-                    <div className="text-base font-medium text-gray-800 mb-1">Thank you. Rated</div>
-                    <div className="text-xl font-bold text-gray-800">{userRating.toFixed(0)}</div>
-                  </div>
-                </div>
-              )}
-              
-              {/* Re-voting overlay - shown when editing existing vote */}
-              {isVoted && isEditing && !showThanks && !isExample && (
-                <div className="absolute inset-0 bg-gray-300 rounded-r flex flex-col items-center justify-center gap-3">
-                  <span className="text-lg sm:text-xl font-medium text-gray-800">Vote</span>
-                  <div className="scale-[1.5] sm:scale-[1.8]">
-                    <StarRating 
-                      rating={0} 
-                      isVoted={false}
-                      variant="white"
-                      hideText={true}
-                      onRate={(rating) => {
-                        console.log('Compact edit mode StarRating onRate called with rating:', rating);
-                        console.log('User state:', propUser);
-                        if (!propUser) {
-                          setShowLoginModal(true);
-                          return;
-                        }
-                        setUserRating(rating);
-                        localStorage.setItem(`rating-${name}-${propUser.id}`, rating.toString());
-                        setIsEditing(false);
-                        handleRate(rating); // ИСПРАВЛЕНО: вызываем handleRate для сохранения в БД
-                      }}
-                    />
-                  </div>
-                </div>
-              )}
-              
-              {/* Contestant info - shown after voting instead of normal content */}
-              {isVoted && !isEditing && !showThanks && (
-                <div className={`absolute inset-0 rounded-r flex flex-col justify-between p-1 sm:p-2 md:p-3 ${isExample ? 'bg-yellow-100' : 'bg-white'}`}>
-                  <div className="flex items-start justify-between">
-                    {!isExample && (
-                      <div className="min-w-0 flex-1 mr-2">
-                         <h3 className="font-semibold text-contest-text text-base sm:text-lg truncate">{profileId ? (<Link to={`/u/${profileId}`} className="hover:text-primary underline-offset-2 hover:underline">{name}</Link>) : name}</h3>
-                         <div className="text-xs sm:text-sm text-muted-foreground font-normal">{age} yo · {weight} kg · {height} cm</div>
-                         <div className="text-sm sm:text-base text-contest-blue truncate">
-                           {getCountryDisplayName(country)} · {city}
-                         </div>
-                      </div>
-                    )}
-                    
-                    {/* Example bullet points - positioned to the right for compact example cards */}
-                    {isExample && (
-                      <div className="flex-1 flex items-center justify-start pl-2">
-                        <div className="text-xs text-gray-700 space-y-1">
-                          <div className="font-bold mb-2">Photo Requirements</div>
-                          <div>• Portrait and whole body</div>
-                          <div>• No makeup, no filters</div>
-                          <div>• Wear tight/fitted clothes.</div>
-                          <div>• No dresses, glasses</div>
-                        </div>
-                      </div>
-                    )}
-                    
-                    {!isExample && (
-                      <div className="text-right flex-shrink-0">
-                      </div>
-                    )}
-                  </div>
-                  
-                  {!isExample && (
-                    <div className="flex items-center justify-end gap-2 sm:gap-4">
-                       <button
-                         type="button"
-                         className={cn(
-                           "inline-flex items-center gap-1 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors",
-                           (isLiked[0] || isLiked[1]) && "text-contest-blue"
-                         )}
-                         onClick={() => handleLike(0)}
-                         aria-label="Like"
-                       >
-                          <ThumbsUp className={cn("w-3.5 h-3.5", (isLiked[0] || isLiked[1]) ? "text-blue-500" : "text-gray-500")} strokeWidth={1} />
-                          <span className={cn("hidden xl:inline", (isLiked[0] || isLiked[1]) ? "text-blue-500" : "text-gray-500")}>Like</span>
-                           <span className={cn((isLiked[0] || isLiked[1]) ? "text-blue-500" : "text-gray-500")}>{cardData.likes}</span>
-                       </button>
-                      {showDislike && (
-                        <button
-                          type="button"
-                          className={cn(
-                            "inline-flex items-center gap-1 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors",
-                            isDisliked && "text-red-500"
-                          )}
-                          onClick={handleDislike}
-                          aria-label="Dislike"
-                        >
-                          <ThumbsDown className="w-3.5 h-3.5" />
-                          <span className="hidden xl:inline">Dislike</span>
-                          <span>{dislikesCount}</span>
-                        </button>
-                      )}
-                       <button
-                         type="button"
-                         className={cn(
-                           "inline-flex items-center gap-1 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors",
-                           hasCommented && "text-contest-blue"
-                         )}
-                         onClick={handleComment}
-                         aria-label="Comments"
-                       >
-                          <MessageCircle className={cn("w-3.5 h-3.5", hasCommented ? "text-contest-blue" : "text-gray-500")} strokeWidth={1} />
-                          <span className="hidden xl:inline">Comment</span>
-                          <span>{cardData.comments}</span>
-                       </button>
-                       <button
-                         type="button"
-                         className="inline-flex items-center gap-1 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors"
-                         onClick={() => openShareModal({
-                           title: `${name} - Beauty Contest`,
-                           url: profileId ? `https://obcface.com/u/${profileId}` : `https://obcface.com`,
-                           description: `Check out ${name}, ${age} from ${city}, ${country} in this beauty contest!`
-                         })}
-                         aria-label="Share"
-                       >
-                         <Share2 className="w-3.5 h-3.5" strokeWidth={1} />
-                         <span className="hidden sm:inline">Share</span>
-                       </button>
-                    </div>
-                  )}
-                </div>
-              )}
-              
-              {/* Normal content - completely hidden, not used anymore */}
-              <div className="hidden"></div>
-              </div>
-            </>
+            <CompactCardLayout
+              name={name}
+              age={age}
+              weight={weight}
+              height={height}
+              country={country}
+              city={city}
+              profileId={profileId}
+              faceImage={faceImage}
+              fullBodyImage={fullBodyImage}
+              additionalPhotos={additionalPhotos}
+              isVoted={isVoted}
+              isEditing={isEditing}
+              showThanks={showThanks}
+              isExample={isExample}
+              isThisWeek={isThisWeek}
+              rank={rank}
+              userRating={userRating}
+              cardData={cardData}
+              isLiked={isLiked}
+              hasCommented={hasCommented}
+              isDisliked={isDisliked}
+              dislikesCount={dislikesCount}
+              showDislike={showDislike}
+              propUser={propUser}
+              openModal={openModal}
+              handleLike={handleLike}
+              handleComment={markAsCommented}
+              handleDislike={handleDislike}
+              openShareModal={openShareModal}
+              handleRate={handleRate}
+              setShowLoginModal={setShowLoginModal}
+              setUserRating={setUserRating}
+              setIsEditing={setIsEditing}
+            />
           )}
         </div>
         
