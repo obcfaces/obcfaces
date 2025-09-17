@@ -806,7 +806,12 @@ export function ContestantCard({
                               onRate={(rating) => {
                                 console.log('Compact StarRating onRate called with rating:', rating);
                                 console.log('User state:', user);
-                                handleRate(rating);
+                                if (!user) {
+                                  console.log('Unauthenticated user voting, showing login modal');
+                                  setShowLoginModal(true);
+                                } else {
+                                  handleRate(rating);
+                                }
                               }}
                             />
                           </div>
