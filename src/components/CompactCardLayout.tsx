@@ -88,6 +88,17 @@ export function CompactCardLayout({
   setUserRating,
   setIsEditing
 }: CompactCardLayoutProps) {
+  // Debug specifically for winner cards
+  if (isWinner) {
+    console.log(`🏆 WINNER CARD DEBUG - ${name}:`, {
+      isVoted,
+      isEditing, 
+      showThanks,
+      propUser: !!propUser,
+      isThisWeek,
+      isExample
+    });
+  }
   return (
     <>
       <div className="relative">
