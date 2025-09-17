@@ -88,17 +88,6 @@ export function CompactCardLayout({
   setUserRating,
   setIsEditing
 }: CompactCardLayoutProps) {
-  // Debug specifically for winner cards
-  if (isWinner) {
-    console.log(`🏆 WINNER CARD DEBUG - ${name}:`, {
-      isVoted,
-      isEditing, 
-      showThanks,
-      propUser: !!propUser,
-      isThisWeek,
-      isExample
-    });
-  }
   return (
     <>
       <div className="relative">
@@ -155,8 +144,8 @@ export function CompactCardLayout({
           compact={true}
         />
         
-        {/* Contestant info - shown after voting OR for unauthenticated users in past weeks */}
-        {((isVoted && !isEditing && !showThanks) || (!propUser && !isThisWeek)) && (
+        {/* Contestant info - for unauthenticated users in past weeks, always show */}
+        {(!propUser && !isThisWeek) && (
           <div className={`absolute inset-0 rounded-r flex flex-col justify-between p-1 sm:p-2 md:p-3 ${isExample ? 'bg-yellow-100' : 'bg-white'}`}>
             <div className="flex items-start justify-between">
               {!isExample && (
