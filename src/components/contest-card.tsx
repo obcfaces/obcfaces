@@ -707,11 +707,10 @@ export function ContestantCard({
                     {isWinner && (
                       <Crown className="w-4 h-4 text-yellow-400 absolute -top-5 left-1/2 transform -translate-x-1/2" />
                     )}
-                    {(() => {
-                      console.log('Compact rating display - isAdmin:', isAdmin, 'userRating:', userRating, 'localAverageRating:', localAverageRating);
-                      // Для всех пользователей (включая админов) показываем средний рейтинг
-                      return localAverageRating > 0 ? localAverageRating.toFixed(1) : '0.0';
-                    })()}
+                     {(() => {
+                       // Для всех пользователей (включая админов) показываем средний рейтинг
+                       return localAverageRating > 0 ? localAverageRating.toFixed(1) : '0.0';
+                     })()}
                  </div>
               </PopoverTrigger>
                <PopoverContent className="w-auto p-3">
