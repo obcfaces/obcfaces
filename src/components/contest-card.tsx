@@ -88,11 +88,10 @@ export function ContestantCard({
   const [isAdmin, setIsAdmin] = useState(false);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   
-  // TEMPORARILY DISABLED LOCAL STATE TO PREVENT RECURSION
-  // Local state for immediate rating updates - initialize with static values to prevent recursion
-  // const [localAverageRating, setLocalAverageRating] = useState(0);
-  // const [localTotalVotes, setLocalTotalVotes] = useState(0);
-  // const [previousUserRating, setPreviousUserRating] = useState(0);
+  // Local state for immediate rating updates
+  const [localAverageRating, setLocalAverageRating] = useState(averageRating);
+  const [localTotalVotes, setLocalTotalVotes] = useState(totalVotes);
+  const [previousUserRating, setPreviousUserRating] = useState(0);
   
   // TEMPORARILY DISABLED - Use unified card data hook with stable dependencies
   // const { data: cardData, loading: cardDataLoading, refresh: refreshCardData } = useCardData(name, user?.id, profileId);
@@ -100,6 +99,12 @@ export function ContestantCard({
   // Mock cardData to prevent build errors while debugging
   const cardData = { likes: 0, comments: 0, isLiked: false, hasCommented: false };
   const cardDataLoading = false;
+
+  // Initialize local state when props change
+  useEffect(() => {
+    setLocalAverageRating(averageRating);
+    setLocalTotalVotes(totalVotes);
+  }, [averageRating, totalVotes]);
   const refreshCardData = () => {};
   
   // TEMPORARILY DISABLED ALL EFFECTS AND PROP SYNC TO STOP RECURSION
@@ -343,10 +348,20 @@ export function ContestantCard({
     setUserRating(rating);
     setIsVoted(true);
     
+    // Calculate new average rating immediately
+    const newTotalVotes = previousUserRating === 0 ? localTotalVotes + 1 : localTotalVotes;
+    const newSum = (localAverageRating * localTotalVotes) - previousUserRating + rating;
+    const newAverageRating = newTotalVotes > 0 ? newSum / newTotalVotes : 0;
+    
+    setLocalAverageRating(newAverageRating);
+    setLocalTotalVotes(newTotalVotes);
+    setPreviousUserRating(rating);
+    
     // Show thanks message briefly
     setShowThanks(true);
     setTimeout(() => {
       setShowThanks(false);
+      setIsEditing(false); // Exit editing mode after rating
     }, 1500);
     
     try {
@@ -446,7 +461,7 @@ export function ContestantCard({
                  <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
                    <PopoverTrigger asChild>
                      <div className="bg-contest-blue text-white px-2 py-1.5 rounded-bl-lg text-lg font-bold cursor-pointer hover:bg-contest-blue/90 transition-colors">
-                       {averageRating > 0 ? averageRating.toFixed(1) : '0.0'}
+                       {localAverageRating > 0 ? localAverageRating.toFixed(1) : '0.0'}
                      </div>
                    </PopoverTrigger>
                    <PopoverContent className="w-auto p-3">
@@ -722,7 +737,7 @@ export function ContestantCard({
           </div>
         )}
         
-        {/* Rating badge in top right corner - show immediately after voting */}
+        {/* Rating badge in top right corner - show immediately after voting - hide when editing in full cards */}
         {isVoted && !isEditing && !showThanks && !isExample && !(isThisWeek && !user) && (
           <div className="absolute top-0 right-0 z-10 flex flex-col items-end">
              <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
@@ -733,7 +748,7 @@ export function ContestantCard({
                      )}
                       {(() => {
                         // Для всех пользователей (включая админов) показываем средний рейтинг
-                        return averageRating > 0 ? averageRating.toFixed(1) : '0.0';
+                        return localAverageRating > 0 ? localAverageRating.toFixed(1) : '0.0';
                       })()}
                   </div>
                </PopoverTrigger>
