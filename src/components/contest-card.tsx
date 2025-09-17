@@ -46,6 +46,7 @@ interface ContestantCardProps {
   totalVotes?: number; // Add total votes prop
   isExample?: boolean; // Add example flag prop
   isThisWeek?: boolean; // Add prop to identify THIS WEEK contests
+  user?: any; // Add user prop to avoid individual auth calls
 }
 
 export function ContestantCard({
@@ -71,7 +72,8 @@ export function ContestantCard({
   averageRating = 0,
   totalVotes = 0,
   isExample = false,
-  isThisWeek = false
+  isThisWeek = false,
+  user: propUser
 }: ContestantCardProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalStartIndex, setModalStartIndex] = useState(0);
@@ -81,7 +83,7 @@ export function ContestantCard({
   const [isLiked, setIsLiked] = useState<boolean[]>([false, false]);
   const [isDisliked, setIsDisliked] = useState(false);
   const [hasCommented, setHasCommented] = useState(false);
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<any>(propUser);
   const [dislikesCount, setDislikesCount] = useState<number>(0);
   const [isAdmin, setIsAdmin] = useState(false);
   
@@ -161,14 +163,10 @@ export function ContestantCard({
   const [showLoginModal, setShowLoginModal] = useState(false);
   const { isShareModalOpen, shareData, openShareModal, closeShareModal } = useShare();
 
-  // Get user from session once on mount - no auth state listener needed
+  // Update user state when prop changes
   useEffect(() => {
-    const getCurrentUser = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      setUser(session?.user ?? null);
-    };
-    getCurrentUser();
-  }, []);
+    setUser(propUser);
+  }, [propUser]);
 
   // Login modal removed auto-close
 
