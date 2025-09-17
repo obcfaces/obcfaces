@@ -872,21 +872,21 @@ export function ContestantCard({
                         </div>
                       </div>
                       
-                  {!isExample && !(isThisWeek && !isVoted) && user && (
-                    <div className="flex items-center justify-end gap-2 sm:gap-4">
-                       <button
-                         type="button"
-                         className={cn(
-                           "inline-flex items-center gap-1 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors",
-                           (isLiked[0] || isLiked[1]) && "text-contest-blue"
-                         )}
-                         onClick={() => handleLike(0)}
-                         aria-label="Like"
-                       >
-                          <ThumbsUp className={cn("w-3.5 h-3.5", (isLiked[0] || isLiked[1]) ? "text-blue-500" : "text-gray-500")} strokeWidth={1} />
-                          <span className={cn("hidden xl:inline", (isLiked[0] || isLiked[1]) ? "text-blue-500" : "text-gray-500")}>Like</span>
-                           <span className={cn((isLiked[0] || isLiked[1]) ? "text-blue-500" : "text-gray-500")}>{cardData.likes}</span>
-                       </button>
+                      {!isExample && !(isThisWeek && !isVoted) && (
+                        <div className="flex items-center justify-end gap-2 sm:gap-4">
+                           <button
+                             type="button"
+                             className={cn(
+                               "inline-flex items-center gap-1 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors",
+                               (isLiked[0] || isLiked[1]) && "text-contest-blue"
+                             )}
+                             onClick={() => handleLike(0)}
+                             aria-label="Like"
+                           >
+                              <ThumbsUp className={cn("w-3.5 h-3.5", (isLiked[0] || isLiked[1]) ? "text-blue-500" : "text-gray-500")} strokeWidth={1} />
+                              <span className={cn("hidden xl:inline", (isLiked[0] || isLiked[1]) ? "text-blue-500" : "text-gray-500")}>Like</span>
+                               <span className={cn((isLiked[0] || isLiked[1]) ? "text-blue-500" : "text-gray-500")}>{cardData.likes}</span>
+                           </button>
                           {showDislike && (
                             <button
                               type="button"
@@ -1105,7 +1105,7 @@ export function ContestantCard({
                     )}
                   </div>
                   
-                  {!isExample && user && (
+                  {!isExample && (
                     <div className="flex items-center justify-end gap-2 sm:gap-4">
                        <button
                          type="button"
@@ -1163,33 +1163,7 @@ export function ContestantCard({
                        </button>
                     </div>
                   )}
-                  
-                  {/* Stars for non-authenticated users in this week section */}
-                  {!isExample && isThisWeek && !user && (
-                    <div className="flex items-center justify-center">
-                      <StarRating 
-                        rating={0} 
-                        isVoted={false}
-                        onRate={(rating) => {
-                          setShowLoginModal(true);
-                        }}
-                      />
-                     </div>
-                   )}
-                   
-                   {/* Stars for non-authenticated users */}
-                   {!isExample && !user && (
-                     <div className="flex items-center justify-center">
-                       <StarRating 
-                         rating={0} 
-                         isVoted={false}
-                         onRate={(rating) => {
-                           setShowLoginModal(true);
-                         }}
-                       />
-                     </div>
-                   )}
-                 </div>
+                </div>
               )}
               
               {/* Normal content - completely hidden, not used anymore */}
