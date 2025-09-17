@@ -65,6 +65,16 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
   const [realContestants, setRealContestants] = useState<any[]>([]);
   const [contestants, setContestants] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [user, setUser] = useState<any>(null);
+
+  // Get user session once for the entire section
+  useEffect(() => {
+    const getCurrentUser = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setUser(session?.user ?? null);
+    };
+    getCurrentUser();
+  }, []);
 
   const loadContestParticipants = async (weekOffset: number = 0) => {
     try {
@@ -414,6 +424,7 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
                     viewMode={viewMode}
                     onRate={(rating) => handleRate(contestant.rank, rating)}
                     isThisWeek={title === "THIS WEEK"}
+                    user={user}
                   />
                 ))}
               </div>
@@ -437,6 +448,7 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
                   viewMode={viewMode}
                   onRate={(rating) => handleRate(contestant.rank, rating)}
                   isThisWeek={title === "THIS WEEK"}
+                  user={user}
                 />
               ))}
             </div>
