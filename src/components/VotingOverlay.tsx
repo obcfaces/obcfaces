@@ -34,7 +34,13 @@ export function VotingOverlay({
   
   // ТОЧНАЯ КОПИЯ ЛОГИКИ ПОЛНОГО РЕЖИМА + дополнительное условие для компактного режима  
   // Voting overlay - shown by default when not voted and not editing, OR for unauthenticated users in THIS WEEK for compact mode
-  if ((!isVoted && !isEditing && !showThanks && !isExample) || (compact && isThisWeek && !propUser && !isExample)) {
+  
+  console.log('VotingOverlay render check:', {
+    isVoted, isEditing, showThanks, isExample, isThisWeek, hasUser: !!propUser, compact, name
+  });
+  
+  // ПОЛНОСТЬЮ УБИРАЕМ РАЗЛИЧИЯ - ДЕЛАЕМ ТОЧНО КАК В ПОЛНОМ РЕЖИМЕ
+  if (!isVoted && !isEditing && !showThanks && !isExample) {
     return (
       <div className="absolute inset-0 bg-gray-300 rounded-r flex flex-col items-center justify-center gap-3">
         {/* Show only stars for all users in THIS WEEK, full voting UI for other sections */}
