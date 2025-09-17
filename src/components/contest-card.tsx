@@ -460,24 +460,43 @@ export function ContestantCard({
           
           {/* Header with content or voting overlay */}
           <div className="relative px-6 py-3 border-b border-contest-border h-[80px]">
-            {/* Default content - name and rating info */}
-            {!isEditing && !showThanks && (
-              <div className="flex items-center justify-between h-full">
-                <div>
-                  <h3 className="text-xl font-semibold text-contest-text">
-                    {profileId ? (
-                      <Link to={`/u/${profileId}`} className="hover:text-primary underline-offset-2 hover:underline">
-                        {name}
-                      </Link>
-                    ) : name}
-                  </h3>
-                  <div className="text-sm text-muted-foreground">
-                    {age} yo · {weight} kg · {height} cm
+            {/* Show different content based on user auth status and contest type */}
+            {isThisWeek && !user ? (
+              /* Unauthorized users in THIS WEEK section only see voting */
+              <div className="flex items-center justify-center h-full">
+                <div className="flex items-center gap-6">
+                  <span className="text-lg font-medium text-gray-800">Rate this contestant</span>
+                  <div className="scale-125">
+                    <StarRating 
+                      rating={userRating}
+                      isVoted={false}
+                      onRate={handleRate}
+                      readonly={false}
+                      hideText={true}
+                    />
                   </div>
-                  <div className="text-contest-blue text-sm">{getCountryDisplayName(country)} · {city}</div>
                 </div>
-                {/* Remove rating display from header since it's now in corner */}
               </div>
+            ) : (
+              /* Authorized users or non-THIS WEEK sections see full content */
+              !isEditing && !showThanks && (
+                <div className="flex items-center justify-between h-full">
+                  <div>
+                    <h3 className="text-xl font-semibold text-contest-text">
+                      {profileId ? (
+                        <Link to={`/u/${profileId}`} className="hover:text-primary underline-offset-2 hover:underline">
+                          {name}
+                        </Link>
+                      ) : name}
+                    </h3>
+                    <div className="text-sm text-muted-foreground">
+                      {age} yo · {weight} kg · {height} cm
+                    </div>
+                    <div className="text-contest-blue text-sm">{getCountryDisplayName(country)} · {city}</div>
+                  </div>
+                  {/* Remove rating display from header since it's now in corner */}
+                </div>
+              )
             )}
             
             {/* Thank you message - shown for 1 second after voting */}
