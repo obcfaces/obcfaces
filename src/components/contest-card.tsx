@@ -102,11 +102,17 @@ export function ContestantCard({
   const cardData = { likes: 0, comments: 0, isLiked: false, hasCommented: false };
   const cardDataLoading = false;
 
-  // Initialize local state when props change
+  // TEMPORARILY DISABLED - Initialize local state when props change (was causing recursion)
+  // useEffect(() => {
+  //   setLocalAverageRating(averageRating);
+  //   setLocalTotalVotes(totalVotes);
+  // }, [averageRating, totalVotes]);
+  
+  // Initialize once on mount instead
   useEffect(() => {
     setLocalAverageRating(averageRating);
     setLocalTotalVotes(totalVotes);
-  }, [averageRating, totalVotes]);
+  }, []); // Empty dependency array
   const refreshCardData = () => {};
   
   // TEMPORARILY DISABLED ALL EFFECTS AND PROP SYNC TO STOP RECURSION
@@ -319,7 +325,7 @@ export function ContestantCard({
   };
 
   const handleRate = async (rating: number) => {
-    console.log('handleRate called with:', { rating, name, userId: propUser?.id, profileId });
+    console.log('handleRate called with:', { rating, name, userId: propUser?.id, profileId, timestamp: Date.now() });
     
     if (!propUser) {
       setShowLoginModal(true);
