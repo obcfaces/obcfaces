@@ -75,6 +75,9 @@ export function ContestantCard({
   isThisWeek = false,
   user: propUser
 }: ContestantCardProps) {
+  // Add debug logging to track excessive re-renders
+  console.log(`ContestantCard rendering: ${name} at ${Date.now()}`);
+  
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalStartIndex, setModalStartIndex] = useState(0);
   const [isEditing, setIsEditing] = useState(false);
@@ -88,9 +91,9 @@ export function ContestantCard({
   const [isAdmin, setIsAdmin] = useState(false);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   
-  // Local state for immediate rating updates
-  const [localAverageRating, setLocalAverageRating] = useState(averageRating);
-  const [localTotalVotes, setLocalTotalVotes] = useState(totalVotes);
+  // Initialize local state directly from props (no useEffect needed)
+  const [localAverageRating, setLocalAverageRating] = useState(averageRating || 0);
+  const [localTotalVotes, setLocalTotalVotes] = useState(totalVotes || 0);
   const [previousUserRating, setPreviousUserRating] = useState(0);
   
   // TEMPORARILY DISABLED - Use unified card data hook with stable dependencies
@@ -106,22 +109,11 @@ export function ContestantCard({
   //   setLocalTotalVotes(totalVotes);
   // }, [averageRating, totalVotes]);
   
-  // Initialize once on mount instead
-  useEffect(() => {
-    setLocalAverageRating(averageRating);
-    setLocalTotalVotes(totalVotes);
-  }, []); // Empty dependency array
+  // Initialize local state directly from props to prevent useEffect recursion
   const refreshCardData = () => {};
   
-  // TEMPORARILY DISABLED ALL EFFECTS AND PROP SYNC TO STOP RECURSION
-  // Sync local state with props only once on mount to prevent recursion
-  // useEffect(() => {
-  //   setLocalAverageRating(averageRating);
-  //   setLocalTotalVotes(totalVotes);
-  // }, []); // Empty dependency array - only run once on mount
-
-  // Local state should only be updated through user interactions, not props changes
-  // This prevents infinite recursion from prop updates
+  // REMOVED ALL USEEFFECTS THAT SYNC WITH PROPS TO PREVENT RECURSION
+  // State is now initialized directly from props and only updated through user interactions
 
   // TEMPORARILY DISABLED - Check if user is admin
   // useEffect(() => {
