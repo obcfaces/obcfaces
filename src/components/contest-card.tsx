@@ -21,8 +21,6 @@ import { useParticipantData } from "@/hooks/useParticipantData";
 import LoginModalContent from "@/components/login-modal-content";
 import { ShareModal } from "@/components/share-modal";
 import { useShare } from "@/hooks/useShare";
-import { CompactCardLayout } from "@/components/CompactCardLayout";
-import { FullCardLayout } from "@/components/FullCardLayout";
 
 interface ContestantCardProps {
   rank: number;
@@ -777,83 +775,120 @@ export function ContestantCard({
           {/* Winner cards have different layout */}
           {isWinner ? (
             <div className="flex flex-col">
-              <FullCardLayout
-                name={name}
-                age={age}
-                weight={weight}
-                height={height}
-                country={country}
-                city={city}
-                profileId={profileId}
-                faceImage={faceImage}
-                fullBodyImage={fullBodyImage}
-                additionalPhotos={additionalPhotos}
-                isVoted={isVoted}
-                isEditing={isEditing}
-                showThanks={showThanks}
-                isExample={isExample}
-                isThisWeek={isThisWeek}
-                isWinner={isWinner}
-                rank={rank}
-                userRating={userRating}
-                localAverageRating={localAverageRating}
-                isPopoverOpen={isPopoverOpen}
-                setIsPopoverOpen={setIsPopoverOpen}
-                cardData={cardData}
-                isLiked={isLiked}
-                hasCommented={hasCommented}
-                isDisliked={isDisliked}
-                dislikesCount={dislikesCount}
-                showDislike={showDislike}
-                propUser={propUser}
-                openModal={openModal}
-                handleLike={handleLike}
-                handleComment={markAsCommented}
-                handleDislike={handleDislike}
-                openShareModal={openShareModal}
-                handleRate={handleRate}
-                setShowLoginModal={setShowLoginModal}
-                setUserRating={setUserRating}
-                setIsEditing={setIsEditing}
-              />
+              {/* Photos row for winner - same as regular cards */}
+              <div className="flex h-36 sm:h-40 md:h-44 gap-px">
+                <div className="relative">
+                  <img 
+                    src={faceImage} 
+                    alt={`${name} face`}
+                    className="w-24 sm:w-28 md:w-32 h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                    onClick={() => openModal(0)}
+                  />
+                  {isVoted && !isExample && (
+                    <div className="absolute top-0 left-0 bg-black/70 text-white text-xs font-bold px-1 py-0.5 rounded-br">
+                      {rank > 0 ? rank : '★'}
+                    </div>
+                  )}
+                </div>
+                <div className="relative">
+                  <img 
+                    src={fullBodyImage} 
+                    alt={`${name} full body`}
+                    className="w-24 sm:w-28 md:w-32 h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                    onClick={() => openModal(1)}
+                  />
+                  {(additionalPhotos.length > 0 || isWinner) && (
+                    <div 
+                      className="absolute bottom-0.5 right-0.5 bg-black/40 text-white/80 text-xs px-1 py-0.5 rounded cursor-pointer hover:bg-black/60 transition-colors"
+                      onClick={() => openModal(2)}
+                    >
+                      +{additionalPhotos.length + (isWinner ? 2 : 0)}
+                    </div>
+                  )}
+                </div>
+                
+                {/* Content area for winner cards - same logic for all modes */}
+                <div className={`flex-1 p-1 sm:p-2 md:p-3 flex flex-col relative ${isWinner ? 'bg-blue-100' : ''}`}>
+                  {/* Voting overlay - UNIFIED LOGIC FOR ALL MODES */}
+                  {!isVoted && !isEditing && !showThanks && !isExample && (
+                    <div className="absolute inset-0 bg-gray-300 rounded-r flex flex-col items-center justify-center gap-3">
+                      <div className="scale-[1.5] sm:scale-[1.8]">
+                        <StarRating 
+                          rating={0} 
+                          isVoted={false}
+                          variant="white"
+                          hideText={true}
+                          onRate={(rating) => {
+                            if (!propUser) {
+                              setShowLoginModal(true);
+                            } else {
+                              handleRate(rating);
+                            }
+                          }}
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
           ) : (
-            /* Regular cards layout */
-            <CompactCardLayout
-              name={name}
-              age={age}
-              weight={weight}
-              height={height}
-              country={country}
-              city={city}
-              profileId={profileId}
-              faceImage={faceImage}
-              fullBodyImage={fullBodyImage}
-              additionalPhotos={additionalPhotos}
-              isVoted={isVoted}
-              isEditing={isEditing}
-              showThanks={showThanks}
-              isExample={isExample}
-              isThisWeek={isThisWeek}
-              rank={rank}
-              userRating={userRating}
-              cardData={cardData}
-              isLiked={isLiked}
-              hasCommented={hasCommented}
-              isDisliked={isDisliked}
-              dislikesCount={dislikesCount}
-              showDislike={showDislike}
-              propUser={propUser}
-              openModal={openModal}
-              handleLike={handleLike}
-              handleComment={markAsCommented}
-              handleDislike={handleDislike}
-              openShareModal={openShareModal}
-              handleRate={handleRate}
-              setShowLoginModal={setShowLoginModal}
-              setUserRating={setUserRating}
-              setIsEditing={setIsEditing}
-            />
+            /* Regular compact cards layout */
+            <>
+              <div className="relative">
+                <img 
+                  src={faceImage} 
+                  alt={`${name} face`}
+                  className="w-24 sm:w-28 md:w-32 h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                  onClick={() => openModal(0)}
+                />
+                {isVoted && !isExample && (
+                  <div className="absolute top-0 left-0 bg-black/70 text-white text-xs font-bold px-1 py-0.5 rounded-br">
+                    {rank > 0 ? rank : '★'}
+                  </div>
+                )}
+              </div>
+              <div className="relative">
+                <img 
+                  src={fullBodyImage} 
+                  alt={`${name} full body`}
+                  className="w-24 sm:w-28 md:w-32 h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                  onClick={() => openModal(1)}
+                />
+                {additionalPhotos.length > 0 && (
+                  <div 
+                    className="absolute bottom-0.5 right-0.5 bg-black/40 text-white/80 text-xs px-1 py-0.5 rounded cursor-pointer hover:bg-black/60 transition-colors"
+                    onClick={() => openModal(2)}
+                  >
+                    +{additionalPhotos.length}
+                  </div>
+                )}
+              </div>
+              
+              {/* Content area - SAME UNIFIED LOGIC */}
+              <div className="flex-1 p-1 sm:p-2 md:p-3 flex flex-col relative">
+                {/* Voting overlay - UNIFIED LOGIC FOR ALL MODES */}
+                {!isVoted && !isEditing && !showThanks && !isExample && (
+                  <div className="absolute inset-0 bg-gray-300 rounded-r flex flex-col items-center justify-center gap-3">
+                    <div className="scale-[1.5] sm:scale-[1.8]">
+                      <StarRating 
+                        rating={0} 
+                        isVoted={false}
+                        variant="white"
+                        hideText={true}
+                        onRate={(rating) => {
+                          if (!propUser) {
+                            setShowLoginModal(true);
+                          } else {
+                            handleRate(rating);
+                          }
+                        }}
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+            </>
           )}
         </div>
         
