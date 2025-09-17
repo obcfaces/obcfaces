@@ -462,12 +462,19 @@ export function ContestantCard({
           <div className="relative px-6 py-3 border-b border-contest-border h-[80px]">
             {/* Show different content based on user auth status and contest type */}
             {(() => {
-              console.log('Contest Card Debug:', { isThisWeek, user: !!user, name, userRating });
+              console.log('Contest Card Debug:', { 
+                isThisWeek, 
+                user: !!user, 
+                name, 
+                userRating,
+                condition: isThisWeek && !user,
+                showingStars: isThisWeek && !user
+              });
               return null;
             })()}
             {isThisWeek && !user ? (
               /* Unauthorized users in THIS WEEK section only see voting */
-              <div className="flex items-center justify-center h-full">
+              <div className="flex items-center justify-center h-full bg-yellow-100 border-2 border-yellow-400">
                 <div className="flex items-center gap-6">
                   <span className="text-lg font-medium text-gray-800">Rate this contestant</span>
                   <div className="scale-125">
@@ -481,7 +488,7 @@ export function ContestantCard({
                   </div>
                 </div>
                 {/* Debug info in UI */}
-                <div className="absolute bottom-0 left-0 text-xs bg-red-100 p-1">
+                <div className="absolute bottom-0 left-0 text-xs bg-red-100 p-1 z-30">
                   Debug: user={user ? 'YES' : 'NO'}, thisWeek={isThisWeek ? 'YES' : 'NO'}
                 </div>
               </div>
