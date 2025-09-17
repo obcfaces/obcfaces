@@ -201,6 +201,17 @@ export function ContestantCard({
     }
   };
 
+  // Load user's existing rating when user changes
+  useEffect(() => {
+    if (propUser?.id && profileId) {
+      loadUserExistingRating(propUser.id);
+    } else {
+      // Reset rating if no user
+      setUserRating(0);
+      setIsVoted(false);
+    }
+  }, [propUser?.id, profileId, name]);
+
   // Login modal removed auto-close
 
   // TEMPORARILY DISABLED - Load user voting status and setup dislikes - only run when we have a stable user
