@@ -693,7 +693,7 @@ export function ContestantCard({
         )}
         
         {/* Rating badge in top right corner - hidden for example cards */}
-        {isVoted && !isEditing && !showThanks && rank > 0 && !isExample && (
+        {isVoted && !isEditing && !showThanks && rank > 0 && !isExample && !(isThisWeek && !user) && (
           <div className="absolute top-0 right-0 z-10 flex flex-col items-end">
             <Popover>
               <PopoverTrigger asChild>
@@ -994,7 +994,7 @@ export function ContestantCard({
               {/* Content area for non-winner cards */}
               <div className="flex-1 p-1 sm:p-2 md:p-3 flex flex-col relative">
                {/* Voting overlay - shown by default when not voted and not editing */}
-               {((!isVoted && !isEditing && !showThanks && !isExample) || (isThisWeek && !user && !isExample)) && (
+               {((!isVoted && !isEditing && !showThanks && !isExample) || (isThisWeek && !user && !isExample && !isVoted)) && (
                  <div className="absolute inset-0 bg-gray-300 rounded-r flex flex-col items-center justify-center gap-3">
                    {/* Show stars for ALL cards in compact mode */}
                    {isThisWeek ? (
