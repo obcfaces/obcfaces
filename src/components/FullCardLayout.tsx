@@ -182,7 +182,6 @@ export function FullCardLayout({
             isExample={isExample}
             propUser={propUser}
             userRating={userRating}
-            onRate={handleRate}
             setShowLoginModal={setShowLoginModal}
             setUserRating={setUserRating}
             setIsEditing={setIsEditing}
