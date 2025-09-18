@@ -421,44 +421,24 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
         </div>
       ) : (
         <div className="px-0 sm:px-6">
-          {/* Test/Example card */}
-          {contestants.some(c => c.isExample) && (
-            <>
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-1 sm:gap-3 max-w-full overflow-hidden mb-6">
-                 {contestants.filter(c => c.isExample).map((contestant) => (
-                  <ContestantCard
-                    key={contestant.rank}
-                    {...contestant}
-                    viewMode={viewMode}
-                    onRate={(rating) => handleRate(contestant.rank, rating)}
-                    isThisWeek={title === "THIS WEEK"}
-                    user={user}
-                  />
-                ))}
-              </div>
-              {title === "THIS WEEK" && (
-                <div className="mb-12 px-6">
-                  <p className="text-muted-foreground italic text-center">
-                    The winner of the week is the one with the highest rating. If the rating is the same, the one with more likes wins. Make your choice – vote
-                  </p>
-                </div>
-              )}
-            </>
-          )}
-          
-          {/* Real contestants */}
-          {contestants.filter(c => !c.isExample).length > 0 && (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-1 sm:gap-3 max-w-full overflow-hidden">
-              {contestants.filter(c => !c.isExample).map((contestant) => (
-                <ContestantCard
-                  key={contestant.rank}
-                  {...contestant}
-                  viewMode={viewMode}
-                  onRate={(rating) => handleRate(contestant.rank, rating)}
-                  isThisWeek={title === "THIS WEEK"}
-                  user={user}
-                />
-              ))}
+          {/* Regular contestants only */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-1 sm:gap-3 max-w-full overflow-hidden">
+            {contestants.filter(c => !c.isExample).map((contestant) => (
+              <ContestantCard
+                key={contestant.rank}
+                {...contestant}
+                viewMode={viewMode}
+                onRate={(rating) => handleRate(contestant.rank, rating)}
+                isThisWeek={title === "THIS WEEK"}
+                user={user}
+              />
+            ))}
+          </div>
+          {title === "THIS WEEK" && (
+            <div className="mb-12 px-6">
+              <p className="text-muted-foreground italic text-center">
+                The winner of the week is the one with the highest rating. If the rating is the same, the one with more likes wins. Make your choice – vote
+              </p>
             </div>
           )}
         </div>

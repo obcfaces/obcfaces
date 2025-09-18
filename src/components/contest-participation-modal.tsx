@@ -14,6 +14,8 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import SearchableSelect from "@/components/ui/searchable-select";
 import { getCitiesForLocation } from '@/lib/location-utils';
+import testContestantFace from "@/assets/test-contestant-face.jpg";
+import testContestantFull from "@/assets/test-contestant-full.jpg";
 
 interface ContestParticipationModalProps {
   children?: React.ReactNode;
@@ -1342,6 +1344,45 @@ export const ContestParticipationModal = ({
           <form onSubmit={handleProfileSubmit} className="space-y-3">
             <div className="text-center mb-4">
               <h2 className="text-lg font-semibold text-foreground">Contest Registration Form</h2>
+            </div>
+            
+            {/* Example card showing requirements */}
+            <div className="mb-6 border-2 border-yellow-300 rounded-lg overflow-hidden bg-yellow-50">
+              <div className="bg-yellow-200 text-black px-4 py-3">
+                <div className="text-sm font-semibold mb-3">How your photos should look:</div>
+                <div className="grid grid-cols-2 gap-6 text-xs">
+                  <div className="space-y-1">
+                    <div>• Look like an ID photo</div>
+                    <div>• No makeup</div>
+                    <div>• No filters</div>
+                    <div>• No glasses allowed</div>
+                  </div>
+                  <div className="space-y-1">
+                    <div>• Whole body from head to toe</div>
+                    <div>• Wear tight/fitted clothes. No dresses, skirts, heels</div>
+                    <div>• No bags or backpacks</div>
+                  </div>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-px">
+                <div className="relative">
+                  <img 
+                    src={testContestantFace}
+                    alt="Example face photo"
+                    className="w-full aspect-[4/5] object-cover"
+                  />
+                  <div className="absolute top-1 left-1 bg-yellow-500 text-white px-1.5 py-0.5 text-xs font-bold rounded">
+                    Example
+                  </div>
+                </div>
+                <div className="relative">
+                  <img 
+                    src={testContestantFull}
+                    alt="Example full body photo"
+                    className="w-full aspect-[4/5] object-cover"
+                  />
+                </div>
+              </div>
             </div>
             <div className="grid gap-2 grid-cols-3">
               <Input
