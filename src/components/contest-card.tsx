@@ -447,8 +447,8 @@ export function ContestantCard({
     return (
       <>
         <Card className={`${isExample ? 'border-yellow-400 border-2 bg-yellow-50/50' : isWinner ? 'border-contest-blue border-2' : 'bg-card border-contest-border'} relative overflow-hidden`}>
-          {/* Rank number in top left corner - show in past weeks for all users */}
-          {rank > 0 && !isExample && totalVotes > 0 && !isThisWeek && (
+          {/* Rank number in top left corner - show in past weeks for all users and current week after voting */}
+          {rank > 0 && !isExample && totalVotes > 0 && (!isThisWeek || isVoted) && (
             <div className="absolute top-0 left-0 z-20 flex items-center">
               <div className="bg-black/70 text-white px-1 py-0.5 rounded-br text-xs font-bold">
                 {rank}
@@ -456,34 +456,34 @@ export function ContestantCard({
             </div>
           )}
            
-             {/* Rating in top right corner - show for all users in past weeks */}
-             {rank > 0 && !isExample && !isThisWeek && (
-               <div className="absolute top-0 right-0 z-20 flex items-center">
-                 <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
-                   <PopoverTrigger asChild>
-                     <div className="bg-contest-blue text-white px-2 py-1.5 rounded-bl-lg text-sm sm:text-base font-bold cursor-pointer hover:bg-contest-blue/90 transition-colors">
-                       {localAverageRating > 0 ? localAverageRating.toFixed(1) : '0.0'}
-                     </div>
-                   </PopoverTrigger>
-                   <PopoverContent className="w-auto p-3">
-                     <div className="text-sm">
-                       {userRating > 0 ? 
-                         `Your rating: ${userRating}` : 
-                         `No rating`
-                       }{isThisWeek && ` — `}<button 
-                         className={`text-contest-blue hover:underline ${!isThisWeek ? 'hidden' : ''}`}
-                         onClick={() => {
-                           setIsEditing(true);
-                           setIsPopoverOpen(false);
-                         }}
-                       >
-                         change
-                       </button>
-                     </div>
-                   </PopoverContent>
-                 </Popover>
-               </div>
-             )}
+              {/* Rating in top right corner - show for all users in past weeks and current week after voting */}
+              {rank > 0 && !isExample && (!isThisWeek || isVoted) && (
+                <div className="absolute top-0 right-0 z-20 flex items-center">
+                  <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
+                    <PopoverTrigger asChild>
+                      <div className="bg-contest-blue text-white px-2 py-1.5 rounded-bl-lg text-sm sm:text-base font-bold cursor-pointer hover:bg-contest-blue/90 transition-colors">
+                        {localAverageRating > 0 ? localAverageRating.toFixed(1) : '0.0'}
+                      </div>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-3">
+                      <div className="text-sm">
+                        {userRating > 0 ? 
+                          `Your rating: ${userRating}` : 
+                          `No rating`
+                        }{isThisWeek && ` — `}<button 
+                          className={`text-contest-blue hover:underline ${!isThisWeek ? 'hidden' : ''}`}
+                          onClick={() => {
+                            setIsEditing(true);
+                            setIsPopoverOpen(false);
+                          }}
+                        >
+                          change
+                        </button>
+                      </div>
+                    </PopoverContent>
+                  </Popover>
+                </div>
+              )}
           
           
           {/* Header with content or voting overlay */}
