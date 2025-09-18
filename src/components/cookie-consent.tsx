@@ -25,6 +25,11 @@ export const CookieConsent = () => {
     setIsVisible(false);
   };
 
+  const handleCustomize = () => {
+    localStorage.setItem('cookie-consent', 'customized');
+    setIsVisible(false);
+  };
+
   if (!isVisible) return null;
 
   return (
@@ -34,17 +39,23 @@ export const CookieConsent = () => {
           <Cookie className="h-6 w-6 text-primary mt-1 flex-shrink-0" />
           <div className="flex-1">
             <h3 className="font-semibold text-foreground mb-2">
-              {t("We use cookies")}
+              Cookies
             </h3>
             <p className="text-sm text-muted-foreground mb-4">
-              {t("We use cookies to enhance your browsing experience, serve personalized content, and analyze our traffic. By clicking 'Accept All', you consent to our use of cookies.")}
+              We use cookies to improve your experience. Some are necessary, others (analytics/ads) need your consent. See our{" "}
+              <a href="/cookie-policy" className="text-primary underline hover:no-underline">
+                Cookie Policy
+              </a>.
             </p>
             <div className="flex flex-wrap gap-3">
               <Button onClick={handleAccept} size="sm">
-                {t("Accept All")}
+                Accept all
               </Button>
               <Button onClick={handleReject} variant="outline" size="sm">
-                {t("Reject All")}
+                Reject all
+              </Button>
+              <Button onClick={handleCustomize} variant="outline" size="sm">
+                Customize
               </Button>
             </div>
           </div>
