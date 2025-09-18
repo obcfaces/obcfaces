@@ -75,14 +75,9 @@ const Terms = () => {
 
             <section className="mb-8">
               <h2 className="text-2xl font-semibold mb-4">6. Prizes & Payments</h2>
-              <ul className="list-disc pl-6 mb-4 space-y-2">
-                <li><strong>Weekly contest prize:</strong> PHP 5,000 (or equivalent in local currency).</li>
-                <li><strong>Annual contest prize:</strong> PHP 200,000 (or equivalent in local currency).</li>
-                <li>Winners are announced on the Platform after verification.</li>
-                <li>Prizes are paid within 30 days via bank transfer, digital wallet, or another agreed method.</li>
-                <li>Winners are responsible for any local taxes or fees related to receiving the prize.</li>
-                <li>The Platform may request identity verification before payout.</li>
-              </ul>
+              <p className="mb-4">
+                The Platform awards weekly and annual prizes to winners. The specific amounts, frequency, and payment methods are announced on the Platform and may change over time. Winners are responsible for any local taxes or fees related to receiving the prize.
+              </p>
             </section>
 
             <section className="mb-8">
