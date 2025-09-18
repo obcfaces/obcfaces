@@ -190,8 +190,8 @@ export function FullCardLayout({
             compact={false}
           />
           
-          {/* Contestant info - shown after voting instead of normal content */}
-          {isVoted && !isEditing && !showThanks && (
+          {/* Contestant info - shown for all users in past weeks or after voting in current week */}
+          {(!isThisWeek || isVoted) && !isEditing && !showThanks && (
             <div className={`absolute inset-0 rounded-r flex flex-col justify-between p-1 sm:p-2 md:p-3 ${isWinner ? 'bg-blue-100' : 'bg-white'}`}>
               <div className="flex items-start justify-between">
                 <div className="min-w-0 flex-1 mr-2">
