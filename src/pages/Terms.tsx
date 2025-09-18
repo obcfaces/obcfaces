@@ -23,101 +23,123 @@ const Terms = () => {
           </div>
           
           <div className="prose prose-gray max-w-none">
-            <h1 className="text-3xl font-bold mb-8 text-center">OBCFaces — Terms of Service</h1>
+            <h1 className="text-3xl font-bold mb-8 text-center">Terms of Service — obcface.com</h1>
             
             <div className="mb-6">
               <p className="text-muted-foreground mb-2">
-                <strong>Last updated:</strong> August 13, 2025 &nbsp;|&nbsp; <strong>Effective date:</strong> August 13, 2025
+                <strong>Effective Date:</strong> 13 August 2025 &nbsp;|&nbsp; <strong>Operator:</strong> OBCFaces — https://obcface.com
               </p>
             </div>
             
             <section className="mb-8">
               <h2 className="text-2xl font-semibold mb-4">1. Introduction</h2>
               <p className="mb-4">
-                Welcome to <strong>OBCFaces</strong> ("Platform"), an online beauty contest platform where users can participate in weekly competitions, vote for contestants, and interact with AI-powered features ("Services"). By accessing or using our Services, you agree to these Terms and our Privacy Policy.
+                Welcome to <strong>OBCFaces</strong> (the "Platform"), an online beauty contest platform where users can participate in weekly and annual competitions, vote for contestants, and interact with the services (the "Services"). By accessing or using our Services, you agree to these Terms of Service and our Privacy Policy.
               </p>
             </section>
 
             <section className="mb-8">
               <h2 className="text-2xl font-semibold mb-4">2. Eligibility</h2>
               <ul className="list-disc pl-6 mb-4 space-y-2">
-                <li><strong>Minimum Age:</strong> 13 years old.</li>
-                <li><strong>Minors (13–17):</strong> Participation only with verified parental/guardian consent.</li>
-                <li><strong>Adults:</strong> 18+ without extra consent.</li>
-                <li><strong>Jurisdiction:</strong> You must comply with your local laws regarding age and content.</li>
+                <li><strong>Minimum Age:</strong> You must be 18 years or older to register, upload content, or participate in contests.</li>
+                <li>By using the Platform, you confirm that you are legally allowed to view and share contest content in your jurisdiction.</li>
               </ul>
             </section>
 
             <section className="mb-8">
               <h2 className="text-2xl font-semibold mb-4">3. Account Registration</h2>
-              <p className="mb-4">
-                You must provide truthful and accurate information. You are responsible for securing your account and password. We may suspend or terminate accounts that violate the Terms.
-              </p>
+              <ul className="list-disc pl-6 mb-4 space-y-2">
+                <li>You must provide truthful and accurate information during registration.</li>
+                <li>You are responsible for securing your account and password.</li>
+                <li>The Platform may suspend or terminate accounts that violate these Terms.</li>
+              </ul>
             </section>
 
             <section className="mb-8">
               <h2 className="text-2xl font-semibold mb-4">4. Content Rules</h2>
               <ul className="list-disc pl-6 mb-4 space-y-2">
-                <li>You confirm you own or have permission to share uploaded content.</li>
-                <li><strong>Prohibited content includes:</strong> nudity or sexual content; exploitation or sexualized depiction of minors; hate speech, threats, or harassment; AI deepfakes or manipulated images without consent; fraudulent content or vote manipulation.</li>
+                <li>You confirm you own or have permission to share all uploaded content.</li>
+                <li><strong>Prohibited content includes:</strong> nudity or sexual content; exploitation or depiction of minors; hate speech, harassment, or threats; fraudulent or manipulated content; AI-generated images of real persons without consent; vote manipulation.</li>
+                <li>All content must follow community guidelines and respect the rights of others.</li>
               </ul>
             </section>
 
             <section className="mb-8">
-              <h2 className="text-2xl font-semibold mb-4">5. Deepfake & AI Content Policy</h2>
-              <p className="mb-4">
-                All AI-generated or altered images must be clearly labeled as such. Uploading deepfake or AI-altered images of real persons without consent is prohibited and may result in account termination and legal action.
-              </p>
-            </section>
-
-            <section className="mb-8">
-              <h2 className="text-2xl font-semibold mb-4">6. Voting & Competition Rules</h2>
-              <p className="mb-4">
-                Votes are for registered users only. Bots, scripts, and fake accounts are forbidden. False reporting or harassment leads to penalties or bans. We may adjust or nullify votes if manipulation is detected.
-              </p>
-            </section>
-
-            <section className="mb-8">
-              <h2 className="text-2xl font-semibold mb-4">7. AI Features Transparency</h2>
-              <p className="mb-4">
-                Our AI may generate photo descriptions, suggestions, and analyze entries. AI outputs may not always be accurate and should be considered informational only.
-              </p>
-            </section>
-
-            <section className="mb-8">
-              <h2 className="text-2xl font-semibold mb-4">8. Special Rules for Minors' Content</h2>
+              <h2 className="text-2xl font-semibold mb-4">5. Voting & Competitions</h2>
               <ul className="list-disc pl-6 mb-4 space-y-2">
-                <li>All minors' photos are reviewed by human moderators before publication.</li>
-                <li>No public display of minors' contact details.</li>
-                <li>Parents/guardians can request removal of their child's data at any time.</li>
+                <li>Votes are allowed only for registered users. Bots, scripts, and fake accounts are forbidden.</li>
+                <li>False reporting, harassment, or vote manipulation may lead to disqualification and account removal.</li>
+                <li>The Platform may adjust or nullify votes if manipulation is detected.</li>
               </ul>
             </section>
 
             <section className="mb-8">
-              <h2 className="text-2xl font-semibold mb-4">9. Intellectual Property</h2>
-              <p className="mb-4">
-                You retain ownership of your content but grant OBCFaces a non-exclusive, worldwide, royalty-free license to use, display, distribute, and promote it in connection with the Platform and related marketing. Unauthorized use of Platform content outside OBCFaces without written permission is prohibited.
-              </p>
+              <h2 className="text-2xl font-semibold mb-4">6. Prizes & Payments</h2>
+              <ul className="list-disc pl-6 mb-4 space-y-2">
+                <li><strong>Weekly contest prize:</strong> PHP 5,000 (or equivalent in local currency).</li>
+                <li><strong>Annual contest prize:</strong> PHP 200,000 (or equivalent in local currency).</li>
+                <li>Winners are announced on the Platform after verification.</li>
+                <li>Prizes are paid within 30 days via bank transfer, digital wallet, or another agreed method.</li>
+                <li>Winners are responsible for any local taxes or fees related to receiving the prize.</li>
+                <li>The Platform may request identity verification before payout.</li>
+              </ul>
+            </section>
+
+            <section className="mb-8">
+              <h2 className="text-2xl font-semibold mb-4">7. Termination & Suspension</h2>
+              <ul className="list-disc pl-6 mb-4 space-y-2">
+                <li>We may suspend or terminate your account for violations of these Terms, fraudulent activity, or unlawful behavior.</li>
+                <li>Upon termination, your access to the Platform ends, and your content may be removed.</li>
+                <li>You may request account deletion at any time by contacting support@obcfaces.com.</li>
+              </ul>
+            </section>
+
+            <section className="mb-8">
+              <h2 className="text-2xl font-semibold mb-4">8. Intellectual Property</h2>
+              <ul className="list-disc pl-6 mb-4 space-y-2">
+                <li>You retain ownership of your content.</li>
+                <li>By submitting content, you grant OBCFaces a non-exclusive, worldwide, royalty-free license to use, display, distribute, and promote your content in connection with the Platform and related marketing.</li>
+                <li>Unauthorized use of Platform content outside OBCFaces without permission is prohibited.</li>
+              </ul>
+            </section>
+
+            <section className="mb-8">
+              <h2 className="text-2xl font-semibold mb-4">9. AI Features</h2>
+              <ul className="list-disc pl-6 mb-4 space-y-2">
+                <li>The Platform may use AI to generate descriptions, suggestions, or analysis of entries.</li>
+                <li>AI outputs may not always be accurate and should be considered informational only.</li>
+              </ul>
             </section>
 
             <section className="mb-8">
               <h2 className="text-2xl font-semibold mb-4">10. Liability & Disclaimer</h2>
+              <ul className="list-disc pl-6 mb-4 space-y-2">
+                <li>The Platform is provided "as is," without warranties of any kind.</li>
+                <li>OBCFaces is not responsible for user content, actions of users, or damages arising from your use of the Services.</li>
+                <li>You agree to indemnify and hold OBCFaces harmless from any claims or damages resulting from your violation of these Terms or misuse of the Services.</li>
+              </ul>
+            </section>
+
+            <section className="mb-8">
+              <h2 className="text-2xl font-semibold mb-4">11. Governing Law & Dispute Resolution</h2>
+              <ul className="list-disc pl-6 mb-4 space-y-2">
+                <li>These Terms are governed by the laws of Kazakhstan.</li>
+                <li>Any disputes shall be resolved exclusively in the courts of Almaty, Kazakhstan.</li>
+              </ul>
+            </section>
+
+            <section className="mb-8">
+              <h2 className="text-2xl font-semibold mb-4">12. Changes to Terms</h2>
               <p className="mb-4">
-                The Platform is provided "as is" without warranties of any kind. OBCFaces is not responsible for user content, actions of other users, or damages arising from your use of the Services. In jurisdictions with applicable laws such as GDPR, users have rights as outlined in our Privacy Policy.
+                We may update these Terms from time to time. Continued use of the Platform after updates means you accept the revised Terms. The latest version will always be available at https://obcface.com/terms.
               </p>
             </section>
 
             <section className="mb-8">
-              <h2 className="text-2xl font-semibold mb-4">11. Changes to Terms</h2>
+              <h2 className="text-2xl font-semibold mb-4">13. Contact</h2>
               <p className="mb-4">
-                We may update these Terms at any time. Continued use of the Platform after updates means you accept the new Terms.
-              </p>
-            </section>
-
-            <section className="mb-8">
-              <h2 className="text-2xl font-semibold mb-4">12. Contact</h2>
-              <p className="mb-4">
-                <strong>Email:</strong> support@obcfaces.com
+                If you have questions about these Terms, please contact us:<br />
+                <strong>📧 support@obcfaces.com</strong>
               </p>
             </section>
 
