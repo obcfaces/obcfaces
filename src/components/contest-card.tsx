@@ -492,8 +492,8 @@ export function ContestantCard({
             {isThisWeek && !propUser && !isExample ? (
               /* Unauthorized users in THIS WEEK section only see voting (but not for test cards) */
               <div className="absolute inset-0 bg-gray-300 flex items-center justify-center h-full">
-                <div className="flex items-center gap-12">
-                  <span className="text-lg font-medium text-gray-800">Vote</span>
+                <div className="flex items-center gap-16">
+                  <span className="text-lg font-medium text-gray-600">Vote</span>
                   <div className="scale-[2]">
                     <StarRating 
                       rating={userRating}
@@ -538,8 +538,8 @@ export function ContestantCard({
             {/* Re-voting overlay - shown when editing existing vote */}
             {isVoted && isEditing && !showThanks && (
             <div className="absolute inset-0 bg-gray-300 flex items-center justify-center h-full">
-              <div className="-translate-x-2 flex items-center gap-6">
-                <span className="text-2xl font-medium text-gray-800 mr-8">Vote</span>
+              <div className="-translate-x-2 flex items-center gap-10">
+                <span className="text-2xl font-medium text-gray-600 mr-8">Vote</span>
                 <div className="scale-[2]">
                    <StarRating 
                      rating={0}
