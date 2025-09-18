@@ -1356,17 +1356,17 @@ export const ContestParticipationModal = ({
                   <div className="text-center">
                     <div className="text-xs font-medium mb-2">Portrait photo</div>
                     <div className="space-y-1 text-xs">
-                      <div>Look like an ID photo</div>
-                      <div>No makeup, no filters</div>
-                      <div>No glasses allowed</div>
+                      <div className="text-red-600">Look like an ID photo</div>
+                      <div className="text-red-600">No makeup, no filters</div>
+                      <div className="text-red-600">No glasses allowed</div>
                     </div>
                   </div>
                   <div className="text-center">
                     <div className="text-xs font-medium mb-2">Body photo</div>
                     <div className="space-y-1 text-xs">
-                      <div>Look like an ID photo</div>
-                      <div>No makeup, no filters</div>
-                      <div>No glasses allowed</div>
+                      <div className="text-red-600">Look like an ID photo</div>
+                      <div className="text-red-600">No makeup, no filters</div>
+                      <div className="text-red-600">No glasses allowed</div>
                     </div>
                   </div>
                 </div>
