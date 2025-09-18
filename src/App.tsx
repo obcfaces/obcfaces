@@ -21,7 +21,7 @@ import { Footer } from "@/components/footer";
 import { SocialWidgets } from "@/components/social-widgets";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { CookieConsent } from "@/components/cookie-consent";
-import { AgeVerification } from "@/components/age-verification";
+
 
 
 const queryClient = new QueryClient();
@@ -59,7 +59,7 @@ const App = () => {
               <Footer />
               <SocialWidgets />
               <CookieConsent />
-              <AgeVerification />
+              
             </BrowserRouter>
             </TooltipProvider>
           </QueryClientProvider>
