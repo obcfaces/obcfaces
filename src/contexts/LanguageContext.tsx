@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { translationService } from '../services/translationService';
 
 export interface Language {
   code: string;
@@ -25,7 +26,8 @@ export const languages: Language[] = [
 interface LanguageContextType {
   currentLanguage: Language;
   setLanguage: (language: Language) => void;
-  t: (key: string) => string;
+  t: (text: string) => Promise<string>;
+  tSync: (text: string) => string;
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
@@ -44,29 +46,54 @@ interface LanguageProviderProps {
 
 export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) => {
   const [currentLanguage, setCurrentLanguage] = useState<Language>(languages[0]);
-  const [translations, setTranslations] = useState<Record<string, string>>({});
-
-  const loadTranslations = async (languageCode: string) => {
-    try {
-      const translationModule = await import(`../translations/${languageCode}.ts`);
-      setTranslations(translationModule.default);
-    } catch (error) {
-      console.warn(`Failed to load translations for ${languageCode}, falling back to English`);
-      if (languageCode !== 'en') {
-        const fallbackModule = await import('../translations/en.ts');
-        setTranslations(fallbackModule.default);
-      }
-    }
-  };
+  const [translatedTexts, setTranslatedTexts] = useState<Map<string, string>>(new Map());
 
   const setLanguage = (language: Language) => {
     setCurrentLanguage(language);
     localStorage.setItem('preferredLanguage', language.code);
-    loadTranslations(language.code);
+    // Clear translated texts cache when language changes
+    setTranslatedTexts(new Map());
   };
 
-  const t = (key: string): string => {
-    return translations[key] || key;
+  // Async translation function
+  const t = async (text: string): Promise<string> => {
+    if (currentLanguage.code === 'en') {
+      return text; // English is the base language
+    }
+
+    const cacheKey = `${text}_${currentLanguage.code}`;
+    if (translatedTexts.has(cacheKey)) {
+      return translatedTexts.get(cacheKey)!;
+    }
+
+    try {
+      const translated = await translationService.translateText(text, currentLanguage.code);
+      setTranslatedTexts(prev => new Map(prev).set(cacheKey, translated));
+      return translated;
+    } catch (error) {
+      console.error('Translation error:', error);
+      return text;
+    }
+  };
+
+  // Synchronous translation function for immediate use
+  const tSync = (text: string): string => {
+    if (currentLanguage.code === 'en') {
+      return text; // English is the base language
+    }
+
+    const cacheKey = `${text}_${currentLanguage.code}`;
+    if (translatedTexts.has(cacheKey)) {
+      return translatedTexts.get(cacheKey)!;
+    }
+
+    // For synchronous use, trigger async translation in background
+    t(text).then(() => {
+      // This will update the cache for next render
+    });
+
+    // Return original text while translation is pending
+    return text;
   };
 
   useEffect(() => {
@@ -75,15 +102,12 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) 
       const language = languages.find(lang => lang.code === savedLanguage);
       if (language) {
         setCurrentLanguage(language);
-        loadTranslations(language.code);
-        return;
       }
     }
-    loadTranslations('en');
   }, []);
 
   return (
-    <LanguageContext.Provider value={{ currentLanguage, setLanguage, t }}>
+    <LanguageContext.Provider value={{ currentLanguage, setLanguage, t, tSync }}>
       {children}
     </LanguageContext.Provider>
   );
