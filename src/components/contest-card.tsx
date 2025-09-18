@@ -843,6 +843,7 @@ export function ContestantCard({
               isWinner={isWinner}
               rank={rank}
               userRating={userRating}
+              localAverageRating={localAverageRating}
               cardData={cardData}
               isLiked={isLiked}
               hasCommented={hasCommented}

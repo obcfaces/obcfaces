@@ -28,6 +28,7 @@ interface CompactCardLayoutProps {
   isWinner: boolean;
   rank: number;
   userRating: number;
+  localAverageRating: number;
   
   // Card data
   cardData: any;
@@ -71,6 +72,7 @@ export function CompactCardLayout({
   isWinner,
   rank,
   userRating,
+  localAverageRating,
   cardData,
   isLiked,
   hasCommented,
@@ -126,6 +128,16 @@ export function CompactCardLayout({
         )}
       </div>
       
+      {/* Rating badge in top right corner for past weeks */}
+      {!isEditing && !showThanks && !isExample && !isThisWeek && (
+        <div className="absolute top-0 right-0 z-10">
+          <div className="bg-contest-blue text-white px-1 py-0.5 rounded-bl text-xs font-bold">
+            {localAverageRating > 0 ? localAverageRating.toFixed(1) : '0.0'}
+          </div>
+        </div>
+      )}
+      
+      {/* Content area */}
       {/* Content area */}
       <div className="flex-1 p-1 sm:p-2 md:p-3 flex flex-col relative">
         <VotingOverlay
