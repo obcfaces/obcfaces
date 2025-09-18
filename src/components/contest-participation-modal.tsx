@@ -1354,21 +1354,19 @@ export const ContestParticipationModal = ({
                   {/* Vertical divider line */}
                   <div className="absolute left-1/2 top-0 bottom-0 w-px bg-yellow-400 transform -translate-x-1/2"></div>
                   <div className="text-center">
-                    <div className="text-xs font-medium mb-2">Face Photo</div>
+                    <div className="text-xs font-medium mb-2">Portrait photo</div>
                     <div className="space-y-1 text-xs">
                       <div>Look like an ID photo</div>
-                      <div>No makeup</div>
-                      <div>No filters</div>
+                      <div>No makeup, no filters</div>
                       <div>No glasses allowed</div>
                     </div>
                   </div>
                   <div className="text-center">
-                    <div className="text-xs font-medium mb-2">Full Body Photo</div>
+                    <div className="text-xs font-medium mb-2">Body photo</div>
                     <div className="space-y-1 text-xs">
-                      <div>Whole body from head to toe</div>
-                      <div>Wear tight/fitted clothes</div>
-                      <div>No dresses, skirts, heels</div>
-                      <div>No bags or backpacks</div>
+                      <div>Look like an ID photo</div>
+                      <div>No makeup, no filters</div>
+                      <div>No glasses allowed</div>
                     </div>
                   </div>
                 </div>
