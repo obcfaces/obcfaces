@@ -191,32 +191,11 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
       participantsData: participantsData.slice(0, 2) // Log first 2 for debugging
     });
 
-    // For "THIS WEEK" section, always create and show example card
+    // For "THIS WEEK" section, use real contestants if available
     if (title === "THIS WEEK") {
-      console.log('Creating test card for THIS WEEK');
-      const testCard = {
-        rank: 0, // Use 0 to distinguish from real ranks
-        name: "Example Card", 
-        profileId: "00000000-0000-0000-0000-000000000000", // Use null UUID for example
-        country: "Philippines",
-        city: "Manila",
-        age: 25,
-        weight: 55,
-        height: 165,
-        rating: 4.8,
-        averageRating: 4.8,
-        totalVotes: 124,
-        faceImage: testContestantFace,
-        fullBodyImage: testContestantFull,
-        additionalPhotos: [],
-        isVoted: true,
-        isWinner: false,
-        prize: undefined,
-        isRealContestant: false,
-        isExample: true // Special flag for example card
-      };
+      console.log('Processing THIS WEEK section');
 
-      // If there are real contestants, process them too
+      // If there are real contestants, process them
       if (actualParticipants && actualParticipants.length > 0) {
         console.log(`Using real contestants for ${title}:`, actualParticipants.length);
         const contestantsWithRatings = await Promise.all(
@@ -276,7 +255,7 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
           return (b.totalVotes || 0) - (a.totalVotes || 0);
         });
 
-        // Add test card at the beginning, then real contestants
+        // Return real contestants with ranks
         const realContestantsWithRanks = sortedContestants.map((contestant, index) => {
           const newRank = contestant.rating > 0 ? index + 1 : 0;
           return {
@@ -287,11 +266,11 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
           };
         });
         
-        return [testCard, ...realContestantsWithRanks];
+        return realContestantsWithRanks;
       } else {
-        // Only show example card if no real contestants
-        console.log('Returning only test card for THIS WEEK');
-        return [testCard];
+        // Return empty array if no real contestants
+        console.log('No contestants for THIS WEEK');
+        return [];
       }
     }
     
