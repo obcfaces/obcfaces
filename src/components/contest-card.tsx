@@ -491,7 +491,7 @@ export function ContestantCard({
             {/* Show different content based on user auth status and contest type */}
             {isThisWeek && !propUser && !isExample ? (
               /* Unauthorized users in THIS WEEK section only see voting (but not for test cards) */
-              <div className="absolute inset-0 bg-gray-200 flex items-center justify-center h-full">
+              <div className="absolute inset-0 bg-gray-300 flex items-center justify-center h-full">
                 <div className="flex items-center gap-12">
                   <span className="text-lg font-medium text-gray-800">Vote</span>
                   <div className="scale-[2]">
@@ -530,7 +530,7 @@ export function ContestantCard({
             
             {/* Thank you message - shown for 1 second after voting */}
             {showThanks && (
-              <div className="absolute inset-0 bg-gray-200 flex items-center justify-center gap-3 h-full">
+              <div className="absolute inset-0 bg-gray-300 flex items-center justify-center gap-3 h-full">
                 <span className="text-lg font-medium text-gray-800">Thank you! Rated {userRating.toFixed(0)}</span>
               </div>
             )}

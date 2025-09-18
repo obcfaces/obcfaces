@@ -102,7 +102,7 @@ export function VotingOverlay({
   // Thank you message - shown for 1 second after voting
   if (showThanks) {
     return (
-      <div className="absolute inset-0 bg-gray-200 rounded-r flex items-center justify-center px-4">
+      <div className="absolute inset-0 bg-gray-300 rounded-r flex items-center justify-center px-4">
         <div className="text-center">
           <div className="text-base font-medium text-gray-800 mb-1">Thank you. Rated</div>
           <div className="text-xl font-bold text-gray-800">{userRating.toFixed(0)}</div>
