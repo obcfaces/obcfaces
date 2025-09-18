@@ -199,7 +199,7 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
   const currentCandidate = filteredCandidates[currentIndex];
 
   return (
-    <section className="max-w-6xl mx-auto py-8 mb-2 mt-2 bg-background rounded-lg shadow-lg shadow-foreground/15">
+    <section className="max-w-6xl mx-auto pt-8 pb-0 mb-2 mt-2 bg-background rounded-lg shadow-lg shadow-foreground/15">
       <div className="mb-8 px-6">
         <div className="mb-4">
           <div className="flex items-baseline gap-3 mb-1">
