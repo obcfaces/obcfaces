@@ -14,8 +14,8 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import SearchableSelect from "@/components/ui/searchable-select";
 import { getCitiesForLocation } from '@/lib/location-utils';
-import testContestantFace from "@/assets/test-contestant-face.jpg";
-import testContestantFull from "@/assets/test-contestant-full.jpg";
+import testContestantFace from "@/assets/test-contestant-face-new.jpg";
+import testContestantFull from "@/assets/test-contestant-full-new.jpg";
 
 interface ContestParticipationModalProps {
   children?: React.ReactNode;
@@ -1350,17 +1350,38 @@ export const ContestParticipationModal = ({
             <div className="mb-6 border-2 border-yellow-300 rounded-lg overflow-hidden bg-yellow-50">
               <div className="bg-yellow-200 text-black px-4 py-3">
                 <div className="text-sm font-semibold mb-3">How your photos should look:</div>
-                <div className="grid grid-cols-2 gap-6 text-xs">
+                <div className="grid grid-cols-2 gap-4 text-xs">
                   <div className="space-y-1">
-                    <div>• Look like an ID photo</div>
-                    <div>• No makeup</div>
-                    <div>• No filters</div>
-                    <div>• No glasses allowed</div>
+                    <div className="flex">
+                      <span className="mr-1">•</span>
+                      <span>Look like an ID photo</span>
+                    </div>
+                    <div className="flex">
+                      <span className="mr-1">•</span>
+                      <span>No makeup</span>
+                    </div>
+                    <div className="flex">
+                      <span className="mr-1">•</span>
+                      <span>No filters</span>
+                    </div>
+                    <div className="flex">
+                      <span className="mr-1">•</span>
+                      <span>No glasses allowed</span>
+                    </div>
                   </div>
-                  <div className="space-y-1">
-                    <div>• Whole body from head to toe</div>
-                    <div>• Wear tight/fitted clothes. No dresses, skirts, heels</div>
-                    <div>• No bags or backpacks</div>
+                  <div className="space-y-1 -ml-2">
+                    <div className="flex">
+                      <span className="mr-1">•</span>
+                      <span>Whole body from head to toe</span>
+                    </div>
+                    <div className="flex">
+                      <span className="mr-1">•</span>
+                      <span>Wear tight/fitted clothes. No dresses, skirts, heels</span>
+                    </div>
+                    <div className="flex">
+                      <span className="mr-1">•</span>
+                      <span>No bags or backpacks</span>
+                    </div>
                   </div>
                 </div>
               </div>
