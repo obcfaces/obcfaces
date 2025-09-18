@@ -103,7 +103,7 @@ export function CompactCardLayout({
             Example
           </div>
         )}
-        {isVoted && !isExample && (propUser || !isThisWeek) && (
+        {isVoted && !isExample && !isThisWeek && (
           <div className="absolute top-0 left-0 bg-black/70 text-white text-xs font-bold px-1 py-0.5 rounded-br">
             {rank > 0 ? rank : '★'}
           </div>
@@ -146,7 +146,7 @@ export function CompactCardLayout({
         
         {/* FOR PAST WEEKS: Show info ALWAYS for ALL USERS - NO CONDITIONS */}
         {!isThisWeek && (
-          <div className={`absolute inset-0 rounded-r flex flex-col justify-between p-1 sm:p-2 md:p-3 ${isExample ? 'bg-yellow-100' : isWinner ? 'bg-blue-100' : 'bg-white'}`}>
+          <div className={`absolute inset-0 rounded-r flex flex-col justify-between p-1 sm:p-2 md:p-3 ${isExample ? 'bg-yellow-100' : 'bg-white'}`}>
             <div className="flex items-start justify-between">
               {!isExample && (
                 <div className="min-w-0 flex-1 mr-2">
@@ -240,7 +240,7 @@ export function CompactCardLayout({
         
         {/* FOR CURRENT WEEK: Show info only after voting */}
         {isThisWeek && isVoted && !isEditing && !showThanks && (
-          <div className={`absolute inset-0 rounded-r flex flex-col justify-between p-1 sm:p-2 md:p-3 ${isExample ? 'bg-yellow-100' : isWinner ? 'bg-blue-100' : 'bg-white'}`}>
+          <div className={`absolute inset-0 rounded-r flex flex-col justify-between p-1 sm:p-2 md:p-3 ${isExample ? 'bg-yellow-100' : 'bg-white'}`}>
             <div className="flex items-start justify-between">
               {!isExample && (
                 <div className="min-w-0 flex-1 mr-2">
