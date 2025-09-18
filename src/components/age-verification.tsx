@@ -33,19 +33,26 @@ export const AgeVerification = () => {
             <AlertTriangle className="h-6 w-6 text-destructive" />
           </div>
           <DialogTitle className="text-xl font-semibold">
-            {t("Age Verification Required")}
+            Age & Consent
           </DialogTitle>
           <DialogDescription className="text-center mt-2">
-            {t("You must be 18 years or older to access this website. This site contains content intended for adults only.")}
+            By continuing, you confirm that you are 18 years or older and agree to our{" "}
+            <a href="/terms" className="text-primary underline hover:no-underline">
+              Terms
+            </a>{" "}
+            and{" "}
+            <a href="/privacy" className="text-primary underline hover:no-underline">
+              Privacy Policy
+            </a>.
           </DialogDescription>
         </DialogHeader>
         
         <div className="mt-6 space-y-3">
           <Button onClick={handleConfirm} className="w-full" size="lg">
-            {t("I am 18 or older")}
+            Yes, I am 18+ and agree
           </Button>
           <Button onClick={handleReject} variant="outline" className="w-full" size="lg">
-            {t("I am under 18")}
+            No, I am under 18
           </Button>
         </div>
         
