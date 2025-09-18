@@ -1583,7 +1583,7 @@ export const ContestParticipationModal = ({
                  <div className="flex flex-row gap-4 items-start w-full">
                    {/* Portrait Photo */}
                    <div className="flex flex-col items-center gap-1 flex-1 min-w-0">
-                     <p className="text-xs text-muted-foreground">Portrait</p>
+                     <p className="text-xs text-muted-foreground">Portrait photo</p>
                     <div className="relative w-full">
                       <input
                         type="file"
@@ -1648,7 +1648,7 @@ export const ContestParticipationModal = ({
 
                   {/* Full Length Photo */}
                   <div className="flex flex-col items-center gap-1 flex-1 min-w-0">
-                    <p className="text-xs text-muted-foreground">full length</p>
+                    <p className="text-xs text-muted-foreground">Body photo</p>
                     <div className="relative w-full">
                       <input
                         type="file"
