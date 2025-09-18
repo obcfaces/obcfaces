@@ -144,7 +144,7 @@ export function CompactCardLayout({
           compact={true}
         />
         
-        {/* FOR PAST WEEKS: Show info ALWAYS - NO CONDITIONS */}
+        {/* FOR PAST WEEKS: Show info ALWAYS for ALL USERS - NO CONDITIONS */}
         {!isThisWeek && (
           <div className={`absolute inset-0 rounded-r flex flex-col justify-between p-1 sm:p-2 md:p-3 ${isExample ? 'bg-yellow-100' : isWinner ? 'bg-blue-100' : 'bg-white'}`}>
             <div className="flex items-start justify-between">
