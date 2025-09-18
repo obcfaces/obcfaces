@@ -106,7 +106,7 @@ export function FullCardLayout({
       )}
       
       {/* Rating badge in top right corner - show for everyone in past weeks */}
-      {!isEditing && !showThanks && !isExample && !isThisWeek && (
+      {!isEditing && !showThanks && !isExample && (!isThisWeek || isVoted) && (
         <div className="absolute top-0 right-0 z-10 flex flex-col items-end">
            <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
              <PopoverTrigger asChild>
@@ -149,7 +149,7 @@ export function FullCardLayout({
             className="w-24 sm:w-28 md:w-32 h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
             onClick={() => openModal(0)}
           />
-          {!isExample && !isThisWeek && (
+          {!isExample && (!isThisWeek || isVoted) && (
             <div className="absolute top-0 left-0 bg-black/70 text-white text-xs font-bold px-1 py-0.5 rounded-br">
               {rank > 0 ? rank : '★'}
             </div>
