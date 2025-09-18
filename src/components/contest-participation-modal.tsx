@@ -1346,50 +1346,6 @@ export const ContestParticipationModal = ({
               <h2 className="text-lg font-semibold text-foreground">Contest Registration Form</h2>
             </div>
             
-            {/* Example card showing requirements */}
-            <div className="mb-6 border-2 border-yellow-300 rounded-lg overflow-hidden bg-yellow-50">
-              <div className="bg-yellow-200 text-black px-4 py-3 relative">
-                <div className="text-sm font-semibold mb-3 text-center">How your photos should look:</div>
-                <div className="grid grid-cols-2 gap-4 relative">
-                  {/* Vertical divider line */}
-                  <div className="absolute left-1/2 top-0 bottom-0 w-px bg-yellow-400 transform -translate-x-1/2"></div>
-                  <div className="text-center">
-                    <div className="text-xs font-medium mb-2">Portrait photo</div>
-                    <div className="space-y-1 text-xs">
-                      <div className="text-red-600">Look like an ID photo</div>
-                      <div className="text-red-600">No makeup, no filters</div>
-                      <div className="text-red-600">No glasses allowed</div>
-                    </div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-xs font-medium mb-2">Body photo</div>
-                    <div className="space-y-1 text-xs">
-                      <div className="text-red-600">Whole body from head to toe.</div>
-                      <div className="text-red-600">Tight-clothed.</div>
-                      <div className="text-red-600">No dresses, no skirts.</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-px relative">
-                {/* Vertical divider line for photos */}
-                <div className="absolute left-1/2 top-0 bottom-0 w-px bg-gray-300 transform -translate-x-1/2 z-10"></div>
-                <div className="relative">
-                  <img 
-                    src={testContestantFace}
-                    alt="Example face photo"
-                    className="w-full aspect-[4/5] object-cover"
-                  />
-                </div>
-                <div className="relative">
-                  <img 
-                    src={testContestantFull}
-                    alt="Example full body photo"
-                    className="w-full aspect-[4/5] object-cover"
-                  />
-                </div>
-              </div>
-            </div>
             <div className="grid gap-2 grid-cols-3">
               <Input
                 id="first_name"
@@ -1573,6 +1529,51 @@ export const ContestParticipationModal = ({
                   }
                 }}
               />
+            </div>
+
+            {/* Example card showing requirements */}
+            <div className="mb-6 border-2 border-yellow-300 rounded-lg overflow-hidden bg-yellow-50">
+              <div className="bg-yellow-200 text-black px-4 py-3 relative">
+                <div className="text-sm font-semibold mb-3 text-center">How your photos should look:</div>
+                <div className="grid grid-cols-2 gap-4 relative">
+                  {/* Vertical divider line */}
+                  <div className="absolute left-1/2 top-0 bottom-0 w-px bg-yellow-400 transform -translate-x-1/2"></div>
+                  <div className="text-center">
+                    <div className="text-xs font-medium mb-2">Portrait photo</div>
+                    <div className="space-y-1 text-xs">
+                      <div className="text-red-600">Look like an ID photo</div>
+                      <div className="text-red-600">No makeup, no filters</div>
+                      <div className="text-red-600">No glasses allowed</div>
+                    </div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-xs font-medium mb-2">Body photo</div>
+                    <div className="space-y-1 text-xs">
+                      <div className="text-red-600">Whole body from head to toe.</div>
+                      <div className="text-red-600">Tight-clothed.</div>
+                      <div className="text-red-600">No dresses, no skirts.</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-px relative">
+                {/* Vertical divider line for photos */}
+                <div className="absolute left-1/2 top-0 bottom-0 w-px bg-gray-300 transform -translate-x-1/2 z-10"></div>
+                <div className="relative">
+                  <img 
+                    src={testContestantFace}
+                    alt="Example face photo"
+                    className="w-full aspect-[4/5] object-cover"
+                  />
+                </div>
+                <div className="relative">
+                  <img 
+                    src={testContestantFull}
+                    alt="Example full body photo"
+                    className="w-full aspect-[4/5] object-cover"
+                  />
+                </div>
+              </div>
             </div>
 
             <div className="space-y-4 mt-4">
