@@ -100,7 +100,7 @@ export function FullCardLayout({
     <>
       {/* Winner header */}
       {isWinner && (
-        <div className="absolute top-0 left-0 w-[193px] sm:w-[225px] md:w-[257px] text-blue-700 pl-2 pr-2 py-1 text-xs font-semibold flex items-center justify-start z-20">
+        <div className="absolute top-0 left-0 w-[193px] sm:w-[225px] md:w-[257px] bg-blue-100 text-blue-700 pl-2 pr-2 py-1 text-xs font-semibold flex items-center justify-start z-20">
           <span>🏆 WINNER   + 5000 PHP</span>
         </div>
       )}
