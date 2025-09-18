@@ -434,13 +434,6 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
               />
             ))}
           </div>
-          {title === "THIS WEEK" && (
-            <div className="mb-12 px-6">
-              <p className="text-muted-foreground italic text-center">
-                The winner of the week is the one with the highest rating. If the rating is the same, the one with more likes wins. Make your choice – vote
-              </p>
-            </div>
-          )}
         </div>
       )}
 
