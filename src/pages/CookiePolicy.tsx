@@ -16,13 +16,13 @@ const CookiePolicy = () => {
             </h1>
             <p className="text-muted-foreground mb-8">
               <strong>Effective date:</strong> 13 August 2025<br />
-              <strong>Operator:</strong> OBCFaces (https://obcface.com)
+              <strong>Operator:</strong> OBCFaces — https://obcface.com
             </p>
 
             <section className="mb-8">
               <h2 className="text-2xl font-semibold text-foreground mb-4">1. What Are Cookies</h2>
               <p className="text-muted-foreground leading-relaxed">
-                Cookies are small text files stored on your device when you visit our website. They help us recognize your browser, remember your preferences, and improve your experience.
+                Cookies are small text files placed on your device when you visit our website. They help us keep the site secure, remember your preferences, and improve your experience.
               </p>
             </section>
 
@@ -32,7 +32,7 @@ const CookiePolicy = () => {
               <div className="space-y-4">
                 <div>
                   <h3 className="text-lg font-medium text-foreground mb-2">Strictly Necessary Cookies</h3>
-                  <p className="text-muted-foreground">Required for core site functionality (security, login, navigation). You cannot disable these.</p>
+                  <p className="text-muted-foreground">Required for core site functions (login, security, navigation). These cannot be disabled.</p>
                 </div>
                 
                 <div>
@@ -42,12 +42,12 @@ const CookiePolicy = () => {
                 
                 <div>
                   <h3 className="text-lg font-medium text-foreground mb-2">Personalization Cookies</h3>
-                  <p className="text-muted-foreground">Store your choices (language, layout, contest preferences).</p>
+                  <p className="text-muted-foreground">Store your preferences such as language and contest settings.</p>
                 </div>
                 
                 <div>
                   <h3 className="text-lg font-medium text-foreground mb-2">Marketing Cookies</h3>
-                  <p className="text-muted-foreground">Used to deliver relevant ads and measure campaign effectiveness.</p>
+                  <p className="text-muted-foreground">Used to deliver relevant promotions and measure campaigns (e.g., Meta Pixel).</p>
                 </div>
               </div>
             </section>
@@ -56,56 +56,56 @@ const CookiePolicy = () => {
               <h2 className="text-2xl font-semibold text-foreground mb-4">3. How We Use Cookies</h2>
               <p className="text-muted-foreground mb-3">We use cookies to:</p>
               <ul className="list-disc pl-6 text-muted-foreground space-y-2">
-                <li>keep you logged in and secure your account;</li>
-                <li>remember your preferences (language, region);</li>
-                <li>analyze site traffic and improve performance;</li>
+                <li>keep you signed in and secure your account;</li>
+                <li>remember your preferences (e.g., language, region);</li>
+                <li>analyze traffic and improve performance;</li>
                 <li>personalize your contest experience;</li>
-                <li>serve relevant promotions (only if you consent).</li>
+                <li>provide relevant promotions, if you consent.</li>
               </ul>
             </section>
 
             <section className="mb-8">
               <h2 className="text-2xl font-semibold text-foreground mb-4">4. Managing Cookies</h2>
-              <p className="text-muted-foreground mb-3">You can control cookies in two ways:</p>
+              <p className="text-muted-foreground mb-3">You can manage cookies in two ways:</p>
               <ul className="list-disc pl-6 text-muted-foreground space-y-2 mb-4">
-                <li><strong>On our website:</strong> via the cookie banner (Accept / Reject / Customize).</li>
-                <li><strong>In your browser:</strong> you can delete or block cookies at any time (see instructions for Chrome, Safari, Firefox, Edge).</li>
+                <li><strong>On our site</strong> — via the cookie banner where you can Accept all, Reject all, or Customize.</li>
+                <li><strong>In your browser</strong> — you can delete or block cookies at any time (see help pages for Chrome, Safari, Firefox, Edge).</li>
               </ul>
               <p className="text-muted-foreground">
-                <strong>Please note:</strong> blocking necessary cookies may affect how obcface.com functions.
+                <strong>Note:</strong> blocking necessary cookies may affect how obcface.com works.
               </p>
             </section>
 
             <section className="mb-8">
               <h2 className="text-2xl font-semibold text-foreground mb-4">5. Third-Party Cookies</h2>
-              <p className="text-muted-foreground mb-3">Some cookies are placed by third parties:</p>
+              <p className="text-muted-foreground mb-3">Some cookies are placed by third parties, including:</p>
               <ul className="list-disc pl-6 text-muted-foreground space-y-2 mb-4">
-                <li>Google Analytics (analytics)</li>
-                <li>Facebook Pixel (marketing, if enabled)</li>
-                <li>Other service providers we may use</li>
+                <li>Google Analytics — analytics and usage statistics;</li>
+                <li>Meta (Facebook) Pixel — marketing and advertising;</li>
+                <li>Other service providers we may use for performance and security.</li>
               </ul>
-              <p className="text-muted-foreground">These third parties have their own privacy policies.</p>
+              <p className="text-muted-foreground">Each provider has its own privacy policy.</p>
             </section>
 
             <section className="mb-8">
-              <h2 className="text-2xl font-semibold text-foreground mb-4">6. Data Retention</h2>
+              <h2 className="text-2xl font-semibold text-foreground mb-4">6. Retention</h2>
               <ul className="list-disc pl-6 text-muted-foreground space-y-2">
-                <li><strong>Session cookies:</strong> deleted when you close your browser.</li>
-                <li><strong>Persistent cookies:</strong> remain until expiry or deletion by you.</li>
-                <li>Retention period does not exceed 13 months (per GDPR/ePrivacy rules).</li>
+                <li>Session cookies are deleted when you close your browser.</li>
+                <li>Persistent cookies stay until their expiry date or until you delete them.</li>
+                <li>No cookies remain longer than 13 months (per GDPR/ePrivacy rules).</li>
               </ul>
             </section>
 
             <section className="mb-8">
               <h2 className="text-2xl font-semibold text-foreground mb-4">7. Your Rights</h2>
               <p className="text-muted-foreground mb-3">
-                Depending on your location (EU/EEA, UK, California, etc.), you may have rights to:
+                Depending on your location (EU/EEA, UK, California, etc.), you may have the right to:
               </p>
               <ul className="list-disc pl-6 text-muted-foreground space-y-2 mb-4">
                 <li>withdraw consent at any time;</li>
-                <li>request access, correction, or deletion of your personal data.</li>
+                <li>request access, correction, or deletion of your data.</li>
               </ul>
-              <p className="text-muted-foreground">See our Privacy Policy for details.</p>
+              <p className="text-muted-foreground">For details, see our Privacy Policy.</p>
             </section>
 
             <section className="mb-8">
@@ -120,7 +120,7 @@ const CookiePolicy = () => {
 
             <section className="mb-8">
               <h2 className="text-2xl font-semibold text-foreground mb-4">9. Contact</h2>
-              <p className="text-muted-foreground mb-2">If you have questions about cookies or your data, contact us at:</p>
+              <p className="text-muted-foreground mb-2">If you have any questions about this policy or your data, contact us:</p>
               <p className="text-muted-foreground">
                 📧 <a href="mailto:support@obcfaces.com" className="text-primary underline hover:no-underline">
                   support@obcfaces.com
