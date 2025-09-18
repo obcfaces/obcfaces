@@ -14,8 +14,8 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import SearchableSelect from "@/components/ui/searchable-select";
 import { getCitiesForLocation } from '@/lib/location-utils';
-import testContestantFace from "@/assets/test-contestant-face-new.jpg";
-import testContestantFull from "@/assets/test-contestant-full-new.jpg";
+import testContestantFace from "@/assets/example-face-photo.jpg";
+import testContestantFull from "@/assets/example-full-photo.jpg";
 
 interface ContestParticipationModalProps {
   children?: React.ReactNode;
@@ -1349,38 +1349,48 @@ export const ContestParticipationModal = ({
             {/* Example card showing requirements */}
             <div className="mb-6 border-2 border-yellow-300 rounded-lg overflow-hidden bg-yellow-50">
               <div className="bg-yellow-200 text-black px-4 py-3">
-                <div className="text-sm font-semibold mb-3">How your photos should look:</div>
-                <div className="grid grid-cols-2 gap-4 text-xs">
-                  <div className="space-y-1">
-                    <div className="flex">
-                      <span className="mr-1">•</span>
-                      <span>Look like an ID photo</span>
-                    </div>
-                    <div className="flex">
-                      <span className="mr-1">•</span>
-                      <span>No makeup</span>
-                    </div>
-                    <div className="flex">
-                      <span className="mr-1">•</span>
-                      <span>No filters</span>
-                    </div>
-                    <div className="flex">
-                      <span className="mr-1">•</span>
-                      <span>No glasses allowed</span>
+                <div className="text-sm font-semibold mb-3 text-center">How your photos should look:</div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="text-center">
+                    <div className="text-xs font-medium mb-2">Face Photo</div>
+                    <div className="space-y-1 text-xs">
+                      <div className="flex">
+                        <span className="mr-1">•</span>
+                        <span>Look like an ID photo</span>
+                      </div>
+                      <div className="flex">
+                        <span className="mr-1">•</span>
+                        <span>No makeup</span>
+                      </div>
+                      <div className="flex">
+                        <span className="mr-1">•</span>
+                        <span>No filters</span>
+                      </div>
+                      <div className="flex">
+                        <span className="mr-1">•</span>
+                        <span>No glasses allowed</span>
+                      </div>
                     </div>
                   </div>
-                  <div className="space-y-1 -ml-2">
-                    <div className="flex">
-                      <span className="mr-1">•</span>
-                      <span>Whole body from head to toe</span>
-                    </div>
-                    <div className="flex">
-                      <span className="mr-1">•</span>
-                      <span>Wear tight/fitted clothes. No dresses, skirts, heels</span>
-                    </div>
-                    <div className="flex">
-                      <span className="mr-1">•</span>
-                      <span>No bags or backpacks</span>
+                  <div className="text-center">
+                    <div className="text-xs font-medium mb-2">Full Body Photo</div>
+                    <div className="space-y-1 text-xs">
+                      <div className="flex">
+                        <span className="mr-1">•</span>
+                        <span>Whole body from head to toe</span>
+                      </div>
+                      <div className="flex">
+                        <span className="mr-1">•</span>
+                        <span>Wear tight/fitted clothes</span>
+                      </div>
+                      <div className="flex">
+                        <span className="mr-1">•</span>
+                        <span>No dresses, skirts, heels</span>
+                      </div>
+                      <div className="flex">
+                        <span className="mr-1">•</span>
+                        <span>No bags or backpacks</span>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -1392,9 +1402,6 @@ export const ContestParticipationModal = ({
                     alt="Example face photo"
                     className="w-full aspect-[4/5] object-cover"
                   />
-                  <div className="absolute top-1 left-1 bg-yellow-500 text-white px-1.5 py-0.5 text-xs font-bold rounded">
-                    Example
-                  </div>
                 </div>
                 <div className="relative">
                   <img 
