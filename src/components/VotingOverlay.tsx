@@ -38,6 +38,7 @@ export function VotingOverlay({
     // Show stars for unauthenticated users in THIS WEEK ONLY
     return (
       <div className="absolute inset-0 bg-gray-300 rounded-r flex flex-col items-center justify-center gap-3">
+        {!compact && <span className="text-lg sm:text-xl font-medium text-gray-800">Vote</span>}
         <div className="scale-[1.5] sm:scale-[1.8]">
           <StarRating 
             rating={0} 
@@ -61,18 +62,21 @@ export function VotingOverlay({
       <div className="absolute inset-0 bg-gray-300 rounded-r flex flex-col items-center justify-center gap-3">
         {/* Show only stars for all users in THIS WEEK, full voting UI for other sections */}
         {isThisWeek ? (
-          <div className="scale-[1.5] sm:scale-[1.8]">
-            <StarRating 
-              rating={0} 
-              isVoted={false}
-              variant="white"
-              hideText={true}
-              onRate={(rating) => {
-                console.log('Authenticated user voting in THIS WEEK');
-                handleRate(rating);
-              }}
-            />
-          </div>
+          <>
+            {!compact && <span className="text-lg sm:text-xl font-medium text-gray-800">Vote</span>}
+            <div className="scale-[1.5] sm:scale-[1.8]">
+              <StarRating 
+                rating={0} 
+                isVoted={false}
+                variant="white"
+                hideText={true}
+                onRate={(rating) => {
+                  console.log('Authenticated user voting in THIS WEEK');
+                  handleRate(rating);
+                }}
+              />
+            </div>
+          </>
         ) : (
           <>
             <span className="text-lg sm:text-xl font-medium text-gray-800">Vote</span>
