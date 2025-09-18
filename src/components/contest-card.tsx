@@ -460,8 +460,8 @@ export function ContestantCard({
             </div>
           )}
            
-             {/* Rating in top right corner - only show for authorized users */}
-             {rank > 0 && isVoted && !isExample && propUser && (
+             {/* Rating in top right corner - show for all users in past weeks */}
+             {rank > 0 && isVoted && !isExample && !isThisWeek && (
                <div className="absolute top-0 right-0 z-20 flex items-center">
                  <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
                    <PopoverTrigger asChild>

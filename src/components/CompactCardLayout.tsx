@@ -129,20 +129,7 @@ export function CompactCardLayout({
       </div>
       
       {/* Rating badge in top right corner for past weeks */}
-      {(() => {
-        const shouldShow = !isEditing && !showThanks && !isExample && !isThisWeek;
-        console.log('CompactCardLayout rating check:', { 
-          name, 
-          shouldShow, 
-          isEditing, 
-          showThanks, 
-          isExample, 
-          isThisWeek, 
-          localAverageRating,
-          propUser: !!propUser 
-        });
-        return shouldShow;
-      })() && (
+      {!isEditing && !showThanks && !isExample && !isThisWeek && (
         <div className="absolute top-0 right-0 z-10">
           <div className="bg-contest-blue text-white px-1 py-0.5 rounded-bl text-xs font-bold">
             {localAverageRating > 0 ? localAverageRating.toFixed(1) : '0.0'}
