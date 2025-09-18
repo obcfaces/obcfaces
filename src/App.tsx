@@ -19,6 +19,7 @@ import AuthCallbackHandler from "@/components/auth-callback-handler";
 import TopBar from "@/components/top-bar";
 import { Footer } from "@/components/footer";
 import { SocialWidgets } from "@/components/social-widgets";
+import { LanguageProvider } from "@/contexts/LanguageContext";
 
 
 const queryClient = new QueryClient();
@@ -29,8 +30,9 @@ const App = () => {
   return (
     <div className="min-h-screen w-full flex flex-col">
       <HelmetProvider>
-        <QueryClientProvider client={queryClient}>
-          <TooltipProvider>
+        <LanguageProvider>
+          <QueryClientProvider client={queryClient}>
+            <TooltipProvider>
             <Toaster />
             <Sonner />
             <BrowserRouter>
@@ -55,8 +57,9 @@ const App = () => {
               <Footer />
               <SocialWidgets />
             </BrowserRouter>
-          </TooltipProvider>
-        </QueryClientProvider>
+            </TooltipProvider>
+          </QueryClientProvider>
+        </LanguageProvider>
       </HelmetProvider>
     </div>
   );
