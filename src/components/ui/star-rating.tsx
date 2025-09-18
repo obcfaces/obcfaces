@@ -45,10 +45,10 @@ export function StarRating({ rating, isVoted, onRate, readonly, variant = "defau
                 "w-4 h-4 transition-colors",
                 variant === "white"
                   ? (star <= (hoveredRating || rating))
-                    ? "fill-yellow-400 text-yellow-400"
+                    ? "fill-blue-500 text-blue-500"
                     : "fill-white text-white stroke-2"
                   : (star <= (hoveredRating || rating))
-                    ? "fill-star-active text-star-active"
+                    ? "fill-blue-500 text-blue-500"
                     : "fill-star-inactive text-star-inactive"
               )}
             />
