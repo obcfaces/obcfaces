@@ -37,8 +37,8 @@ export function VotingOverlay({
   if (isThisWeek && !propUser && !isExample) {
     // Show stars for unauthenticated users in THIS WEEK ONLY
     return (
-      <div className="absolute inset-0 bg-gray-500 rounded-r flex flex-col items-center justify-center gap-6">
-        {!compact && <span className="text-lg sm:text-xl font-medium text-white">Vote</span>}
+      <div className={`absolute inset-0 ${compact ? 'bg-gray-300' : 'bg-gray-600'} rounded-r flex flex-col items-center justify-center gap-6`}>
+        {!compact && <span className={`text-lg sm:text-xl font-medium ${compact ? 'text-gray-800' : 'text-white'}`}>Vote</span>}
         <div className="scale-[1.5] sm:scale-[1.8]">
           <StarRating 
             rating={0} 
@@ -59,11 +59,11 @@ export function VotingOverlay({
   } else if (!isVoted && !isEditing && !showThanks && !isExample) {
     // Show voting overlay only for authenticated users in all sections
     return (
-      <div className="absolute inset-0 bg-gray-500 rounded-r flex flex-col items-center justify-center gap-6">
+      <div className={`absolute inset-0 ${compact ? 'bg-gray-300' : 'bg-gray-600'} rounded-r flex flex-col items-center justify-center gap-6`}>
         {/* Show only stars for all users in THIS WEEK, full voting UI for other sections */}
         {isThisWeek ? (
           <>
-            {!compact && <span className="text-lg sm:text-xl font-medium text-white">Vote</span>}
+            {!compact && <span className={`text-lg sm:text-xl font-medium ${compact ? 'text-gray-800' : 'text-white'}`}>Vote</span>}
             <div className="scale-[1.5] sm:scale-[1.8]">
               <StarRating 
                 rating={0} 
@@ -79,7 +79,7 @@ export function VotingOverlay({
           </>
         ) : (
           <>
-            <span className="text-lg sm:text-xl font-medium text-white">Vote</span>
+            <span className={`text-lg sm:text-xl font-medium ${compact ? 'text-gray-800' : 'text-white'}`}>Vote</span>
             <div className="scale-[1.5] sm:scale-[1.8]">
               <StarRating 
                 rating={0} 
@@ -114,8 +114,8 @@ export function VotingOverlay({
   // Re-voting overlay - shown when editing existing vote
   if (isVoted && isEditing && !showThanks && !isExample) {
     return (
-      <div className="absolute inset-0 bg-gray-500 rounded-r flex flex-col items-center justify-center gap-6">
-        <span className="text-lg sm:text-xl font-medium text-white">Vote</span>
+      <div className={`absolute inset-0 ${compact ? 'bg-gray-300' : 'bg-gray-600'} rounded-r flex flex-col items-center justify-center gap-6`}>
+        <span className={`text-lg sm:text-xl font-medium ${compact ? 'text-gray-800' : 'text-white'}`}>Vote</span>
         <div className="scale-[1.5] sm:scale-[1.8]">
           <StarRating 
             rating={0} 
