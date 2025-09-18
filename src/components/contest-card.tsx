@@ -446,7 +446,7 @@ export function ContestantCard({
   if (viewMode === 'full') {
     return (
       <>
-        <Card className={`${isExample ? 'border-yellow-400 border-2 bg-yellow-50/50' : isWinner ? 'bg-blue-50 border-contest-blue border-2' : 'bg-card border-contest-border'} relative overflow-hidden`}>
+        <Card className={`${isExample ? 'border-yellow-400 border-2 bg-yellow-50/50' : isWinner ? 'bg-card border-contest-blue border-2' : 'bg-card border-contest-border'} relative overflow-hidden`}>
           {/* Rank number in top left corner - show in past weeks for all users */}
           {rank > 0 && !isExample && totalVotes > 0 && !isThisWeek && (
             <div className="absolute top-0 left-0 z-20 flex items-center">
@@ -731,7 +731,7 @@ export function ContestantCard({
   return (
     <>
       
-      <Card className={`${isExample ? 'border-yellow-400 border-2 bg-yellow-50/50' : isWinner ? 'bg-blue-50 border-contest-blue border-2' : 'bg-card border-contest-border'} relative overflow-hidden ${isWinner ? 'flex flex-col' : 'h-36 sm:h-40 md:h-44'}`}>
+      <Card className={`${isExample ? 'border-yellow-400 border-2 bg-yellow-50/50' : isWinner ? 'bg-card border-contest-blue border-2' : 'bg-card border-contest-border'} relative overflow-hidden ${isWinner ? 'flex flex-col' : 'h-36 sm:h-40 md:h-44'}`}>
         {isWinner && (
           <div className="absolute top-0 left-0 w-[193px] sm:w-[225px] md:w-[257px] bg-blue-100 text-blue-700 pl-2 pr-2 py-1 text-xs font-semibold flex items-center justify-start z-20">
             <span>🏆 WINNER   + 5000 PHP</span>
@@ -889,7 +889,7 @@ export function ContestantCard({
               </div>
               
               {/* Testimonial text */}
-              <div className="flex-1 p-3 flex flex-col items-center justify-center bg-blue-100">
+              <div className="flex-1 p-3 flex flex-col items-center justify-center bg-card">
                 <p className="text-sm text-gray-700 italic text-center mb-3">
                   "I never imagined this could be real. I'm so happy I won! All I had to do was fill out the form. Anyone can do it!"
                 </p>
