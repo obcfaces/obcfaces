@@ -432,8 +432,13 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
                 isThisWeek={title === "THIS WEEK"}
                 user={user}
               />
-            ))}
-          </div>
+             ))}
+           </div>
+           
+           {/* Add spacing after cards for THIS WEEK section */}
+           {title === "THIS WEEK" && (
+             <div className="mt-1 sm:mt-3"></div>
+           )}
         </div>
       )}
 
