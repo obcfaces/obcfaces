@@ -508,7 +508,7 @@ export function ContestantCard({
               </div>
             ) : (
               /* Authorized users or non-THIS WEEK sections see full content */
-              !isEditing && !showThanks && (
+              !isEditing && !showThanks && !isExample && (
                 <div className="flex items-center justify-between h-full">
                   <div>
                     <h3 className="text-xl font-semibold text-contest-text">
@@ -575,7 +575,7 @@ export function ContestantCard({
            <div className="relative">
               {/* Example text area with photo requirements */}
               {isExample && (
-                <div className="bg-yellow-400 text-black px-4 py-3">
+                <div className="bg-yellow-200 text-black px-4 py-3">
                   <div className="text-sm font-semibold mb-3">How your photos should look:</div>
                   <div className="grid grid-cols-2 gap-6 text-xs">
                     <div className="space-y-1">
