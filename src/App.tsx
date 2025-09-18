@@ -12,6 +12,7 @@ import Profile from "./pages/Profile";
 import Contest from "./pages/Contest";
 import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
+import CookiePolicy from "./pages/CookiePolicy";
 import Messages from "./pages/Messages";
 import Likes from "./pages/Likes";
 import Admin from "./pages/Admin";
@@ -51,6 +52,7 @@ const App = () => {
                   <Route path="/admin" element={<Admin />} />
                   <Route path="/terms" element={<Terms />} />
                   <Route path="/privacy" element={<Privacy />} />
+                  <Route path="/cookie-policy" element={<CookiePolicy />} />
                   <Route path="/likes" element={<Likes />} />
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<NotFound />} />
