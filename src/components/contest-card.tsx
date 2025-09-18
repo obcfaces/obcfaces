@@ -95,19 +95,15 @@ export function ContestantCard({
   const [localTotalVotes, setLocalTotalVotes] = useState(totalVotes);
   const [previousUserRating, setPreviousUserRating] = useState(0);
   
-  // TEMPORARILY DISABLED - Use unified card data hook with stable dependencies
-  // const { data: cardData, loading: cardDataLoading, refresh: refreshCardData } = useCardData(name, user?.id, profileId);
-  
-  // Mock cardData to prevent build errors while debugging
-  const cardData = { likes: 0, comments: 0, isLiked: false, hasCommented: false };
-  const cardDataLoading = false;
+  // Use unified card data hook with stable dependencies
+  const { data: cardData, loading: cardDataLoading, refresh: refreshCardData } = useCardData(name, propUser?.id, profileId);
 
   // Initialize local state when props change
   useEffect(() => {
     setLocalAverageRating(averageRating);
     setLocalTotalVotes(totalVotes);
   }, [averageRating, totalVotes]);
-  const refreshCardData = () => {};
+  
   
   // TEMPORARILY DISABLED ALL EFFECTS AND PROP SYNC TO STOP RECURSION
   // Sync local state with props only once on mount to prevent recursion
