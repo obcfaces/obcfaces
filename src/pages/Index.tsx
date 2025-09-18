@@ -190,8 +190,10 @@ Submit your entry anytime! If not selected this week, you may be chosen for the 
               <h3 className="text-lg font-semibold mb-2">3. Selection & Voting</h3>
               <EditableContent 
                 content={`• Each Monday, we post new contestants.
-• Our audience votes by liking photos ❤️
-• Admins make the final decision to ensure fairness.`}
+• Our audience votes by rating with stars ⭐
+• The winner of the week is the one with the highest rating.
+• If the rating is the same, the one with more likes wins.
+• Make your choice – vote!`}
                 contentKey="selection-voting"
                 className="text-sm whitespace-pre-line"
                 isAdmin={isAdmin}
