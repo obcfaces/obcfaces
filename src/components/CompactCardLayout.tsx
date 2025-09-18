@@ -103,11 +103,7 @@ export function CompactCardLayout({
             Example
           </div>
         )}
-        {(() => {
-          const shouldShow = !isExample && !isThisWeek;
-          console.log('CompactCardLayout rank display:', { name, shouldShow, isExample, isThisWeek, rank });
-          return shouldShow;
-        })() && (
+        {!isExample && !isThisWeek && (
           <div className="absolute top-0 left-0 bg-black/70 text-white text-xs font-bold px-1 py-0.5 rounded-br">
             {rank > 0 ? rank : '★'}
           </div>

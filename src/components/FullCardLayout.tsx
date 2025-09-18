@@ -106,11 +106,7 @@ export function FullCardLayout({
       )}
       
       {/* Rating badge in top right corner - show for everyone in past weeks */}
-      {(() => {
-        const shouldShow = !isEditing && !showThanks && !isExample && !isThisWeek;
-        console.log('FullCardLayout rating display:', { name, shouldShow, isEditing, showThanks, isExample, isThisWeek });
-        return shouldShow;
-      })() && (
+      {!isEditing && !showThanks && !isExample && !isThisWeek && (
         <div className="absolute top-0 right-0 z-10 flex flex-col items-end">
            <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
              <PopoverTrigger asChild>
