@@ -778,9 +778,9 @@ export function ContestantCard({
         )}
         
         {/* First row: Main two photos with additional photos indicator */}
-        <div className={`${isWinner ? 'w-full' : 'flex h-full'} relative gap-px`}>
-          {/* Winner cards have different layout */}
-          {isWinner ? (
+        <div className={`${isWinner && viewMode !== 'compact' ? 'w-full' : 'flex h-full'} relative gap-px`}>
+          {/* Winner cards have different layout only in full mode */}
+          {isWinner && viewMode !== 'compact' ? (
             <div className="flex flex-col">
               <FullCardLayout
                 name={name}
@@ -823,7 +823,7 @@ export function ContestantCard({
               />
             </div>
           ) : (
-            /* Regular cards layout */
+            /* Regular cards layout (including winners in compact mode) */
             <CompactCardLayout
               name={name}
               age={age}
