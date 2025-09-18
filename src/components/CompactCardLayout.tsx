@@ -238,8 +238,8 @@ export function CompactCardLayout({
           </div>
         )}
         
-        {/* FOR CURRENT WEEK: Show info only after voting */}
-        {isThisWeek && isVoted && !isEditing && !showThanks && (
+        {/* FOR CURRENT WEEK: Show info only after voting OR for examples */}
+        {isThisWeek && (isVoted || isExample) && !isEditing && !showThanks && (
           <div className={`absolute inset-0 rounded-r flex flex-col justify-between p-1 sm:p-2 md:p-3 ${isExample ? 'bg-yellow-100' : 'bg-white'}`}>
             <div className="flex items-start justify-between">
               {!isExample && (
@@ -249,6 +249,19 @@ export function CompactCardLayout({
                    <div className="text-sm sm:text-base text-contest-blue truncate">
                      {getCountryDisplayName(country)} · {city}
                    </div>
+                </div>
+              )}
+              
+              {/* Example bullet points for current week examples */}
+              {isExample && (
+                <div className="flex-1 flex items-center justify-start pl-2">
+                  <div className="text-xs text-gray-700 space-y-1">
+                    <div className="font-bold mb-2">Photo Requirements</div>
+                    <div>• Portrait and whole body</div>
+                    <div>• No makeup, no filters</div>
+                    <div>• Wear tight/fitted clothes.</div>
+                    <div>• No dresses, glasses</div>
+                  </div>
                 </div>
               )}
               
