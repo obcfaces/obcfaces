@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { MessageCircle, Heart } from "lucide-react";
 import AuthNav from "@/components/auth-nav";
 import GlobalSearch from "@/components/global-search";
+import LanguageSelector from "@/components/language-selector";
 import { useUnreadMessages } from "@/hooks/useUnreadMessages";
 import { useUnreadLikes } from "@/hooks/useUnreadLikes";
 
@@ -27,6 +28,8 @@ const TopBar = () => {
         </div>
         
         <div className="flex items-center gap-1">
+          <LanguageSelector />
+          
           {/* Likes Icon with Unread Count */}
           <Link
             to="/likes"
