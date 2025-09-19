@@ -137,57 +137,23 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
         setForgotEmailSent(true);
         toast({ description: "Письмо для восстановления пароля отправлено на ваш email" });
       } else if (mode === "login") {
-        // Сначала пытаемся сбросить пароль чтобы проверить существование email
-        try {
-          const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
-            redirectTo: `${window.location.origin}/`,
-          });
-          
-          // Если resetPasswordForEmail вернул ошибку о том что пользователь не найден
-          if (resetError && (
-            resetError.message.includes("User not found") || 
-            resetError.message.includes("user_not_found") ||
-            resetError.message.includes("Invalid email")
-          )) {
-            setEmailError("Такой почты не существует");
+        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) {
+          if (error.message === "Invalid login credentials") {
+            // Стандартное сообщение с двумя ссылками
+            setEmailError("Неправильный email или пароль");
             setLoading(false);
             return;
+          } else if (error.message === "Email not confirmed") {
+            setAuthError("Email не подтвержден. Проверьте почту");
+          } else if (error.message === "Too many requests") {
+            setAuthError("Слишком много попыток. Попробуйте позже");
+          } else {
+            setAuthError(error.message);
           }
           
-          // Email существует или resetPassword не дал четкого ответа, пытаемся авторизоваться
-          const { error } = await supabase.auth.signInWithPassword({ email, password });
-          if (error) {
-            if (error.message === "Invalid login credentials") {
-              // Если дошли до сюда и получили Invalid credentials, то скорее всего неправильный пароль
-              setPasswordError("Пароль не подходит");
-              setLoading(false);
-              return;
-            } else if (error.message === "Email not confirmed") {
-              setAuthError("Email не подтвержден. Проверьте почту");
-            } else if (error.message === "Too many requests") {
-              setAuthError("Слишком много попыток. Попробуйте позже");
-            } else {
-              setAuthError(error.message);
-            }
-            
-            throw new Error("Login failed");
-          }
-        } catch (resetErr: any) {
-          // Если resetPassword дал другую ошибку, все равно пытаемся авторизоваться
-          const { error } = await supabase.auth.signInWithPassword({ email, password });
-          if (error) {
-            if (error.message === "Invalid login credentials") {
-              // В этом случае не можем точно сказать что именно неправильно
-              setEmailError("Неправильный email или пароль");
-              setLoading(false);
-              return;
-            } else {
-              setAuthError(error.message);
-              throw new Error("Login failed");
-            }
-          }
+          throw new Error("Login failed");
         }
-        
         toast({ description: "Авторизация успешна" });
         onClose?.(); // Close modal after successful login
       } else {
@@ -367,7 +333,19 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
                   setPasswordError("");
                 }}
               >
-                Sign up
+                Зарегистрироваться
+              </button>
+              {" или "}
+              <button 
+                type="button" 
+                className="text-primary underline hover:no-underline"
+                onClick={() => {
+                  setMode("forgot");
+                  setEmailError("");
+                  setPasswordError("");
+                }}
+              >
+                Восстановить пароль
               </button>
             </div>
           )}
