@@ -78,14 +78,6 @@ export const CookieConsent = () => {
                 Customize
               </Button>
             </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleReject}
-              className="h-6 w-6 text-muted-foreground hover:text-foreground"
-            >
-              <X className="h-4 w-4" />
-            </Button>
           </div>
         </Card>
       </div>
