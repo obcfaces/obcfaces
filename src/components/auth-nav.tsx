@@ -4,10 +4,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Settings, MessageCircle } from "lucide-react";
-import LoginModalTrigger from "@/components/login-modal";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import LoginModalContent from "@/components/login-modal-content";
 
 // Shows Login button when logged out and a round avatar linking to the user's profile when logged in
 const AuthNav = () => {
+  const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [session, setSession] = useState<import("@supabase/supabase-js").Session | null>(null);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [displayName, setDisplayName] = useState<string | null>(null);
@@ -64,7 +66,22 @@ const AuthNav = () => {
   }, [displayName, session?.user?.email]);
 
   if (!session?.user) {
-    return <LoginModalTrigger />;
+    return (
+      <>
+        <button 
+          className="text-sm underline text-primary"
+          onClick={() => setIsLoginOpen(true)}
+        >
+          Sign in
+        </button>
+        
+        <Dialog open={isLoginOpen} onOpenChange={setIsLoginOpen}>
+          <DialogContent className="sm:max-w-lg data-[state=open]:translate-y-[5%] sm:data-[state=open]:translate-y-[2%]">
+            <LoginModalContent onClose={() => setIsLoginOpen(false)} />
+          </DialogContent>
+        </Dialog>
+      </>
+    );
   }
 
   return (
