@@ -153,7 +153,7 @@ const Index = () => {
 
       {/* How it works content */}
       {activeSection === "How it works" && (
-        <div className="max-w-6xl mx-auto px-0 sm:px-6 py-8 space-y-8 text-foreground">
+        <div className="max-w-6xl mx-auto px-0 sm:px-6 py-8 space-y-2 text-foreground">
           <div className="text-center mb-12">
             <h1 className="text-3xl md:text-4xl font-black bg-gradient-to-r from-purple-600 via-pink-500 to-orange-400 bg-clip-text text-transparent mb-4">
               How It Works
@@ -168,12 +168,12 @@ const Index = () => {
           
           <div className="space-y-8">
             {/* 1. Enter Anytime */}
-            <div className="bg-background p-3 sm:p-6 rounded-none sm:rounded-2xl border-0 sm:border border-border shadow-lg mx-0 sm:mx-0">
-              <div className="flex items-center gap-3 mb-4">
+            <div className="bg-background p-6 sm:p-8 rounded-none sm:rounded-2xl border-0 sm:border border-border shadow-lg mx-0 sm:mx-0">
+              <div className="flex items-center gap-3 mb-6">
                 <div className="flex items-center justify-center w-12 h-12 bg-primary text-primary-foreground rounded-full text-xl font-bold">1</div>
                 <h3 className="text-lg font-bold text-foreground">📸 Enter Anytime</h3>
               </div>
-              <div className="text-base whitespace-pre-line text-foreground">
+              <div className="text-base whitespace-pre-line text-foreground text-justify">
                 Upload two photos:
                 • 1 full-body photo (natural look — no filters, no heavy editing)
                 • 1 close-up face photo (no makeup)
@@ -183,52 +183,64 @@ const Index = () => {
                 <a href="/privacy" className="text-primary hover:underline font-semibold">Privacy Policy</a>.
               </div>
             </div>
+            
+            {/* Separator */}
+            <div className="h-2 bg-muted/30"></div>
 
             {/* 2. Selection & Posting */}
-            <div className="bg-background p-3 sm:p-6 rounded-none sm:rounded-2xl border-0 sm:border border-border shadow-lg mx-0 sm:mx-0">
-              <div className="flex items-center gap-3 mb-4">
+            <div className="bg-background p-6 sm:p-8 rounded-none sm:rounded-2xl border-0 sm:border border-border shadow-lg mx-0 sm:mx-0">
+              <div className="flex items-center gap-3 mb-6">
                 <div className="flex items-center justify-center w-12 h-12 bg-primary text-primary-foreground rounded-full text-xl font-bold">2</div>
                 <h3 className="text-lg font-bold text-foreground">🔍 Selection & Posting</h3>
               </div>
               <EditableContent 
                 content="New contestants are posted each week. We review every entry for compliance with our rules; submissions may be rejected or removed if they violate our policies (see Rules below)."
                 contentKey="selection-posting"
-                className="text-base text-foreground"
+                className="text-base text-foreground text-justify"
                 isAdmin={isAdmin}
               />
             </div>
+            
+            {/* Separator */}
+            <div className="h-2 bg-muted/30"></div>
 
             {/* 3. Global Voting */}
-            <div className="bg-background p-3 sm:p-6 rounded-none sm:rounded-2xl border-0 sm:border border-border shadow-lg mx-0 sm:mx-0">
-              <div className="flex items-center gap-3 mb-4">
+            <div className="bg-background p-6 sm:p-8 rounded-none sm:rounded-2xl border-0 sm:border border-border shadow-lg mx-0 sm:mx-0">
+              <div className="flex items-center gap-3 mb-6">
                 <div className="flex items-center justify-center w-12 h-12 bg-primary text-primary-foreground rounded-full text-xl font-bold">3</div>
                 <h3 className="text-lg font-bold text-foreground">⭐ Global Voting</h3>
               </div>
               <EditableContent 
                 content="Fans worldwide vote using star ratings. Weekly winners are chosen by highest rating; ties are resolved by likes or other pre-published tiebreakers. We monitor votes for fraud and reserve the right to adjust or void votes if manipulation is detected."
                 contentKey="global-voting"
-                className="text-base text-foreground"
+                className="text-base text-foreground text-justify"
                 isAdmin={isAdmin}
               />
             </div>
+            
+            {/* Separator */}
+            <div className="h-2 bg-muted/30"></div>
 
             {/* 4. Prizes & Verification */}
-            <div className="bg-background p-3 sm:p-6 rounded-none sm:rounded-2xl border-0 sm:border border-border shadow-lg mx-0 sm:mx-0">
-              <div className="flex items-center gap-3 mb-4">
+            <div className="bg-background p-6 sm:p-8 rounded-none sm:rounded-2xl border-0 sm:border border-border shadow-lg mx-0 sm:mx-0">
+              <div className="flex items-center gap-3 mb-6">
                 <div className="flex items-center justify-center w-12 h-12 bg-primary text-primary-foreground rounded-full text-xl font-bold">4</div>
                 <h3 className="text-lg font-bold text-foreground">🏆 Prizes & Verification</h3>
               </div>
               <EditableContent 
                 content="Prizes and payment methods are announced on the Platform. Winners are verified before payout and are responsible for any local taxes or fees. We may request identification to confirm eligibility."
                 contentKey="prizes-verification"
-                className="text-base text-foreground"
+                className="text-base text-foreground text-justify"
                 isAdmin={isAdmin}
               />
             </div>
+            
+            {/* Separator */}
+            <div className="h-2 bg-muted/30"></div>
 
             {/* 5. Rules & Safety */}
-            <div className="bg-background p-3 sm:p-6 rounded-none sm:rounded-2xl border-0 sm:border border-border shadow-lg mx-0 sm:mx-0">
-              <div className="flex items-center gap-3 mb-4">
+            <div className="bg-background p-6 sm:p-8 rounded-none sm:rounded-2xl border-0 sm:border border-border shadow-lg mx-0 sm:mx-0">
+              <div className="flex items-center gap-3 mb-6">
                 <div className="flex items-center justify-center w-12 h-12 bg-primary text-primary-foreground rounded-full text-xl font-bold">5</div>
                 <h3 className="text-lg font-bold text-foreground">🛡️ Rules & Safety</h3>
               </div>
@@ -238,18 +250,21 @@ const Index = () => {
 • By submitting, you grant OBC a limited, non-exclusive, worldwide license to use your photos for the contest and promotion (see full Terms). You retain ownership.
 • If you see prohibited content, report it immediately via our report button or at support@obcfaces.com. We process reports and remove content that violates rules. Repeat infringers will be suspended.`}
                 contentKey="rules-safety"
-                className="text-base whitespace-pre-line text-foreground"
+                className="text-base whitespace-pre-line text-foreground text-justify"
                 isAdmin={isAdmin}
               />
             </div>
+            
+            {/* Separator */}
+            <div className="h-2 bg-muted/30"></div>
 
             {/* Questions or disputes */}
-            <div className="bg-background p-3 sm:p-6 rounded-none sm:rounded-2xl border-0 sm:border border-border shadow-lg mx-0 sm:mx-0 text-center">
-              <div className="flex items-center justify-center gap-3 mb-4">
+            <div className="bg-background p-6 sm:p-8 rounded-none sm:rounded-2xl border-0 sm:border border-border shadow-lg mx-0 sm:mx-0 text-center">
+              <div className="flex items-center justify-center gap-3 mb-6">
                 <span className="text-4xl">💬</span>
                 <h3 className="text-lg font-bold text-foreground">Questions or disputes?</h3>
               </div>
-              <div className="text-lg text-foreground">
+              <div className="text-lg text-foreground text-justify">
                 <EditableContent 
                   content="Contact support: support@obcfaces.com. For full details, see our"
                   contentKey="questions-disputes-intro"
@@ -262,10 +277,13 @@ const Index = () => {
                 <a href="/privacy" className="text-primary hover:underline font-semibold">Privacy Policy</a>.
               </div>
             </div>
+            
+            {/* Separator */}
+            <div className="h-2 bg-muted/30"></div>
 
             {/* FAQ Section */}
-            <div className="bg-background p-3 sm:p-6 rounded-none sm:rounded-2xl border-0 sm:border border-border shadow-lg mx-3 sm:mx-0">
-              <div className="flex items-center gap-3 mb-6">
+            <div className="bg-background p-6 sm:p-8 rounded-none sm:rounded-2xl border-0 sm:border border-border shadow-lg mx-3 sm:mx-0">
+              <div className="flex items-center gap-3 mb-8">
                 <h3 className="text-lg font-bold text-foreground">❓ Frequently Asked Questions (FAQ)</h3>
               </div>
               
