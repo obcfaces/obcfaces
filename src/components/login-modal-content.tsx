@@ -141,7 +141,7 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
         if (error) {
           if (error.message === "Invalid login credentials") {
             // Стандартное сообщение с двумя ссылками
-            setEmailError("Неправильный email или пароль");
+            setEmailError("Invalid email or password");
             setLoading(false);
             return;
           } else if (error.message === "Email not confirmed") {
