@@ -33,31 +33,31 @@ export const CookieConsent = () => {
   if (!isVisible) return null;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 p-4">
-      <Card className="mx-auto max-w-4xl border border-border bg-background/95 backdrop-blur-sm shadow-lg">
-        <div className="flex items-start gap-4 p-6">
-          <Cookie className="h-6 w-6 text-primary mt-1 flex-shrink-0" />
-          <div className="flex-1">
-            <h3 className="font-semibold text-foreground mb-2">
+    <div className="fixed bottom-0 left-0 right-0 z-50 p-0">
+      <Card className="w-full border-t border-border bg-background/95 backdrop-blur-sm shadow-lg rounded-none">
+        <div className="flex items-center gap-4 p-4">
+          <Cookie className="h-6 w-6 text-primary flex-shrink-0" />
+          <div className="flex-1 flex items-center gap-2">
+            <h3 className="font-semibold text-foreground">
               Cookies
             </h3>
-            <p className="text-sm text-muted-foreground mb-4">
+            <span className="text-sm text-muted-foreground">
               We use cookies to improve your experience. Some are necessary, others (analytics/ads) need your consent. See our{" "}
               <a href="/cookie-policy" className="text-primary underline hover:no-underline">
                 Cookie Policy
               </a>.
-            </p>
-            <div className="flex flex-wrap gap-3">
-              <Button onClick={handleAccept} size="sm">
-                Accept all
-              </Button>
-              <Button onClick={handleReject} variant="outline" size="sm">
-                Reject all
-              </Button>
-              <Button onClick={handleCustomize} variant="outline" size="sm">
-                Customize
-              </Button>
-            </div>
+            </span>
+          </div>
+          <div className="flex gap-3">
+            <Button onClick={handleAccept} size="sm">
+              Accept all
+            </Button>
+            <Button onClick={handleReject} variant="outline" size="sm">
+              Reject all
+            </Button>
+            <Button onClick={handleCustomize} variant="outline" size="sm">
+              Customize
+            </Button>
           </div>
           <Button
             variant="ghost"
