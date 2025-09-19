@@ -120,7 +120,7 @@ const CookiePolicy = () => {
 
             <section className="mb-8">
               <h2 className="text-2xl font-semibold text-foreground mb-4">9. Contact</h2>
-              <p className="text-muted-foreground mb-2">If you have any questions about this policy or your data, contact us:</p>
+              <p className="text-muted-foreground mb-2">Questions about cookies? Contact:</p>
               <p className="text-muted-foreground">
                 📧 <a href="mailto:support@obcfaces.com" className="text-primary underline hover:no-underline">
                   support@obcfaces.com
