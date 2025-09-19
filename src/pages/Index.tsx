@@ -172,15 +172,15 @@ const Index = () => {
                 <div className="flex items-center justify-center w-12 h-12 bg-primary text-primary-foreground rounded-full text-2xl font-bold">1</div>
                 <h3 className="text-2xl font-bold text-foreground">📸 Enter Anytime</h3>
               </div>
-              <EditableContent 
-                content={`Upload two photos:
-• 1 full-body photo (natural look — no filters, no heavy editing)
-• 1 close-up face photo (no makeup)
-By submitting, you confirm you are 18 years or older, you own the photos (or have permission), and you accept our [Terms] and [Privacy Policy].`}
-                contentKey="enter-anytime"
-                className="text-base whitespace-pre-line text-foreground"
-                isAdmin={isAdmin}
-              />
+              <div className="text-base whitespace-pre-line text-foreground">
+                Upload two photos:
+                • 1 full-body photo (natural look — no filters, no heavy editing)
+                • 1 close-up face photo (no makeup)
+                By submitting, you confirm you are 18 years or older, you own the photos (or have permission), and you accept our{" "}
+                <a href="/terms" className="text-primary hover:underline font-semibold">Terms</a>
+                {" and "}
+                <a href="/privacy" className="text-primary hover:underline font-semibold">Privacy Policy</a>.
+              </div>
             </div>
 
             {/* 2. Selection & Posting */}
@@ -249,12 +249,18 @@ By submitting, you confirm you are 18 years or older, you own the photos (or hav
                 <h3 className="text-2xl font-bold text-foreground">Questions or disputes?</h3>
                 <span className="text-4xl">💬</span>
               </div>
-              <EditableContent 
-                content="Contact support: support@obcfaces.com. For full details, see our [Terms] and [Privacy Policy] (links)."
-                contentKey="questions-disputes"
-                className="text-lg text-foreground font-medium"
-                isAdmin={isAdmin}
-              />
+              <div className="text-lg text-foreground font-medium">
+                <EditableContent 
+                  content="Contact support: support@obcfaces.com. For full details, see our"
+                  contentKey="questions-disputes-intro"
+                  className="text-lg text-foreground font-medium inline"
+                  isAdmin={isAdmin}
+                />
+                {" "}
+                <a href="/terms" className="text-primary hover:underline font-semibold">Terms</a>
+                {" and "}
+                <a href="/privacy" className="text-primary hover:underline font-semibold">Privacy Policy</a>.
+              </div>
             </div>
           </div>
         </div>
