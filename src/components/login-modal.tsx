@@ -88,7 +88,7 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
     }
     try {
       if (mode === "forgot") {
-        // Обработка восстановления пароля
+        // Password recovery handling
         const redirectUrl = `${window.location.origin}/`;
         const { error } = await supabase.auth.resetPasswordForEmail(email, {
           redirectTo: redirectUrl,
@@ -97,13 +97,13 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
         if (error) throw error;
         
         setForgotEmailSent(true);
-        toast({ description: "Письмо для восстановления пароля отправлено" });
+        toast({ description: "Password recovery email sent" });
       } else if (mode === "login") {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
         toast({ 
           description: "Signed in",
-          duration: 1000  // Автоматическое исчезновение через 1 секунду
+          duration: 1000  // Auto-hide after 1 second
         });
         setOpen(false); // Close modal after successful login
       } else {
