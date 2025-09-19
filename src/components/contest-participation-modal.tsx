@@ -411,15 +411,29 @@ export const ContestParticipationModal = ({
       if (mode === 'login') {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
+        
+        // Check if email is confirmed after login
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user?.email_confirmed_at) {
+          setCurrentStep('profile');
+        } else {
+          setAuthError("Please confirm your email address before proceeding.");
+        }
       } else {
-        const { error } = await supabase.auth.signUp({ email, password });
+        const { error } = await supabase.auth.signUp({ 
+          email, 
+          password,
+          options: {
+            emailRedirectTo: `${window.location.origin}/`
+          }
+        });
         if (error) throw error;
         toast({
           title: "Success",
-          description: "Please check your email to confirm your account."
+          description: "Please check your email to confirm your account, then log in to participate."
         });
+        // Don't advance to profile step after signup - user needs to confirm email first
       }
-      setCurrentStep('profile');
     } catch (error: any) {
       setAuthError(error.message);
     } finally {
@@ -898,10 +912,16 @@ export const ContestParticipationModal = ({
       const checkAuth = async () => {
         console.log('Checking authentication status');
         const { data: { session } } = await supabase.auth.getSession();
-        console.log('Auth check result', { hasSession: !!session?.user });
-        if (session) {
+        console.log('Auth check result', { 
+          hasSession: !!session?.user, 
+          emailConfirmed: !!session?.user?.email_confirmed_at 
+        });
+        
+        if (session?.user?.email_confirmed_at) {
+          // User is authenticated and email is confirmed
           setCurrentStep('profile');
         } else {
+          // User is not authenticated or email not confirmed
           setCurrentStep('auth');
         }
       };
