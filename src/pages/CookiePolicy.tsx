@@ -1,4 +1,5 @@
 import { Helmet } from "react-helmet-async";
+import { CookiePreferencesManager } from "@/components/cookie-preferences-manager";
 
 const CookiePolicy = () => {
   return (
@@ -126,6 +127,11 @@ const CookiePolicy = () => {
                   support@obcfaces.com
                 </a>
               </p>
+            </section>
+
+            {/* Cookie Preferences Manager */}
+            <section className="mb-8">
+              <CookiePreferencesManager />
             </section>
           </div>
         </div>
