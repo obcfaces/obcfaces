@@ -247,13 +247,12 @@ const Index = () => {
               <div className="flex items-center justify-center gap-3 mb-4">
                 <span className="text-4xl">💬</span>
                 <h3 className="text-lg font-bold text-foreground">Questions or disputes?</h3>
-                <span className="text-4xl">💬</span>
               </div>
-              <div className="text-lg text-foreground font-medium">
+              <div className="text-lg text-foreground">
                 <EditableContent 
                   content="Contact support: support@obcfaces.com. For full details, see our"
                   contentKey="questions-disputes-intro"
-                  className="text-lg text-foreground font-medium inline"
+                  className="text-lg text-foreground inline"
                   isAdmin={isAdmin}
                 />
                 {" "}
@@ -265,10 +264,9 @@ const Index = () => {
 
             {/* FAQ Section */}
             <div className="bg-background p-6 rounded-2xl border border-border shadow-lg">
-              <div className="flex items-center justify-center gap-3 mb-6">
-                <span className="text-4xl">❓</span>
-                <h3 className="text-2xl font-bold text-foreground text-center">Frequently Asked Questions (FAQ)</h3>
-                <span className="text-4xl">❓</span>
+              <div className="flex items-center gap-3 mb-6">
+                <div className="flex items-center justify-center w-12 h-12 bg-primary text-primary-foreground rounded-full text-xl font-bold">6</div>
+                <h3 className="text-lg font-bold text-foreground">❓ Frequently Asked Questions (FAQ)</h3>
               </div>
               
               <div className="space-y-4 max-w-4xl mx-auto">
