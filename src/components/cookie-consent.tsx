@@ -54,20 +54,20 @@ export const CookieConsent = () => {
     <>
       <div className="fixed bottom-0 left-0 right-0 z-50 p-0">
         <Card className="w-full border-t border-border bg-background/95 backdrop-blur-sm shadow-lg rounded-none">
-          <div className="flex items-center gap-4 p-4">
-            <Cookie className="h-6 w-6 text-primary flex-shrink-0" />
-            <div className="flex-1 flex items-center gap-2">
-              <h3 className="font-semibold text-foreground">
-                Cookies
-              </h3>
-              <span className="text-sm text-muted-foreground">
-                We use cookies to improve your experience. Some are necessary, others (analytics/ads) need your consent. See our{" "}
-                <a href="/cookie-policy" className="text-primary underline hover:no-underline">
-                  Cookie Policy
-                </a>.
-              </span>
+          <div className="p-4 space-y-3">
+            <div className="flex items-start gap-4">
+              <Cookie className="h-6 w-6 text-primary flex-shrink-0 mt-0.5" />
+              <div className="flex-1">
+                <span className="font-semibold text-foreground">Cookies</span>
+                <span className="text-sm text-muted-foreground ml-2">
+                  We use cookies to improve your experience. Some are necessary, others (analytics/ads) need your consent. See our{" "}
+                  <a href="/cookie-policy" className="text-primary underline hover:no-underline">
+                    Cookie Policy
+                  </a>.
+                </span>
+              </div>
             </div>
-            <div className="flex gap-3">
+            <div className="flex gap-3 justify-end">
               <Button onClick={handleAccept} size="sm">
                 Accept all
               </Button>
