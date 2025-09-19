@@ -169,8 +169,8 @@ const Index = () => {
             {/* 1. Enter Anytime */}
             <div className="bg-background p-6 rounded-2xl border border-border shadow-lg">
               <div className="flex items-center gap-3 mb-4">
-                <div className="flex items-center justify-center w-12 h-12 bg-primary text-primary-foreground rounded-full text-2xl font-bold">1</div>
-                <h3 className="text-2xl font-bold text-foreground">📸 Enter Anytime</h3>
+                <div className="flex items-center justify-center w-12 h-12 bg-primary text-primary-foreground rounded-full text-xl font-bold">1</div>
+                <h3 className="text-lg font-bold text-foreground">📸 Enter Anytime</h3>
               </div>
               <div className="text-base whitespace-pre-line text-foreground">
                 Upload two photos:
@@ -186,8 +186,8 @@ const Index = () => {
             {/* 2. Selection & Posting */}
             <div className="bg-background p-6 rounded-2xl border border-border shadow-lg">
               <div className="flex items-center gap-3 mb-4">
-                <div className="flex items-center justify-center w-12 h-12 bg-primary text-primary-foreground rounded-full text-2xl font-bold">2</div>
-                <h3 className="text-2xl font-bold text-foreground">🔍 Selection & Posting</h3>
+                <div className="flex items-center justify-center w-12 h-12 bg-primary text-primary-foreground rounded-full text-xl font-bold">2</div>
+                <h3 className="text-lg font-bold text-foreground">🔍 Selection & Posting</h3>
               </div>
               <EditableContent 
                 content="New contestants are posted each week. We review every entry for compliance with our rules; submissions may be rejected or removed if they violate our policies (see Rules below)."
@@ -200,8 +200,8 @@ const Index = () => {
             {/* 3. Global Voting */}
             <div className="bg-background p-6 rounded-2xl border border-border shadow-lg">
               <div className="flex items-center gap-3 mb-4">
-                <div className="flex items-center justify-center w-12 h-12 bg-primary text-primary-foreground rounded-full text-2xl font-bold">3</div>
-                <h3 className="text-2xl font-bold text-foreground">⭐ Global Voting</h3>
+                <div className="flex items-center justify-center w-12 h-12 bg-primary text-primary-foreground rounded-full text-xl font-bold">3</div>
+                <h3 className="text-lg font-bold text-foreground">⭐ Global Voting</h3>
               </div>
               <EditableContent 
                 content="Fans worldwide vote using star ratings. Weekly winners are chosen by highest rating; ties are resolved by likes or other pre-published tiebreakers. We monitor votes for fraud and reserve the right to adjust or void votes if manipulation is detected."
@@ -214,8 +214,8 @@ const Index = () => {
             {/* 4. Prizes & Verification */}
             <div className="bg-background p-6 rounded-2xl border border-border shadow-lg">
               <div className="flex items-center gap-3 mb-4">
-                <div className="flex items-center justify-center w-12 h-12 bg-primary text-primary-foreground rounded-full text-2xl font-bold">4</div>
-                <h3 className="text-2xl font-bold text-foreground">🏆 Prizes & Verification</h3>
+                <div className="flex items-center justify-center w-12 h-12 bg-primary text-primary-foreground rounded-full text-xl font-bold">4</div>
+                <h3 className="text-lg font-bold text-foreground">🏆 Prizes & Verification</h3>
               </div>
               <EditableContent 
                 content="Prizes and payment methods are announced on the Platform. Winners are verified before payout and are responsible for any local taxes or fees. We may request identification to confirm eligibility."
@@ -228,8 +228,8 @@ const Index = () => {
             {/* 5. Rules & Safety */}
             <div className="bg-background p-6 rounded-2xl border border-border shadow-lg">
               <div className="flex items-center gap-3 mb-4">
-                <div className="flex items-center justify-center w-12 h-12 bg-primary text-primary-foreground rounded-full text-2xl font-bold">5</div>
-                <h3 className="text-2xl font-bold text-foreground">🛡️ Rules & Safety</h3>
+                <div className="flex items-center justify-center w-12 h-12 bg-primary text-primary-foreground rounded-full text-xl font-bold">5</div>
+                <h3 className="text-lg font-bold text-foreground">🛡️ Rules & Safety</h3>
               </div>
               <EditableContent 
                 content={`• Open to women aged 18–35 only.
@@ -246,7 +246,7 @@ const Index = () => {
             <div className="bg-background p-6 rounded-2xl border border-border shadow-lg text-center">
               <div className="flex items-center justify-center gap-3 mb-4">
                 <span className="text-4xl">💬</span>
-                <h3 className="text-2xl font-bold text-foreground">Questions or disputes?</h3>
+                <h3 className="text-lg font-bold text-foreground">Questions or disputes?</h3>
                 <span className="text-4xl">💬</span>
               </div>
               <div className="text-lg text-foreground font-medium">
