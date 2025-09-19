@@ -93,7 +93,7 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setAuthError(""); // Очищаем предыдущие ошибки
+    setAuthError(""); // Clear previous errors
     setEmailError("");
     setPasswordError("");
     setLoading(true);
@@ -107,7 +107,7 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
     }
     try {
       if (mode === "forgot") {
-        // Обработка восстановления пароля
+        // Password recovery handling
         const redirectUrl = `${window.location.origin}/`;
         const { error } = await supabase.auth.resetPasswordForEmail(email, {
           redirectTo: redirectUrl,
@@ -118,14 +118,14 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
           
           switch (error.message) {
             case "Invalid email":
-              errorMessage = "Неправильный формат email";
+              errorMessage = "Invalid email format";
               break;
             case "For security purposes, you can only request this once every 60 seconds":
-              errorMessage = "Слишком частые запросы. Подождите 60 секунд";
+              errorMessage = "Too many requests. Please wait 60 seconds";
               break;
             default:
               if (error.message.toLowerCase().includes("rate limit")) {
-                errorMessage = "Слишком много запросов. Попробуйте позже";
+                errorMessage = "Too many requests. Please try again later";
               } else {
                 errorMessage = error.message;
               }
@@ -135,7 +135,7 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
         }
         
         setForgotEmailSent(true);
-        toast({ description: "Письмо для восстановления пароля отправлено на ваш email" });
+        toast({ description: "Password recovery email sent to your email" });
       } else if (mode === "login") {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) {
@@ -145,16 +145,16 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
             setLoading(false);
             return;
           } else if (error.message === "Email not confirmed") {
-            setAuthError("Email не подтвержден. Проверьте почту");
+            setAuthError("Email not confirmed. Check your email");
           } else if (error.message === "Too many requests") {
-            setAuthError("Слишком много попыток. Попробуйте позже");
+            setAuthError("Too many attempts. Please try again later");
           } else {
             setAuthError(error.message);
           }
           
           throw new Error("Login failed");
         }
-        toast({ description: "Авторизация успешна" });
+        toast({ description: "Login successful" });
         onClose?.(); // Close modal after successful login
       } else {
         const redirectUrl = window.location.href; // Confirm email back to current page
@@ -176,7 +176,7 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
         });
         
         if (error) {
-          // Более конкретные сообщения об ошибках регистрации
+          // More specific registration error messages
           let errorMessage = "Registration error";
           
           switch (error.message) {
@@ -187,7 +187,7 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
               errorMessage = "Password must contain at least 6 characters";
               break;
             case "Invalid email":
-              errorMessage = "Неправильный формат email";
+              errorMessage = "Invalid email format";
               break;
             case "Weak password":
               errorMessage = "Password too simple. Use letters, numbers and symbols";
@@ -196,7 +196,7 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
               if (error.message.toLowerCase().includes("already registered") || error.message.toLowerCase().includes("already exists")) {
                 errorMessage = "User with this email is already registered";
               } else if (error.message.toLowerCase().includes("password")) {
-                errorMessage = "Проблема с паролем: " + error.message;
+                errorMessage = "Password issue: " + error.message;
               } else {
                 errorMessage = error.message;
               }
