@@ -262,6 +262,67 @@ const Index = () => {
                 <a href="/privacy" className="text-primary hover:underline font-semibold">Privacy Policy</a>.
               </div>
             </div>
+
+            {/* FAQ Section */}
+            <div className="bg-background p-6 rounded-2xl border border-border shadow-lg">
+              <div className="flex items-center justify-center gap-3 mb-6">
+                <span className="text-4xl">❓</span>
+                <h3 className="text-2xl font-bold text-foreground text-center">Frequently Asked Questions (FAQ)</h3>
+                <span className="text-4xl">❓</span>
+              </div>
+              
+              <div className="space-y-4 max-w-4xl mx-auto">
+                <div className="bg-muted/30 p-4 rounded-lg">
+                  <EditableContent 
+                    content="**How much does participation cost?**
+Free of charge."
+                    contentKey="faq-cost"
+                    className="text-base whitespace-pre-line"
+                    isAdmin={isAdmin}
+                  />
+                </div>
+
+                <div className="bg-muted/30 p-4 rounded-lg">
+                  <EditableContent 
+                    content="**How is the winner determined?**
+By number of votes (anti-fraud protection enabled). Only registered users can vote. One user - one vote per candidate."
+                    contentKey="faq-winner"
+                    className="text-base whitespace-pre-line"
+                    isAdmin={isAdmin}
+                  />
+                </div>
+
+                <div className="bg-muted/30 p-4 rounded-lg">
+                  <EditableContent 
+                    content="**How and when are prizes awarded?**
+Weekly through quick payment systems/GCash/bank transfer, annual — offline/online ceremony."
+                    contentKey="faq-prizes"
+                    className="text-base whitespace-pre-line"
+                    isAdmin={isAdmin}
+                  />
+                </div>
+
+                <div className="bg-muted/30 p-4 rounded-lg">
+                  <EditableContent 
+                    content="**Can I participate again?**
+After one year from participation."
+                    contentKey="faq-repeat"
+                    className="text-base whitespace-pre-line"
+                    isAdmin={isAdmin}
+                  />
+                </div>
+
+                <div className="bg-muted/30 p-4 rounded-lg">
+                  <EditableContent 
+                    content="**What's the minimum age to participate?**
+18 years old."
+                    contentKey="faq-age"
+                    className="text-base whitespace-pre-line"
+                    isAdmin={isAdmin}
+                  />
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       )}
