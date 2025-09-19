@@ -6,6 +6,7 @@ import { NextWeekSection } from "@/components/next-week-section";
 import ContestFilters from "@/components/contest-filters";
 
 import { EditableContent } from "@/components/editable-content";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { supabase } from "@/integrations/supabase/client";
 import type { Category } from "@/components/contest-filters";
 
@@ -269,56 +270,78 @@ const Index = () => {
                 <h3 className="text-lg font-bold text-foreground">❓ Frequently Asked Questions (FAQ)</h3>
               </div>
               
-              <div className="space-y-4 max-w-4xl mx-auto">
-                <div className="bg-muted/30 p-4 rounded-lg">
-                  <EditableContent 
-                    content="**How much does participation cost?**
-Free of charge."
-                    contentKey="faq-cost"
-                    className="text-base whitespace-pre-line"
-                    isAdmin={isAdmin}
-                  />
-                </div>
+              <div className="max-w-4xl mx-auto">
+                <Accordion type="single" collapsible className="space-y-2">
+                  <AccordionItem value="item-1" className="bg-muted/30 rounded-lg px-4">
+                    <AccordionTrigger className="hover:no-underline">
+                      <span className="text-base font-bold">How much does participation cost?</span>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <EditableContent 
+                        content="Free of charge."
+                        contentKey="faq-cost-answer"
+                        className="text-base"
+                        isAdmin={isAdmin}
+                      />
+                    </AccordionContent>
+                  </AccordionItem>
 
-                <div className="bg-muted/30 p-4 rounded-lg">
-                  <EditableContent 
-                    content="**How is the winner determined?**
-By number of votes (anti-fraud protection enabled). Only registered users can vote. One user - one vote per candidate."
-                    contentKey="faq-winner"
-                    className="text-base whitespace-pre-line"
-                    isAdmin={isAdmin}
-                  />
-                </div>
+                  <AccordionItem value="item-2" className="bg-muted/30 rounded-lg px-4">
+                    <AccordionTrigger className="hover:no-underline">
+                      <span className="text-base font-bold">How is the winner determined?</span>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <EditableContent 
+                        content="By number of votes (anti-fraud protection enabled). Only registered users can vote. One user - one vote per candidate."
+                        contentKey="faq-winner-answer"
+                        className="text-base"
+                        isAdmin={isAdmin}
+                      />
+                    </AccordionContent>
+                  </AccordionItem>
 
-                <div className="bg-muted/30 p-4 rounded-lg">
-                  <EditableContent 
-                    content="**How and when are prizes awarded?**
-Weekly through quick payment systems/GCash/bank transfer, annual — offline/online ceremony."
-                    contentKey="faq-prizes"
-                    className="text-base whitespace-pre-line"
-                    isAdmin={isAdmin}
-                  />
-                </div>
+                  <AccordionItem value="item-3" className="bg-muted/30 rounded-lg px-4">
+                    <AccordionTrigger className="hover:no-underline">
+                      <span className="text-base font-bold">How and when are prizes awarded?</span>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <EditableContent 
+                        content="Weekly through quick payment systems/GCash/bank transfer, annual — offline/online ceremony."
+                        contentKey="faq-prizes-answer"
+                        className="text-base"
+                        isAdmin={isAdmin}
+                      />
+                    </AccordionContent>
+                  </AccordionItem>
 
-                <div className="bg-muted/30 p-4 rounded-lg">
-                  <EditableContent 
-                    content="**Can I participate again?**
-After one year from participation."
-                    contentKey="faq-repeat"
-                    className="text-base whitespace-pre-line"
-                    isAdmin={isAdmin}
-                  />
-                </div>
+                  <AccordionItem value="item-4" className="bg-muted/30 rounded-lg px-4">
+                    <AccordionTrigger className="hover:no-underline">
+                      <span className="text-base font-bold">Can I participate again?</span>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <EditableContent 
+                        content="After one year from participation."
+                        contentKey="faq-repeat-answer"
+                        className="text-base"
+                        isAdmin={isAdmin}
+                      />
+                    </AccordionContent>
+                  </AccordionItem>
 
-                <div className="bg-muted/30 p-4 rounded-lg">
-                  <EditableContent 
-                    content="**What's the minimum age to participate?**
-18 years old."
-                    contentKey="faq-age"
-                    className="text-base whitespace-pre-line"
-                    isAdmin={isAdmin}
-                  />
-                </div>
+                  <AccordionItem value="item-5" className="bg-muted/30 rounded-lg px-4">
+                    <AccordionTrigger className="hover:no-underline">
+                      <span className="text-base font-bold">What's the minimum age to participate?</span>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <EditableContent 
+                        content="18 years old."
+                        contentKey="faq-age-answer"
+                        className="text-base"
+                        isAdmin={isAdmin}
+                      />
+                    </AccordionContent>
+                  </AccordionItem>
+                </Accordion>
               </div>
             </div>
           </div>
