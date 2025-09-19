@@ -19,10 +19,10 @@ export function ContestHeader({ activeSection, onSectionChange }: ContestHeaderP
     <div className="bg-contest-light-bg">
       <div className="max-w-6xl mx-auto px-6 py-4">
         {/* Title and button in one line */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center justify-between w-full">
           <h1 className="text-2xl font-bold text-contest-text">OBC faces</h1>
           <AuthProtectedModal>
-            <Button className="bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200">
+            <Button className="bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 whitespace-nowrap">
               🏆 Join & Win 5,000 PHP
             </Button>
           </AuthProtectedModal>
