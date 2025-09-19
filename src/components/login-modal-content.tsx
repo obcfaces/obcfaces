@@ -40,6 +40,8 @@ const LoginModalContent = ({ onClose }: LoginModalContentProps) => {
   const [gender, setGender] = useState<string>("");
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [authError, setAuthError] = useState<string>("");
+  const [emailError, setEmailError] = useState<string>("");
+  const [passwordError, setPasswordError] = useState<string>("");
   const [forgotEmailSent, setForgotEmailSent] = useState(false);
   
   const [loading, setLoading] = useState(false);
@@ -92,6 +94,8 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setAuthError(""); // Очищаем предыдущие ошибки
+    setEmailError("");
+    setPasswordError("");
     setLoading(true);
     if (mode === "signup") {
       setSubmitted(true);
@@ -135,42 +139,34 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
       } else if (mode === "login") {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) {
-          // Более конкретные сообщения об ошибках
-          let errorMessage = "Login error";
-          
-          switch (error.message) {
-            case "Invalid login credentials":
-              errorMessage = "Incorrect email or password";
-              break;
-            case "Email not confirmed":
-              errorMessage = "Email не подтвержден. Проверьте почту";
-              break;
-            case "Too many requests":
-              errorMessage = "Слишком много попыток. Попробуйте позже";
-              break;
-            case "User not found":
-              errorMessage = "User not found";
-              break;
-            case "Invalid email":
-              errorMessage = "Неправильный формат email";
-              break;
-            case "Weak password":
-              errorMessage = "Password too weak";
-              break;
-            default:
-              // Проверяем, содержит ли сообщение ключевые слова
-              if (error.message.toLowerCase().includes("password")) {
-                errorMessage = "Неправильный пароль";
-              } else if (error.message.toLowerCase().includes("email") || error.message.toLowerCase().includes("user")) {
-                errorMessage = "Пользователь с таким email не существует";
-              } else if (error.message.toLowerCase().includes("confirmed")) {
-                errorMessage = "Email не подтвержден";
-              } else {
-                errorMessage = error.message;
-              }
+          // Check if it's an email-related error (user not found)
+          if (error.message === "Invalid login credentials") {
+            // First check if user exists by trying to sign up with same email
+            const { error: signUpError } = await supabase.auth.signUp({
+              email,
+              password: "temp_password_check_only"
+            });
+            
+            if (signUpError && signUpError.message.includes("already registered")) {
+              // User exists, so it's a password error
+              setPasswordError("Incorrect password");
+              setLoading(false);
+              return;
+            } else {
+              // User doesn't exist
+              setEmailError("No such email exists");
+              setLoading(false);
+              return;
+            }
+          } else if (error.message === "Email not confirmed") {
+            setAuthError("Email не подтвержден. Проверьте почту");
+          } else if (error.message === "Too many requests") {
+            setAuthError("Слишком много попыток. Попробуйте позже");
+          } else {
+            setAuthError(error.message);
           }
           
-          throw new Error(errorMessage);
+          throw new Error("Login failed");
         }
         toast({ description: "Login successful" });
         onClose?.(); // Close modal after successful login
@@ -288,6 +284,8 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
           <button type="button" className="text-primary underline" onClick={() => {
             setMode("signup");
             setAuthError("");
+            setEmailError("");
+            setPasswordError("");
           }}>Sign up</button>
         </span>
       );
@@ -297,6 +295,8 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
           <button type="button" className="text-primary underline" onClick={() => {
             setMode("login");
             setAuthError("");
+            setEmailError("");
+            setPasswordError("");
           }}>Sign in</button>
         </span>
       );
@@ -306,6 +306,8 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
           <button type="button" className="text-primary underline" onClick={() => {
             setMode("login");
             setAuthError("");
+            setEmailError("");
+            setPasswordError("");
             setForgotEmailSent(false);
           }}>Sign in</button>
         </span>
@@ -333,10 +335,42 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
           </div>
         )}
         <div className="space-y-2">
+          {emailError && mode === "login" && (
+            <div className="text-red-500 text-sm font-medium">
+              {emailError}{" "}
+              <button 
+                type="button" 
+                className="text-primary underline hover:no-underline"
+                onClick={() => {
+                  setMode("signup");
+                  setEmailError("");
+                  setPasswordError("");
+                }}
+              >
+                Sign up
+              </button>
+            </div>
+          )}
           <Input id="auth-email" type="email" placeholder="Email" className="placeholder:italic placeholder:text-muted-foreground" value={email} onChange={(e) => setEmail(e.target.value)} required />
         </div>
         {mode !== "forgot" && (
           <div className="space-y-2">
+            {passwordError && mode === "login" && (
+              <div className="text-red-500 text-sm font-medium">
+                {passwordError}{" "}
+                <button 
+                  type="button" 
+                  className="text-primary underline hover:no-underline"
+                  onClick={() => {
+                    setMode("forgot");
+                    setPasswordError("");
+                    setEmailError("");
+                  }}
+                >
+                  Forgot password?
+                </button>
+              </div>
+            )}
             <div className="relative">
               <Input id="auth-password" type={showPassword ? "text" : "password"} placeholder="Password" className="pr-10 placeholder:italic placeholder:text-muted-foreground" value={password} onChange={(e) => setPassword(e.target.value)} required />
               <button type="button" aria-label={showPassword ? "Hide password" : "Show password"} onClick={() => setShowPassword((v) => !v)} className="absolute inset-y-0 right-2 inline-flex items-center text-muted-foreground hover:text-foreground">
