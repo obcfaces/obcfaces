@@ -1011,7 +1011,7 @@ export const ContestParticipationModal = ({
           {children}
         </DialogTrigger>
       )}
-      <DialogContent className="w-full max-w-4xl mx-auto max-h-[95vh] bg-background p-0 overflow-hidden">
+      <DialogContent className={`w-full max-w-4xl mx-auto max-h-[95vh] bg-background p-0 overflow-hidden ${submissionSuccess ? '[&>[data-radix-dialog-close]]:hidden' : ''}`}>
         <div className="px-6 py-4 border-b">
           <DialogHeader>
             <DialogTitle>
