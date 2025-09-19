@@ -154,13 +154,9 @@ const Index = () => {
       {activeSection === "How it works" && (
         <div className="max-w-6xl mx-auto px-6 py-8 space-y-8 text-foreground">
           <div className="text-center mb-12">
-            <div className="flex items-center justify-center gap-3 mb-4">
-              <span className="text-6xl">🌟</span>
-              <h1 className="text-5xl md:text-6xl font-black bg-gradient-to-r from-purple-600 via-pink-500 to-orange-400 bg-clip-text text-transparent">
-                How It Works
-              </h1>
-              <span className="text-6xl">🌟</span>
-            </div>
+            <h1 className="text-3xl md:text-4xl font-black bg-gradient-to-r from-purple-600 via-pink-500 to-orange-400 bg-clip-text text-transparent mb-4">
+              How It Works
+            </h1>
             <p className="text-lg text-muted-foreground font-medium">(international — user-facing, legal-safe)</p>
             <div className="mt-6 p-6 bg-gradient-to-r from-purple-100 to-pink-100 dark:from-purple-900/20 dark:to-pink-900/20 rounded-2xl border border-purple-200 dark:border-purple-800">
               <p className="text-2xl md:text-3xl font-bold text-center bg-gradient-to-r from-purple-700 to-pink-600 bg-clip-text text-transparent">
@@ -171,10 +167,10 @@ const Index = () => {
           
           <div className="space-y-8">
             {/* 1. Enter Anytime */}
-            <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 p-6 rounded-2xl border border-green-200 dark:border-green-800 shadow-lg">
+            <div className="bg-background p-6 rounded-2xl border border-border shadow-lg">
               <div className="flex items-center gap-3 mb-4">
-                <div className="flex items-center justify-center w-12 h-12 bg-green-500 text-white rounded-full text-2xl font-bold">1</div>
-                <h3 className="text-2xl font-bold text-green-700 dark:text-green-300">📸 Enter Anytime</h3>
+                <div className="flex items-center justify-center w-12 h-12 bg-primary text-primary-foreground rounded-full text-2xl font-bold">1</div>
+                <h3 className="text-2xl font-bold text-foreground">📸 Enter Anytime</h3>
               </div>
               <EditableContent 
                 content={`Upload two photos:
@@ -182,58 +178,58 @@ const Index = () => {
 • 1 close-up face photo (no makeup)
 By submitting, you confirm you are 18 years or older, you own the photos (or have permission), and you accept our [Terms] and [Privacy Policy].`}
                 contentKey="enter-anytime"
-                className="text-base whitespace-pre-line text-green-800 dark:text-green-200"
+                className="text-base whitespace-pre-line text-foreground"
                 isAdmin={isAdmin}
               />
             </div>
 
             {/* 2. Selection & Posting */}
-            <div className="bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 p-6 rounded-2xl border border-blue-200 dark:border-blue-800 shadow-lg">
+            <div className="bg-background p-6 rounded-2xl border border-border shadow-lg">
               <div className="flex items-center gap-3 mb-4">
-                <div className="flex items-center justify-center w-12 h-12 bg-blue-500 text-white rounded-full text-2xl font-bold">2</div>
-                <h3 className="text-2xl font-bold text-blue-700 dark:text-blue-300">🔍 Selection & Posting</h3>
+                <div className="flex items-center justify-center w-12 h-12 bg-primary text-primary-foreground rounded-full text-2xl font-bold">2</div>
+                <h3 className="text-2xl font-bold text-foreground">🔍 Selection & Posting</h3>
               </div>
               <EditableContent 
                 content="New contestants are posted each week. We review every entry for compliance with our rules; submissions may be rejected or removed if they violate our policies (see Rules below)."
                 contentKey="selection-posting"
-                className="text-base text-blue-800 dark:text-blue-200"
+                className="text-base text-foreground"
                 isAdmin={isAdmin}
               />
             </div>
 
             {/* 3. Global Voting */}
-            <div className="bg-gradient-to-r from-purple-50 to-violet-50 dark:from-purple-900/20 dark:to-violet-900/20 p-6 rounded-2xl border border-purple-200 dark:border-purple-800 shadow-lg">
+            <div className="bg-background p-6 rounded-2xl border border-border shadow-lg">
               <div className="flex items-center gap-3 mb-4">
-                <div className="flex items-center justify-center w-12 h-12 bg-purple-500 text-white rounded-full text-2xl font-bold">3</div>
-                <h3 className="text-2xl font-bold text-purple-700 dark:text-purple-300">⭐ Global Voting</h3>
+                <div className="flex items-center justify-center w-12 h-12 bg-primary text-primary-foreground rounded-full text-2xl font-bold">3</div>
+                <h3 className="text-2xl font-bold text-foreground">⭐ Global Voting</h3>
               </div>
               <EditableContent 
                 content="Fans worldwide vote using star ratings. Weekly winners are chosen by highest rating; ties are resolved by likes or other pre-published tiebreakers. We monitor votes for fraud and reserve the right to adjust or void votes if manipulation is detected."
                 contentKey="global-voting"
-                className="text-base text-purple-800 dark:text-purple-200"
+                className="text-base text-foreground"
                 isAdmin={isAdmin}
               />
             </div>
 
             {/* 4. Prizes & Verification */}
-            <div className="bg-gradient-to-r from-orange-50 to-yellow-50 dark:from-orange-900/20 dark:to-yellow-900/20 p-6 rounded-2xl border border-orange-200 dark:border-orange-800 shadow-lg">
+            <div className="bg-background p-6 rounded-2xl border border-border shadow-lg">
               <div className="flex items-center gap-3 mb-4">
-                <div className="flex items-center justify-center w-12 h-12 bg-orange-500 text-white rounded-full text-2xl font-bold">4</div>
-                <h3 className="text-2xl font-bold text-orange-700 dark:text-orange-300">🏆 Prizes & Verification</h3>
+                <div className="flex items-center justify-center w-12 h-12 bg-primary text-primary-foreground rounded-full text-2xl font-bold">4</div>
+                <h3 className="text-2xl font-bold text-foreground">🏆 Prizes & Verification</h3>
               </div>
               <EditableContent 
                 content="Prizes and payment methods are announced on the Platform. Winners are verified before payout and are responsible for any local taxes or fees. We may request identification to confirm eligibility."
                 contentKey="prizes-verification"
-                className="text-base text-orange-800 dark:text-orange-200"
+                className="text-base text-foreground"
                 isAdmin={isAdmin}
               />
             </div>
 
             {/* 5. Rules & Safety */}
-            <div className="bg-gradient-to-r from-red-50 to-pink-50 dark:from-red-900/20 dark:to-pink-900/20 p-6 rounded-2xl border border-red-200 dark:border-red-800 shadow-lg">
+            <div className="bg-background p-6 rounded-2xl border border-border shadow-lg">
               <div className="flex items-center gap-3 mb-4">
-                <div className="flex items-center justify-center w-12 h-12 bg-red-500 text-white rounded-full text-2xl font-bold">5</div>
-                <h3 className="text-2xl font-bold text-red-700 dark:text-red-300">🛡️ Rules & Safety</h3>
+                <div className="flex items-center justify-center w-12 h-12 bg-primary text-primary-foreground rounded-full text-2xl font-bold">5</div>
+                <h3 className="text-2xl font-bold text-foreground">🛡️ Rules & Safety</h3>
               </div>
               <EditableContent 
                 content={`• Open to women aged 18–35 only.
@@ -241,22 +237,22 @@ By submitting, you confirm you are 18 years or older, you own the photos (or hav
 • By submitting, you grant OBC a limited, non-exclusive, worldwide license to use your photos for the contest and promotion (see full Terms). You retain ownership.
 • If you see prohibited content, report it immediately via our report button or at support@obcfaces.com. We process reports and remove content that violates rules. Repeat infringers will be suspended.`}
                 contentKey="rules-safety"
-                className="text-base whitespace-pre-line text-red-800 dark:text-red-200"
+                className="text-base whitespace-pre-line text-foreground"
                 isAdmin={isAdmin}
               />
             </div>
 
             {/* Questions or disputes */}
-            <div className="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 p-6 rounded-2xl border border-indigo-200 dark:border-indigo-800 shadow-lg text-center">
+            <div className="bg-background p-6 rounded-2xl border border-border shadow-lg text-center">
               <div className="flex items-center justify-center gap-3 mb-4">
                 <span className="text-4xl">💬</span>
-                <h3 className="text-2xl font-bold text-indigo-700 dark:text-indigo-300">Questions or disputes?</h3>
+                <h3 className="text-2xl font-bold text-foreground">Questions or disputes?</h3>
                 <span className="text-4xl">💬</span>
               </div>
               <EditableContent 
                 content="Contact support: support@obcfaces.com. For full details, see our [Terms] and [Privacy Policy] (links)."
                 contentKey="questions-disputes"
-                className="text-lg text-indigo-800 dark:text-indigo-200 font-medium"
+                className="text-lg text-foreground font-medium"
                 isAdmin={isAdmin}
               />
             </div>
