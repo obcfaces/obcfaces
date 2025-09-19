@@ -36,7 +36,7 @@ export function ContestHeader({ activeSection, onSectionChange }: ContestHeaderP
           </div>
           <div className="flex items-center gap-2">
             <span>🌍</span>
-            <span>Anyone can join — open to all! (18-35 years old)</span>
+            <span>Anyone can join — open to all!</span>
           </div>
           <div className="flex items-center gap-2">
             <span>📸</span>
