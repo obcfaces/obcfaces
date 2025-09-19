@@ -153,7 +153,7 @@ const Index = () => {
 
       {/* How it works content */}
       {activeSection === "How it works" && (
-        <div className="max-w-6xl mx-auto px-2 sm:px-6 py-8 space-y-8 text-foreground">
+        <div className="max-w-6xl mx-auto px-0 sm:px-6 py-8 space-y-8 text-foreground">
           <div className="text-center mb-12">
             <h1 className="text-3xl md:text-4xl font-black bg-gradient-to-r from-purple-600 via-pink-500 to-orange-400 bg-clip-text text-transparent mb-4">
               How It Works
@@ -168,7 +168,7 @@ const Index = () => {
           
           <div className="space-y-8">
             {/* 1. Enter Anytime */}
-            <div className="bg-background p-6 rounded-2xl border border-border shadow-lg">
+            <div className="bg-background p-3 sm:p-6 rounded-none sm:rounded-2xl border-0 sm:border border-border shadow-lg mx-0 sm:mx-0">
               <div className="flex items-center gap-3 mb-4">
                 <div className="flex items-center justify-center w-12 h-12 bg-primary text-primary-foreground rounded-full text-xl font-bold">1</div>
                 <h3 className="text-lg font-bold text-foreground">📸 Enter Anytime</h3>
@@ -185,7 +185,7 @@ const Index = () => {
             </div>
 
             {/* 2. Selection & Posting */}
-            <div className="bg-background p-6 rounded-2xl border border-border shadow-lg">
+            <div className="bg-background p-3 sm:p-6 rounded-none sm:rounded-2xl border-0 sm:border border-border shadow-lg mx-0 sm:mx-0">
               <div className="flex items-center gap-3 mb-4">
                 <div className="flex items-center justify-center w-12 h-12 bg-primary text-primary-foreground rounded-full text-xl font-bold">2</div>
                 <h3 className="text-lg font-bold text-foreground">🔍 Selection & Posting</h3>
@@ -199,7 +199,7 @@ const Index = () => {
             </div>
 
             {/* 3. Global Voting */}
-            <div className="bg-background p-6 rounded-2xl border border-border shadow-lg">
+            <div className="bg-background p-3 sm:p-6 rounded-none sm:rounded-2xl border-0 sm:border border-border shadow-lg mx-0 sm:mx-0">
               <div className="flex items-center gap-3 mb-4">
                 <div className="flex items-center justify-center w-12 h-12 bg-primary text-primary-foreground rounded-full text-xl font-bold">3</div>
                 <h3 className="text-lg font-bold text-foreground">⭐ Global Voting</h3>
@@ -213,7 +213,7 @@ const Index = () => {
             </div>
 
             {/* 4. Prizes & Verification */}
-            <div className="bg-background p-6 rounded-2xl border border-border shadow-lg">
+            <div className="bg-background p-3 sm:p-6 rounded-none sm:rounded-2xl border-0 sm:border border-border shadow-lg mx-0 sm:mx-0">
               <div className="flex items-center gap-3 mb-4">
                 <div className="flex items-center justify-center w-12 h-12 bg-primary text-primary-foreground rounded-full text-xl font-bold">4</div>
                 <h3 className="text-lg font-bold text-foreground">🏆 Prizes & Verification</h3>
@@ -227,7 +227,7 @@ const Index = () => {
             </div>
 
             {/* 5. Rules & Safety */}
-            <div className="bg-background p-6 rounded-2xl border border-border shadow-lg">
+            <div className="bg-background p-3 sm:p-6 rounded-none sm:rounded-2xl border-0 sm:border border-border shadow-lg mx-0 sm:mx-0">
               <div className="flex items-center gap-3 mb-4">
                 <div className="flex items-center justify-center w-12 h-12 bg-primary text-primary-foreground rounded-full text-xl font-bold">5</div>
                 <h3 className="text-lg font-bold text-foreground">🛡️ Rules & Safety</h3>
@@ -244,7 +244,7 @@ const Index = () => {
             </div>
 
             {/* Questions or disputes */}
-            <div className="bg-background p-6 rounded-2xl border border-border shadow-lg text-center">
+            <div className="bg-background p-3 sm:p-6 rounded-none sm:rounded-2xl border-0 sm:border border-border shadow-lg mx-0 sm:mx-0 text-center">
               <div className="flex items-center justify-center gap-3 mb-4">
                 <span className="text-4xl">💬</span>
                 <h3 className="text-lg font-bold text-foreground">Questions or disputes?</h3>
@@ -264,7 +264,7 @@ const Index = () => {
             </div>
 
             {/* FAQ Section */}
-            <div className="bg-background p-6 rounded-2xl border border-border shadow-lg">
+            <div className="bg-background p-3 sm:p-6 rounded-none sm:rounded-2xl border-0 sm:border border-border shadow-lg mx-0 sm:mx-0">
               <div className="flex items-center gap-3 mb-6">
                 <div className="flex items-center justify-center w-12 h-12 bg-primary text-primary-foreground rounded-full text-xl font-bold">6</div>
                 <h3 className="text-lg font-bold text-foreground">❓ Frequently Asked Questions (FAQ)</h3>
