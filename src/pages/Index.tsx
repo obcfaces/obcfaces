@@ -152,7 +152,7 @@ const Index = () => {
 
       {/* How it works content */}
       {activeSection === "How it works" && (
-        <div className="max-w-6xl mx-auto px-6 py-8 space-y-8 text-foreground">
+        <div className="max-w-6xl mx-auto px-2 sm:px-6 py-8 space-y-8 text-foreground">
           <div className="text-center mb-12">
             <h1 className="text-3xl md:text-4xl font-black bg-gradient-to-r from-purple-600 via-pink-500 to-orange-400 bg-clip-text text-transparent mb-4">
               How It Works
