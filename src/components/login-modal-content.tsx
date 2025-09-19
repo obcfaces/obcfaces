@@ -333,9 +333,9 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
                   setPasswordError("");
                 }}
               >
-                Зарегистрироваться
+                Sign up
               </button>
-              {" или "}
+              {" or "}
               <button 
                 type="button" 
                 className="text-primary underline hover:no-underline"
@@ -345,7 +345,7 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
                   setPasswordError("");
                 }}
               >
-                Восстановить пароль
+                Reset password
               </button>
             </div>
           )}
