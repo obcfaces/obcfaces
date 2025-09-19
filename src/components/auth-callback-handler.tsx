@@ -45,8 +45,18 @@ const AuthCallbackHandler = () => {
         
         console.log('Auth callback successful:', data);
 
-        // Clean URL from auth params
+        // Check if this is a password recovery callback
         const url = new URL(window.location.href);
+        const type = url.searchParams.get('type');
+        
+        if (type === 'recovery') {
+          // For password recovery, redirect to reset password page
+          // Keep the URL params for the reset password page to handle
+          navigate('/reset-password' + window.location.search);
+          return;
+        }
+
+        // Clean URL from auth params for normal email confirmation
         ["code", "type", "redirect_to", "next"].forEach((k) => url.searchParams.delete(k));
         
         // Always redirect to home page instead of localhost URLs
