@@ -47,10 +47,6 @@ export const AuthProtectedModal = ({ children }: AuthProtectedModalProps) => {
       {/* Login Modal */}
       <Dialog open={isLoginOpen} onOpenChange={setIsLoginOpen}>
         <DialogContent className="sm:max-w-lg data-[state=open]:translate-y-[5%] sm:data-[state=open]:translate-y-[2%]">
-          <DialogHeader>
-            <DialogTitle>Sign in</DialogTitle>
-            <DialogDescription>Enter your email and password to continue.</DialogDescription>
-          </DialogHeader>
           <LoginModalContent onClose={() => setIsLoginOpen(false)} />
         </DialogContent>
       </Dialog>

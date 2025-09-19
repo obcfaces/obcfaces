@@ -141,23 +141,22 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
         if (error) {
           // Check if it's an email-related error (user not found)
           if (error.message === "Invalid login credentials") {
-            // First check if user exists by trying to sign up with same email
-            const { error: signUpError } = await supabase.auth.signUp({
-              email,
-              password: "temp_password_check_only"
+            // Check if email exists in auth.users table
+            const { data: resetData, error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
+              redirectTo: `${window.location.origin}/`,
             });
             
-            if (signUpError && signUpError.message.includes("already registered")) {
-              // User exists, so it's a password error
+            // If reset succeeds, email exists - it's a password error
+            if (!resetError) {
               setPasswordError("Incorrect password");
-              setLoading(false);
-              return;
-            } else {
-              // User doesn't exist
+            } else if (resetError.message.includes("User not found")) {
               setEmailError("No such email exists");
-              setLoading(false);
-              return;
+            } else {
+              // For any other case, assume it's a password error to be safe
+              setPasswordError("Incorrect password");
             }
+            setLoading(false);
+            return;
           } else if (error.message === "Email not confirmed") {
             setAuthError("Email не подтвержден. Проверьте почту");
           } else if (error.message === "Too many requests") {
