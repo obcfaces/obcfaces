@@ -25,6 +25,7 @@ const LoginModalContent = ({ onClose }: LoginModalContentProps) => {
     setMode("login");
     setAuthError("");
     setForgotEmailSent(false);
+    setRegistrationSuccess(false);
   }, []);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -43,6 +44,7 @@ const LoginModalContent = ({ onClose }: LoginModalContentProps) => {
   const [emailError, setEmailError] = useState<string>("");
   const [passwordError, setPasswordError] = useState<string>("");
   const [forgotEmailSent, setForgotEmailSent] = useState(false);
+  const [registrationSuccess, setRegistrationSuccess] = useState(false);
   
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -135,7 +137,7 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
         }
         
         setForgotEmailSent(true);
-        toast({ description: "Password recovery email sent to your email" });
+        // Don't show toast, show in modal instead
       } else if (mode === "login") {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) {
@@ -232,8 +234,8 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
           onClose?.(); // Close modal after successful registration
         } else {
           // User needs to confirm email but registration was successful
-          toast({ description: "Registration completed. Check your email for confirmation" });
-          onClose?.(); // Close modal after signup (user needs to check email)
+          setRegistrationSuccess(true);
+          // Don't close modal, show success message instead
         }
       }
     } catch (err: any) {
@@ -272,6 +274,7 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
             setAuthError("");
             setEmailError("");
             setPasswordError("");
+            setRegistrationSuccess(false);
           }}>Sign up</button>
         </span>
       );
@@ -283,6 +286,7 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
             setAuthError("");
             setEmailError("");
             setPasswordError("");
+            setRegistrationSuccess(false);
           }}>Sign in</button>
         </span>
       );
@@ -295,6 +299,7 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
             setEmailError("");
             setPasswordError("");
             setForgotEmailSent(false);
+            setRegistrationSuccess(false);
           }}>Sign in</button>
         </span>
       );
@@ -318,6 +323,16 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
         {authError && (
           <div className="text-destructive text-sm font-medium">
             {authError}
+          </div>
+        )}
+        {forgotEmailSent && mode === "forgot" && (
+          <div className="text-green-600 text-sm font-bold">
+            Password recovery link has been sent to your email. Please check your inbox.
+          </div>
+        )}
+        {registrationSuccess && mode === "signup" && (
+          <div className="text-green-600 text-sm font-bold">
+            Registration successful! Please check your email and click the confirmation link to activate your account.
           </div>
         )}
         <div className="space-y-2">
@@ -365,7 +380,7 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
                     setEmailError("");
                   }}
                 >
-                  Восстановить пароль
+                  Reset password
                 </button>
               </div>
             )}
