@@ -264,9 +264,8 @@ const Index = () => {
             </div>
 
             {/* FAQ Section */}
-            <div className="bg-background p-3 sm:p-6 rounded-none sm:rounded-2xl border-0 sm:border border-border shadow-lg mx-0 sm:mx-0">
+            <div className="bg-background p-3 sm:p-6 rounded-none sm:rounded-2xl border-0 sm:border border-border shadow-lg mx-3 sm:mx-0">
               <div className="flex items-center gap-3 mb-6">
-                <div className="flex items-center justify-center w-12 h-12 bg-primary text-primary-foreground rounded-full text-xl font-bold">6</div>
                 <h3 className="text-lg font-bold text-foreground">❓ Frequently Asked Questions (FAQ)</h3>
               </div>
               
@@ -274,7 +273,7 @@ const Index = () => {
                 <Accordion type="single" collapsible className="space-y-2">
                   <AccordionItem value="item-1" className="bg-muted/30 rounded-lg px-4">
                     <AccordionTrigger className="hover:no-underline">
-                      <span className="text-base font-bold">How much does participation cost?</span>
+                      <span className="text-sm font-bold">How much does participation cost?</span>
                     </AccordionTrigger>
                     <AccordionContent>
                       <EditableContent 
@@ -288,7 +287,7 @@ const Index = () => {
 
                   <AccordionItem value="item-2" className="bg-muted/30 rounded-lg px-4">
                     <AccordionTrigger className="hover:no-underline">
-                      <span className="text-base font-bold">How is the winner determined?</span>
+                      <span className="text-sm font-bold">How is the winner determined?</span>
                     </AccordionTrigger>
                     <AccordionContent>
                       <EditableContent 
@@ -302,7 +301,7 @@ const Index = () => {
 
                   <AccordionItem value="item-3" className="bg-muted/30 rounded-lg px-4">
                     <AccordionTrigger className="hover:no-underline">
-                      <span className="text-base font-bold">How and when are prizes awarded?</span>
+                      <span className="text-sm font-bold">How and when are prizes awarded?</span>
                     </AccordionTrigger>
                     <AccordionContent>
                       <EditableContent 
@@ -316,7 +315,7 @@ const Index = () => {
 
                   <AccordionItem value="item-4" className="bg-muted/30 rounded-lg px-4">
                     <AccordionTrigger className="hover:no-underline">
-                      <span className="text-base font-bold">Can I participate again?</span>
+                      <span className="text-sm font-bold">Can I participate again?</span>
                     </AccordionTrigger>
                     <AccordionContent>
                       <EditableContent 
@@ -330,7 +329,7 @@ const Index = () => {
 
                   <AccordionItem value="item-5" className="bg-muted/30 rounded-lg px-4">
                     <AccordionTrigger className="hover:no-underline">
-                      <span className="text-base font-bold">What's the minimum age to participate?</span>
+                      <span className="text-sm font-bold">What's the minimum age to participate?</span>
                     </AccordionTrigger>
                     <AccordionContent>
                       <EditableContent 
