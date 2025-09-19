@@ -153,91 +153,41 @@ const Index = () => {
       {/* How it works content */}
       {activeSection === "How it works" && (
         <div className="max-w-6xl mx-auto px-6 py-8 space-y-6 text-foreground">
-          <div className="text-center">
-            <h2 className="text-2xl font-bold mb-1">🌟 How It Works</h2>
-            <h3 className="text-lg text-muted-foreground mb-4">OBC (Online Beauty Contest)</h3>
+          <div className="text-center mb-8">
+            <h2 className="text-3xl font-bold mb-2">🌟 How It Works</h2>
+            <p className="text-lg text-muted-foreground">(international — user-facing, legal-safe)</p>
+            <p className="text-xl font-semibold mt-2">Join OBC — the international, fully online beauty contest.</p>
           </div>
           
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {/* Weekly Photo Contest */}
-            <div className="bg-white/50 p-4 rounded-lg shadow-sm border">
-              <h3 className="text-lg font-semibold mb-2">1. Weekly Photo Contest</h3>
-              <EditableContent 
-                content="Every week, we select the most beautiful girls from across the Philippines and post them on our site and social media."
-                contentKey="weekly-contest"
-                className="text-sm"
-                isAdmin={isAdmin}
-              />
-            </div>
-            
-            {/* How to Join */}
-            <div className="bg-white/50 p-4 rounded-lg shadow-sm border">
-              <h3 className="text-lg font-semibold mb-2">2. How to Join</h3>
-              <EditableContent 
-                content={`To participate, send us:
-📸 1 full-body photo (no filter, no makeup)
-📸 1 close-up face photo (no makeup)
+          <div className="prose prose-lg max-w-none">
+            <EditableContent 
+              content={`**1. Enter Anytime**
+Upload two photos:
+• 1 full-body photo (natural look — no filters, no heavy editing)
+• 1 close-up face photo (no makeup)
+By submitting, you confirm you are 18 years or older, you own the photos (or have permission), and you accept our [Terms] and [Privacy Policy].
 
-Submit your entry anytime! If not selected this week, you may be chosen for the next.`}
-                contentKey="how-to-join"
-                className="text-sm whitespace-pre-line"
-                isAdmin={isAdmin}
-              />
-            </div>
-            
-            {/* Selection & Voting */}
-            <div className="bg-white/50 p-4 rounded-lg shadow-sm border">
-              <h3 className="text-lg font-semibold mb-2">3. Selection & Voting</h3>
-              <EditableContent 
-                content={`• Each Monday, we post new contestants.
-• Our audience votes by rating with stars ⭐
-• The winner of the week is the one with the highest rating.
-• If the rating is the same, the one with more likes wins.
-• Make your choice – vote!`}
-                contentKey="selection-voting"
-                className="text-sm whitespace-pre-line"
-                isAdmin={isAdmin}
-              />
-            </div>
-            
-            {/* Prizes */}
-            <div className="bg-white/50 p-4 rounded-lg shadow-sm border">
-              <h3 className="text-lg font-semibold mb-2">4. Prizes</h3>
-              <EditableContent 
-                content={`🏆 Weekly Winner: ₱5,000
-👑 End-of-Year Grand Prize:
-    1st Place – ₱200,000
-    2nd Place – ₱100,000
-    3rd Place – ₱50,000`}
-                contentKey="prizes"
-                className="text-sm whitespace-pre-line"
-                isAdmin={isAdmin}
-              />
-            </div>
-            
-            {/* Rules */}
-            <div className="bg-white/50 p-4 rounded-lg shadow-sm border">
-              <h3 className="text-lg font-semibold mb-2">5. Rules</h3>
-              <EditableContent 
-                content={`• Girls only, aged 18–35
-• No editing, filters, or makeup
-• By sending photos, you agree we can use them for the contest and promotion`}
-                contentKey="rules"
-                className="text-sm whitespace-pre-line"
-                isAdmin={isAdmin}
-              />
-            </div>
-            
-            {/* Questions */}
-            <div className="bg-white/50 p-4 rounded-lg shadow-sm border">
-              <h3 className="text-lg font-semibold mb-2">Questions?</h3>
-              <EditableContent 
-                content="Just message us anytime 💬"
-                contentKey="questions"
-                className="text-sm"
-                isAdmin={isAdmin}
-              />
-            </div>
+**2. Selection & Posting**
+New contestants are posted each week. We review every entry for compliance with our rules; submissions may be rejected or removed if they violate our policies (see Rules below).
+
+**3. Global Voting**
+Fans worldwide vote using star ratings. Weekly winners are chosen by highest rating; ties are resolved by likes or other pre-published tiebreakers. We monitor votes for fraud and reserve the right to adjust or void votes if manipulation is detected.
+
+**4. Prizes & Verification**
+Prizes and payment methods are announced on the Platform. Winners are verified before payout and are responsible for any local taxes or fees. We may request identification to confirm eligibility.
+
+**5. Rules & Safety**
+• Open to women aged 18–35 only.
+• Prohibited: nudity, explicit/sexual content, sexualization of minors, hate speech, harassment, illegal content, AI-generated images of real people without consent, and any form of vote manipulation.
+• By submitting, you grant OBC a limited, non-exclusive, worldwide license to use your photos for the contest and promotion (see full Terms). You retain ownership.
+• If you see prohibited content, report it immediately via our report button or at support@obcfaces.com. We process reports and remove content that violates rules. Repeat infringers will be suspended.
+
+**Questions or disputes?**
+Contact support: support@obcfaces.com. For full details, see our [Terms] and [Privacy Policy] (links).`}
+              contentKey="how-it-works-comprehensive"
+              className="text-sm whitespace-pre-line"
+              isAdmin={isAdmin}
+            />
           </div>
         </div>
       )}
