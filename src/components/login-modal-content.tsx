@@ -137,24 +137,24 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
         setForgotEmailSent(true);
         toast({ description: "Письмо для восстановления пароля отправлено на ваш email" });
       } else if (mode === "login") {
+        // Сначала проверяем, существует ли email
+        const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: `${window.location.origin}/`,
+        });
+        
+        if (resetError && resetError.message.includes("User not found")) {
+          // Email не существует
+          setEmailError("Такой почты не существует");
+          setLoading(false);
+          return;
+        }
+        
+        // Email существует, пытаемся авторизоваться
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) {
-          // Check if it's an email-related error (user not found)
           if (error.message === "Invalid login credentials") {
-            // Check if email exists in auth.users table
-            const { data: resetData, error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
-              redirectTo: `${window.location.origin}/`,
-            });
-            
-            // If reset succeeds, email exists - it's a password error
-            if (!resetError) {
-              setPasswordError("Incorrect password");
-            } else if (resetError.message.includes("User not found")) {
-              setEmailError("No such email exists");
-            } else {
-              // For any other case, assume it's a password error to be safe
-              setPasswordError("Incorrect password");
-            }
+            // Если email существует, но логин не удался - неправильный пароль
+            setPasswordError("Пароль не подходит");
             setLoading(false);
             return;
           } else if (error.message === "Email not confirmed") {
@@ -167,7 +167,7 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
           
           throw new Error("Login failed");
         }
-        toast({ description: "Login successful" });
+        toast({ description: "Авторизация успешна" });
         onClose?.(); // Close modal after successful login
       } else {
         const redirectUrl = window.location.href; // Confirm email back to current page
@@ -366,7 +366,7 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
                     setEmailError("");
                   }}
                 >
-                  Forgot password?
+                  Восстановить пароль
                 </button>
               </div>
             )}
