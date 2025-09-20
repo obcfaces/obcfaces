@@ -310,7 +310,6 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
     <>
       <DialogHeader>
         <DialogTitle>{getTitle()}</DialogTitle>
-        <DialogDescription>{getDescription()}</DialogDescription>
       </DialogHeader>
       <form onSubmit={onSubmit} className="space-y-3">
         {authError && (
