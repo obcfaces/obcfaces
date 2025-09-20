@@ -31,7 +31,7 @@ const LoginModalContent = ({ onClose, defaultMode = "login" }: LoginModalContent
   }, [defaultMode]);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
+  const [showPassword, setShowPassword] = useState(true);
   const [firstName, setFirstName] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [country, setCountry] = useState("");
@@ -383,21 +383,7 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
                 {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
               </button>
             </div>
-          </div>
-        )}
-        {mode === "signup" && (
-          <>
-            <div className="space-y-2">
-              <Input 
-                id="auth-firstname" 
-                placeholder="First name" 
-                aria-invalid={invalidFirstName} 
-                className={`placeholder:italic placeholder:text-muted-foreground ${invalidFirstName ? 'border-destructive focus:ring-destructive' : ''}`} 
-                value={firstName} 
-                onChange={(e) => setFirstName(e.target.value)} 
-              />
-            </div>
-            <div className="space-y-2">
+            {mode === "signup" && (
               <div className="relative">
                 <Input 
                   id="auth-confirm-password" 
@@ -417,11 +403,42 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
                   {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
                 </button>
               </div>
-              {invalidPasswordMatch && (
-                <div className="text-destructive text-sm">
-                  Passwords do not match
-                </div>
-              )}
+            )}
+            {invalidPasswordMatch && mode === "signup" && (
+              <div className="text-destructive text-sm">
+                Passwords do not match
+              </div>
+            )}
+          </div>
+        )}
+        {mode === "signup" && (
+          <>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Your name</label>
+              <div className="grid gap-2 grid-cols-2">
+                <Input 
+                  id="auth-firstname" 
+                  placeholder="First name" 
+                  aria-invalid={invalidFirstName} 
+                  className={`placeholder:italic placeholder:text-muted-foreground ${invalidFirstName ? 'border-destructive focus:ring-destructive' : ''}`} 
+                  value={firstName} 
+                  onChange={(e) => setFirstName(e.target.value)} 
+                />
+                <SearchableSelect
+                  value={countryCode ?? ""}
+                  onValueChange={(code) => {
+                    setCountryCode(code);
+                    const c = countries.find((c) => c.value === code);
+                    setCountry(c?.label || "");
+                    setStateName("");
+                    setStateCode(null);
+                    setCity("");
+                  }}
+                  placeholder="Country"
+                  ariaLabel="Select country"
+                  options={countries}
+                />
+              </div>
             </div>
             
             <div className="space-y-3">
