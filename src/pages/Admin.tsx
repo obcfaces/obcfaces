@@ -1988,37 +1988,29 @@ const getApplicationStatusBadge = (status: string) => {
                                  )}
                                </div>
 
-                               {/* Sixth line: Phone */}
+                               {/* Sixth line: Phone and Facebook */}
                                <div className="text-xs text-muted-foreground mb-1">
-                                 {phone ? phone.full_number : 'Not provided'}
-                               </div>
-
-                               {/* Seventh line: Facebook - truncated */}
-                               <div className="text-xs text-muted-foreground">
-                                 {appData.facebook_url ? (
-                                   <div className="flex items-center gap-1">
-                                     <span 
-                                       className="cursor-pointer" 
-                                       title={appData.facebook_url}
-                                     >
-                                       {(() => {
-                                         const displayUrl = appData.facebook_url.replace(/^https?:\/\/(www\.)?facebook\.com\/?/, '');
-                                         return displayUrl.length > 30 ? `${displayUrl.substring(0, 30)}...` : displayUrl;
-                                       })()}
-                                     </span>
-                                     <button 
-                                       onClick={() => navigator.clipboard.writeText(appData.facebook_url)}
-                                       className="text-muted-foreground hover:text-foreground transition-colors"
-                                       title="Copy Facebook URL"
-                                     >
-                                       <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                                       </svg>
-                                     </button>
-                                   </div>
-                                 ) : (
-                                   <span>Not provided</span>
-                                 )}
+                                 <div className="flex items-center gap-2">
+                                   <span>{phone ? phone.full_number : 'Not provided'}</span>
+                                   {appData.facebook_url && (
+                                     <div className="flex items-center gap-1">
+                                       <span>•</span>
+                                       <span 
+                                         className="cursor-pointer" 
+                                         title={appData.facebook_url}
+                                       >
+                                         {(() => {
+                                           const displayUrl = appData.facebook_url.replace(/^https?:\/\/(www\.)?facebook\.com\/?/, '');
+                                           return displayUrl.length > 10 ? `${displayUrl.substring(0, 10)}...` : displayUrl;
+                                         })()}
+                                       </span>
+                                       <Copy 
+                                         className="h-3 w-3 cursor-pointer hover:text-foreground" 
+                                         onClick={() => navigator.clipboard.writeText(appData.facebook_url)}
+                                       />
+                                     </div>
+                                   )}
+                                 </div>
                                </div>
                              </div>
 
