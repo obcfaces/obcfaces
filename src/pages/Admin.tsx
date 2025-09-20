@@ -1920,7 +1920,7 @@ const getApplicationStatusBadge = (status: string) => {
                                    <img 
                                      src={appData.photo1_url} 
                                      alt="Portrait" 
-                                     className="w-full h-24 object-cover rounded border cursor-pointer hover:opacity-80 transition-opacity"
+                                     className="w-full max-h-32 object-contain rounded border cursor-pointer hover:opacity-80 transition-opacity"
                                      onClick={() => openPhotoModal([appData.photo1_url, appData.photo2_url].filter(Boolean), 0, `${appData.first_name} ${appData.last_name}`)}
                                    />
                                  </div>
@@ -1930,7 +1930,7 @@ const getApplicationStatusBadge = (status: string) => {
                                    <img 
                                      src={appData.photo2_url} 
                                      alt="Full length" 
-                                     className="w-full h-24 object-cover rounded border cursor-pointer hover:opacity-80 transition-opacity"
+                                     className="w-full max-h-32 object-contain rounded border cursor-pointer hover:opacity-80 transition-opacity"
                                      onClick={() => openPhotoModal([appData.photo1_url, appData.photo2_url].filter(Boolean), 1, `${appData.first_name} ${appData.last_name}`)}
                                    />
                                  </div>
