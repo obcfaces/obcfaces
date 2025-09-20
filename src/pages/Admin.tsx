@@ -1912,153 +1912,123 @@ const getApplicationStatusBadge = (status: string) => {
                   return (
                      <Card key={application.id} className="overflow-hidden">
                        <CardContent className="p-4">
-                          <div className="flex flex-col md:flex-row md:items-center gap-4">
-                            {/* Mobile: Stack vertically, Desktop: Horizontal layout */}
-                            
-                            {/* Top section: Avatar, photos and basic info */}
-                             <div className="flex items-center gap-3 flex-1 min-w-0">
-                              <Avatar className="h-12 w-12 flex-shrink-0">
-                                <AvatarImage src={userProfile?.avatar_url || ''} />
-                                <AvatarFallback>
-                                  {appData.first_name?.charAt(0) || 'U'}
-                                </AvatarFallback>
-                              </Avatar>
-                              
-                              <div className="flex-1 min-w-0">
-                                {/* First line: Name and Age */}
-                                <div className="flex items-center gap-2 flex-wrap">
-                                  <h3 className="text-sm font-semibold truncate">
-                                    {appData.first_name} {appData.last_name}
-                                  </h3>
-                                  <span className="text-sm">{new Date().getFullYear() - appData.birth_year}</span>
-                                </div>
-                                
-                                {/* Second line: Location */}
-                                <div className="text-xs text-muted-foreground truncate">
-                                  {appData.state}, {appData.city}
-                                </div>
-                                
-                                {/* Third line: Email, Kids status, Single status - Mobile only */}
-                                <div className="md:hidden flex items-center gap-2 text-xs mt-1 flex-wrap">
-                                  {userProfile?.email && (
-                                    <span 
-                                      className="truncate max-w-[160px] cursor-pointer" 
-                                      title={userProfile.email}
-                                    >
-                                      {userProfile.email.length > 20 ? `${userProfile.email.substring(0, 20)}...` : userProfile.email}
-                                    </span>
-                                  )}
-                                  <span className="text-muted-foreground">
-                                    {appData.has_children ? 'kids' : 'no kids'}
-                                  </span>
-                                  {appData.marital_status === 'single' && (
-                                    <span className="text-muted-foreground">Single</span>
-                                  )}
-                                </div>
-                                
-                                {/* Fourth line: Phone and Facebook - Mobile only */}
-                                <div className="md:hidden flex items-center gap-2 text-xs mt-1 flex-wrap">
-                                  <span>{phone ? phone.full_number : 'no phone'}</span>
-                                  {appData.facebook_url && (
-                                    <div className="flex items-center gap-1">
-                                      <span 
-                                        className="truncate max-w-[120px] cursor-pointer" 
-                                        title={appData.facebook_url}
-                                      >
-                                        {appData.facebook_url.length > 15 ? `${appData.facebook_url.substring(0, 15)}...` : appData.facebook_url}
-                                      </span>
-                                      <button 
-                                        onClick={() => navigator.clipboard.writeText(appData.facebook_url)}
-                                        className="text-muted-foreground hover:text-foreground transition-colors"
-                                        title="Copy Facebook URL"
-                                      >
-                                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                                        </svg>
-                                      </button>
-                                    </div>
-                                  )}
-                                </div>
-                              </div>
-                           </div>
-
-                           {/* Desktop: Contact info section */}
-                           <div className="hidden md:block flex-1 min-w-0">
-                             <div className="flex items-center gap-2 text-xs">
-                               {userProfile?.email && (
-                                 <span 
-                                   className="truncate max-w-[160px] cursor-pointer" 
-                                   title={userProfile.email}
-                                 >
-                                   {userProfile.email.length > 20 ? `${userProfile.email.substring(0, 20)}...` : userProfile.email}
-                                 </span>
+                           <div className="flex flex-col md:flex-row md:items-stretch gap-4">
+                             {/* Photos section - Left edge without padding */}
+                             <div className="flex items-center gap-2 py-0 md:py-0">
+                               {appData.photo1_url && (
+                                 <div className="text-center">
+                                   <p className="text-xs text-muted-foreground mb-1">Portrait</p>
+                                   <img 
+                                     src={appData.photo1_url} 
+                                     alt="Portrait" 
+                                     className="w-16 h-20 object-cover rounded border cursor-pointer hover:opacity-80 transition-opacity"
+                                     onClick={() => openPhotoModal([appData.photo1_url, appData.photo2_url].filter(Boolean), 0, `${appData.first_name} ${appData.last_name}`)}
+                                   />
+                                 </div>
                                )}
-                               <span className="text-muted-foreground">
-                                 {appData.has_children ? 'kids' : 'no kids'}
-                               </span>
-                               {appData.marital_status === 'single' && (
-                                 <span className="text-muted-foreground">Single</span>
-                               )}
-                             </div>
-                             
-                             <div className="flex items-center gap-2 text-xs mt-1">
-                               <span>{phone ? phone.full_number : 'no phone'}</span>
-                               {appData.facebook_url && (
-                                 <div className="flex items-center gap-1">
-                                   <span 
-                                     className="truncate max-w-[120px] cursor-pointer" 
-                                     title={appData.facebook_url}
-                                   >
-                                     {appData.facebook_url.length > 15 ? `${appData.facebook_url.substring(0, 15)}...` : appData.facebook_url}
-                                   </span>
-                                   <button 
-                                     onClick={() => navigator.clipboard.writeText(appData.facebook_url)}
-                                     className="text-muted-foreground hover:text-foreground transition-colors"
-                                     title="Copy Facebook URL"
-                                   >
-                                     <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                                     </svg>
-                                   </button>
+                               {appData.photo2_url && (
+                                 <div className="text-center">
+                                   <p className="text-xs text-muted-foreground mb-1">Full Length</p>
+                                   <img 
+                                     src={appData.photo2_url} 
+                                     alt="Full length" 
+                                     className="w-16 h-20 object-cover rounded border cursor-pointer hover:opacity-80 transition-opacity"
+                                     onClick={() => openPhotoModal([appData.photo1_url, appData.photo2_url].filter(Boolean), 1, `${appData.first_name} ${appData.last_name}`)}
+                                   />
                                  </div>
                                )}
                              </div>
-                           </div>
 
-                           {/* Photos section */}
-                           <div className="flex items-center gap-2 justify-center md:justify-start">
-                             {appData.photo1_url && (
-                               <div className="text-center">
-                                 <p className="text-xs text-muted-foreground mb-1">Portrait</p>
-                                 <img 
-                                   src={appData.photo1_url} 
-                                   alt="Portrait" 
-                                   className="w-16 h-20 object-cover rounded border cursor-pointer hover:opacity-80 transition-opacity"
-                                   onClick={() => openPhotoModal([appData.photo1_url, appData.photo2_url].filter(Boolean), 0, `${appData.first_name} ${appData.last_name}`)}
-                                 />
+                             {/* Main info section - Fixed width 45 chars */}
+                             <div className="md:w-[45ch] md:flex-shrink-0 flex-1 min-w-0">
+                               {/* First line: Avatar + Name and Age */}
+                               <div className="flex items-center gap-2 mb-1">
+                                 <Avatar className="h-6 w-6 flex-shrink-0">
+                                   <AvatarImage src={userProfile?.avatar_url || ''} />
+                                   <AvatarFallback className="text-xs">
+                                     {appData.first_name?.charAt(0) || 'U'}
+                                   </AvatarFallback>
+                                 </Avatar>
+                                 <h3 className="text-sm font-semibold">
+                                   {appData.first_name} {appData.last_name}
+                                 </h3>
+                                 <span className="text-sm text-muted-foreground">
+                                   {new Date().getFullYear() - appData.birth_year} yo
+                                 </span>
                                </div>
-                             )}
-                             {appData.photo2_url && (
-                               <div className="text-center">
-                                 <p className="text-xs text-muted-foreground mb-1">Full Length</p>
-                                 <img 
-                                   src={appData.photo2_url} 
-                                   alt="Full length" 
-                                   className="w-16 h-20 object-cover rounded border cursor-pointer hover:opacity-80 transition-opacity"
-                                   onClick={() => openPhotoModal([appData.photo1_url, appData.photo2_url].filter(Boolean), 1, `${appData.first_name} ${appData.last_name}`)}
-                                 />
+                               
+                               {/* Second line: Location */}
+                               <div className="text-xs text-muted-foreground mb-1">
+                                 {appData.city}, {appData.country}
                                </div>
-                             )}
-                           </div>
+                               
+                               {/* Third line: Physical stats */}
+                               <div className="text-xs text-muted-foreground mb-1">
+                                 {appData.weight_kg}kg • {appData.height_cm}cm • {appData.gender}
+                               </div>
 
-                           {/* Controls and status section */}
-                           <div className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
-                             <div className="flex items-center gap-2 text-xs">
-                               <Switch
-                                 checked={application.is_active ?? true}
-                                 onCheckedChange={() => toggleApplicationActive(application.id, application.is_active ?? true)}
-                               />
+                               {/* Fourth line: Birth details */}
+                               <div className="text-xs text-muted-foreground mb-1">
+                                 Born: {appData.birth_day}/{appData.birth_month}/{appData.birth_year}
+                               </div>
+
+                               {/* Fifth line: Marital and children status */}
+                               <div className="text-xs text-muted-foreground mb-1">
+                                 {appData.marital_status} • {appData.has_children ? 'Has children' : 'No children'}
+                               </div>
+
+                               {/* Sixth line: Contact - email truncated */}
+                               <div className="text-xs text-muted-foreground mb-1">
+                                 {userProfile?.email && (
+                                   <span 
+                                     className="cursor-pointer" 
+                                     title={userProfile.email}
+                                   >
+                                     {userProfile.email.length > 25 ? `${userProfile.email.substring(0, 25)}...` : userProfile.email}
+                                   </span>
+                                 )}
+                               </div>
+
+                               {/* Seventh line: Phone */}
+                               <div className="text-xs text-muted-foreground mb-1">
+                                 Phone: {phone ? phone.full_number : 'Not provided'}
+                               </div>
+
+                               {/* Eighth line: Facebook - truncated */}
+                               <div className="text-xs text-muted-foreground">
+                                 {appData.facebook_url ? (
+                                   <div className="flex items-center gap-1">
+                                     <span>FB:</span>
+                                     <span 
+                                       className="cursor-pointer" 
+                                       title={appData.facebook_url}
+                                     >
+                                       {appData.facebook_url.length > 30 ? `${appData.facebook_url.substring(0, 30)}...` : appData.facebook_url}
+                                     </span>
+                                     <button 
+                                       onClick={() => navigator.clipboard.writeText(appData.facebook_url)}
+                                       className="text-muted-foreground hover:text-foreground transition-colors"
+                                       title="Copy Facebook URL"
+                                     >
+                                       <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                       </svg>
+                                     </button>
+                                   </div>
+                                 ) : (
+                                   <span>FB: Not provided</span>
+                                 )}
+                               </div>
                              </div>
+
+                            {/* Controls and status section */}
+                            <div className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
+                              <div className="flex items-center gap-2 text-xs">
+                                <Switch
+                                  checked={application.is_active ?? true}
+                                  onCheckedChange={() => toggleApplicationActive(application.id, application.is_active ?? true)}
+                                />
+                              </div>
                              <div className="flex flex-col gap-1 items-center">
                                {getApplicationStatusBadge(application.status)}
                                <p className="text-xs text-muted-foreground text-center">
