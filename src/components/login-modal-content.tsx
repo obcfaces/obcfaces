@@ -461,20 +461,20 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
                     <Link to="/privacy" className="text-primary underline hover:no-underline" target="_blank">
                       Privacy Policy
                     </Link>
-                    {" "}
-                    <Collapsible open={isTermsOpen} onOpenChange={setIsTermsOpen}>
-                      <CollapsibleTrigger className="inline-flex items-center gap-1 text-muted-foreground hover:text-foreground transition-colors">
-                        <ChevronDown className={`h-4 w-4 transition-transform ${isTermsOpen ? 'rotate-180' : ''}`} />
-                      </CollapsibleTrigger>
-                      <CollapsibleContent className="mt-2">
-                        <p className="text-xs text-muted-foreground">
-                          By registering, you confirm that you are at least 18 years old and agree to our community guidelines. 
-                          We may use your information to improve our services and provide personalized content. 
-                          You can delete your account at any time. We respect your privacy and will never share your personal data with third parties without your consent.
-                        </p>
-                      </CollapsibleContent>
-                    </Collapsible>
                   </label>
+                  
+                  <Collapsible open={isTermsOpen} onOpenChange={setIsTermsOpen}>
+                    <CollapsibleTrigger className="inline-flex items-center gap-1 text-muted-foreground hover:text-foreground transition-colors ml-1">
+                      <ChevronDown className={`h-4 w-4 transition-transform ${isTermsOpen ? 'rotate-180' : ''}`} />
+                    </CollapsibleTrigger>
+                    <CollapsibleContent className="mt-2">
+                      <p className="text-xs text-muted-foreground">
+                        By registering, you confirm that you are at least 18 years old and agree to our community guidelines. 
+                        We may use your information to improve our services and provide personalized content. 
+                        You can delete your account at any time. We respect your privacy and will never share your personal data with third parties without your consent.
+                      </p>
+                    </CollapsibleContent>
+                  </Collapsible>
                 </div>
               </div>
             </div>
