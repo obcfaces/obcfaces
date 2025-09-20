@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import SearchableSelect from "@/components/ui/searchable-select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import LoginModalContent from "@/components/login-modal-content";
 import { LogOut, Eye, EyeOff, UserIcon, MapPin, Pencil, Lock, MessageCircle, AlertCircle } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import PostCard from "@/components/profile/PostCard";
@@ -116,6 +117,7 @@ const Profile = () => {
   // Rejection reason modal states
   const [showRejectReasonModal, setShowRejectReasonModal] = useState(false);
   const [updatingRejection, setUpdatingRejection] = useState(false);
+  const [isSignupOpen, setIsSignupOpen] = useState(false);
 
   // Demo profile for fallback
   const demoProfile: ProfileRow = {
@@ -1198,11 +1200,12 @@ const Profile = () => {
             
             <div className="flex items-center gap-2 mt-4">
               {isOwner && (
-                <ContestParticipationModal>
-                   <Button className="bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200">
-                     🏆 Join & Win 5,000 PHP
-                   </Button>
-                 </ContestParticipationModal>
+                <Button 
+                  onClick={() => setIsSignupOpen(true)}
+                  className="bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
+                >
+                  🏆 Join & Win 5,000 PHP
+                </Button>
               )}
               
               {/* Edit Modal for existing applications */}
@@ -2372,6 +2375,13 @@ const Profile = () => {
         onConfirm={handleUpdateRejectionReason}
         isLoading={updatingRejection}
       />
+
+      {/* Signup Modal */}
+      <Dialog open={isSignupOpen} onOpenChange={setIsSignupOpen}>
+        <DialogContent className="sm:max-w-lg data-[state=open]:translate-y-[5%] sm:data-[state=open]:translate-y-[2%]">
+          <LoginModalContent defaultMode="signup" onClose={() => setIsSignupOpen(false)} />
+        </DialogContent>
+      </Dialog>
 
     </div>
   );
