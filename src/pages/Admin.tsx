@@ -1949,15 +1949,15 @@ const getApplicationStatusBadge = (status: string) => {
                                      {appData.first_name?.charAt(0) || 'U'}
                                    </AvatarFallback>
                                  </Avatar>
-                                 <span className="text-sm font-semibold whitespace-nowrap">
-                                   {appData.first_name} {appData.last_name} {new Date().getFullYear() - appData.birth_year} yo
-                                 </span>
-                               </div>
-                               
-                               {/* Second line: Location */}
-                               <div className="text-xs text-muted-foreground mb-1">
-                                 {appData.city}, {appData.country}
-                               </div>
+                                <span className="text-sm font-semibold whitespace-nowrap">
+                                  {appData.first_name} {appData.last_name} {new Date().getFullYear() - appData.birth_year}
+                                </span>
+                              </div>
+                              
+                              {/* Second line: Location */}
+                              <div className="text-xs text-muted-foreground mb-1">
+                                {appData.city} {appData.state} {appData.country}
+                              </div>
                                
                                {/* Third line: Physical stats */}
                                <div className="text-xs text-muted-foreground mb-1">
