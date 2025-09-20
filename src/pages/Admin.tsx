@@ -1916,23 +1916,21 @@ const getApplicationStatusBadge = (status: string) => {
                              {/* Photos section - Left edge without padding */}
                              <div className="flex items-center gap-2 py-0 md:py-0 md:w-[20ch] md:flex-shrink-0">
                                {appData.photo1_url && (
-                                 <div className="text-center">
-                                   <p className="text-xs text-muted-foreground mb-1">Portrait</p>
+                                 <div className="flex-1">
                                    <img 
                                      src={appData.photo1_url} 
                                      alt="Portrait" 
-                                     className="w-16 h-20 object-cover rounded border cursor-pointer hover:opacity-80 transition-opacity"
+                                     className="w-full h-24 object-cover rounded border cursor-pointer hover:opacity-80 transition-opacity"
                                      onClick={() => openPhotoModal([appData.photo1_url, appData.photo2_url].filter(Boolean), 0, `${appData.first_name} ${appData.last_name}`)}
                                    />
                                  </div>
                                )}
                                {appData.photo2_url && (
-                                 <div className="text-center">
-                                   <p className="text-xs text-muted-foreground mb-1">Full Length</p>
+                                 <div className="flex-1">
                                    <img 
                                      src={appData.photo2_url} 
                                      alt="Full length" 
-                                     className="w-16 h-20 object-cover rounded border cursor-pointer hover:opacity-80 transition-opacity"
+                                     className="w-full h-24 object-cover rounded border cursor-pointer hover:opacity-80 transition-opacity"
                                      onClick={() => openPhotoModal([appData.photo1_url, appData.photo2_url].filter(Boolean), 1, `${appData.first_name} ${appData.last_name}`)}
                                    />
                                  </div>
