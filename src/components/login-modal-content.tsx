@@ -394,17 +394,16 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
         )}
         {mode === "signup" && (
           <>
-            <div className="grid gap-2 sm:grid-cols-2">
+            <div className="grid gap-2 grid-cols-2">
               <div className="space-y-2">
-                
                 <Input id="auth-firstname" placeholder="First name" aria-invalid={invalidFirstName} className={`placeholder:italic placeholder:text-muted-foreground ${invalidFirstName ? 'border-destructive focus:ring-destructive' : ''}`} value={firstName} onChange={(e) => setFirstName(e.target.value)} />
               </div>
               <div className="space-y-2">
-                
                 <Input id="auth-lastname" placeholder="Last name" aria-invalid={invalidLastName} className={`placeholder:italic placeholder:text-muted-foreground ${invalidLastName ? 'border-destructive focus:ring-destructive' : ''}`} value={lastName} onChange={(e) => setLastName(e.target.value)} />
               </div>
+            </div>
+            <div className="grid gap-2 grid-cols-3">
               <div className="space-y-2">
-                
                 <SearchableSelect
                   value={countryCode ?? ""}
                   onValueChange={(code) => {
@@ -422,7 +421,6 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
                 />
               </div>
               <div className="space-y-2">
-                
                 <Select value={age} onValueChange={setAge}>
                   <SelectTrigger aria-label="Age" className={invalidAge ? "border-destructive focus:ring-destructive" : undefined}>
                     <SelectValue placeholder="Age" />
@@ -437,7 +435,6 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
                 </Select>
               </div>
               <div className="space-y-2">
-                
                 <Select value={gender} onValueChange={setGender}>
                   <SelectTrigger aria-label="Gender">
                     <SelectValue placeholder="Gender" />
