@@ -1847,7 +1847,27 @@ const getApplicationStatusBadge = (status: string) => {
                   return (
                     <Card key={application.id} className="overflow-hidden">
                       <CardContent className="p-0">
-                         <div className="flex items-stretch justify-between gap-4 h-32">
+                         <div className="flex items-stretch h-32">
+                           {/* Photos section - at the start without padding */}
+                           <div className="flex items-stretch h-full">
+                             {appData.photo1_url && (
+                               <img 
+                                 src={appData.photo1_url} 
+                                 alt="Portrait" 
+                                 className="w-24 h-full object-cover cursor-pointer hover:opacity-80 transition-opacity"
+                                 onClick={() => openPhotoModal([appData.photo1_url, appData.photo2_url].filter(Boolean), 0, `${appData.first_name} ${appData.last_name}`)}
+                               />
+                             )}
+                             {appData.photo2_url && (
+                               <img 
+                                 src={appData.photo2_url} 
+                                 alt="Full length" 
+                                 className="w-24 h-full object-cover cursor-pointer hover:opacity-80 transition-opacity"
+                                 onClick={() => openPhotoModal([appData.photo1_url, appData.photo2_url].filter(Boolean), 1, `${appData.first_name} ${appData.last_name}`)}
+                               />
+                             )}
+                           </div>
+
                            {/* Left section with avatar and basic info */}
                             <div className="flex items-center gap-3 flex-1 p-4">
                              <Avatar className="h-12 w-12 flex-shrink-0">
@@ -1856,26 +1876,6 @@ const getApplicationStatusBadge = (status: string) => {
                                  {appData.first_name?.charAt(0) || 'U'}
                                </AvatarFallback>
                              </Avatar>
-                             
-                             {/* Photos section - moved after avatar */}
-                             <div className="flex items-stretch gap-1 h-full">
-                               {appData.photo1_url && (
-                                 <img 
-                                   src={appData.photo1_url} 
-                                   alt="Portrait" 
-                                   className="w-20 h-full object-cover cursor-pointer hover:opacity-80 transition-opacity"
-                                   onClick={() => openPhotoModal([appData.photo1_url, appData.photo2_url].filter(Boolean), 0, `${appData.first_name} ${appData.last_name}`)}
-                                 />
-                               )}
-                               {appData.photo2_url && (
-                                 <img 
-                                   src={appData.photo2_url} 
-                                   alt="Full length" 
-                                   className="w-20 h-full object-cover cursor-pointer hover:opacity-80 transition-opacity"
-                                   onClick={() => openPhotoModal([appData.photo1_url, appData.photo2_url].filter(Boolean), 1, `${appData.first_name} ${appData.last_name}`)}
-                                 />
-                               )}
-                             </div>
                             
                             <div className="flex-1 min-w-0">
                               <h3 className="text-sm font-semibold truncate">
