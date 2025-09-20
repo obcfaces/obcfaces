@@ -55,49 +55,6 @@ interface ContestApplication {
   deleted_at?: string;
 }
 
-interface WeeklyContest {
-  id: string;
-  week_start_date: string;
-  week_end_date: string;
-  is_active: boolean;
-  created_at: string;
-}
-
-interface WeeklyContestParticipant {
-  id: string;
-  weekly_contest_id: string;
-  user_id: string;
-  application_data?: any;
-  final_rank: number | null;
-  total_votes?: number;
-  average_rating?: number;
-  created_at?: string;
-  first_name: string;
-  last_name: string;
-  age: number;
-  city: string;
-  country: string;
-  photo1_url: string;
-  photo2_url: string;
-  height_cm: number;
-  weight_kg: number;
-  contest_status?: string;
-  week_start_date?: string;
-  week_end_date?: string;
-  is_active: boolean;
-}
-
-const REJECTION_REASONS = {
-  'inappropriate_content': 'Inappropriate content',
-  'fake_photos': 'Fake or edited photos',
-  'incorrect_info': 'Incorrect information',
-  'terms_violation': 'Terms of service violation',
-  'duplicate_application': 'Duplicate application',
-  'age_verification': 'Age verification required',
-  'photo_quality': 'Poor photo quality',
-  'other': 'Other reason'
-};
-
 const Admin = () => {
   const [user, setUser] = useState<any>(null);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -106,16 +63,7 @@ const Admin = () => {
   const [userRoles, setUserRoles] = useState<UserRole[]>([]);
   const [contestApplications, setContestApplications] = useState<ContestApplication[]>([]);
   const [deletedApplications, setDeletedApplications] = useState<ContestApplication[]>([]);
-  const [weeklyContests, setWeeklyContests] = useState<WeeklyContest[]>([]);
-  const [weeklyParticipants, setWeeklyParticipants] = useState<WeeklyContestParticipant[]>([]);
-  const [selectedContest, setSelectedContest] = useState<string | null>(null);
-  const [selectedWeekOffset, setSelectedWeekOffset] = useState<number>(0);
   const [showDeletedApplications, setShowDeletedApplications] = useState(false);
-  const [editingApplication, setEditingApplication] = useState<ContestApplication | null>(null);
-  const [editForm, setEditForm] = useState<any>({});
-  const [photo1File, setPhoto1File] = useState<File | null>(null);
-  const [photo2File, setPhoto2File] = useState<File | null>(null);
-  const [uploadingPhotos, setUploadingPhotos] = useState(false);
   const [photoModalOpen, setPhotoModalOpen] = useState(false);
   const [photoModalImages, setPhotoModalImages] = useState<string[]>([]);
   const [photoModalIndex, setPhotoModalIndex] = useState(0);
@@ -139,7 +87,6 @@ const Admin = () => {
       const { data: { session } } = await supabase.auth.getSession();
       
       if (!session?.user) {
-        // Save current admin path for redirect after login
         sessionStorage.setItem('redirectPath', '/admin');
         navigate('/auth');
         return;
@@ -168,8 +115,6 @@ const Admin = () => {
       fetchProfiles();
       fetchUserRoles();
       fetchContestApplications();
-      fetchWeeklyContests();
-      fetchWeeklyParticipants();
     } catch (error) {
       console.error('Error checking admin access:', error);
       navigate('/');
@@ -261,39 +206,6 @@ const Admin = () => {
 
     return data || [];
   };
-
-  const fetchWeeklyContests = async () => {
-    const { data, error } = await supabase
-      .from('weekly_contests')
-      .select('*')
-      .order('week_start_date', { ascending: false });
-
-    if (error) {
-      toast({
-        title: "Error",
-        description: "Failed to fetch weekly contests",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    setWeeklyContests((data || []).map(contest => ({...contest, is_active: contest.status === 'active'})));
-  };
-
-  const fetchWeeklyParticipants = async () => {
-    try {
-      // For now, set empty array as we need to check available RPC functions
-      setWeeklyParticipants([]);
-    } catch (error) {
-      console.error('Error in fetchWeeklyParticipants:', error);
-    }
-  };
-
-  useEffect(() => {
-    if (isAdmin) {
-      fetchWeeklyParticipants();
-    }
-  }, [selectedWeekOffset, isAdmin]);
 
   const getApplicationStatusBadge = (status: string) => {
     switch (status) {
@@ -415,8 +327,6 @@ const Admin = () => {
   };
 
   const getUserRoles = (userId: string) => {
-    return userRoles.filter(r => r.user_id === userId).map(r => r.role);
-  };
     return userRoles.filter(r => r.user_id === userId).map(r => r.role);
   };
 
@@ -1071,7 +981,6 @@ const Admin = () => {
         </div>
       </div>
 
-      {/* Photo Modal */}
       <PhotoModal
         isOpen={photoModalOpen}
         onClose={() => setPhotoModalOpen(false)}
