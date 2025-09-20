@@ -1916,21 +1916,21 @@ const getApplicationStatusBadge = (status: string) => {
                               {/* Photos section - No padding, extends to card edges */}
                               <div className="flex gap-px md:w-[30ch] md:flex-shrink-0 p-0">
                                {appData.photo1_url && (
-                                 <div className="flex-1">
+                                 <div className="w-24 sm:w-28 md:w-32">
                                    <img 
                                      src={appData.photo1_url} 
                                      alt="Portrait" 
-                                     className="w-full h-32 object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                                     className="w-full h-36 sm:h-40 md:h-44 object-contain cursor-pointer hover:opacity-90 transition-opacity"
                                      onClick={() => openPhotoModal([appData.photo1_url, appData.photo2_url].filter(Boolean), 0, `${appData.first_name} ${appData.last_name}`)}
                                    />
                                  </div>
                                )}
                                {appData.photo2_url && (
-                                 <div className="flex-1">
+                                 <div className="w-24 sm:w-28 md:w-32">
                                    <img 
                                      src={appData.photo2_url} 
                                      alt="Full length" 
-                                     className="w-full h-32 object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                                     className="w-full h-36 sm:h-40 md:h-44 object-cover cursor-pointer hover:opacity-90 transition-opacity"
                                      onClick={() => openPhotoModal([appData.photo1_url, appData.photo2_url].filter(Boolean), 1, `${appData.first_name} ${appData.last_name}`)}
                                    />
                                  </div>
