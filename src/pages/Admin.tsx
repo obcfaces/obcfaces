@@ -1592,16 +1592,16 @@ const getApplicationStatusBadge = (status: string) => {
                               <h3 className="text-sm font-semibold truncate">
                                 {participant.first_name} {participant.last_name}
                               </h3>
+                              <div className="text-xs text-muted-foreground truncate">
+                                {participant.city}, {participant.country}
+                              </div>
                                <div className="flex items-center gap-3 text-xs text-muted-foreground">
                                  <span>{participant.age} yo</span>
                                  <span>•</span>
                                  <span>{participant.weight_kg}kg</span>
                                  <span>•</span>
                                  <span>{participant.height_cm}cm</span>
-                                 <span>•</span>
-                                 <span className="truncate">{participant.city}, {participant.country}</span>
                                 </div>
-                                {/* Contact Information - Always show section with status */}
                                 <div className="flex items-center gap-3 text-xs text-muted-foreground mt-1">
                                   <span>📞 {participant.application_data?.phone?.full_number || 'Not provided'}</span>
                                   <span>•</span>
@@ -1643,7 +1643,6 @@ const getApplicationStatusBadge = (status: string) => {
                           {/* Right section with controls and stats */}
                           <div className="flex items-center gap-3">
                             <div className="flex items-center gap-2 text-xs">
-                              <span className="font-medium">Active:</span>
                               <Switch
                                 checked={participant.is_active}
                                 onCheckedChange={() => toggleParticipantActive(participant.id, participant.is_active)}
