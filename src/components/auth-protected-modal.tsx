@@ -16,11 +16,13 @@ export const AuthProtectedModal = ({ children }: AuthProtectedModalProps) => {
   useEffect(() => {
     // Subscribe to auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_, nextSession) => {
+      console.log('Auth state changed in AuthProtectedModal:', nextSession?.user?.email_confirmed_at);
       setSession(nextSession);
     });
 
     // Get current session
     supabase.auth.getSession().then(({ data }) => {
+      console.log('Initial session in AuthProtectedModal:', data.session?.user?.email_confirmed_at);
       setSession(data.session);
     });
 
