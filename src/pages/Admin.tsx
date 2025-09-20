@@ -1911,10 +1911,10 @@ const getApplicationStatusBadge = (status: string) => {
                   
                   return (
                      <Card key={application.id} className="overflow-hidden">
-                       <CardContent className="p-4">
-                           <div className="flex flex-col md:flex-row md:items-stretch gap-4">
-                             {/* Photos section - Left edge without padding */}
-                             <div className="flex items-center gap-2 py-0 md:py-0 md:w-[30ch] md:flex-shrink-0">
+                        <CardContent className="p-0">
+                            <div className="flex flex-col md:flex-row md:items-stretch">
+                              {/* Photos section - No padding, extends to card edges */}
+                              <div className="flex items-center gap-2 md:w-[30ch] md:flex-shrink-0 p-0">
                                {appData.photo1_url && (
                                  <div className="flex-1">
                                    <img 
@@ -1938,7 +1938,7 @@ const getApplicationStatusBadge = (status: string) => {
                              </div>
 
                              {/* Main info section - Fixed width 50 chars */}
-                             <div className="md:w-[50ch] md:flex-shrink-0 flex-1 min-w-0">
+                             <div className="md:w-[50ch] md:flex-shrink-0 flex-1 min-w-0 p-4">
                                {/* First line: Avatar + Name and Age */}
                                <div className="flex items-center gap-2 mb-1">
                                  <Avatar className="h-6 w-6 flex-shrink-0">
