@@ -72,7 +72,7 @@ const AuthNav = () => {
           className="text-sm underline text-primary"
           onClick={() => setIsLoginOpen(true)}
         >
-          Sign in
+          Sign up
         </button>
         
         <Dialog open={isLoginOpen} onOpenChange={setIsLoginOpen}>

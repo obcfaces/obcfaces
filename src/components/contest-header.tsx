@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Camera, Upload } from "lucide-react";
-import AuthProtectedModal from "@/components/auth-protected-modal";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import LoginModalContent from "@/components/login-modal-content";
 
 interface ContestHeaderProps {
   activeSection: string;
@@ -9,6 +10,7 @@ interface ContestHeaderProps {
 }
 
 export function ContestHeader({ activeSection, onSectionChange }: ContestHeaderProps) {
+  const [isSignupOpen, setIsSignupOpen] = useState(false);
 
   const navItems = [
     { name: "Contest", href: "#" },
@@ -21,12 +23,19 @@ export function ContestHeader({ activeSection, onSectionChange }: ContestHeaderP
         {/* Title and button in one line */}
         <div className="flex items-center justify-between w-full">
           <h1 className="text-2xl font-bold text-contest-text">OBC faces</h1>
-          <AuthProtectedModal>
-            <Button className="bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 whitespace-nowrap">
-              🏆 Join & Win 5,000 PHP
-            </Button>
-          </AuthProtectedModal>
+          <Button 
+            onClick={() => setIsSignupOpen(true)}
+            className="bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 whitespace-nowrap"
+          >
+            🏆 Join & Win 5,000 PHP
+          </Button>
         </div>
+        
+        <Dialog open={isSignupOpen} onOpenChange={setIsSignupOpen}>
+          <DialogContent className="sm:max-w-lg data-[state=open]:translate-y-[5%] sm:data-[state=open]:translate-y-[2%]">
+            <LoginModalContent defaultMode="signup" onClose={() => setIsSignupOpen(false)} />
+          </DialogContent>
+        </Dialog>
         
         {/* Contest info points - always visible */}
         <div className="mt-6 space-y-1 text-sm text-contest-text">

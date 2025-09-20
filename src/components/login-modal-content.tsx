@@ -16,30 +16,29 @@ import { getCitiesForLocation } from '@/lib/location-utils';
 
 interface LoginModalContentProps {
   onClose?: () => void;
+  defaultMode?: "login" | "signup" | "forgot";
 }
 
-const LoginModalContent = ({ onClose }: LoginModalContentProps) => {
-  const [mode, setMode] = useState<"login" | "signup" | "forgot">("login");
+const LoginModalContent = ({ onClose, defaultMode = "login" }: LoginModalContentProps) => {
+  const [mode, setMode] = useState<"login" | "signup" | "forgot">(defaultMode);
   
-  // Reset to login mode when modal opens
+  // Reset to default mode when modal opens
   useEffect(() => {
-    setMode("login");
+    setMode(defaultMode);
     setAuthError("");
     setForgotEmailSent(false);
     setRegistrationSuccess(false);
-  }, []);
+  }, [defaultMode]);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [country, setCountry] = useState("");
   const [countryCode, setCountryCode] = useState<string | null>(null);
   const [stateName, setStateName] = useState("");
   const [stateCode, setStateCode] = useState<string | null>(null);
   const [city, setCity] = useState("");
-  const [age, setAge] = useState<string>("");
-  const [gender, setGender] = useState<string>("");
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [isTermsOpen, setIsTermsOpen] = useState(false);
   const [authError, setAuthError] = useState<string>("");
@@ -104,7 +103,7 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
     if (mode === "signup") {
       setSubmitted(true);
       // Check validation for signup
-      if (!firstName.trim() || !lastName.trim() || !countryCode || !age || !acceptTerms) {
+      if (!firstName.trim() || !acceptTerms || password !== confirmPassword) {
         setLoading(false);
         return;
       }
@@ -169,12 +168,9 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
             emailRedirectTo: redirectUrl,
             data: {
               first_name: firstName || null,
-              last_name: lastName || null,
               country: country || null,
               state: stateName || null,
               city: city || null,
-              age: age ? Number(age) : null,
-              gender: gender || null,
             },
           },
         });
@@ -218,12 +214,9 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
               {
                 id: userId,
                 first_name: firstName || null,
-                last_name: lastName || null,
                 country: country || null,
                 state: stateName || null,
                 city: city || null,
-                age: age ? Number(age) : null,
-                gender: gender || null,
               },
               { onConflict: "id" }
             );
@@ -259,7 +252,7 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
   const getDescription = () => {
     switch (mode) {
       case "login": return "Enter your email and password to continue.";
-      case "signup": return "Create an account for your profile.";
+      case "signup": return "";
       case "forgot": return forgotEmailSent 
         ? "Check your email for password reset instructions." 
         : "Enter your email address to receive password reset instructions.";
@@ -310,10 +303,8 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
 
   const showErrors = submitted && mode === "signup";
   const invalidFirstName = showErrors && !firstName.trim();
-  const invalidLastName = showErrors && !lastName.trim();
-  const invalidCountry = showErrors && !countryCode;
-  const invalidAge = showErrors && !age;
   const invalidTerms = showErrors && !acceptTerms;
+  const invalidPasswordMatch = showErrors && password !== confirmPassword;
 
   return (
     <>
@@ -396,59 +387,41 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
         )}
         {mode === "signup" && (
           <>
-            <div className="grid gap-2 grid-cols-2">
-              <div className="space-y-2">
-                <Input id="auth-firstname" placeholder="First name" aria-invalid={invalidFirstName} className={`placeholder:italic placeholder:text-muted-foreground ${invalidFirstName ? 'border-destructive focus:ring-destructive' : ''}`} value={firstName} onChange={(e) => setFirstName(e.target.value)} />
-              </div>
-              <div className="space-y-2">
-                <Input id="auth-lastname" placeholder="Last name" aria-invalid={invalidLastName} className={`placeholder:italic placeholder:text-muted-foreground ${invalidLastName ? 'border-destructive focus:ring-destructive' : ''}`} value={lastName} onChange={(e) => setLastName(e.target.value)} />
-              </div>
+            <div className="space-y-2">
+              <Input 
+                id="auth-firstname" 
+                placeholder="First name" 
+                aria-invalid={invalidFirstName} 
+                className={`placeholder:italic placeholder:text-muted-foreground ${invalidFirstName ? 'border-destructive focus:ring-destructive' : ''}`} 
+                value={firstName} 
+                onChange={(e) => setFirstName(e.target.value)} 
+              />
             </div>
-            <div className="grid gap-2 grid-cols-3">
-              <div className="space-y-2">
-                <SearchableSelect
-                  value={countryCode ?? ""}
-                  onValueChange={(code) => {
-                    setCountryCode(code);
-                    const c = countries.find((c) => c.value === code);
-                    setCountry(c?.label || "");
-                    setStateName("");
-                    setStateCode(null);
-                    setCity("");
-                  }}
-                  placeholder="Country"
-                  ariaLabel="Select country"
-                  invalid={invalidCountry}
-                  options={countries}
+            <div className="space-y-2">
+              <div className="relative">
+                <Input 
+                  id="auth-confirm-password" 
+                  type={showPassword ? "text" : "password"} 
+                  placeholder="Confirm password" 
+                  className={`pr-10 placeholder:italic placeholder:text-muted-foreground ${invalidPasswordMatch ? 'border-destructive focus:ring-destructive' : ''}`} 
+                  value={confirmPassword} 
+                  onChange={(e) => setConfirmPassword(e.target.value)} 
+                  required 
                 />
+                <button 
+                  type="button" 
+                  aria-label={showPassword ? "Hide password" : "Show password"} 
+                  onClick={() => setShowPassword((v) => !v)} 
+                  className="absolute inset-y-0 right-2 inline-flex items-center text-muted-foreground hover:text-foreground"
+                >
+                  {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                </button>
               </div>
-              <div className="space-y-2">
-                <Select value={age} onValueChange={setAge}>
-                  <SelectTrigger aria-label="Age" className={invalidAge ? "border-destructive focus:ring-destructive" : undefined}>
-                    <SelectValue placeholder="Age" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {ageOptions.map((a) => (
-                      <SelectItem key={a} value={String(a)}>
-                        {a}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Select value={gender} onValueChange={setGender}>
-                  <SelectTrigger aria-label="Gender">
-                    <SelectValue placeholder="Gender" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="male">Male</SelectItem>
-                    <SelectItem value="female">Female</SelectItem>
-                    <SelectItem value="other">Other</SelectItem>
-                    <SelectItem value="na">Prefer not to say</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+              {invalidPasswordMatch && (
+                <div className="text-destructive text-sm">
+                  Passwords do not match
+                </div>
+              )}
             </div>
             
             <div className="space-y-3">
