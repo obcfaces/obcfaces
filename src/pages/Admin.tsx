@@ -16,6 +16,7 @@ import { Check, X, Eye, UserCog, FileText, Calendar, Trophy, RotateCcw, Edit, Pl
 import { PhotoModal } from "@/components/photo-modal";
 import { RejectReasonModal, RejectionReasonType, REJECTION_REASONS } from "@/components/reject-reason-modal";
 import { Switch } from "@/components/ui/switch";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useNavigate } from "react-router-dom";
 import { useApplicationHistory } from "@/hooks/useApplicationHistory";
 import { Clock } from "lucide-react";
@@ -129,6 +130,8 @@ const Admin = () => {
   const [applicationToReject, setApplicationToReject] = useState<{ id: string; name: string } | null>(null);
   const [votersModalOpen, setVotersModalOpen] = useState(false);
   const [selectedParticipantForVoters, setSelectedParticipantForVoters] = useState<{ id: string; name: string } | null>(null);
+  const [countryFilter, setCountryFilter] = useState<string>('all');
+  const [genderFilter, setGenderFilter] = useState<string>('all');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -1835,14 +1838,56 @@ const getApplicationStatusBadge = (status: string) => {
                   </Button>
                 </div>
               </div>
+              
+              {/* Country and Gender Filters */}
+              <div className="flex gap-3 mb-4">
+                <Select value={countryFilter} onValueChange={setCountryFilter}>
+                  <SelectTrigger className="w-48">
+                    <SelectValue placeholder="Filter by country" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Countries</SelectItem>
+                    {Array.from(new Set(contestApplications.map(app => app.application_data?.country).filter(Boolean))).sort().map(country => (
+                      <SelectItem key={country} value={country}>{country}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                
+                <Select value={genderFilter} onValueChange={setGenderFilter}>
+                  <SelectTrigger className="w-32">
+                    <SelectValue placeholder="Filter by gender" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Genders</SelectItem>
+                    <SelectItem value="female">Female</SelectItem>
+                    <SelectItem value="male">Male</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
               <div className="grid gap-4">
-                {(showDeletedApplications ? deletedApplications : contestApplications).map((application) => {
-                  const appData = application.application_data || {};
-                  const phone = appData.phone;
-                  const submittedDate = new Date(application.submitted_at);
-                  
-                  // Find the user's profile to get auth data
-                  const userProfile = profiles.find(p => p.id === application.user_id);
+                {(showDeletedApplications ? deletedApplications : contestApplications)
+                  .filter((application) => {
+                    const appData = application.application_data || {};
+                    
+                    // Apply country filter
+                    if (countryFilter !== 'all' && appData.country !== countryFilter) {
+                      return false;
+                    }
+                    
+                    // Apply gender filter  
+                    if (genderFilter !== 'all' && appData.gender !== genderFilter) {
+                      return false;
+                    }
+                    
+                    return true;
+                  })
+                  .map((application) => {
+                   const appData = application.application_data || {};
+                   const phone = appData.phone;
+                   const submittedDate = new Date(application.submitted_at);
+                   
+                   // Find the user's profile to get auth data
+                   const userProfile = profiles.find(p => p.id === application.user_id);
                   
                   return (
                     <Card key={application.id} className="overflow-hidden">
@@ -1877,44 +1922,58 @@ const getApplicationStatusBadge = (status: string) => {
                                )}
                              </div>
                             
-                            <div className="flex-1 min-w-0">
-                              <h3 className="text-sm font-semibold truncate">
-                                {appData.first_name} {appData.last_name}
-                              </h3>
-                              {userProfile && (
-                                <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1">
-                                  <span>Auth:</span>
-                                  <Badge variant={userProfile.auth_provider === 'facebook' ? 'default' : 'outline'} className="text-xs">
-                                    {userProfile.auth_provider || 'email'}
-                                  </Badge>
-                                  {userProfile.email && (
-                                    <span>• {userProfile.email}</span>
-                                  )}
-                                </div>
-                              )}
-                              <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                                <span>{new Date().getFullYear() - appData.birth_year} yo</span>
-                                <span>•</span>
-                                <span>{appData.weight_kg}kg</span>
-                                <span>•</span>
-                                <span>{appData.height_cm}cm</span>
-                                <span>•</span>
-                                <span>{appData.gender}</span>
-                                <span>•</span>
-                                <span className="truncate">{appData.city}, {appData.country}</span>
-                              </div>
-                              <div className="flex items-center gap-3 text-xs text-muted-foreground mt-0.5">
-                                <span>Born: {appData.birth_day}/{appData.birth_month}/{appData.birth_year}</span>
-                                <span>•</span>
-                                <span>{appData.marital_status}</span>
-                                <span>•</span>
-                                <span>Children: {appData.has_children ? 'Yes' : 'No'}</span>
-                                <span>•</span>
-                                <span>Phone: {phone ? phone.full_number : 'Not provided'}</span>
-                                <span>•</span>
-                                <span>Facebook: {appData.facebook_url || 'Not provided'}</span>
-                              </div>
-                            </div>
+                             <div className="flex-1 min-w-0">
+                               {/* First line: Name and Age */}
+                               <div className="flex items-center gap-2">
+                                 <h3 className="text-sm font-semibold truncate">
+                                   {appData.first_name} {appData.last_name}
+                                 </h3>
+                                 <span className="text-sm">{new Date().getFullYear() - appData.birth_year}</span>
+                                 <span className="text-xs text-muted-foreground">{appData.state}, {appData.city}</span>
+                               </div>
+                               
+                               {/* Second line: Email, Kids status, Single status */}
+                               <div className="flex items-center gap-2 text-xs mt-1">
+                                 {userProfile?.email && (
+                                   <span 
+                                     className="truncate max-w-[160px] cursor-pointer" 
+                                     title={userProfile.email}
+                                   >
+                                     {userProfile.email.length > 20 ? `${userProfile.email.substring(0, 20)}...` : userProfile.email}
+                                   </span>
+                                 )}
+                                 <span className="text-muted-foreground">
+                                   {appData.has_children ? 'kids' : 'no kids'}
+                                 </span>
+                                 {appData.marital_status === 'single' && (
+                                   <span className="text-muted-foreground">Single</span>
+                                 )}
+                               </div>
+                               
+                               {/* Third line: Phone and Facebook */}
+                               <div className="flex items-center gap-2 text-xs mt-1">
+                                 <span>{phone ? phone.full_number : 'no phone'}</span>
+                                 {appData.facebook_url && (
+                                   <div className="flex items-center gap-1">
+                                     <span 
+                                       className="truncate max-w-[120px] cursor-pointer" 
+                                       title={appData.facebook_url}
+                                     >
+                                       {appData.facebook_url.length > 15 ? `${appData.facebook_url.substring(0, 15)}...` : appData.facebook_url}
+                                     </span>
+                                     <button 
+                                       onClick={() => navigator.clipboard.writeText(appData.facebook_url)}
+                                       className="text-muted-foreground hover:text-foreground transition-colors"
+                                       title="Copy Facebook URL"
+                                     >
+                                       <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                       </svg>
+                                     </button>
+                                   </div>
+                                 )}
+                               </div>
+                             </div>
                           </div>
 
                           {/* Right section with controls and status */}
