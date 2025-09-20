@@ -1910,188 +1910,242 @@ const getApplicationStatusBadge = (status: string) => {
                    const userProfile = profiles.find(p => p.id === application.user_id);
                   
                   return (
-                    <Card key={application.id} className="overflow-hidden">
-                      <CardContent className="p-0">
-                         <div className="flex items-stretch h-32">
-                           {/* Left section with avatar and basic info */}
-                            <div className="flex items-center gap-3 flex-1 p-4">
-                             <Avatar className="h-12 w-12 flex-shrink-0">
-                               <AvatarImage src={userProfile?.avatar_url || ''} />
-                               <AvatarFallback>
-                                 {appData.first_name?.charAt(0) || 'U'}
-                               </AvatarFallback>
-                             </Avatar>
+                     <Card key={application.id} className="overflow-hidden">
+                       <CardContent className="p-4">
+                          <div className="flex flex-col md:flex-row md:items-center gap-4">
+                            {/* Mobile: Stack vertically, Desktop: Horizontal layout */}
+                            
+                            {/* Top section: Avatar, photos and basic info */}
+                             <div className="flex items-center gap-3 flex-1 min-w-0">
+                              <Avatar className="h-12 w-12 flex-shrink-0">
+                                <AvatarImage src={userProfile?.avatar_url || ''} />
+                                <AvatarFallback>
+                                  {appData.first_name?.charAt(0) || 'U'}
+                                </AvatarFallback>
+                              </Avatar>
+                              
+                              <div className="flex-1 min-w-0">
+                                {/* First line: Name and Age */}
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  <h3 className="text-sm font-semibold truncate">
+                                    {appData.first_name} {appData.last_name}
+                                  </h3>
+                                  <span className="text-sm">{new Date().getFullYear() - appData.birth_year}</span>
+                                </div>
+                                
+                                {/* Second line: Location */}
+                                <div className="text-xs text-muted-foreground truncate">
+                                  {appData.state}, {appData.city}
+                                </div>
+                                
+                                {/* Third line: Email, Kids status, Single status - Mobile only */}
+                                <div className="md:hidden flex items-center gap-2 text-xs mt-1 flex-wrap">
+                                  {userProfile?.email && (
+                                    <span 
+                                      className="truncate max-w-[160px] cursor-pointer" 
+                                      title={userProfile.email}
+                                    >
+                                      {userProfile.email.length > 20 ? `${userProfile.email.substring(0, 20)}...` : userProfile.email}
+                                    </span>
+                                  )}
+                                  <span className="text-muted-foreground">
+                                    {appData.has_children ? 'kids' : 'no kids'}
+                                  </span>
+                                  {appData.marital_status === 'single' && (
+                                    <span className="text-muted-foreground">Single</span>
+                                  )}
+                                </div>
+                                
+                                {/* Fourth line: Phone and Facebook - Mobile only */}
+                                <div className="md:hidden flex items-center gap-2 text-xs mt-1 flex-wrap">
+                                  <span>{phone ? phone.full_number : 'no phone'}</span>
+                                  {appData.facebook_url && (
+                                    <div className="flex items-center gap-1">
+                                      <span 
+                                        className="truncate max-w-[120px] cursor-pointer" 
+                                        title={appData.facebook_url}
+                                      >
+                                        {appData.facebook_url.length > 15 ? `${appData.facebook_url.substring(0, 15)}...` : appData.facebook_url}
+                                      </span>
+                                      <button 
+                                        onClick={() => navigator.clipboard.writeText(appData.facebook_url)}
+                                        className="text-muted-foreground hover:text-foreground transition-colors"
+                                        title="Copy Facebook URL"
+                                      >
+                                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                        </svg>
+                                      </button>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                           </div>
+
+                           {/* Desktop: Contact info section */}
+                           <div className="hidden md:block flex-1 min-w-0">
+                             <div className="flex items-center gap-2 text-xs">
+                               {userProfile?.email && (
+                                 <span 
+                                   className="truncate max-w-[160px] cursor-pointer" 
+                                   title={userProfile.email}
+                                 >
+                                   {userProfile.email.length > 20 ? `${userProfile.email.substring(0, 20)}...` : userProfile.email}
+                                 </span>
+                               )}
+                               <span className="text-muted-foreground">
+                                 {appData.has_children ? 'kids' : 'no kids'}
+                               </span>
+                               {appData.marital_status === 'single' && (
+                                 <span className="text-muted-foreground">Single</span>
+                               )}
+                             </div>
                              
-                             {/* Photos section - after avatar */}
-                             <div className="flex items-stretch h-full">
-                               {appData.photo1_url && (
+                             <div className="flex items-center gap-2 text-xs mt-1">
+                               <span>{phone ? phone.full_number : 'no phone'}</span>
+                               {appData.facebook_url && (
+                                 <div className="flex items-center gap-1">
+                                   <span 
+                                     className="truncate max-w-[120px] cursor-pointer" 
+                                     title={appData.facebook_url}
+                                   >
+                                     {appData.facebook_url.length > 15 ? `${appData.facebook_url.substring(0, 15)}...` : appData.facebook_url}
+                                   </span>
+                                   <button 
+                                     onClick={() => navigator.clipboard.writeText(appData.facebook_url)}
+                                     className="text-muted-foreground hover:text-foreground transition-colors"
+                                     title="Copy Facebook URL"
+                                   >
+                                     <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                     </svg>
+                                   </button>
+                                 </div>
+                               )}
+                             </div>
+                           </div>
+
+                           {/* Photos section */}
+                           <div className="flex items-center gap-2 justify-center md:justify-start">
+                             {appData.photo1_url && (
+                               <div className="text-center">
+                                 <p className="text-xs text-muted-foreground mb-1">Portrait</p>
                                  <img 
                                    src={appData.photo1_url} 
                                    alt="Portrait" 
-                                   className="h-full object-contain cursor-pointer hover:opacity-80 transition-opacity"
+                                   className="w-16 h-20 object-cover rounded border cursor-pointer hover:opacity-80 transition-opacity"
                                    onClick={() => openPhotoModal([appData.photo1_url, appData.photo2_url].filter(Boolean), 0, `${appData.first_name} ${appData.last_name}`)}
                                  />
-                               )}
-                               {appData.photo2_url && (
+                               </div>
+                             )}
+                             {appData.photo2_url && (
+                               <div className="text-center">
+                                 <p className="text-xs text-muted-foreground mb-1">Full Length</p>
                                  <img 
                                    src={appData.photo2_url} 
                                    alt="Full length" 
-                                   className="h-full object-contain cursor-pointer hover:opacity-80 transition-opacity"
+                                   className="w-16 h-20 object-cover rounded border cursor-pointer hover:opacity-80 transition-opacity"
                                    onClick={() => openPhotoModal([appData.photo1_url, appData.photo2_url].filter(Boolean), 1, `${appData.first_name} ${appData.last_name}`)}
                                  />
-                               )}
-                             </div>
-                            
-                             <div className="flex-1 min-w-0">
-                               {/* First line: Name and Age */}
-                               <div className="flex items-center gap-2">
-                                 <h3 className="text-sm font-semibold truncate">
-                                   {appData.first_name} {appData.last_name}
-                                 </h3>
-                                 <span className="text-sm">{new Date().getFullYear() - appData.birth_year}</span>
-                                 <span className="text-xs text-muted-foreground">{appData.state}, {appData.city}</span>
                                </div>
-                               
-                               {/* Second line: Email, Kids status, Single status */}
-                               <div className="flex items-center gap-2 text-xs mt-1">
-                                 {userProfile?.email && (
-                                   <span 
-                                     className="truncate max-w-[160px] cursor-pointer" 
-                                     title={userProfile.email}
-                                   >
-                                     {userProfile.email.length > 20 ? `${userProfile.email.substring(0, 20)}...` : userProfile.email}
-                                   </span>
-                                 )}
-                                 <span className="text-muted-foreground">
-                                   {appData.has_children ? 'kids' : 'no kids'}
-                                 </span>
-                                 {appData.marital_status === 'single' && (
-                                   <span className="text-muted-foreground">Single</span>
-                                 )}
-                               </div>
-                               
-                               {/* Third line: Phone and Facebook */}
-                               <div className="flex items-center gap-2 text-xs mt-1">
-                                 <span>{phone ? phone.full_number : 'no phone'}</span>
-                                 {appData.facebook_url && (
-                                   <div className="flex items-center gap-1">
-                                     <span 
-                                       className="truncate max-w-[120px] cursor-pointer" 
-                                       title={appData.facebook_url}
-                                     >
-                                       {appData.facebook_url.length > 15 ? `${appData.facebook_url.substring(0, 15)}...` : appData.facebook_url}
-                                     </span>
-                                     <button 
-                                       onClick={() => navigator.clipboard.writeText(appData.facebook_url)}
-                                       className="text-muted-foreground hover:text-foreground transition-colors"
-                                       title="Copy Facebook URL"
-                                     >
-                                       <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                                       </svg>
-                                     </button>
-                                   </div>
-                                 )}
-                               </div>
-                             </div>
-                          </div>
+                             )}
+                           </div>
 
-                          {/* Right section with controls and status */}
-                          <div className="flex items-center gap-3">
-                            <div className="flex items-center gap-2 text-xs">
-                              <span className="font-medium">Active:</span>
-                              <Switch
-                                checked={application.is_active ?? true}
-                                onCheckedChange={() => toggleApplicationActive(application.id, application.is_active ?? true)}
-                              />
-                            </div>
-                            <div className="flex flex-col gap-1 items-center">
-                              {getApplicationStatusBadge(application.status)}
-                              <p className="text-xs text-muted-foreground text-center">
-                                {submittedDate.toLocaleDateString('ru-RU')} {submittedDate.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}
-                              </p>
-                            </div>
-                            <div className="flex gap-1">
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => {
-                                  setViewingApplicationHistory(application.id);
-                                  setApplicationHistoryOpen(true);
-                                }}
-                                className="px-2"
-                              >
-                                <Clock className="w-3 h-3" />
-                              </Button>
-                               {!showDeletedApplications && (
-                                <>
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    onClick={() => startEditingApplication(application)}
-                                    className="flex items-center gap-1 text-xs px-2 py-1 h-7"
-                                  >
-                                    <Edit className="w-3 h-3" />
-                                    Edit
-                                  </Button>
-                                  <Button
-                                    size="sm"
-                                    onClick={() => {
-                                      if (application.status === 'approved') {
-                                        reviewApplication(application.id, 'pending')
-                                      } else {
-                                        reviewApplication(application.id, 'approved')
-                                      }
-                                    }}
-                                    className={
-                                      application.status === 'approved'
-                                        ? "bg-yellow-600 hover:bg-yellow-700 text-xs px-2 py-1 h-7"
-                                        : "bg-green-600 hover:bg-green-700 text-xs px-2 py-1 h-7"
-                                    }
-                                  >
-                                    <Check className="w-3 h-3" />
-                                    {application.status === 'approved' ? 'Unapprove' : 'Approve'}
-                                  </Button>
+                           {/* Controls and status section */}
+                           <div className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
+                             <div className="flex items-center gap-2 text-xs">
+                               <Switch
+                                 checked={application.is_active ?? true}
+                                 onCheckedChange={() => toggleApplicationActive(application.id, application.is_active ?? true)}
+                               />
+                             </div>
+                             <div className="flex flex-col gap-1 items-center">
+                               {getApplicationStatusBadge(application.status)}
+                               <p className="text-xs text-muted-foreground text-center">
+                                 {submittedDate.toLocaleDateString('ru-RU')} {submittedDate.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}
+                               </p>
+                             </div>
+                             <div className="flex gap-1 flex-wrap justify-center">
+                               <Button
+                                 size="sm"
+                                 variant="outline"
+                                 onClick={() => {
+                                   setViewingApplicationHistory(application.id);
+                                   setApplicationHistoryOpen(true);
+                                 }}
+                                 className="px-2"
+                               >
+                                 <Clock className="w-3 h-3" />
+                               </Button>
+                                {!showDeletedApplications && (
+                                 <>
                                    <Button
                                      size="sm"
-                                     variant="destructive"
-                                     onClick={() => {
-                                       const appData = application.application_data as any;
-                                       const name = `${appData.first_name || ''} ${appData.last_name || ''}`.trim();
-                                       setApplicationToReject({ id: application.id, name });
-                                       setRejectModalOpen(true);
-                                     }}
-                                     disabled={application.status === 'rejected'}
-                                     className="text-xs px-2 py-1 h-7"
-                                   >
-                                     <X className="w-3 h-3" />
-                                     Reject
-                                   </Button>
-                                   <Button
-                                     onClick={() => deleteApplication(application.id, `${appData.first_name} ${appData.last_name}`)}
-                                     size="sm"
-                                     variant="destructive"
+                                     variant="outline"
+                                     onClick={() => startEditingApplication(application)}
                                      className="flex items-center gap-1 text-xs px-2 py-1 h-7"
-                                     title="Удалить заявку"
                                    >
-                                     <Trash2 className="w-3 h-3" />
+                                     <Edit className="w-3 h-3" />
+                                     <span className="hidden sm:inline">Edit</span>
                                    </Button>
-                                </>
-                               )}
-                               {showDeletedApplications && (
-                                 <Button
-                                   onClick={() => restoreApplication(application.id, `${appData.first_name} ${appData.last_name}`)}
-                                   size="sm"
-                                   className="bg-blue-600 hover:bg-blue-700 text-xs px-2 py-1 h-7"
-                                   title="Восстановить заявку"
-                                 >
-                                   <RotateCcw className="w-3 h-3" />
-                                   Restore
-                                 </Button>
-                               )}
-                            </div>
-                          </div>
-                        </div>
+                                   <Button
+                                     size="sm"
+                                     onClick={() => {
+                                       if (application.status === 'approved') {
+                                         reviewApplication(application.id, 'pending')
+                                       } else {
+                                         reviewApplication(application.id, 'approved')
+                                       }
+                                     }}
+                                     className={
+                                       application.status === 'approved'
+                                         ? "bg-yellow-600 hover:bg-yellow-700 text-xs px-2 py-1 h-7"
+                                         : "bg-green-600 hover:bg-green-700 text-xs px-2 py-1 h-7"
+                                     }
+                                   >
+                                     <Check className="w-3 h-3" />
+                                     <span className="hidden sm:inline">{application.status === 'approved' ? 'Unapprove' : 'Approve'}</span>
+                                   </Button>
+                                    <Button
+                                      size="sm"
+                                      variant="destructive"
+                                      onClick={() => {
+                                        const appData = application.application_data as any;
+                                        const name = `${appData.first_name || ''} ${appData.last_name || ''}`.trim();
+                                        setApplicationToReject({ id: application.id, name });
+                                        setRejectModalOpen(true);
+                                      }}
+                                      disabled={application.status === 'rejected'}
+                                      className="text-xs px-2 py-1 h-7"
+                                    >
+                                      <X className="w-3 h-3" />
+                                      <span className="hidden sm:inline">Reject</span>
+                                    </Button>
+                                    <Button
+                                      onClick={() => deleteApplication(application.id, `${appData.first_name} ${appData.last_name}`)}
+                                      size="sm"
+                                      variant="destructive"
+                                      className="flex items-center gap-1 text-xs px-2 py-1 h-7"
+                                      title="Удалить заявку"
+                                    >
+                                      <Trash2 className="w-3 h-3" />
+                                    </Button>
+                                 </>
+                                )}
+                                {showDeletedApplications && (
+                                  <Button
+                                    onClick={() => restoreApplication(application.id, `${appData.first_name} ${appData.last_name}`)}
+                                    size="sm"
+                                    className="bg-blue-600 hover:bg-blue-700 text-xs px-2 py-1 h-7"
+                                    title="Восстановить заявку"
+                                  >
+                                    <RotateCcw className="w-3 h-3" />
+                                    <span className="hidden sm:inline">Restore</span>
+                                  </Button>
+                                )}
+                             </div>
+                           </div>
+                         </div>
                         
                         {/* Timestamps and notes section - collapsed */}
                         {(application.notes || application.reviewed_at || (application.status === 'rejected' && (application.rejection_reason || application.rejection_reason_type))) && (
