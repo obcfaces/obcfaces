@@ -1579,9 +1579,11 @@ const getApplicationStatusBadge = (status: string) => {
                 {weeklyParticipants.map((participant) => (
                     <Card key={participant.id} className="py-3">
                       <CardContent className="p-4">
-                        <div className="flex items-center justify-between gap-4">
-                          {/* Left section with avatar and basic info */}
-                          <div className="flex items-center gap-3 flex-1">
+                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                          {/* Mobile: Stack vertically, Desktop: Horizontal layout */}
+                          
+                          {/* Top section: Avatar and basic info */}
+                          <div className="flex items-center gap-3 flex-1 min-w-0">
                             <Avatar className="h-12 w-12 flex-shrink-0">
                               <AvatarImage src={participant.photo1_url || ''} />
                               <AvatarFallback>
@@ -1595,27 +1597,44 @@ const getApplicationStatusBadge = (status: string) => {
                               <div className="text-xs text-muted-foreground truncate">
                                 {participant.city}, {participant.country}
                               </div>
-                               <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                               <div className="flex items-center gap-3 text-xs text-muted-foreground flex-wrap">
                                  <span>{participant.age} yo</span>
                                  <span>•</span>
                                  <span>{participant.weight_kg}kg</span>
                                  <span>•</span>
                                  <span>{participant.height_cm}cm</span>
                                 </div>
-                                <div className="flex items-center gap-3 text-xs text-muted-foreground mt-1">
-                                  <span>📞 {participant.application_data?.phone?.full_number || 'Not provided'}</span>
-                                  <span>•</span>
-                                  {participant.application_data?.facebook_url ? (
-                                    <span>{participant.application_data.facebook_url}</span>
-                                  ) : (
-                                    <span>Facebook: Not provided</span>
-                                  )}
-                                </div>
                             </div>
                           </div>
 
-                          {/* Center section with photos */}
-                          <div className="flex items-center gap-2">
+                          {/* Mobile: Contact info on separate row */}
+                          <div className="md:hidden w-full">
+                            <div className="flex items-center gap-3 text-xs text-muted-foreground flex-wrap">
+                              <span>📞 {participant.application_data?.phone?.full_number || 'Not provided'}</span>
+                              {participant.application_data?.facebook_url && (
+                                <>
+                                  <span>•</span>
+                                  <span className="truncate">{participant.application_data.facebook_url}</span>
+                                </>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Desktop: Contact info inline */}
+                          <div className="hidden md:block flex-1 min-w-0">
+                            <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                              <span>📞 {participant.application_data?.phone?.full_number || 'Not provided'}</span>
+                              <span>•</span>
+                              {participant.application_data?.facebook_url ? (
+                                <span className="truncate">{participant.application_data.facebook_url}</span>
+                              ) : (
+                                <span>Facebook: Not provided</span>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Photos section */}
+                          <div className="flex items-center gap-2 justify-center md:justify-start">
                             <div className="text-center">
                               <p className="text-xs text-muted-foreground mb-1">Portrait</p>
                               {participant.photo1_url && (
@@ -1640,8 +1659,8 @@ const getApplicationStatusBadge = (status: string) => {
                             </div>
                           </div>
 
-                          {/* Right section with controls and stats */}
-                          <div className="flex items-center gap-3">
+                          {/* Controls and stats section */}
+                          <div className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
                             <div className="flex items-center gap-2 text-xs">
                               <Switch
                                 checked={participant.is_active}
@@ -1666,32 +1685,34 @@ const getApplicationStatusBadge = (status: string) => {
                                 <Badge variant="secondary" className="text-xs px-2 py-0">No Rating</Badge>
                               )}
                             </div>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => toggleHistoryExpansion(participant.id)}
-                              className="px-2"
-                              title="История изменений"
-                            >
-                              <Plus className={`h-4 w-4 transition-transform ${expandedHistory.has(participant.id) ? 'rotate-45' : ''}`} />
-                            </Button>
-                            <Button
-                              onClick={() => startEditingParticipant(participant)}
-                              size="sm"
-                              className="flex items-center gap-1 text-xs px-2 py-1 h-7"
-                            >
-                              <Edit className="w-3 h-3" />
-                              Edit
-                            </Button>
-                            <Button
-                              onClick={() => deleteParticipant(participant.id, `${participant.first_name} ${participant.last_name}`)}
-                              size="sm"
-                              variant="destructive"
-                              className="flex items-center gap-1 text-xs px-2 py-1 h-7"
-                              title="Удалить участника"
-                            >
-                              <Trash2 className="w-3 h-3" />
-                            </Button>
+                            <div className="flex gap-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => toggleHistoryExpansion(participant.id)}
+                                className="px-2"
+                                title="История изменений"
+                              >
+                                <Plus className={`h-4 w-4 transition-transform ${expandedHistory.has(participant.id) ? 'rotate-45' : ''}`} />
+                              </Button>
+                              <Button
+                                onClick={() => startEditingParticipant(participant)}
+                                size="sm"
+                                className="flex items-center gap-1 text-xs px-2 py-1 h-7"
+                              >
+                                <Edit className="w-3 h-3" />
+                                <span className="hidden sm:inline">Edit</span>
+                              </Button>
+                              <Button
+                                onClick={() => deleteParticipant(participant.id, `${participant.first_name} ${participant.last_name}`)}
+                                size="sm"
+                                variant="destructive"
+                                className="flex items-center gap-1 text-xs px-2 py-1 h-7"
+                                title="Удалить участника"
+                              >
+                                <Trash2 className="w-3 h-3" />
+                              </Button>
+                            </div>
                           </div>
                         </div>
                         
