@@ -472,9 +472,39 @@ export function ContestantCard({
                           `No rating`
                         }{isThisWeek && ` — `}<button 
                           className={`text-contest-blue hover:underline ${!isThisWeek ? 'hidden' : ''}`}
-                          onClick={() => {
-                            setIsEditing(true);
-                            setIsPopoverOpen(false);
+                          onClick={async () => {
+                            // Immediately delete rating from database and reset local state
+                            if (propUser && profileId) {
+                              try {
+                                await supabase
+                                  .from('contestant_ratings')
+                                  .delete()
+                                  .eq('user_id', propUser.id)
+                                  .eq('contestant_user_id', profileId);
+                                
+                                // Reset local state to unrated
+                                setUserRating(0);
+                                setIsVoted(false);
+                                setPreviousUserRating(0);
+                                setIsEditing(true);
+                                setIsPopoverOpen(false);
+                                
+                                // Update local stats
+                                const newTotalVotes = Math.max(0, localTotalVotes - 1);
+                                const newSum = Math.max(0, (localAverageRating * localTotalVotes) - userRating);
+                                const newAverageRating = newTotalVotes > 0 ? newSum / newTotalVotes : 0;
+                                setLocalAverageRating(newAverageRating);
+                                setLocalTotalVotes(newTotalVotes);
+                                
+                                // Remove from localStorage
+                                localStorage.removeItem(`rating-${name}-${propUser.id}`);
+                                
+                                toast({ description: "Rating removed" });
+                              } catch (error) {
+                                console.error('Error removing rating:', error);
+                                toast({ description: "Error removing rating" });
+                              }
+                            }
                           }}
                         >
                           change
