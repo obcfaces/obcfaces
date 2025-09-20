@@ -637,14 +637,169 @@ const Admin = () => {
                                 const prevAppData = typeof prevApp.application_data === 'string' 
                                   ? JSON.parse(prevApp.application_data) 
                                   : prevApp.application_data;
+                                const prevSubmittedDate = new Date(prevApp.submitted_at);
+                                const prevPhone = prevAppData.phone?.country && prevAppData.phone?.number 
+                                  ? { full_number: `${prevAppData.phone.country} ${prevAppData.phone.number}` }
+                                  : null;
                                 
                                 return (
                                   <Card key={prevApp.id} className="overflow-hidden bg-muted/30">
-                                    <CardContent className="p-4">
-                                      <div className="text-sm">
-                                        {prevAppData.first_name} {prevAppData.last_name} - {new Date(prevApp.submitted_at).toLocaleDateString('ru-RU')}
-                                        <br />
-                                        Статус: {getApplicationStatusBadge(prevApp.status)}
+                                    <CardContent className="p-0">
+                                      <div className="flex flex-col md:flex-row md:items-stretch">
+                                        {/* Photos section */}
+                                        <div className="flex gap-px md:w-[25ch] md:flex-shrink-0 p-0">
+                                          {prevAppData.photo1_url && (
+                                            <div className="w-24 sm:w-28 md:w-32">
+                                              <img 
+                                                src={prevAppData.photo1_url} 
+                                                alt="Portrait" 
+                                                className="w-full h-36 sm:h-40 md:h-44 object-contain cursor-pointer hover:opacity-90 transition-opacity"
+                                                onClick={() => openPhotoModal([prevAppData.photo1_url, prevAppData.photo2_url].filter(Boolean), 0, `${prevAppData.first_name} ${prevAppData.last_name}`)}
+                                              />
+                                            </div>
+                                          )}
+                                          {prevAppData.photo2_url && (
+                                            <div className="w-24 sm:w-28 md:w-32">
+                                              <img 
+                                                src={prevAppData.photo2_url} 
+                                                alt="Full length" 
+                                                className="w-full h-36 sm:h-40 md:h-44 object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                                                onClick={() => openPhotoModal([prevAppData.photo1_url, prevAppData.photo2_url].filter(Boolean), 1, `${prevAppData.first_name} ${prevAppData.last_name}`)}
+                                              />
+                                            </div>
+                                          )}
+                                        </div>
+
+                                        {/* Main info section */}
+                                        <div className="md:w-[50ch] md:flex-shrink-0 flex-1 min-w-0 p-4">
+                                          <div className="flex items-center gap-2 mb-1">
+                                            <Avatar className="h-6 w-6 flex-shrink-0">
+                                              <AvatarImage src={userProfile?.avatar_url || ''} />
+                                              <AvatarFallback className="text-xs">
+                                                {prevAppData.first_name?.charAt(0) || 'U'}
+                                              </AvatarFallback>
+                                            </Avatar>
+                                            <span className="text-sm font-semibold whitespace-nowrap">
+                                              {prevAppData.first_name} {prevAppData.last_name} {new Date().getFullYear() - prevAppData.birth_year}
+                                            </span>
+                                          </div>
+                                          
+                                          <div className="text-xs text-muted-foreground mb-1">
+                                            {prevAppData.city} {prevAppData.state} {prevAppData.country}
+                                          </div>
+                                           
+                                          <div className="text-xs text-muted-foreground mb-1">
+                                            {prevAppData.weight_kg}kg • {prevAppData.height_cm}cm • {prevAppData.gender}
+                                          </div>
+
+                                          <div className="text-xs text-muted-foreground mb-1">
+                                            {prevAppData.marital_status} • {prevAppData.has_children ? 'Has children' : 'No children'}
+                                          </div>
+
+                                          <div className="text-xs text-muted-foreground mb-1">
+                                            {userProfile?.email && (
+                                              <div className="flex items-center gap-1">
+                                                <span 
+                                                  className="cursor-pointer" 
+                                                  title={userProfile.email}
+                                                >
+                                                  {userProfile.email.length > 25 ? `${userProfile.email.substring(0, 25)}...` : userProfile.email}
+                                                </span>
+                                                <Copy 
+                                                  className="h-3 w-3 cursor-pointer hover:text-foreground" 
+                                                  onClick={() => navigator.clipboard.writeText(userProfile.email)}
+                                                />
+                                              </div>
+                                            )}
+                                          </div>
+
+                                          <div className="text-xs text-muted-foreground mb-1">
+                                            <div className="flex items-center gap-2">
+                                              <span>{prevPhone ? prevPhone.full_number : 'Not provided'}</span>
+                                              {prevAppData.facebook_url && (
+                                                <a
+                                                  href={prevAppData.facebook_url}
+                                                  target="_blank"
+                                                  rel="noopener noreferrer"
+                                                  className="text-blue-600 hover:text-blue-800"
+                                                >
+                                                  <Facebook className="h-3 w-3" />
+                                                </a>
+                                              )}
+                                            </div>
+                                          </div>
+
+                                          <div className="text-xs text-muted-foreground">
+                                            Education: {prevAppData.education || 'Not specified'}
+                                          </div>
+                                        </div>
+
+                                        {/* Right side actions */}
+                                        <div className="p-4 md:w-auto flex flex-col justify-between gap-2">
+                                          <div className="flex flex-col gap-1 items-center">
+                                            {getApplicationStatusBadge(prevApp.status)}
+                                            <p className="text-xs text-muted-foreground text-center">
+                                              {prevSubmittedDate.toLocaleDateString('ru-RU')} {prevSubmittedDate.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}
+                                            </p>
+                                          </div>
+                                          <div className="flex gap-1 flex-wrap justify-center">
+                                            {!showDeletedApplications && (
+                                              <>
+                                                <Button
+                                                  size="sm"
+                                                  onClick={() => {
+                                                    if (prevApp.status === 'approved') {
+                                                      reviewApplication(prevApp.id, 'pending')
+                                                    } else {
+                                                      reviewApplication(prevApp.id, 'approved')
+                                                    }
+                                                  }}
+                                                  className={
+                                                    prevApp.status === 'approved'
+                                                      ? "bg-yellow-600 hover:bg-yellow-700 text-xs px-2 py-1 h-7"
+                                                      : "bg-green-600 hover:bg-green-700 text-xs px-2 py-1 h-7"
+                                                  }
+                                                >
+                                                  {prevApp.status === 'approved' ? (
+                                                    <>
+                                                      <Minus className="w-3 h-3" />
+                                                      <span className="hidden sm:inline ml-1">Unpublish</span>
+                                                    </>
+                                                  ) : (
+                                                    <>
+                                                      <Check className="w-3 h-3" />
+                                                      <span className="hidden sm:inline ml-1">Approve</span>
+                                                    </>
+                                                  )}
+                                                </Button>
+                                                <Button
+                                                  size="sm"
+                                                  variant="destructive"
+                                                  onClick={() => {
+                                                    setApplicationToReject({
+                                                      id: prevApp.id,
+                                                      name: `${prevAppData.first_name} ${prevAppData.last_name}`
+                                                    });
+                                                    setRejectModalOpen(true);
+                                                  }}
+                                                  className="text-xs px-2 py-1 h-7"
+                                                >
+                                                  <X className="w-3 h-3" />
+                                                  <span className="hidden sm:inline ml-1">Reject</span>
+                                                </Button>
+                                                <Button
+                                                  size="sm"
+                                                  variant="outline"
+                                                  onClick={() => deleteApplication(prevApp.id)}
+                                                  className="text-xs px-2 py-1 h-7"
+                                                >
+                                                  <Trash2 className="w-3 h-3" />
+                                                  <span className="hidden sm:inline ml-1">Delete</span>
+                                                </Button>
+                                              </>
+                                            )}
+                                          </div>
+                                        </div>
                                       </div>
                                     </CardContent>
                                   </Card>
