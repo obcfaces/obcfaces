@@ -1988,16 +1988,15 @@ const getApplicationStatusBadge = (status: string) => {
                                  )}
                                </div>
 
-                               {/* Seventh line: Phone */}
+                               {/* Sixth line: Phone */}
                                <div className="text-xs text-muted-foreground mb-1">
-                                 Phone: {phone ? phone.full_number : 'Not provided'}
+                                 {phone ? phone.full_number : 'Not provided'}
                                </div>
 
-                               {/* Eighth line: Facebook - truncated */}
+                               {/* Seventh line: Facebook - truncated */}
                                <div className="text-xs text-muted-foreground">
                                  {appData.facebook_url ? (
                                    <div className="flex items-center gap-1">
-                                     <span>FB:</span>
                                      <span 
                                        className="cursor-pointer" 
                                        title={appData.facebook_url}
@@ -2015,7 +2014,7 @@ const getApplicationStatusBadge = (status: string) => {
                                      </button>
                                    </div>
                                  ) : (
-                                   <span>FB: Not provided</span>
+                                   <span>Not provided</span>
                                  )}
                                </div>
                              </div>
