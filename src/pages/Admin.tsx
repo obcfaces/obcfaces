@@ -1939,8 +1939,8 @@ const getApplicationStatusBadge = (status: string) => {
                                )}
                              </div>
 
-                             {/* Main info section - Fixed width 45 chars */}
-                             <div className="md:w-[45ch] md:flex-shrink-0 flex-1 min-w-0">
+                             {/* Main info section - Fixed width 50 chars */}
+                             <div className="md:w-[50ch] md:flex-shrink-0 flex-1 min-w-0">
                                {/* First line: Avatar + Name and Age */}
                                <div className="flex items-center gap-2 mb-1">
                                  <Avatar className="h-6 w-6 flex-shrink-0">
@@ -1949,11 +1949,8 @@ const getApplicationStatusBadge = (status: string) => {
                                      {appData.first_name?.charAt(0) || 'U'}
                                    </AvatarFallback>
                                  </Avatar>
-                                 <h3 className="text-sm font-semibold">
-                                   {appData.first_name} {appData.last_name}
-                                 </h3>
-                                 <span className="text-sm text-muted-foreground">
-                                   {new Date().getFullYear() - appData.birth_year} yo
+                                 <span className="text-sm font-semibold whitespace-nowrap">
+                                   {appData.first_name} {appData.last_name} {new Date().getFullYear() - appData.birth_year} yo
                                  </span>
                                </div>
                                
