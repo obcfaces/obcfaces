@@ -15,18 +15,23 @@ export const AuthProtectedModal = ({ children }: AuthProtectedModalProps) => {
 
   useEffect(() => {
     // Subscribe to auth state changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_, nextSession) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, nextSession) => {
+      console.log('Auth state changed:', event, nextSession?.user?.email_confirmed_at);
       setSession(nextSession);
       
       // If user just logged in and login modal was open, close it and open participation modal
       if (nextSession?.user?.email_confirmed_at && isLoginOpen) {
+        console.log('Switching from login to participation modal');
         setIsLoginOpen(false);
-        setIsParticipationOpen(true);
+        setTimeout(() => {
+          setIsParticipationOpen(true);
+        }, 100);
       }
     });
 
     // Get current session
     supabase.auth.getSession().then(({ data }) => {
+      console.log('Initial session:', data.session?.user?.email_confirmed_at);
       setSession(data.session);
     });
 
