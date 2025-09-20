@@ -1914,7 +1914,7 @@ const getApplicationStatusBadge = (status: string) => {
                         <CardContent className="p-0">
                             <div className="flex flex-col md:flex-row md:items-stretch">
                               {/* Photos section - No padding, extends to card edges */}
-                              <div className="flex gap-px md:w-[30ch] md:flex-shrink-0 p-0">
+                              <div className="flex gap-px md:w-[25ch] md:flex-shrink-0 p-0">
                                {appData.photo1_url && (
                                  <div className="w-24 sm:w-28 md:w-32">
                                    <img 
