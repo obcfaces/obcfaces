@@ -17,9 +17,10 @@ import { getCitiesForLocation } from '@/lib/location-utils';
 interface LoginModalContentProps {
   onClose?: () => void;
   defaultMode?: "login" | "signup" | "forgot";
+  onAuthSuccess?: () => void;
 }
 
-const LoginModalContent = ({ onClose, defaultMode = "login" }: LoginModalContentProps) => {
+const LoginModalContent = ({ onClose, defaultMode = "login", onAuthSuccess }: LoginModalContentProps) => {
   const [mode, setMode] = useState<"login" | "signup" | "forgot">(defaultMode);
   
   // Reset to default mode when modal opens
@@ -158,7 +159,7 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
           throw new Error("Login failed");
         }
         toast({ description: "Login successful" });
-        onClose?.(); // Close modal after successful login
+        onAuthSuccess?.(); // Call auth success callback
       } else {
         const redirectUrl = window.location.href; // Confirm email back to current page
         const { data, error } = await supabase.auth.signUp({
@@ -226,7 +227,7 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
         if (data.session?.user) {
           // User is immediately logged in
           toast({ description: "Registration completed successfully" });
-          onClose?.(); // Close modal after successful registration
+          onAuthSuccess?.(); // Call auth success callback
         } else {
           // User needs to confirm email but registration was successful
           setRegistrationSuccess(true);
