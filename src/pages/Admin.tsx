@@ -1847,7 +1847,7 @@ const getApplicationStatusBadge = (status: string) => {
                   return (
                     <Card key={application.id} className="py-3">
                       <CardContent className="p-4">
-                        <div className="flex items-center justify-between gap-4">
+                         <div className="flex items-stretch justify-between gap-4 h-24">
                           {/* Left section with avatar and basic info */}
                            <div className="flex items-center gap-3 flex-1">
                             <Avatar className="h-12 w-12 flex-shrink-0">
@@ -1856,6 +1856,27 @@ const getApplicationStatusBadge = (status: string) => {
                                 {appData.first_name?.charAt(0) || 'U'}
                               </AvatarFallback>
                             </Avatar>
+                            
+                            {/* Photos section - moved after avatar */}
+                            <div className="flex items-stretch gap-2 h-full">
+                              {appData.photo1_url && (
+                                <img 
+                                  src={appData.photo1_url} 
+                                  alt="Portrait" 
+                                  className="w-16 h-full object-cover rounded border cursor-pointer hover:opacity-80 transition-opacity"
+                                  onClick={() => openPhotoModal([appData.photo1_url, appData.photo2_url].filter(Boolean), 0, `${appData.first_name} ${appData.last_name}`)}
+                                />
+                              )}
+                              {appData.photo2_url && (
+                                <img 
+                                  src={appData.photo2_url} 
+                                  alt="Full length" 
+                                  className="w-16 h-full object-cover rounded border cursor-pointer hover:opacity-80 transition-opacity"
+                                  onClick={() => openPhotoModal([appData.photo1_url, appData.photo2_url].filter(Boolean), 1, `${appData.first_name} ${appData.last_name}`)}
+                                />
+                              )}
+                            </div>
+                            
                             <div className="flex-1 min-w-0">
                               <h3 className="text-sm font-semibold truncate">
                                 {appData.first_name} {appData.last_name}
@@ -1893,32 +1914,6 @@ const getApplicationStatusBadge = (status: string) => {
                                 <span>•</span>
                                 <span>Facebook: {appData.facebook_url || 'Not provided'}</span>
                               </div>
-                            </div>
-                          </div>
-
-                          {/* Center section with photos */}
-                          <div className="flex items-center gap-2">
-                            <div className="text-center">
-                              <p className="text-xs text-muted-foreground mb-1">Portrait</p>
-                              {appData.photo1_url && (
-                                <img 
-                                  src={appData.photo1_url} 
-                                  alt="Portrait" 
-                                  className="w-16 h-20 object-cover rounded border cursor-pointer hover:opacity-80 transition-opacity"
-                                  onClick={() => openPhotoModal([appData.photo1_url, appData.photo2_url].filter(Boolean), 0, `${appData.first_name} ${appData.last_name}`)}
-                                />
-                              )}
-                            </div>
-                            <div className="text-center">
-                              <p className="text-xs text-muted-foreground mb-1">Full Length</p>
-                              {appData.photo2_url && (
-                                <img 
-                                  src={appData.photo2_url} 
-                                  alt="Full length" 
-                                  className="w-16 h-20 object-cover rounded border cursor-pointer hover:opacity-80 transition-opacity"
-                                  onClick={() => openPhotoModal([appData.photo1_url, appData.photo2_url].filter(Boolean), 1, `${appData.first_name} ${appData.last_name}`)}
-                                />
-                              )}
                             </div>
                           </div>
 
