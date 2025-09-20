@@ -454,6 +454,14 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
                     className={`text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 ${invalidTerms ? 'text-destructive' : ''}`}
                   >
                     I agree to the{" "}
+                    <Link to="/terms" className="text-primary underline hover:no-underline" target="_blank">
+                      Terms of Service
+                    </Link>
+                    {" "}and{" "}
+                    <Link to="/privacy" className="text-primary underline hover:no-underline" target="_blank">
+                      Privacy Policy
+                    </Link>
+                    {" "}
                     <Collapsible open={isTermsOpen} onOpenChange={setIsTermsOpen}>
                       <CollapsibleTrigger className="inline-flex items-center gap-1 text-muted-foreground hover:text-foreground transition-colors">
                         <ChevronDown className={`h-4 w-4 transition-transform ${isTermsOpen ? 'rotate-180' : ''}`} />
@@ -466,14 +474,6 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
                         </p>
                       </CollapsibleContent>
                     </Collapsible>
-                    <br />
-                    <Link to="/terms" className="text-primary underline hover:no-underline" target="_blank">
-                      Terms of Service
-                    </Link>
-                    {" "}and{" "}
-                    <Link to="/privacy" className="text-primary underline hover:no-underline" target="_blank">
-                      Privacy Policy
-                    </Link>
                   </label>
                 </div>
               </div>
