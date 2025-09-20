@@ -50,10 +50,13 @@ export const AuthProtectedModal = ({ children }: AuthProtectedModalProps) => {
         {children}
       </div>
 
-      {/* Login Modal - same as in auth-nav.tsx */}
+      {/* Login Modal - opens in signup mode for participation */}
       <Dialog open={isLoginOpen} onOpenChange={setIsLoginOpen}>
         <DialogContent className="sm:max-w-lg data-[state=open]:translate-y-[5%] sm:data-[state=open]:translate-y-[2%]">
-          <LoginModalContent onClose={() => setIsLoginOpen(false)} />
+          <LoginModalContent 
+            defaultMode="signup" 
+            onClose={() => setIsLoginOpen(false)} 
+          />
         </DialogContent>
       </Dialog>
 
