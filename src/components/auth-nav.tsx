@@ -69,7 +69,7 @@ const AuthNav = () => {
     return (
       <>
         <button 
-          className="text-sm underline text-primary"
+          className="text-sm underline text-primary whitespace-nowrap"
           onClick={() => setIsLoginOpen(true)}
         >
           Sign in
