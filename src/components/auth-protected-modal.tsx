@@ -17,6 +17,12 @@ export const AuthProtectedModal = ({ children }: AuthProtectedModalProps) => {
     // Subscribe to auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_, nextSession) => {
       setSession(nextSession);
+      
+      // If user just logged in and login modal was open, close it and open participation modal
+      if (nextSession?.user?.email_confirmed_at && isLoginOpen) {
+        setIsLoginOpen(false);
+        setIsParticipationOpen(true);
+      }
     });
 
     // Get current session
@@ -25,7 +31,7 @@ export const AuthProtectedModal = ({ children }: AuthProtectedModalProps) => {
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [isLoginOpen]);
 
   const handleTriggerClick = () => {
     if (session?.user?.email_confirmed_at) {
@@ -47,7 +53,13 @@ export const AuthProtectedModal = ({ children }: AuthProtectedModalProps) => {
       {/* Login Modal */}
       <Dialog open={isLoginOpen} onOpenChange={setIsLoginOpen}>
         <DialogContent className="sm:max-w-lg data-[state=open]:translate-y-[5%] sm:data-[state=open]:translate-y-[2%]">
-          <LoginModalContent onClose={() => setIsLoginOpen(false)} />
+          <LoginModalContent 
+            onClose={() => setIsLoginOpen(false)}
+            onAuthSuccess={() => {
+              setIsLoginOpen(false);
+              setIsParticipationOpen(true);
+            }}
+          />
         </DialogContent>
       </Dialog>
 
