@@ -2001,7 +2001,10 @@ const getApplicationStatusBadge = (status: string) => {
                                        className="cursor-pointer" 
                                        title={appData.facebook_url}
                                      >
-                                       {appData.facebook_url.length > 30 ? `${appData.facebook_url.substring(0, 30)}...` : appData.facebook_url}
+                                       {(() => {
+                                         const displayUrl = appData.facebook_url.replace(/^https?:\/\/(www\.)?facebook\.com\/?/, '');
+                                         return displayUrl.length > 30 ? `${displayUrl.substring(0, 30)}...` : displayUrl;
+                                       })()}
                                      </span>
                                      <button 
                                        onClick={() => navigator.clipboard.writeText(appData.facebook_url)}
