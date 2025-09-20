@@ -22,6 +22,121 @@ import { useApplicationHistory } from "@/hooks/useApplicationHistory";
 import { Clock } from "lucide-react";
 import { VotersModal } from "@/components/voters-modal";
 
+// User Applications History Modal Component
+const UserApplicationsModal = ({ userId, profiles, onClose }: { 
+  userId: string | null, 
+  profiles: any[], 
+  onClose: () => void 
+}) => {
+  const [userApplications, setUserApplications] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!userId) return;
+
+    const fetchUserApplications = async () => {
+      setLoading(true);
+      try {
+        const { data, error } = await supabase
+          .from('contest_applications')
+          .select('*')
+          .eq('user_id', userId)
+          .eq('deleted_at', null)
+          .order('submitted_at', { ascending: false });
+
+        if (error) throw error;
+        setUserApplications(data || []);
+      } catch (error) {
+        console.error('Error fetching user applications:', error);
+        toast({ description: "Error loading applications history" });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserApplications();
+  }, [userId]);
+
+  if (!userId) return null;
+
+  const userProfile = profiles.find(p => p.id === userId);
+  const userName = userProfile?.first_name && userProfile?.last_name 
+    ? `${userProfile.first_name} ${userProfile.last_name}` 
+    : userProfile?.display_name || 'Unknown User';
+
+  return (
+    <Dialog open={!!userId} onOpenChange={() => onClose()}>
+      <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Application History - {userName}</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4">
+          {loading ? (
+            <div className="text-center py-8">Loading...</div>
+          ) : userApplications.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">
+              No applications found for this user.
+            </div>
+          ) : (
+            userApplications.map((application, index) => {
+              const appData = application.application_data || {};
+              const submittedDate = new Date(application.submitted_at);
+              
+              return (
+                <Card key={application.id} className={`${index === 0 ? 'border-blue-500 border-2' : ''}`}>
+                  <CardContent className="p-4">
+                    <div className="flex justify-between items-start mb-2">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <Badge variant={application.status === 'approved' ? 'default' : 
+                                        application.status === 'rejected' ? 'destructive' : 'secondary'}>
+                            {application.status}
+                            {index === 0 && <span className="ml-1">(Latest)</span>}
+                          </Badge>
+                          <span className="text-sm text-muted-foreground">
+                            {submittedDate.toLocaleDateString()} {submittedDate.toLocaleTimeString()}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <span className="font-medium">Name:</span> {appData.first_name} {appData.last_name}
+                      </div>
+                      <div>
+                        <span className="font-medium">Age:</span> {appData.age || 'N/A'}
+                      </div>
+                      <div>
+                        <span className="font-medium">Location:</span> {appData.city}, {appData.country}
+                      </div>
+                      <div>
+                        <span className="font-medium">Height/Weight:</span> {appData.height_cm}cm / {appData.weight_kg}kg
+                      </div>
+                    </div>
+                    
+                    {application.notes && (
+                      <div className="mt-3 p-2 bg-muted rounded text-sm">
+                        <span className="font-medium">Notes:</span> {application.notes}
+                      </div>
+                    )}
+                    
+                    {application.rejection_reason && (
+                      <div className="mt-3 p-2 bg-red-50 border border-red-200 rounded text-sm">
+                        <span className="font-medium text-red-700">Rejection Reason:</span> {application.rejection_reason}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              );
+            })
+          )}
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
 interface ProfileData {
   id: string;
   display_name: string | null;
@@ -132,6 +247,7 @@ const Admin = () => {
   const [selectedParticipantForVoters, setSelectedParticipantForVoters] = useState<{ id: string; name: string } | null>(null);
   const [countryFilter, setCountryFilter] = useState<string>('all');
   const [genderFilter, setGenderFilter] = useState<string>('all');
+  const [selectedUserApplications, setSelectedUserApplications] = useState<string | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -1885,32 +2001,66 @@ const getApplicationStatusBadge = (status: string) => {
                 </Select>
               </div>
               <div className="grid gap-4">
-                {(showDeletedApplications ? deletedApplications : contestApplications)
-                  .filter((application) => {
-                    const appData = application.application_data || {};
-                    
-                    // Apply country filter
-                    if (countryFilter !== 'all' && appData.country !== countryFilter) {
-                      return false;
+                {/* Get unique applications by user_id showing only the latest one */}
+                {(() => {
+                  const filteredApplications = (showDeletedApplications ? deletedApplications : contestApplications)
+                    .filter((application) => {
+                      const appData = application.application_data || {};
+                      
+                      // Apply country filter
+                      if (countryFilter !== 'all' && appData.country !== countryFilter) {
+                        return false;
+                      }
+                      
+                      // Apply gender filter  
+                      if (genderFilter !== 'all' && appData.gender !== genderFilter) {
+                        return false;
+                      }
+                      
+                      return true;
+                    });
+                  
+                  // Group by user_id and get the latest application for each user
+                  const userApplicationsMap = new Map();
+                  const userApplicationCounts = new Map();
+                  
+                  filteredApplications.forEach(app => {
+                    if (!userApplicationCounts.has(app.user_id)) {
+                      userApplicationCounts.set(app.user_id, 0);
                     }
+                    userApplicationCounts.set(app.user_id, userApplicationCounts.get(app.user_id) + 1);
                     
-                    // Apply gender filter  
-                    if (genderFilter !== 'all' && appData.gender !== genderFilter) {
-                      return false;
+                    if (!userApplicationsMap.has(app.user_id) || 
+                        new Date(app.submitted_at) > new Date(userApplicationsMap.get(app.user_id).submitted_at)) {
+                      userApplicationsMap.set(app.user_id, app);
                     }
-                    
-                    return true;
-                  })
-                  .map((application) => {
+                  });
+                  
+                  return Array.from(userApplicationsMap.values());
+                })().map((application) => {
                    const appData = application.application_data || {};
                    const phone = appData.phone;
                    const submittedDate = new Date(application.submitted_at);
                    
                    // Find the user's profile to get auth data
                    const userProfile = profiles.find(p => p.id === application.user_id);
+                   
+                   // Get total application count for this user
+                   const userApplicationCount = (showDeletedApplications ? deletedApplications : contestApplications)
+                     .filter(app => app.user_id === application.user_id).length;
                   
                   return (
-                     <Card key={application.id} className="overflow-hidden">
+                     <Card key={application.id} className="overflow-hidden relative">
+                        {/* Application count badge in top left corner */}
+                        {userApplicationCount > 1 && (
+                          <div 
+                            className="absolute top-2 left-2 z-10 bg-blue-500 text-white text-xs px-2 py-1 rounded-full cursor-pointer hover:bg-blue-600 transition-colors"
+                            onClick={() => setSelectedUserApplications(application.user_id)}
+                          >
+                            {userApplicationCount}
+                          </div>
+                        )}
+                        
                         <CardContent className="p-0">
                             <div className="flex flex-col md:flex-row md:items-stretch">
                               {/* Photos section - No padding, extends to card edges */}
@@ -2737,6 +2887,13 @@ const getApplicationStatusBadge = (status: string) => {
         }}
         participantId={selectedParticipantForVoters?.id || ''}
         participantName={selectedParticipantForVoters?.name || ''}
+      />
+
+      {/* User Applications History Modal */}
+      <UserApplicationsModal 
+        userId={selectedUserApplications}
+        profiles={profiles}
+        onClose={() => setSelectedUserApplications(null)}
       />
     </>
   );
