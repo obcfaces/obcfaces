@@ -244,8 +244,6 @@ const Admin = () => {
   const [photoModalIndex, setPhotoModalIndex] = useState(0);
   const [photoModalName, setPhotoModalName] = useState("");
   const [expandedHistory, setExpandedHistory] = useState<Set<string>>(new Set());
-  const [viewingApplicationHistory, setViewingApplicationHistory] = useState<string | null>(null);
-  const [applicationHistoryOpen, setApplicationHistoryOpen] = useState(false);
   const [rejectModalOpen, setRejectModalOpen] = useState(false);
   const [applicationToReject, setApplicationToReject] = useState<{ id: string; name: string } | null>(null);
   const [votersModalOpen, setVotersModalOpen] = useState(false);
@@ -2062,12 +2060,14 @@ const getApplicationStatusBadge = (status: string) => {
                      <Card key={application.id} className="overflow-hidden relative">
                         {/* Application count badge in top left corner */}
                         {userApplicationCount > 1 && (
-                          <div 
-                            className="absolute top-0 left-0 z-10 bg-blue-500 text-white text-xs px-2 py-1 rounded-br cursor-pointer hover:bg-blue-600 transition-colors"
-                            onClick={() => setSelectedUserApplications(application.user_id)}
-                          >
-                            {userApplicationCount}
-                          </div>
+                           <div 
+                             className="absolute top-0 left-0 z-10 bg-blue-500 text-white text-xs px-2 py-1 rounded-br cursor-pointer hover:bg-blue-600 transition-colors"
+                             onClick={() => setSelectedUserApplications(
+                               selectedUserApplications === application.user_id ? null : application.user_id
+                             )}
+                           >
+                             {userApplicationCount}
+                           </div>
                         )}
                         
                         <CardContent className="p-0">
@@ -2186,17 +2186,16 @@ const getApplicationStatusBadge = (status: string) => {
                                </p>
                              </div>
                              <div className="flex gap-1 flex-wrap justify-center">
-                               <Button
-                                 size="sm"
-                                 variant="outline"
-                                 onClick={() => {
-                                   setViewingApplicationHistory(application.id);
-                                   setApplicationHistoryOpen(true);
-                                 }}
-                                 className="px-2"
-                               >
-                                 <Clock className="w-3 h-3" />
-                               </Button>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => setSelectedUserApplications(
+                                    selectedUserApplications === application.user_id ? null : application.user_id
+                                  )}
+                                  className="px-2"
+                                >
+                                  <Clock className="w-3 h-3" />
+                                </Button>
                                 {!showDeletedApplications && (
                                  <>
                                    <Button
@@ -2303,12 +2302,235 @@ const getApplicationStatusBadge = (status: string) => {
                             )}
                           </div>
                         )}
-                      </CardContent>
-                    </Card>
+                       </CardContent>
+                     </Card>
+                     
+                     {/* Previous applications for this user */}
+                     {selectedUserApplications === application.user_id && (
+                       <div className="mt-2 space-y-2">
+                         {(showDeletedApplications ? deletedApplications : contestApplications)
+                           .filter(app => app.user_id === application.user_id && app.id !== application.id)
+                           .sort((a, b) => new Date(b.submitted_at).getTime() - new Date(a.submitted_at).getTime())
+                           .map((prevApp) => {
+                             const prevAppData = typeof prevApp.application_data === 'string' 
+                               ? JSON.parse(prevApp.application_data) 
+                               : prevApp.application_data;
+                             
+                             return (
+                               <Card key={prevApp.id} className="overflow-hidden bg-muted/30">
+                                 <CardContent className="p-4">
+                                   <div className="text-sm">
+                                     {prevAppData.first_name} {prevAppData.last_name} - {new Date(prevApp.submitted_at).toLocaleDateString('ru-RU')}
+                                     <br />
+                                     Статус: {getApplicationStatusBadge(prevApp.status)}
+                                   </div>
+                                 </CardContent>
+                               </Card>
+                             );
+                           })}
+                       </div>
+                     )}
+                  })}
+                  
+                  {/* Show message when no applications */}
+                  {(() => {
+                             const prevAppData = typeof prevApp.application_data === 'string' 
+                               ? JSON.parse(prevApp.application_data) 
+                               : prevApp.application_data;
+                             const prevSubmittedDate = new Date(prevApp.submitted_at);
+                             const prevPhone = prevAppData.phone?.country && prevAppData.phone?.number 
+                               ? { full_number: `${prevAppData.phone.country} ${prevAppData.phone.number}` }
+                               : null;
+                             
+                             return (
+                               <Card key={prevApp.id} className="overflow-hidden bg-muted/30">
+                                 <CardContent className="p-0">
+                                   <div className="flex flex-col md:flex-row md:items-stretch">
+                                     {/* Photos section */}
+                                     <div className="flex gap-px md:w-[25ch] md:flex-shrink-0 p-0">
+                                       {prevAppData.photo1_url && (
+                                         <div className="w-24 sm:w-28 md:w-32">
+                                           <img 
+                                             src={prevAppData.photo1_url} 
+                                             alt="Portrait" 
+                                             className="w-full h-36 sm:h-40 md:h-44 object-contain cursor-pointer hover:opacity-90 transition-opacity"
+                                             onClick={() => openPhotoModal([prevAppData.photo1_url, prevAppData.photo2_url].filter(Boolean), 0, `${prevAppData.first_name} ${prevAppData.last_name}`)}
+                                           />
+                                         </div>
+                                       )}
+                                       {prevAppData.photo2_url && (
+                                         <div className="w-24 sm:w-28 md:w-32">
+                                           <img 
+                                             src={prevAppData.photo2_url} 
+                                             alt="Full length" 
+                                             className="w-full h-36 sm:h-40 md:h-44 object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                                             onClick={() => openPhotoModal([prevAppData.photo1_url, prevAppData.photo2_url].filter(Boolean), 1, `${prevAppData.first_name} ${prevAppData.last_name}`)}
+                                           />
+                                         </div>
+                                       )}
+                                     </div>
+
+                                     {/* Main info section */}
+                                     <div className="md:w-[50ch] md:flex-shrink-0 flex-1 min-w-0 p-4">
+                                       <div className="flex items-center gap-2 mb-1">
+                                         <Avatar className="h-6 w-6 flex-shrink-0">
+                                           <AvatarImage src={userProfile?.avatar_url || ''} />
+                                           <AvatarFallback className="text-xs">
+                                             {prevAppData.first_name?.charAt(0) || 'U'}
+                                           </AvatarFallback>
+                                         </Avatar>
+                                         <span className="text-sm font-semibold whitespace-nowrap">
+                                           {prevAppData.first_name} {prevAppData.last_name} {new Date().getFullYear() - prevAppData.birth_year}
+                                         </span>
+                                       </div>
+                                       
+                                       <div className="text-xs text-muted-foreground mb-1">
+                                         {prevAppData.city} {prevAppData.state} {prevAppData.country}
+                                       </div>
+                                       
+                                       <div className="text-xs text-muted-foreground mb-1">
+                                         {prevAppData.weight_kg}kg • {prevAppData.height_cm}cm • {prevAppData.gender}
+                                       </div>
+
+                                       <div className="text-xs text-muted-foreground mb-1">
+                                         {prevAppData.marital_status} • {prevAppData.has_children ? 'Has children' : 'No children'}
+                                       </div>
+
+                                       <div className="text-xs text-muted-foreground mb-1">
+                                         {userProfile?.email && (
+                                           <div className="flex items-center gap-1">
+                                             <span 
+                                               className="cursor-pointer" 
+                                               title={userProfile.email}
+                                             >
+                                               {userProfile.email.length > 25 ? `${userProfile.email.substring(0, 25)}...` : userProfile.email}
+                                             </span>
+                                             <Copy 
+                                               className="h-3 w-3 cursor-pointer hover:text-foreground" 
+                                               onClick={() => navigator.clipboard.writeText(userProfile.email)}
+                                             />
+                                           </div>
+                                         )}
+                                       </div>
+
+                                       <div className="text-xs text-muted-foreground mb-1">
+                                         <div className="flex items-center gap-2">
+                                           <span>{prevPhone ? prevPhone.full_number : 'Not provided'}</span>
+                                           {prevAppData.facebook_url && (
+                                             <a
+                                               href={prevAppData.facebook_url}
+                                               target="_blank"
+                                               rel="noopener noreferrer"
+                                               className="text-blue-600 hover:text-blue-800"
+                                             >
+                                               <Facebook className="h-3 w-3" />
+                                             </a>
+                                           )}
+                                         </div>
+                                       </div>
+
+                                       <div className="text-xs text-muted-foreground">
+                                         Education: {prevAppData.education || 'Not specified'}
+                                       </div>
+                                     </div>
+
+                                     {/* Right side actions */}
+                                     <div className="p-4 md:w-auto flex flex-col justify-between gap-2">
+                                       <div className="flex flex-col gap-1 items-center">
+                                         {getApplicationStatusBadge(prevApp.status)}
+                                         <p className="text-xs text-muted-foreground text-center">
+                                           {prevSubmittedDate.toLocaleDateString('ru-RU')} {prevSubmittedDate.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}
+                                         </p>
+                                       </div>
+                                       <div className="flex gap-1 flex-wrap justify-center">
+                                         {!showDeletedApplications && (
+                                           <>
+                                             <Button
+                                               size="sm"
+                                               variant="outline"
+                                               onClick={() => startEditingApplication(prevApp)}
+                                               className="flex items-center gap-1 text-xs px-2 py-1 h-7"
+                                             >
+                                               <Edit className="w-3 h-3" />
+                                               <span className="hidden sm:inline">Edit</span>
+                                             </Button>
+                                             <Button
+                                               size="sm"
+                                               onClick={() => {
+                                                 if (prevApp.status === 'approved') {
+                                                   reviewApplication(prevApp.id, 'pending')
+                                                 } else {
+                                                   reviewApplication(prevApp.id, 'approved')
+                                                 }
+                                               }}
+                                               className={
+                                                 prevApp.status === 'approved'
+                                                   ? "bg-yellow-600 hover:bg-yellow-700 text-xs px-2 py-1 h-7"
+                                                   : "bg-green-600 hover:bg-green-700 text-xs px-2 py-1 h-7"
+                                               }
+                                             >
+                                               {prevApp.status === 'approved' ? (
+                                                 <>
+                                                   <Minus className="w-3 h-3" />
+                                                   <span className="hidden sm:inline ml-1">Unpublish</span>
+                                                 </>
+                                               ) : (
+                                                 <>
+                                                   <Check className="w-3 h-3" />
+                                                   <span className="hidden sm:inline ml-1">Approve</span>
+                                                 </>
+                                               )}
+                                             </Button>
+                                             <Button
+                                               size="sm"
+                                               variant="destructive"
+                                               onClick={() => {
+                                                 setApplicationToReject({
+                                                   id: prevApp.id,
+                                                   name: `${prevAppData.first_name} ${prevAppData.last_name}`
+                                                 });
+                                                 setRejectModalOpen(true);
+                                               }}
+                                               className="text-xs px-2 py-1 h-7"
+                                             >
+                                               <X className="w-3 h-3" />
+                                               <span className="hidden sm:inline ml-1">Reject</span>
+                                             </Button>
+                                             <Button
+                                               size="sm"
+                                               variant="outline"
+                                               onClick={() => deleteApplication(prevApp.id)}
+                                               className="text-xs px-2 py-1 h-7"
+                                             >
+                                               <Trash2 className="w-3 h-3" />
+                                               <span className="hidden sm:inline ml-1">Delete</span>
+                                             </Button>
+                                           </>
+                                         )}
+                                         {showDeletedApplications && (
+                                           <Button
+                                             size="sm"
+                                             onClick={() => restoreApplication(prevApp.id)}
+                                             className="bg-blue-600 hover:bg-blue-700 text-xs px-2 py-1 h-7"
+                                           >
+                                             <RotateCcw className="w-3 h-3" />
+                                             <span className="hidden sm:inline ml-1">Restore</span>
+                                           </Button>
+                                         )}
+                                       </div>
+                                     </div>
+                                   </div>
+                                 </CardContent>
+                               </Card>
+                             );
+                           })}
+                       </div>
+                     )}
+                  </div>
                   );
-                 })}
-                 
-                 {/* Show message when no applications */}
+                  })}
+                  
+                  {/* Show message when no applications */}
                  {(() => {
                    const filteredApplications = (showDeletedApplications ? deletedApplications : contestApplications)
                      .filter((application) => {
@@ -2903,15 +3125,6 @@ const getApplicationStatusBadge = (status: string) => {
             </DialogContent>
           </Dialog>
 
-          {/* Application History Modal */}
-          <ApplicationHistoryModal 
-            applicationId={viewingApplicationHistory}
-            isOpen={applicationHistoryOpen}
-            onClose={() => {
-              setApplicationHistoryOpen(false);
-              setViewingApplicationHistory(null);
-            }}
-          />
         </div>
       </div>
 
