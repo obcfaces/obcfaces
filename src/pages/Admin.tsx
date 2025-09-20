@@ -1914,13 +1914,13 @@ const getApplicationStatusBadge = (status: string) => {
                         <CardContent className="p-0">
                             <div className="flex flex-col md:flex-row md:items-stretch">
                               {/* Photos section - No padding, extends to card edges */}
-                              <div className="flex items-center gap-2 md:w-[30ch] md:flex-shrink-0 p-0">
+                              <div className="flex gap-px md:w-[30ch] md:flex-shrink-0 p-0">
                                {appData.photo1_url && (
                                  <div className="flex-1">
                                    <img 
                                      src={appData.photo1_url} 
                                      alt="Portrait" 
-                                     className="w-full max-h-32 object-contain rounded border cursor-pointer hover:opacity-80 transition-opacity"
+                                     className="w-full h-32 object-cover cursor-pointer hover:opacity-90 transition-opacity"
                                      onClick={() => openPhotoModal([appData.photo1_url, appData.photo2_url].filter(Boolean), 0, `${appData.first_name} ${appData.last_name}`)}
                                    />
                                  </div>
@@ -1930,7 +1930,7 @@ const getApplicationStatusBadge = (status: string) => {
                                    <img 
                                      src={appData.photo2_url} 
                                      alt="Full length" 
-                                     className="w-full max-h-32 object-contain rounded border cursor-pointer hover:opacity-80 transition-opacity"
+                                     className="w-full h-32 object-cover cursor-pointer hover:opacity-90 transition-opacity"
                                      onClick={() => openPhotoModal([appData.photo1_url, appData.photo2_url].filter(Boolean), 1, `${appData.first_name} ${appData.last_name}`)}
                                    />
                                  </div>
