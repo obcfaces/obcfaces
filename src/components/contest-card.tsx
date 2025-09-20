@@ -470,60 +470,15 @@ export function ContestantCard({
                         {userRating > 0 ? 
                           `Your rating: ${userRating}` : 
                           `No rating`
-                        }{isThisWeek && userRating > 0 && ` — `}
-                        {isThisWeek && userRating > 0 && (
-                          <div className="inline-flex gap-2">
-                            <button 
-                              className="text-contest-blue hover:underline"
-                              onClick={() => {
-                                setIsEditing(true);
-                                setIsPopoverOpen(false);
-                              }}
-                            >
-                              change
-                            </button>
-                            <span>|</span>
-                            <button 
-                              className="text-red-500 hover:underline"
-                              onClick={async () => {
-                                if (!propUser || !profileId) return;
-                                
-                                try {
-                                  // Remove rating from database
-                                  await supabase
-                                    .from('contestant_ratings')
-                                    .delete()
-                                    .eq('user_id', propUser.id)
-                                    .eq('contestant_user_id', profileId);
-                                  
-                                  // Remove from localStorage
-                                  localStorage.removeItem(`rating-${name}-${propUser.id}`);
-                                  
-                                  // Update local state to unrated
-                                  setUserRating(0);
-                                  setIsVoted(false);
-                                  setPreviousUserRating(0);
-                                  
-                                  // Recalculate average rating
-                                  const newTotalVotes = Math.max(0, localTotalVotes - 1);
-                                  const newSum = Math.max(0, (localAverageRating * localTotalVotes) - previousUserRating);
-                                  const newAverageRating = newTotalVotes > 0 ? newSum / newTotalVotes : 0;
-                                  
-                                  setLocalAverageRating(newAverageRating);
-                                  setLocalTotalVotes(newTotalVotes);
-                                  
-                                  setIsPopoverOpen(false);
-                                  toast({ description: "Rating removed successfully" });
-                                } catch (error) {
-                                  console.error('Error removing rating:', error);
-                                  toast({ description: "Error removing rating" });
-                                }
-                              }}
-                            >
-                              remove
-                            </button>
-                          </div>
-                        )}
+                        }{isThisWeek && ` — `}<button 
+                          className={`text-contest-blue hover:underline ${!isThisWeek ? 'hidden' : ''}`}
+                          onClick={() => {
+                            setIsEditing(true);
+                            setIsPopoverOpen(false);
+                          }}
+                        >
+                          change
+                        </button>
                       </div>
                     </PopoverContent>
                   </Popover>
