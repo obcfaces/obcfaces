@@ -36,15 +36,17 @@ const UserApplicationsModal = ({ userId, profiles, onClose }: {
 
     const fetchUserApplications = async () => {
       setLoading(true);
+      console.log('Fetching applications for user:', userId);
       try {
         const { data, error } = await supabase
           .from('contest_applications')
           .select('*')
           .eq('user_id', userId)
-          .eq('deleted_at', null)
+          .is('deleted_at', null)
           .order('submitted_at', { ascending: false });
 
         if (error) throw error;
+        console.log('Fetched user applications:', data?.length || 0);
         setUserApplications(data || []);
       } catch (error) {
         console.error('Error fetching user applications:', error);
@@ -66,9 +68,12 @@ const UserApplicationsModal = ({ userId, profiles, onClose }: {
 
   return (
     <Dialog open={!!userId} onOpenChange={() => onClose()}>
-      <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+      <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto" aria-describedby="user-applications-description">
         <DialogHeader>
           <DialogTitle>Application History - {userName}</DialogTitle>
+          <div id="user-applications-description" className="sr-only">
+            Complete application history for {userName}
+          </div>
         </DialogHeader>
         <div className="space-y-4">
           {loading ? (
@@ -2020,6 +2025,8 @@ const getApplicationStatusBadge = (status: string) => {
                       return true;
                     });
                   
+                  console.log('Filtered applications:', filteredApplications.length);
+                  
                   // Group by user_id and get the latest application for each user
                   const userApplicationsMap = new Map();
                   const userApplicationCounts = new Map();
@@ -2036,7 +2043,9 @@ const getApplicationStatusBadge = (status: string) => {
                     }
                   });
                   
-                  return Array.from(userApplicationsMap.values());
+                  const result = Array.from(userApplicationsMap.values());
+                  console.log('Unique applications to display:', result.length);
+                  return result;
                 })().map((application) => {
                    const appData = application.application_data || {};
                    const phone = appData.phone;
@@ -2054,7 +2063,7 @@ const getApplicationStatusBadge = (status: string) => {
                         {/* Application count badge in top left corner */}
                         {userApplicationCount > 1 && (
                           <div 
-                            className="absolute top-2 left-2 z-10 bg-blue-500 text-white text-xs px-2 py-1 rounded-full cursor-pointer hover:bg-blue-600 transition-colors"
+                            className="absolute top-0 left-0 z-10 bg-blue-500 text-white text-xs px-2 py-1 rounded-br cursor-pointer hover:bg-blue-600 transition-colors"
                             onClick={() => setSelectedUserApplications(application.user_id)}
                           >
                             {userApplicationCount}
@@ -2297,8 +2306,54 @@ const getApplicationStatusBadge = (status: string) => {
                       </CardContent>
                     </Card>
                   );
-                })}
-              </div>
+                 })}
+                 
+                 {/* Show message when no applications */}
+                 {(() => {
+                   const filteredApplications = (showDeletedApplications ? deletedApplications : contestApplications)
+                     .filter((application) => {
+                       const appData = application.application_data || {};
+                       
+                       // Apply country filter
+                       if (countryFilter !== 'all' && appData.country !== countryFilter) {
+                         return false;
+                       }
+                       
+                       // Apply gender filter  
+                       if (genderFilter !== 'all' && appData.gender !== genderFilter) {
+                         return false;
+                       }
+                       
+                       return true;
+                     });
+                   
+                   // Group by user_id
+                   const userApplicationsMap = new Map();
+                   filteredApplications.forEach(app => {
+                     if (!userApplicationsMap.has(app.user_id) || 
+                         new Date(app.submitted_at) > new Date(userApplicationsMap.get(app.user_id).submitted_at)) {
+                       userApplicationsMap.set(app.user_id, app);
+                     }
+                   });
+                   
+                   const uniqueApplications = Array.from(userApplicationsMap.values());
+                   
+                   if (uniqueApplications.length === 0) {
+                     return (
+                       <div className="text-center py-8 text-muted-foreground">
+                         <p className="text-lg">No applications found</p>
+                         <p className="text-sm mt-2">
+                           {showDeletedApplications 
+                             ? "No deleted applications match your filters."
+                             : "No active applications match your filters."
+                           }
+                         </p>
+                       </div>
+                     );
+                   }
+                   return null;
+                 })()}
+               </div>
             </TabsContent>
 
             <TabsContent value="registrations" className="space-y-4">
