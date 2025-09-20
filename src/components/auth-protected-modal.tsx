@@ -12,40 +12,49 @@ export const AuthProtectedModal = ({ children }: AuthProtectedModalProps) => {
   const [session, setSession] = useState<any>(null);
   const [isParticipationOpen, setIsParticipationOpen] = useState(false);
   const [isLoginOpen, setIsLoginOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    // Get current session first
+    const getInitialSession = async () => {
+      const { data } = await supabase.auth.getSession();
+      setSession(data.session);
+      setIsLoading(false);
+      console.log('Initial session loaded:', data.session?.user?.email_confirmed_at);
+    };
+
+    getInitialSession();
+
     // Subscribe to auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, nextSession) => {
       console.log('Auth state changed:', event, nextSession?.user?.email_confirmed_at);
       setSession(nextSession);
-      
-      // If user just logged in and login modal was open, close it and open participation modal
-      if (nextSession?.user?.email_confirmed_at && isLoginOpen) {
-        console.log('Switching from login to participation modal');
-        setIsLoginOpen(false);
-        setTimeout(() => {
-          setIsParticipationOpen(true);
-        }, 100);
-      }
-    });
-
-    // Get current session
-    supabase.auth.getSession().then(({ data }) => {
-      console.log('Initial session:', data.session?.user?.email_confirmed_at);
-      setSession(data.session);
     });
 
     return () => subscription.unsubscribe();
-  }, [isLoginOpen]);
+  }, []);
 
   const handleTriggerClick = () => {
+    if (isLoading) return;
+    
     if (session?.user?.email_confirmed_at) {
       // User is authenticated and email confirmed, open participation modal
+      console.log('Opening participation modal for authenticated user');
       setIsParticipationOpen(true);
     } else {
       // User is not authenticated or email not confirmed, open login modal
+      console.log('Opening login modal for unauthenticated user');
       setIsLoginOpen(true);
     }
+  };
+
+  const handleAuthSuccess = () => {
+    console.log('Auth success callback triggered');
+    setIsLoginOpen(false);
+    // Small delay to ensure modal closes properly before opening new one
+    setTimeout(() => {
+      setIsParticipationOpen(true);
+    }, 200);
   };
 
   return (
@@ -60,10 +69,7 @@ export const AuthProtectedModal = ({ children }: AuthProtectedModalProps) => {
         <DialogContent className="sm:max-w-lg data-[state=open]:translate-y-[5%] sm:data-[state=open]:translate-y-[2%]">
           <LoginModalContent 
             onClose={() => setIsLoginOpen(false)}
-            onAuthSuccess={() => {
-              setIsLoginOpen(false);
-              setIsParticipationOpen(true);
-            }}
+            onAuthSuccess={handleAuthSuccess}
           />
         </DialogContent>
       </Dialog>
