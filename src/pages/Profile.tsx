@@ -185,7 +185,7 @@ const Profile = () => {
     { value: "Other", label: "Other" }
   ];
 
-  const profile = data;
+  const profile = data || null;
   const isOwner = currentUserId && currentUserId === id;
 
   // Load profile data
@@ -1081,8 +1081,8 @@ const Profile = () => {
   };
 
 
-  // Sample posts data
-  const samplePosts = [
+  // Sample posts data - only create if profile exists
+  const samplePosts = profile ? [
     {
       id: "1",
       authorName: profile.display_name || "User",
@@ -1101,7 +1101,7 @@ const Profile = () => {
       likes: 45,
       comments: 8
     }
-  ];
+  ] : [];
 
   if (loading) {
     return (
