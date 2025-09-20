@@ -20,6 +20,7 @@ import { ProfilePhotoModal } from "@/components/profile-photo-modal";
 import { ContestParticipationModal } from "@/components/contest-participation-modal";
 import CreatePostModal from "@/components/create-post-modal";
 import { REJECTION_REASONS, RejectReasonModal, RejectionReasonType } from "@/components/reject-reason-modal";
+import { AuthProtectedModal } from "@/components/auth-protected-modal";
 import c1 from "@/assets/contestant-1.jpg";
 import c2 from "@/assets/contestant-2.jpg";
 import c3 from "@/assets/contestant-3.jpg";
@@ -117,7 +118,6 @@ const Profile = () => {
   // Rejection reason modal states
   const [showRejectReasonModal, setShowRejectReasonModal] = useState(false);
   const [updatingRejection, setUpdatingRejection] = useState(false);
-  const [isSignupOpen, setIsSignupOpen] = useState(false);
 
   // Demo profile removed - no longer using fallback data
 
@@ -1198,12 +1198,13 @@ const Profile = () => {
             
             <div className="flex items-center gap-2 mt-4">
               {isOwner && (
-                <Button 
-                  onClick={() => setIsSignupOpen(true)}
-                  className="bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
-                >
-                  🏆 Join & Win 5,000 PHP
-                </Button>
+                <AuthProtectedModal>
+                  <Button 
+                    className="bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
+                  >
+                    🏆 Join & Win 5,000 PHP
+                  </Button>
+                </AuthProtectedModal>
               )}
               
               {/* Edit Modal for existing applications */}
@@ -2374,12 +2375,6 @@ const Profile = () => {
         isLoading={updatingRejection}
       />
 
-      {/* Signup Modal */}
-      <Dialog open={isSignupOpen} onOpenChange={setIsSignupOpen}>
-        <DialogContent className="sm:max-w-lg data-[state=open]:translate-y-[5%] sm:data-[state=open]:translate-y-[2%]">
-          <LoginModalContent defaultMode="signup" onClose={() => setIsSignupOpen(false)} />
-        </DialogContent>
-      </Dialog>
 
     </div>
   );
