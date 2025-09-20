@@ -119,19 +119,7 @@ const Profile = () => {
   const [updatingRejection, setUpdatingRejection] = useState(false);
   const [isSignupOpen, setIsSignupOpen] = useState(false);
 
-  // Demo profile for fallback
-  const demoProfile: ProfileRow = {
-    display_name: "Anna Petrova",
-    first_name: "Anna",
-    last_name: "Petrova",
-    birthdate: "1999-03-15",
-    height_cm: 165,
-    weight_kg: 55,
-    avatar_url: c1face,
-    city: "Moscow",
-    country: "Russia",
-    bio: "Model and photographer. Love traveling and discovering new places. Always looking for inspiration in everyday moments."
-  };
+  // Demo profile removed - no longer using fallback data
 
   // Country options
   const countryOptions = [
@@ -197,7 +185,7 @@ const Profile = () => {
     { value: "Other", label: "Other" }
   ];
 
-  const profile = data || demoProfile;
+  const profile = data;
   const isOwner = currentUserId && currentUserId === id;
 
   // Load profile data
@@ -1120,6 +1108,16 @@ const Profile = () => {
       <div className="min-h-screen bg-background">
         <main className="container mx-auto px-6 py-8">
           <p>Loading...</p>
+        </main>
+      </div>
+    );
+  }
+
+  if (!profile) {
+    return (
+      <div className="min-h-screen bg-background">
+        <main className="container mx-auto px-6 py-8">
+          <p>Профиль не найден</p>
         </main>
       </div>
     );
