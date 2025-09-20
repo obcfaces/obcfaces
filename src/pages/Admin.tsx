@@ -40,6 +40,17 @@ interface ProfileData {
   moderated_at?: string;
   bio?: string;
   avatar_url?: string;
+  age?: number;
+  city?: string;
+  state?: string;
+  country?: string;
+  gender?: string;
+  marital_status?: string;
+  has_children?: boolean;
+  weight_kg?: number;
+  height_cm?: number;
+  photo_1_url?: string;
+  photo_2_url?: string;
 }
 
 interface ContestApplication {
@@ -477,71 +488,118 @@ const Admin = () => {
                 <p className="text-muted-foreground">Manage weekly contests and participants</p>
               </div>
               
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {weeklyContests.length === 0 ? (
-                  <Card className="col-span-full">
-                    <CardContent className="text-center py-8">
-                      <p className="text-muted-foreground">No weekly contests found</p>
-                    </CardContent>
-                  </Card>
-                ) : (
-                  weeklyContests.map((contest) => (
-                    <Card key={contest.id}>
-                      <CardHeader>
-                        <div className="flex items-center justify-between">
-                          <h3 className="font-semibold">{contest.title}</h3>
-                          <Badge variant={contest.status === 'active' ? 'default' : 'secondary'}>
-                            {contest.status}
-                          </Badge>
-                        </div>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="space-y-2 text-sm">
-                          <p><strong>Start:</strong> {new Date(contest.week_start_date).toLocaleDateString()}</p>
-                          <p><strong>End:</strong> {new Date(contest.week_end_date).toLocaleDateString()}</p>
-                          <p><strong>Created:</strong> {new Date(contest.created_at).toLocaleDateString()}</p>
-                          {contest.winner_id && (
-                            <p><strong>Winner:</strong> {contest.winner_id}</p>
-                          )}
-                        </div>
-                        <div className="mt-4 flex gap-2">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => setSelectedContest(contest.id)}
-                          >
-                            <Eye className="h-4 w-4 mr-1" />
-                            View Participants
-                          </Button>
+              {(() => {
+                if (weeklyParticipants.length === 0) {
+                  return (
+                    <div className="text-center py-8 text-muted-foreground">
+                      <p className="text-lg">No weekly contest participants found</p>
+                    </div>
+                  );
+                }
+
+                return weeklyParticipants.map((participant) => {
+                  const participantProfile = profiles.find(p => p.id === participant.user_id);
+                  const appData = participant.application_data || {};
+                  
+                  return (
+                    <Card key={participant.id} className="overflow-hidden relative">
+                      <CardContent className="p-0">
+                        <div className="flex flex-col md:flex-row md:items-stretch">
+                          {/* Photos section */}
+                          <div className="flex gap-px md:w-[25ch] md:flex-shrink-0 p-0">
+                            {(participantProfile?.photo_1_url || appData.photo1_url) && (
+                              <div className="w-24 sm:w-28 md:w-32">
+                                <img 
+                                  src={participantProfile?.photo_1_url || appData.photo1_url} 
+                                  alt="Portrait" 
+                                  className="w-full h-36 sm:h-40 md:h-44 object-contain cursor-pointer hover:opacity-90 transition-opacity"
+                                  onClick={() => openPhotoModal([
+                                    participantProfile?.photo_1_url || appData.photo1_url, 
+                                    participantProfile?.photo_2_url || appData.photo2_url
+                                  ].filter(Boolean), 0, `${participantProfile?.first_name || appData.first_name} ${participantProfile?.last_name || appData.last_name}`)}
+                                />
+                              </div>
+                            )}
+                            {(participantProfile?.photo_2_url || appData.photo2_url) && (
+                              <div className="w-24 sm:w-28 md:w-32">
+                                <img 
+                                  src={participantProfile?.photo_2_url || appData.photo2_url} 
+                                  alt="Full length" 
+                                  className="w-full h-36 sm:h-40 md:h-44 object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                                  onClick={() => openPhotoModal([
+                                    participantProfile?.photo_1_url || appData.photo1_url, 
+                                    participantProfile?.photo_2_url || appData.photo2_url
+                                  ].filter(Boolean), 1, `${participantProfile?.first_name || appData.first_name} ${participantProfile?.last_name || appData.last_name}`)}
+                                />
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Main info section */}
+                          <div className="md:w-[50ch] md:flex-shrink-0 flex-1 min-w-0 p-4">
+                            <div className="flex items-center gap-2 mb-1">
+                              <Avatar className="h-6 w-6 flex-shrink-0">
+                                <AvatarImage src={participantProfile?.avatar_url || ''} />
+                                <AvatarFallback className="text-xs">
+                                  {(participantProfile?.first_name || appData.first_name)?.charAt(0) || 'U'}
+                                </AvatarFallback>
+                              </Avatar>
+                              <span className="text-sm font-semibold whitespace-nowrap">
+                                {participantProfile?.first_name || appData.first_name} {participantProfile?.last_name || appData.last_name} {participantProfile?.age || (appData.birth_year ? new Date().getFullYear() - appData.birth_year : '')}
+                              </span>
+                            </div>
+                            
+                            <div className="text-xs text-muted-foreground mb-1">
+                              {participantProfile?.city || appData.city} {participantProfile?.state || appData.state} {participantProfile?.country || appData.country}
+                            </div>
+                             
+                            <div className="text-xs text-muted-foreground mb-1">
+                              {(participantProfile?.weight_kg || appData.weight_kg)}kg • {(participantProfile?.height_cm || appData.height_cm)}cm • {participantProfile?.gender || appData.gender}
+                            </div>
+
+                            <div className="text-xs text-muted-foreground mb-1">
+                              {participantProfile?.marital_status || appData.marital_status} • {(participantProfile?.has_children || appData.has_children) ? 'Has children' : 'No children'}
+                            </div>
+
+                            <div className="text-xs text-muted-foreground mb-1">
+                              Contest Participant • Rank: {participant.final_rank || 'Unranked'} • Votes: {participant.total_votes || 0}
+                            </div>
+                          </div>
+
+                          {/* Right side actions */}
+                          <div className="p-4 md:w-auto flex flex-col justify-between gap-2">
+                            <div className="flex flex-col gap-1 items-center">
+                              <Badge variant={participant.is_active ? 'default' : 'secondary'}>
+                                {participant.is_active ? 'Active' : 'Inactive'}
+                              </Badge>
+                              <p className="text-xs text-muted-foreground text-center">
+                                Rating: {participant.average_rating || 0}
+                              </p>
+                            </div>
+                            <div className="flex gap-1 flex-wrap justify-center">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => {
+                                  setSelectedParticipantForVoters({
+                                    id: participant.id,
+                                    name: `${participantProfile?.first_name || appData.first_name} ${participantProfile?.last_name || appData.last_name}`
+                                  });
+                                  setVotersModalOpen(true);
+                                }}
+                                className="text-xs px-2 py-1 h-7"
+                              >
+                                <Eye className="w-3 h-3" />
+                                <span className="hidden sm:inline ml-1">Voters</span>
+                              </Button>
+                            </div>
+                          </div>
                         </div>
                       </CardContent>
                     </Card>
-                  ))
-                )}
-              </div>
-              
-              {selectedContest && (
-                <div className="mt-8">
-                  <h3 className="text-lg font-semibold mb-4">Contest Participants</h3>
-                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                    {weeklyParticipants
-                      .filter(p => p.contest_id === selectedContest)
-                      .map((participant) => (
-                        <Card key={participant.id}>
-                          <CardContent className="pt-6">
-                            <div className="space-y-2 text-sm">
-                              <p><strong>User ID:</strong> {participant.user_id}</p>
-                              <p><strong>Rank:</strong> {participant.final_rank || 'Not ranked'}</p>
-                              <p><strong>Votes:</strong> {participant.total_votes || 0}</p>
-                              <p><strong>Rating:</strong> {participant.average_rating || 0}</p>
-                              <p><strong>Active:</strong> {participant.is_active ? 'Yes' : 'No'}</p>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      ))}
-                  </div>
-                </div>
-              )}
+                  );
+                });
+              })()}
             </TabsContent>
 
             <TabsContent value="applications" className="space-y-4">
