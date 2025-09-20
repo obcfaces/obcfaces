@@ -1,6 +1,7 @@
 import { useMemo, useState, useEffect } from "react";
 import { DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { Eye, EyeOff } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Eye, EyeOff, ChevronDown } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Country, State } from 'country-state-city';
 
@@ -40,6 +41,7 @@ const LoginModalContent = ({ onClose }: LoginModalContentProps) => {
   const [age, setAge] = useState<string>("");
   const [gender, setGender] = useState<string>("");
   const [acceptTerms, setAcceptTerms] = useState(false);
+  const [isTermsOpen, setIsTermsOpen] = useState(false);
   const [authError, setAuthError] = useState<string>("");
   const [emailError, setEmailError] = useState<string>("");
   const [passwordError, setPasswordError] = useState<string>("");
@@ -457,7 +459,7 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
                   onCheckedChange={(checked) => setAcceptTerms(!!checked)}
                   className={invalidTerms ? "border-destructive" : ""}
                 />
-                <div className="grid gap-1.5 leading-none">
+                <div className="grid gap-1.5 leading-none flex-1">
                   <label
                     htmlFor="terms"
                     className={`text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 ${invalidTerms ? 'text-destructive' : ''}`}
@@ -471,11 +473,20 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
                       Privacy Policy
                     </Link>
                   </label>
-                  <p className="text-xs text-muted-foreground">
-                    By registering, you confirm that you are at least 18 years old and agree to our community guidelines. 
-                    We may use your information to improve our services and provide personalized content. 
-                    You can delete your account at any time. We respect your privacy and will never share your personal data with third parties without your consent.
-                  </p>
+                  
+                  <Collapsible open={isTermsOpen} onOpenChange={setIsTermsOpen}>
+                    <CollapsibleTrigger className="flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground transition-colors">
+                      <span>Read details</span>
+                      <ChevronDown className={`h-3 w-3 transition-transform ${isTermsOpen ? 'rotate-180' : ''}`} />
+                    </CollapsibleTrigger>
+                    <CollapsibleContent className="mt-2">
+                      <p className="text-xs text-muted-foreground">
+                        By registering, you confirm that you are at least 18 years old and agree to our community guidelines. 
+                        We may use your information to improve our services and provide personalized content. 
+                        You can delete your account at any time. We respect your privacy and will never share your personal data with third parties without your consent.
+                      </p>
+                    </CollapsibleContent>
+                  </Collapsible>
                 </div>
               </div>
             </div>
