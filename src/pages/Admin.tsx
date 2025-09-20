@@ -55,6 +55,51 @@ interface ContestApplication {
   deleted_at?: string;
 }
 
+interface WeeklyContest {
+  id: string;
+  week_start_date: string;
+  week_end_date: string;
+  status: string;
+  title: string;
+  winner_id?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+interface WeeklyContestParticipant {
+  id: string;
+  contest_id: string;
+  user_id: string;
+  application_data?: any;
+  final_rank: number | null;
+  total_votes?: number;
+  average_rating?: number;
+  created_at?: string;
+  is_active: boolean;
+  profiles?: {
+    first_name: string;
+    last_name: string;
+    age: number;
+    city: string;
+    country: string;
+    photo_1_url: string;
+    photo_2_url: string;
+    height_cm: number;
+    weight_kg: number;
+  } | null;
+}
+
+const REJECTION_REASONS = {
+  'inappropriate_content': 'Inappropriate content',
+  'fake_photos': 'Fake or edited photos',
+  'incorrect_info': 'Incorrect information',
+  'terms_violation': 'Terms of service violation',
+  'duplicate_application': 'Duplicate application',
+  'age_verification': 'Age verification required',
+  'photo_quality': 'Poor photo quality',
+  'other': 'Other reason'
+};
+
 const Admin = () => {
   const [user, setUser] = useState<any>(null);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -64,6 +109,10 @@ const Admin = () => {
   const [contestApplications, setContestApplications] = useState<ContestApplication[]>([]);
   const [deletedApplications, setDeletedApplications] = useState<ContestApplication[]>([]);
   const [showDeletedApplications, setShowDeletedApplications] = useState(false);
+  const [weeklyContests, setWeeklyContests] = useState<WeeklyContest[]>([]);
+  const [weeklyParticipants, setWeeklyParticipants] = useState<WeeklyContestParticipant[]>([]);
+  const [selectedContest, setSelectedContest] = useState<string | null>(null);
+  const [selectedWeekOffset, setSelectedWeekOffset] = useState<number>(0);
   const [photoModalOpen, setPhotoModalOpen] = useState(false);
   const [photoModalImages, setPhotoModalImages] = useState<string[]>([]);
   const [photoModalIndex, setPhotoModalIndex] = useState(0);
@@ -115,6 +164,8 @@ const Admin = () => {
       fetchProfiles();
       fetchUserRoles();
       fetchContestApplications();
+      fetchWeeklyContests();
+      fetchWeeklyParticipants();
     } catch (error) {
       console.error('Error checking admin access:', error);
       navigate('/');
@@ -205,6 +256,43 @@ const Admin = () => {
     }
 
     return data || [];
+  };
+
+  const fetchWeeklyContests = async () => {
+    const { data, error } = await supabase
+      .from('weekly_contests')
+      .select('*')
+      .order('week_start_date', { ascending: false });
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to fetch weekly contests",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setWeeklyContests(data || []);
+  };
+
+  const fetchWeeklyParticipants = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('weekly_contest_participants')
+        .select('*')
+        .eq('is_active', true)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching weekly participants:', error);
+        return;
+      }
+
+      setWeeklyParticipants(data || []);
+    } catch (error) {
+      console.error('Error in fetchWeeklyParticipants:', error);
+    }
   };
 
   const getApplicationStatusBadge = (status: string) => {
@@ -389,9 +477,71 @@ const Admin = () => {
                 <p className="text-muted-foreground">Manage weekly contests and participants</p>
               </div>
               
-              <div className="text-center py-8 text-muted-foreground">
-                <p className="text-lg">Weekly Contests functionality will be restored here</p>
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {weeklyContests.length === 0 ? (
+                  <Card className="col-span-full">
+                    <CardContent className="text-center py-8">
+                      <p className="text-muted-foreground">No weekly contests found</p>
+                    </CardContent>
+                  </Card>
+                ) : (
+                  weeklyContests.map((contest) => (
+                    <Card key={contest.id}>
+                      <CardHeader>
+                        <div className="flex items-center justify-between">
+                          <h3 className="font-semibold">{contest.title}</h3>
+                          <Badge variant={contest.status === 'active' ? 'default' : 'secondary'}>
+                            {contest.status}
+                          </Badge>
+                        </div>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-2 text-sm">
+                          <p><strong>Start:</strong> {new Date(contest.week_start_date).toLocaleDateString()}</p>
+                          <p><strong>End:</strong> {new Date(contest.week_end_date).toLocaleDateString()}</p>
+                          <p><strong>Created:</strong> {new Date(contest.created_at).toLocaleDateString()}</p>
+                          {contest.winner_id && (
+                            <p><strong>Winner:</strong> {contest.winner_id}</p>
+                          )}
+                        </div>
+                        <div className="mt-4 flex gap-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => setSelectedContest(contest.id)}
+                          >
+                            <Eye className="h-4 w-4 mr-1" />
+                            View Participants
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))
+                )}
               </div>
+              
+              {selectedContest && (
+                <div className="mt-8">
+                  <h3 className="text-lg font-semibold mb-4">Contest Participants</h3>
+                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                    {weeklyParticipants
+                      .filter(p => p.contest_id === selectedContest)
+                      .map((participant) => (
+                        <Card key={participant.id}>
+                          <CardContent className="pt-6">
+                            <div className="space-y-2 text-sm">
+                              <p><strong>User ID:</strong> {participant.user_id}</p>
+                              <p><strong>Rank:</strong> {participant.final_rank || 'Not ranked'}</p>
+                              <p><strong>Votes:</strong> {participant.total_votes || 0}</p>
+                              <p><strong>Rating:</strong> {participant.average_rating || 0}</p>
+                              <p><strong>Active:</strong> {participant.is_active ? 'Yes' : 'No'}</p>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                  </div>
+                </div>
+              )}
             </TabsContent>
 
             <TabsContent value="applications" className="space-y-4">
