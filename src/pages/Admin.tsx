@@ -365,7 +365,58 @@ const Admin = () => {
     setPhotoModalOpen(true);
   };
 
+  const assignRole = async (userId: string, role: 'admin' | 'moderator' | 'user') => {
+    const { error } = await supabase
+      .from('user_roles')
+      .upsert({
+        user_id: userId,
+        role: role
+      });
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to assign role",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    toast({
+      title: "Success",
+      description: `Role ${role} assigned successfully`,
+    });
+
+    fetchUserRoles();
+  };
+
+  const removeRole = async (userId: string, role: 'admin' | 'moderator' | 'user') => {
+    const { error } = await supabase
+      .from('user_roles')
+      .delete()
+      .eq('user_id', userId)
+      .eq('role', role);
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to remove role",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    toast({
+      title: "Success",
+      description: "Role removed successfully",
+    });
+
+    fetchUserRoles();
+  };
+
   const getUserRoles = (userId: string) => {
+    return userRoles.filter(r => r.user_id === userId).map(r => r.role);
+  };
     return userRoles.filter(r => r.user_id === userId).map(r => r.role);
   };
 
@@ -400,11 +451,38 @@ const Admin = () => {
 
           <Tabs defaultValue="applications" className="space-y-6">
             <TabsList>
+              <TabsTrigger value="weekly" className="flex items-center gap-2">
+                <Calendar className="w-4 h-4" />
+                Weekly Contests
+              </TabsTrigger>
               <TabsTrigger value="applications" className="flex items-center gap-2">
                 <FileText className="w-4 h-4" />
                 Contest Applications
               </TabsTrigger>
+              <TabsTrigger value="registrations" className="flex items-center gap-2">
+                <UserCog className="w-4 h-4" />
+                Регистрации
+              </TabsTrigger>
+              <TabsTrigger value="moderation" className="flex items-center gap-2">
+                <Eye className="w-4 h-4" />
+                Profile Moderation
+              </TabsTrigger>
+              <TabsTrigger value="roles" className="flex items-center gap-2">
+                <UserCog className="w-4 h-4" />
+                User Roles
+              </TabsTrigger>
             </TabsList>
+
+            <TabsContent value="weekly" className="space-y-4">
+              <div className="mb-6">
+                <h2 className="text-xl font-semibold">Weekly Contest Management</h2>
+                <p className="text-muted-foreground">Manage weekly contests and participants</p>
+              </div>
+              
+              <div className="text-center py-8 text-muted-foreground">
+                <p className="text-lg">Weekly Contests functionality will be restored here</p>
+              </div>
+            </TabsContent>
 
             <TabsContent value="applications" className="space-y-4">
               <div className="mb-6">
@@ -813,6 +891,180 @@ const Admin = () => {
                     );
                   });
                 })()}
+              </div>
+            </TabsContent>
+
+            <TabsContent value="registrations" className="space-y-4">
+              <div className="mb-6">
+                <h2 className="text-xl font-semibold">All User Registrations</h2>
+                <p className="text-muted-foreground">Complete list of all registered users</p>
+              </div>
+              
+              <div className="grid gap-4">
+                {profiles.map((profile) => (
+                  <Card key={profile.id}>
+                    <CardHeader>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                          <Avatar>
+                            <AvatarImage src={profile.avatar_url || ''} />
+                            <AvatarFallback>
+                              {profile.display_name?.charAt(0) || profile.first_name?.charAt(0) || 'U'}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <h3 className="font-semibold">
+                              {profile.display_name || `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 'No Name'}
+                            </h3>
+                            <div className="text-sm text-muted-foreground mb-1">
+                              {profile.email && <div>Email: {profile.email}</div>}
+                              <div>Created: {new Date(profile.created_at).toLocaleDateString()}</div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </CardHeader>
+                  </Card>
+                ))}
+              </div>
+            </TabsContent>
+
+            <TabsContent value="moderation" className="space-y-4">
+              <div className="mb-6">
+                <h2 className="text-xl font-semibold">Profile Moderation</h2>
+                <p className="text-muted-foreground">Review and moderate user profiles</p>
+              </div>
+              
+              <div className="grid gap-4">
+                {profiles.filter(p => p.is_approved === null).map((profile) => (
+                  <Card key={profile.id}>
+                    <CardHeader>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                          <Avatar>
+                            <AvatarImage src={profile.avatar_url || ''} />
+                            <AvatarFallback>
+                              {profile.display_name?.charAt(0) || profile.first_name?.charAt(0) || 'U'}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <h3 className="font-semibold">
+                              {profile.display_name || `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 'No Name'}
+                            </h3>
+                            <div className="text-sm text-muted-foreground">
+                              {profile.email && <div>Email: {profile.email}</div>}
+                              <div>Created: {new Date(profile.created_at).toLocaleDateString()}</div>
+                            </div>
+                            <div className="mt-2">
+                              <Badge variant="secondary">Pending Review</Badge>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex gap-2">
+                        <Button size="sm" className="bg-green-600 hover:bg-green-700">
+                          <Check className="w-4 h-4 mr-1" />
+                          Approve
+                        </Button>
+                        <Button size="sm" variant="destructive">
+                          <X className="w-4 h-4 mr-1" />
+                          Reject
+                        </Button>
+                        <Button size="sm" variant="outline">
+                          <Eye className="w-4 h-4 mr-1" />
+                          View Profile
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </TabsContent>
+
+            <TabsContent value="roles" className="space-y-4">
+              <div className="mb-6">
+                <h2 className="text-xl font-semibold">User Roles Management</h2>
+                <p className="text-muted-foreground">Manage user roles and permissions</p>
+              </div>
+              
+              <div className="grid gap-4">
+                {profiles.map((profile) => {
+                  const roles = getUserRoles(profile.id);
+                  return (
+                    <Card key={profile.id}>
+                      <CardHeader>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-4">
+                            <Avatar>
+                              <AvatarImage src={profile.avatar_url || ''} />
+                              <AvatarFallback>
+                                {profile.display_name?.charAt(0) || profile.first_name?.charAt(0) || 'U'}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div>
+                              <h3 className="font-semibold">
+                                {profile.display_name || `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 'No Name'}
+                              </h3>
+                              <div className="text-sm text-muted-foreground mb-1">
+                                {profile.email && <div>Email: {profile.email}</div>}
+                              </div>
+                              <div className="flex gap-2 mt-1">
+                                {roles.map((role) => (
+                                  <Badge key={role} variant="outline">
+                                    {role}
+                                  </Badge>
+                                ))}
+                                {roles.length === 0 && (
+                                  <Badge variant="secondary">user</Badge>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="flex gap-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => assignRole(profile.id, 'admin')}
+                            disabled={roles.includes('admin')}
+                          >
+                            Make Admin
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => assignRole(profile.id, 'moderator')}
+                            disabled={roles.includes('moderator')}
+                          >
+                            Make Moderator
+                          </Button>
+                          {roles.includes('admin') && (
+                            <Button
+                              size="sm"
+                              variant="destructive"
+                              onClick={() => removeRole(profile.id, 'admin')}
+                            >
+                              Remove Admin
+                            </Button>
+                          )}
+                          {roles.includes('moderator') && (
+                            <Button
+                              size="sm"
+                              variant="destructive"
+                              onClick={() => removeRole(profile.id, 'moderator')}
+                            >
+                              Remove Moderator
+                            </Button>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
               </div>
             </TabsContent>
           </Tabs>
