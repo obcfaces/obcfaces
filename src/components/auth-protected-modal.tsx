@@ -28,11 +28,15 @@ export const AuthProtectedModal = ({ children }: AuthProtectedModalProps) => {
   }, []);
 
   const handleTriggerClick = () => {
+    console.log('Participation button clicked, session:', session?.user?.email_confirmed_at);
+    
     if (session?.user?.email_confirmed_at) {
       // User is authenticated, open participation modal
+      console.log('Opening participation modal for authenticated user');
       setIsParticipationOpen(true);
     } else {
       // User is not authenticated, open login modal (same as header)
+      console.log('Opening login modal for unauthenticated user');
       setIsLoginOpen(true);
     }
   };
