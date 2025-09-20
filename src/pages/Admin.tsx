@@ -12,7 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { toast } from "@/components/ui/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Check, X, Eye, UserCog, FileText, Calendar, Trophy, RotateCcw, Edit, Plus, History, AlertCircle, Trash2 } from "lucide-react";
+import { Check, X, Eye, UserCog, FileText, Calendar, Trophy, RotateCcw, Edit, Plus, History, AlertCircle, Trash2, Copy } from "lucide-react";
 import { PhotoModal } from "@/components/photo-modal";
 import { RejectReasonModal, RejectionReasonType, REJECTION_REASONS } from "@/components/reject-reason-modal";
 import { Switch } from "@/components/ui/switch";
@@ -1964,25 +1964,27 @@ const getApplicationStatusBadge = (status: string) => {
                                  {appData.weight_kg}kg • {appData.height_cm}cm • {appData.gender}
                                </div>
 
-                               {/* Fourth line: Birth details */}
-                               <div className="text-xs text-muted-foreground mb-1">
-                                 Born: {appData.birth_day}/{appData.birth_month}/{appData.birth_year}
-                               </div>
 
                                {/* Fifth line: Marital and children status */}
                                <div className="text-xs text-muted-foreground mb-1">
                                  {appData.marital_status} • {appData.has_children ? 'Has children' : 'No children'}
                                </div>
 
-                               {/* Sixth line: Contact - email truncated */}
+                               {/* Fifth line: Contact - email with copy icon */}
                                <div className="text-xs text-muted-foreground mb-1">
                                  {userProfile?.email && (
-                                   <span 
-                                     className="cursor-pointer" 
-                                     title={userProfile.email}
-                                   >
-                                     {userProfile.email.length > 25 ? `${userProfile.email.substring(0, 25)}...` : userProfile.email}
-                                   </span>
+                                   <div className="flex items-center gap-1">
+                                     <span 
+                                       className="cursor-pointer" 
+                                       title={userProfile.email}
+                                     >
+                                       {userProfile.email.length > 25 ? `${userProfile.email.substring(0, 25)}...` : userProfile.email}
+                                     </span>
+                                     <Copy 
+                                       className="h-3 w-3 cursor-pointer hover:text-foreground" 
+                                       onClick={() => navigator.clipboard.writeText(userProfile.email)}
+                                     />
+                                   </div>
                                  )}
                                </div>
 
