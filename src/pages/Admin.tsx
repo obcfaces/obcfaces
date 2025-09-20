@@ -139,6 +139,8 @@ const Admin = () => {
       const { data: { session } } = await supabase.auth.getSession();
       
       if (!session?.user) {
+        // Save current admin path for redirect after login
+        sessionStorage.setItem('redirectPath', '/admin');
         navigate('/auth');
         return;
       }

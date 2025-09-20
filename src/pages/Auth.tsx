@@ -46,12 +46,28 @@ const Auth = () => {
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (session?.user) {
-        navigate("/account", { replace: true });
+        // Check if there's a saved redirect path (for admin users)
+        const redirectPath = sessionStorage.getItem('redirectPath');
+        if (redirectPath) {
+          sessionStorage.removeItem('redirectPath');
+          navigate(redirectPath, { replace: true });
+        } else {
+          navigate("/account", { replace: true });
+        }
       }
     });
 
     supabase.auth.getSession().then(({ data }) => {
-      if (data.session?.user) navigate("/account", { replace: true });
+      if (data.session?.user) {
+        // Check if there's a saved redirect path (for admin users)
+        const redirectPath = sessionStorage.getItem('redirectPath');
+        if (redirectPath) {
+          sessionStorage.removeItem('redirectPath');
+          navigate(redirectPath, { replace: true });
+        } else {
+          navigate("/account", { replace: true });
+        }
+      }
     });
 
     return () => subscription.unsubscribe();
