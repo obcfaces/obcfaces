@@ -732,6 +732,7 @@ const Admin = () => {
                             statusFilter === 'approved' ? 'bg-green-100 border-green-500 text-green-700' :
                             statusFilter === 'rejected' ? 'bg-red-100 border-red-500 text-red-700' :
                             statusFilter === 'finalist' ? 'bg-blue-100 border-blue-500 text-blue-700' :
+                            statusFilter === 'this_week' ? 'bg-yellow-100 border-yellow-500 text-yellow-700' :
                             ''
                           }`}
                         >
@@ -743,6 +744,7 @@ const Admin = () => {
                           <SelectItem value="approved">Approved</SelectItem>
                           <SelectItem value="rejected">Rejected</SelectItem>
                           <SelectItem value="finalist">Finalist</SelectItem>
+                          <SelectItem value="this_week">This Week</SelectItem>
                         </SelectContent>
                       </Select>
                       {statusFilter !== 'all' && (
@@ -973,6 +975,7 @@ const Admin = () => {
                                             application.status === 'approved' ? 'bg-green-100 border-green-500 text-green-700' :
                                             application.status === 'rejected' ? 'bg-red-100 border-red-500 text-red-700' :
                                             application.status === 'finalist' ? 'bg-blue-100 border-blue-500 text-blue-700' :
+                                            application.status === 'this_week' ? 'bg-yellow-100 border-yellow-500 text-yellow-700' :
                                             ''
                                           }`}
                                         >
@@ -983,6 +986,7 @@ const Admin = () => {
                                           <SelectItem value="approved">Approved</SelectItem>
                                           <SelectItem value="finalist">Finalist</SelectItem>
                                           <SelectItem value="rejected">Rejected</SelectItem>
+                                          <SelectItem value="this_week">This Week</SelectItem>
                                         </SelectContent>
                                       </Select>
                                       <Button
@@ -1161,6 +1165,7 @@ const Admin = () => {
                                                       prevApp.status === 'approved' ? 'bg-green-100 border-green-500 text-green-700' :
                                                       prevApp.status === 'rejected' ? 'bg-red-100 border-red-500 text-red-700' :
                                                       prevApp.status === 'finalist' ? 'bg-blue-100 border-blue-500 text-blue-700' :
+                                                      prevApp.status === 'this_week' ? 'bg-yellow-100 border-yellow-500 text-yellow-700' :
                                                       ''
                                                     }`}
                                                   >
@@ -1171,6 +1176,7 @@ const Admin = () => {
                                                     <SelectItem value="approved">Approved</SelectItem>
                                                     <SelectItem value="finalist">Finalist</SelectItem>
                                                     <SelectItem value="rejected">Rejected</SelectItem>
+                                                    <SelectItem value="this_week">This Week</SelectItem>
                                                   </SelectContent>
                                                 </Select>
                                                  <Button
