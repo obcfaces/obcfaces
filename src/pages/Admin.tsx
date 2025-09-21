@@ -101,14 +101,15 @@ interface WeeklyContestParticipant {
 }
 
 const REJECTION_REASONS = {
-  'inappropriate_content': 'Inappropriate content',
-  'fake_photos': 'Fake or edited photos',
-  'incorrect_info': 'Incorrect information',
-  'terms_violation': 'Terms of service violation',
-  'duplicate_application': 'Duplicate application',
-  'age_verification': 'Age verification required',
-  'photo_quality': 'Poor photo quality',
-  'other': 'Other reason'
+  first_photo_makeup: "First photo – No makeup allowed.",
+  first_photo_id_style: "First photo – Must look like an ID photo: face straight to the camera, hands together in front.",
+  first_photo_blurry: "First photo – Photo is too blurry/low quality.",
+  first_photo_filters: "First photo – No filters allowed.",
+  second_photo_makeup: "Second photo – No makeup allowed.",
+  second_photo_pose: "Second photo – Must show the whole body from head to toe, standing straight, arms at the sides.",
+  second_photo_clothing: "Second photo – Wear tight/fitted clothes (swimsuit, fitted shorts, or top). Dresses, skirts, loose tops, or high heels are not allowed.",
+  second_photo_accessories: "Second photo – No bags or backpacks.",
+  both_photos_quality: "Both photos – The quality is too low."
 };
 
 const Admin = () => {
@@ -825,34 +826,22 @@ const Admin = () => {
                           </CardContent>
                         </Card>
         
-        {/* Rejection reason under the card - simplified */}
-        {application.status === 'rejected' && (
+        {/* Rejection reason under the card */}
+        {application.status === 'rejected' && ((application as any).rejection_reason_types || application.rejection_reason) && (
           <div className="p-2 bg-destructive/10 border border-destructive/20 rounded-b-lg -mt-1">
             <div className="space-y-1 text-xs leading-tight">
-              {/* Debug info */}
-              <div className="text-xs text-gray-500 mb-2">
-                Debug: Status={application.status},{' '}
-                Types={JSON.stringify((application as any).rejection_reason_types)},{' '}
-                Reason={application.rejection_reason}
-              </div>
-              
-              {(application as any).rejection_reason_types && (application as any).rejection_reason_types.length > 0 ? (
+              {(application as any).rejection_reason_types && (application as any).rejection_reason_types.length > 0 && (
                 <div className="text-destructive/80">
                   {(application as any).rejection_reason_types
                     .filter((type: string) => type && REJECTION_REASONS[type as keyof typeof REJECTION_REASONS])
                     .map((type: string) => REJECTION_REASONS[type as keyof typeof REJECTION_REASONS])
                     .join(', ')}
                 </div>
-              ) : (
-                <div className="text-gray-500 text-xs">No rejection reason types found</div>
               )}
-              
-              {application.rejection_reason ? (
+              {application.rejection_reason && (
                 <div className="text-destructive/70">
                   {application.rejection_reason}
                 </div>
-              ) : (
-                <div className="text-gray-500 text-xs">No rejection reason text found</div>
               )}
             </div>
           </div>
