@@ -161,6 +161,7 @@ const Admin = () => {
   const [genderFilter, setGenderFilter] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [weeklyContestFilter, setWeeklyContestFilter] = useState<string>('approve');
+  const [filteredWeeklyParticipants, setFilteredWeeklyParticipants] = useState<any[]>([]);
   const [selectedUserApplications, setSelectedUserApplications] = useState<string | null>(null);
   const [editingApplicationId, setEditingApplicationId] = useState<string | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -178,6 +179,59 @@ const Admin = () => {
   useEffect(() => {
     checkAdminAccess();
   }, []);
+
+  // Handle Weekly Contest participants filtering with async rating fetching
+  useEffect(() => {
+    const filterWeeklyParticipants = async () => {
+      if (weeklyContestFilter === 'approve') {
+        const approvedApps = contestApplications
+          .filter(app => app.status === 'approved')
+          .filter((app, index, arr) => arr.findIndex(a => a.user_id === app.user_id) === index);
+
+        const participantsWithRatings = await Promise.all(
+          approvedApps.map(async (app) => {
+            const appData = app.application_data || {};
+            
+            try {
+              const { data: ratingStats } = await supabase
+                .rpc('get_user_rating_stats', { target_user_id: app.user_id });
+              
+              return {
+                id: `app-${app.id}`,
+                user_id: app.user_id,
+                application_data: appData,
+                average_rating: ratingStats?.[0]?.average_rating || 0,
+                total_votes: ratingStats?.[0]?.total_votes || 0,
+                final_rank: null,
+                fromApplication: true
+              };
+            } catch (error) {
+              console.error('Error fetching rating stats:', error);
+              return {
+                id: `app-${app.id}`,
+                user_id: app.user_id,
+                application_data: appData,
+                average_rating: 0,
+                total_votes: 0,
+                final_rank: null,
+                fromApplication: true
+              };
+            }
+          })
+        );
+
+        setFilteredWeeklyParticipants(participantsWithRatings);
+      } else {
+        const filtered = weeklyParticipants.filter(participant => {
+          const index = weeklyParticipants.findIndex(p => p.user_id === participant.user_id);
+          return weeklyParticipants.indexOf(participant) === index;
+        });
+        setFilteredWeeklyParticipants(filtered);
+      }
+    };
+
+    filterWeeklyParticipants();
+  }, [weeklyContestFilter, contestApplications, weeklyParticipants]);
 
   const checkAdminAccess = async () => {
     try {
@@ -643,59 +697,7 @@ const Admin = () => {
               </div>
               
               {(() => {
-                const renderParticipants = async () => {
-                  // Фильтрация участников на основе выбранного фильтра
-                  let filteredParticipants = [];
-                  
-                  if (weeklyContestFilter === 'approve') {
-                    // Показать одобренные заявки (approved applications), которые должны попасть в Weekly Contest
-                    const approvedApps = contestApplications
-                      .filter(app => app.status === 'approved')
-                      // Remove duplicates by user_id to avoid showing the same person multiple times
-                      .filter((app, index, arr) => arr.findIndex(a => a.user_id === app.user_id) === index);
-
-                    // Get ratings for each approved user
-                    const participantsWithRatings = await Promise.all(
-                      approvedApps.map(async (app) => {
-                        const appData = app.application_data || {};
-                        
-                        // Get rating stats for this user
-                        const { data: ratingStats } = await supabase
-                          .rpc('get_user_rating_stats', { target_user_id: app.user_id });
-                        
-                        return {
-                          id: `app-${app.id}`, // Prefix to distinguish from real participants
-                          user_id: app.user_id,
-                          application_data: appData,
-                          average_rating: ratingStats?.[0]?.average_rating || 0,
-                          total_votes: ratingStats?.[0]?.total_votes || 0,
-                          final_rank: null,
-                          fromApplication: true
-                        };
-                      })
-                    );
-
-                    filteredParticipants = participantsWithRatings;
-                  } else {
-                    // Показать существующих участников Weekly Contest
-                    filteredParticipants = weeklyParticipants.filter(participant => {
-                      // Remove duplicates by user_id for actual participants too
-                      const index = weeklyParticipants.findIndex(p => p.user_id === participant.user_id);
-                      return weeklyParticipants.indexOf(participant) === index;
-                    });
-                  }
-                  
-                  return filteredParticipants;
-                };
-
-                // Use React hooks to handle async data loading
-                const [filteredParticipants, setFilteredParticipants] = React.useState([]);
-                
-                React.useEffect(() => {
-                  renderParticipants().then(setFilteredParticipants);
-                }, [weeklyContestFilter, contestApplications, weeklyParticipants]);
-                
-                if (filteredParticipants.length === 0) {
+                if (filteredWeeklyParticipants.length === 0) {
                   return (
                     <div className="text-center py-8 text-muted-foreground">
                       <p className="text-lg">
@@ -707,7 +709,7 @@ const Admin = () => {
                   );
                 }
 
-                return filteredParticipants.map((participant) => {
+                return filteredWeeklyParticipants.map((participant) => {
                   const participantProfile = profiles.find(p => p.id === participant.user_id);
                   const appData = participant.application_data || {};
                   
