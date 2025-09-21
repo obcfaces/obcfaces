@@ -825,31 +825,23 @@ const Admin = () => {
                           </CardContent>
                         </Card>
                         
-                        {/* Rejection reason under the card - full width */}
-                        {application.status === 'rejected' && ((application as any).rejection_reason_types || application.rejection_reason) && (
-                          <div className="mt-2 p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
-                            <div className="flex items-center gap-2 mb-2">
-                              <AlertCircle className="h-4 w-4 text-destructive" />
-                              <h4 className="font-medium text-destructive">Rejection Details</h4>
-                            </div>
-                            <div className="space-y-2">
-                              {(application as any).rejection_reason_types && (application as any).rejection_reason_types.length > 0 && (
-                                <div>
-                                  <span className="text-sm font-medium text-destructive/90">Reasons: </span>
-                                  <span className="text-sm text-destructive/80">
-                                    {(application as any).rejection_reason_types.map((type: string) => REJECTION_REASONS[type as keyof typeof REJECTION_REASONS]).join(', ')}
-                                  </span>
-                                </div>
-                              )}
-                              {application.rejection_reason && (
-                                <div>
-                                  <span className="text-sm font-medium text-destructive/90">Notes: </span>
-                                  <span className="text-sm text-destructive/80">{application.rejection_reason}</span>
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        )}
+        {/* Rejection reason under the card - simplified */}
+        {application.status === 'rejected' && ((application as any).rejection_reason_types || application.rejection_reason) && (
+          <div className="p-2 bg-destructive/10 border border-destructive/20 rounded-b-lg -mt-1">
+            <div className="space-y-1 text-xs leading-tight">
+              {(application as any).rejection_reason_types && (application as any).rejection_reason_types.length > 0 && (
+                <div className="text-destructive/80">
+                  {(application as any).rejection_reason_types.map((type: string) => REJECTION_REASONS[type as keyof typeof REJECTION_REASONS]).join(', ')}
+                </div>
+              )}
+              {application.rejection_reason && (
+                <div className="text-destructive/70">
+                  {application.rejection_reason}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
                         
                         {/* Previous applications for this user */}
                         {selectedUserApplications === application.user_id && (
