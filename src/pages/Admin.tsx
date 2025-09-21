@@ -161,7 +161,7 @@ const Admin = () => {
   const [countryFilter, setCountryFilter] = useState<string>('all');
   const [genderFilter, setGenderFilter] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<string>('all');
-  const [weeklyContestFilter, setWeeklyContestFilter] = useState<string>('approve');
+  const [weeklyContestFilter, setWeeklyContestFilter] = useState<string>('this week');
   const [filteredWeeklyParticipants, setFilteredWeeklyParticipants] = useState<any[]>([]);
   const [selectedUserApplications, setSelectedUserApplications] = useState<string | null>(null);
   const [editingApplicationId, setEditingApplicationId] = useState<string | null>(null);
@@ -225,6 +225,13 @@ const Admin = () => {
         );
 
         setFilteredWeeklyParticipants(participantsWithRatings);
+      } else if (weeklyContestFilter === 'this week') {
+        // Filter participants who have 'this week' status
+        const filteredByStatus = weeklyParticipants.filter(participant => {
+          const filterStatus = participantFilters[participant.id] || (participant.final_rank ? 'this week' : 'approve');
+          return filterStatus === 'this week';
+        });
+        setFilteredWeeklyParticipants(filteredByStatus);
       } else {
         const filtered = weeklyParticipants.filter(participant => {
           const index = weeklyParticipants.findIndex(p => p.user_id === participant.user_id);
@@ -235,7 +242,7 @@ const Admin = () => {
     };
 
     filterWeeklyParticipants();
-  }, [weeklyContestFilter, contestApplications, weeklyParticipants]);
+  }, [weeklyContestFilter, contestApplications, weeklyParticipants, participantFilters]);
 
   const checkAdminAccess = async () => {
     try {
@@ -697,9 +704,9 @@ const Admin = () => {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="approve">Approve</SelectItem>
-                    <SelectItem value="this_week">This Week</SelectItem>
-                    <SelectItem value="next_week">Next Week</SelectItem>
-                    <SelectItem value="after_next_week">After Next Week</SelectItem>
+                    <SelectItem value="this week">This Week</SelectItem>
+                    <SelectItem value="next week">Next Week</SelectItem>
+                    <SelectItem value="after next week">After Next Week</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
