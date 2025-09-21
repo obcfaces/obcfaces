@@ -81,6 +81,7 @@ interface ContestApplication {
   rejected_at?: string;
   rejection_reason?: string;
   rejection_reason_type?: string;
+  reviewed_by?: string;
   deleted_at?: string;
 }
 
@@ -906,20 +907,32 @@ const Admin = () => {
          {/* Rejection reason under the card */}
         {application.status === 'rejected' && ((application as any).rejection_reason_types || application.rejection_reason) && (
           <div className="p-2 bg-destructive/10 border border-destructive/20 rounded-b-lg -mt-1">
-            <div className="space-y-1 text-xs leading-tight">
-              {(application as any).rejection_reason_types && (application as any).rejection_reason_types.length > 0 && (
-                <div className="text-destructive/80">
-                  <span className="font-medium">Rejection reasons:</span> {(application as any).rejection_reason_types
-                    .filter((type: string) => type && REJECTION_REASONS[type as keyof typeof REJECTION_REASONS])
-                    .map((type: string) => REJECTION_REASONS[type as keyof typeof REJECTION_REASONS])
-                    .join(', ')}
-                </div>
-              )}
-              {application.rejection_reason && application.rejection_reason.trim() && !isReasonDuplicate(application.rejection_reason, (application as any).rejection_reason_types) && (
-                <div className="text-destructive/70">
-                  <span className="font-medium">Additional comments:</span> {application.rejection_reason}
-                </div>
-              )}
+             <div className="space-y-1 text-xs leading-tight">
+               {/* Date and admin info */}
+               {application.rejected_at && (
+                 <div className="text-destructive/60 mb-2">
+                   {new Date(application.rejected_at).toLocaleDateString('en-GB', { 
+                     day: 'numeric', 
+                     month: 'short' 
+                   }).toLowerCase()}{' '}
+                   {application.reviewed_by && profiles.find(p => p.id === application.reviewed_by)?.email && 
+                     profiles.find(p => p.id === application.reviewed_by)?.email?.substring(0, 4)}
+                 </div>
+               )}
+               
+               {(application as any).rejection_reason_types && (application as any).rejection_reason_types.length > 0 && (
+                 <div className="text-destructive/80">
+                   <span className="font-medium">Rejection reasons:</span> {(application as any).rejection_reason_types
+                     .filter((type: string) => type && REJECTION_REASONS[type as keyof typeof REJECTION_REASONS])
+                     .map((type: string) => REJECTION_REASONS[type as keyof typeof REJECTION_REASONS])
+                     .join(', ')}
+                 </div>
+               )}
+               {application.rejection_reason && application.rejection_reason.trim() && !isReasonDuplicate(application.rejection_reason, (application as any).rejection_reason_types) && (
+                 <div className="text-destructive/70">
+                   <span className="font-medium">Additional comments:</span> {application.rejection_reason}
+                 </div>
+               )}
             </div>
           </div>
         )}
@@ -1102,20 +1115,32 @@ const Admin = () => {
                                        {/* Rejection reason for previous application */}
                                       {prevApp.status === 'rejected' && ((prevApp as any).rejection_reason_types || prevApp.rejection_reason) && (
                                         <div className="p-2 bg-destructive/10 border-t border-destructive/20">
-                                          <div className="space-y-1 text-xs leading-tight">
-                                            {(prevApp as any).rejection_reason_types && (prevApp as any).rejection_reason_types.length > 0 && (
-                                              <div className="text-destructive/80">
-                                                <span className="font-medium">Rejection reasons:</span> {(prevApp as any).rejection_reason_types
-                                                  .filter((type: string) => type && REJECTION_REASONS[type as keyof typeof REJECTION_REASONS])
-                                                  .map((type: string) => REJECTION_REASONS[type as keyof typeof REJECTION_REASONS])
-                                                  .join(', ')}
-                                              </div>
-                                            )}
-                                            {prevApp.rejection_reason && prevApp.rejection_reason.trim() && !isReasonDuplicate(prevApp.rejection_reason, (prevApp as any).rejection_reason_types) && (
-                                              <div className="text-destructive/70">
-                                                <span className="font-medium">Additional comments:</span> {prevApp.rejection_reason}
-                                              </div>
-                                            )}
+                           <div className="space-y-1 text-xs leading-tight">
+                             {/* Date and admin info for previous application */}
+                             {prevApp.rejected_at && (
+                               <div className="text-destructive/60 mb-2">
+                                 {new Date(prevApp.rejected_at).toLocaleDateString('en-GB', { 
+                                   day: 'numeric', 
+                                   month: 'short' 
+                                 }).toLowerCase()}{' '}
+                                 {prevApp.reviewed_by && profiles.find(p => p.id === prevApp.reviewed_by)?.email && 
+                                   profiles.find(p => p.id === prevApp.reviewed_by)?.email?.substring(0, 4)}
+                               </div>
+                             )}
+                             
+                             {(prevApp as any).rejection_reason_types && (prevApp as any).rejection_reason_types.length > 0 && (
+                               <div className="text-destructive/80">
+                                 <span className="font-medium">Rejection reasons:</span> {(prevApp as any).rejection_reason_types
+                                   .filter((type: string) => type && REJECTION_REASONS[type as keyof typeof REJECTION_REASONS])
+                                   .map((type: string) => REJECTION_REASONS[type as keyof typeof REJECTION_REASONS])
+                                   .join(', ')}
+                               </div>
+                             )}
+                             {prevApp.rejection_reason && prevApp.rejection_reason.trim() && !isReasonDuplicate(prevApp.rejection_reason, (prevApp as any).rejection_reason_types) && (
+                               <div className="text-destructive/70">
+                                 <span className="font-medium">Additional comments:</span> {prevApp.rejection_reason}
+                               </div>
+                             )}
                                           </div>
                                         </div>
                                       )}
