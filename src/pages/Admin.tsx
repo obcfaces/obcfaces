@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useToast } from '@/hooks/use-toast';
 import { 
   Calendar, FileText, UserCog, Eye, Edit, Check, X, Trash2, 
@@ -1014,15 +1015,37 @@ const Admin = () => {
                  <div className="text-destructive/80">
                    {/* Always show date and admin info if available */}
                    {(application.rejected_at || application.reviewed_at) && (
-                     <span className="text-black font-medium">
-                       {new Date(application.rejected_at || application.reviewed_at).toLocaleDateString('en-GB', { 
-                         day: 'numeric', 
-                         month: 'short' 
-                       }).toLowerCase()}{' '}
-                       {application.reviewed_by && profiles.find(p => p.id === application.reviewed_by)?.email ? 
-                         profiles.find(p => p.id === application.reviewed_by)?.email?.substring(0, 4) + ' ' : 
-                         'unkn '}
-                     </span>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span className="text-black font-medium cursor-help">
+                              {new Date(application.rejected_at || application.reviewed_at).toLocaleDateString('en-GB', { 
+                                day: 'numeric', 
+                                month: 'short' 
+                              }).toLowerCase()}{' '}
+                              {application.reviewed_by && profiles.find(p => p.id === application.reviewed_by)?.email ? 
+                                profiles.find(p => p.id === application.reviewed_by)?.email?.substring(0, 4) + ' ' : 
+                                'unkn '}
+                            </span>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>
+                              {new Date(application.rejected_at || application.reviewed_at).toLocaleDateString('en-GB', { 
+                                day: 'numeric', 
+                                month: 'short',
+                                year: 'numeric'
+                              }).toLowerCase()}{' '}
+                              {new Date(application.rejected_at || application.reviewed_at).toLocaleTimeString('en-GB', {
+                                hour: '2-digit',
+                                minute: '2-digit'
+                              })}
+                              {application.reviewed_by && profiles.find(p => p.id === application.reviewed_by)?.email && (
+                                <><br />Admin: {profiles.find(p => p.id === application.reviewed_by)?.email}</>
+                              )}
+                            </p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
                    )}
                    {(application as any).rejection_reason_types
                      .filter((type: string) => type && REJECTION_REASONS[type as keyof typeof REJECTION_REASONS])
@@ -1202,15 +1225,37 @@ const Admin = () => {
                                <div className="text-destructive/80">
                                  {/* Always show date and admin info if available */}
                                  {(prevApp.rejected_at || prevApp.reviewed_at) && (
-                                   <span className="text-black font-medium">
-                                     {new Date(prevApp.rejected_at || prevApp.reviewed_at).toLocaleDateString('en-GB', { 
-                                       day: 'numeric', 
-                                       month: 'short' 
-                                     }).toLowerCase()}{' '}
-                                     {prevApp.reviewed_by && profiles.find(p => p.id === prevApp.reviewed_by)?.email ? 
-                                       profiles.find(p => p.id === prevApp.reviewed_by)?.email?.substring(0, 4) + ' ' : 
-                                       'unkn '}
-                                   </span>
+                                    <TooltipProvider>
+                                      <Tooltip>
+                                        <TooltipTrigger asChild>
+                                          <span className="text-black font-medium cursor-help">
+                                            {new Date(prevApp.rejected_at || prevApp.reviewed_at).toLocaleDateString('en-GB', { 
+                                              day: 'numeric', 
+                                              month: 'short' 
+                                            }).toLowerCase()}{' '}
+                                            {prevApp.reviewed_by && profiles.find(p => p.id === prevApp.reviewed_by)?.email ? 
+                                              profiles.find(p => p.id === prevApp.reviewed_by)?.email?.substring(0, 4) + ' ' : 
+                                              'unkn '}
+                                          </span>
+                                        </TooltipTrigger>
+                                        <TooltipContent>
+                                          <p>
+                                            {new Date(prevApp.rejected_at || prevApp.reviewed_at).toLocaleDateString('en-GB', { 
+                                              day: 'numeric', 
+                                              month: 'short',
+                                              year: 'numeric'
+                                            }).toLowerCase()}{' '}
+                                            {new Date(prevApp.rejected_at || prevApp.reviewed_at).toLocaleTimeString('en-GB', {
+                                              hour: '2-digit',
+                                              minute: '2-digit'
+                                            })}
+                                            {prevApp.reviewed_by && profiles.find(p => p.id === prevApp.reviewed_by)?.email && (
+                                              <><br />Admin: {profiles.find(p => p.id === prevApp.reviewed_by)?.email}</>
+                                            )}
+                                          </p>
+                                        </TooltipContent>
+                                      </Tooltip>
+                                    </TooltipProvider>
                                  )}
                                  {(prevApp as any).rejection_reason_types
                                    .filter((type: string) => type && REJECTION_REASONS[type as keyof typeof REJECTION_REASONS])
