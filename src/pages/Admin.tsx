@@ -934,9 +934,9 @@ const Admin = () => {
                            )}
                           
                             <CardContent className="p-0">
-                              <div className="flex flex-col md:flex-row">
-                                {/* Column 1: Photos - responsive width */}
-                                <div className="w-full md:w-[25ch] flex-shrink-0 p-0">
+                              <div className="flex">
+                                {/* Column 1: Photos (25ch) */}
+                                <div className="w-[25ch] flex-shrink-0 p-0">
                                   <div className="flex gap-px">
                                     {appData.photo1_url && (
                                       <div className="w-full">
@@ -961,8 +961,8 @@ const Admin = () => {
                                   </div>
                                 </div>
 
-                                {/* Column 2: Information - contains all info + status on mobile */}
-                                <div className="flex-1 p-4">
+                                {/* Column 2: Information (25ch) */}
+                                <div className="w-[25ch] flex-shrink-0 p-4">
                                   <div className="flex items-center gap-2 mb-1">
                                     <Avatar className="h-6 w-6 flex-shrink-0">
                                       <AvatarImage src={userProfile?.avatar_url || ''} />
@@ -1005,7 +1005,7 @@ const Admin = () => {
                                    </div>
 
                                    {/* Phone and Social Media */}
-                                   <div className="text-xs text-muted-foreground mb-1">
+                                   <div className="text-xs text-muted-foreground mb-3">
                                      <div className="flex items-center gap-2">
                                        {(() => {
                                          const phone = appData.phone?.country && appData.phone?.number 
@@ -1026,9 +1026,8 @@ const Admin = () => {
                                      </div>
                                    </div>
 
-                                   {/* Status section - on mobile at bottom, on desktop separate column */}
-                                   <div className="mt-2 md:hidden">
-                                     {/* Status dropdown - mobile */}
+                                   {/* Status filter - добавлено в мобильной версии в конец второго столбца */}
+                                   <div className="md:hidden mt-2">
                                      {!showDeletedApplications && (
                                        <Select 
                                          value={application.status} 
@@ -1048,7 +1047,7 @@ const Admin = () => {
                                          }}
                                        >
                                          <SelectTrigger 
-                                            className={`w-40 h-7 text-xs ${
+                                            className={`w-full h-7 text-xs ${
                                               application.status === 'approved' ? 'bg-green-100 border-green-500 text-green-700' :
                                               application.status === 'rejected' ? 'bg-red-100 border-red-500 text-red-700' :
                                               ''
@@ -1071,7 +1070,7 @@ const Admin = () => {
                                        </Select>
                                      )}
                                      
-                                     {/* Status change date with reviewer login - mobile */}
+                                     {/* Date with admin - под фильтром статусов */}
                                      <div className="text-xs text-muted-foreground mt-1">
                                        {(() => {
                                          const statusDate = application.reviewed_at || application.approved_at || application.rejected_at || application.submitted_at;
@@ -1098,7 +1097,7 @@ const Admin = () => {
                                    </div>
                                 </div>
 
-                                 {/* Column 3: Status - desktop only */}
+                                 {/* Column 3: Status Button (20ch) - только для десктопа */}
                                  <div className="hidden md:flex md:w-[20ch] md:flex-shrink-0 p-4 pl-0 flex-col gap-2">
                                    {/* Status dropdown at the top - desktop */}
                                    {!showDeletedApplications && (
