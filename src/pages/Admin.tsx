@@ -1029,27 +1029,6 @@ const Admin = () => {
                                           <div className="text-xs text-muted-foreground">
                                             Education: {prevAppData.education || 'Not specified'}
                                           </div>
-                                          
-                                           {/* Rejection reason for previous application */}
-                                          {prevApp.status === 'rejected' && ((prevApp as any).rejection_reason_types || prevApp.rejection_reason) && (
-                                            <div className="mt-2 p-2 bg-destructive/10 border border-destructive/20 rounded">
-                                              <div className="space-y-1 text-xs leading-tight">
-                                                {(prevApp as any).rejection_reason_types && (prevApp as any).rejection_reason_types.length > 0 && (
-                                                  <div className="text-destructive/80">
-                                                    <span className="font-medium">Rejection reasons:</span> {(prevApp as any).rejection_reason_types
-                                                      .filter((type: string) => type && REJECTION_REASONS[type as keyof typeof REJECTION_REASONS])
-                                                      .map((type: string) => REJECTION_REASONS[type as keyof typeof REJECTION_REASONS])
-                                                      .join(', ')}
-                                                  </div>
-                                                )}
-                                                {prevApp.rejection_reason && prevApp.rejection_reason.trim() && !isReasonDuplicate(prevApp.rejection_reason, (prevApp as any).rejection_reason_types) && (
-                                                  <div className="text-destructive/70">
-                                                    <span className="font-medium">Additional comments:</span> {prevApp.rejection_reason}
-                                                  </div>
-                                                )}
-                                              </div>
-                                            </div>
-                                          )}
                                         </div>
 
                                         {/* Right side actions */}
