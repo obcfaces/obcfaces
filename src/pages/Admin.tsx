@@ -844,169 +844,184 @@ const Admin = () => {
                              </div>
                            )}
                           
-                          <CardContent className="p-0">
-                            <div className="flex flex-col md:flex-row md:items-stretch">
-                              {/* Photos section */}
-                              <div className="flex gap-px md:w-[25ch] md:flex-shrink-0 p-0">
-                                {appData.photo1_url && (
-                                  <div className="w-24 sm:w-28 md:w-32">
-                                    <img 
-                                      src={appData.photo1_url} 
-                                      alt="Portrait" 
-                                      className="w-full h-36 sm:h-40 md:h-44 object-contain cursor-pointer hover:opacity-90 transition-opacity"
-                                      onClick={() => openPhotoModal([appData.photo1_url, appData.photo2_url].filter(Boolean), 0, `${appData.first_name} ${appData.last_name}`)}
-                                    />
-                                  </div>
-                                )}
-                                {appData.photo2_url && (
-                                  <div className="w-24 sm:w-28 md:w-32">
-                                    <img 
-                                      src={appData.photo2_url} 
-                                      alt="Full length" 
-                                      className="w-full h-36 sm:h-40 md:h-44 object-cover cursor-pointer hover:opacity-90 transition-opacity"
-                                      onClick={() => openPhotoModal([appData.photo1_url, appData.photo2_url].filter(Boolean), 1, `${appData.first_name} ${appData.last_name}`)}
-                                    />
-                                  </div>
-                                )}
-                              </div>
-
-                              {/* Main info section */}
-                              <div className="md:w-[50ch] md:flex-shrink-0 flex-1 min-w-0 p-4">
-                                <div className="flex items-center gap-2 mb-1">
-                                  <Avatar className="h-6 w-6 flex-shrink-0">
-                                    <AvatarImage src={userProfile?.avatar_url || ''} />
-                                    <AvatarFallback className="text-xs">
-                                      {appData.first_name?.charAt(0) || 'U'}
-                                    </AvatarFallback>
-                                  </Avatar>
-                                  <span className="text-sm font-semibold whitespace-nowrap">
-                                    {appData.first_name} {appData.last_name} {new Date().getFullYear() - appData.birth_year}
-                                  </span>
-                                </div>
-                                
-                                <div className="text-xs text-muted-foreground mb-1">
-                                  {appData.city} {appData.state} {appData.country}
-                                </div>
-                                 
-                                <div className="text-xs text-muted-foreground mb-1">
-                                  {appData.weight_kg}kg • {appData.height_cm}cm • {appData.gender}
-                                </div>
-
-                                <div className="text-xs text-muted-foreground mb-1">
-                                  {appData.marital_status} • {appData.has_children ? 'Has children' : 'No children'}
-                                </div>
-
-                                <div className="text-xs text-muted-foreground mb-1">
-                                  {userProfile?.email && (
-                                    <div className="flex items-center gap-1">
-                                      <span 
-                                        className="cursor-pointer" 
-                                        title={userProfile.email}
-                                      >
-                                        {userProfile.email.length > 25 ? `${userProfile.email.substring(0, 25)}...` : userProfile.email}
-                                      </span>
-                                      <Copy 
-                                        className="h-3 w-3 cursor-pointer hover:text-foreground" 
-                                        onClick={() => navigator.clipboard.writeText(userProfile.email)}
-                                      />
-                                    </div>
-                                  )}
+                           <CardContent className="p-0">
+                             <div className="flex">
+                               {/* Column 1: Photos (25ch) */}
+                               <div className="w-[25ch] flex-shrink-0 p-0">
+                                 <div className="flex gap-px">
+                                   {appData.photo1_url && (
+                                     <div className="w-full">
+                                       <img 
+                                         src={appData.photo1_url} 
+                                         alt="Portrait" 
+                                         className="w-full h-36 object-contain cursor-pointer hover:opacity-90 transition-opacity"
+                                         onClick={() => openPhotoModal([appData.photo1_url, appData.photo2_url].filter(Boolean), 0, `${appData.first_name} ${appData.last_name}`)}
+                                       />
+                                     </div>
+                                   )}
+                                   {appData.photo2_url && (
+                                     <div className="w-full">
+                                       <img 
+                                         src={appData.photo2_url} 
+                                         alt="Full length" 
+                                         className="w-full h-36 object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                                         onClick={() => openPhotoModal([appData.photo1_url, appData.photo2_url].filter(Boolean), 1, `${appData.first_name} ${appData.last_name}`)}
+                                       />
+                                     </div>
+                                   )}
                                  </div>
-
-                                 {/* Phone and Social Media */}
-                                 <div className="text-xs text-muted-foreground mb-1">
-                                   <div className="flex items-center gap-2">
-                                     {(() => {
-                                       const phone = appData.phone?.country && appData.phone?.number 
-                                         ? `${appData.phone.country} ${appData.phone.number}` 
-                                         : 'Not provided';
-                                       return <span>{phone}</span>;
-                                     })()}
-                                     {appData.facebook_url && (
-                                       <a
-                                         href={appData.facebook_url}
-                                         target="_blank"
-                                         rel="noopener noreferrer"
-                                         className="text-blue-600 hover:text-blue-800"
-                                       >
-                                         <Facebook className="h-3 w-3" />
-                                       </a>
-                                     )}
-                                   </div>
-                                 </div>
-
                                </div>
 
-                              {/* Right side actions */}
-                              <div className="p-4 md:w-auto flex flex-col justify-between gap-2">
-                              <div className="flex flex-col gap-1 items-center">
-                                <p className="text-xs text-muted-foreground text-center">
-                                  {submittedDate.toLocaleDateString('ru-RU')} {submittedDate.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}
-                                </p>
-                              </div>
-                                <div className="flex gap-1 flex-wrap justify-center">
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    onClick={() => setSelectedUserApplications(
-                                      selectedUserApplications === application.user_id ? null : application.user_id
-                                    )}
-                                    className="px-2"
-                                    title="View Previous Applications"
-                                  >
-                                    <Eye className="w-3 h-3" />
-                                  </Button>
-                                  {!showDeletedApplications && (
-                                    <>
-                                       <Select 
-                                         value={application.status} 
-                                         onValueChange={(newStatus) => {
-                                           if (newStatus === 'delete') {
-                                             const appData = typeof application.application_data === 'string' 
-                                               ? JSON.parse(application.application_data) 
-                                               : application.application_data;
-                                             setApplicationToDelete({ 
-                                               id: application.id, 
-                                               name: `${appData.firstName} ${appData.lastName}` 
-                                             });
-                                             setShowDeleteConfirmModal(true);
-                                             return;
-                                           }
-                                           reviewApplication(application.id, newStatus);
-                                         }}
+                               {/* Column 2: Information (25ch) */}
+                               <div className="w-[25ch] flex-shrink-0 p-4">
+                                 <div className="flex items-center gap-2 mb-1">
+                                   <Avatar className="h-6 w-6 flex-shrink-0">
+                                     <AvatarImage src={userProfile?.avatar_url || ''} />
+                                     <AvatarFallback className="text-xs">
+                                       {appData.first_name?.charAt(0) || 'U'}
+                                     </AvatarFallback>
+                                   </Avatar>
+                                   <span className="text-sm font-semibold whitespace-nowrap">
+                                     {appData.first_name} {appData.last_name} {new Date().getFullYear() - appData.birth_year}
+                                   </span>
+                                 </div>
+                                 
+                                 <div className="text-xs text-muted-foreground mb-1">
+                                   {appData.city} {appData.state} {appData.country}
+                                 </div>
+                                  
+                                 <div className="text-xs text-muted-foreground mb-1">
+                                   {appData.weight_kg}kg • {appData.height_cm}cm • {appData.gender}
+                                 </div>
+
+                                 <div className="text-xs text-muted-foreground mb-1">
+                                   {appData.marital_status} • {appData.has_children ? 'Has children' : 'No children'}
+                                 </div>
+
+                                 <div className="text-xs text-muted-foreground mb-1">
+                                   {userProfile?.email && (
+                                     <div className="flex items-center gap-1">
+                                       <span 
+                                         className="cursor-pointer" 
+                                         title={userProfile.email}
                                        >
-                                         <SelectTrigger 
-                                           className={`w-28 h-7 text-xs ${
-                                             application.status === 'approved' ? 'bg-green-100 border-green-500 text-green-700' :
-                                             application.status === 'rejected' ? 'bg-red-100 border-red-500 text-red-700' :
-                                             application.status === 'finalist' ? 'bg-blue-100 border-blue-500 text-blue-700' :
-                                             application.status === 'this_week' ? 'bg-yellow-100 border-yellow-500 text-yellow-700' :
-                                             ''
-                                           }`}
-                                         >
-                                           <SelectValue />
-                                         </SelectTrigger>
-                                         <SelectContent>
-                                           <SelectItem value="pending">Pending</SelectItem>
-                                           <SelectItem value="approved">Approved</SelectItem>
-                                           <SelectItem value="finalist">Finalist</SelectItem>
-                                           <SelectItem value="rejected">Rejected</SelectItem>
-                                           <SelectItem value="this_week">This Week</SelectItem>
-                                           <div className="h-1 border-t border-border my-1"></div>
-                                           <SelectItem 
-                                             value="delete" 
-                                             className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                                           >
-                                             🗑️ Delete
-                                           </SelectItem>
-                                         </SelectContent>
-                                       </Select>
-                                     </>
+                                         {userProfile.email.length > 25 ? `${userProfile.email.substring(0, 25)}...` : userProfile.email}
+                                       </span>
+                                       <Copy 
+                                         className="h-3 w-3 cursor-pointer hover:text-foreground" 
+                                         onClick={() => navigator.clipboard.writeText(userProfile.email)}
+                                       />
+                                     </div>
                                    )}
-                                </div>
-                              </div>
-                            </div>
-                          </CardContent>
+                                  </div>
+
+                                  {/* Phone and Social Media */}
+                                  <div className="text-xs text-muted-foreground mb-1">
+                                    <div className="flex items-center gap-2">
+                                      {(() => {
+                                        const phone = appData.phone?.country && appData.phone?.number 
+                                          ? `${appData.phone.country} ${appData.phone.number}` 
+                                          : 'Not provided';
+                                        return <span>{phone}</span>;
+                                      })()}
+                                      {appData.facebook_url && (
+                                        <a
+                                          href={appData.facebook_url}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          className="text-blue-600 hover:text-blue-800"
+                                        >
+                                          <Facebook className="h-3 w-3" />
+                                        </a>
+                                      )}
+                                    </div>
+                                  </div>
+                               </div>
+
+                               {/* Column 3: Status Button (20ch) */}
+                               <div className="w-[20ch] flex-shrink-0 p-4 flex flex-col gap-2">
+                                 {/* Status dropdown at the top */}
+                                 {!showDeletedApplications && (
+                                   <Select 
+                                     value={application.status} 
+                                     onValueChange={(newStatus) => {
+                                       if (newStatus === 'delete') {
+                                         const appData = typeof application.application_data === 'string' 
+                                           ? JSON.parse(application.application_data) 
+                                           : application.application_data;
+                                         setApplicationToDelete({ 
+                                           id: application.id, 
+                                           name: `${appData.firstName} ${appData.lastName}` 
+                                         });
+                                         setShowDeleteConfirmModal(true);
+                                         return;
+                                       }
+                                       reviewApplication(application.id, newStatus);
+                                     }}
+                                   >
+                                     <SelectTrigger 
+                                       className={`w-full h-7 text-xs ${
+                                         application.status === 'approved' ? 'bg-green-100 border-green-500 text-green-700' :
+                                         application.status === 'rejected' ? 'bg-red-100 border-red-500 text-red-700' :
+                                         application.status === 'finalist' ? 'bg-blue-100 border-blue-500 text-blue-700' :
+                                         application.status === 'this_week' ? 'bg-yellow-100 border-yellow-500 text-yellow-700' :
+                                         ''
+                                       }`}
+                                     >
+                                       <SelectValue />
+                                     </SelectTrigger>
+                                     <SelectContent>
+                                       <SelectItem value="pending">Pending</SelectItem>
+                                       <SelectItem value="approved">Approved</SelectItem>
+                                       <SelectItem value="finalist">Finalist</SelectItem>
+                                       <SelectItem value="rejected">Rejected</SelectItem>
+                                       <SelectItem value="this_week">This Week</SelectItem>
+                                       <div className="h-1 border-t border-border my-1"></div>
+                                       <SelectItem 
+                                         value="delete" 
+                                         className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                       >
+                                         🗑️ Delete
+                                       </SelectItem>
+                                     </SelectContent>
+                                   </Select>
+                                 )}
+                                 
+                                 {/* Status change date under the dropdown */}
+                                 <div className="text-xs text-muted-foreground text-center">
+                                   {(() => {
+                                     const statusDate = application.reviewed_at || application.approved_at || application.rejected_at || application.submitted_at;
+                                     if (statusDate) {
+                                       const date = new Date(statusDate);
+                                       const time = date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+                                       const dateStr = date.toLocaleDateString('en-GB', { 
+                                         day: 'numeric', 
+                                         month: 'short',
+                                         year: '2-digit'
+                                       }).toLowerCase();
+                                       return `${time} - ${dateStr}`;
+                                     }
+                                     return '';
+                                   })()}
+                                 </div>
+                                 
+                                 {/* Other action buttons */}
+                                 <div className="flex flex-col gap-1">
+                                   <Button
+                                     size="sm"
+                                     variant="outline"
+                                     onClick={() => setSelectedUserApplications(
+                                       selectedUserApplications === application.user_id ? null : application.user_id
+                                     )}
+                                     className="px-2 text-xs h-7"
+                                     title="View Previous Applications"
+                                   >
+                                     <Eye className="w-3 h-3" />
+                                   </Button>
+                                 </div>
+                               </div>
+                             </div>
+                           </CardContent>
                         </Card>
         
          {/* Rejection reason under the card */}
