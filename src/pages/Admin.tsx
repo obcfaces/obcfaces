@@ -18,6 +18,8 @@ import {
 import { PhotoModal } from '@/components/photo-modal';
 import { RejectReasonModal } from '@/components/reject-reason-modal';
 import { VotersModal } from '@/components/voters-modal';
+import { AdminEditApplicationModal } from '@/components/AdminEditApplicationModal';
+import { ApplicationEditHistory } from '@/components/ApplicationEditHistory';
 
 interface UserRole {
   user_id: string;
@@ -138,6 +140,9 @@ const Admin = () => {
   const [selectedUserApplications, setSelectedUserApplications] = useState<string | null>(null);
   const [editingApplicationId, setEditingApplicationId] = useState<string | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [editingApplicationData, setEditingApplicationData] = useState<any>(null);
+  const [showEditHistory, setShowEditHistory] = useState(false);
+  const [editHistoryApplicationId, setEditHistoryApplicationId] = useState<string | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -760,12 +765,25 @@ const Admin = () => {
                                   <Button
                                     size="sm"
                                     variant="outline"
+                                    onClick={() => {
+                                      setEditHistoryApplicationId(application.id);
+                                      setShowEditHistory(true);
+                                    }}
+                                    className="px-2"
+                                    title="View Edit History"
+                                  >
+                                    <Clock className="w-3 h-3" />
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
                                     onClick={() => setSelectedUserApplications(
                                       selectedUserApplications === application.user_id ? null : application.user_id
                                     )}
                                     className="px-2"
+                                    title="View Previous Applications"
                                   >
-                                    <Clock className="w-3 h-3" />
+                                    <Eye className="w-3 h-3" />
                                   </Button>
                                   {!showDeletedApplications && (
                                     <>
@@ -774,6 +792,7 @@ const Admin = () => {
                                         variant="outline"
                                         onClick={() => {
                                           setEditingApplicationId(application.id);
+                                          setEditingApplicationData(application);
                                           setShowEditModal(true);
                                         }}
                                         className="text-xs px-2 py-1 h-7"
@@ -1332,38 +1351,29 @@ const Admin = () => {
         participantName={selectedParticipantForVoters?.name || ''}
       />
 
-      {/* Edit Application Modal */}
-      <Dialog open={showEditModal} onOpenChange={setShowEditModal}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Edit Application</DialogTitle>
-          </DialogHeader>
-          <div className="text-center p-4">
-            <p className="text-sm text-muted-foreground mb-4">
-              Editing functionality will redirect to the application form.
-            </p>
-            <div className="flex gap-2 justify-center">
-              <Button
-                variant="outline"
-                onClick={() => setShowEditModal(false)}
-              >
-                Cancel
-              </Button>
-              <Button
-                onClick={() => {
-                  if (editingApplicationId) {
-                    // Redirect to contest page with edit mode
-                    navigate(`/contest?edit=${editingApplicationId}`);
-                  }
-                  setShowEditModal(false);
-                }}
-              >
-                Edit Application
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+      {/* Admin Edit Application Modal */}
+      <AdminEditApplicationModal
+        isOpen={showEditModal}
+        onOpenChange={setShowEditModal}
+        applicationId={editingApplicationId}
+        applicationData={editingApplicationData}
+        onSave={() => {
+          fetchContestApplications();
+          setShowEditModal(false);
+          setEditingApplicationId(null);
+          setEditingApplicationData(null);
+        }}
+      />
+
+      {/* Application Edit History */}
+      <ApplicationEditHistory
+        applicationId={editHistoryApplicationId || ''}
+        isOpen={showEditHistory}
+        onClose={() => {
+          setShowEditHistory(false);
+          setEditHistoryApplicationId(null);
+        }}
+      />
     </>
   );
 };
