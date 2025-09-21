@@ -5,9 +5,10 @@ import WeightFilterDropdown from "@/components/ui/weight-filter-dropdown";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Camera, Phone, Facebook } from "lucide-react";
+import { Camera, Phone, Mail, Facebook, Instagram } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -50,11 +51,9 @@ export const AdminEditApplicationModal = ({
       marital_status: "",
       has_children: undefined as boolean | undefined,
       height_cm: "",
+      height_ft: "",
       weight_kg: "",
-      photo1_url: null,
-      photo2_url: null,
-      phone: "",
-      facebook_url: "",
+      measurement_system: "metric",
     };
 
     let appData = applicationData;
@@ -85,20 +84,63 @@ export const AdminEditApplicationModal = ({
       marital_status: appData.marital_status || "",
       has_children: appData.has_children as boolean | undefined,
       height_cm: appData.height_cm ? appData.height_cm.toString() : "",
+      height_ft: "",
       weight_kg: appData.weight_kg ? appData.weight_kg.toString() : "",
-      photo1_url: appData.photo1_url || appData.photo_1_url || null,
-      photo2_url: appData.photo2_url || appData.photo_2_url || null,
-      phone: appData.phone?.number || "",
-      facebook_url: appData.facebook_url || "",
+      measurement_system: "metric",
     };
   };
 
   const [formData, setFormData] = useState(loadApplicationData);
+  
+  // Track selected height and weight display formats
+  const [selectedHeight, setSelectedHeight] = useState<string>("");
+  const [selectedWeight, setSelectedWeight] = useState<string>("");
+
+  // Contact form state
+  const [selectedContactMethod, setSelectedContactMethod] = useState<string | null>(null);
+  const [contactForm, setContactForm] = useState({
+    name: "",
+    contact: "",
+    message: "",
+    countryCode: "",
+    facebookUrl: ""
+  });
 
   // Update form data when application data changes
   useEffect(() => {
     if (applicationData) {
-      setFormData(loadApplicationData());
+      const newFormData = loadApplicationData();
+      setFormData(newFormData);
+      
+      // Set selected height/weight display
+      if (newFormData.height_cm) {
+        setSelectedHeight(`${newFormData.height_cm} cm`);
+      }
+      if (newFormData.weight_kg) {
+        setSelectedWeight(`${newFormData.weight_kg} kg`);
+      }
+
+      // Load contact data
+      let appData = applicationData;
+      if (applicationData.application_data) {
+        appData = { ...applicationData, ...applicationData.application_data };
+      }
+      
+      if (appData.phone || appData.facebook_url) {
+        setContactForm({
+          name: `${appData.first_name || ''} ${appData.last_name || ''}`.trim(),
+          contact: appData.phone?.number || '',
+          message: '',
+          countryCode: appData.phone?.country_code || appData.country || '',
+          facebookUrl: appData.facebook_url || ''
+        });
+        
+        if (appData.phone?.number) {
+          setSelectedContactMethod('phone');
+        } else if (appData.facebook_url) {
+          setSelectedContactMethod('facebook');
+        }
+      }
     }
   }, [applicationData]);
 
@@ -118,6 +160,20 @@ export const AdminEditApplicationModal = ({
       return `${baseClasses} border border-red-500`.trim();
     }
     return baseClasses;
+  };
+
+  // Field change handler
+  const handleFieldChange = (field: string, value: any) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+    
+    // Remove from invalid fields when user starts typing
+    if (invalidFields.has(field)) {
+      setInvalidFields(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(field);
+        return newSet;
+      });
+    }
   };
 
   // Photo upload handlers
@@ -221,15 +277,20 @@ export const AdminEditApplicationModal = ({
     if (!formData.countryCode) errors.add('country');
     if (!formData.city.trim()) errors.add('city');
     if (!formData.gender) errors.add('gender');
-    if (!formData.birth_day || !formData.birth_month || !formData.birth_year) errors.add('birthdate');
+    if (!formData.birth_day || !formData.birth_month || !formData.birth_year) {
+      errors.add('birth_day');
+      errors.add('birth_month'); 
+      errors.add('birth_year');
+    }
     if (!formData.marital_status) errors.add('marital_status');
     if (formData.has_children === undefined) errors.add('has_children');
-    if (!formData.height_cm) errors.add('height');
-    if (!formData.weight_kg) errors.add('weight');
+    if (!formData.height_cm) errors.add('height_cm');
+    if (!formData.weight_kg) errors.add('weight_kg');
     
     // Check if we have existing photos or new uploads
-    const hasPhoto1 = photo1File || formData.photo1_url;
-    const hasPhoto2 = photo2File || formData.photo2_url;
+    const currentAppData = applicationData?.application_data || applicationData || {};
+    const hasPhoto1 = photo1File || currentAppData.photo1_url || currentAppData.photo_1_url;
+    const hasPhoto2 = photo2File || currentAppData.photo2_url || currentAppData.photo_2_url;
     
     if (!hasPhoto1) errors.add('photo1');
     if (!hasPhoto2) errors.add('photo2');
@@ -239,7 +300,7 @@ export const AdminEditApplicationModal = ({
   };
 
   // Save form
-  const handleSave = async () => {
+  const handleSubmit = async () => {
     setSubmitted(true);
     
     if (!validateForm()) {
@@ -264,8 +325,9 @@ export const AdminEditApplicationModal = ({
 
     try {
       // Upload new photos if provided
-      let photo1Url = formData.photo1_url;
-      let photo2Url = formData.photo2_url;
+      const currentAppData = applicationData?.application_data || applicationData || {};
+      let photo1Url = currentAppData.photo1_url || currentAppData.photo_1_url;
+      let photo2Url = currentAppData.photo2_url || currentAppData.photo_2_url;
 
       if (photo1File) {
         const uploadedUrl1 = await uploadPhoto(photo1File, `admin_edit_photo1_${applicationId}`);
@@ -277,7 +339,7 @@ export const AdminEditApplicationModal = ({
         if (uploadedUrl2) photo2Url = uploadedUrl2;
       }
 
-      // Build application data
+      // Build application data exactly like the original form
       const applicationDataToSave = {
         first_name: formData.first_name.trim(),
         last_name: formData.last_name.trim(),
@@ -296,13 +358,16 @@ export const AdminEditApplicationModal = ({
         photo2_url: photo2Url,
         photo_1_url: photo1Url, // For compatibility
         photo_2_url: photo2Url, // For compatibility
-        ...(formData.phone && {
+        // Add contact data if provided
+        ...(selectedContactMethod === 'phone' && contactForm.contact && {
           phone: {
-            number: formData.phone,
-            country_code: formData.countryCode
+            number: contactForm.contact,
+            country_code: contactForm.countryCode
           }
         }),
-        ...(formData.facebook_url && { facebook_url: formData.facebook_url }),
+        ...(selectedContactMethod === 'facebook' && contactForm.facebookUrl && { 
+          facebook_url: contactForm.facebookUrl 
+        }),
         admin_edited: true,
         admin_edited_at: new Date().toISOString()
       };
@@ -317,6 +382,18 @@ export const AdminEditApplicationModal = ({
         .eq('id', applicationId);
 
       if (error) throw error;
+
+      // Also update weekly_contest_participants if this user is in current contest
+      const { error: weeklyError } = await supabase
+        .from('weekly_contest_participants')
+        .update({
+          application_data: applicationDataToSave
+        })
+        .eq('user_id', applicationData?.user_id);
+
+      if (weeklyError) {
+        console.warn('Could not update weekly contest participant data:', weeklyError);
+      }
 
       toast({
         title: "Success",
@@ -338,316 +415,363 @@ export const AdminEditApplicationModal = ({
     }
   };
 
+  // Get current photo URLs
+  const getCurrentPhoto1Url = () => {
+    if (photo1File) return URL.createObjectURL(photo1File);
+    const currentAppData = applicationData?.application_data || applicationData || {};
+    return currentAppData.photo1_url || currentAppData.photo_1_url;
+  };
+
+  const getCurrentPhoto2Url = () => {
+    if (photo2File) return URL.createObjectURL(photo2File);
+    const currentAppData = applicationData?.application_data || applicationData || {};
+    return currentAppData.photo2_url || currentAppData.photo_2_url;
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden">
-        <DialogHeader>
-          <DialogTitle>Edit Application - Admin</DialogTitle>
+      <DialogContent className="max-w-md max-h-[95vh] overflow-hidden p-0">
+        <DialogHeader className="p-6 pb-4">
+          <DialogTitle className="text-center">Edit Application - Admin</DialogTitle>
         </DialogHeader>
         
-        <ScrollArea className="h-[70vh] pr-4">
-          <div className="space-y-6">
-            {/* Personal Information */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold">Personal Information</h3>
-              
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="first_name">First Name *</Label>
-                  <Input
-                    id="first_name"
-                    value={formData.first_name}
-                    onChange={(e) => setFormData({...formData, first_name: e.target.value})}
-                    className={getFieldClasses('first_name')}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="last_name">Last Name *</Label>
-                  <Input
-                    id="last_name"
-                    value={formData.last_name}
-                    onChange={(e) => setFormData({...formData, last_name: e.target.value})}
-                    className={getFieldClasses('last_name')}
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-3 gap-4">
-                <div>
-                  <Label htmlFor="birth_day">Birth Day *</Label>
-                  <Select value={formData.birth_day} onValueChange={(value) => setFormData({...formData, birth_day: value})}>
-                    <SelectTrigger className={getFieldClasses('birthdate')}>
-                      <SelectValue placeholder="Day" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {Array.from({length: 31}, (_, i) => (
-                        <SelectItem key={i + 1} value={(i + 1).toString()}>
-                          {i + 1}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label htmlFor="birth_month">Birth Month *</Label>
-                  <Select value={formData.birth_month} onValueChange={(value) => setFormData({...formData, birth_month: value})}>
-                    <SelectTrigger className={getFieldClasses('birthdate')}>
-                      <SelectValue placeholder="Month" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {Array.from({length: 12}, (_, i) => (
-                        <SelectItem key={i + 1} value={(i + 1).toString()}>
-                          {new Date(2000, i, 1).toLocaleString('default', { month: 'long' })}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label htmlFor="birth_year">Birth Year *</Label>
-                  <Select value={formData.birth_year} onValueChange={(value) => setFormData({...formData, birth_year: value})}>
-                    <SelectTrigger className={getFieldClasses('birthdate')}>
-                      <SelectValue placeholder="Year" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {Array.from({length: 50}, (_, i) => {
-                        const year = new Date().getFullYear() - 18 - i;
-                        return (
-                          <SelectItem key={year} value={year.toString()}>
-                            {year}
-                          </SelectItem>
-                        );
-                      })}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              <div>
-                <Label htmlFor="gender">Gender *</Label>
-                <Select value={formData.gender} onValueChange={(value) => setFormData({...formData, gender: value})}>
-                  <SelectTrigger className={getFieldClasses('gender')}>
-                    <SelectValue placeholder="Select gender" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="female">Female</SelectItem>
-                    <SelectItem value="male">Male</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+        <ScrollArea className="h-[70vh] px-6">
+          <div className="space-y-4 pb-6">
+            {/* Name fields */}
+            <div className="grid gap-2 grid-cols-2">
+              <Input
+                placeholder="First name"
+                value={formData.first_name}
+                onChange={(e) => handleFieldChange('first_name', e.target.value)}
+                className={getFieldClasses('first_name', "text-sm")}
+              />
+              <Input
+                placeholder="Last name"
+                value={formData.last_name}
+                onChange={(e) => handleFieldChange('last_name', e.target.value)}
+                className={getFieldClasses('last_name', "text-sm")}
+              />
             </div>
+
+            {/* Gender */}
+            <Select 
+              value={formData.gender} 
+              onValueChange={(value) => handleFieldChange('gender', value)}
+            >
+              <SelectTrigger className={getFieldClasses('gender', "text-sm")}>
+                <SelectValue placeholder="Gender" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="female">Female</SelectItem>
+                <SelectItem value="male">Male</SelectItem>
+              </SelectContent>
+            </Select>
 
             {/* Location */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold">Location</h3>
-              
-              <div>
-                <Label htmlFor="country">Country *</Label>
-                <SearchableSelect
-                  options={countries}
-                  value={formData.countryCode}
-                  onValueChange={(value) => setFormData({...formData, countryCode: value, country: value, stateCode: "", city: ""})}
-                  placeholder="Select country"
-                  invalid={hasRedBorder('country')}
-                />
-              </div>
-
-              {states.length > 0 && (
-                <div>
-                  <Label htmlFor="state">State/Province</Label>
-                  <SearchableSelect
-                    options={states}
-                    value={formData.stateCode}
-                    onValueChange={(value) => setFormData({...formData, stateCode: value, state: value, city: ""})}
-                    placeholder="Select state/province"
-                  />
-                </div>
-              )}
-
-              <div>
-                <Label htmlFor="city">City *</Label>
-                <SearchableSelect
-                  options={cities}
-                  value={formData.city}
-                  onValueChange={(value) => setFormData({...formData, city: value})}
-                  placeholder="Select or type city"
-                  allowCustom={true}
-                  invalid={hasRedBorder('city')}
-                />
-              </div>
+            <div className="grid gap-2 grid-cols-3">
+              <SearchableSelect
+                options={countries}
+                value={formData.countryCode}
+                onValueChange={(value) => {
+                  handleFieldChange('country', value);
+                  setFormData(prev => ({ ...prev, countryCode: value, stateCode: "", city: "" }));
+                }}
+                placeholder="Country"
+                invalid={hasRedBorder('country')}
+              />
+              <SearchableSelect
+                options={states}
+                value={formData.stateCode}
+                onValueChange={(value) => {
+                  handleFieldChange('state', value);
+                  setFormData(prev => ({ ...prev, stateCode: value, city: "" }));
+                }}
+                placeholder="State/Region"
+                disabled={!formData.countryCode}
+                invalid={hasRedBorder('state')}
+              />
+              <SearchableSelect
+                options={cities}
+                value={formData.city}
+                onValueChange={(value) => handleFieldChange('city', value)}
+                placeholder="City"
+                disabled={!formData.stateCode}
+                invalid={hasRedBorder('city')}
+                allowCustom={true}
+                emptyMessage="No cities found. Type to add custom city."
+              />
             </div>
 
-            {/* Family Status */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold">Family Status</h3>
-              
-              <div>
-                <Label htmlFor="marital_status">Marital Status *</Label>
-                <Select value={formData.marital_status} onValueChange={(value) => setFormData({...formData, marital_status: value})}>
-                  <SelectTrigger className={getFieldClasses('marital_status')}>
-                    <SelectValue placeholder="Select marital status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="single">Single</SelectItem>
-                    <SelectItem value="married">Married</SelectItem>
-                    <SelectItem value="divorced">Divorced</SelectItem>
-                    <SelectItem value="widowed">Widowed</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label htmlFor="has_children">Do you have children? *</Label>
-                <Select 
-                  value={formData.has_children === undefined ? "" : formData.has_children.toString()} 
-                  onValueChange={(value) => setFormData({...formData, has_children: value === "true"})}
-                >
-                  <SelectTrigger className={getFieldClasses('has_children')}>
-                    <SelectValue placeholder="Select option" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="false">No</SelectItem>
-                    <SelectItem value="true">Yes</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+            {/* Birth date */}
+            <div className="grid gap-2 grid-cols-3">
+              <Select 
+                value={formData.birth_day} 
+                onValueChange={(value) => handleFieldChange('birth_day', value)}
+              >
+                <SelectTrigger className={getFieldClasses('birth_day', "text-sm")}>
+                  <SelectValue placeholder="Day of birth" />
+                </SelectTrigger>
+                <SelectContent>
+                  {Array.from({ length: 31 }, (_, i) => (
+                    <SelectItem key={i + 1} value={(i + 1).toString()}>
+                      {i + 1}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select 
+                value={formData.birth_month} 
+                onValueChange={(value) => handleFieldChange('birth_month', value)}
+              >
+                <SelectTrigger className={getFieldClasses('birth_month', "text-sm")}>
+                  <SelectValue placeholder="Month of birth" />
+                </SelectTrigger>
+                <SelectContent>
+                  {[
+                    "January", "February", "March", "April", "May", "June",
+                    "July", "August", "September", "October", "November", "December"
+                  ].map((month, index) => (
+                    <SelectItem key={index + 1} value={(index + 1).toString()}>
+                      {month}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select 
+                value={formData.birth_year} 
+                onValueChange={(value) => handleFieldChange('birth_year', value)}
+              >
+                <SelectTrigger className={getFieldClasses('birth_year', "text-sm")}>
+                  <SelectValue placeholder="Year of birth" />
+                </SelectTrigger>
+                <SelectContent>
+                  {Array.from({ length: 60 }, (_, i) => {
+                    const year = new Date().getFullYear() - 18 - i;
+                    return (
+                      <SelectItem key={year} value={year.toString()}>
+                        {year}
+                      </SelectItem>
+                    );
+                  })}
+                </SelectContent>
+              </Select>
             </div>
 
-            {/* Physical Information */}
+            {/* Marital status and children */}
+            <div className="grid gap-2 grid-cols-2">
+              <Select 
+                value={formData.marital_status} 
+                onValueChange={(value) => handleFieldChange('marital_status', value)}
+              >
+                <SelectTrigger className={getFieldClasses('marital_status', "text-sm")}>
+                  <SelectValue placeholder="Marital status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="single">Single</SelectItem>
+                  <SelectItem value="married">Married</SelectItem>
+                  <SelectItem value="divorced">Divorced</SelectItem>
+                  <SelectItem value="widowed">Widowed</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select 
+                value={formData.has_children?.toString()} 
+                onValueChange={(value) => handleFieldChange('has_children', value === 'true')}
+              >
+                <SelectTrigger className={getFieldClasses('has_children', "text-sm")}>
+                  <SelectValue placeholder="Do you have children?" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="true">Yes</SelectItem>
+                  <SelectItem value="false">No</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Height and Weight */}
+            <div className="grid gap-2 grid-cols-2">
+              <HeightDropdownOneScrollPick 
+                value={selectedHeight || undefined}
+                className={getFieldClasses('height_cm', "")}
+                onSelect={(value) => {
+                  setSelectedHeight(value.label);
+                  if (value.system === "cm") {
+                    const cm = value.label.replace(' cm', '');
+                    handleFieldChange('height_cm', cm);
+                  } else {
+                    const ftIn = value.label;
+                    const [feet, inches] = ftIn.replace('"', '').split("'").map(Number);
+                    const totalInches = feet * 12 + inches;
+                    const cm = Math.round(totalInches * 2.54);
+                    handleFieldChange('height_cm', cm.toString());
+                  }
+                }}
+              />
+              <WeightFilterDropdown 
+                value={selectedWeight || undefined}
+                className={getFieldClasses('weight_kg', "")}
+                onSelect={(value) => {
+                  setSelectedWeight(value.label);
+                  if (value.system === "kg") {
+                    const kg = value.label.replace(' kg', '');
+                    handleFieldChange('weight_kg', kg);
+                  } else {
+                    const lbs = parseFloat(value.label.replace(' lbs', ''));
+                    const kg = Math.round(lbs / 2.205);
+                    handleFieldChange('weight_kg', kg.toString());
+                  }
+                }}
+              />
+            </div>
+
+            {/* Photo Upload Section */}
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold">Physical Information</h3>
+              <div className="text-sm font-medium text-center mb-2">Upload your photos</div>
               
               <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="height">Height *</Label>
-                  <HeightDropdownOneScrollPick
-                    value={formData.height_cm ? `${formData.height_cm} cm` : undefined}
-                    className={getFieldClasses('height')}
-                    onSelect={(value) => {
-                      if (value.system === "cm") {
-                        const cm = value.label.replace(' cm', '');
-                        setFormData({...formData, height_cm: cm});
-                      } else {
-                        const ftIn = value.label;
-                        const [feet, inches] = ftIn.replace('"', '').split("'").map(Number);
-                        const totalInches = feet * 12 + inches;
-                        const cm = Math.round(totalInches * 2.54);
-                        setFormData({...formData, height_cm: cm.toString()});
-                      }
-                    }}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="weight">Weight *</Label>
-                  <WeightFilterDropdown
-                    value={formData.weight_kg ? `${formData.weight_kg} kg` : undefined}
-                    className={getFieldClasses('weight')}
-                    onSelect={(value) => {
-                      if (value.system === "kg") {
-                        const kg = value.label.replace(' kg', '');
-                        setFormData({...formData, weight_kg: kg});
-                      } else {
-                        const lbs = parseFloat(value.label.replace(' lbs', ''));
-                        const kg = Math.round(lbs / 2.205);
-                        setFormData({...formData, weight_kg: kg.toString()});
-                      }
-                    }}
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Contact Information */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold">Contact Information</h3>
-              
-              <div>
-                <Label htmlFor="phone">Phone Number</Label>
-                <div className="flex items-center space-x-2">
-                  <Phone className="w-4 h-4 text-muted-foreground" />
-                  <Input
-                    id="phone"
-                    value={formData.phone}
-                    onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                    placeholder="Phone number"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <Label htmlFor="facebook_url">Facebook Profile URL</Label>
-                <div className="flex items-center space-x-2">
-                  <Facebook className="w-4 h-4 text-muted-foreground" />
-                  <Input
-                    id="facebook_url"
-                    value={formData.facebook_url}
-                    onChange={(e) => setFormData({...formData, facebook_url: e.target.value})}
-                    placeholder="https://facebook.com/yourprofile"
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Photos */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold">Photos *</h3>
-              
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label>Face Photo (ID Style) *</Label>
-                  <div className={`border-2 border-dashed rounded-lg p-4 text-center ${hasRedBorder('photo1') ? 'border-red-500' : 'border-gray-300'}`}>
-                    {formData.photo1_url && !photo1File && (
-                      <img src={formData.photo1_url} alt="Current photo 1" className="w-full h-32 object-cover rounded mb-2" />
-                    )}
-                    {photo1File && (
-                      <img src={URL.createObjectURL(photo1File)} alt="New photo 1" className="w-full h-32 object-cover rounded mb-2" />
+                {/* Photo 1 */}
+                <div className="space-y-2">
+                  <Label className="text-xs text-center block">Portrait photo</Label>
+                  <div className={`relative border-2 border-dashed rounded-lg overflow-hidden aspect-[4/5] ${hasRedBorder('photo1') ? 'border-red-500' : 'border-gray-300'}`}>
+                    {getCurrentPhoto1Url() ? (
+                      <img 
+                        src={getCurrentPhoto1Url()} 
+                        alt="Photo 1" 
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="flex flex-col items-center justify-center h-full text-gray-400">
+                        <Camera className="w-8 h-8 mb-2" />
+                        <span className="text-xs">Upload</span>
+                      </div>
                     )}
                     <input
                       type="file"
                       accept="image/*"
                       onChange={handlePhoto1Upload}
-                      className="hidden"
-                      id="photo1-upload"
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                     />
-                    <label htmlFor="photo1-upload" className="cursor-pointer flex flex-col items-center">
-                      <Camera className="w-8 h-8 text-gray-400 mb-2" />
-                      <span className="text-sm text-gray-600">
-                        {photo1File || formData.photo1_url ? 'Change Photo' : 'Upload Photo'}
-                      </span>
-                    </label>
                   </div>
                 </div>
 
-                <div>
-                  <Label>Full Body Photo *</Label>
-                  <div className={`border-2 border-dashed rounded-lg p-4 text-center ${hasRedBorder('photo2') ? 'border-red-500' : 'border-gray-300'}`}>
-                    {formData.photo2_url && !photo2File && (
-                      <img src={formData.photo2_url} alt="Current photo 2" className="w-full h-32 object-cover rounded mb-2" />
-                    )}
-                    {photo2File && (
-                      <img src={URL.createObjectURL(photo2File)} alt="New photo 2" className="w-full h-32 object-cover rounded mb-2" />
+                {/* Photo 2 */}
+                <div className="space-y-2">
+                  <Label className="text-xs text-center block">Body photo</Label>
+                  <div className={`relative border-2 border-dashed rounded-lg overflow-hidden aspect-[4/5] ${hasRedBorder('photo2') ? 'border-red-500' : 'border-gray-300'}`}>
+                    {getCurrentPhoto2Url() ? (
+                      <img 
+                        src={getCurrentPhoto2Url()} 
+                        alt="Photo 2" 
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="flex flex-col items-center justify-center h-full text-gray-400">
+                        <Camera className="w-8 h-8 mb-2" />
+                        <span className="text-xs">Upload</span>
+                      </div>
                     )}
                     <input
                       type="file"
                       accept="image/*"
                       onChange={handlePhoto2Upload}
-                      className="hidden"
-                      id="photo2-upload"
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                     />
-                    <label htmlFor="photo2-upload" className="cursor-pointer flex flex-col items-center">
-                      <Camera className="w-8 h-8 text-gray-400 mb-2" />
-                      <span className="text-sm text-gray-600">
-                        {photo2File || formData.photo2_url ? 'Change Photo' : 'Upload Photo'}
-                      </span>
-                    </label>
                   </div>
                 </div>
               </div>
             </div>
+
+            {/* Contact Method Selection */}
+            <div className="space-y-4">
+              <div className="text-sm font-medium text-center">Contact method (optional)</div>
+              
+              <div className="grid grid-cols-3 gap-2">
+                <Button
+                  type="button"
+                  variant={selectedContactMethod === 'phone' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setSelectedContactMethod(selectedContactMethod === 'phone' ? null : 'phone')}
+                  className="text-xs"
+                >
+                  <Phone className="w-3 h-3 mr-1" />
+                  Phone
+                </Button>
+                <Button
+                  type="button"
+                  variant={selectedContactMethod === 'facebook' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setSelectedContactMethod(selectedContactMethod === 'facebook' ? null : 'facebook')}
+                  className="text-xs"
+                >
+                  <Facebook className="w-3 h-3 mr-1" />
+                  Facebook
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setSelectedContactMethod(null)}
+                  className="text-xs"
+                >
+                  Skip
+                </Button>
+              </div>
+
+              {/* Phone Contact Form */}
+              {selectedContactMethod === 'phone' && (
+                <div className="space-y-3 p-4 border rounded-lg bg-gray-50">
+                  <div>
+                    <Label htmlFor="contact_name" className="text-xs">Name</Label>
+                    <Input
+                      id="contact_name"
+                      placeholder="Your name"
+                      value={contactForm.name}
+                      onChange={(e) => setContactForm(prev => ({ ...prev, name: e.target.value }))}
+                      className="text-sm"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="phone_number" className="text-xs">Phone Number</Label>
+                    <Input
+                      id="phone_number"
+                      placeholder="Your phone number"
+                      value={contactForm.contact}
+                      onChange={(e) => setContactForm(prev => ({ ...prev, contact: e.target.value }))}
+                      className="text-sm"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Facebook Contact Form */}
+              {selectedContactMethod === 'facebook' && (
+                <div className="space-y-3 p-4 border rounded-lg bg-gray-50">
+                  <div>
+                    <Label htmlFor="facebook_name" className="text-xs">Name</Label>
+                    <Input
+                      id="facebook_name"
+                      placeholder="Your name"
+                      value={contactForm.name}
+                      onChange={(e) => setContactForm(prev => ({ ...prev, name: e.target.value }))}
+                      className="text-sm"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="facebook_url" className="text-xs">Facebook Profile URL</Label>
+                    <Input
+                      id="facebook_url"
+                      placeholder="https://facebook.com/yourprofile"
+                      value={contactForm.facebookUrl}
+                      onChange={(e) => setContactForm(prev => ({ ...prev, facebookUrl: e.target.value }))}
+                      className="text-sm"
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </ScrollArea>
 
-        <div className="flex justify-end space-x-2 pt-4 border-t">
+        <div className="flex justify-between p-6 pt-4 border-t">
           <Button
             variant="outline"
             onClick={() => onOpenChange(false)}
@@ -656,7 +780,7 @@ export const AdminEditApplicationModal = ({
             Cancel
           </Button>
           <Button
-            onClick={handleSave}
+            onClick={handleSubmit}
             disabled={isLoading}
           >
             {isLoading ? "Saving..." : "Save Changes"}
