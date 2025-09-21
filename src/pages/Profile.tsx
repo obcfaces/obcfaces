@@ -1402,7 +1402,13 @@ const Profile = () => {
                                 <span className="font-medium">Reasons:</span> {contestApplication.rejection_reason_types.map((type: string) => REJECTION_REASONS[type as keyof typeof REJECTION_REASONS]).join(', ')}
                                  {isOwner && (
                                    <button 
-                                     onClick={() => startEditingParticipationPhotos()}
+                                     onClick={() => {
+                                       console.log('Change link clicked! Loading user application data...');
+                                       if (contestApplication) {
+                                         setEditModalData(contestApplication);
+                                         setIsEditModalOpen(true);
+                                       }
+                                     }}
                                      className="ml-2 text-primary hover:text-primary/80 underline text-sm"
                                    >
                                      change
