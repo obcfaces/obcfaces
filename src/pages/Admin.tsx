@@ -10,11 +10,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { 
   Calendar, FileText, UserCog, Eye, Edit, Check, X, Trash2, 
-  RotateCcw, Copy, Facebook, Minus, Clock, AlertCircle
+  RotateCcw, Copy, Facebook, Minus, Clock, AlertCircle, Trophy
 } from 'lucide-react';
+import cityTimezones from 'city-timezones';
 import { PhotoModal } from '@/components/photo-modal';
 import { RejectReasonModal } from '@/components/reject-reason-modal';
 import { VotersModal } from '@/components/voters-modal';
@@ -156,6 +158,7 @@ const Admin = () => {
   const [selectedParticipantForVoters, setSelectedParticipantForVoters] = useState<{ id: string; name: string } | null>(null);
   const [countryFilter, setCountryFilter] = useState<string>('all');
   const [genderFilter, setGenderFilter] = useState<string>('all');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
   const [selectedUserApplications, setSelectedUserApplications] = useState<string | null>(null);
   const [editingApplicationId, setEditingApplicationId] = useState<string | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -341,12 +344,52 @@ const Admin = () => {
         return <Badge variant="default" className="bg-green-500">Approved</Badge>;
       case 'rejected':
         return <Badge variant="destructive">Rejected</Badge>;
+      case 'finalist':
+        return <Badge variant="default" className="bg-yellow-500 text-black">
+          <Trophy className="w-3 h-3 mr-1" />
+          Finalist
+        </Badge>;
       default:
         return <Badge variant="outline">{status}</Badge>;
     }
   };
 
+  // Helper function to get the next Monday based on timezone
+  const getNextMondayForCountry = (country: string) => {
+    try {
+      // Get timezone for the country
+      const cityLookup = cityTimezones.lookupViaCity('Manila'); // Default to Philippines timezone
+      const timezone = Array.isArray(cityLookup) && cityLookup.length > 0 ? cityLookup[0].timezone : 'Asia/Manila';
+      
+      // Get current date in the target timezone
+      const now = new Date();
+      const targetDate = new Date(now.toLocaleString("en-US", {timeZone: timezone}));
+      
+      // Calculate next Monday
+      const dayOfWeek = targetDate.getDay(); // 0 = Sunday, 1 = Monday, etc.
+      const daysUntilMonday = dayOfWeek === 0 ? 1 : (8 - dayOfWeek); // Days to next Monday
+      
+      const nextMonday = new Date(targetDate);
+      nextMonday.setDate(targetDate.getDate() + daysUntilMonday);
+      nextMonday.setHours(0, 0, 0, 0);
+      
+      return nextMonday.toISOString().split('T')[0]; // Return YYYY-MM-DD format
+    } catch (error) {
+      console.error('Error calculating next Monday:', error);
+      // Fallback: calculate next Monday in local time
+      const now = new Date();
+      const dayOfWeek = now.getDay();
+      const daysUntilMonday = dayOfWeek === 0 ? 1 : (8 - dayOfWeek);
+      const nextMonday = new Date(now);
+      nextMonday.setDate(now.getDate() + daysUntilMonday);
+      nextMonday.setHours(0, 0, 0, 0);
+      return nextMonday.toISOString().split('T')[0];
+    }
+  };
+
   const reviewApplication = async (applicationId: string, newStatus: string) => {
+    const application = contestApplications.find(app => app.id === applicationId);
+    
     const { error } = await supabase
       .from('contest_applications')
       .update({
@@ -365,12 +408,72 @@ const Admin = () => {
       return;
     }
 
+    // If status is finalist, automatically add to weekly contest
+    if (newStatus === 'finalist' && application) {
+      try {
+        const appData = typeof application.application_data === 'string' 
+          ? JSON.parse(application.application_data) 
+          : application.application_data;
+        
+        const nextMondayDate = getNextMondayForCountry(appData.country || 'PH');
+        const nextSundayDate = new Date(nextMondayDate);
+        nextSundayDate.setDate(nextSundayDate.getDate() + 6);
+        
+        // Check if weekly contest exists for next Monday
+        let { data: existingContest } = await supabase
+          .from('weekly_contests')
+          .select('id')
+          .eq('week_start_date', nextMondayDate)
+          .single();
+
+        let contestId = existingContest?.id;
+
+        // Create contest if it doesn't exist
+        if (!contestId) {
+          const { data: newContest, error: contestError } = await supabase
+            .from('weekly_contests')
+            .insert({
+              title: `Contest ${new Date(nextMondayDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}-${nextSundayDate.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}`,
+              week_start_date: nextMondayDate,
+              week_end_date: nextSundayDate.toISOString().split('T')[0],
+              status: 'active'
+            })
+            .select('id')
+            .single();
+
+          if (contestError) {
+            console.error('Error creating weekly contest:', contestError);
+          } else {
+            contestId = newContest.id;
+          }
+        }
+
+        // Add participant to weekly contest
+        if (contestId) {
+          const { error: participantError } = await supabase
+            .from('weekly_contest_participants')
+            .insert({
+              contest_id: contestId,
+              user_id: application.user_id,
+              application_data: application.application_data
+            });
+
+          if (participantError) {
+            console.error('Error adding participant to weekly contest:', participantError);
+          }
+        }
+      } catch (error) {
+        console.error('Error handling finalist status:', error);
+      }
+    }
+
     toast({
       title: "Success",
       description: `Application ${newStatus}`,
     });
 
     fetchContestApplications();
+    fetchWeeklyParticipants();
   };
 
   const deleteApplication = async (applicationId: string) => {
@@ -634,6 +737,18 @@ const Admin = () => {
                 <div className="flex items-center justify-between">
                   <h2 className="text-xl font-semibold">Contest Applications</h2>
                   <div className="flex gap-4 items-center">
+                    <Select value={statusFilter} onValueChange={setStatusFilter}>
+                      <SelectTrigger className="w-40">
+                        <SelectValue placeholder="Filter by status" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Statuses</SelectItem>
+                        <SelectItem value="pending">Pending</SelectItem>
+                        <SelectItem value="approved">Approved</SelectItem>
+                        <SelectItem value="rejected">Rejected</SelectItem>
+                        <SelectItem value="finalist">Finalist</SelectItem>
+                      </SelectContent>
+                    </Select>
                     <Button
                       variant={showDeletedApplications ? "default" : "outline"}
                       onClick={async () => {
@@ -657,6 +772,7 @@ const Admin = () => {
                       const appData = application.application_data || {};
                       if (countryFilter !== 'all' && appData.country !== countryFilter) return false;
                       if (genderFilter !== 'all' && appData.gender !== genderFilter) return false;
+                      if (statusFilter !== 'all' && application.status !== statusFilter) return false;
                       return true;
                     });
                   
@@ -846,48 +962,20 @@ const Admin = () => {
                                         <Edit className="w-3 h-3" />
                                         <span className="hidden sm:inline ml-1">Edit</span>
                                       </Button>
-                                      <Button
-                                        size="sm"
-                                        onClick={() => {
-                                          if (application.status === 'approved') {
-                                            reviewApplication(application.id, 'pending')
-                                          } else {
-                                            reviewApplication(application.id, 'approved')
-                                          }
-                                        }}
-                                        className={
-                                          application.status === 'approved'
-                                            ? "bg-yellow-600 hover:bg-yellow-700 text-xs px-2 py-1 h-7"
-                                            : "bg-green-600 hover:bg-green-700 text-xs px-2 py-1 h-7"
-                                        }
-                                      >
-                                        {application.status === 'approved' ? (
-                                          <>
-                                            <Minus className="w-3 h-3" />
-                                            <span className="hidden sm:inline ml-1">Unpublish</span>
-                                          </>
-                                        ) : (
-                                          <>
-                                            <Check className="w-3 h-3" />
-                                            <span className="hidden sm:inline ml-1">Approve</span>
-                                          </>
-                                        )}
-                                      </Button>
-                                      <Button
-                                        size="sm"
-                                        variant="destructive"
-                                        onClick={() => {
-                                          setApplicationToReject({
-                                            id: application.id,
-                                            name: `${appData.first_name} ${appData.last_name}`
-                                          });
-                                          setRejectModalOpen(true);
-                                        }}
-                                        className="text-xs px-2 py-1 h-7"
-                                      >
-                                        <X className="w-3 h-3" />
-                                        <span className="hidden sm:inline ml-1">Reject</span>
-                                      </Button>
+                                       <Select 
+                                         value={application.status} 
+                                         onValueChange={(newStatus) => reviewApplication(application.id, newStatus)}
+                                       >
+                                         <SelectTrigger className="w-28 h-7 text-xs">
+                                           <SelectValue />
+                                         </SelectTrigger>
+                                         <SelectContent>
+                                           <SelectItem value="pending">Pending</SelectItem>
+                                           <SelectItem value="approved">Approved</SelectItem>
+                                           <SelectItem value="finalist">Finalist</SelectItem>
+                                           <SelectItem value="rejected">Rejected</SelectItem>
+                                         </SelectContent>
+                                       </Select>
                                       <Button
                                         size="sm"
                                         variant="outline"
@@ -1056,57 +1144,29 @@ const Admin = () => {
                                           <div className="flex gap-1 flex-wrap justify-center">
                                             {!showDeletedApplications && (
                                               <>
-                                                <Button
-                                                  size="sm"
-                                                  onClick={() => {
-                                                    if (prevApp.status === 'approved') {
-                                                      reviewApplication(prevApp.id, 'pending')
-                                                    } else {
-                                                      reviewApplication(prevApp.id, 'approved')
-                                                    }
-                                                  }}
-                                                  className={
-                                                    prevApp.status === 'approved'
-                                                      ? "bg-yellow-600 hover:bg-yellow-700 text-xs px-2 py-1 h-7"
-                                                      : "bg-green-600 hover:bg-green-700 text-xs px-2 py-1 h-7"
-                                                  }
-                                                >
-                                                  {prevApp.status === 'approved' ? (
-                                                    <>
-                                                      <Minus className="w-3 h-3" />
-                                                      <span className="hidden sm:inline ml-1">Unpublish</span>
-                                                    </>
-                                                  ) : (
-                                                    <>
-                                                      <Check className="w-3 h-3" />
-                                                      <span className="hidden sm:inline ml-1">Approve</span>
-                                                    </>
-                                                  )}
-                                                </Button>
-                                                <Button
-                                                  size="sm"
-                                                  variant="destructive"
-                                                  onClick={() => {
-                                                    setApplicationToReject({
-                                                      id: prevApp.id,
-                                                      name: `${prevAppData.first_name} ${prevAppData.last_name}`
-                                                    });
-                                                    setRejectModalOpen(true);
-                                                  }}
-                                                  className="text-xs px-2 py-1 h-7"
-                                                >
-                                                  <X className="w-3 h-3" />
-                                                  <span className="hidden sm:inline ml-1">Reject</span>
-                                                </Button>
-                                                <Button
-                                                  size="sm"
-                                                  variant="outline"
-                                                  onClick={() => deleteApplication(prevApp.id)}
-                                                  className="text-xs px-2 py-1 h-7"
-                                                >
-                                                  <Trash2 className="w-3 h-3" />
-                                                  <span className="hidden sm:inline ml-1">Delete</span>
-                                                </Button>
+                                                 <Select 
+                                                   value={prevApp.status} 
+                                                   onValueChange={(newStatus) => reviewApplication(prevApp.id, newStatus)}
+                                                 >
+                                                   <SelectTrigger className="w-28 h-7 text-xs">
+                                                     <SelectValue />
+                                                   </SelectTrigger>
+                                                   <SelectContent>
+                                                     <SelectItem value="pending">Pending</SelectItem>
+                                                     <SelectItem value="approved">Approved</SelectItem>
+                                                     <SelectItem value="finalist">Finalist</SelectItem>
+                                                     <SelectItem value="rejected">Rejected</SelectItem>
+                                                   </SelectContent>
+                                                 </Select>
+                                                 <Button
+                                                   size="sm"
+                                                   variant="outline"
+                                                   onClick={() => deleteApplication(prevApp.id)}
+                                                   className="text-xs px-2 py-1 h-7"
+                                                 >
+                                                   <Trash2 className="w-3 h-3" />
+                                                   <span className="hidden sm:inline ml-1">Delete</span>
+                                                 </Button>
                                               </>
                                             )}
                                           </div>
