@@ -21,6 +21,18 @@ import { VotersModal } from '@/components/voters-modal';
 import { ContestParticipationModal } from '@/components/contest-participation-modal';
 import { ApplicationEditHistory } from '@/components/ApplicationEditHistory';
 
+// Helper function to check if rejection reason is a duplicate of predefined reasons
+const isReasonDuplicate = (rejectionReason: string, reasonTypes: string[]) => {
+  if (!rejectionReason || !reasonTypes || reasonTypes.length === 0) return false;
+  
+  const predefinedText = reasonTypes
+    .filter(type => type && REJECTION_REASONS[type as keyof typeof REJECTION_REASONS])
+    .map(type => REJECTION_REASONS[type as keyof typeof REJECTION_REASONS])
+    .join(', ');
+    
+  return rejectionReason.trim() === predefinedText;
+};
+
 interface UserRole {
   user_id: string;
   role: string;
@@ -899,7 +911,7 @@ const Admin = () => {
                     .join(', ')}
                 </div>
               )}
-              {application.rejection_reason && application.rejection_reason.trim() && (
+              {application.rejection_reason && application.rejection_reason.trim() && !isReasonDuplicate(application.rejection_reason, (application as any).rejection_reason_types) && (
                 <div className="text-destructive/70">
                   <span className="font-medium">Additional comments:</span> {application.rejection_reason}
                 </div>
@@ -1026,7 +1038,7 @@ const Admin = () => {
                                                       .join(', ')}
                                                   </div>
                                                 )}
-                                                {prevApp.rejection_reason && prevApp.rejection_reason.trim() && (
+                                                {prevApp.rejection_reason && prevApp.rejection_reason.trim() && !isReasonDuplicate(prevApp.rejection_reason, (prevApp as any).rejection_reason_types) && (
                                                   <div className="text-destructive/70">
                                                     <span className="font-medium">Additional comments:</span> {prevApp.rejection_reason}
                                                   </div>
@@ -1116,7 +1128,7 @@ const Admin = () => {
                                                   .join(', ')}
                                               </div>
                                             )}
-                                            {prevApp.rejection_reason && prevApp.rejection_reason.trim() && (
+                                            {prevApp.rejection_reason && prevApp.rejection_reason.trim() && !isReasonDuplicate(prevApp.rejection_reason, (prevApp as any).rejection_reason_types) && (
                                               <div className="text-destructive/70">
                                                 <span className="font-medium">Additional comments:</span> {prevApp.rejection_reason}
                                               </div>
@@ -1333,13 +1345,16 @@ const Admin = () => {
           
           console.log('Rejecting application:', applicationToReject);
           console.log('Reason types:', reasonTypes);
-          console.log('Notes:', notes);
+          console.log('Notes (additional comments):', notes);
+          
+          // Only save notes if they contain actual additional comments, not predefined reasons
+          const trimmedNotes = notes?.trim() || '';
           
           const { error } = await supabase
             .from('contest_applications')
             .update({
               status: 'rejected',
-              rejection_reason: notes,
+              rejection_reason: trimmedNotes, // Only save additional comments here
               rejection_reason_types: reasonTypes,
               reviewed_at: new Date().toISOString(),
               reviewed_by: (await supabase.auth.getUser()).data.user?.id
