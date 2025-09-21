@@ -79,6 +79,7 @@ interface ContestApplication {
   submitted_at: string;
   approved_at?: string;
   rejected_at?: string;
+  reviewed_at?: string;
   rejection_reason?: string;
   rejection_reason_type?: string;
   reviewed_by?: string;
@@ -910,15 +911,16 @@ const Admin = () => {
              <div className="space-y-1 text-xs leading-tight">
                {(application as any).rejection_reason_types && (application as any).rejection_reason_types.length > 0 && (
                  <div className="text-destructive/80">
-                   {/* Date and admin info at the beginning */}
-                   {application.rejected_at && (
+                   {/* Always show date and admin info if available */}
+                   {(application.rejected_at || application.reviewed_at) && (
                      <>
-                       {new Date(application.rejected_at).toLocaleDateString('en-GB', { 
+                       {new Date(application.rejected_at || application.reviewed_at).toLocaleDateString('en-GB', { 
                          day: 'numeric', 
                          month: 'short' 
                        }).toLowerCase()}{' '}
-                       {application.reviewed_by && profiles.find(p => p.id === application.reviewed_by)?.email && 
-                         profiles.find(p => p.id === application.reviewed_by)?.email?.substring(0, 4)}{' '}
+                       {application.reviewed_by && profiles.find(p => p.id === application.reviewed_by)?.email ? 
+                         profiles.find(p => p.id === application.reviewed_by)?.email?.substring(0, 4) + ' ' : 
+                         'unkn '}
                      </>
                    )}
                    {(application as any).rejection_reason_types
@@ -1117,15 +1119,16 @@ const Admin = () => {
                            <div className="space-y-1 text-xs leading-tight">
                              {(prevApp as any).rejection_reason_types && (prevApp as any).rejection_reason_types.length > 0 && (
                                <div className="text-destructive/80">
-                                 {/* Date and admin info at the beginning */}
-                                 {prevApp.rejected_at && (
+                                 {/* Always show date and admin info if available */}
+                                 {(prevApp.rejected_at || prevApp.reviewed_at) && (
                                    <>
-                                     {new Date(prevApp.rejected_at).toLocaleDateString('en-GB', { 
+                                     {new Date(prevApp.rejected_at || prevApp.reviewed_at).toLocaleDateString('en-GB', { 
                                        day: 'numeric', 
                                        month: 'short' 
                                      }).toLowerCase()}{' '}
-                                     {prevApp.reviewed_by && profiles.find(p => p.id === prevApp.reviewed_by)?.email && 
-                                       profiles.find(p => p.id === prevApp.reviewed_by)?.email?.substring(0, 4)}{' '}
+                                     {prevApp.reviewed_by && profiles.find(p => p.id === prevApp.reviewed_by)?.email ? 
+                                       profiles.find(p => p.id === prevApp.reviewed_by)?.email?.substring(0, 4) + ' ' : 
+                                       'unkn '}
                                    </>
                                  )}
                                  {(prevApp as any).rejection_reason_types
