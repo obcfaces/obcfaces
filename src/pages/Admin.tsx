@@ -893,15 +893,15 @@ const Admin = () => {
             <div className="space-y-1 text-xs leading-tight">
               {(application as any).rejection_reason_types && (application as any).rejection_reason_types.length > 0 && (
                 <div className="text-destructive/80">
-                  <span className="font-medium">Reasons:</span> {(application as any).rejection_reason_types
+                  <span className="font-medium">Rejection reasons:</span> {(application as any).rejection_reason_types
                     .filter((type: string) => type && REJECTION_REASONS[type as keyof typeof REJECTION_REASONS])
                     .map((type: string) => REJECTION_REASONS[type as keyof typeof REJECTION_REASONS])
                     .join(', ')}
                 </div>
               )}
-              {application.rejection_reason && (
+              {application.rejection_reason && application.rejection_reason.trim() && (
                 <div className="text-destructive/70">
-                  <span className="font-medium">Notes:</span> {application.rejection_reason}
+                  <span className="font-medium">Additional comments:</span> {application.rejection_reason}
                 </div>
               )}
             </div>
@@ -1020,15 +1020,15 @@ const Admin = () => {
                                               <div className="space-y-1 text-xs leading-tight">
                                                 {(prevApp as any).rejection_reason_types && (prevApp as any).rejection_reason_types.length > 0 && (
                                                   <div className="text-destructive/80">
-                                                    <span className="font-medium">Reasons:</span> {(prevApp as any).rejection_reason_types
+                                                    <span className="font-medium">Rejection reasons:</span> {(prevApp as any).rejection_reason_types
                                                       .filter((type: string) => type && REJECTION_REASONS[type as keyof typeof REJECTION_REASONS])
                                                       .map((type: string) => REJECTION_REASONS[type as keyof typeof REJECTION_REASONS])
                                                       .join(', ')}
                                                   </div>
                                                 )}
-                                                {prevApp.rejection_reason && (
+                                                {prevApp.rejection_reason && prevApp.rejection_reason.trim() && (
                                                   <div className="text-destructive/70">
-                                                    <span className="font-medium">Notes:</span> {prevApp.rejection_reason}
+                                                    <span className="font-medium">Additional comments:</span> {prevApp.rejection_reason}
                                                   </div>
                                                 )}
                                               </div>
@@ -1110,15 +1110,15 @@ const Admin = () => {
                                           <div className="space-y-1 text-xs leading-tight">
                                             {(prevApp as any).rejection_reason_types && (prevApp as any).rejection_reason_types.length > 0 && (
                                               <div className="text-destructive/80">
-                                                <span className="font-medium">Reasons:</span> {(prevApp as any).rejection_reason_types
+                                                <span className="font-medium">Rejection reasons:</span> {(prevApp as any).rejection_reason_types
                                                   .filter((type: string) => type && REJECTION_REASONS[type as keyof typeof REJECTION_REASONS])
                                                   .map((type: string) => REJECTION_REASONS[type as keyof typeof REJECTION_REASONS])
                                                   .join(', ')}
                                               </div>
                                             )}
-                                            {prevApp.rejection_reason && (
+                                            {prevApp.rejection_reason && prevApp.rejection_reason.trim() && (
                                               <div className="text-destructive/70">
-                                                <span className="font-medium">Notes:</span> {prevApp.rejection_reason}
+                                                <span className="font-medium">Additional comments:</span> {prevApp.rejection_reason}
                                               </div>
                                             )}
                                           </div>

@@ -1397,30 +1397,30 @@ const Profile = () => {
                            <h3 className="font-semibold text-destructive">Application Rejected</h3>
                          </div>
                          <div className="space-y-2">
-                            {contestApplication.rejection_reason_types && contestApplication.rejection_reason_types.length > 0 && (
-                              <p className="text-sm text-destructive/80">
-                                <span className="font-medium">Reasons:</span> {contestApplication.rejection_reason_types.map((type: string) => REJECTION_REASONS[type as keyof typeof REJECTION_REASONS]).join(', ')}
-                                 {isOwner && (
-                                   <button 
-                                     onClick={() => {
-                                       console.log('Change link clicked! Loading user application data...');
-                                       if (contestApplication) {
-                                         setEditModalData(contestApplication);
-                                         setIsEditModalOpen(true);
-                                       }
-                                     }}
-                                     className="ml-2 text-primary hover:text-primary/80 underline text-sm"
-                                   >
-                                     change
-                                   </button>
-                                 )}
-                              </p>
-                            )}
-                             {contestApplication.rejection_reason && (
+                             {contestApplication.rejection_reason_types && contestApplication.rejection_reason_types.length > 0 && (
                                <p className="text-sm text-destructive/80">
-                                 <span className="font-medium">Notes:</span> {contestApplication.rejection_reason}
+                                 <span className="font-medium">Rejection reasons:</span> {contestApplication.rejection_reason_types.map((type: string) => REJECTION_REASONS[type as keyof typeof REJECTION_REASONS]).join(', ')}
+                                  {isOwner && (
+                                    <button 
+                                      onClick={() => {
+                                        console.log('Change link clicked! Loading user application data...');
+                                        if (contestApplication) {
+                                          setEditModalData(contestApplication);
+                                          setIsEditModalOpen(true);
+                                        }
+                                      }}
+                                      className="ml-2 text-primary hover:text-primary/80 underline text-sm"
+                                    >
+                                      change
+                                    </button>
+                                  )}
                                </p>
-                              )}
+                             )}
+                              {contestApplication.rejection_reason && contestApplication.rejection_reason.trim() && (
+                                <p className="text-sm text-destructive/80">
+                                  <span className="font-medium">Additional comments:</span> {contestApplication.rejection_reason}
+                                </p>
+                               )}
                            </div>
                        </div>
                      )}
