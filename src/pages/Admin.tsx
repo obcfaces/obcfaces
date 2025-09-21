@@ -111,7 +111,7 @@ const REJECTION_REASONS = {
   second_photo_pose: "Second photo – Must show the whole body from head to toe, standing straight, arms at the sides.",
   second_photo_clothing: "Second photo – Wear tight/fitted clothes (swimsuit, fitted shorts, or top). Dresses, skirts, loose tops, or high heels are not allowed.",
   second_photo_accessories: "Second photo – No bags or backpacks.",
-  second_photo_filters: "Second photo – No filters allowed.",
+  second_photo_filters: "Second photo – No filters or ai allowed.",
   both_photos_quality: "Both photos – The quality is too low."
 };
 
