@@ -752,6 +752,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      auto_transition_weekly_contests: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       check_conversation_membership: {
         Args: { conversation_id_param: string; user_id_param: string }
         Returns: boolean
