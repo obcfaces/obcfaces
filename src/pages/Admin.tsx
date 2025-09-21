@@ -750,8 +750,35 @@ const Admin = () => {
                                       />
                                     </div>
                                   )}
-                                </div>
-                              </div>
+                                 </div>
+
+                                 {/* Phone and Social Media */}
+                                 <div className="text-xs text-muted-foreground mb-1">
+                                   <div className="flex items-center gap-2">
+                                     {(() => {
+                                       const phone = appData.phone?.country && appData.phone?.number 
+                                         ? `${appData.phone.country} ${appData.phone.number}` 
+                                         : 'Not provided';
+                                       return <span>{phone}</span>;
+                                     })()}
+                                     {appData.facebook_url && (
+                                       <a
+                                         href={appData.facebook_url}
+                                         target="_blank"
+                                         rel="noopener noreferrer"
+                                         className="text-blue-600 hover:text-blue-800"
+                                       >
+                                         <Facebook className="h-3 w-3" />
+                                       </a>
+                                     )}
+                                   </div>
+                                 </div>
+
+                                 {/* Education */}
+                                 <div className="text-xs text-muted-foreground mb-1">
+                                   Education: {appData.education || 'Not specified'}
+                                 </div>
+                               </div>
 
                               {/* Right side actions */}
                               <div className="p-4 md:w-auto flex flex-col justify-between gap-2">
