@@ -338,23 +338,6 @@ const Admin = () => {
     }
   };
 
-  const getApplicationStatusBadge = (status: string) => {
-    switch (status) {
-      case 'pending':
-        return <Badge variant="secondary">Pending</Badge>;
-      case 'approved':
-        return <Badge variant="default" className="bg-green-500">Approved</Badge>;
-      case 'rejected':
-        return <Badge variant="destructive">Rejected</Badge>;
-      case 'finalist':
-        return <Badge variant="default" className="bg-yellow-500 text-black">
-          <Trophy className="w-3 h-3 mr-1" />
-          Finalist
-        </Badge>;
-      default:
-        return <Badge variant="outline">{status}</Badge>;
-    }
-  };
 
   // Helper function to get the next Monday based on timezone
   const getNextMondayForCountry = (country: string) => {
@@ -739,18 +722,35 @@ const Admin = () => {
                 <div className="flex items-center justify-between">
                   <h2 className="text-xl font-semibold">Contest Applications</h2>
                   <div className="flex gap-4 items-center">
-                    <Select value={statusFilter} onValueChange={setStatusFilter}>
-                      <SelectTrigger className="w-40">
-                        <SelectValue placeholder="Filter by status" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">All Statuses</SelectItem>
-                        <SelectItem value="pending">Pending</SelectItem>
-                        <SelectItem value="approved">Approved</SelectItem>
-                        <SelectItem value="rejected">Rejected</SelectItem>
-                        <SelectItem value="finalist">Finalist</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <div className="flex flex-col gap-2">
+                      <Select 
+                        value={statusFilter} 
+                        onValueChange={setStatusFilter}
+                      >
+                        <SelectTrigger 
+                          className={`w-40 ${
+                            statusFilter === 'approved' ? 'bg-green-100 border-green-500 text-green-700' :
+                            statusFilter === 'rejected' ? 'bg-red-100 border-red-500 text-red-700' :
+                            statusFilter === 'finalist' ? 'bg-blue-100 border-blue-500 text-blue-700' :
+                            ''
+                          }`}
+                        >
+                          <SelectValue placeholder="Filter by status" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">All Statuses</SelectItem>
+                          <SelectItem value="pending">Pending</SelectItem>
+                          <SelectItem value="approved">Approved</SelectItem>
+                          <SelectItem value="rejected">Rejected</SelectItem>
+                          <SelectItem value="finalist">Finalist</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      {statusFilter !== 'all' && (
+                        <p className="text-xs text-muted-foreground">
+                          Filter: {statusFilter}
+                        </p>
+                      )}
+                    </div>
                     <Button
                       variant={showDeletedApplications ? "default" : "outline"}
                       onClick={async () => {
@@ -920,12 +920,11 @@ const Admin = () => {
 
                               {/* Right side actions */}
                               <div className="p-4 md:w-auto flex flex-col justify-between gap-2">
-                                <div className="flex flex-col gap-1 items-center">
-                                  {getApplicationStatusBadge(application.status)}
-                                  <p className="text-xs text-muted-foreground text-center">
-                                    {submittedDate.toLocaleDateString('ru-RU')} {submittedDate.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}
-                                  </p>
-                                </div>
+                              <div className="flex flex-col gap-1 items-center">
+                                <p className="text-xs text-muted-foreground text-center">
+                                  {submittedDate.toLocaleDateString('ru-RU')} {submittedDate.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}
+                                </p>
+                              </div>
                                 <div className="flex gap-1 flex-wrap justify-center">
                                   <Button
                                     size="sm"
@@ -965,20 +964,27 @@ const Admin = () => {
                                         <Edit className="w-3 h-3" />
                                         <span className="hidden sm:inline ml-1">Edit</span>
                                       </Button>
-                                       <Select 
-                                         value={application.status} 
-                                         onValueChange={(newStatus) => reviewApplication(application.id, newStatus)}
-                                       >
-                                         <SelectTrigger className="w-28 h-7 text-xs">
-                                           <SelectValue />
-                                         </SelectTrigger>
-                                         <SelectContent>
-                                           <SelectItem value="pending">Pending</SelectItem>
-                                           <SelectItem value="approved">Approved</SelectItem>
-                                           <SelectItem value="finalist">Finalist</SelectItem>
-                                           <SelectItem value="rejected">Rejected</SelectItem>
-                                         </SelectContent>
-                                       </Select>
+                                      <Select 
+                                        value={application.status} 
+                                        onValueChange={(newStatus) => reviewApplication(application.id, newStatus)}
+                                      >
+                                        <SelectTrigger 
+                                          className={`w-28 h-7 text-xs ${
+                                            application.status === 'approved' ? 'bg-green-100 border-green-500 text-green-700' :
+                                            application.status === 'rejected' ? 'bg-red-100 border-red-500 text-red-700' :
+                                            application.status === 'finalist' ? 'bg-blue-100 border-blue-500 text-blue-700' :
+                                            ''
+                                          }`}
+                                        >
+                                          <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                          <SelectItem value="pending">Pending</SelectItem>
+                                          <SelectItem value="approved">Approved</SelectItem>
+                                          <SelectItem value="finalist">Finalist</SelectItem>
+                                          <SelectItem value="rejected">Rejected</SelectItem>
+                                        </SelectContent>
+                                      </Select>
                                       <Button
                                         size="sm"
                                         variant="outline"
@@ -1139,7 +1145,6 @@ const Admin = () => {
                                         {/* Right side actions */}
                                         <div className="p-4 md:w-auto flex flex-col justify-between gap-2">
                                           <div className="flex flex-col gap-1 items-center">
-                                            {getApplicationStatusBadge(prevApp.status)}
                                             <p className="text-xs text-muted-foreground text-center">
                                               {prevSubmittedDate.toLocaleDateString('ru-RU')} {prevSubmittedDate.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}
                                             </p>
@@ -1147,20 +1152,27 @@ const Admin = () => {
                                           <div className="flex gap-1 flex-wrap justify-center">
                                             {!showDeletedApplications && (
                                               <>
-                                                 <Select 
-                                                   value={prevApp.status} 
-                                                   onValueChange={(newStatus) => reviewApplication(prevApp.id, newStatus)}
-                                                 >
-                                                   <SelectTrigger className="w-28 h-7 text-xs">
-                                                     <SelectValue />
-                                                   </SelectTrigger>
-                                                   <SelectContent>
-                                                     <SelectItem value="pending">Pending</SelectItem>
-                                                     <SelectItem value="approved">Approved</SelectItem>
-                                                     <SelectItem value="finalist">Finalist</SelectItem>
-                                                     <SelectItem value="rejected">Rejected</SelectItem>
-                                                   </SelectContent>
-                                                 </Select>
+                                                <Select 
+                                                  value={prevApp.status} 
+                                                  onValueChange={(newStatus) => reviewApplication(prevApp.id, newStatus)}
+                                                >
+                                                  <SelectTrigger 
+                                                    className={`w-28 h-7 text-xs ${
+                                                      prevApp.status === 'approved' ? 'bg-green-100 border-green-500 text-green-700' :
+                                                      prevApp.status === 'rejected' ? 'bg-red-100 border-red-500 text-red-700' :
+                                                      prevApp.status === 'finalist' ? 'bg-blue-100 border-blue-500 text-blue-700' :
+                                                      ''
+                                                    }`}
+                                                  >
+                                                    <SelectValue />
+                                                  </SelectTrigger>
+                                                  <SelectContent>
+                                                    <SelectItem value="pending">Pending</SelectItem>
+                                                    <SelectItem value="approved">Approved</SelectItem>
+                                                    <SelectItem value="finalist">Finalist</SelectItem>
+                                                    <SelectItem value="rejected">Rejected</SelectItem>
+                                                  </SelectContent>
+                                                </Select>
                                                  <Button
                                                    size="sm"
                                                    variant="outline"
