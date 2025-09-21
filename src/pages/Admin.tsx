@@ -13,7 +13,7 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { 
   Calendar, FileText, UserCog, Eye, Edit, Check, X, Trash2, 
-  RotateCcw, Copy, Facebook, Minus, Clock
+  RotateCcw, Copy, Facebook, Minus, Clock, AlertCircle
 } from 'lucide-react';
 import { PhotoModal } from '@/components/photo-modal';
 import { RejectReasonModal } from '@/components/reject-reason-modal';
@@ -752,23 +752,6 @@ const Admin = () => {
                                   <p className="text-xs text-muted-foreground text-center">
                                     {submittedDate.toLocaleDateString('ru-RU')} {submittedDate.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}
                                   </p>
-                                  {/* Show rejection reason if application is rejected */}
-                                  {application.status === 'rejected' && ((application as any).rejection_reason_types || application.rejection_reason) && (
-                                    <div className="text-xs text-center max-w-[120px]">
-                                      {(application as any).rejection_reason_types && (application as any).rejection_reason_types.length > 0 && (
-                                        <p className="text-destructive/80 mb-1">
-                                          <span className="font-medium">Reasons:</span><br />
-                                          {(application as any).rejection_reason_types.map((type: string) => REJECTION_REASONS[type as keyof typeof REJECTION_REASONS]).join(', ')}
-                                        </p>
-                                      )}
-                                      {application.rejection_reason && (
-                                        <p className="text-destructive/70">
-                                          <span className="font-medium">Notes:</span><br />
-                                          {application.rejection_reason.length > 50 ? `${application.rejection_reason.substring(0, 50)}...` : application.rejection_reason}
-                                        </p>
-                                      )}
-                                    </div>
-                                  )}
                                 </div>
                                 <div className="flex gap-1 flex-wrap justify-center">
                                   <Button
@@ -842,6 +825,32 @@ const Admin = () => {
                           </CardContent>
                         </Card>
                         
+                        {/* Rejection reason under the card - full width */}
+                        {application.status === 'rejected' && ((application as any).rejection_reason_types || application.rejection_reason) && (
+                          <div className="mt-2 p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
+                            <div className="flex items-center gap-2 mb-2">
+                              <AlertCircle className="h-4 w-4 text-destructive" />
+                              <h4 className="font-medium text-destructive">Rejection Details</h4>
+                            </div>
+                            <div className="space-y-2">
+                              {(application as any).rejection_reason_types && (application as any).rejection_reason_types.length > 0 && (
+                                <div>
+                                  <span className="text-sm font-medium text-destructive/90">Reasons: </span>
+                                  <span className="text-sm text-destructive/80">
+                                    {(application as any).rejection_reason_types.map((type: string) => REJECTION_REASONS[type as keyof typeof REJECTION_REASONS]).join(', ')}
+                                  </span>
+                                </div>
+                              )}
+                              {application.rejection_reason && (
+                                <div>
+                                  <span className="text-sm font-medium text-destructive/90">Notes: </span>
+                                  <span className="text-sm text-destructive/80">{application.rejection_reason}</span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                        
                         {/* Previous applications for this user */}
                         {selectedUserApplications === application.user_id && (
                           <div className="mt-2 space-y-2">
@@ -858,6 +867,7 @@ const Admin = () => {
                                   : null;
                                 
                                 return (
+                                  <Card key={prevApp.id} className="overflow-hidden bg-muted/30">
                                   <Card key={prevApp.id} className="overflow-hidden bg-muted/30">
                                     <CardContent className="p-0">
                                       <div className="flex flex-col md:flex-row md:items-stretch">
@@ -956,23 +966,6 @@ const Admin = () => {
                                             <p className="text-xs text-muted-foreground text-center">
                                               {prevSubmittedDate.toLocaleDateString('ru-RU')} {prevSubmittedDate.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}
                                             </p>
-                                            {/* Show rejection reason if application is rejected */}
-                                            {prevApp.status === 'rejected' && ((prevApp as any).rejection_reason_types || prevApp.rejection_reason) && (
-                                              <div className="text-xs text-center max-w-[120px]">
-                                                {(prevApp as any).rejection_reason_types && (prevApp as any).rejection_reason_types.length > 0 && (
-                                                  <p className="text-destructive/80 mb-1">
-                                                    <span className="font-medium">Reasons:</span><br />
-                                                    {(prevApp as any).rejection_reason_types.map((type: string) => REJECTION_REASONS[type as keyof typeof REJECTION_REASONS]).join(', ')}
-                                                  </p>
-                                                )}
-                                                {prevApp.rejection_reason && (
-                                                  <p className="text-destructive/70">
-                                                    <span className="font-medium">Notes:</span><br />
-                                                    {prevApp.rejection_reason.length > 50 ? `${prevApp.rejection_reason.substring(0, 50)}...` : prevApp.rejection_reason}
-                                                  </p>
-                                                )}
-                                              </div>
-                                            )}
                                           </div>
                                           <div className="flex gap-1 flex-wrap justify-center">
                                             {!showDeletedApplications && (
