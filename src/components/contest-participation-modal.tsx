@@ -747,26 +747,33 @@ export const ContestParticipationModal = ({
         city: formData.city
       };
 
+      const userIdToUpdate = (editMode && existingData) ? existingData.user_id : session.user.id;
+      
       const { error: profileError } = await supabase
         .from('profiles')
         .update(profileUpdateData)
-        .eq('id', session.user.id);
+        .eq('id', userIdToUpdate);
 
       if (profileError) {
         console.warn('Failed to update profile:', profileError);
+      } else {
+        console.log('Successfully updated profile for user:', userIdToUpdate);
       }
 
       // Update weekly contest participant data if user is already in current week's contest
-      if (editMode) {
+      if (editMode && existingData) {
+        const userIdToUpdate = existingData.user_id || session.user.id;
         const { error: participantUpdateError } = await supabase
           .from('weekly_contest_participants')
           .update({
             application_data: applicationData
           })
-          .eq('user_id', session.user.id);
+          .eq('user_id', userIdToUpdate);
 
         if (participantUpdateError) {
           console.warn('Failed to update weekly contest participant:', participantUpdateError);
+        } else {
+          console.log('Successfully updated weekly contest participant for user:', userIdToUpdate);
         }
       }
 
@@ -911,6 +918,14 @@ export const ContestParticipationModal = ({
       
       const checkAuth = async () => {
         console.log('Checking authentication status');
+        
+        // In edit mode, skip auth check and go directly to profile
+        if (editMode) {
+          console.log('Edit mode detected, going directly to profile');
+          setCurrentStep('profile');
+          return;
+        }
+        
         const { data: { session } } = await supabase.auth.getSession();
         console.log('Auth check result', { 
           hasSession: !!session?.user, 

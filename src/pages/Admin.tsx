@@ -18,7 +18,7 @@ import {
 import { PhotoModal } from '@/components/photo-modal';
 import { RejectReasonModal } from '@/components/reject-reason-modal';
 import { VotersModal } from '@/components/voters-modal';
-import { AdminEditApplicationModal } from '@/components/AdminEditApplicationModal';
+import { ContestParticipationModal } from '@/components/contest-participation-modal';
 import { ApplicationEditHistory } from '@/components/ApplicationEditHistory';
 
 interface UserRole {
@@ -1352,17 +1352,19 @@ const Admin = () => {
       />
 
       {/* Admin Edit Application Modal */}
-      <AdminEditApplicationModal
+      <ContestParticipationModal
         isOpen={showEditModal}
-        onOpenChange={setShowEditModal}
-        applicationId={editingApplicationId}
-        applicationData={editingApplicationData}
-        onSave={() => {
-          fetchContestApplications();
-          setShowEditModal(false);
-          setEditingApplicationId(null);
-          setEditingApplicationData(null);
+        onOpenChange={(open) => {
+          setShowEditModal(open);
+          if (!open) {
+            // Refresh data when modal closes
+            fetchContestApplications();
+            setEditingApplicationId(null);
+            setEditingApplicationData(null);
+          }
         }}
+        editMode={true}
+        existingData={editingApplicationData}
       />
 
       {/* Application Edit History */}
