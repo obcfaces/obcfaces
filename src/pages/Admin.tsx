@@ -915,10 +915,6 @@ const Admin = () => {
                                    </div>
                                  </div>
 
-                                  {/* Education */}
-                                  <div className="text-xs text-muted-foreground mb-1">
-                                    Education: {appData.education || 'Not specified'}
-                                  </div>
                                </div>
 
                               {/* Right side actions */}
@@ -1164,9 +1160,6 @@ const Admin = () => {
                                             </div>
                                           </div>
 
-                                          <div className="text-xs text-muted-foreground">
-                                            Education: {prevAppData.education || 'Not specified'}
-                                          </div>
                                         </div>
 
                                         {/* Right side actions */}
