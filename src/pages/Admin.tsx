@@ -168,6 +168,8 @@ const Admin = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  console.log('Admin component rendering, statusFilter:', statusFilter);
+
   useEffect(() => {
     checkAdminAccess();
   }, []);
@@ -767,6 +769,7 @@ const Admin = () => {
 
               <div className="space-y-4">
                 {(() => {
+                  console.log('Filtering applications, statusFilter:', statusFilter);
                   const filteredApplications = (showDeletedApplications ? deletedApplications : contestApplications)
                     .filter((application) => {
                       const appData = application.application_data || {};
