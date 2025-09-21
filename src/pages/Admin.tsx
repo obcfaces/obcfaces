@@ -863,6 +863,7 @@ const Admin = () => {
                                 
                                 return (
                                   <Card key={prevApp.id} className="overflow-hidden bg-muted/30">
+                                  <Card key={prevApp.id} className="overflow-hidden bg-muted/30">
                                     <CardContent className="p-0">
                                       <div className="flex flex-col md:flex-row md:items-stretch">
                                         {/* Photos section */}
@@ -951,6 +952,27 @@ const Admin = () => {
                                           <div className="text-xs text-muted-foreground">
                                             Education: {prevAppData.education || 'Not specified'}
                                           </div>
+                                          
+                                          {/* Rejection reason for previous application */}
+                                          {prevApp.status === 'rejected' && ((prevApp as any).rejection_reason_types || prevApp.rejection_reason) && (
+                                            <div className="mt-2 p-2 bg-destructive/10 border border-destructive/20 rounded">
+                                              <div className="space-y-1 text-xs leading-tight">
+                                                {(prevApp as any).rejection_reason_types && (prevApp as any).rejection_reason_types.length > 0 && (
+                                                  <div className="text-destructive/80">
+                                                    {(prevApp as any).rejection_reason_types
+                                                      .filter((type: string) => type && REJECTION_REASONS[type as keyof typeof REJECTION_REASONS])
+                                                      .map((type: string) => REJECTION_REASONS[type as keyof typeof REJECTION_REASONS])
+                                                      .join(', ')}
+                                                  </div>
+                                                )}
+                                                {prevApp.rejection_reason && (
+                                                  <div className="text-destructive/70">
+                                                    {prevApp.rejection_reason}
+                                                  </div>
+                                                )}
+                                              </div>
+                                            </div>
+                                          )}
                                         </div>
 
                                         {/* Right side actions */}
@@ -1020,6 +1042,27 @@ const Admin = () => {
                                           </div>
                                         </div>
                                       </div>
+                                      
+                                      {/* Rejection reason for previous application */}
+                                      {prevApp.status === 'rejected' && ((prevApp as any).rejection_reason_types || prevApp.rejection_reason) && (
+                                        <div className="p-2 bg-destructive/10 border-t border-destructive/20">
+                                          <div className="space-y-1 text-xs leading-tight">
+                                            {(prevApp as any).rejection_reason_types && (prevApp as any).rejection_reason_types.length > 0 && (
+                                              <div className="text-destructive/80">
+                                                {(prevApp as any).rejection_reason_types
+                                                  .filter((type: string) => type && REJECTION_REASONS[type as keyof typeof REJECTION_REASONS])
+                                                  .map((type: string) => REJECTION_REASONS[type as keyof typeof REJECTION_REASONS])
+                                                  .join(', ')}
+                                              </div>
+                                            )}
+                                            {prevApp.rejection_reason && (
+                                              <div className="text-destructive/70">
+                                                {prevApp.rejection_reason}
+                                              </div>
+                                            )}
+                                          </div>
+                                        </div>
+                                      )}
                                     </CardContent>
                                   </Card>
                                 );
