@@ -814,18 +814,35 @@ const Admin = () => {
                    
                     return (
                       <div key={application.id}>
-                        <Card className="overflow-hidden relative">
-                          {/* Application count badge */}
-                          {userApplicationCount > 1 && (
-                            <div 
-                              className="absolute top-0 left-0 z-10 bg-blue-500 text-white text-xs px-2 py-1 rounded-br cursor-pointer hover:bg-blue-600 transition-colors"
-                              onClick={() => setSelectedUserApplications(
-                                selectedUserApplications === application.user_id ? null : application.user_id
-                              )}
-                            >
-                              {userApplicationCount}
-                            </div>
-                          )}
+                         <Card className="overflow-hidden relative">
+                           {/* Edit button in bottom left corner */}
+                           {!showDeletedApplications && (
+                             <Button
+                               size="sm"
+                               variant="outline"
+                               onClick={() => {
+                                 setEditingApplicationId(application.id);
+                                 setEditingApplicationData(application);
+                                 setShowEditModal(true);
+                               }}
+                               className="absolute bottom-0 left-0 z-20 p-1 m-0 rounded-none rounded-tr-md border-0 border-t border-r bg-background/90 hover:bg-background"
+                               title="Edit Application"
+                             >
+                               <Edit className="w-4 h-4" />
+                             </Button>
+                           )}
+                           
+                           {/* Application count badge */}
+                           {userApplicationCount > 1 && (
+                             <div 
+                               className="absolute top-0 left-0 z-10 bg-blue-500 text-white text-xs px-2 py-1 rounded-br cursor-pointer hover:bg-blue-600 transition-colors"
+                               onClick={() => setSelectedUserApplications(
+                                 selectedUserApplications === application.user_id ? null : application.user_id
+                               )}
+                             >
+                               {userApplicationCount}
+                             </div>
+                           )}
                           
                           <CardContent className="p-0">
                             <div className="flex flex-col md:flex-row md:items-stretch">
@@ -941,19 +958,6 @@ const Admin = () => {
                                   </Button>
                                   {!showDeletedApplications && (
                                     <>
-                                      <Button
-                                        size="sm"
-                                        variant="outline"
-                                        onClick={() => {
-                                          setEditingApplicationId(application.id);
-                                          setEditingApplicationData(application);
-                                          setShowEditModal(true);
-                                        }}
-                                        className="text-xs px-2 py-1 h-7"
-                                      >
-                                        <Edit className="w-3 h-3" />
-                                        <span className="hidden sm:inline ml-1">Edit</span>
-                                      </Button>
                                        <Select 
                                          value={application.status} 
                                          onValueChange={(newStatus) => {
