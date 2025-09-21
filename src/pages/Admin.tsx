@@ -1206,20 +1206,29 @@ const Admin = () => {
         onConfirm={async (reasonTypes, notes) => {
           if (!applicationToReject) return;
           
+          console.log('Rejecting application:', applicationToReject);
+          console.log('Reason types:', reasonTypes);
+          console.log('Notes:', notes);
+          
           const { error } = await supabase
             .from('contest_applications')
             .update({
               status: 'rejected',
               rejected_at: new Date().toISOString(),
               rejection_reason: notes,
-              rejection_reason_types: reasonTypes
+              rejection_reason_types: reasonTypes,
+              reviewed_at: new Date().toISOString(),
+              reviewed_by: (await supabase.auth.getUser()).data.user?.id
             })
             .eq('id', applicationToReject.id);
 
+          console.log('Supabase error:', error);
+
           if (error) {
+            console.error('Detailed error:', error);
             toast({
               title: "Error",
-              description: "Failed to reject application",
+              description: `Failed to reject application: ${error.message}`,
               variant: "destructive"
             });
             return;
