@@ -166,6 +166,9 @@ const Admin = () => {
   const [editingApplicationData, setEditingApplicationData] = useState<any>(null);
   const [showEditHistory, setShowEditHistory] = useState(false);
   const [editHistoryApplicationId, setEditHistoryApplicationId] = useState<string | null>(null);
+  const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState('');
+  const [applicationToDelete, setApplicationToDelete] = useState<{ id: string; name: string } | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -724,7 +727,7 @@ const Admin = () => {
                   <h2 className="text-xl font-semibold">Contest Applications</h2>
                   <div className="flex gap-4 items-center">
                     <div className="flex flex-col gap-2">
-                      <Select 
+                       <Select 
                         value={statusFilter} 
                         onValueChange={setStatusFilter}
                       >
@@ -963,40 +966,52 @@ const Admin = () => {
                                         <Edit className="w-3 h-3" />
                                         <span className="hidden sm:inline ml-1">Edit</span>
                                       </Button>
-                                      <Select 
-                                        value={application.status} 
-                                        onValueChange={(newStatus) => reviewApplication(application.id, newStatus)}
-                                      >
-                                        <SelectTrigger 
-                                          className={`w-28 h-7 text-xs ${
-                                            application.status === 'approved' ? 'bg-green-100 border-green-500 text-green-700' :
-                                            application.status === 'rejected' ? 'bg-red-100 border-red-500 text-red-700' :
-                                            application.status === 'finalist' ? 'bg-blue-100 border-blue-500 text-blue-700' :
-                                            application.status === 'this_week' ? 'bg-yellow-100 border-yellow-500 text-yellow-700' :
-                                            ''
-                                          }`}
-                                        >
-                                          <SelectValue />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                          <SelectItem value="pending">Pending</SelectItem>
-                                          <SelectItem value="approved">Approved</SelectItem>
-                                          <SelectItem value="finalist">Finalist</SelectItem>
-                                          <SelectItem value="rejected">Rejected</SelectItem>
-                                          <SelectItem value="this_week">This Week</SelectItem>
-                                        </SelectContent>
-                                      </Select>
-                                      <Button
-                                        size="sm"
-                                        variant="outline"
-                                        onClick={() => deleteApplication(application.id)}
-                                        className="text-xs px-2 py-1 h-7"
-                                      >
-                                        <Trash2 className="w-3 h-3" />
-                                        <span className="hidden sm:inline ml-1">Delete</span>
-                                      </Button>
-                                    </>
-                                  )}
+                                       <Select 
+                                         value={application.status} 
+                                         onValueChange={(newStatus) => {
+                                           if (newStatus === 'delete') {
+                                             const appData = typeof application.application_data === 'string' 
+                                               ? JSON.parse(application.application_data) 
+                                               : application.application_data;
+                                             setApplicationToDelete({ 
+                                               id: application.id, 
+                                               name: `${appData.firstName} ${appData.lastName}` 
+                                             });
+                                             setShowDeleteConfirmModal(true);
+                                             return;
+                                           }
+                                           reviewApplication(application.id, newStatus);
+                                         }}
+                                       >
+                                         <SelectTrigger 
+                                           className={`w-28 h-7 text-xs ${
+                                             application.status === 'approved' ? 'bg-green-100 border-green-500 text-green-700' :
+                                             application.status === 'rejected' ? 'bg-red-100 border-red-500 text-red-700' :
+                                             application.status === 'finalist' ? 'bg-blue-100 border-blue-500 text-blue-700' :
+                                             application.status === 'this_week' ? 'bg-yellow-100 border-yellow-500 text-yellow-700' :
+                                             ''
+                                           }`}
+                                         >
+                                           <SelectValue />
+                                         </SelectTrigger>
+                                         <SelectContent>
+                                           <SelectItem value="pending">Pending</SelectItem>
+                                           <SelectItem value="approved">Approved</SelectItem>
+                                           <SelectItem value="finalist">Finalist</SelectItem>
+                                           <SelectItem value="rejected">Rejected</SelectItem>
+                                           <SelectItem value="this_week">This Week</SelectItem>
+                                           <SelectItem value="" disabled className="h-2"></SelectItem>
+                                           <SelectItem value="" disabled className="h-2"></SelectItem>
+                                           <SelectItem 
+                                             value="delete" 
+                                             className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                           >
+                                             🗑️ Delete
+                                           </SelectItem>
+                                         </SelectContent>
+                                       </Select>
+                                     </>
+                                   )}
                                 </div>
                               </div>
                             </div>
@@ -1172,40 +1187,52 @@ const Admin = () => {
                                           <div className="flex gap-1 flex-wrap justify-center">
                                             {!showDeletedApplications && (
                                               <>
-                                                <Select 
-                                                  value={prevApp.status} 
-                                                  onValueChange={(newStatus) => reviewApplication(prevApp.id, newStatus)}
-                                                >
-                                                  <SelectTrigger 
-                                                    className={`w-28 h-7 text-xs ${
-                                                      prevApp.status === 'approved' ? 'bg-green-100 border-green-500 text-green-700' :
-                                                      prevApp.status === 'rejected' ? 'bg-red-100 border-red-500 text-red-700' :
-                                                      prevApp.status === 'finalist' ? 'bg-blue-100 border-blue-500 text-blue-700' :
-                                                      prevApp.status === 'this_week' ? 'bg-yellow-100 border-yellow-500 text-yellow-700' :
-                                                      ''
-                                                    }`}
-                                                  >
-                                                    <SelectValue />
-                                                  </SelectTrigger>
-                                                  <SelectContent>
-                                                    <SelectItem value="pending">Pending</SelectItem>
-                                                    <SelectItem value="approved">Approved</SelectItem>
-                                                    <SelectItem value="finalist">Finalist</SelectItem>
-                                                    <SelectItem value="rejected">Rejected</SelectItem>
-                                                    <SelectItem value="this_week">This Week</SelectItem>
-                                                  </SelectContent>
-                                                </Select>
-                                                 <Button
-                                                   size="sm"
-                                                   variant="outline"
-                                                   onClick={() => deleteApplication(prevApp.id)}
-                                                   className="text-xs px-2 py-1 h-7"
+                                                 <Select 
+                                                   value={prevApp.status} 
+                                                   onValueChange={(newStatus) => {
+                                                     if (newStatus === 'delete') {
+                                                       const prevAppData = typeof prevApp.application_data === 'string' 
+                                                         ? JSON.parse(prevApp.application_data) 
+                                                         : prevApp.application_data;
+                                                       setApplicationToDelete({ 
+                                                         id: prevApp.id, 
+                                                         name: `${prevAppData.firstName} ${prevAppData.lastName}` 
+                                                       });
+                                                       setShowDeleteConfirmModal(true);
+                                                       return;
+                                                     }
+                                                     reviewApplication(prevApp.id, newStatus);
+                                                   }}
                                                  >
-                                                   <Trash2 className="w-3 h-3" />
-                                                   <span className="hidden sm:inline ml-1">Delete</span>
-                                                 </Button>
-                                              </>
-                                            )}
+                                                   <SelectTrigger 
+                                                     className={`w-28 h-7 text-xs ${
+                                                       prevApp.status === 'approved' ? 'bg-green-100 border-green-500 text-green-700' :
+                                                       prevApp.status === 'rejected' ? 'bg-red-100 border-red-500 text-red-700' :
+                                                       prevApp.status === 'finalist' ? 'bg-blue-100 border-blue-500 text-blue-700' :
+                                                       prevApp.status === 'this_week' ? 'bg-yellow-100 border-yellow-500 text-yellow-700' :
+                                                       ''
+                                                     }`}
+                                                   >
+                                                     <SelectValue />
+                                                   </SelectTrigger>
+                                                   <SelectContent>
+                                                     <SelectItem value="pending">Pending</SelectItem>
+                                                     <SelectItem value="approved">Approved</SelectItem>
+                                                     <SelectItem value="finalist">Finalist</SelectItem>
+                                                     <SelectItem value="rejected">Rejected</SelectItem>
+                                                     <SelectItem value="this_week">This Week</SelectItem>
+                                                     <SelectItem value="" disabled className="h-2"></SelectItem>
+                                                     <SelectItem value="" disabled className="h-2"></SelectItem>
+                                                     <SelectItem 
+                                                       value="delete" 
+                                                       className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                                     >
+                                                       🗑️ Delete
+                                                     </SelectItem>
+                                                   </SelectContent>
+                                                 </Select>
+                                               </>
+                                             )}
                                           </div>
                                         </div>
                                       </div>
@@ -1547,6 +1574,55 @@ const Admin = () => {
           setEditHistoryApplicationId(null);
         }}
       />
+
+      {/* Delete Confirmation Modal */}
+      <Dialog open={showDeleteConfirmModal} onOpenChange={setShowDeleteConfirmModal}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-red-600">Delete Application</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Are you sure you want to delete the application for <strong>{applicationToDelete?.name}</strong>?
+            </p>
+            <p className="text-sm text-muted-foreground">
+              This action cannot be undone. To confirm, please type <strong>delete</strong> below:
+            </p>
+            <Input
+              value={deleteConfirmText}
+              onChange={(e) => setDeleteConfirmText(e.target.value)}
+              placeholder="Type 'delete' to confirm"
+              className="w-full"
+            />
+            <div className="flex justify-end gap-3">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowDeleteConfirmModal(false);
+                  setDeleteConfirmText('');
+                  setApplicationToDelete(null);
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                disabled={deleteConfirmText.toLowerCase() !== 'delete'}
+                onClick={async () => {
+                  if (deleteConfirmText.toLowerCase() === 'delete' && applicationToDelete) {
+                    await deleteApplication(applicationToDelete.id);
+                    setShowDeleteConfirmModal(false);
+                    setDeleteConfirmText('');
+                    setApplicationToDelete(null);
+                  }
+                }}
+              >
+                Delete Application
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 };
