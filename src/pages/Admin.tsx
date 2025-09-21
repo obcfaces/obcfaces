@@ -244,6 +244,30 @@ const Admin = () => {
     filterWeeklyParticipants();
   }, [weeklyContestFilter, contestApplications, weeklyParticipants, participantFilters]);
 
+  // Initialize participant filters when weekly participants are loaded
+  useEffect(() => {
+    if (weeklyParticipants.length > 0) {
+      const newFilters: { [key: string]: string } = {};
+      weeklyParticipants.forEach(participant => {
+        // If participant has final_rank (is a finalist), set to "this week"
+        if (participant.final_rank && participant.final_rank > 0) {
+          newFilters[participant.id] = 'this week';
+        } else if (!participantFilters[participant.id]) {
+          // For non-finalists, set default to "approve" only if not already set
+          newFilters[participant.id] = 'approve';
+        }
+      });
+      
+      // Only update if there are new filters to set
+      if (Object.keys(newFilters).length > 0) {
+        setParticipantFilters(prev => ({
+          ...prev,
+          ...newFilters
+        }));
+      }
+    }
+  }, [weeklyParticipants]);
+
   const checkAdminAccess = async () => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
@@ -798,7 +822,7 @@ const Admin = () => {
                             {/* Contest filter dropdown */}
                             <div className="flex flex-col gap-1 mb-2">
                               <Select 
-                                value={participantFilters[participant.id] || (participant.final_rank ? 'this week' : 'approve')} 
+                                value={participantFilters[participant.id] || 'approve'} 
                                 onValueChange={(value) => {
                                   setParticipantFilters(prev => ({
                                     ...prev,
