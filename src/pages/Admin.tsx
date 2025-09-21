@@ -136,6 +136,8 @@ const Admin = () => {
   const [countryFilter, setCountryFilter] = useState<string>('all');
   const [genderFilter, setGenderFilter] = useState<string>('all');
   const [selectedUserApplications, setSelectedUserApplications] = useState<string | null>(null);
+  const [editingApplicationId, setEditingApplicationId] = useState<string | null>(null);
+  const [showEditModal, setShowEditModal] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -769,6 +771,18 @@ const Admin = () => {
                                     <>
                                       <Button
                                         size="sm"
+                                        variant="outline"
+                                        onClick={() => {
+                                          setEditingApplicationId(application.id);
+                                          setShowEditModal(true);
+                                        }}
+                                        className="text-xs px-2 py-1 h-7"
+                                      >
+                                        <Edit className="w-3 h-3" />
+                                        <span className="hidden sm:inline ml-1">Edit</span>
+                                      </Button>
+                                      <Button
+                                        size="sm"
                                         onClick={() => {
                                           if (application.status === 'approved') {
                                             reviewApplication(application.id, 'pending')
@@ -1317,6 +1331,39 @@ const Admin = () => {
         participantId={selectedParticipantForVoters?.id || ''}
         participantName={selectedParticipantForVoters?.name || ''}
       />
+
+      {/* Edit Application Modal */}
+      <Dialog open={showEditModal} onOpenChange={setShowEditModal}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Edit Application</DialogTitle>
+          </DialogHeader>
+          <div className="text-center p-4">
+            <p className="text-sm text-muted-foreground mb-4">
+              Editing functionality will redirect to the application form.
+            </p>
+            <div className="flex gap-2 justify-center">
+              <Button
+                variant="outline"
+                onClick={() => setShowEditModal(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={() => {
+                  if (editingApplicationId) {
+                    // Redirect to contest page with edit mode
+                    navigate(`/contest?edit=${editingApplicationId}`);
+                  }
+                  setShowEditModal(false);
+                }}
+              >
+                Edit Application
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 };
