@@ -15,7 +15,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { useToast } from '@/hooks/use-toast';
 import { 
   Calendar, FileText, UserCog, Eye, Edit, Check, X, Trash2, 
-  RotateCcw, Copy, Facebook, Minus, Clock, AlertCircle, Trophy
+  RotateCcw, Copy, Facebook, Minus, AlertCircle, Trophy
 } from 'lucide-react';
 import cityTimezones from 'city-timezones';
 import { PhotoModal } from '@/components/photo-modal';
@@ -928,18 +928,6 @@ const Admin = () => {
                                 </p>
                               </div>
                                 <div className="flex gap-1 flex-wrap justify-center">
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    onClick={() => {
-                                      setEditHistoryApplicationId(application.id);
-                                      setShowEditHistory(true);
-                                    }}
-                                    className="px-2"
-                                    title="View Edit History"
-                                  >
-                                    <Clock className="w-3 h-3" />
-                                  </Button>
                                   <Button
                                     size="sm"
                                     variant="outline"
