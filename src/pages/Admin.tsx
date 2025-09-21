@@ -791,32 +791,11 @@ const Admin = () => {
                                    </div>
                                  </div>
 
-                                  {/* Education */}
-                                  <div className="text-xs text-muted-foreground mb-1">
-                                    Education: {appData.education || 'Not specified'}
-                                  </div>
-
-                                  {/* Rejection reason display within main info */}
-                                  {application.status === 'rejected' && ((application as any).rejection_reason_types || application.rejection_reason) && (
-                                    <div className="mt-2 p-2 bg-destructive/10 border border-destructive/20 rounded">
-                                      <div className="space-y-1 text-xs leading-tight">
-                                        {(application as any).rejection_reason_types && (application as any).rejection_reason_types.length > 0 && (
-                                          <div className="text-destructive/80">
-                                            <span className="font-medium">Rejection reasons:</span> {(application as any).rejection_reason_types
-                                              .filter((type: string) => type && REJECTION_REASONS[type as keyof typeof REJECTION_REASONS])
-                                              .map((type: string) => REJECTION_REASONS[type as keyof typeof REJECTION_REASONS])
-                                              .join(', ')}
-                                          </div>
-                                        )}
-                                        {application.rejection_reason && application.rejection_reason.trim() && !isReasonDuplicate(application.rejection_reason, (application as any).rejection_reason_types) && (
-                                          <div className="text-destructive/70">
-                                            <span className="font-medium">Additional comments:</span> {application.rejection_reason}
-                                          </div>
-                                        )}
-                                      </div>
-                                    </div>
-                                  )}
-                                </div>
+                                 {/* Education */}
+                                 <div className="text-xs text-muted-foreground mb-1">
+                                   Education: {appData.education || 'Not specified'}
+                                 </div>
+                               </div>
 
                               {/* Right side actions */}
                               <div className="p-4 md:w-auto flex flex-col justify-between gap-2">
@@ -923,6 +902,27 @@ const Admin = () => {
                             </div>
                           </CardContent>
                         </Card>
+        
+         {/* Rejection reason under the card */}
+        {application.status === 'rejected' && ((application as any).rejection_reason_types || application.rejection_reason) && (
+          <div className="p-2 bg-destructive/10 border border-destructive/20 rounded-b-lg -mt-1">
+            <div className="space-y-1 text-xs leading-tight">
+              {(application as any).rejection_reason_types && (application as any).rejection_reason_types.length > 0 && (
+                <div className="text-destructive/80">
+                  <span className="font-medium">Rejection reasons:</span> {(application as any).rejection_reason_types
+                    .filter((type: string) => type && REJECTION_REASONS[type as keyof typeof REJECTION_REASONS])
+                    .map((type: string) => REJECTION_REASONS[type as keyof typeof REJECTION_REASONS])
+                    .join(', ')}
+                </div>
+              )}
+              {application.rejection_reason && application.rejection_reason.trim() && !isReasonDuplicate(application.rejection_reason, (application as any).rejection_reason_types) && (
+                <div className="text-destructive/70">
+                  <span className="font-medium">Additional comments:</span> {application.rejection_reason}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
                         
                         {/* Previous applications for this user */}
                         {selectedUserApplications === application.user_id && (
