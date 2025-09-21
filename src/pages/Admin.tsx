@@ -752,6 +752,23 @@ const Admin = () => {
                                   <p className="text-xs text-muted-foreground text-center">
                                     {submittedDate.toLocaleDateString('ru-RU')} {submittedDate.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}
                                   </p>
+                                  {/* Show rejection reason if application is rejected */}
+                                  {application.status === 'rejected' && ((application as any).rejection_reason_types || application.rejection_reason) && (
+                                    <div className="text-xs text-center max-w-[120px]">
+                                      {(application as any).rejection_reason_types && (application as any).rejection_reason_types.length > 0 && (
+                                        <p className="text-destructive/80 mb-1">
+                                          <span className="font-medium">Reasons:</span><br />
+                                          {(application as any).rejection_reason_types.map((type: string) => REJECTION_REASONS[type as keyof typeof REJECTION_REASONS]).join(', ')}
+                                        </p>
+                                      )}
+                                      {application.rejection_reason && (
+                                        <p className="text-destructive/70">
+                                          <span className="font-medium">Notes:</span><br />
+                                          {application.rejection_reason.length > 50 ? `${application.rejection_reason.substring(0, 50)}...` : application.rejection_reason}
+                                        </p>
+                                      )}
+                                    </div>
+                                  )}
                                 </div>
                                 <div className="flex gap-1 flex-wrap justify-center">
                                   <Button
@@ -939,6 +956,23 @@ const Admin = () => {
                                             <p className="text-xs text-muted-foreground text-center">
                                               {prevSubmittedDate.toLocaleDateString('ru-RU')} {prevSubmittedDate.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}
                                             </p>
+                                            {/* Show rejection reason if application is rejected */}
+                                            {prevApp.status === 'rejected' && ((prevApp as any).rejection_reason_types || prevApp.rejection_reason) && (
+                                              <div className="text-xs text-center max-w-[120px]">
+                                                {(prevApp as any).rejection_reason_types && (prevApp as any).rejection_reason_types.length > 0 && (
+                                                  <p className="text-destructive/80 mb-1">
+                                                    <span className="font-medium">Reasons:</span><br />
+                                                    {(prevApp as any).rejection_reason_types.map((type: string) => REJECTION_REASONS[type as keyof typeof REJECTION_REASONS]).join(', ')}
+                                                  </p>
+                                                )}
+                                                {prevApp.rejection_reason && (
+                                                  <p className="text-destructive/70">
+                                                    <span className="font-medium">Notes:</span><br />
+                                                    {prevApp.rejection_reason.length > 50 ? `${prevApp.rejection_reason.substring(0, 50)}...` : prevApp.rejection_reason}
+                                                  </p>
+                                                )}
+                                              </div>
+                                            )}
                                           </div>
                                           <div className="flex gap-1 flex-wrap justify-center">
                                             {!showDeletedApplications && (
