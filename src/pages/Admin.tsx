@@ -938,72 +938,80 @@ const Admin = () => {
                                   </div>
                                </div>
 
-                               {/* Column 3: Status Button (20ch) */}
-                               <div className="w-[20ch] flex-shrink-0 p-4 flex flex-col gap-2">
-                                 {/* Status dropdown at the top */}
-                                 {!showDeletedApplications && (
-                                   <Select 
-                                     value={application.status} 
-                                     onValueChange={(newStatus) => {
-                                       if (newStatus === 'delete') {
-                                         const appData = typeof application.application_data === 'string' 
-                                           ? JSON.parse(application.application_data) 
-                                           : application.application_data;
-                                         setApplicationToDelete({ 
-                                           id: application.id, 
-                                           name: `${appData.firstName} ${appData.lastName}` 
-                                         });
-                                         setShowDeleteConfirmModal(true);
-                                         return;
-                                       }
-                                       reviewApplication(application.id, newStatus);
-                                     }}
-                                   >
-                                     <SelectTrigger 
-                                       className={`w-full h-7 text-xs ${
-                                         application.status === 'approved' ? 'bg-green-100 border-green-500 text-green-700' :
-                                         application.status === 'rejected' ? 'bg-red-100 border-red-500 text-red-700' :
-                                         application.status === 'finalist' ? 'bg-blue-100 border-blue-500 text-blue-700' :
-                                         application.status === 'this_week' ? 'bg-yellow-100 border-yellow-500 text-yellow-700' :
-                                         ''
-                                       }`}
-                                     >
-                                       <SelectValue />
-                                     </SelectTrigger>
-                                     <SelectContent>
-                                       <SelectItem value="pending">Pending</SelectItem>
-                                       <SelectItem value="approved">Approved</SelectItem>
-                                       <SelectItem value="finalist">Finalist</SelectItem>
-                                       <SelectItem value="rejected">Rejected</SelectItem>
-                                       <SelectItem value="this_week">This Week</SelectItem>
-                                       <div className="h-1 border-t border-border my-1"></div>
-                                       <SelectItem 
-                                         value="delete" 
-                                         className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                                       >
-                                         🗑️ Delete
-                                       </SelectItem>
-                                     </SelectContent>
-                                   </Select>
-                                 )}
-                                 
-                                 {/* Status change date under the dropdown */}
-                                 <div className="text-xs text-muted-foreground text-center">
-                                   {(() => {
-                                     const statusDate = application.reviewed_at || application.approved_at || application.rejected_at || application.submitted_at;
-                                     if (statusDate) {
-                                       const date = new Date(statusDate);
-                                       const time = date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
-                                       const dateStr = date.toLocaleDateString('en-GB', { 
-                                         day: 'numeric', 
-                                         month: 'short',
-                                         year: '2-digit'
-                                       }).toLowerCase();
-                                       return `${time} - ${dateStr}`;
-                                     }
-                                     return '';
-                                   })()}
-                                 </div>
+                                {/* Column 3: Status Button (20ch) */}
+                                <div className="w-[20ch] flex-shrink-0 p-4 pl-0 flex flex-col gap-2">
+                                  {/* Status dropdown at the top */}
+                                  {!showDeletedApplications && (
+                                    <Select 
+                                      value={application.status} 
+                                      onValueChange={(newStatus) => {
+                                        if (newStatus === 'delete') {
+                                          const appData = typeof application.application_data === 'string' 
+                                            ? JSON.parse(application.application_data) 
+                                            : application.application_data;
+                                          setApplicationToDelete({ 
+                                            id: application.id, 
+                                            name: `${appData.firstName} ${appData.lastName}` 
+                                          });
+                                          setShowDeleteConfirmModal(true);
+                                          return;
+                                        }
+                                        reviewApplication(application.id, newStatus);
+                                      }}
+                                    >
+                                      <SelectTrigger 
+                                        className={`w-[60%] h-7 text-xs ${
+                                          application.status === 'approved' ? 'bg-green-100 border-green-500 text-green-700' :
+                                          application.status === 'rejected' ? 'bg-red-100 border-red-500 text-red-700' :
+                                          application.status === 'finalist' ? 'bg-blue-100 border-blue-500 text-blue-700' :
+                                          application.status === 'this_week' ? 'bg-yellow-100 border-yellow-500 text-yellow-700' :
+                                          ''
+                                        }`}
+                                      >
+                                        <SelectValue />
+                                      </SelectTrigger>
+                                      <SelectContent>
+                                        <SelectItem value="pending">Pending</SelectItem>
+                                        <SelectItem value="approved">Approved</SelectItem>
+                                        <SelectItem value="finalist">Finalist</SelectItem>
+                                        <SelectItem value="rejected">Rejected</SelectItem>
+                                        <SelectItem value="this_week">This Week</SelectItem>
+                                        <div className="h-1 border-t border-border my-1"></div>
+                                        <SelectItem 
+                                          value="delete" 
+                                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                        >
+                                          🗑️ Delete
+                                        </SelectItem>
+                                      </SelectContent>
+                                    </Select>
+                                  )}
+                                  
+                                  {/* Status change date with reviewer login under the dropdown */}
+                                  <div className="text-xs text-muted-foreground">
+                                    {(() => {
+                                      const statusDate = application.reviewed_at || application.approved_at || application.rejected_at || application.submitted_at;
+                                      if (statusDate) {
+                                        const date = new Date(statusDate);
+                                        const time = date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+                                        const dateStr = date.toLocaleDateString('en-GB', { 
+                                          day: 'numeric', 
+                                          month: 'short',
+                                          year: '2-digit'
+                                        }).toLowerCase();
+                                        const reviewerEmail = application.reviewed_by && profiles.find(p => p.id === application.reviewed_by)?.email;
+                                        const reviewerLogin = reviewerEmail ? reviewerEmail.substring(0, reviewerEmail.indexOf('@')) : 'system';
+                                        return (
+                                          <>
+                                            <span className="text-blue-600">{reviewerLogin}</span>
+                                            <br />
+                                            {`${time} - ${dateStr}`}
+                                          </>
+                                        );
+                                      }
+                                      return '';
+                                    })()}
+                                  </div>
                                  
                                  {/* Other action buttons */}
                                  <div className="flex flex-col gap-1">
