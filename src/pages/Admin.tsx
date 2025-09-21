@@ -379,12 +379,17 @@ const Admin = () => {
   const reviewApplication = async (applicationId: string, newStatus: string) => {
     const application = contestApplications.find(app => app.id === applicationId);
     
+    const { data: { user } } = await supabase.auth.getUser();
+    const currentTime = new Date().toISOString();
+    
     const { error } = await supabase
       .from('contest_applications')
       .update({
         status: newStatus,
-        approved_at: newStatus === 'approved' ? new Date().toISOString() : null,
-        rejected_at: newStatus === 'rejected' ? new Date().toISOString() : null
+        reviewed_at: currentTime,
+        reviewed_by: user?.id,
+        approved_at: newStatus === 'approved' ? currentTime : null,
+        rejected_at: newStatus === 'rejected' ? currentTime : null
       })
       .eq('id', applicationId);
 
