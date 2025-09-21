@@ -1400,14 +1400,14 @@ const Profile = () => {
                             {contestApplication.rejection_reason_types && contestApplication.rejection_reason_types.length > 0 && (
                               <p className="text-sm text-destructive/80">
                                 <span className="font-medium">Reasons:</span> {contestApplication.rejection_reason_types.map((type: string) => REJECTION_REASONS[type as keyof typeof REJECTION_REASONS]).join(', ')}
-                                {isOwner && (
-                                  <button 
-                                    onClick={() => setShowRejectReasonModal(true)}
-                                    className="ml-2 text-primary hover:text-primary/80 underline text-sm"
-                                  >
-                                    change
-                                  </button>
-                                )}
+                                 {isOwner && (
+                                   <button 
+                                     onClick={() => startEditingParticipationPhotos()}
+                                     className="ml-2 text-primary hover:text-primary/80 underline text-sm"
+                                   >
+                                     change
+                                   </button>
+                                 )}
                               </p>
                             )}
                              {contestApplication.rejection_reason && (
