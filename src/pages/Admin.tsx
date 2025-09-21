@@ -624,9 +624,22 @@ const Admin = () => {
             </TabsList>
 
             <TabsContent value="weekly" className="space-y-4">
-              <div className="mb-6">
-                <h2 className="text-xl font-semibold">Weekly Contest Management</h2>
-                <p className="text-muted-foreground">Manage weekly contests and participants</p>
+              <div className="mb-6 flex items-center justify-between">
+                <div>
+                  <h2 className="text-xl font-semibold">Weekly Contest Management</h2>
+                  <p className="text-muted-foreground">Manage weekly contests and participants</p>
+                </div>
+                <Select value={weeklyContestFilter} onValueChange={setWeeklyContestFilter}>
+                  <SelectTrigger className="w-48">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="approve">Approve</SelectItem>
+                    <SelectItem value="this_week">This Week</SelectItem>
+                    <SelectItem value="next_week">Next Week</SelectItem>
+                    <SelectItem value="after_next_week">After Next Week</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
               
               {(() => {
@@ -637,10 +650,12 @@ const Admin = () => {
                   // Показать одобренные заявки (approved applications), которые должны попасть в Weekly Contest
                   filteredParticipants = contestApplications
                     .filter(app => app.status === 'approved')
+                    // Remove duplicates by user_id to avoid showing the same person multiple times
+                    .filter((app, index, arr) => arr.findIndex(a => a.user_id === app.user_id) === index)
                     .map(app => {
                       const appData = app.application_data || {};
                       return {
-                        id: app.id,
+                        id: `app-${app.id}`, // Prefix to distinguish from real participants
                         user_id: app.user_id,
                         application_data: appData,
                         average_rating: 0,
@@ -652,8 +667,9 @@ const Admin = () => {
                 } else {
                   // Показать существующих участников Weekly Contest
                   filteredParticipants = weeklyParticipants.filter(participant => {
-                    // Здесь можно добавить логику для this_week, next_week, after_next_week
-                    return true; // Пока показываем всех
+                    // Remove duplicates by user_id for actual participants too
+                    const index = weeklyParticipants.findIndex(p => p.user_id === participant.user_id);
+                    return weeklyParticipants.indexOf(participant) === index;
                   });
                 }
                 
