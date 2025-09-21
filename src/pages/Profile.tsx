@@ -29,6 +29,18 @@ import c2face from "@/assets/contestant-2-face.jpg";
 import c3face from "@/assets/contestant-3-face.jpg";
 import { AlignJustify, Grid2X2, Edit } from "lucide-react";
 
+// Helper function to check if rejection reason is a duplicate of predefined reasons
+const isReasonDuplicate = (rejectionReason: string, reasonTypes: string[]) => {
+  if (!rejectionReason || !reasonTypes || reasonTypes.length === 0) return false;
+  
+  const predefinedText = reasonTypes
+    .filter(type => type && REJECTION_REASONS[type as keyof typeof REJECTION_REASONS])
+    .map(type => REJECTION_REASONS[type as keyof typeof REJECTION_REASONS])
+    .join(', ');
+    
+  return rejectionReason.trim() === predefinedText;
+};
+
 interface ProfileRow {
   display_name: string | null;
   first_name: string | null;
@@ -1416,11 +1428,11 @@ const Profile = () => {
                                   )}
                                </p>
                              )}
-                              {contestApplication.rejection_reason && contestApplication.rejection_reason.trim() && (
-                                <p className="text-sm text-destructive/80">
-                                  <span className="font-medium">Additional comments:</span> {contestApplication.rejection_reason}
-                                </p>
-                               )}
+                               {contestApplication.rejection_reason && contestApplication.rejection_reason.trim() && !isReasonDuplicate(contestApplication.rejection_reason, contestApplication.rejection_reason_types) && (
+                                 <p className="text-sm text-destructive/80">
+                                   <span className="font-medium">Additional comments:</span> {contestApplication.rejection_reason}
+                                 </p>
+                                )}
                            </div>
                        </div>
                      )}
