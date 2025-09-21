@@ -868,7 +868,6 @@ const Admin = () => {
                                 
                                 return (
                                   <Card key={prevApp.id} className="overflow-hidden bg-muted/30">
-                                  <Card key={prevApp.id} className="overflow-hidden bg-muted/30">
                                     <CardContent className="p-0">
                                       <div className="flex flex-col md:flex-row md:items-stretch">
                                         {/* Photos section */}
