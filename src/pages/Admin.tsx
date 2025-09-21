@@ -831,7 +831,10 @@ const Admin = () => {
             <div className="space-y-1 text-xs leading-tight">
               {(application as any).rejection_reason_types && (application as any).rejection_reason_types.length > 0 && (
                 <div className="text-destructive/80">
-                  {(application as any).rejection_reason_types.map((type: string) => REJECTION_REASONS[type as keyof typeof REJECTION_REASONS]).join(', ')}
+                  {(application as any).rejection_reason_types
+                    .filter((type: string) => type && REJECTION_REASONS[type as keyof typeof REJECTION_REASONS])
+                    .map((type: string) => REJECTION_REASONS[type as keyof typeof REJECTION_REASONS])
+                    .join(', ')}
                 </div>
               )}
               {application.rejection_reason && (
