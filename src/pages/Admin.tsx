@@ -379,24 +379,40 @@ const Admin = () => {
   const reviewApplication = async (applicationId: string, newStatus: string) => {
     const application = contestApplications.find(app => app.id === applicationId);
     
-    const { data: { user } } = await supabase.auth.getUser();
-    const currentTime = new Date().toISOString();
-    
-    const { error } = await supabase
-      .from('contest_applications')
-      .update({
-        status: newStatus,
-        reviewed_at: currentTime,
-        reviewed_by: user?.id,
-        approved_at: newStatus === 'approved' ? currentTime : null,
-        rejected_at: newStatus === 'rejected' ? currentTime : null
-      })
-      .eq('id', applicationId);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      const currentTime = new Date().toISOString();
+      
+      console.log('Updating application:', applicationId, 'to status:', newStatus);
+      
+      const { data, error } = await supabase
+        .from('contest_applications')
+        .update({
+          status: newStatus,
+          reviewed_at: currentTime,
+          reviewed_by: user?.id,
+          ...(newStatus === 'approved' && { approved_at: currentTime }),
+          ...(newStatus === 'rejected' && { rejected_at: currentTime })
+        })
+        .eq('id', applicationId)
+        .select();
 
-    if (error) {
+      if (error) {
+        console.error('Database error:', error);
+        toast({
+          title: "Error",
+          description: `Failed to update application status: ${error.message}`,
+          variant: "destructive"
+        });
+        return;
+      }
+
+      console.log('Update successful:', data);
+    } catch (err) {
+      console.error('Unexpected error:', err);
       toast({
-        title: "Error",
-        description: "Failed to update application status",
+        title: "Error", 
+        description: "An unexpected error occurred",
         variant: "destructive"
       });
       return;
