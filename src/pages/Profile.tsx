@@ -33,12 +33,16 @@ import { AlignJustify, Grid2X2, Edit } from "lucide-react";
 const isReasonDuplicate = (rejectionReason: string, reasonTypes: string[]) => {
   if (!rejectionReason || !reasonTypes || reasonTypes.length === 0) return false;
   
-  const predefinedText = reasonTypes
+  const predefinedReasons = reasonTypes
     .filter(type => type && REJECTION_REASONS[type as keyof typeof REJECTION_REASONS])
-    .map(type => REJECTION_REASONS[type as keyof typeof REJECTION_REASONS])
-    .join(', ');
+    .map(type => REJECTION_REASONS[type as keyof typeof REJECTION_REASONS]);
     
-  return rejectionReason.trim() === predefinedText;
+  // Check if rejection reason contains all predefined reasons (in any order, with any separator)
+  const normalizedRejectionReason = rejectionReason.toLowerCase().replace(/[;,]\s*/g, '|');
+  const normalizedPredefined = predefinedReasons.map(r => r.toLowerCase()).join('|');
+  
+  return normalizedRejectionReason === normalizedPredefined || 
+         predefinedReasons.every(reason => rejectionReason.includes(reason));
 };
 
 interface ProfileRow {
