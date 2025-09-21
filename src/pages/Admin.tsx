@@ -933,186 +933,242 @@ const Admin = () => {
                              </div>
                            )}
                           
-                           <CardContent className="p-0">
-                             <div className="flex">
-                               {/* Column 1: Photos (25ch) */}
-                               <div className="w-[25ch] flex-shrink-0 p-0">
-                                 <div className="flex gap-px">
-                                   {appData.photo1_url && (
-                                     <div className="w-full">
-                                       <img 
-                                         src={appData.photo1_url} 
-                                         alt="Portrait" 
-                                         className="w-full h-36 object-contain cursor-pointer hover:opacity-90 transition-opacity"
-                                         onClick={() => openPhotoModal([appData.photo1_url, appData.photo2_url].filter(Boolean), 0, `${appData.first_name} ${appData.last_name}`)}
-                                       />
-                                     </div>
-                                   )}
-                                   {appData.photo2_url && (
-                                     <div className="w-full">
-                                       <img 
-                                         src={appData.photo2_url} 
-                                         alt="Full length" 
-                                         className="w-full h-36 object-cover cursor-pointer hover:opacity-90 transition-opacity"
-                                         onClick={() => openPhotoModal([appData.photo1_url, appData.photo2_url].filter(Boolean), 1, `${appData.first_name} ${appData.last_name}`)}
-                                       />
-                                     </div>
-                                   )}
-                                 </div>
-                               </div>
-
-                               {/* Column 2: Information (25ch) */}
-                               <div className="w-[25ch] flex-shrink-0 p-4">
-                                 <div className="flex items-center gap-2 mb-1">
-                                   <Avatar className="h-6 w-6 flex-shrink-0">
-                                     <AvatarImage src={userProfile?.avatar_url || ''} />
-                                     <AvatarFallback className="text-xs">
-                                       {appData.first_name?.charAt(0) || 'U'}
-                                     </AvatarFallback>
-                                   </Avatar>
-                                   <span className="text-sm font-semibold whitespace-nowrap">
-                                     {appData.first_name} {appData.last_name} {new Date().getFullYear() - appData.birth_year}
-                                   </span>
-                                 </div>
-                                 
-                                 <div className="text-xs text-muted-foreground mb-1">
-                                   {appData.city} {appData.state} {appData.country}
-                                 </div>
-                                  
-                                 <div className="text-xs text-muted-foreground mb-1">
-                                   {appData.weight_kg}kg • {appData.height_cm}cm • {appData.gender}
-                                 </div>
-
-                                 <div className="text-xs text-muted-foreground mb-1">
-                                   {appData.marital_status} • {appData.has_children ? 'Has children' : 'No children'}
-                                 </div>
-
-                                 <div className="text-xs text-muted-foreground mb-1">
-                                   {userProfile?.email && (
-                                     <div className="flex items-center gap-1">
-                                       <span 
-                                         className="cursor-pointer" 
-                                         title={userProfile.email}
-                                       >
-                                         {userProfile.email.length > 25 ? `${userProfile.email.substring(0, 25)}...` : userProfile.email}
-                                       </span>
-                                       <Copy 
-                                         className="h-3 w-3 cursor-pointer hover:text-foreground" 
-                                         onClick={() => navigator.clipboard.writeText(userProfile.email)}
-                                       />
-                                     </div>
-                                   )}
+                            <CardContent className="p-0">
+                              <div className="flex flex-col md:flex-row">
+                                {/* Column 1: Photos - responsive width */}
+                                <div className="w-full md:w-[25ch] flex-shrink-0 p-0">
+                                  <div className="flex gap-px">
+                                    {appData.photo1_url && (
+                                      <div className="w-full">
+                                        <img 
+                                          src={appData.photo1_url} 
+                                          alt="Portrait" 
+                                          className="w-full h-36 object-contain cursor-pointer hover:opacity-90 transition-opacity"
+                                          onClick={() => openPhotoModal([appData.photo1_url, appData.photo2_url].filter(Boolean), 0, `${appData.first_name} ${appData.last_name}`)}
+                                        />
+                                      </div>
+                                    )}
+                                    {appData.photo2_url && (
+                                      <div className="w-full">
+                                        <img 
+                                          src={appData.photo2_url} 
+                                          alt="Full length" 
+                                          className="w-full h-36 object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                                          onClick={() => openPhotoModal([appData.photo1_url, appData.photo2_url].filter(Boolean), 1, `${appData.first_name} ${appData.last_name}`)}
+                                        />
+                                      </div>
+                                    )}
                                   </div>
+                                </div>
 
-                                  {/* Phone and Social Media */}
+                                {/* Column 2: Information - contains all info + status on mobile */}
+                                <div className="flex-1 p-4">
+                                  <div className="flex items-center gap-2 mb-1">
+                                    <Avatar className="h-6 w-6 flex-shrink-0">
+                                      <AvatarImage src={userProfile?.avatar_url || ''} />
+                                      <AvatarFallback className="text-xs">
+                                        {appData.first_name?.charAt(0) || 'U'}
+                                      </AvatarFallback>
+                                    </Avatar>
+                                    <span className="text-sm font-semibold whitespace-nowrap">
+                                      {appData.first_name} {appData.last_name} {new Date().getFullYear() - appData.birth_year}
+                                    </span>
+                                  </div>
+                                  
                                   <div className="text-xs text-muted-foreground mb-1">
-                                    <div className="flex items-center gap-2">
-                                      {(() => {
-                                        const phone = appData.phone?.country && appData.phone?.number 
-                                          ? `${appData.phone.country} ${appData.phone.number}` 
-                                          : 'Not provided';
-                                        return <span>{phone}</span>;
-                                      })()}
-                                      {appData.facebook_url && (
-                                        <a
-                                          href={appData.facebook_url}
-                                          target="_blank"
-                                          rel="noopener noreferrer"
-                                          className="text-blue-600 hover:text-blue-800"
-                                        >
-                                          <Facebook className="h-3 w-3" />
-                                        </a>
-                                      )}
-                                    </div>
+                                    {appData.city} {appData.state} {appData.country}
                                   </div>
-                               </div>
+                                   
+                                  <div className="text-xs text-muted-foreground mb-1">
+                                    {appData.weight_kg}kg • {appData.height_cm}cm • {appData.gender}
+                                  </div>
 
-                                {/* Column 3: Status Button (20ch) */}
-                                <div className="w-[20ch] flex-shrink-0 p-4 pl-0 flex flex-col gap-2">
-                                  {/* Status dropdown at the top */}
-                                  {!showDeletedApplications && (
-                                    <Select 
-                                      value={application.status} 
-                                      onValueChange={(newStatus) => {
-                                        if (newStatus === 'delete') {
-                                          const appData = typeof application.application_data === 'string' 
-                                            ? JSON.parse(application.application_data) 
-                                            : application.application_data;
-                                          setApplicationToDelete({ 
-                                            id: application.id, 
-                                            name: `${appData.firstName} ${appData.lastName}` 
-                                          });
-                                          setShowDeleteConfirmModal(true);
-                                          return;
-                                        }
-                                        reviewApplication(application.id, newStatus);
-                                      }}
-                                    >
-                                      <SelectTrigger 
-                                         className={`w-[60%] h-7 text-xs ${
-                                           application.status === 'approved' ? 'bg-green-100 border-green-500 text-green-700' :
-                                           application.status === 'rejected' ? 'bg-red-100 border-red-500 text-red-700' :
-                                           ''
-                                         }`}
-                                      >
-                                        <SelectValue />
-                                      </SelectTrigger>
-                                      <SelectContent>
-                                        <SelectItem value="pending">Pending</SelectItem>
-                                        <SelectItem value="approved">Approved</SelectItem>
-                                        <SelectItem value="rejected">Rejected</SelectItem>
-                                        <div className="h-1 border-t border-border my-1"></div>
-                                        <SelectItem 
-                                          value="delete" 
-                                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                                        >
-                                          🗑️ Delete
-                                        </SelectItem>
-                                      </SelectContent>
-                                    </Select>
-                                  )}
-                                  
-                                  {/* Status change date with reviewer login under the dropdown */}
-                                  <div className="text-xs text-muted-foreground">
-                                    {(() => {
-                                      const statusDate = application.reviewed_at || application.approved_at || application.rejected_at || application.submitted_at;
-                                      if (statusDate) {
-                                        const date = new Date(statusDate);
-                                        const time = date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
-                                        const dateStr = date.toLocaleDateString('en-GB', { 
-                                          day: 'numeric', 
-                                          month: 'short',
-                                          year: '2-digit'
-                                        }).toLowerCase();
-                                        const reviewerEmail = application.reviewed_by && profiles.find(p => p.id === application.reviewed_by)?.email;
-                                        const reviewerLogin = reviewerEmail ? reviewerEmail.substring(0, 4) : 'syst';
-                                        return (
-                                          <>
-                                            <span className="text-blue-600">{reviewerLogin}</span>
-                                            {` ${time} - ${dateStr}`}
-                                          </>
-                                        );
-                                      }
-                                      return '';
-                                    })()}
+                                  <div className="text-xs text-muted-foreground mb-1">
+                                    {appData.marital_status} • {appData.has_children ? 'Has children' : 'No children'}
                                   </div>
-                                 
-                                 {/* Other action buttons */}
-                                 <div className="flex flex-col gap-1">
-                                   <Button
-                                     size="sm"
-                                     variant="outline"
-                                     onClick={() => setSelectedUserApplications(
-                                       selectedUserApplications === application.user_id ? null : application.user_id
+
+                                  <div className="text-xs text-muted-foreground mb-1">
+                                    {userProfile?.email && (
+                                      <div className="flex items-center gap-1">
+                                        <span 
+                                          className="cursor-pointer" 
+                                          title={userProfile.email}
+                                        >
+                                          {userProfile.email.length > 25 ? `${userProfile.email.substring(0, 25)}...` : userProfile.email}
+                                        </span>
+                                        <Copy 
+                                          className="h-3 w-3 cursor-pointer hover:text-foreground" 
+                                          onClick={() => navigator.clipboard.writeText(userProfile.email)}
+                                        />
+                                      </div>
+                                    )}
+                                   </div>
+
+                                   {/* Phone and Social Media */}
+                                   <div className="text-xs text-muted-foreground mb-1">
+                                     <div className="flex items-center gap-2">
+                                       {(() => {
+                                         const phone = appData.phone?.country && appData.phone?.number 
+                                           ? `${appData.phone.country} ${appData.phone.number}` 
+                                           : 'Not provided';
+                                         return <span>{phone}</span>;
+                                       })()}
+                                       {appData.facebook_url && (
+                                         <a
+                                           href={appData.facebook_url}
+                                           target="_blank"
+                                           rel="noopener noreferrer"
+                                           className="text-blue-600 hover:text-blue-800"
+                                         >
+                                           <Facebook className="h-3 w-3" />
+                                         </a>
+                                       )}
+                                     </div>
+                                   </div>
+
+                                   {/* Status section - on mobile at bottom, on desktop separate column */}
+                                   <div className="mt-2 md:hidden">
+                                     {/* Status dropdown - mobile */}
+                                     {!showDeletedApplications && (
+                                       <Select 
+                                         value={application.status} 
+                                         onValueChange={(newStatus) => {
+                                           if (newStatus === 'delete') {
+                                             const appData = typeof application.application_data === 'string' 
+                                               ? JSON.parse(application.application_data) 
+                                               : application.application_data;
+                                             setApplicationToDelete({ 
+                                               id: application.id, 
+                                               name: `${appData.firstName} ${appData.lastName}` 
+                                             });
+                                             setShowDeleteConfirmModal(true);
+                                             return;
+                                           }
+                                           reviewApplication(application.id, newStatus);
+                                         }}
+                                       >
+                                         <SelectTrigger 
+                                            className={`w-40 h-7 text-xs ${
+                                              application.status === 'approved' ? 'bg-green-100 border-green-500 text-green-700' :
+                                              application.status === 'rejected' ? 'bg-red-100 border-red-500 text-red-700' :
+                                              ''
+                                            }`}
+                                         >
+                                           <SelectValue />
+                                         </SelectTrigger>
+                                         <SelectContent>
+                                           <SelectItem value="pending">Pending</SelectItem>
+                                           <SelectItem value="approved">Approved</SelectItem>
+                                           <SelectItem value="rejected">Rejected</SelectItem>
+                                           <div className="h-1 border-t border-border my-1"></div>
+                                           <SelectItem 
+                                             value="delete" 
+                                             className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                           >
+                                             🗑️ Delete
+                                           </SelectItem>
+                                         </SelectContent>
+                                       </Select>
                                      )}
-                                     className="px-2 text-xs h-7"
-                                     title="View Previous Applications"
-                                   >
-                                     <Eye className="w-3 h-3" />
-                                   </Button>
+                                     
+                                     {/* Status change date with reviewer login - mobile */}
+                                     <div className="text-xs text-muted-foreground mt-1">
+                                       {(() => {
+                                         const statusDate = application.reviewed_at || application.approved_at || application.rejected_at || application.submitted_at;
+                                         if (statusDate) {
+                                           const date = new Date(statusDate);
+                                           const time = date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+                                           const dateStr = date.toLocaleDateString('en-GB', { 
+                                             day: 'numeric', 
+                                             month: 'short',
+                                             year: '2-digit'
+                                           }).toLowerCase();
+                                           const reviewerEmail = application.reviewed_by && profiles.find(p => p.id === application.reviewed_by)?.email;
+                                           const reviewerLogin = reviewerEmail ? reviewerEmail.substring(0, 4) : 'syst';
+                                           return (
+                                             <>
+                                               <span className="text-blue-600">{reviewerLogin}</span>
+                                               {` ${time} - ${dateStr}`}
+                                             </>
+                                           );
+                                         }
+                                         return '';
+                                       })()}
+                                     </div>
+                                   </div>
+                                </div>
+
+                                 {/* Column 3: Status - desktop only */}
+                                 <div className="hidden md:flex md:w-[20ch] md:flex-shrink-0 p-4 pl-0 flex-col gap-2">
+                                   {/* Status dropdown at the top - desktop */}
+                                   {!showDeletedApplications && (
+                                     <Select 
+                                       value={application.status} 
+                                       onValueChange={(newStatus) => {
+                                         if (newStatus === 'delete') {
+                                           const appData = typeof application.application_data === 'string' 
+                                             ? JSON.parse(application.application_data) 
+                                             : application.application_data;
+                                           setApplicationToDelete({ 
+                                             id: application.id, 
+                                             name: `${appData.firstName} ${appData.lastName}` 
+                                           });
+                                           setShowDeleteConfirmModal(true);
+                                           return;
+                                         }
+                                         reviewApplication(application.id, newStatus);
+                                       }}
+                                     >
+                                       <SelectTrigger 
+                                          className={`w-[60%] h-7 text-xs ${
+                                            application.status === 'approved' ? 'bg-green-100 border-green-500 text-green-700' :
+                                            application.status === 'rejected' ? 'bg-red-100 border-red-500 text-red-700' :
+                                            ''
+                                          }`}
+                                       >
+                                         <SelectValue />
+                                       </SelectTrigger>
+                                       <SelectContent>
+                                         <SelectItem value="pending">Pending</SelectItem>
+                                         <SelectItem value="approved">Approved</SelectItem>
+                                         <SelectItem value="rejected">Rejected</SelectItem>
+                                         <div className="h-1 border-t border-border my-1"></div>
+                                         <SelectItem 
+                                           value="delete" 
+                                           className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                         >
+                                           🗑️ Delete
+                                         </SelectItem>
+                                       </SelectContent>
+                                     </Select>
+                                   )}
+                                   
+                                   {/* Status change date with reviewer login - desktop */}
+                                   <div className="text-xs text-muted-foreground">
+                                     {(() => {
+                                       const statusDate = application.reviewed_at || application.approved_at || application.rejected_at || application.submitted_at;
+                                       if (statusDate) {
+                                         const date = new Date(statusDate);
+                                         const time = date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+                                         const dateStr = date.toLocaleDateString('en-GB', { 
+                                           day: 'numeric', 
+                                           month: 'short',
+                                           year: '2-digit'
+                                         }).toLowerCase();
+                                         const reviewerEmail = application.reviewed_by && profiles.find(p => p.id === application.reviewed_by)?.email;
+                                         const reviewerLogin = reviewerEmail ? reviewerEmail.substring(0, 4) : 'syst';
+                                         return (
+                                           <>
+                                             <span className="text-blue-600">{reviewerLogin}</span>
+                                             {` ${time} - ${dateStr}`}
+                                           </>
+                                         );
+                                       }
+                                       return '';
+                                     })()}
+                                   </div>
                                  </div>
-                               </div>
-                             </div>
+                              </div>
                            </CardContent>
                         </Card>
         
