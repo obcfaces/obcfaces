@@ -913,7 +913,7 @@ const Admin = () => {
                  <div className="text-destructive/80">
                    {/* Always show date and admin info if available */}
                    {(application.rejected_at || application.reviewed_at) && (
-                     <>
+                     <span className="text-black font-medium">
                        {new Date(application.rejected_at || application.reviewed_at).toLocaleDateString('en-GB', { 
                          day: 'numeric', 
                          month: 'short' 
@@ -921,7 +921,7 @@ const Admin = () => {
                        {application.reviewed_by && profiles.find(p => p.id === application.reviewed_by)?.email ? 
                          profiles.find(p => p.id === application.reviewed_by)?.email?.substring(0, 4) + ' ' : 
                          'unkn '}
-                     </>
+                     </span>
                    )}
                    {(application as any).rejection_reason_types
                      .filter((type: string) => type && REJECTION_REASONS[type as keyof typeof REJECTION_REASONS])
@@ -1121,7 +1121,7 @@ const Admin = () => {
                                <div className="text-destructive/80">
                                  {/* Always show date and admin info if available */}
                                  {(prevApp.rejected_at || prevApp.reviewed_at) && (
-                                   <>
+                                   <span className="text-black font-medium">
                                      {new Date(prevApp.rejected_at || prevApp.reviewed_at).toLocaleDateString('en-GB', { 
                                        day: 'numeric', 
                                        month: 'short' 
@@ -1129,7 +1129,7 @@ const Admin = () => {
                                      {prevApp.reviewed_by && profiles.find(p => p.id === prevApp.reviewed_by)?.email ? 
                                        profiles.find(p => p.id === prevApp.reviewed_by)?.email?.substring(0, 4) + ' ' : 
                                        'unkn '}
-                                   </>
+                                   </span>
                                  )}
                                  {(prevApp as any).rejection_reason_types
                                    .filter((type: string) => type && REJECTION_REASONS[type as keyof typeof REJECTION_REASONS])
