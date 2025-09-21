@@ -174,6 +174,7 @@ const Admin = () => {
   const [applicationToDelete, setApplicationToDelete] = useState<{ id: string; name: string } | null>(null);
   const [expandedMobileItems, setExpandedMobileItems] = useState<Set<string>>(new Set());
   const [participantFilters, setParticipantFilters] = useState<{ [key: string]: string }>({});
+  const [pastWeekParticipants, setPastWeekParticipants] = useState<any[]>([]);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -662,6 +663,10 @@ const Admin = () => {
                 <Calendar className="w-4 h-4" />
                 Weekly Contests
               </TabsTrigger>
+              <TabsTrigger value="pastweek" className="flex items-center gap-2">
+                <Trophy className="w-4 h-4" />
+                Past Week
+              </TabsTrigger>
               <TabsTrigger value="applications" className="flex items-center gap-2">
                 <FileText className="w-4 h-4" />
                 Contest Applications
@@ -808,6 +813,133 @@ const Admin = () => {
                             <div className="flex flex-col gap-1 items-center">
                               <Badge variant={participant.is_active ? 'default' : 'secondary'}>
                                 {participant.is_active ? 'Active' : 'Inactive'}
+                              </Badge>
+                              <p className="text-xs text-muted-foreground text-center">
+                                Rating: {(participant.average_rating || 0).toFixed(1)}
+                              </p>
+                            </div>
+                            <div className="flex gap-1 flex-wrap justify-center">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => {
+                                  setSelectedParticipantForVoters({
+                                    id: participant.id,
+                                    name: `${participantProfile?.first_name || appData.first_name} ${participantProfile?.last_name || appData.last_name}`
+                                  });
+                                  setVotersModalOpen(true);
+                                }}
+                                className="text-xs px-2 py-1 h-7"
+                              >
+                                <Eye className="w-3 h-3" />
+                                <span className="hidden sm:inline ml-1">Voters</span>
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                });
+              })()}
+            </TabsContent>
+
+            <TabsContent value="pastweek" className="space-y-4">
+              <div className="mb-6 flex items-center justify-between">
+                <div>
+                  <h2 className="text-xl font-semibold">Past Week Finalists</h2>
+                  <p className="text-muted-foreground">Finalists from previous weeks</p>
+                </div>
+              </div>
+              
+              {(() => {
+                // Filter past week participants (from previous weeks with final_rank)
+                const pastWeekFinalists = weeklyParticipants.filter(participant => {
+                  return participant.final_rank && participant.final_rank > 0;
+                });
+
+                if (pastWeekFinalists.length === 0) {
+                  return (
+                    <div className="text-center py-8 text-muted-foreground">
+                      <p className="text-lg">No past week finalists found</p>
+                    </div>
+                  );
+                }
+
+                return pastWeekFinalists.map((participant) => {
+                  const participantProfile = profiles.find(p => p.id === participant.user_id);
+                  const appData = participant.application_data || {};
+                  
+                  return (
+                    <Card key={participant.id} className="overflow-hidden relative">
+                      <CardContent className="p-0">
+                        <div className="flex flex-col md:flex-row md:items-stretch">
+                          {/* Photos section */}
+                          <div className="flex gap-px md:w-[25ch] md:flex-shrink-0 p-0">
+                            {(participantProfile?.photo_1_url || appData.photo1_url) && (
+                              <div className="w-24 sm:w-28 md:w-32">
+                                <img 
+                                  src={participantProfile?.photo_1_url || appData.photo1_url} 
+                                  alt="Portrait" 
+                                  className="w-full h-36 sm:h-40 md:h-44 object-contain cursor-pointer hover:opacity-90 transition-opacity"
+                                  onClick={() => openPhotoModal([
+                                    participantProfile?.photo_1_url || appData.photo1_url, 
+                                    participantProfile?.photo_2_url || appData.photo2_url
+                                  ].filter(Boolean), 0, `${participantProfile?.first_name || appData.first_name} ${participantProfile?.last_name || appData.last_name}`)}
+                                />
+                              </div>
+                            )}
+                            {(participantProfile?.photo_2_url || appData.photo2_url) && (
+                              <div className="w-24 sm:w-28 md:w-32">
+                                <img 
+                                  src={participantProfile?.photo_2_url || appData.photo2_url} 
+                                  alt="Full length" 
+                                  className="w-full h-36 sm:h-40 md:h-44 object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                                  onClick={() => openPhotoModal([
+                                    participantProfile?.photo_1_url || appData.photo1_url, 
+                                    participantProfile?.photo_2_url || appData.photo2_url
+                                  ].filter(Boolean), 1, `${participantProfile?.first_name || appData.first_name} ${participantProfile?.last_name || appData.last_name}`)}
+                                />
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Main info section */}
+                          <div className="md:w-[50ch] md:flex-shrink-0 flex-1 min-w-0 p-4">
+                            <div className="flex items-center gap-2 mb-1">
+                              <Avatar className="h-6 w-6 flex-shrink-0">
+                                <AvatarImage src={participantProfile?.avatar_url || ''} />
+                                <AvatarFallback className="text-xs">
+                                  {(participantProfile?.first_name || appData.first_name)?.charAt(0) || 'U'}
+                                </AvatarFallback>
+                              </Avatar>
+                              <span className="text-sm font-semibold whitespace-nowrap">
+                                {participantProfile?.first_name || appData.first_name} {participantProfile?.last_name || appData.last_name} {participantProfile?.age || (appData.birth_year ? new Date().getFullYear() - appData.birth_year : '')}
+                              </span>
+                            </div>
+                            
+                            <div className="text-xs text-muted-foreground mb-1">
+                              {participantProfile?.city || appData.city} {participantProfile?.state || appData.state} {participantProfile?.country || appData.country}
+                            </div>
+                             
+                            <div className="text-xs text-muted-foreground mb-1">
+                              {(participantProfile?.weight_kg || appData.weight_kg)}kg • {(participantProfile?.height_cm || appData.height_cm)}cm • {participantProfile?.gender || appData.gender}
+                            </div>
+
+                            <div className="text-xs text-muted-foreground mb-1">
+                              {participantProfile?.marital_status || appData.marital_status} • {(participantProfile?.has_children || appData.has_children) ? 'Has children' : 'No children'}
+                            </div>
+
+                            <div className="text-xs text-muted-foreground mb-1">
+                              Past Week Finalist • Rank: {participant.final_rank} • Votes: {participant.total_votes || 0}
+                            </div>
+                          </div>
+
+                          {/* Right side actions */}
+                          <div className="p-4 md:w-auto flex flex-col justify-between gap-2">
+                            <div className="flex flex-col gap-1 items-center">
+                              <Badge variant={participant.final_rank === 1 ? 'default' : 'secondary'}>
+                                {participant.final_rank === 1 ? 'Winner' : `Rank ${participant.final_rank}`}
                               </Badge>
                               <p className="text-xs text-muted-foreground text-center">
                                 Rating: {(participant.average_rating || 0).toFixed(1)}
