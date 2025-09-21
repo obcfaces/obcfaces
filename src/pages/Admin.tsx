@@ -887,13 +887,13 @@ const Admin = () => {
                           </CardContent>
                         </Card>
         
-        {/* Rejection reason under the card */}
+         {/* Rejection reason under the card */}
         {application.status === 'rejected' && ((application as any).rejection_reason_types || application.rejection_reason) && (
           <div className="p-2 bg-destructive/10 border border-destructive/20 rounded-b-lg -mt-1">
             <div className="space-y-1 text-xs leading-tight">
               {(application as any).rejection_reason_types && (application as any).rejection_reason_types.length > 0 && (
                 <div className="text-destructive/80">
-                  {(application as any).rejection_reason_types
+                  <span className="font-medium">Reasons:</span> {(application as any).rejection_reason_types
                     .filter((type: string) => type && REJECTION_REASONS[type as keyof typeof REJECTION_REASONS])
                     .map((type: string) => REJECTION_REASONS[type as keyof typeof REJECTION_REASONS])
                     .join(', ')}
@@ -901,7 +901,7 @@ const Admin = () => {
               )}
               {application.rejection_reason && (
                 <div className="text-destructive/70">
-                  {application.rejection_reason}
+                  <span className="font-medium">Notes:</span> {application.rejection_reason}
                 </div>
               )}
             </div>
@@ -1014,13 +1014,13 @@ const Admin = () => {
                                             Education: {prevAppData.education || 'Not specified'}
                                           </div>
                                           
-                                          {/* Rejection reason for previous application */}
+                                           {/* Rejection reason for previous application */}
                                           {prevApp.status === 'rejected' && ((prevApp as any).rejection_reason_types || prevApp.rejection_reason) && (
                                             <div className="mt-2 p-2 bg-destructive/10 border border-destructive/20 rounded">
                                               <div className="space-y-1 text-xs leading-tight">
                                                 {(prevApp as any).rejection_reason_types && (prevApp as any).rejection_reason_types.length > 0 && (
                                                   <div className="text-destructive/80">
-                                                    {(prevApp as any).rejection_reason_types
+                                                    <span className="font-medium">Reasons:</span> {(prevApp as any).rejection_reason_types
                                                       .filter((type: string) => type && REJECTION_REASONS[type as keyof typeof REJECTION_REASONS])
                                                       .map((type: string) => REJECTION_REASONS[type as keyof typeof REJECTION_REASONS])
                                                       .join(', ')}
@@ -1028,7 +1028,7 @@ const Admin = () => {
                                                 )}
                                                 {prevApp.rejection_reason && (
                                                   <div className="text-destructive/70">
-                                                    {prevApp.rejection_reason}
+                                                    <span className="font-medium">Notes:</span> {prevApp.rejection_reason}
                                                   </div>
                                                 )}
                                               </div>
@@ -1104,13 +1104,13 @@ const Admin = () => {
                                         </div>
                                       </div>
                                       
-                                      {/* Rejection reason for previous application */}
+                                       {/* Rejection reason for previous application */}
                                       {prevApp.status === 'rejected' && ((prevApp as any).rejection_reason_types || prevApp.rejection_reason) && (
                                         <div className="p-2 bg-destructive/10 border-t border-destructive/20">
                                           <div className="space-y-1 text-xs leading-tight">
                                             {(prevApp as any).rejection_reason_types && (prevApp as any).rejection_reason_types.length > 0 && (
                                               <div className="text-destructive/80">
-                                                {(prevApp as any).rejection_reason_types
+                                                <span className="font-medium">Reasons:</span> {(prevApp as any).rejection_reason_types
                                                   .filter((type: string) => type && REJECTION_REASONS[type as keyof typeof REJECTION_REASONS])
                                                   .map((type: string) => REJECTION_REASONS[type as keyof typeof REJECTION_REASONS])
                                                   .join(', ')}
@@ -1118,7 +1118,7 @@ const Admin = () => {
                                             )}
                                             {prevApp.rejection_reason && (
                                               <div className="text-destructive/70">
-                                                {prevApp.rejection_reason}
+                                                <span className="font-medium">Notes:</span> {prevApp.rejection_reason}
                                               </div>
                                             )}
                                           </div>
