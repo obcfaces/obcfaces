@@ -824,23 +824,35 @@ const Admin = () => {
                             </div>
                           </CardContent>
                         </Card>
-                        
+        
         {/* Rejection reason under the card - simplified */}
-        {application.status === 'rejected' && ((application as any).rejection_reason_types || application.rejection_reason) && (
+        {application.status === 'rejected' && (
           <div className="p-2 bg-destructive/10 border border-destructive/20 rounded-b-lg -mt-1">
             <div className="space-y-1 text-xs leading-tight">
-              {(application as any).rejection_reason_types && (application as any).rejection_reason_types.length > 0 && (
+              {/* Debug info */}
+              <div className="text-xs text-gray-500 mb-2">
+                Debug: Status={application.status},{' '}
+                Types={JSON.stringify((application as any).rejection_reason_types)},{' '}
+                Reason={application.rejection_reason}
+              </div>
+              
+              {(application as any).rejection_reason_types && (application as any).rejection_reason_types.length > 0 ? (
                 <div className="text-destructive/80">
                   {(application as any).rejection_reason_types
                     .filter((type: string) => type && REJECTION_REASONS[type as keyof typeof REJECTION_REASONS])
                     .map((type: string) => REJECTION_REASONS[type as keyof typeof REJECTION_REASONS])
                     .join(', ')}
                 </div>
+              ) : (
+                <div className="text-gray-500 text-xs">No rejection reason types found</div>
               )}
-              {application.rejection_reason && (
+              
+              {application.rejection_reason ? (
                 <div className="text-destructive/70">
                   {application.rejection_reason}
                 </div>
+              ) : (
+                <div className="text-gray-500 text-xs">No rejection reason text found</div>
               )}
             </div>
           </div>
