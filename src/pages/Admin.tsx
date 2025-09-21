@@ -742,7 +742,7 @@ const Admin = () => {
                         >
                           <SelectValue placeholder="Filter by status" />
                         </SelectTrigger>
-                        <SelectContent>
+                        <SelectContent className="z-50 bg-background border shadow-md">
                           <SelectItem value="all">All Statuses</SelectItem>
                           <SelectItem value="pending">Pending</SelectItem>
                           <SelectItem value="approved">Approved</SelectItem>
