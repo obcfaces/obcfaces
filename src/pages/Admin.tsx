@@ -786,7 +786,7 @@ const Admin = () => {
                             {/* Contest filter dropdown */}
                             <div className="flex flex-col gap-1 mb-2">
                               <Select 
-                                value={participantFilters[participant.id] || (participant.final_rank ? 'this week' : '')} 
+                                value={participantFilters[participant.id] || (participant.final_rank ? 'this week' : 'approve')} 
                                 onValueChange={(value) => {
                                   setParticipantFilters(prev => ({
                                     ...prev,
@@ -795,7 +795,7 @@ const Admin = () => {
                                 }}
                               >
                                 <SelectTrigger className="w-28 h-6 text-xs">
-                                  <SelectValue placeholder="Filter" />
+                                  <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent className="z-50 bg-background border shadow-md">
                                   <SelectItem value="this week">This Week</SelectItem>
