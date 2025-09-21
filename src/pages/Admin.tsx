@@ -908,21 +908,20 @@ const Admin = () => {
         {application.status === 'rejected' && ((application as any).rejection_reason_types || application.rejection_reason) && (
           <div className="p-2 bg-destructive/10 border border-destructive/20 rounded-b-lg -mt-1">
              <div className="space-y-1 text-xs leading-tight">
-               {/* Date and admin info */}
-               {application.rejected_at && (
-                 <div className="text-destructive/60 mb-2">
-                   {new Date(application.rejected_at).toLocaleDateString('en-GB', { 
-                     day: 'numeric', 
-                     month: 'short' 
-                   }).toLowerCase()}{' '}
-                   {application.reviewed_by && profiles.find(p => p.id === application.reviewed_by)?.email && 
-                     profiles.find(p => p.id === application.reviewed_by)?.email?.substring(0, 4)}
-                 </div>
-               )}
-               
                {(application as any).rejection_reason_types && (application as any).rejection_reason_types.length > 0 && (
                  <div className="text-destructive/80">
-                   <span className="font-medium">Rejection reasons:</span> {(application as any).rejection_reason_types
+                   {/* Date and admin info at the beginning */}
+                   {application.rejected_at && (
+                     <>
+                       {new Date(application.rejected_at).toLocaleDateString('en-GB', { 
+                         day: 'numeric', 
+                         month: 'short' 
+                       }).toLowerCase()}{' '}
+                       {application.reviewed_by && profiles.find(p => p.id === application.reviewed_by)?.email && 
+                         profiles.find(p => p.id === application.reviewed_by)?.email?.substring(0, 4)}{' '}
+                     </>
+                   )}
+                   {(application as any).rejection_reason_types
                      .filter((type: string) => type && REJECTION_REASONS[type as keyof typeof REJECTION_REASONS])
                      .map((type: string) => REJECTION_REASONS[type as keyof typeof REJECTION_REASONS])
                      .join(', ')}
@@ -1116,21 +1115,20 @@ const Admin = () => {
                                       {prevApp.status === 'rejected' && ((prevApp as any).rejection_reason_types || prevApp.rejection_reason) && (
                                         <div className="p-2 bg-destructive/10 border-t border-destructive/20">
                            <div className="space-y-1 text-xs leading-tight">
-                             {/* Date and admin info for previous application */}
-                             {prevApp.rejected_at && (
-                               <div className="text-destructive/60 mb-2">
-                                 {new Date(prevApp.rejected_at).toLocaleDateString('en-GB', { 
-                                   day: 'numeric', 
-                                   month: 'short' 
-                                 }).toLowerCase()}{' '}
-                                 {prevApp.reviewed_by && profiles.find(p => p.id === prevApp.reviewed_by)?.email && 
-                                   profiles.find(p => p.id === prevApp.reviewed_by)?.email?.substring(0, 4)}
-                               </div>
-                             )}
-                             
                              {(prevApp as any).rejection_reason_types && (prevApp as any).rejection_reason_types.length > 0 && (
                                <div className="text-destructive/80">
-                                 <span className="font-medium">Rejection reasons:</span> {(prevApp as any).rejection_reason_types
+                                 {/* Date and admin info at the beginning */}
+                                 {prevApp.rejected_at && (
+                                   <>
+                                     {new Date(prevApp.rejected_at).toLocaleDateString('en-GB', { 
+                                       day: 'numeric', 
+                                       month: 'short' 
+                                     }).toLowerCase()}{' '}
+                                     {prevApp.reviewed_by && profiles.find(p => p.id === prevApp.reviewed_by)?.email && 
+                                       profiles.find(p => p.id === prevApp.reviewed_by)?.email?.substring(0, 4)}{' '}
+                                   </>
+                                 )}
+                                 {(prevApp as any).rejection_reason_types
                                    .filter((type: string) => type && REJECTION_REASONS[type as keyof typeof REJECTION_REASONS])
                                    .map((type: string) => REJECTION_REASONS[type as keyof typeof REJECTION_REASONS])
                                    .join(', ')}
