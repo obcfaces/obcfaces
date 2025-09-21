@@ -1000,12 +1000,11 @@ const Admin = () => {
                                           year: '2-digit'
                                         }).toLowerCase();
                                         const reviewerEmail = application.reviewed_by && profiles.find(p => p.id === application.reviewed_by)?.email;
-                                        const reviewerLogin = reviewerEmail ? reviewerEmail.substring(0, reviewerEmail.indexOf('@')) : 'system';
+                                        const reviewerLogin = reviewerEmail ? reviewerEmail.substring(0, 4) : 'syst';
                                         return (
                                           <>
                                             <span className="text-blue-600">{reviewerLogin}</span>
-                                            <br />
-                                            {`${time} - ${dateStr}`}
+                                            {` ${time} - ${dateStr}`}
                                           </>
                                         );
                                       }
