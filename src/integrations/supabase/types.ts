@@ -61,12 +61,14 @@ export type Database = {
       contest_applications: {
         Row: {
           application_data: Json | null
+          approved_at: string | null
           created_at: string
           deleted_at: string | null
           id: string
           is_active: boolean
           last_participation_date: string | null
           notes: string | null
+          rejected_at: string | null
           rejection_reason: string | null
           rejection_reason_types: string[] | null
           reviewed_at: string | null
@@ -78,12 +80,14 @@ export type Database = {
         }
         Insert: {
           application_data?: Json | null
+          approved_at?: string | null
           created_at?: string
           deleted_at?: string | null
           id?: string
           is_active?: boolean
           last_participation_date?: string | null
           notes?: string | null
+          rejected_at?: string | null
           rejection_reason?: string | null
           rejection_reason_types?: string[] | null
           reviewed_at?: string | null
@@ -95,12 +99,14 @@ export type Database = {
         }
         Update: {
           application_data?: Json | null
+          approved_at?: string | null
           created_at?: string
           deleted_at?: string | null
           id?: string
           is_active?: boolean
           last_participation_date?: string | null
           notes?: string | null
+          rejected_at?: string | null
           rejection_reason?: string | null
           rejection_reason_types?: string[] | null
           reviewed_at?: string | null
