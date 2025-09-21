@@ -106,11 +106,12 @@ const REJECTION_REASONS = {
   first_photo_makeup: "First photo – No makeup allowed.",
   first_photo_id_style: "First photo – Must look like an ID photo: face straight to the camera, hands together in front.",
   first_photo_blurry: "First photo – Photo is too blurry/low quality.",
-  first_photo_filters: "First photo – No filters allowed.",
+  first_photo_filters: "First photo – No filters or ai allowed.",
   second_photo_makeup: "Second photo – No makeup allowed.",
   second_photo_pose: "Second photo – Must show the whole body from head to toe, standing straight, arms at the sides.",
   second_photo_clothing: "Second photo – Wear tight/fitted clothes (swimsuit, fitted shorts, or top). Dresses, skirts, loose tops, or high heels are not allowed.",
   second_photo_accessories: "Second photo – No bags or backpacks.",
+  second_photo_filters: "Second photo – No filters allowed.",
   both_photos_quality: "Both photos – The quality is too low."
 };
 
