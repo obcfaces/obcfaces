@@ -1214,7 +1214,6 @@ const Admin = () => {
             .from('contest_applications')
             .update({
               status: 'rejected',
-              rejected_at: new Date().toISOString(),
               rejection_reason: notes,
               rejection_reason_types: reasonTypes,
               reviewed_at: new Date().toISOString(),
