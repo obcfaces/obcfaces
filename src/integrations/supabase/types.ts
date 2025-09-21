@@ -756,6 +756,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      auto_transition_weekly_contests_with_timezone: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       check_conversation_membership: {
         Args: { conversation_id_param: string; user_id_param: string }
         Returns: boolean
@@ -918,6 +922,10 @@ export type Database = {
           week_end_date: string
           week_start_date: string
         }[]
+      }
+      get_primary_participant_timezone: {
+        Args: Record<PropertyKey, never>
+        Returns: string
       }
       get_public_profile_summary: {
         Args: { profile_user_id: string }
