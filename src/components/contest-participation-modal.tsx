@@ -996,6 +996,10 @@ export const ContestParticipationModal = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => {
+      // Prevent closing the modal if submission was successful
+      if (submissionSuccess && !open) {
+        return;
+      }
       setIsOpen(open);
       if (!open) {
         // Reset states when modal closes
@@ -1011,7 +1015,7 @@ export const ContestParticipationModal = ({
           {children}
         </DialogTrigger>
       )}
-      <DialogContent className={`w-full max-w-4xl mx-auto max-h-[95vh] bg-background p-0 overflow-hidden ${submissionSuccess ? '[&_button[data-radix-dialog-close]]:!hidden [&>[data-radix-dialog-close]]:!hidden [&_.lucide-x]:!hidden' : ''}`}>
+      <DialogContent className={`w-full max-w-4xl mx-auto max-h-[95vh] bg-background p-0 overflow-hidden ${submissionSuccess ? '[&_button[data-radix-dialog-close]]:!hidden [&>[data-radix-dialog-close]]:!hidden [&_.lucide-x]:!hidden [&_[data-radix-dialog-close]]:!hidden [&_button]:has(.lucide-x):!hidden' : ''}`}>
         <div className="px-6 py-4 border-b">
           <DialogHeader>
             <DialogTitle>
