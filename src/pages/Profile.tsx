@@ -741,7 +741,7 @@ const Profile = () => {
       // Также проверяем наличие заявки на участие (исключаем удалённые)
       const { data: contestApplication } = await supabase
         .from('contest_applications')
-        .select('id, status, created_at, application_data, rejection_reason')
+        .select('id, status, created_at, application_data, rejection_reason, rejection_reason_types')
         .eq('user_id', id)
         .is('deleted_at', null)  // Исключаем удалённые заявки
         .order('created_at', { ascending: false })
@@ -1389,41 +1389,35 @@ const Profile = () => {
                     </div>
                    </div>
                    
-                    {/* Rejection reason notice */}
-                     {isOwner && contestApplication?.status === 'rejected' && (contestApplication?.rejection_reason || contestApplication?.rejection_reason_type) && contestApplication?.rejection_reason_type !== 'without_signature' && (
-                       <div className="mb-0 p-4 bg-destructive/10 border border-destructive/20 rounded-lg shadow-sm">{/* Full width, no margins, card-like styling */}
-                        <div className="flex items-center gap-2 mb-2">
-                          <AlertCircle className="h-5 w-5 text-destructive" />
-                          <h3 className="font-semibold text-destructive">Application Rejected</h3>
-                        </div>
-                        <div className="space-y-2">
-                           {contestApplication.rejection_reason_type && (
-                             <p className="text-sm text-destructive/80">
-                               <span className="font-medium">Reason:</span> {REJECTION_REASONS[contestApplication.rejection_reason_type as keyof typeof REJECTION_REASONS]}
-                               {isOwner && (
-                                 <button 
-                                   onClick={() => setShowRejectReasonModal(true)}
-                                   className="ml-2 text-primary hover:text-primary/80 underline text-sm"
-                                 >
-                                   change
-                                 </button>
-                               )}
-                             </p>
-                           )}
-                            {contestApplication.rejection_reason && (
+                     {/* Rejection reason notice */}
+                      {isOwner && contestApplication?.status === 'rejected' && (contestApplication?.rejection_reason || contestApplication?.rejection_reason_types) && (
+                        <div className="mb-0 p-4 bg-destructive/10 border border-destructive/20 rounded-lg shadow-sm">{/* Full width, no margins, card-like styling */}
+                         <div className="flex items-center gap-2 mb-2">
+                           <AlertCircle className="h-5 w-5 text-destructive" />
+                           <h3 className="font-semibold text-destructive">Application Rejected</h3>
+                         </div>
+                         <div className="space-y-2">
+                            {contestApplication.rejection_reason_types && contestApplication.rejection_reason_types.length > 0 && (
                               <p className="text-sm text-destructive/80">
-                                <span className="font-medium"></span> {contestApplication.rejection_reason}
-                                <button 
-                                  onClick={() => setIsEditModalOpen(true)}
-                                  className="ml-2 text-primary hover:text-primary/80 underline text-sm"
-                                >
-                                  Edit
-                                </button>
+                                <span className="font-medium">Reasons:</span> {contestApplication.rejection_reason_types.map((type: string) => REJECTION_REASONS[type as keyof typeof REJECTION_REASONS]).join(', ')}
+                                {isOwner && (
+                                  <button 
+                                    onClick={() => setShowRejectReasonModal(true)}
+                                    className="ml-2 text-primary hover:text-primary/80 underline text-sm"
+                                  >
+                                    change
+                                  </button>
+                                )}
                               </p>
-                             )}
-                          </div>
-                      </div>
-                    )}
+                            )}
+                             {contestApplication.rejection_reason && (
+                               <p className="text-sm text-destructive/80">
+                                 <span className="font-medium">Notes:</span> {contestApplication.rejection_reason}
+                               </p>
+                              )}
+                           </div>
+                       </div>
+                     )}
                    
                    {/* Participation items grid */}
                   <div className={`grid gap-1 sm:gap-3 ${
