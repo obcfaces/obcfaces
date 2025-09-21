@@ -1000,8 +1000,7 @@ const Admin = () => {
                                            <SelectItem value="finalist">Finalist</SelectItem>
                                            <SelectItem value="rejected">Rejected</SelectItem>
                                            <SelectItem value="this_week">This Week</SelectItem>
-                                           <SelectItem value="" disabled className="h-2"></SelectItem>
-                                           <SelectItem value="" disabled className="h-2"></SelectItem>
+                                           <div className="h-1 border-t border-border my-1"></div>
                                            <SelectItem 
                                              value="delete" 
                                              className="text-red-600 hover:text-red-700 hover:bg-red-50"
@@ -1221,8 +1220,7 @@ const Admin = () => {
                                                      <SelectItem value="finalist">Finalist</SelectItem>
                                                      <SelectItem value="rejected">Rejected</SelectItem>
                                                      <SelectItem value="this_week">This Week</SelectItem>
-                                                     <SelectItem value="" disabled className="h-2"></SelectItem>
-                                                     <SelectItem value="" disabled className="h-2"></SelectItem>
+                                                     <div className="h-1 border-t border-border my-1"></div>
                                                      <SelectItem 
                                                        value="delete" 
                                                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
