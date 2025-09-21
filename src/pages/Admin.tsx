@@ -160,6 +160,7 @@ const Admin = () => {
   const [countryFilter, setCountryFilter] = useState<string>('all');
   const [genderFilter, setGenderFilter] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [weeklyContestFilter, setWeeklyContestFilter] = useState<string>('approve');
   const [selectedUserApplications, setSelectedUserApplications] = useState<string | null>(null);
   const [editingApplicationId, setEditingApplicationId] = useState<string | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -418,8 +419,8 @@ const Admin = () => {
       return;
     }
 
-    // If status is finalist, automatically add to weekly contest
-    if (newStatus === 'finalist' && application) {
+    // If status is approved, automatically add to weekly contest
+    if (newStatus === 'approved' && application) {
       try {
         const appData = typeof application.application_data === 'string' 
           ? JSON.parse(application.application_data) 
@@ -473,7 +474,7 @@ const Admin = () => {
           }
         }
       } catch (error) {
-        console.error('Error handling finalist status:', error);
+        console.error('Error handling approved status:', error);
       }
     }
 
@@ -629,15 +630,46 @@ const Admin = () => {
               </div>
               
               {(() => {
-                if (weeklyParticipants.length === 0) {
+                // Фильтрация участников на основе выбранного фильтра
+                let filteredParticipants = [];
+                
+                if (weeklyContestFilter === 'approve') {
+                  // Показать одобренные заявки (approved applications), которые должны попасть в Weekly Contest
+                  filteredParticipants = contestApplications
+                    .filter(app => app.status === 'approved')
+                    .map(app => {
+                      const appData = app.application_data || {};
+                      return {
+                        id: app.id,
+                        user_id: app.user_id,
+                        application_data: appData,
+                        average_rating: 0,
+                        total_votes: 0,
+                        final_rank: null,
+                        fromApplication: true
+                      };
+                    });
+                } else {
+                  // Показать существующих участников Weekly Contest
+                  filteredParticipants = weeklyParticipants.filter(participant => {
+                    // Здесь можно добавить логику для this_week, next_week, after_next_week
+                    return true; // Пока показываем всех
+                  });
+                }
+                
+                if (filteredParticipants.length === 0) {
                   return (
                     <div className="text-center py-8 text-muted-foreground">
-                      <p className="text-lg">No weekly contest participants found</p>
+                      <p className="text-lg">
+                        {weeklyContestFilter === 'approve' 
+                          ? 'No approved applications found' 
+                          : 'No weekly contest participants found'}
+                      </p>
                     </div>
                   );
                 }
 
-                return weeklyParticipants.map((participant) => {
+                return filteredParticipants.map((participant) => {
                   const participantProfile = profiles.find(p => p.id === participant.user_id);
                   const appData = participant.application_data || {};
                   
@@ -756,8 +788,6 @@ const Admin = () => {
                           className={`w-40 ${
                             statusFilter === 'approved' ? 'bg-green-100 border-green-500 text-green-700' :
                             statusFilter === 'rejected' ? 'bg-red-100 border-red-500 text-red-700' :
-                            statusFilter === 'finalist' ? 'bg-blue-100 border-blue-500 text-blue-700' :
-                            statusFilter === 'this_week' ? 'bg-yellow-100 border-yellow-500 text-yellow-700' :
                             ''
                           }`}
                         >
@@ -768,8 +798,6 @@ const Admin = () => {
                           <SelectItem value="pending">Pending</SelectItem>
                           <SelectItem value="approved">Approved</SelectItem>
                           <SelectItem value="rejected">Rejected</SelectItem>
-                          <SelectItem value="finalist">Finalist</SelectItem>
-                          <SelectItem value="this_week">This Week</SelectItem>
                         </SelectContent>
                       </Select>
                       {statusFilter !== 'all' && (
@@ -981,22 +1009,18 @@ const Admin = () => {
                                       }}
                                     >
                                       <SelectTrigger 
-                                        className={`w-[60%] h-7 text-xs ${
-                                          application.status === 'approved' ? 'bg-green-100 border-green-500 text-green-700' :
-                                          application.status === 'rejected' ? 'bg-red-100 border-red-500 text-red-700' :
-                                          application.status === 'finalist' ? 'bg-blue-100 border-blue-500 text-blue-700' :
-                                          application.status === 'this_week' ? 'bg-yellow-100 border-yellow-500 text-yellow-700' :
-                                          ''
-                                        }`}
+                                         className={`w-[60%] h-7 text-xs ${
+                                           application.status === 'approved' ? 'bg-green-100 border-green-500 text-green-700' :
+                                           application.status === 'rejected' ? 'bg-red-100 border-red-500 text-red-700' :
+                                           ''
+                                         }`}
                                       >
                                         <SelectValue />
                                       </SelectTrigger>
                                       <SelectContent>
                                         <SelectItem value="pending">Pending</SelectItem>
                                         <SelectItem value="approved">Approved</SelectItem>
-                                        <SelectItem value="finalist">Finalist</SelectItem>
                                         <SelectItem value="rejected">Rejected</SelectItem>
-                                        <SelectItem value="this_week">This Week</SelectItem>
                                         <div className="h-1 border-t border-border my-1"></div>
                                         <SelectItem 
                                           value="delete" 
@@ -1239,23 +1263,19 @@ const Admin = () => {
                                                    }}
                                                  >
                                                    <SelectTrigger 
-                                                     className={`w-28 h-7 text-xs ${
-                                                       prevApp.status === 'approved' ? 'bg-green-100 border-green-500 text-green-700' :
-                                                       prevApp.status === 'rejected' ? 'bg-red-100 border-red-500 text-red-700' :
-                                                       prevApp.status === 'finalist' ? 'bg-blue-100 border-blue-500 text-blue-700' :
-                                                       prevApp.status === 'this_week' ? 'bg-yellow-100 border-yellow-500 text-yellow-700' :
-                                                       ''
-                                                     }`}
+                                                      className={`w-28 h-7 text-xs ${
+                                                        prevApp.status === 'approved' ? 'bg-green-100 border-green-500 text-green-700' :
+                                                        prevApp.status === 'rejected' ? 'bg-red-100 border-red-500 text-red-700' :
+                                                        ''
+                                                      }`}
                                                    >
                                                      <SelectValue />
                                                    </SelectTrigger>
                                                    <SelectContent>
                                                      <SelectItem value="pending">Pending</SelectItem>
-                                                     <SelectItem value="approved">Approved</SelectItem>
-                                                     <SelectItem value="finalist">Finalist</SelectItem>
-                                                     <SelectItem value="rejected">Rejected</SelectItem>
-                                                     <SelectItem value="this_week">This Week</SelectItem>
-                                                     <div className="h-1 border-t border-border my-1"></div>
+                                                      <SelectItem value="approved">Approved</SelectItem>
+                                                      <SelectItem value="rejected">Rejected</SelectItem>
+                                                      <div className="h-1 border-t border-border my-1"></div>
                                                      <SelectItem 
                                                        value="delete" 
                                                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
