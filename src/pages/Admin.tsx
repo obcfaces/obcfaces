@@ -173,6 +173,7 @@ const Admin = () => {
   const [deleteConfirmText, setDeleteConfirmText] = useState('');
   const [applicationToDelete, setApplicationToDelete] = useState<{ id: string; name: string } | null>(null);
   const [expandedMobileItems, setExpandedMobileItems] = useState<Set<string>>(new Set());
+  const [participantFilters, setParticipantFilters] = useState<{ [key: string]: string }>({});
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -782,6 +783,28 @@ const Admin = () => {
 
                           {/* Right side actions */}
                           <div className="p-4 md:w-auto flex flex-col justify-between gap-2">
+                            {/* Contest filter dropdown */}
+                            <div className="flex flex-col gap-1 mb-2">
+                              <Select 
+                                value={participantFilters[participant.id] || (participant.final_rank ? 'this week' : '')} 
+                                onValueChange={(value) => {
+                                  setParticipantFilters(prev => ({
+                                    ...prev,
+                                    [participant.id]: value
+                                  }));
+                                }}
+                              >
+                                <SelectTrigger className="w-28 h-6 text-xs">
+                                  <SelectValue placeholder="Filter" />
+                                </SelectTrigger>
+                                <SelectContent className="z-50 bg-background border shadow-md">
+                                  <SelectItem value="this week">This Week</SelectItem>
+                                  <SelectItem value="next week">Next Week</SelectItem>
+                                  <SelectItem value="approve">Approve</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            
                             <div className="flex flex-col gap-1 items-center">
                               <Badge variant={participant.is_active ? 'default' : 'secondary'}>
                                 {participant.is_active ? 'Active' : 'Inactive'}
