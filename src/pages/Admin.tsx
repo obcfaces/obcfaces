@@ -1212,7 +1212,7 @@ const Admin = () => {
               status: 'rejected',
               rejected_at: new Date().toISOString(),
               rejection_reason: notes,
-              rejection_reason_type: reasonTypes.join(', ')
+              rejection_reason_types: reasonTypes
             })
             .eq('id', applicationToReject.id);
 
