@@ -15,8 +15,9 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { useToast } from '@/hooks/use-toast';
 import { 
   Calendar, FileText, UserCog, Eye, Edit, Check, X, Trash2, 
-  RotateCcw, Copy, Facebook, Minus, AlertCircle, Trophy
+  RotateCcw, Copy, Facebook, Minus, AlertCircle, Trophy, ChevronDown, ChevronUp
 } from 'lucide-react';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import cityTimezones from 'city-timezones';
 import { PhotoModal } from '@/components/photo-modal';
 import { RejectReasonModal } from '@/components/reject-reason-modal';
@@ -171,6 +172,7 @@ const Admin = () => {
   const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false);
   const [deleteConfirmText, setDeleteConfirmText] = useState('');
   const [applicationToDelete, setApplicationToDelete] = useState<{ id: string; name: string } | null>(null);
+  const [expandedMobileItems, setExpandedMobileItems] = useState<Set<string>>(new Set());
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -934,7 +936,7 @@ const Admin = () => {
                            )}
                           
                             <CardContent className="p-0">
-                              <div className="flex">
+                              <div className="flex overflow-x-auto md:overflow-visible">
                                 {/* Column 1: Photos (25ch) */}
                                 <div className="w-[25ch] flex-shrink-0 p-0">
                                   <div className="flex gap-px">
@@ -975,126 +977,202 @@ const Admin = () => {
                                     </span>
                                   </div>
                                   
-                                  <div className="text-xs text-muted-foreground mb-1">
-                                    {appData.city} {appData.state} {appData.country}
-                                  </div>
-                                   
-                                  <div className="text-xs text-muted-foreground mb-1">
-                                    {appData.weight_kg}kg • {appData.height_cm}cm • {appData.gender}
-                                  </div>
-
-                                  <div className="text-xs text-muted-foreground mb-1">
-                                    {appData.marital_status} • {appData.has_children ? 'Has children' : 'No children'}
-                                  </div>
-
-                                  <div className="text-xs text-muted-foreground mb-1">
-                                    {userProfile?.email && (
-                                      <div className="flex items-center gap-1">
-                                        <span 
-                                          className="cursor-pointer" 
-                                          title={userProfile.email}
-                                        >
-                                          {userProfile.email.length > 25 ? `${userProfile.email.substring(0, 25)}...` : userProfile.email}
-                                        </span>
-                                        <Copy 
-                                          className="h-3 w-3 cursor-pointer hover:text-foreground" 
-                                          onClick={() => navigator.clipboard.writeText(userProfile.email)}
-                                        />
+                                  {/* City row with collapsible trigger on mobile */}
+                                  <Collapsible 
+                                    open={expandedMobileItems.has(application.id)} 
+                                    onOpenChange={(open) => {
+                                      const newSet = new Set(expandedMobileItems);
+                                      if (open) {
+                                        newSet.add(application.id);
+                                      } else {
+                                        newSet.delete(application.id);
+                                      }
+                                      setExpandedMobileItems(newSet);
+                                    }}
+                                  >
+                                    <CollapsibleTrigger className="w-full">
+                                      <div className="flex items-center justify-between text-xs text-muted-foreground mb-1 group">
+                                        <span className="truncate">{appData.city} {appData.state} {appData.country}</span>
+                                        <div className="md:hidden flex-shrink-0 ml-2">
+                                          {expandedMobileItems.has(application.id) ? (
+                                            <ChevronUp className="h-3 w-3 group-hover:text-foreground" />
+                                          ) : (
+                                            <ChevronDown className="h-3 w-3 group-hover:text-foreground" />
+                                          )}
+                                        </div>
                                       </div>
-                                    )}
-                                   </div>
+                                    </CollapsibleTrigger>
+                                    
+                                    {/* Always visible on desktop, collapsible on mobile */}
+                                    <div className="hidden md:block">
+                                      <div className="text-xs text-muted-foreground mb-1">
+                                        {appData.weight_kg}kg • {appData.height_cm}cm • {appData.gender}
+                                      </div>
 
-                                   {/* Phone and Social Media */}
-                                   <div className="text-xs text-muted-foreground mb-3">
-                                     <div className="flex items-center gap-2">
-                                       {(() => {
-                                         const phone = appData.phone?.country && appData.phone?.number 
-                                           ? `${appData.phone.country} ${appData.phone.number}` 
-                                           : 'Not provided';
-                                         return <span>{phone}</span>;
-                                       })()}
-                                       {appData.facebook_url && (
-                                         <a
-                                           href={appData.facebook_url}
-                                           target="_blank"
-                                           rel="noopener noreferrer"
-                                           className="text-blue-600 hover:text-blue-800"
-                                         >
-                                           <Facebook className="h-3 w-3" />
-                                         </a>
-                                       )}
-                                     </div>
-                                   </div>
+                                      <div className="text-xs text-muted-foreground mb-1">
+                                        {appData.marital_status} • {appData.has_children ? 'Has children' : 'No children'}
+                                      </div>
 
-                                   {/* Status filter - добавлено в мобильной версии в конец второго столбца */}
-                                   <div className="md:hidden mt-2">
-                                     {!showDeletedApplications && (
-                                       <Select 
-                                         value={application.status} 
-                                         onValueChange={(newStatus) => {
-                                           if (newStatus === 'delete') {
-                                             const appData = typeof application.application_data === 'string' 
-                                               ? JSON.parse(application.application_data) 
-                                               : application.application_data;
-                                             setApplicationToDelete({ 
-                                               id: application.id, 
-                                               name: `${appData.firstName} ${appData.lastName}` 
-                                             });
-                                             setShowDeleteConfirmModal(true);
-                                             return;
-                                           }
-                                           reviewApplication(application.id, newStatus);
-                                         }}
-                                       >
-                                         <SelectTrigger 
-                                            className={`w-full h-7 text-xs ${
-                                              application.status === 'approved' ? 'bg-green-100 border-green-500 text-green-700' :
-                                              application.status === 'rejected' ? 'bg-red-100 border-red-500 text-red-700' :
-                                              ''
-                                            }`}
-                                         >
-                                           <SelectValue />
-                                         </SelectTrigger>
-                                         <SelectContent>
-                                           <SelectItem value="pending">Pending</SelectItem>
-                                           <SelectItem value="approved">Approved</SelectItem>
-                                           <SelectItem value="rejected">Rejected</SelectItem>
-                                           <div className="h-1 border-t border-border my-1"></div>
-                                           <SelectItem 
-                                             value="delete" 
-                                             className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                                           >
-                                             🗑️ Delete
-                                           </SelectItem>
-                                         </SelectContent>
-                                       </Select>
-                                     )}
-                                     
-                                     {/* Date with admin - под фильтром статусов */}
-                                     <div className="text-xs text-muted-foreground mt-1">
-                                       {(() => {
-                                         const statusDate = application.reviewed_at || application.approved_at || application.rejected_at || application.submitted_at;
-                                         if (statusDate) {
-                                           const date = new Date(statusDate);
-                                           const time = date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
-                                           const dateStr = date.toLocaleDateString('en-GB', { 
-                                             day: 'numeric', 
-                                             month: 'short',
-                                             year: '2-digit'
-                                           }).toLowerCase();
-                                           const reviewerEmail = application.reviewed_by && profiles.find(p => p.id === application.reviewed_by)?.email;
-                                           const reviewerLogin = reviewerEmail ? reviewerEmail.substring(0, 4) : 'syst';
-                                           return (
-                                             <>
-                                               <span className="text-blue-600">{reviewerLogin}</span>
-                                               {` ${time} - ${dateStr}`}
-                                             </>
-                                           );
-                                         }
-                                         return '';
-                                       })()}
-                                     </div>
-                                   </div>
+                                      <div className="text-xs text-muted-foreground mb-1">
+                                        {userProfile?.email && (
+                                          <div className="flex items-center gap-1">
+                                            <span 
+                                              className="cursor-pointer" 
+                                              title={userProfile.email}
+                                            >
+                                              {userProfile.email.length > 25 ? `${userProfile.email.substring(0, 25)}...` : userProfile.email}
+                                            </span>
+                                            <Copy 
+                                              className="h-3 w-3 cursor-pointer hover:text-foreground" 
+                                              onClick={() => navigator.clipboard.writeText(userProfile.email)}
+                                            />
+                                          </div>
+                                        )}
+                                      </div>
+
+                                      {/* Phone and Social Media */}
+                                      <div className="text-xs text-muted-foreground mb-3">
+                                        <div className="flex items-center gap-2">
+                                          {(() => {
+                                            const phone = appData.phone?.country && appData.phone?.number 
+                                              ? `${appData.phone.country} ${appData.phone.number}` 
+                                              : 'Not provided';
+                                            return <span>{phone}</span>;
+                                          })()}
+                                          {appData.facebook_url && (
+                                            <a
+                                              href={appData.facebook_url}
+                                              target="_blank"
+                                              rel="noopener noreferrer"
+                                              className="text-blue-600 hover:text-blue-800"
+                                            >
+                                              <Facebook className="h-3 w-3" />
+                                            </a>
+                                          )}
+                                        </div>
+                                      </div>
+                                    </div>
+
+                                    {/* Collapsible content for mobile */}
+                                    <CollapsibleContent className="md:hidden">
+                                      <div className="text-xs text-muted-foreground mb-1">
+                                        {appData.weight_kg}kg • {appData.height_cm}cm • {appData.gender}
+                                      </div>
+
+                                      <div className="text-xs text-muted-foreground mb-1">
+                                        {appData.marital_status} • {appData.has_children ? 'Has children' : 'No children'}
+                                      </div>
+
+                                      <div className="text-xs text-muted-foreground mb-1">
+                                        {userProfile?.email && (
+                                          <div className="flex items-center gap-1">
+                                            <span 
+                                              className="cursor-pointer" 
+                                              title={userProfile.email}
+                                            >
+                                              {userProfile.email.length > 25 ? `${userProfile.email.substring(0, 25)}...` : userProfile.email}
+                                            </span>
+                                            <Copy 
+                                              className="h-3 w-3 cursor-pointer hover:text-foreground" 
+                                              onClick={() => navigator.clipboard.writeText(userProfile.email)}
+                                            />
+                                          </div>
+                                        )}
+                                      </div>
+
+                                      {/* Phone and Social Media */}
+                                      <div className="text-xs text-muted-foreground mb-3">
+                                        <div className="flex items-center gap-2">
+                                          {(() => {
+                                            const phone = appData.phone?.country && appData.phone?.number 
+                                              ? `${appData.phone.country} ${appData.phone.number}` 
+                                              : 'Not provided';
+                                            return <span>{phone}</span>;
+                                          })()}
+                                          {appData.facebook_url && (
+                                            <a
+                                              href={appData.facebook_url}
+                                              target="_blank"
+                                              rel="noopener noreferrer"
+                                              className="text-blue-600 hover:text-blue-800"
+                                            >
+                                              <Facebook className="h-3 w-3" />
+                                            </a>
+                                          )}
+                                        </div>
+                                      </div>
+
+                                      {/* Status filter - добавлено в мобильной версии в конец второго столбца */}
+                                      <div className="mt-2">
+                                        {!showDeletedApplications && (
+                                          <Select 
+                                            value={application.status} 
+                                            onValueChange={(newStatus) => {
+                                              if (newStatus === 'delete') {
+                                                const appData = typeof application.application_data === 'string' 
+                                                  ? JSON.parse(application.application_data) 
+                                                  : application.application_data;
+                                                setApplicationToDelete({ 
+                                                  id: application.id, 
+                                                  name: `${appData.firstName} ${appData.lastName}` 
+                                                });
+                                                setShowDeleteConfirmModal(true);
+                                                return;
+                                              }
+                                              reviewApplication(application.id, newStatus);
+                                            }}
+                                          >
+                                            <SelectTrigger 
+                                               className={`w-full h-7 text-xs ${
+                                                 application.status === 'approved' ? 'bg-green-100 border-green-500 text-green-700' :
+                                                 application.status === 'rejected' ? 'bg-red-100 border-red-500 text-red-700' :
+                                                 ''
+                                               }`}
+                                            >
+                                              <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                              <SelectItem value="pending">Pending</SelectItem>
+                                              <SelectItem value="approved">Approved</SelectItem>
+                                              <SelectItem value="rejected">Rejected</SelectItem>
+                                              <div className="h-1 border-t border-border my-1"></div>
+                                              <SelectItem 
+                                                value="delete" 
+                                                className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                              >
+                                                🗑️ Delete
+                                              </SelectItem>
+                                            </SelectContent>
+                                          </Select>
+                                        )}
+                                        
+                                        {/* Date with admin - под фильтром статусов */}
+                                        <div className="text-xs text-muted-foreground mt-1">
+                                          {(() => {
+                                            const statusDate = application.reviewed_at || application.approved_at || application.rejected_at || application.submitted_at;
+                                            if (statusDate) {
+                                              const date = new Date(statusDate);
+                                              const time = date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+                                              const dateStr = date.toLocaleDateString('en-GB', { 
+                                                day: 'numeric', 
+                                                month: 'short',
+                                                year: '2-digit'
+                                              }).toLowerCase();
+                                              const reviewerEmail = application.reviewed_by && profiles.find(p => p.id === application.reviewed_by)?.email;
+                                              const reviewerLogin = reviewerEmail ? reviewerEmail.substring(0, 4) : 'syst';
+                                              return (
+                                                <>
+                                                  <span className="text-blue-600">{reviewerLogin}</span>
+                                                  {` ${time} - ${dateStr}`}
+                                                </>
+                                              );
+                                            }
+                                            return '';
+                                          })()}
+                                        </div>
+                                      </div>
+                                    </CollapsibleContent>
+                                  </Collapsible>
                                 </div>
 
                                  {/* Column 3: Status Button (20ch) - только для десктопа */}
