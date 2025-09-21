@@ -713,7 +713,7 @@ const Admin = () => {
                                 {participant.is_active ? 'Active' : 'Inactive'}
                               </Badge>
                               <p className="text-xs text-muted-foreground text-center">
-                                Rating: {participant.average_rating || 0}
+                                Rating: {(participant.average_rating || 0).toFixed(1)}
                               </p>
                             </div>
                             <div className="flex gap-1 flex-wrap justify-center">
