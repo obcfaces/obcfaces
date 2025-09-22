@@ -22,6 +22,7 @@ interface ContestSectionProps {
   noWrapTitle?: boolean;
   viewMode?: 'compact' | 'full';
   filters?: React.ReactNode; // Add filters prop
+  weekOffset?: number; // Add weekOffset prop
 }
 
 // Helper function to get week range dates (Monday-Sunday)
@@ -54,7 +55,7 @@ const getWeekRange = (weeksOffset: number = 0) => {
   }
 };
 
-export function ContestSection({ title, subtitle, description, isActive, showWinner, centerSubtitle, titleSuffix, noWrapTitle, viewMode: controlledViewMode, filters }: ContestSectionProps) {
+export function ContestSection({ title, subtitle, description, isActive, showWinner, centerSubtitle, titleSuffix, noWrapTitle, viewMode: controlledViewMode, filters, weekOffset = 0 }: ContestSectionProps) {
   const [localViewMode] = useState<'compact' | 'full'>('compact');
   const viewMode = controlledViewMode ?? localViewMode;
   const [ratings, setRatings] = useState<Record<number, number>>({
@@ -431,6 +432,7 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
                 onRate={(rating) => handleRate(contestant.rank, rating)}
                 isThisWeek={title === "THIS WEEK"}
                 user={user}
+                weekOffset={weekOffset}
               />
              ))}
            </div>
