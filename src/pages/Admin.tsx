@@ -1380,10 +1380,9 @@ const Admin = () => {
                                     </span>
                                   </div>
                                   
-                                   <div className="flex items-center justify-between text-xs text-muted-foreground mb-1">
-                                     <span>{appData.city} {appData.state} {appData.country}</span>
+                                   <div className="flex items-center text-xs text-muted-foreground mb-1">
                                      <ChevronDown 
-                                       className={`h-4 w-4 cursor-pointer transition-transform ${
+                                       className={`h-4 w-4 cursor-pointer transition-transform mr-1 ${
                                          expandedDesktopItems.has(application.id) ? 'rotate-180' : ''
                                        }`}
                                        onClick={() => {
@@ -1396,6 +1395,7 @@ const Admin = () => {
                                          setExpandedDesktopItems(newExpanded);
                                        }}
                                      />
+                                     <span>{appData.city} {appData.state} {appData.country}</span>
                                    </div>
                                    
                                    {/* Expanded information - desktop */}
@@ -1572,23 +1572,23 @@ const Admin = () => {
                                           </span>
                                        </div>
                                        
-                                        <div className="flex items-center justify-between text-xs text-muted-foreground mb-2">
-                                          <span className="truncate">{appData.city} {appData.country}</span>
-                                          <ChevronDown 
-                                            className={`h-4 w-4 cursor-pointer transition-transform ${
-                                              expandedMobileItems.has(application.id) ? 'rotate-180' : ''
-                                            }`}
-                                            onClick={() => {
-                                              const newExpanded = new Set(expandedMobileItems);
-                                              if (expandedMobileItems.has(application.id)) {
-                                                newExpanded.delete(application.id);
-                                              } else {
-                                                newExpanded.add(application.id);
-                                              }
-                                              setExpandedMobileItems(newExpanded);
-                                            }}
-                                          />
-                                         </div>
+                                         <div className="flex items-center text-xs text-muted-foreground mb-2">
+                                           <ChevronDown 
+                                             className={`h-4 w-4 cursor-pointer transition-transform mr-1 ${
+                                               expandedMobileItems.has(application.id) ? 'rotate-180' : ''
+                                             }`}
+                                             onClick={() => {
+                                               const newExpanded = new Set(expandedMobileItems);
+                                               if (expandedMobileItems.has(application.id)) {
+                                                 newExpanded.delete(application.id);
+                                               } else {
+                                                 newExpanded.add(application.id);
+                                               }
+                                               setExpandedMobileItems(newExpanded);
+                                             }}
+                                           />
+                                           <span className="truncate">{appData.city} {appData.country}</span>
+                                          </div>
                                         
                                         {/* Expanded information */}
                                         {expandedMobileItems.has(application.id) && (
