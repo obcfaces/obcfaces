@@ -1955,7 +1955,7 @@ const Admin = () => {
                            disabled={!!profile.email_confirmed_at}
                          />
                          <span className="text-sm text-muted-foreground">
-                           {profile.email_confirmed_at ? 'Verified' : 'Not verified'}
+                           {profile.email_confirmed_at ? 'Verified' : 'verif'}
                          </span>
                        </>
                      )}
