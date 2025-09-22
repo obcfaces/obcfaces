@@ -253,7 +253,13 @@ const Admin = () => {
           
           return participantMonday.getTime() >= currentMonday.getTime();
         });
-        setFilteredWeeklyParticipants(filteredByStatus);
+
+        // Remove duplicates based on user_id
+        const uniqueParticipants = filteredByStatus.filter((participant, index, arr) => 
+          arr.findIndex(p => p.user_id === participant.user_id) === index
+        );
+        
+        setFilteredWeeklyParticipants(uniqueParticipants);
       } else {
         const filtered = weeklyParticipants.filter(participant => {
           const index = weeklyParticipants.findIndex(p => p.user_id === participant.user_id);
