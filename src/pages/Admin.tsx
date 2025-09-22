@@ -753,7 +753,43 @@ const Admin = () => {
           </div>
 
           <Tabs defaultValue="applications" className="space-y-6">
-            <TabsList>
+            {/* Mobile layout: Two rows of tabs */}
+            <div className="md:hidden space-y-2">
+              {/* First row - secondary tabs */}
+              <TabsList className="grid grid-cols-3 w-full">
+                <TabsTrigger value="registrations" className="flex items-center gap-1 text-xs">
+                  <UserCog className="w-3 h-3" />
+                  Reg
+                </TabsTrigger>
+                <TabsTrigger value="moderation" className="flex items-center gap-1 text-xs">
+                  <Eye className="w-3 h-3" />
+                  Moderate
+                </TabsTrigger>
+                <TabsTrigger value="roles" className="flex items-center gap-1 text-xs">
+                  <UserCog className="w-3 h-3" />
+                  Role
+                </TabsTrigger>
+              </TabsList>
+              
+              {/* Second row - main tabs */}
+              <TabsList className="grid grid-cols-3 w-full">
+                <TabsTrigger value="applications" className="flex items-center gap-1 text-xs">
+                  <FileText className="w-3 h-3" />
+                  Card
+                </TabsTrigger>
+                <TabsTrigger value="weekly" className="flex items-center gap-1 text-xs">
+                  <Calendar className="w-3 h-3" />
+                  This
+                </TabsTrigger>
+                <TabsTrigger value="pastweek" className="flex items-center gap-1 text-xs">
+                  <Trophy className="w-3 h-3" />
+                  Past
+                </TabsTrigger>
+              </TabsList>
+            </div>
+
+            {/* Desktop layout - single row */}
+            <TabsList className="hidden md:flex">
               <TabsTrigger value="weekly" className="flex items-center gap-2">
                 <Calendar className="w-4 h-4" />
                 Weekly Contests
