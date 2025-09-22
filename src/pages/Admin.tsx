@@ -1380,22 +1380,19 @@ const Admin = () => {
                                     </span>
                                   </div>
                                   
-                                   <div className="flex items-center text-xs text-muted-foreground mb-1">
-                                     <ChevronDown 
-                                       className={`h-4 w-4 cursor-pointer transition-transform mr-1 ${
-                                         expandedDesktopItems.has(application.id) ? 'rotate-180' : ''
-                                       }`}
-                                       onClick={() => {
-                                         const newExpanded = new Set(expandedDesktopItems);
-                                         if (expandedDesktopItems.has(application.id)) {
-                                           newExpanded.delete(application.id);
-                                         } else {
-                                           newExpanded.add(application.id);
-                                         }
-                                         setExpandedDesktopItems(newExpanded);
-                                       }}
-                                     />
-                                     <span>{appData.city} {appData.state} {appData.country}</span>
+                                   <div 
+                                     className="text-xs text-muted-foreground mb-1 cursor-pointer hover:text-foreground transition-colors"
+                                     onClick={() => {
+                                       const newExpanded = new Set(expandedDesktopItems);
+                                       if (expandedDesktopItems.has(application.id)) {
+                                         newExpanded.delete(application.id);
+                                       } else {
+                                         newExpanded.add(application.id);
+                                       }
+                                       setExpandedDesktopItems(newExpanded);
+                                     }}
+                                   >
+                                     {appData.city} {appData.state} {appData.country}
                                    </div>
                                    
                                    {/* Expanded information - desktop */}
@@ -1570,23 +1567,20 @@ const Admin = () => {
                                           </span>
                                        </div>
                                        
-                                         <div className="flex items-center text-xs text-muted-foreground mb-2">
-                                           <ChevronDown 
-                                             className={`h-4 w-4 cursor-pointer transition-transform mr-1 ${
-                                               expandedMobileItems.has(application.id) ? 'rotate-180' : ''
-                                             }`}
-                                             onClick={() => {
-                                               const newExpanded = new Set(expandedMobileItems);
-                                               if (expandedMobileItems.has(application.id)) {
-                                                 newExpanded.delete(application.id);
-                                               } else {
-                                                 newExpanded.add(application.id);
-                                               }
-                                               setExpandedMobileItems(newExpanded);
-                                             }}
-                                           />
-                                           <span className="truncate">{appData.city} {appData.country}</span>
-                                          </div>
+                                         <div 
+                                           className="text-xs text-muted-foreground mb-2 cursor-pointer hover:text-foreground transition-colors"
+                                           onClick={() => {
+                                             const newExpanded = new Set(expandedMobileItems);
+                                             if (expandedMobileItems.has(application.id)) {
+                                               newExpanded.delete(application.id);
+                                             } else {
+                                               newExpanded.add(application.id);
+                                             }
+                                             setExpandedMobileItems(newExpanded);
+                                           }}
+                                         >
+                                           {appData.city} {appData.country}
+                                         </div>
                                         
                                          {/* Expanded information */}
                                          {expandedMobileItems.has(application.id) && (
