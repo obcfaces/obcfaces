@@ -166,6 +166,7 @@ const Admin = () => {
   const [expandedMobileItems, setExpandedMobileItems] = useState<Set<string>>(new Set());
   const [participantFilters, setParticipantFilters] = useState<{ [key: string]: string }>({});
   const [pastWeekParticipants, setPastWeekParticipants] = useState<any[]>([]);
+  const [verificationFilter, setVerificationFilter] = useState<string>('all');
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -1859,8 +1860,42 @@ const Admin = () => {
                 <p className="text-muted-foreground">Complete list of all registered users</p>
               </div>
               
+              {/* Verification filters */}
+              <div className="flex gap-2 mb-4">
+                <Button
+                  variant={verificationFilter === 'all' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setVerificationFilter('all')}
+                >
+                  All Users
+                </Button>
+                <Button
+                  variant={verificationFilter === 'verified' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setVerificationFilter('verified')}
+                >
+                  Verified
+                </Button>
+                <Button
+                  variant={verificationFilter === 'not_verified' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setVerificationFilter('not_verified')}
+                >
+                  Not Verified
+                </Button>
+              </div>
+              
               <div className="grid gap-4">
-                {profiles.map((profile) => (
+                {profiles
+                  .filter((profile) => {
+                    if (verificationFilter === 'verified') {
+                      return !!profile.email_confirmed_at;
+                    } else if (verificationFilter === 'not_verified') {
+                      return !profile.email_confirmed_at;
+                    }
+                    return true; // 'all' case
+                  })
+                  .map((profile) => (
                   <Card key={profile.id}>
                     <CardHeader>
                       <div className="flex items-center justify-between">
