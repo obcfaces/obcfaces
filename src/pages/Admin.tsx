@@ -18,6 +18,7 @@ import {
   Calendar, FileText, UserCog, Eye, Edit, Check, X, Trash2, 
   RotateCcw, Copy, Facebook, Minus, AlertCircle, Trophy, ChevronDown, ChevronUp
 } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import cityTimezones from 'city-timezones';
 import { PhotoModal } from '@/components/photo-modal';
@@ -57,6 +58,7 @@ interface ProfileData {
   facebook_data?: any;
   last_sign_in_at?: string;
   created_at: string;
+  email_confirmed_at?: string;
   is_approved?: boolean | null;
   moderation_notes?: string;
   moderated_by?: string;
@@ -318,6 +320,45 @@ const Admin = () => {
     sunday.setDate(monday.getDate() + 6);
     
     return `${monday.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit' })} - ${sunday.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })}`;
+  };
+
+  const handleEmailVerification = async (userId: string) => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) {
+        throw new Error('No access token');
+      }
+
+      const response = await fetch(`https://mlbzdxsumfudrtuuybqn.supabase.co/functions/v1/verify-user-email`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ userId }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to verify email');
+      }
+
+      toast({
+        title: "Success",
+        description: "User email verified successfully",
+      });
+
+      // Refresh the profiles to show updated verification status
+      fetchProfiles();
+    } catch (error: any) {
+      console.error('Error verifying email:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to verify user email",
+        variant: "destructive"
+      });
+    }
   };
 
   const checkAdminAccess = async () => {
@@ -1837,6 +1878,22 @@ const Admin = () => {
                               {profile.email && <div>Email: {profile.email}</div>}
                               <div>Created: {new Date(profile.created_at).toLocaleDateString()}</div>
                             </div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-2">
+                            <Checkbox
+                              checked={profile.email_confirmed_at ? true : false}
+                              onCheckedChange={async (checked) => {
+                                if (checked && !profile.email_confirmed_at) {
+                                  await handleEmailVerification(profile.id);
+                                }
+                              }}
+                              disabled={profile.email_confirmed_at ? true : false}
+                            />
+                            <span className="text-sm text-muted-foreground">
+                              {profile.email_confirmed_at ? 'Verified' : 'Not verified'}
+                            </span>
                           </div>
                         </div>
                       </div>
