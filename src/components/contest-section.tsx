@@ -87,9 +87,9 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
 
   const loadContestParticipants = async (weekOffset: number = 0) => {
     try {
-      // Use the secure public function that doesn't expose sensitive data
+      // Use the new function that respects admin filtering
       const { data, error } = await supabase
-        .rpc('get_weekly_contest_participants_public', { weeks_offset: weekOffset });
+        .rpc('get_weekly_participants_by_admin_status', { weeks_offset: weekOffset });
 
       console.log(`Loading participants for week offset ${weekOffset}:`, data);
       console.log('Weekly contest participants error:', error);
