@@ -1882,15 +1882,15 @@ const Admin = () => {
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
-                          <div className="flex items-center gap-2">
+                           <div className="flex items-center gap-2">
                             <Checkbox
-                              checked={profile.email_confirmed_at ? true : false}
+                              checked={!!profile.email_confirmed_at}
                               onCheckedChange={async (checked) => {
                                 if (checked && !profile.email_confirmed_at) {
                                   await handleEmailVerification(profile.id);
                                 }
                               }}
-                              disabled={profile.email_confirmed_at ? true : false}
+                              disabled={!!profile.email_confirmed_at}
                             />
                             <span className="text-sm text-muted-foreground">
                               {profile.email_confirmed_at ? 'Verified' : 'Not verified'}
