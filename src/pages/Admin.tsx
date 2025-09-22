@@ -1923,15 +1923,14 @@ const Admin = () => {
                        {profile.email && <div>{profile.email}</div>}
                        {profile.country && <div>{profile.country}</div>}
                        <div>
-                         {new Date(profile.created_at).toLocaleDateString('en-GB', { 
+                         {new Date(profile.created_at).toLocaleTimeString('en-GB', {
+                           hour: '2-digit',
+                           minute: '2-digit'
+                         })} - {new Date(profile.created_at).toLocaleDateString('en-GB', { 
                            day: 'numeric', 
                            month: 'short', 
                            year: 'numeric' 
-                         }).toLowerCase().replace(/(\d+) (\w+) (\d+)/, '$1 $2 $3')} 
-                         at {new Date(profile.created_at).toLocaleTimeString('en-GB', {
-                           hour: '2-digit',
-                           minute: '2-digit'
-                         })}
+                         }).toLowerCase()}
                        </div>
                      </div>
                    </div>
