@@ -244,6 +244,50 @@ const Admin = () => {
     filterWeeklyParticipants();
   }, [weeklyContestFilter, contestApplications, weeklyParticipants, participantFilters]);
 
+  // Handle Past Week participants filtering  
+  useEffect(() => {
+    const filterPastWeekParticipants = () => {
+      // Get participants who don't have 'this week' status
+      const pastParticipants = weeklyParticipants.filter(participant => {
+        const filterStatus = participantFilters[participant.id] || (participant.final_rank ? 'this week' : 'approve');
+        return filterStatus !== 'this week';
+      }).map(participant => ({
+        ...participant,
+        weekInterval: getParticipantWeekInterval(participant)
+      }));
+
+      setPastWeekParticipants(pastParticipants);
+    };
+
+    filterPastWeekParticipants();
+  }, [weeklyParticipants, participantFilters]);
+
+  // Helper function to determine week interval for participant
+  const getParticipantWeekInterval = (participant: any) => {
+    // If participant has final_rank, they were a finalist in their week
+    if (participant.final_rank) {
+      return `Week ${participant.final_rank === 1 ? 'Winner' : 'Finalist'} - ${formatWeekInterval(participant.created_at)}`;
+    }
+    
+    // Otherwise, assign based on creation date
+    const createdDate = new Date(participant.created_at);
+    return formatWeekInterval(createdDate);
+  };
+
+  // Helper function to format week interval
+  const formatWeekInterval = (date: Date | string) => {
+    const d = new Date(date);
+    const monday = new Date(d);
+    const dayOfWeek = d.getDay();
+    const daysSinceMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+    monday.setDate(d.getDate() - daysSinceMonday);
+    
+    const sunday = new Date(monday);
+    sunday.setDate(monday.getDate() + 6);
+    
+    return `${monday.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit' })} - ${sunday.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })}`;
+  };
+
   const checkAdminAccess = async () => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
@@ -854,26 +898,21 @@ const Admin = () => {
             <TabsContent value="pastweek" className="space-y-4">
               <div className="mb-6 flex items-center justify-between">
                 <div>
-                  <h2 className="text-xl font-semibold">Past Week Finalists</h2>
-                  <p className="text-muted-foreground">Finalists from previous weeks</p>
+                  <h2 className="text-xl font-semibold">Past Week Participants</h2>
+                  <p className="text-muted-foreground">Participants from previous weeks with their week intervals</p>
                 </div>
               </div>
               
               {(() => {
-                // Filter past week participants (from previous weeks with final_rank)
-                const pastWeekFinalists = weeklyParticipants.filter(participant => {
-                  return participant.final_rank && participant.final_rank > 0;
-                });
-
-                if (pastWeekFinalists.length === 0) {
+                if (pastWeekParticipants.length === 0) {
                   return (
                     <div className="text-center py-8 text-muted-foreground">
-                      <p className="text-lg">No past week finalists found</p>
+                      <p className="text-lg">No past week participants found</p>
                     </div>
                   );
                 }
 
-                return pastWeekFinalists.map((participant) => {
+                return pastWeekParticipants.map((participant) => {
                   const participantProfile = profiles.find(p => p.id === participant.user_id);
                   const appData = participant.application_data || {};
                   
@@ -938,37 +977,40 @@ const Admin = () => {
                             </div>
 
                             <div className="text-xs text-muted-foreground mb-1">
-                              Past Week Finalist • Rank: {participant.final_rank} • Votes: {participant.total_votes || 0}
+                              Past Participant • Rank: {participant.final_rank || 'Unranked'} • Votes: {participant.total_votes || 0}
                             </div>
                           </div>
 
-                          {/* Right side actions */}
+                          {/* Right side info */}
                           <div className="p-4 md:w-auto flex flex-col justify-between gap-2">
-                            <div className="flex flex-col gap-1 items-center">
-                              <Badge variant={participant.final_rank === 1 ? 'default' : 'secondary'}>
-                                {participant.final_rank === 1 ? 'Winner' : `Rank ${participant.final_rank}`}
-                              </Badge>
-                              <p className="text-xs text-muted-foreground text-center">
-                                Rating: {(participant.average_rating || 0).toFixed(1)}
-                              </p>
+                            <div className="text-xs text-muted-foreground">
+                              <div className="font-semibold mb-1">Week participated:</div>
+                              <div className="bg-muted p-2 rounded text-center">
+                                {participant.weekInterval}
+                              </div>
+                              {participant.final_rank && (
+                                <div className="mt-2 p-2 bg-primary/10 rounded text-center">
+                                  <div className="font-semibold text-primary">
+                                    {participant.final_rank === 1 ? '🏆 Winner' : `🏅 Finalist #${participant.final_rank}`}
+                                  </div>
+                                </div>
+                              )}
                             </div>
-                            <div className="flex gap-1 flex-wrap justify-center">
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => {
-                                  setSelectedParticipantForVoters({
-                                    id: participant.id,
-                                    name: `${participantProfile?.first_name || appData.first_name} ${participantProfile?.last_name || appData.last_name}`
-                                  });
-                                  setVotersModalOpen(true);
-                                }}
-                                className="text-xs px-2 py-1 h-7"
-                              >
-                                <Eye className="w-3 h-3" />
-                                <span className="hidden sm:inline ml-1">Voters</span>
-                              </Button>
-                            </div>
+                            
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => {
+                                setSelectedParticipantForVoters({ 
+                                  id: participant.user_id, 
+                                  name: `${participantProfile?.first_name || appData.first_name} ${participantProfile?.last_name || appData.last_name}` 
+                                });
+                                setVotersModalOpen(true);
+                              }}
+                            >
+                              <Eye className="w-4 h-4 mr-1" />
+                              View Voters
+                            </Button>
                           </div>
                         </div>
                       </CardContent>
