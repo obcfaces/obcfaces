@@ -1859,424 +1859,53 @@ const Admin = () => {
                    });
                  })()}
                </div>
-             </TabsContent>
-                                const prevAppData = typeof prevApp.application_data === 'string' 
-                                  ? JSON.parse(prevApp.application_data) 
-                                  : prevApp.application_data;
-                                const prevSubmittedDate = new Date(prevApp.submitted_at);
-                                const prevPhone = prevAppData.phone?.country && prevAppData.phone?.number 
-                                  ? { full_number: `${prevAppData.phone.country} ${prevAppData.phone.number}` }
-                                  : null;
-                                
-                                return (
-                                  <Card key={prevApp.id} className="overflow-hidden bg-muted/30">
-                                    <CardContent className="p-0">
-                                      <div className="flex flex-col md:flex-row md:items-stretch">
-                                        {/* Photos section */}
-                                        <div className="flex gap-px md:w-[25ch] md:flex-shrink-0 p-0">
-                                          {prevAppData.photo1_url && (
-                                            <div className="w-24 sm:w-28 md:w-32">
-                                              <img 
-                                                src={prevAppData.photo1_url} 
-                                                alt="Portrait" 
-                                                className="w-full h-36 sm:h-40 md:h-44 object-contain cursor-pointer hover:opacity-90 transition-opacity"
-                                                onClick={() => openPhotoModal([prevAppData.photo1_url, prevAppData.photo2_url].filter(Boolean), 0, `${prevAppData.first_name} ${prevAppData.last_name}`)}
-                                              />
-                                            </div>
-                                          )}
-                                          {prevAppData.photo2_url && (
-                                            <div className="w-24 sm:w-28 md:w-32">
-                                              <img 
-                                                src={prevAppData.photo2_url} 
-                                                alt="Full length" 
-                                                className="w-full h-36 sm:h-40 md:h-44 object-cover cursor-pointer hover:opacity-90 transition-opacity"
-                                                onClick={() => openPhotoModal([prevAppData.photo1_url, prevAppData.photo2_url].filter(Boolean), 1, `${prevAppData.first_name} ${prevAppData.last_name}`)}
-                                              />
-                                            </div>
-                                          )}
-                                        </div>
+              </TabsContent>
 
-                                        {/* Main info section */}
-                                        <div className="md:w-[50ch] md:flex-shrink-0 flex-1 min-w-0 p-4">
-                                          <div className="flex items-center gap-2 mb-1">
-                                            <Avatar className="h-6 w-6 flex-shrink-0">
-                                              <AvatarImage src={userProfile?.avatar_url || ''} />
-                                              <AvatarFallback className="text-xs">
-                                                {prevAppData.first_name?.charAt(0) || 'U'}
-                                              </AvatarFallback>
-                                            </Avatar>
-                                            <span className="text-sm font-semibold whitespace-nowrap">
-                                              {prevAppData.first_name} {prevAppData.last_name} {new Date().getFullYear() - prevAppData.birth_year}
-                                            </span>
-                                          </div>
-                                          
-                                          <div className="text-xs text-muted-foreground mb-1">
-                                            {prevAppData.city} {prevAppData.state} {prevAppData.country}
-                                          </div>
-                                           
-                                          <div className="text-xs text-muted-foreground mb-1">
-                                            {prevAppData.weight_kg}kg • {prevAppData.height_cm}cm • {prevAppData.gender}
-                                          </div>
+              <TabsContent value="registrations" className="space-y-4">
+                <div className="mb-6">
+                  <h2 className="text-xl font-semibold">All User Registrations</h2>
+                  <p className="text-muted-foreground">Complete list of all registered users</p>
+                </div>
+                
+                {/* Verification filters */}
+                <div className="flex gap-2 mb-4">
+                  <Button
+                    variant={verificationFilter === 'all' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setVerificationFilter('all')}
+                  >
+                    All Users
+                  </Button>
+                  <Button
+                    variant={verificationFilter === 'verified' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setVerificationFilter('verified')}
+                  >
+                    Verified
+                  </Button>
+                  <Button
+                    variant={verificationFilter === 'unverified' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setVerificationFilter('unverified')}
+                  >
+                    Unverified
+                  </Button>
+                </div>
 
-                                          <div className="text-xs text-muted-foreground mb-1">
-                                            {prevAppData.marital_status} • {prevAppData.has_children ? 'Has children' : 'No children'}
-                                          </div>
-
-                                          <div className="text-xs text-muted-foreground mb-1">
-                                            {userProfile?.email && (
-                                              <div className="flex items-center gap-1">
-                                                <span 
-                                                  className="cursor-pointer" 
-                                                  title={userProfile.email}
-                                                >
-                                                  {userProfile.email.length > 25 ? `${userProfile.email.substring(0, 25)}...` : userProfile.email}
-                                                </span>
-                                                <Copy 
-                                                  className="h-3 w-3 cursor-pointer hover:text-foreground" 
-                                                  onClick={() => navigator.clipboard.writeText(userProfile.email)}
-                                                />
-                                              </div>
-                                            )}
-                                          </div>
-
-                                          <div className="text-xs text-muted-foreground mb-1">
-                                            <div className="flex items-center gap-2">
-                                              <span>{prevPhone ? prevPhone.full_number : 'Not provided'}</span>
-                                              {prevAppData.facebook_url && (
-                                                <a
-                                                  href={prevAppData.facebook_url}
-                                                  target="_blank"
-                                                  rel="noopener noreferrer"
-                                                  className="text-blue-600 hover:text-blue-800"
-                                                >
-                                                  <Facebook className="h-3 w-3" />
-                                                </a>
-                                              )}
-                                            </div>
-                                          </div>
-
-                                        </div>
-
-                                        {/* Right side actions */}
-                                        <div className="p-4 md:w-auto flex flex-col justify-between gap-2">
-                                          <div className="flex flex-col gap-1 items-center">
-                                            <p className="text-xs text-muted-foreground text-center">
-                                              {prevSubmittedDate.toLocaleDateString('ru-RU')} {prevSubmittedDate.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}
-                                            </p>
-                                          </div>
-                                          <div className="flex gap-1 flex-wrap justify-center">
-                                            {!showDeletedApplications && (
-                                              <>
-                                                 <Select 
-                                                   value={prevApp.status} 
-                                                    onValueChange={(newStatus) => {
-                                                      if (newStatus === 'delete') {
-                                                        const prevAppData = typeof prevApp.application_data === 'string' 
-                                                          ? JSON.parse(prevApp.application_data) 
-                                                          : prevApp.application_data;
-                                                        setApplicationToDelete({ 
-                                                          id: prevApp.id, 
-                                                          name: `${prevAppData.firstName} ${prevAppData.lastName}` 
-                                                        });
-                                                        setShowDeleteConfirmModal(true);
-                                                        return;
-                                                      }
-                                                      if (newStatus === 'rejected') {
-                                                        const prevAppData = typeof prevApp.application_data === 'string' 
-                                                          ? JSON.parse(prevApp.application_data) 
-                                                          : prevApp.application_data;
-                                                        setApplicationToReject({ 
-                                                          id: prevApp.id, 
-                                                          name: `${prevAppData.firstName} ${prevAppData.lastName}` 
-                                                        });
-                                                        setRejectModalOpen(true);
-                                                        return;
-                                                      }
-                                                      reviewApplication(prevApp.id, newStatus);
-                                                    }}
-                                                 >
-                                                   <SelectTrigger 
-                                                      className={`w-28 h-7 text-xs ${
-                                                        prevApp.status === 'approved' ? 'bg-green-100 border-green-500 text-green-700' :
-                                                        prevApp.status === 'rejected' ? 'bg-red-100 border-red-500 text-red-700' :
-                                                        ''
-                                                      }`}
-                                                   >
-                                                     <SelectValue />
-                                                   </SelectTrigger>
-                                                   <SelectContent>
-                                                     <SelectItem value="pending">Pending</SelectItem>
-                                                      <SelectItem value="approved">Approved</SelectItem>
-                                                      <SelectItem value="rejected">Rejected</SelectItem>
-                                                      <div className="h-1 border-t border-border my-1"></div>
-                                                     <SelectItem 
-                                                       value="delete" 
-                                                       className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                                                     >
-                                                       🗑️ Delete
-                                                     </SelectItem>
-                                                   </SelectContent>
-                                                 </Select>
-                                               </>
-                                             )}
-                                          </div>
-                                        </div>
-                                      </div>
-                                      
-                                       {/* Rejection reason for previous application */}
-                                      {prevApp.status === 'rejected' && ((prevApp as any).rejection_reason_types || prevApp.rejection_reason) && (
-                                        <div className="p-2 bg-destructive/10 border-t border-destructive/20">
-                           <div className="space-y-1 text-xs leading-tight">
-                             {(prevApp as any).rejection_reason_types && (prevApp as any).rejection_reason_types.length > 0 && (
-                               <div className="text-destructive/80">
-                                 {/* Always show date and admin info if available */}
-                                 {(prevApp.rejected_at || prevApp.reviewed_at) && (
-                                    <TooltipProvider>
-                                      <Tooltip>
-                                        <TooltipTrigger asChild>
-                                          <span className="text-black font-medium cursor-help">
-                                            {new Date(prevApp.rejected_at || prevApp.reviewed_at).toLocaleDateString('en-GB', { 
-                                              day: 'numeric', 
-                                              month: 'short' 
-                                            }).toLowerCase()}{' '}
-                                            {prevApp.reviewed_by && profiles.find(p => p.id === prevApp.reviewed_by)?.email ? 
-                                              profiles.find(p => p.id === prevApp.reviewed_by)?.email?.substring(0, 4) + ' ' : 
-                                              'unkn '}
-                                          </span>
-                                        </TooltipTrigger>
-                                        <TooltipContent>
-                                          <p>
-                                            {new Date(prevApp.rejected_at || prevApp.reviewed_at).toLocaleDateString('en-GB', { 
-                                              day: 'numeric', 
-                                              month: 'short',
-                                              year: 'numeric'
-                                            }).toLowerCase()}{' '}
-                                            {new Date(prevApp.rejected_at || prevApp.reviewed_at).toLocaleTimeString('en-GB', {
-                                              hour: '2-digit',
-                                              minute: '2-digit'
-                                            })}
-                                            {prevApp.reviewed_by && profiles.find(p => p.id === prevApp.reviewed_by)?.email && (
-                                              <><br />Admin: {profiles.find(p => p.id === prevApp.reviewed_by)?.email}</>
-                                            )}
-                                          </p>
-                                        </TooltipContent>
-                                      </Tooltip>
-                                    </TooltipProvider>
-                                 )}
-                                 {(prevApp as any).rejection_reason_types
-                                   .filter((type: string) => type && REJECTION_REASONS[type as keyof typeof REJECTION_REASONS])
-                                   .map((type: string) => REJECTION_REASONS[type as keyof typeof REJECTION_REASONS])
-                                   .join(', ')}
-                               </div>
-                             )}
-                             {prevApp.rejection_reason && prevApp.rejection_reason.trim() && !isReasonDuplicate(prevApp.rejection_reason, (prevApp as any).rejection_reason_types) && (
-                               <div className="text-destructive/70">
-                                 <span className="font-medium">Additional comments:</span> {prevApp.rejection_reason}
-                               </div>
-                             )}
-                                          </div>
-                                        </div>
-                                      )}
-                                    </CardContent>
-                                  </Card>
-                                );
-                       </div>
-                     );
-                   });
-                 })()}
-               </div>
-             </TabsContent>
-
-            <TabsContent value="registrations" className="space-y-4">
-              <div className="mb-6">
-                <h2 className="text-xl font-semibold">All User Registrations</h2>
-                <p className="text-muted-foreground">Complete list of all registered users</p>
-              </div>
-              
-              {/* Verification filters */}
-              <div className="flex gap-2 mb-4">
-                <Button
-                  variant={verificationFilter === 'all' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setVerificationFilter('all')}
-                >
-                  All Users
-                </Button>
-                <Button
-                  variant={verificationFilter === 'verified' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setVerificationFilter('verified')}
-                >
-                  Verified
-                </Button>
-                <Button
-                  variant={verificationFilter === 'not_verified' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setVerificationFilter('not_verified')}
-                >
-                  Not Verified
-                </Button>
-              </div>
-              
-              <div className="grid gap-4">
-                {profiles
-                  .filter((profile) => {
-                    if (verificationFilter === 'verified') {
-                      return !!profile.email_confirmed_at;
-                    } else if (verificationFilter === 'not_verified') {
-                      return !profile.email_confirmed_at;
-                    }
-                    return true; // 'all' case
-                  })
-                  .map((profile) => (
-                  <Card key={profile.id}>
-                    <CardHeader>
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                          <Avatar>
-                            <AvatarImage src={profile.avatar_url || ''} />
-                            <AvatarFallback>
-                              {profile.display_name?.charAt(0) || profile.first_name?.charAt(0) || 'U'}
-                            </AvatarFallback>
-                          </Avatar>
-                   <div>
-                     <h3 className="font-semibold">
-                       {profile.display_name || `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 'No Name'}
-                     </h3>
-                     <div className="text-sm text-muted-foreground mb-1">
-                       {profile.email && <div>{profile.email}</div>}
-                       {profile.country && <div>{profile.country}</div>}
-                       <div>
-                         {new Date(profile.created_at).toLocaleDateString('en-GB', { 
-                           day: 'numeric', 
-                           month: 'short', 
-                           year: 'numeric' 
-                         }).toLowerCase()} - {new Date(profile.created_at).toLocaleTimeString('en-GB', {
-                           hour: '2-digit',
-                           minute: '2-digit'
-                         })}
-                       </div>
-                     </div>
-                   </div>
-                 </div>
-                 <div className="flex items-center gap-2">
-                    <div className="flex items-center gap-2">
-                     {verifyingUsers.has(profile.id) ? (
-                       <div className="flex items-center gap-2">
-                         <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
-                         <span className="text-sm text-muted-foreground">Verifying...</span>
-                       </div>
-                     ) : (
-                       <>
-                         <Checkbox
-                           checked={!!profile.email_confirmed_at}
-                           onCheckedChange={async (checked) => {
-                             if (checked && !profile.email_confirmed_at) {
-                               await handleEmailVerification(profile.id);
-                             }
-                           }}
-                           disabled={!!profile.email_confirmed_at}
-                         />
-                         <div className="flex flex-col">
-                           <span className="text-sm text-muted-foreground">
-                             {profile.email_confirmed_at ? 'Verified' : 'verif'}
-                           </span>
-                           {profile.email_confirmed_at && profile.email_verified_by_email && (
-                             <div className="text-xs">
-                               <span className="text-black">{profile.email_verified_by_email.substring(0, 5)}</span>
-                               <br />
-                               <span className="text-blue-600">
-                                 {new Date(profile.email_confirmed_at).toLocaleDateString('en-GB', { 
-                                   day: 'numeric', 
-                                   month: 'short', 
-                                   year: 'numeric' 
-                                 }).toLowerCase()} - {new Date(profile.email_confirmed_at).toLocaleTimeString('en-GB', {
-                                   hour: '2-digit',
-                                   minute: '2-digit'
-                                 })}
-                               </span>
-                             </div>
-                           )}
-                         </div>
-                       </>
-                     )}
-                          </div>
-                        </div>
-                      </div>
-                    </CardHeader>
-                  </Card>
-                ))}
-              </div>
-            </TabsContent>
-
-            <TabsContent value="moderation" className="space-y-4">
-              <div className="mb-6">
-                <h2 className="text-xl font-semibold">Profile Moderation</h2>
-                <p className="text-muted-foreground">Review and moderate user profiles</p>
-              </div>
-              
-              <div className="grid gap-4">
-                {profiles.filter(p => p.is_approved === null).map((profile) => (
-                  <Card key={profile.id}>
-                    <CardHeader>
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                          <Avatar>
-                            <AvatarImage src={profile.avatar_url || ''} />
-                            <AvatarFallback>
-                              {profile.display_name?.charAt(0) || profile.first_name?.charAt(0) || 'U'}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <h3 className="font-semibold">
-                              {profile.display_name || `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 'No Name'}
-                            </h3>
-                            <div className="text-sm text-muted-foreground">
-                              {profile.email && <div>Email: {profile.email}</div>}
-                              <div>Created: {new Date(profile.created_at).toLocaleDateString()}</div>
-                            </div>
-                            <div className="mt-2">
-                              <Badge variant="secondary">Pending Review</Badge>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="flex gap-2">
-                        <Button size="sm" className="bg-green-600 hover:bg-green-700">
-                          <Check className="w-4 h-4 mr-1" />
-                          Approve
-                        </Button>
-                        <Button size="sm" variant="destructive">
-                          <X className="w-4 h-4 mr-1" />
-                          Reject
-                        </Button>
-                        <Button size="sm" variant="outline">
-                          <Eye className="w-4 h-4 mr-1" />
-                          View Profile
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </TabsContent>
-
-            <TabsContent value="roles" className="space-y-4">
-              <div className="mb-6">
-                <h2 className="text-xl font-semibold">User Roles Management</h2>
-                <p className="text-muted-foreground">Manage user roles and permissions</p>
-              </div>
-              
-              <div className="grid gap-4">
-                {profiles.map((profile) => {
-                  const roles = getUserRoles(profile.id);
-                  return (
-                    <Card key={profile.id}>
-                      <CardHeader>
+                <div className="grid gap-4">
+                  {profiles
+                    .filter(profile => {
+                      if (verificationFilter === 'verified') {
+                        return profile.email_confirmed_at;
+                      } else if (verificationFilter === 'unverified') {
+                        return !profile.email_confirmed_at;
+                      }
+                      return true;
+                    })
+                    .map(profile => (
+                      <Card key={profile.id} className="p-4">
                         <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-4">
+                          <div className="flex items-center gap-3">
                             <Avatar>
                               <AvatarImage src={profile.avatar_url || ''} />
                               <AvatarFallback>
@@ -2284,203 +1913,111 @@ const Admin = () => {
                               </AvatarFallback>
                             </Avatar>
                             <div>
-                              <h3 className="font-semibold">
-                                {profile.display_name || `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 'No Name'}
-                              </h3>
-                              <div className="text-sm text-muted-foreground mb-1">
-                                {profile.email && <div>Email: {profile.email}</div>}
+                              <div className="font-medium">
+                                {profile.display_name || `${profile.first_name} ${profile.last_name}`}
                               </div>
-                              <div className="flex gap-2 mt-1">
-                                {roles.map((role) => (
-                                  <Badge key={role} variant="outline">
-                                    {role}
-                                  </Badge>
-                                ))}
-                                {roles.length === 0 && (
-                                  <Badge variant="secondary">user</Badge>
-                                )}
+                              <div className="text-sm text-muted-foreground">
+                                {profile.email}
                               </div>
                             </div>
                           </div>
+                          <div className="flex items-center gap-2">
+                            {profile.email_confirmed_at ? (
+                              <Badge variant="default" className="bg-green-100 text-green-700">
+                                Verified
+                              </Badge>
+                            ) : (
+                              <>
+                                <Badge variant="secondary">
+                                  Unverified
+                                </Badge>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => handleEmailVerification(profile.id)}
+                                  disabled={verifyingUsers.has(profile.id)}
+                                >
+                                  {verifyingUsers.has(profile.id) ? 'Verifying...' : 'Verify'}
+                                </Button>
+                              </>
+                            )}
+                          </div>
                         </div>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="flex gap-2">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => assignRole(profile.id, 'admin')}
-                            disabled={roles.includes('admin')}
-                          >
-                            Make Admin
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => assignRole(profile.id, 'moderator')}
-                            disabled={roles.includes('moderator')}
-                          >
-                            Make Moderator
-                          </Button>
-                          {roles.includes('admin') && (
-                            <Button
-                              size="sm"
-                              variant="destructive"
-                              onClick={() => removeRole(profile.id, 'admin')}
-                            >
-                              Remove Admin
-                            </Button>
-                          )}
-                          {roles.includes('moderator') && (
-                            <Button
-                              size="sm"
-                              variant="destructive"
-                              onClick={() => removeRole(profile.id, 'moderator')}
-                            >
-                              Remove Moderator
-                            </Button>
-                          )}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  );
-                })}
-              </div>
-            </TabsContent>
-          </Tabs>
+                      </Card>
+                    ))}
+                </div>
+              </TabsContent>
+            </Tabs>
+          </div>
         </div>
-      </div>
 
+      {/* Photo Modal */}
       <PhotoModal
-        isOpen={photoModalOpen}
-        onClose={() => setPhotoModalOpen(false)}
         photos={photoModalImages}
         currentIndex={photoModalIndex}
+        isOpen={photoModalOpen}
+        onClose={() => setPhotoModalOpen(false)}
         contestantName={photoModalName}
       />
-      
+
+      {/* Reject Reason Modal */}
       <RejectReasonModal
         isOpen={rejectModalOpen}
-        onClose={() => {
-          setRejectModalOpen(false);
-          setApplicationToReject(null);
-        }}
+        onClose={() => setRejectModalOpen(false)}
         onConfirm={async (reasonTypes, notes) => {
-          if (!applicationToReject) return;
-          
-          console.log('Rejecting application:', applicationToReject);
-          console.log('Reason types:', reasonTypes);
-          console.log('Notes (additional comments):', notes);
-          
-          // Only save notes if they contain actual additional comments, not predefined reasons
-          const trimmedNotes = notes?.trim() || '';
-          
-          const { error } = await supabase
-            .from('contest_applications')
-            .update({
-              status: 'rejected',
-              rejection_reason: trimmedNotes, // Only save additional comments here
-              rejection_reason_types: reasonTypes,
-              reviewed_at: new Date().toISOString(),
-              reviewed_by: (await supabase.auth.getUser()).data.user?.id
-            })
-            .eq('id', applicationToReject.id);
-
-          console.log('Supabase error:', error);
-
-          if (error) {
-            console.error('Detailed error:', error);
-            toast({
-              title: "Error",
-              description: `Failed to reject application: ${error.message}`,
-              variant: "destructive"
-            });
-            return;
+          if (applicationToReject) {
+            reviewApplication(applicationToReject.id, 'rejected');
+            setApplicationToReject(null);
           }
-
-          toast({
-            title: "Success",
-            description: "Application rejected",
-          });
-
-          fetchContestApplications();
-          setRejectModalOpen(false);
-          setApplicationToReject(null);
         }}
       />
 
+      {/* Voters Modal */}
       <VotersModal
         isOpen={votersModalOpen}
-        onClose={() => {
-          setVotersModalOpen(false);
-          setSelectedParticipantForVoters(null);
-        }}
+        onClose={() => setVotersModalOpen(false)}
         participantId={selectedParticipantForVoters?.id || ''}
         participantName={selectedParticipantForVoters?.name || ''}
       />
 
-      {/* Admin Edit Application Modal */}
-      <ContestParticipationModal
-        isOpen={showEditModal}
+      {/* Contest Participation Modal */}
+      <ContestParticipationModal 
+        isOpen={weeklyContests.length > 0}
         onOpenChange={(open) => {
-          setShowEditModal(open);
-          if (!open) {
-            // Refresh data when modal closes
-            fetchContestApplications();
-            setEditingApplicationId(null);
-            setEditingApplicationData(null);
-          }
-        }}
-        editMode={true}
-        existingData={editingApplicationData}
-      />
-
-      {/* Application Edit History */}
-      <ApplicationEditHistory
-        applicationId={editHistoryApplicationId || ''}
-        isOpen={showEditHistory}
-        onClose={() => {
-          setShowEditHistory(false);
-          setEditHistoryApplicationId(null);
+          if (!open) setWeeklyContests([]);
         }}
       />
 
       {/* Delete Confirmation Modal */}
       <Dialog open={showDeleteConfirmModal} onOpenChange={setShowDeleteConfirmModal}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent>
           <DialogHeader>
-            <DialogTitle className="text-red-600">Delete Application</DialogTitle>
+            <DialogTitle>Confirm Deletion</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <p className="text-sm text-muted-foreground">
-              Are you sure you want to delete the application for <strong>{applicationToDelete?.name}</strong>?
-            </p>
-            <p className="text-sm text-muted-foreground">
-              This action cannot be undone. To confirm, please type <strong>delete</strong> below:
-            </p>
+            <p>Are you sure you want to delete the application for <strong>{applicationToDelete?.name}</strong>?</p>
+            <p className="text-sm text-muted-foreground">This action cannot be undone.</p>
+            <Label htmlFor="delete-confirm">Type "DELETE" to confirm:</Label>
             <Input
+              id="delete-confirm"
               value={deleteConfirmText}
               onChange={(e) => setDeleteConfirmText(e.target.value)}
-              placeholder="Type 'delete' to confirm"
-              className="w-full"
+              placeholder="Type DELETE"
             />
-            <div className="flex justify-end gap-3">
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setShowDeleteConfirmModal(false);
-                  setDeleteConfirmText('');
-                  setApplicationToDelete(null);
-                }}
-              >
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => {
+                setShowDeleteConfirmModal(false);
+                setDeleteConfirmText('');
+                setApplicationToDelete(null);
+              }}>
                 Cancel
               </Button>
-              <Button
-                variant="destructive"
-                disabled={deleteConfirmText.toLowerCase() !== 'delete'}
-                onClick={async () => {
-                  if (deleteConfirmText.toLowerCase() === 'delete' && applicationToDelete) {
-                    await deleteApplication(applicationToDelete.id);
+              <Button 
+                variant="destructive" 
+                disabled={deleteConfirmText !== 'DELETE'}
+                onClick={() => {
+                  if (applicationToDelete && deleteConfirmText === 'DELETE') {
+                    deleteApplication(applicationToDelete.id);
                     setShowDeleteConfirmModal(false);
                     setDeleteConfirmText('');
                     setApplicationToDelete(null);
@@ -2494,57 +2031,12 @@ const Admin = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Application Edit History Modal */}
+      {/* Application Edit History */}
       <ApplicationEditHistory
         applicationId={editHistoryApplicationId || ''}
         isOpen={showEditHistory}
-        onClose={() => {
-          setShowEditHistory(false);
-          setEditHistoryApplicationId(null);
-        }}
-       />
-
-      {/* Admin Date Popup Modal */}
-      <Dialog open={adminDatePopup.show} onOpenChange={(open) => setAdminDatePopup(prev => ({ ...prev, show: open }))}>
-        <DialogContent className="max-w-md">
-          <div className="space-y-2">
-            {applicationHistory.map((entry, index) => {
-              const date = new Date(entry.created_at);
-              const formattedDate = date.toLocaleDateString('en-GB', { 
-                day: 'numeric', 
-                month: 'short',
-                year: 'numeric'
-              });
-              const time = date.toLocaleTimeString('en-GB', { 
-                hour: '2-digit', 
-                minute: '2-digit' 
-              });
-              
-              const adminEmail = entry.changed_by ? 
-                profiles.find(p => p.id === entry.changed_by)?.email : 
-                null;
-              const adminShort = adminEmail ? adminEmail.substring(0, 3) : 'sys';
-              
-              return (
-                <div key={entry.id || index} className="text-sm border-b pb-2 last:border-b-0">
-                  <div className="flex justify-between items-center">
-                    <span className="font-medium">{entry.status}</span>
-                    <span className="text-muted-foreground">{adminShort}</span>
-                  </div>
-                  <div className="text-xs text-muted-foreground">
-                    {formattedDate} - {time}
-                  </div>
-                  {entry.change_reason && (
-                    <div className="text-xs text-muted-foreground mt-1">
-                      {entry.change_reason}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        </DialogContent>
-      </Dialog>
+        onClose={() => setShowEditHistory(false)}
+      />
     </>
   );
 };
