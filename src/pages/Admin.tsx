@@ -1400,10 +1400,8 @@ const Admin = () => {
                                    
                                    {/* Expanded information - desktop */}
                                    {expandedDesktopItems.has(application.id) && (
-                                     <div className="text-xs text-muted-foreground mb-1 bg-muted/30 p-2 rounded space-y-1">
-                                       <div>{appData.weight_kg}kg • {appData.height_cm}cm • {appData.gender}</div>
-                                       <div>Birth Year: {appData.birth_year}</div>
-                                       <div>{appData.marital_status} • {appData.has_children ? 'Has children' : 'No children'}</div>
+                                     <div className="text-xs text-muted-foreground mb-1">
+                                       {appData.weight_kg}kg • {appData.height_cm}cm • {appData.gender} • {appData.birth_year} • {appData.marital_status} • {appData.has_children ? 'Has children' : 'No children'}
                                      </div>
                                    )}
 
@@ -1590,17 +1588,12 @@ const Admin = () => {
                                            <span className="truncate">{appData.city} {appData.country}</span>
                                           </div>
                                         
-                                        {/* Expanded information */}
-                                        {expandedMobileItems.has(application.id) && (
-                                          <div className="text-xs space-y-1 mb-2 bg-muted/30 p-2 rounded">
-                                            <div>Height: {appData.height_cm}cm</div>
-                                            <div>Weight: {appData.weight_kg}kg</div>
-                                            <div>Gender: {appData.gender}</div>
-                                            <div>Birth Year: {appData.birth_year}</div>
-                                            {appData.marital_status && <div>Status: {appData.marital_status}</div>}
-                                            {appData.has_children !== undefined && <div>Children: {appData.has_children ? 'Yes' : 'No'}</div>}
-                                          </div>
-                                        )}
+                                         {/* Expanded information */}
+                                         {expandedMobileItems.has(application.id) && (
+                                           <div className="text-xs text-muted-foreground mb-2">
+                                             {appData.weight_kg}kg • {appData.height_cm}cm • {appData.gender} • {appData.birth_year} • {appData.marital_status} • {appData.has_children ? 'Has children' : 'No children'}
+                                           </div>
+                                         )}
                                         
                                         <div className="flex-1"></div>
                                        
