@@ -1606,8 +1606,21 @@ const Admin = () => {
                                                  const phone = appData.phone?.country && appData.phone?.number 
                                                    ? `${appData.phone.country} ${appData.phone.number}` 
                                                    : 'No phone';
-                                                 const facebook = appData.facebook_url ? 'facebook' : 'no facebook';
-                                                 return `${phone} ${facebook}`;
+                                                 const facebook = appData.facebook_url ? (
+                                                   <a
+                                                     href={appData.facebook_url}
+                                                     target="_blank"
+                                                     rel="noopener noreferrer"
+                                                     className="text-blue-600 hover:text-blue-800"
+                                                   >
+                                                     fb
+                                                   </a>
+                                                 ) : 'fb';
+                                                 return (
+                                                   <span>
+                                                     {phone} {facebook}
+                                                   </span>
+                                                 );
                                                })()}
                                              </div>
                                            </div>
