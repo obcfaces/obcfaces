@@ -956,6 +956,7 @@ export type Database = {
           auth_provider: string
           created_at: string
           email: string
+          email_confirmed_at: string
           facebook_data: Json
           last_sign_in_at: string
           user_id: string

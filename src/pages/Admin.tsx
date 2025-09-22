@@ -434,7 +434,8 @@ const Admin = () => {
         auth_provider: userAuthData?.auth_provider || 'unknown',
         email: userAuthData?.email || null,
         facebook_data: userAuthData?.facebook_data || null,
-        last_sign_in_at: userAuthData?.last_sign_in_at || null
+        last_sign_in_at: userAuthData?.last_sign_in_at || null,
+        email_confirmed_at: userAuthData?.email_confirmed_at || null
       };
     });
 
