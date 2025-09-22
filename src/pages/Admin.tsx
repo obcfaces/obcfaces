@@ -1231,19 +1231,21 @@ const Admin = () => {
                         </p>
                       )}
                     </div>
-                    <Button
-                      variant={showDeletedApplications ? "default" : "outline"}
-                      onClick={async () => {
-                        if (!showDeletedApplications) {
-                          const deleted = await fetchDeletedApplications();
-                          setDeletedApplications(deleted);
-                        }
-                        setShowDeletedApplications(!showDeletedApplications);
-                      }}
-                      className="text-xs md:text-sm px-2 md:px-4"
-                    >
-                      {showDeletedApplications ? 'Show Active' : 'Show Deleted'}
-                    </Button>
+                    <div className="hidden md:block">
+                      <Button
+                        variant={showDeletedApplications ? "default" : "outline"}
+                        onClick={async () => {
+                          if (!showDeletedApplications) {
+                            const deleted = await fetchDeletedApplications();
+                            setDeletedApplications(deleted);
+                          }
+                          setShowDeletedApplications(!showDeletedApplications);
+                        }}
+                        className="text-xs md:text-sm px-2 md:px-4"
+                      >
+                        {showDeletedApplications ? 'Show Active' : 'Show Deleted'}
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -1465,33 +1467,31 @@ const Admin = () => {
                                        >
                                          <SelectValue />
                                        </SelectTrigger>
-                                       <SelectContent>
-                                         <SelectItem value="pending">Pending</SelectItem>
-                                         <SelectItem value="approved">Approved</SelectItem>
-                                         <SelectItem value="rejected">Rejected</SelectItem>
-                                         <div className="h-1 border-t border-border my-1"></div>
-                                         <SelectItem 
-                                           value="delete" 
-                                           className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                                         >
-                                           🗑️ Delete
-                                         </SelectItem>
-                                       </SelectContent>
+                                        <SelectContent>
+                                          <SelectItem value="pending">Pending</SelectItem>
+                                          <SelectItem value="approved">Approved</SelectItem>
+                                          <SelectItem value="rejected">Rejected</SelectItem>
+                                        </SelectContent>
                                      </Select>
                                    )}
                                    
                                    {/* Status change date with reviewer login - desktop */}
-                                   <div className="text-xs text-muted-foreground">
-                                     {(() => {
-                                       const statusDate = application.reviewed_at || application.approved_at || application.rejected_at || application.submitted_at;
-                                       if (statusDate) {
-                                         const date = new Date(statusDate);
-                                         const time = date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
-                                         const dateStr = date.toLocaleDateString('en-GB', { 
-                                           day: 'numeric', 
-                                           month: 'short',
-                                           year: '2-digit'
-                                         }).toLowerCase();
+                                    <div 
+                                      className="text-xs text-muted-foreground cursor-pointer hover:text-foreground"
+                                      onClick={() => {
+                                        setEditHistoryApplicationId(application.id);
+                                        setShowEditHistory(true);
+                                      }}
+                                    >
+                                      {(() => {
+                                        const statusDate = application.reviewed_at || application.approved_at || application.rejected_at || application.submitted_at;
+                                        if (statusDate) {
+                                          const date = new Date(statusDate);
+                                          const time = date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+                                          const dateStr = date.toLocaleDateString('en-GB', { 
+                                            day: 'numeric', 
+                                            month: 'short'
+                                          }).toLowerCase();
                                          const reviewerEmail = application.reviewed_by && profiles.find(p => p.id === application.reviewed_by)?.email;
                                          const reviewerLogin = reviewerEmail ? reviewerEmail.substring(0, 4) : 'syst';
                                          return (
@@ -1507,12 +1507,12 @@ const Admin = () => {
                                  </div>
                               </div>
                               
-                              {/* Mobile layout with horizontal scroll */}
+                              {/* Mobile layout - full width cards */}
                               <div className="md:hidden">
-                                <ScrollArea className="w-full">
-                                  <div className="flex w-max">
+                                <div className="w-full">
+                                  <div className="flex flex-col">
                                     {/* Photos section - full width on mobile */}
-                                    <div className="flex gap-px w-[50vw] flex-shrink-0">
+                                    <div className="flex gap-px w-full mb-4">
                                       {appData.photo1_url && (
                                         <div className="w-1/2">
                                           <img 
@@ -1535,8 +1535,8 @@ const Admin = () => {
                                       )}
                                     </div>
                                     
-                                    {/* Information section - compact on mobile */}
-                                    <div className="w-[40vw] flex-shrink-0 p-4">
+                                    {/* Information section - full width on mobile */}
+                                    <div className="w-full p-4">
                                       <div className="flex items-center gap-2 mb-2">
                                         <Avatar className="h-5 w-5 flex-shrink-0">
                                           <AvatarImage src={userProfile?.avatar_url || ''} />
@@ -1593,49 +1593,47 @@ const Admin = () => {
                                              >
                                                <SelectValue />
                                              </SelectTrigger>
-                                             <SelectContent>
-                                               <SelectItem value="pending">Pending</SelectItem>
-                                               <SelectItem value="approved">Approved</SelectItem>
-                                               <SelectItem value="rejected">Rejected</SelectItem>
-                                               <div className="h-1 border-t border-border my-1"></div>
-                                               <SelectItem 
-                                                 value="delete" 
-                                                 className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                                               >
-                                                 🗑️ Delete
-                                               </SelectItem>
-                                             </SelectContent>
+                                              <SelectContent>
+                                                <SelectItem value="pending">Pending</SelectItem>
+                                                <SelectItem value="approved">Approved</SelectItem>
+                                                <SelectItem value="rejected">Rejected</SelectItem>
+                                              </SelectContent>
                                            </Select>
                                          </div>
                                        )}
                                          
-                                       {/* Date with admin - под фильтром статусов */}
-                                       <div className="text-xs text-muted-foreground mt-1">
-                                         {(() => {
-                                           const statusDate = application.reviewed_at || application.approved_at || application.rejected_at || application.submitted_at;
-                                           if (statusDate) {
-                                             const date = new Date(statusDate);
-                                             const time = date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
-                                             const dateStr = date.toLocaleDateString('en-GB', { 
-                                               day: 'numeric', 
-                                               month: 'short',
-                                               year: '2-digit'
-                                             }).toLowerCase();
-                                             const reviewerEmail = application.reviewed_by && profiles.find(p => p.id === application.reviewed_by)?.email;
-                                             const reviewerLogin = reviewerEmail ? reviewerEmail.substring(0, 4) : 'syst';
-                                             return (
-                                               <>
-                                                 <span className="text-blue-600">{reviewerLogin}</span>
-                                                 {` ${time} - ${dateStr}`}
-                                               </>
-                                             );
-                                           }
-                                           return '';
-                                         })()}
-                                       </div>
-                                     </div>
+                                        {/* Date with admin - под фильтром статусов */}
+                                        <div 
+                                          className="text-xs text-muted-foreground mt-1 cursor-pointer hover:text-foreground"
+                                          onClick={() => {
+                                            setEditHistoryApplicationId(application.id);
+                                            setShowEditHistory(true);
+                                          }}
+                                        >
+                                          {(() => {
+                                            const statusDate = application.reviewed_at || application.approved_at || application.rejected_at || application.submitted_at;
+                                            if (statusDate) {
+                                              const date = new Date(statusDate);
+                                              const time = date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+                                              const dateStr = date.toLocaleDateString('en-GB', { 
+                                                day: 'numeric', 
+                                                month: 'short'
+                                              }).toLowerCase();
+                                              const reviewerEmail = application.reviewed_by && profiles.find(p => p.id === application.reviewed_by)?.email;
+                                              const reviewerLogin = reviewerEmail ? reviewerEmail.substring(0, 4) : 'syst';
+                                              return (
+                                                <>
+                                                  <span className="text-blue-600">{reviewerLogin}</span>
+                                                  {` ${time} - ${dateStr}`}
+                                                </>
+                                              );
+                                            }
+                                            return '';
+                                          })()}
+                                        </div>
+                                      </div>
                                   </div>
-                                </ScrollArea>
+                                </div>
                               </div>
                             </CardContent>
                         </Card>
@@ -2338,6 +2336,16 @@ const Admin = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Application Edit History Modal */}
+      <ApplicationEditHistory
+        applicationId={editHistoryApplicationId || ''}
+        isOpen={showEditHistory}
+        onClose={() => {
+          setShowEditHistory(false);
+          setEditHistoryApplicationId(null);
+        }}
+      />
     </>
   );
 };
