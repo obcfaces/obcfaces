@@ -167,7 +167,8 @@ const Admin = () => {
   const [applicationToDelete, setApplicationToDelete] = useState<{ id: string; name: string } | null>(null);
   const [expandedMobileItems, setExpandedMobileItems] = useState<Set<string>>(new Set());
   const [participantFilters, setParticipantFilters] = useState<{ [key: string]: string }>({});
-  const [pastWeekParticipants, setPastWeekParticipants] = useState<any[]>([]);
+   const [pastWeekParticipants, setPastWeekParticipants] = useState<any[]>([]);
+   const [expandedAdminDates, setExpandedAdminDates] = useState<Set<string>>(new Set());
   const [verificationFilter, setVerificationFilter] = useState<string>('all');
   const [verifyingUsers, setVerifyingUsers] = useState<Set<string>>(new Set());
   const navigate = useNavigate();
@@ -1604,12 +1605,23 @@ const Admin = () => {
                                                 </SelectContent>
                                              </Select>
                                              
-                                              {/* Admin login and date on the same line */}
+                                              {/* Admin login with expandable date */}
                                               <div className="text-xs text-muted-foreground">
                                                  {(() => {
                                                    const statusDate = application.reviewed_at || application.approved_at || application.rejected_at || application.submitted_at;
                                                    const reviewerEmail = application.reviewed_by && profiles.find(p => p.id === application.reviewed_by)?.email;
                                                    const reviewerLogin = reviewerEmail ? reviewerEmail.substring(0, 3) : 'sys';
+                                                   const isExpanded = expandedAdminDates.has(application.id);
+                                                   
+                                                   const toggleDate = () => {
+                                                     const newExpanded = new Set(expandedAdminDates);
+                                                     if (isExpanded) {
+                                                       newExpanded.delete(application.id);
+                                                     } else {
+                                                       newExpanded.add(application.id);
+                                                     }
+                                                     setExpandedAdminDates(newExpanded);
+                                                   };
                                                    
                                                    if (statusDate) {
                                                      const date = new Date(statusDate);
@@ -1624,10 +1636,17 @@ const Admin = () => {
                                                      });
                                                      
                                                      return (
-                                                       <>
-                                                         <span className="text-blue-600">{reviewerLogin}</span>
-                                                         <span> {formattedDate} - {time}</span>
-                                                       </>
+                                                       <div className="flex items-center gap-1">
+                                                         <span 
+                                                           className="text-blue-600 cursor-pointer hover:text-blue-800"
+                                                           onClick={toggleDate}
+                                                         >
+                                                           {reviewerLogin}
+                                                         </span>
+                                                         {isExpanded && (
+                                                           <span>{formattedDate} - {time}</span>
+                                                         )}
+                                                       </div>
                                                      );
                                                    }
                                                    
