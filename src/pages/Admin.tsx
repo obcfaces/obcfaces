@@ -1585,13 +1585,13 @@ const Admin = () => {
                                                  reviewApplication(application.id, newStatus);
                                                }}
                                             >
-                                              <SelectTrigger 
-                                                 className={`w-20 h-7 text-xs ${
-                                                   application.status === 'approved' ? 'bg-green-100 border-green-500 text-green-700' :
-                                                   application.status === 'rejected' ? 'bg-red-100 border-red-500 text-red-700' :
-                                                   ''
-                                                 }`}
-                                              >
+                                               <SelectTrigger 
+                                                  className={`w-24 h-7 text-xs ${
+                                                    application.status === 'approved' ? 'bg-green-100 border-green-500 text-green-700' :
+                                                    application.status === 'rejected' ? 'bg-red-100 border-red-500 text-red-700' :
+                                                    ''
+                                                  }`}
+                                               >
                                                 <SelectValue />
                                               </SelectTrigger>
                                                <SelectContent>
@@ -1611,26 +1611,13 @@ const Admin = () => {
                                             setShowEditHistory(true);
                                           }}
                                         >
-                                          {(() => {
-                                            const statusDate = application.reviewed_at || application.approved_at || application.rejected_at || application.submitted_at;
-                                            if (statusDate) {
-                                              const date = new Date(statusDate);
-                                              const time = date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
-                                              const dateStr = date.toLocaleDateString('en-GB', { 
-                                                day: 'numeric', 
-                                                month: 'short'
-                                              }).toLowerCase();
-                                              const reviewerEmail = application.reviewed_by && profiles.find(p => p.id === application.reviewed_by)?.email;
-                                              const reviewerLogin = reviewerEmail ? reviewerEmail.substring(0, 4) : 'syst';
-                                              return (
-                                                <>
-                                                  <span className="text-blue-600">{reviewerLogin}</span>
-                                                  {` ${time} - ${dateStr}`}
-                                                </>
-                                              );
-                                            }
-                                            return '';
-                                          })()}
+                                           {(() => {
+                                             const reviewerEmail = application.reviewed_by && profiles.find(p => p.id === application.reviewed_by)?.email;
+                                             const reviewerLogin = reviewerEmail ? reviewerEmail.substring(0, 3) : 'sys';
+                                             return (
+                                               <span className="text-blue-600">{reviewerLogin}</span>
+                                             );
+                                           })()}
                                         </div>
                                       </div>
                                 </div>
