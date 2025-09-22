@@ -1604,22 +1604,36 @@ const Admin = () => {
                                                 </SelectContent>
                                              </Select>
                                              
-                                             {/* Admin login on the same line */}
-                                             <div 
-                                               className="text-xs text-muted-foreground cursor-pointer hover:text-foreground"
-                                               onClick={() => {
-                                                 setEditHistoryApplicationId(application.id);
-                                                 setShowEditHistory(true);
-                                               }}
-                                             >
-                                                {(() => {
-                                                  const reviewerEmail = application.reviewed_by && profiles.find(p => p.id === application.reviewed_by)?.email;
-                                                  const reviewerLogin = reviewerEmail ? reviewerEmail.substring(0, 3) : 'sys';
-                                                  return (
-                                                    <span className="text-blue-600">{reviewerLogin}</span>
-                                                  );
-                                                })()}
-                                             </div>
+                                              {/* Admin login and date on the same line */}
+                                              <div className="text-xs text-muted-foreground">
+                                                 {(() => {
+                                                   const statusDate = application.reviewed_at || application.approved_at || application.rejected_at || application.submitted_at;
+                                                   const reviewerEmail = application.reviewed_by && profiles.find(p => p.id === application.reviewed_by)?.email;
+                                                   const reviewerLogin = reviewerEmail ? reviewerEmail.substring(0, 3) : 'sys';
+                                                   
+                                                   if (statusDate) {
+                                                     const date = new Date(statusDate);
+                                                     const formattedDate = date.toLocaleDateString('en-GB', { 
+                                                       day: 'numeric', 
+                                                       month: 'short',
+                                                       year: 'numeric'
+                                                     });
+                                                     const time = date.toLocaleTimeString('en-GB', { 
+                                                       hour: '2-digit', 
+                                                       minute: '2-digit' 
+                                                     });
+                                                     
+                                                     return (
+                                                       <>
+                                                         <span className="text-blue-600">{reviewerLogin}</span>
+                                                         <span> {formattedDate} - {time}</span>
+                                                       </>
+                                                     );
+                                                   }
+                                                   
+                                                   return <span className="text-blue-600">{reviewerLogin}</span>;
+                                                 })()}
+                                              </div>
                                            </div>
                                          )}
                                       </div>
