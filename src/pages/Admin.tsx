@@ -166,6 +166,7 @@ const Admin = () => {
   const [deleteConfirmText, setDeleteConfirmText] = useState('');
   const [applicationToDelete, setApplicationToDelete] = useState<{ id: string; name: string } | null>(null);
   const [expandedMobileItems, setExpandedMobileItems] = useState<Set<string>>(new Set());
+  const [expandedDesktopItems, setExpandedDesktopItems] = useState<Set<string>>(new Set());
   const [participantFilters, setParticipantFilters] = useState<{ [key: string]: string }>({});
    const [pastWeekParticipants, setPastWeekParticipants] = useState<any[]>([]);
    const [expandedAdminDates, setExpandedAdminDates] = useState<Set<string>>(new Set());
@@ -1379,17 +1380,32 @@ const Admin = () => {
                                     </span>
                                   </div>
                                   
-                                  <div className="text-xs text-muted-foreground mb-1">
-                                    {appData.city} {appData.state} {appData.country}
-                                  </div>
-                                  
-                                  <div className="text-xs text-muted-foreground mb-1">
-                                    {appData.weight_kg}kg • {appData.height_cm}cm • {appData.gender}
-                                  </div>
-
-                                  <div className="text-xs text-muted-foreground mb-1">
-                                    {appData.marital_status} • {appData.has_children ? 'Has children' : 'No children'}
-                                  </div>
+                                   <div className="flex items-center justify-between text-xs text-muted-foreground mb-1">
+                                     <span>{appData.city} {appData.state} {appData.country}</span>
+                                     <ChevronDown 
+                                       className={`h-4 w-4 cursor-pointer transition-transform ${
+                                         expandedDesktopItems.has(application.id) ? 'rotate-180' : ''
+                                       }`}
+                                       onClick={() => {
+                                         const newExpanded = new Set(expandedDesktopItems);
+                                         if (expandedDesktopItems.has(application.id)) {
+                                           newExpanded.delete(application.id);
+                                         } else {
+                                           newExpanded.add(application.id);
+                                         }
+                                         setExpandedDesktopItems(newExpanded);
+                                       }}
+                                     />
+                                   </div>
+                                   
+                                   {/* Expanded information - desktop */}
+                                   {expandedDesktopItems.has(application.id) && (
+                                     <div className="text-xs text-muted-foreground mb-1 bg-muted/30 p-2 rounded space-y-1">
+                                       <div>{appData.weight_kg}kg • {appData.height_cm}cm • {appData.gender}</div>
+                                       <div>Birth Year: {appData.birth_year}</div>
+                                       <div>{appData.marital_status} • {appData.has_children ? 'Has children' : 'No children'}</div>
+                                     </div>
+                                   )}
 
                                   <div className="text-xs text-muted-foreground mb-1">
                                     {userProfile?.email && (
