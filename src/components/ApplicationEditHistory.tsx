@@ -84,14 +84,14 @@ export const ApplicationEditHistory = ({
             </div>
           )}
           
-          {!loading && !error && history.length > 0 && (
+           {!loading && !error && history.length > 0 && (
             <div className="space-y-4">
-              {history.slice(1).map((item, index) => (
+              {history.map((item, index) => (
                 <Card key={item.id} className="relative">
                   <CardHeader className="pb-3">
                     <div className="flex items-center justify-between">
                      <CardTitle className="text-sm font-medium">
-                        Version {history.length - 1 - index}
+                        Version {history.length - index}
                       </CardTitle>
                       <div className="flex items-center gap-2 text-xs text-muted-foreground">
                         <Clock className="w-3 h-3" />

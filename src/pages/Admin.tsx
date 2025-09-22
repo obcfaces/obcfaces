@@ -1209,8 +1209,8 @@ const Admin = () => {
                         value={statusFilter} 
                         onValueChange={setStatusFilter}
                       >
-                        <SelectTrigger 
-                          className={`w-32 md:w-40 ${
+                         <SelectTrigger 
+                          className={`w-26 md:w-32 ${
                             statusFilter === 'approved' ? 'bg-green-100 border-green-500 text-green-700' :
                             statusFilter === 'rejected' ? 'bg-red-100 border-red-500 text-red-700' :
                             ''
@@ -1250,7 +1250,7 @@ const Admin = () => {
                 </div>
               </div>
 
-              <div className="space-y-4 md:mx-0 -mx-4">
+              <div className="space-y-4 -mx-4 md:mx-0">
                 {(() => {
                   console.log('Filtering applications, statusFilter:', statusFilter);
                   const filteredApplications = (showDeletedApplications ? deletedApplications : contestApplications)
@@ -1301,7 +1301,7 @@ const Admin = () => {
                    
                     return (
                       <div key={application.id}>
-                         <Card className="overflow-hidden relative mx-0 md:mx-0">
+                         <Card className="overflow-hidden relative mx-0 rounded-none md:rounded-lg md:mx-0">
                            {/* Edit button in bottom left corner */}
                            {!showDeletedApplications && (
                              <Button
@@ -1534,8 +1534,8 @@ const Admin = () => {
                                       )}
                                     </div>
                                     
-                                    {/* Information section - right side */}
-                                    <div className="w-[50vw] flex-shrink-0 p-4">
+                                     {/* Information section - right side */}
+                                     <div className="w-[50vw] flex-shrink-0 pl-2">
                                       <div className="flex items-center gap-2 mb-2">
                                         <Avatar className="h-5 w-5 flex-shrink-0">
                                           <AvatarImage src={userProfile?.avatar_url || ''} />
