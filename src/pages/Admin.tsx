@@ -172,6 +172,7 @@ const Admin = () => {
    const [adminDatePopup, setAdminDatePopup] = useState<{ show: boolean; date: string; admin: string; applicationId: string }>({ 
      show: false, date: '', admin: '', applicationId: '' 
    });
+   const [applicationHistory, setApplicationHistory] = useState<any[]>([]);
   const [verificationFilter, setVerificationFilter] = useState<string>('all');
   const [verifyingUsers, setVerifyingUsers] = useState<Set<string>>(new Set());
   const navigate = useNavigate();
@@ -1615,26 +1616,42 @@ const Admin = () => {
                                                    const reviewerEmail = application.reviewed_by && profiles.find(p => p.id === application.reviewed_by)?.email;
                                                    const reviewerLogin = reviewerEmail ? reviewerEmail.substring(0, 3) : 'sys';
                                                    
-                                                   const showDatePopup = () => {
-                                                     if (statusDate) {
-                                                       const date = new Date(statusDate);
-                                                       const formattedDate = date.toLocaleDateString('en-GB', { 
-                                                         day: 'numeric', 
-                                                         month: 'short',
-                                                         year: 'numeric'
-                                                       });
-                                                       const time = date.toLocaleTimeString('en-GB', { 
-                                                         hour: '2-digit', 
-                                                         minute: '2-digit' 
-                                                       });
-                                                       const fullAdminEmail = reviewerEmail || 'system';
+                                                   const showDatePopup = async () => {
+                                                     try {
+                                                       // Fetch application history
+                                                       const { data: history } = await supabase
+                                                         .from('contest_application_history')
+                                                         .select('*')
+                                                         .eq('application_id', application.id)
+                                                         .order('created_at', { ascending: true });
+
+                                                       // Add current status as the latest entry if it's different from history
+                                                       const historyWithCurrent = [...(history || [])];
                                                        
+                                                       // Add system entry as first if no history exists
+                                                       if (historyWithCurrent.length === 0) {
+                                                         historyWithCurrent.unshift({
+                                                           id: 'system',
+                                                           application_id: application.id,
+                                                           application_data: null,
+                                                           status: 'pending',
+                                                           notes: '',
+                                                           rejection_reason_types: [],
+                                                           created_at: application.submitted_at,
+                                                           changed_by: '',
+                                                           change_reason: 'Application submitted'
+                                                         });
+                                                       }
+
+                                                       setApplicationHistory(historyWithCurrent);
                                                        setAdminDatePopup({
                                                          show: true,
-                                                         date: `${formattedDate} - ${time}`,
-                                                         admin: fullAdminEmail,
+                                                         date: '',
+                                                         admin: '',
                                                          applicationId: application.id
                                                        });
+                                                     } catch (error) {
+                                                       console.error('Error fetching application history:', error);
                                                      }
                                                    };
                                                    
@@ -2368,18 +2385,41 @@ const Admin = () => {
       {/* Admin Date Popup Modal */}
       <Dialog open={adminDatePopup.show} onOpenChange={(open) => setAdminDatePopup(prev => ({ ...prev, show: open }))}>
         <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Status Change Information</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <label className="text-sm font-medium text-muted-foreground">Admin:</label>
-              <p className="text-sm">{adminDatePopup.admin}</p>
-            </div>
-            <div>
-              <label className="text-sm font-medium text-muted-foreground">Date & Time:</label>
-              <p className="text-sm">{adminDatePopup.date}</p>
-            </div>
+          <div className="space-y-2">
+            {applicationHistory.map((entry, index) => {
+              const date = new Date(entry.created_at);
+              const formattedDate = date.toLocaleDateString('en-GB', { 
+                day: 'numeric', 
+                month: 'short',
+                year: 'numeric'
+              });
+              const time = date.toLocaleTimeString('en-GB', { 
+                hour: '2-digit', 
+                minute: '2-digit' 
+              });
+              
+              const adminEmail = entry.changed_by ? 
+                profiles.find(p => p.id === entry.changed_by)?.email : 
+                null;
+              const adminShort = adminEmail ? adminEmail.substring(0, 3) : 'sys';
+              
+              return (
+                <div key={entry.id || index} className="text-sm border-b pb-2 last:border-b-0">
+                  <div className="flex justify-between items-center">
+                    <span className="font-medium">{entry.status}</span>
+                    <span className="text-muted-foreground">{adminShort}</span>
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    {formattedDate} - {time}
+                  </div>
+                  {entry.change_reason && (
+                    <div className="text-xs text-muted-foreground mt-1">
+                      {entry.change_reason}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </DialogContent>
       </Dialog>
