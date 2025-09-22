@@ -117,9 +117,9 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
     const loadParticipants = async () => {
       setIsLoading(true);
       let weekOffset = 0;
-      if (title === "THIS WEEK") weekOffset = 0;
-      else if (title === "1 WEEK AGO") weekOffset = -1;
-      else if (title === "2 WEEKS AGO") weekOffset = -2;
+      if (title === "THIS WEEK") weekOffset = 0;  // Current week - participants with "this week" status
+      else if (title === "1 WEEK AGO") weekOffset = -1;  // 15/09 - 21/09/2025 range  
+      else if (title === "2 WEEKS AGO") weekOffset = -2;  // 08/09 - 14/09/2025 range
       else if (title === "3 WEEKS AGO") weekOffset = -3;
       
       if (["THIS WEEK", "1 WEEK AGO", "2 WEEKS AGO", "3 WEEKS AGO"].includes(title)) {
