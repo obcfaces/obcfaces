@@ -227,15 +227,21 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
               console.warn('Invalid contestant data:', contestant);
               return null;
             }
-            
-            // Get rating stats using secure function
-            const { data: ratingStats } = await supabase.rpc('get_rating_stats', {
-              contestant_name_param: `${contestant.first_name || ''} ${contestant.last_name || ''}`.trim(),
-              contestant_user_id_param: contestant.user_id
-            });
-            
-            const averageRating = ratingStats?.[0]?.average_rating || 0;
-            const totalVotes = ratingStats?.[0]?.total_votes || 0;
+             
+             // Get simple average rating directly from contestant_ratings table
+             const { data: ratings } = await supabase
+               .from('contestant_ratings')
+               .select('rating')
+               .eq('contestant_user_id', contestant.user_id);
+             
+             let averageRating = 0;
+             let totalVotes = 0;
+             
+             if (ratings && ratings.length > 0) {
+               const totalRating = ratings.reduce((sum, r) => sum + r.rating, 0);
+               averageRating = totalRating / ratings.length;
+               totalVotes = ratings.length;
+             }
             
             const contestantData = {
               rank: contestant.final_rank || 0,
@@ -307,14 +313,20 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
             return null;
           }
           
-          // Get rating stats using secure function
-          const { data: ratingStats } = await supabase.rpc('get_rating_stats', {
-            contestant_name_param: `${contestant.first_name || ''} ${contestant.last_name || ''}`.trim(),
-            contestant_user_id_param: contestant.user_id
-          });
+          // Get simple average rating directly from contestant_ratings table
+          const { data: ratings } = await supabase
+            .from('contestant_ratings')
+            .select('rating')
+            .eq('contestant_user_id', contestant.user_id);
           
-          const averageRating = ratingStats?.[0]?.average_rating || 0;
-          const totalVotes = ratingStats?.[0]?.total_votes || 0;
+          let averageRating = 0;
+          let totalVotes = 0;
+          
+          if (ratings && ratings.length > 0) {
+            const totalRating = ratings.reduce((sum, r) => sum + r.rating, 0);
+            averageRating = totalRating / ratings.length;
+            totalVotes = ratings.length;
+          }
           
           const contestantData = {
             rank: contestant.final_rank || 0,
