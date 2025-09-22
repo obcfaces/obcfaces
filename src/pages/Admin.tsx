@@ -1625,10 +1625,17 @@ const Admin = () => {
                                                          .eq('application_id', application.id)
                                                          .order('created_at', { ascending: true });
 
-                                                       // Add current status as the latest entry if it's different from history
-                                                       const historyWithCurrent = [...(history || [])];
-                                                       
-                                                       // Add system entry as first if no history exists
+                                                       // Remove duplicates based on status, created_at, and changed_by
+                                                       const uniqueHistory = (history || []).filter((entry, index, arr) => {
+                                                         return arr.findIndex(e => 
+                                                           e.status === entry.status &&
+                                                           e.created_at === entry.created_at &&
+                                                           e.changed_by === entry.changed_by
+                                                         ) === index;
+                                                       });
+
+                                                       // Add system entry as first only if no history exists
+                                                       const historyWithCurrent = [...uniqueHistory];
                                                        if (historyWithCurrent.length === 0) {
                                                          historyWithCurrent.unshift({
                                                            id: 'system',
