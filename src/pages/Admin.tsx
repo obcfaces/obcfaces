@@ -167,6 +167,7 @@ const Admin = () => {
   const [participantFilters, setParticipantFilters] = useState<{ [key: string]: string }>({});
   const [pastWeekParticipants, setPastWeekParticipants] = useState<any[]>([]);
   const [verificationFilter, setVerificationFilter] = useState<string>('all');
+  const [verifyingUsers, setVerifyingUsers] = useState<Set<string>>(new Set());
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -325,6 +326,8 @@ const Admin = () => {
 
   const handleEmailVerification = async (userId: string) => {
     try {
+      setVerifyingUsers(prev => new Set(prev).add(userId));
+      
       const { data: { session } } = await supabase.auth.getSession();
       if (!session?.access_token) {
         throw new Error('No access token');
@@ -358,6 +361,12 @@ const Admin = () => {
         title: "Error",
         description: error.message || "Failed to verify user email",
         variant: "destructive"
+      });
+    } finally {
+      setVerifyingUsers(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(userId);
+        return newSet;
       });
     }
   };
@@ -1906,30 +1915,50 @@ const Admin = () => {
                               {profile.display_name?.charAt(0) || profile.first_name?.charAt(0) || 'U'}
                             </AvatarFallback>
                           </Avatar>
-                          <div>
-                            <h3 className="font-semibold">
-                              {profile.display_name || `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 'No Name'}
-                            </h3>
-                            <div className="text-sm text-muted-foreground mb-1">
-                              {profile.email && <div>Email: {profile.email}</div>}
-                              <div>Created: {new Date(profile.created_at).toLocaleDateString()}</div>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                           <div className="flex items-center gap-2">
-                            <Checkbox
-                              checked={!!profile.email_confirmed_at}
-                              onCheckedChange={async (checked) => {
-                                if (checked && !profile.email_confirmed_at) {
-                                  await handleEmailVerification(profile.id);
-                                }
-                              }}
-                              disabled={!!profile.email_confirmed_at}
-                            />
-                            <span className="text-sm text-muted-foreground">
-                              {profile.email_confirmed_at ? 'Verified' : 'Not verified'}
-                            </span>
+                   <div>
+                     <h3 className="font-semibold">
+                       {profile.display_name || `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 'No Name'}
+                     </h3>
+                     <div className="text-sm text-muted-foreground mb-1">
+                       {profile.email && <div>Email: {profile.email}</div>}
+                       {profile.country && <div>Country: {profile.country}</div>}
+                       <div>
+                         Created: {new Date(profile.created_at).toLocaleDateString('en-GB', { 
+                           day: 'numeric', 
+                           month: 'short', 
+                           year: 'numeric' 
+                         }).toLowerCase().replace(/(\d+) (\w+) (\d+)/, '$1 $2 $3')} 
+                         at {new Date(profile.created_at).toLocaleTimeString('en-GB', {
+                           hour: '2-digit',
+                           minute: '2-digit'
+                         })}
+                       </div>
+                     </div>
+                   </div>
+                 </div>
+                 <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2">
+                     {verifyingUsers.has(profile.id) ? (
+                       <div className="flex items-center gap-2">
+                         <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
+                         <span className="text-sm text-muted-foreground">Verifying...</span>
+                       </div>
+                     ) : (
+                       <>
+                         <Checkbox
+                           checked={!!profile.email_confirmed_at}
+                           onCheckedChange={async (checked) => {
+                             if (checked && !profile.email_confirmed_at) {
+                               await handleEmailVerification(profile.id);
+                             }
+                           }}
+                           disabled={!!profile.email_confirmed_at}
+                         />
+                         <span className="text-sm text-muted-foreground">
+                           {profile.email_confirmed_at ? 'Verified' : 'Not verified'}
+                         </span>
+                       </>
+                     )}
                           </div>
                         </div>
                       </div>
