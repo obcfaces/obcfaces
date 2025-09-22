@@ -1554,71 +1554,71 @@ const Admin = () => {
                                        
                                        <div className="flex-1"></div>
                                        
-                                       {/* Status filter at the bottom of the card */}
-                                        {!showDeletedApplications && (
-                                          <div className="mb-2">
-                                            <Select 
-                                              value={application.status}
-                                               onValueChange={(newStatus) => {
-                                                 if (newStatus === 'delete') {
-                                                   const appData = typeof application.application_data === 'string' 
-                                                     ? JSON.parse(application.application_data) 
-                                                     : application.application_data;
-                                                   setApplicationToDelete({ 
-                                                     id: application.id, 
-                                                     name: `${appData.firstName} ${appData.lastName}` 
-                                                   });
-                                                   setShowDeleteConfirmModal(true);
-                                                   return;
-                                                 }
-                                                 if (newStatus === 'rejected') {
-                                                   const appData = typeof application.application_data === 'string' 
-                                                     ? JSON.parse(application.application_data) 
-                                                     : application.application_data;
-                                                   setApplicationToReject({ 
-                                                     id: application.id, 
-                                                     name: `${appData.firstName} ${appData.lastName}` 
-                                                   });
-                                                   setRejectModalOpen(true);
-                                                   return;
-                                                 }
-                                                 reviewApplication(application.id, newStatus);
+                                        {/* Status filter with admin login on the same line */}
+                                         {!showDeletedApplications && (
+                                           <div className="mb-2 flex items-center gap-2">
+                                             <Select 
+                                               value={application.status}
+                                                onValueChange={(newStatus) => {
+                                                  if (newStatus === 'delete') {
+                                                    const appData = typeof application.application_data === 'string' 
+                                                      ? JSON.parse(application.application_data) 
+                                                      : application.application_data;
+                                                    setApplicationToDelete({ 
+                                                      id: application.id, 
+                                                      name: `${appData.firstName} ${appData.lastName}` 
+                                                    });
+                                                    setShowDeleteConfirmModal(true);
+                                                    return;
+                                                  }
+                                                  if (newStatus === 'rejected') {
+                                                    const appData = typeof application.application_data === 'string' 
+                                                      ? JSON.parse(application.application_data) 
+                                                      : application.application_data;
+                                                    setApplicationToReject({ 
+                                                      id: application.id, 
+                                                      name: `${appData.firstName} ${appData.lastName}` 
+                                                    });
+                                                    setRejectModalOpen(true);
+                                                    return;
+                                                  }
+                                                  reviewApplication(application.id, newStatus);
+                                                }}
+                                             >
+                                                <SelectTrigger 
+                                                   className={`w-24 h-7 text-xs ${
+                                                     application.status === 'approved' ? 'bg-green-100 border-green-500 text-green-700' :
+                                                     application.status === 'rejected' ? 'bg-red-100 border-red-500 text-red-700' :
+                                                     ''
+                                                   }`}
+                                                >
+                                                 <SelectValue />
+                                               </SelectTrigger>
+                                                <SelectContent>
+                                                  <SelectItem value="pending">Pending</SelectItem>
+                                                  <SelectItem value="approved">Approved</SelectItem>
+                                                  <SelectItem value="rejected">Rejected</SelectItem>
+                                                </SelectContent>
+                                             </Select>
+                                             
+                                             {/* Admin login on the same line */}
+                                             <div 
+                                               className="text-xs text-muted-foreground cursor-pointer hover:text-foreground"
+                                               onClick={() => {
+                                                 setEditHistoryApplicationId(application.id);
+                                                 setShowEditHistory(true);
                                                }}
-                                            >
-                                               <SelectTrigger 
-                                                  className={`w-24 h-7 text-xs ${
-                                                    application.status === 'approved' ? 'bg-green-100 border-green-500 text-green-700' :
-                                                    application.status === 'rejected' ? 'bg-red-100 border-red-500 text-red-700' :
-                                                    ''
-                                                  }`}
-                                               >
-                                                <SelectValue />
-                                              </SelectTrigger>
-                                               <SelectContent>
-                                                 <SelectItem value="pending">Pending</SelectItem>
-                                                 <SelectItem value="approved">Approved</SelectItem>
-                                                 <SelectItem value="rejected">Rejected</SelectItem>
-                                               </SelectContent>
-                                            </Select>
-                                          </div>
-                                        )}
-                                         
-                                        {/* Date with admin - под фильтром статусов */}
-                                        <div 
-                                          className="text-xs text-muted-foreground mt-1 cursor-pointer hover:text-foreground"
-                                          onClick={() => {
-                                            setEditHistoryApplicationId(application.id);
-                                            setShowEditHistory(true);
-                                          }}
-                                        >
-                                           {(() => {
-                                             const reviewerEmail = application.reviewed_by && profiles.find(p => p.id === application.reviewed_by)?.email;
-                                             const reviewerLogin = reviewerEmail ? reviewerEmail.substring(0, 3) : 'sys';
-                                             return (
-                                               <span className="text-blue-600">{reviewerLogin}</span>
-                                             );
-                                           })()}
-                                        </div>
+                                             >
+                                                {(() => {
+                                                  const reviewerEmail = application.reviewed_by && profiles.find(p => p.id === application.reviewed_by)?.email;
+                                                  const reviewerLogin = reviewerEmail ? reviewerEmail.substring(0, 3) : 'sys';
+                                                  return (
+                                                    <span className="text-blue-600">{reviewerLogin}</span>
+                                                  );
+                                                })()}
+                                             </div>
+                                           </div>
+                                         )}
                                       </div>
                                 </div>
                               </div>
