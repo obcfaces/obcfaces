@@ -169,6 +169,9 @@ const Admin = () => {
   const [participantFilters, setParticipantFilters] = useState<{ [key: string]: string }>({});
    const [pastWeekParticipants, setPastWeekParticipants] = useState<any[]>([]);
    const [expandedAdminDates, setExpandedAdminDates] = useState<Set<string>>(new Set());
+   const [adminDatePopup, setAdminDatePopup] = useState<{ show: boolean; date: string; admin: string; applicationId: string }>({ 
+     show: false, date: '', admin: '', applicationId: '' 
+   });
   const [verificationFilter, setVerificationFilter] = useState<string>('all');
   const [verifyingUsers, setVerifyingUsers] = useState<Set<string>>(new Set());
   const navigate = useNavigate();
@@ -1611,46 +1614,38 @@ const Admin = () => {
                                                    const statusDate = application.reviewed_at || application.approved_at || application.rejected_at || application.submitted_at;
                                                    const reviewerEmail = application.reviewed_by && profiles.find(p => p.id === application.reviewed_by)?.email;
                                                    const reviewerLogin = reviewerEmail ? reviewerEmail.substring(0, 3) : 'sys';
-                                                   const isExpanded = expandedAdminDates.has(application.id);
                                                    
-                                                   const toggleDate = () => {
-                                                     const newExpanded = new Set(expandedAdminDates);
-                                                     if (isExpanded) {
-                                                       newExpanded.delete(application.id);
-                                                     } else {
-                                                       newExpanded.add(application.id);
+                                                   const showDatePopup = () => {
+                                                     if (statusDate) {
+                                                       const date = new Date(statusDate);
+                                                       const formattedDate = date.toLocaleDateString('en-GB', { 
+                                                         day: 'numeric', 
+                                                         month: 'short',
+                                                         year: 'numeric'
+                                                       });
+                                                       const time = date.toLocaleTimeString('en-GB', { 
+                                                         hour: '2-digit', 
+                                                         minute: '2-digit' 
+                                                       });
+                                                       const fullAdminEmail = reviewerEmail || 'system';
+                                                       
+                                                       setAdminDatePopup({
+                                                         show: true,
+                                                         date: `${formattedDate} - ${time}`,
+                                                         admin: fullAdminEmail,
+                                                         applicationId: application.id
+                                                       });
                                                      }
-                                                     setExpandedAdminDates(newExpanded);
                                                    };
                                                    
-                                                   if (statusDate) {
-                                                     const date = new Date(statusDate);
-                                                     const formattedDate = date.toLocaleDateString('en-GB', { 
-                                                       day: 'numeric', 
-                                                       month: 'short',
-                                                       year: 'numeric'
-                                                     });
-                                                     const time = date.toLocaleTimeString('en-GB', { 
-                                                       hour: '2-digit', 
-                                                       minute: '2-digit' 
-                                                     });
-                                                     
-                                                     return (
-                                                       <div className="flex items-center gap-1">
-                                                         <span 
-                                                           className="text-blue-600 cursor-pointer hover:text-blue-800"
-                                                           onClick={toggleDate}
-                                                         >
-                                                           {reviewerLogin}
-                                                         </span>
-                                                         {isExpanded && (
-                                                           <span>{formattedDate} - {time}</span>
-                                                         )}
-                                                       </div>
-                                                     );
-                                                   }
-                                                   
-                                                   return <span className="text-blue-600">{reviewerLogin}</span>;
+                                                   return (
+                                                     <span 
+                                                       className="text-blue-600 cursor-pointer hover:text-blue-800"
+                                                       onClick={showDatePopup}
+                                                     >
+                                                       {reviewerLogin}
+                                                     </span>
+                                                   );
                                                  })()}
                                               </div>
                                            </div>
@@ -2368,7 +2363,26 @@ const Admin = () => {
           setShowEditHistory(false);
           setEditHistoryApplicationId(null);
         }}
-      />
+       />
+
+      {/* Admin Date Popup Modal */}
+      <Dialog open={adminDatePopup.show} onOpenChange={(open) => setAdminDatePopup(prev => ({ ...prev, show: open }))}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Status Change Information</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <label className="text-sm font-medium text-muted-foreground">Admin:</label>
+              <p className="text-sm">{adminDatePopup.admin}</p>
+            </div>
+            <div>
+              <label className="text-sm font-medium text-muted-foreground">Date & Time:</label>
+              <p className="text-sm">{adminDatePopup.date}</p>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 };
