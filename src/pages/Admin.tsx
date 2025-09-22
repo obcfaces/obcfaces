@@ -1920,10 +1920,10 @@ const Admin = () => {
                        {profile.display_name || `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 'No Name'}
                      </h3>
                      <div className="text-sm text-muted-foreground mb-1">
-                       {profile.email && <div>Email: {profile.email}</div>}
-                       {profile.country && <div>Country: {profile.country}</div>}
+                       {profile.email && <div>{profile.email}</div>}
+                       {profile.country && <div>{profile.country}</div>}
                        <div>
-                         Created: {new Date(profile.created_at).toLocaleDateString('en-GB', { 
+                         {new Date(profile.created_at).toLocaleDateString('en-GB', { 
                            day: 'numeric', 
                            month: 'short', 
                            year: 'numeric' 
