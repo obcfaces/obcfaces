@@ -1584,8 +1584,19 @@ const Admin = () => {
                                         
                                          {/* Expanded information */}
                                          {expandedMobileItems.has(application.id) && (
-                                           <div className="text-xs text-muted-foreground mb-2">
-                                             {appData.weight_kg}kg • {appData.height_cm}cm • {appData.gender} • {appData.birth_year} • {appData.marital_status} • {appData.has_children ? 'Has children' : 'No children'}
+                                           <div className="text-xs text-muted-foreground mb-2 space-y-1">
+                                             <div>{appData.weight_kg}kg, {appData.height_cm}cm</div>
+                                             <div>{appData.marital_status}, {appData.has_children ? 'Has kids' : 'No kids'}</div>
+                                             <div>{userProfile?.email || 'No email'}</div>
+                                             <div>
+                                               {(() => {
+                                                 const phone = appData.phone?.country && appData.phone?.number 
+                                                   ? `${appData.phone.country} ${appData.phone.number}` 
+                                                   : 'No phone';
+                                                 const facebook = appData.facebook_url ? 'facebook' : 'no facebook';
+                                                 return `${phone} ${facebook}`;
+                                               })()}
+                                             </div>
                                            </div>
                                          )}
                                         
