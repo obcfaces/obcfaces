@@ -1522,31 +1522,34 @@ const Admin = () => {
                                           />
                                         </div>
                                       )}
-                                      {appData.photo2_url && (
-                                        <div className="w-1/2">
-                                          <img 
-                                            src={appData.photo2_url} 
-                                            alt="Full length" 
-                                            className="w-full h-36 object-cover cursor-pointer hover:opacity-90 transition-opacity"
-                                            onClick={() => openPhotoModal([appData.photo1_url, appData.photo2_url].filter(Boolean), 1, `${appData.first_name} ${appData.last_name}`)}
-                                          />
-                                        </div>
-                                      )}
+                                       {appData.photo2_url && (
+                                         <div className="w-1/2 relative">
+                                           <img 
+                                             src={appData.photo2_url} 
+                                             alt="Full length" 
+                                             className="w-full h-36 object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                                             onClick={() => openPhotoModal([appData.photo1_url, appData.photo2_url].filter(Boolean), 1, `${appData.first_name} ${appData.last_name}`)}
+                                           />
+                                           {/* User avatar positioned in top right corner */}
+                                           <div className="absolute top-2 right-2">
+                                             <Avatar className="h-6 w-6 flex-shrink-0 border-2 border-white shadow-sm">
+                                               <AvatarImage src={userProfile?.avatar_url || ''} />
+                                               <AvatarFallback className="text-xs">
+                                                 {appData.first_name?.charAt(0) || 'U'}
+                                               </AvatarFallback>
+                                             </Avatar>
+                                           </div>
+                                         </div>
+                                       )}
                                     </div>
                                     
-                                     {/* Information section - right side */}
-                                     <div className="w-[50vw] flex-shrink-0 pl-2 flex flex-col h-40">
-                                      <div className="flex items-center gap-2 mb-2">
-                                        <Avatar className="h-5 w-5 flex-shrink-0">
-                                          <AvatarImage src={userProfile?.avatar_url || ''} />
-                                          <AvatarFallback className="text-xs">
-                                            {appData.first_name?.charAt(0) || 'U'}
-                                          </AvatarFallback>
-                                        </Avatar>
-                                         <span className="text-xs font-semibold whitespace-nowrap">
-                                           {new Date().getFullYear() - appData.birth_year} {appData.first_name} {appData.last_name}
-                                         </span>
-                                      </div>
+                                      {/* Information section - right side */}
+                                      <div className="w-[50vw] flex-shrink-0 pl-2 flex flex-col h-40">
+                                       <div className="flex items-center gap-2 mb-2">
+                                          <span className="text-xs font-semibold whitespace-nowrap">
+                                            {new Date().getFullYear() - appData.birth_year} {appData.first_name} {appData.last_name}
+                                          </span>
+                                       </div>
                                        
                                        <div className="text-xs text-muted-foreground mb-2 truncate">
                                          {appData.city} {appData.country}
