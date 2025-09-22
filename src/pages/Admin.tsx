@@ -1250,7 +1250,7 @@ const Admin = () => {
                 </div>
               </div>
 
-              <div className="space-y-4">
+              <div className="space-y-4 md:mx-0 -mx-4">
                 {(() => {
                   console.log('Filtering applications, statusFilter:', statusFilter);
                   const filteredApplications = (showDeletedApplications ? deletedApplications : contestApplications)
@@ -1301,7 +1301,7 @@ const Admin = () => {
                    
                     return (
                       <div key={application.id}>
-                         <Card className="overflow-hidden relative">
+                         <Card className="overflow-hidden relative mx-0 md:mx-0">
                            {/* Edit button in bottom left corner */}
                            {!showDeletedApplications && (
                              <Button
@@ -1507,12 +1507,11 @@ const Admin = () => {
                                  </div>
                               </div>
                               
-                              {/* Mobile layout - full width cards */}
+                              {/* Mobile layout - horizontal with full width */}
                               <div className="md:hidden">
-                                <div className="w-full">
-                                  <div className="flex flex-col">
-                                    {/* Photos section - full width on mobile */}
-                                    <div className="flex gap-px w-full mb-4">
+                                <div className="flex w-full">
+                                  {/* Photos section - left side */}
+                                  <div className="flex gap-px w-[50vw] flex-shrink-0">
                                       {appData.photo1_url && (
                                         <div className="w-1/2">
                                           <img 
@@ -1535,8 +1534,8 @@ const Admin = () => {
                                       )}
                                     </div>
                                     
-                                    {/* Information section - full width on mobile */}
-                                    <div className="w-full p-4">
+                                    {/* Information section - right side */}
+                                    <div className="w-[50vw] flex-shrink-0 p-4">
                                       <div className="flex items-center gap-2 mb-2">
                                         <Avatar className="h-5 w-5 flex-shrink-0">
                                           <AvatarImage src={userProfile?.avatar_url || ''} />
@@ -1632,7 +1631,6 @@ const Admin = () => {
                                           })()}
                                         </div>
                                       </div>
-                                  </div>
                                 </div>
                               </div>
                             </CardContent>
