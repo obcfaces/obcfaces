@@ -59,6 +59,8 @@ interface ProfileData {
   last_sign_in_at?: string;
   created_at: string;
   email_confirmed_at?: string;
+  email_verified_by?: string;
+  email_verified_by_email?: string;
   is_approved?: boolean | null;
   moderation_notes?: string;
   moderated_by?: string;
@@ -348,13 +350,25 @@ const Admin = () => {
         throw new Error(result.error || 'Failed to verify email');
       }
 
+      // Update the profile with verification info locally for immediate UI update
+      setProfiles(prev => prev.map(profile => 
+        profile.id === userId 
+          ? { 
+              ...profile, 
+              email_confirmed_at: new Date().toISOString(),
+              email_verified_by: user.id,
+              email_verified_by_email: user.email
+            }
+          : profile
+      ));
+
       toast({
         title: "Success",
         description: "User email verified successfully",
       });
 
       // Refresh the profiles to show updated verification status
-      fetchProfiles();
+      setTimeout(() => fetchProfiles(), 1000);
     } catch (error: any) {
       console.error('Error verifying email:', error);
       toast({
@@ -1953,9 +1967,27 @@ const Admin = () => {
                            }}
                            disabled={!!profile.email_confirmed_at}
                          />
-                         <span className="text-sm text-muted-foreground">
-                           {profile.email_confirmed_at ? 'Verified' : 'verif'}
-                         </span>
+                         <div className="flex flex-col">
+                           <span className="text-sm text-muted-foreground">
+                             {profile.email_confirmed_at ? 'Verified' : 'verif'}
+                           </span>
+                           {profile.email_confirmed_at && profile.email_verified_by_email && (
+                             <div className="text-xs">
+                               <span className="text-black">{profile.email_verified_by_email.substring(0, 5)}</span>
+                               <br />
+                               <span className="text-blue-600">
+                                 {new Date(profile.email_confirmed_at).toLocaleDateString('en-GB', { 
+                                   day: 'numeric', 
+                                   month: 'short', 
+                                   year: 'numeric' 
+                                 }).toLowerCase()} - {new Date(profile.email_confirmed_at).toLocaleTimeString('en-GB', {
+                                   hour: '2-digit',
+                                   minute: '2-digit'
+                                 })}
+                               </span>
+                             </div>
+                           )}
+                         </div>
                        </>
                      )}
                           </div>
