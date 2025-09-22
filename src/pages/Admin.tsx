@@ -1559,16 +1559,16 @@ const Admin = () => {
                                        )}
                                     </div>
                                     
-                                      {/* Information section - right side */}
-                                      <div className="w-[50vw] flex-shrink-0 pl-2 flex flex-col h-40">
-                                       <div className="flex items-center gap-2 mb-2">
-                                          <span className="text-xs font-semibold whitespace-nowrap">
-                                            {new Date().getFullYear() - appData.birth_year} {appData.first_name} {appData.last_name}
-                                          </span>
-                                       </div>
+                                       {/* Information section - right side */}
+                                       <div className="w-[50vw] flex-shrink-0 pl-2 flex flex-col h-40">
+                                        <div className="flex items-center gap-2 mb-1 mt-1">
+                                           <span className="text-xs font-semibold whitespace-nowrap">
+                                             {new Date().getFullYear() - appData.birth_year} {appData.first_name} {appData.last_name}
+                                           </span>
+                                        </div>
                                        
                                          <div 
-                                           className="text-xs text-muted-foreground mb-2 cursor-pointer hover:text-foreground transition-colors"
+                                           className="text-xs text-muted-foreground mb-1 cursor-pointer hover:text-foreground transition-colors"
                                            onClick={() => {
                                              const newExpanded = new Set(expandedMobileItems);
                                              if (expandedMobileItems.has(application.id)) {
@@ -1584,10 +1584,23 @@ const Admin = () => {
                                         
                                          {/* Expanded information */}
                                          {expandedMobileItems.has(application.id) && (
-                                           <div className="text-xs text-muted-foreground mb-2 space-y-1">
+                                           <div className="text-xs text-muted-foreground mb-1 space-y-0.5">
                                              <div>{appData.weight_kg}kg, {appData.height_cm}cm</div>
                                              <div>{appData.marital_status}, {appData.has_children ? 'Has kids' : 'No kids'}</div>
-                                             <div>{userProfile?.email || 'No email'}</div>
+                                             <div className="flex items-center gap-1">
+                                               <span>
+                                                 {userProfile?.email 
+                                                   ? (userProfile.email.length > 7 ? `${userProfile.email.substring(0, 7)}...` : userProfile.email)
+                                                   : 'No email'
+                                                 }
+                                               </span>
+                                               {userProfile?.email && (
+                                                 <Copy 
+                                                   className="h-3 w-3 cursor-pointer hover:text-foreground" 
+                                                   onClick={() => navigator.clipboard.writeText(userProfile.email)}
+                                                 />
+                                               )}
+                                             </div>
                                              <div>
                                                {(() => {
                                                  const phone = appData.phone?.country && appData.phone?.number 
