@@ -1035,6 +1035,7 @@ const Admin = () => {
                                   <SelectItem value="this week">This Week</SelectItem>
                                   <SelectItem value="next week">Next Week</SelectItem>
                                   <SelectItem value="approve">Approve</SelectItem>
+                                  <SelectItem value="reject">Reject</SelectItem>
                                 </SelectContent>
                               </Select>
                             </div>
