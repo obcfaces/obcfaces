@@ -521,32 +521,7 @@ const Admin = () => {
         return;
       }
 
-      // Fetch real-time ratings for each participant to match website consistency
-      const participantsWithUpdatedRatings = await Promise.all(
-        (data || []).map(async (participant) => {
-          try {
-            const appData = participant.application_data as any || {};
-            const { data: ratingStats } = await supabase.rpc('get_rating_stats', {
-              contestant_name_param: `${appData.first_name || ''} ${appData.last_name || ''}`.trim(),
-              contestant_user_id_param: participant.user_id
-            });
-            
-            const realTimeRating = ratingStats?.[0]?.average_rating || 0;
-            const realTimeVotes = ratingStats?.[0]?.total_votes || 0;
-            
-            return {
-              ...participant,
-              average_rating: realTimeRating,
-              total_votes: realTimeVotes
-            };
-          } catch (error) {
-            console.error('Error fetching real-time rating for participant:', error);
-            return participant; // Return original if rating fetch fails
-          }
-        })
-      );
-
-      setWeeklyParticipants(participantsWithUpdatedRatings);
+      setWeeklyParticipants(data || []);
     } catch (error) {
       console.error('Error in fetchWeeklyParticipants:', error);
     }
