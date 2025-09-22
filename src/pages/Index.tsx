@@ -110,14 +110,15 @@ const Index = () => {
           </div>
           
           <section className="max-w-6xl mx-auto pt-2 mb-1 sm:mb-3 mt-2 bg-background rounded-lg shadow-sm shadow-foreground/10">
-            <ContestSection
-              title="THIS WEEK"
-              subtitle={getWeekRange(0)}
-              description="Choose the winner."
-              isActive={true}
-              noWrapTitle
-              viewMode={viewMode}
-            />
+          <ContestSection
+            title="THIS WEEK"
+            subtitle={getWeekRange(0)}
+            description="Choose the winner."
+            isActive={true}
+            noWrapTitle
+            viewMode={viewMode}
+            weekOffset={0}
+          />
           </section>
 
 
@@ -128,6 +129,7 @@ const Index = () => {
             centerSubtitle
             showWinner={true}
             viewMode={viewMode}
+            weekOffset={1}
           />
 
           <ContestSection
@@ -137,6 +139,7 @@ const Index = () => {
             centerSubtitle
             showWinner={true}
             viewMode={viewMode}
+            weekOffset={2}
           />
 
           <ContestSection
@@ -146,6 +149,7 @@ const Index = () => {
             centerSubtitle
             showWinner={true}
             viewMode={viewMode}
+            weekOffset={3}
           />
 
         </>

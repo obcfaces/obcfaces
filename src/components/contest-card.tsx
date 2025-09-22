@@ -49,6 +49,7 @@ interface ContestantCardProps {
   isExample?: boolean; // Add example flag prop
   isThisWeek?: boolean; // Add prop to identify THIS WEEK contests
   user?: any; // Add user prop to avoid individual auth calls
+  weekOffset?: number; // Add prop to identify which week offset this card is from
 }
 
 export function ContestantCard({
@@ -75,7 +76,8 @@ export function ContestantCard({
   totalVotes = 0,
   isExample = false,
   isThisWeek = false,
-  user: propUser
+  user: propUser,
+  weekOffset = 0
 }: ContestantCardProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalStartIndex, setModalStartIndex] = useState(0);
@@ -893,8 +895,8 @@ export function ContestantCard({
         {/* Divider line between rows */}
         {isWinner && <div className="border-t border-gray-400 w-full"></div>}
         
-        {/* Second row for winner cards only */}
-        {isWinner && (
+        {/* Second row for winner cards only - only show for winners from 2+ weeks ago (weekOffset >= 2) */}
+        {isWinner && weekOffset >= 2 && (
           <>
             <div className="flex h-36 sm:h-40 md:h-44 relative gap-px">
               {/* Payment photo */}
