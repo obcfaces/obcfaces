@@ -220,6 +220,47 @@ const Admin = () => {
         );
 
         setFilteredWeeklyParticipants(participantsWithRatings);
+      } else if (weeklyContestFilter === 'reject') {
+        // Get rejected applications that should not appear in other sections
+        const rejectedApps = contestApplications
+          .filter(app => app.status === 'rejected')
+          .filter((app, index, arr) => arr.findIndex(a => a.user_id === app.user_id) === index);
+
+        const rejectedParticipantsWithRatings = await Promise.all(
+          rejectedApps.map(async (app) => {
+            const appData = app.application_data || {};
+            
+            try {
+              const { data: ratingStats } = await supabase
+                .rpc('get_user_rating_stats', { target_user_id: app.user_id });
+              
+              return {
+                id: `rejected-${app.id}`,
+                user_id: app.user_id,
+                application_data: appData,
+                average_rating: ratingStats?.[0]?.average_rating || 0,
+                total_votes: ratingStats?.[0]?.total_votes || 0,
+                final_rank: null,
+                fromApplication: true,
+                status: 'rejected'
+              };
+            } catch (error) {
+              console.error('Error fetching rating stats:', error);
+              return {
+                id: `rejected-${app.id}`,
+                user_id: app.user_id,
+                application_data: appData,
+                average_rating: 0,
+                total_votes: 0,
+                final_rank: null,
+                fromApplication: true,
+                status: 'rejected'
+              };
+            }
+          })
+        );
+
+        setFilteredWeeklyParticipants(rejectedParticipantsWithRatings);
       } else if (weeklyContestFilter === 'this week') {
         // Get current Monday for comparison
         const now = new Date();
@@ -882,6 +923,7 @@ const Admin = () => {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="approve">Approve</SelectItem>
+                    <SelectItem value="reject">Reject</SelectItem>
                     <SelectItem value="this week">This Week</SelectItem>
                     <SelectItem value="next week">Next Week</SelectItem>
                     <SelectItem value="after next week">After Next Week</SelectItem>
@@ -896,6 +938,8 @@ const Admin = () => {
                       <p className="text-lg">
                         {weeklyContestFilter === 'approve' 
                           ? 'No approved applications found' 
+                          : weeklyContestFilter === 'reject'
+                          ? 'No rejected applications found'
                           : 'No weekly contest participants found'}
                       </p>
                     </div>
@@ -1212,6 +1256,16 @@ const Admin = () => {
                       if (countryFilter !== 'all' && appData.country !== countryFilter) return false;
                       if (genderFilter !== 'all' && appData.gender !== genderFilter) return false;
                       if (statusFilter !== 'all' && application.status !== statusFilter) return false;
+                      
+                      // Don't show approved applications in the cards section if they were moved to "this week"
+                      if (application.status === 'approved') {
+                        // Check if this user is already in weekly participants (moved to "this week")
+                        const isInWeeklyParticipants = weeklyParticipants.some(participant => 
+                          participant.user_id === application.user_id
+                        );
+                        return !isInWeeklyParticipants;
+                      }
+                      
                       return true;
                     });
                   
