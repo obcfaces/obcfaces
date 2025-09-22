@@ -26,6 +26,7 @@ import { RejectReasonModal, REJECTION_REASONS } from '@/components/reject-reason
 import { VotersModal } from '@/components/voters-modal';
 import { ContestParticipationModal } from '@/components/contest-participation-modal';
 import { ApplicationEditHistory } from '@/components/ApplicationEditHistory';
+import { ExpandableApplicationHistory } from '@/components/ExpandableApplicationHistory';
 
 // Helper function to check if rejection reason is a duplicate of predefined reasons
 const isReasonDuplicate = (rejectionReason: string, reasonTypes: string[]) => {
@@ -1294,9 +1295,25 @@ const Admin = () => {
                         <p className="text-lg">No applications found</p>
                       </div>
                     );
-                  }
+                   }
 
-                  return uniqueApplications.map((application) => {
+                   // Function to render status badge
+                   const getApplicationStatusBadge = (status: string) => {
+                     const badgeVariant = status === 'approved' ? 'default' : 
+                                         status === 'rejected' ? 'destructive' : 
+                                         'secondary';
+                     const badgeColor = status === 'approved' ? 'bg-green-100 text-green-700 border-green-500' :
+                                       status === 'rejected' ? 'bg-red-100 text-red-700 border-red-500' :
+                                       '';
+                     
+                     return (
+                       <Badge variant={badgeVariant} className={badgeColor}>
+                         {status.charAt(0).toUpperCase() + status.slice(1)}
+                       </Badge>
+                     );
+                   };
+
+                   return uniqueApplications.map((application) => {
                     const appData = typeof application.application_data === 'string' 
                       ? JSON.parse(application.application_data) 
                       : application.application_data;
@@ -1801,13 +1818,48 @@ const Admin = () => {
           </div>
         )}
                         
-                        {/* Previous applications for this user */}
-                        {selectedUserApplications === application.user_id && (
-                          <div className="mt-2 space-y-2">
-                            {(showDeletedApplications ? deletedApplications : contestApplications)
-                              .filter(app => app.user_id === application.user_id && app.id !== application.id)
-                              .sort((a, b) => new Date(b.submitted_at).getTime() - new Date(a.submitted_at).getTime())
-                              .map((prevApp) => {
+                         {/* Previous applications for this user */}
+                         <ExpandableApplicationHistory
+                           applications={showDeletedApplications ? deletedApplications : contestApplications}
+                           currentApplicationId={application.id}
+                           userId={application.user_id}
+                           isExpanded={selectedUserApplications === application.user_id}
+                           showDeletedApplications={showDeletedApplications}
+                           profiles={profiles}
+                           onEdit={(app) => {
+                             setEditingApplicationId(app.id);
+                             setEditingApplicationData(app);
+                             setShowEditModal(true);
+                           }}
+                           onReview={reviewApplication}
+                           onReject={(id, name) => {
+                             setApplicationToReject({ id, name });
+                             setRejectModalOpen(true);
+                           }}
+                           onDelete={(id) => {
+                             const appToDelete = (showDeletedApplications ? deletedApplications : contestApplications)
+                               .find(app => app.id === id);
+                             if (appToDelete) {
+                               const appData = typeof appToDelete.application_data === 'string' 
+                                 ? JSON.parse(appToDelete.application_data) 
+                                 : appToDelete.application_data;
+                               setApplicationToDelete({ 
+                                 id, 
+                                 name: `${appData.first_name} ${appData.last_name}` 
+                               });
+                               setShowDeleteConfirmModal(true);
+                             }
+                           }}
+                           onRestore={() => {}}
+                           getApplicationStatusBadge={getApplicationStatusBadge}
+                         />
+                        
+                       </div>
+                     );
+                   });
+                 })()}
+               </div>
+             </TabsContent>
                                 const prevAppData = typeof prevApp.application_data === 'string' 
                                   ? JSON.parse(prevApp.application_data) 
                                   : prevApp.application_data;
@@ -2028,15 +2080,12 @@ const Admin = () => {
                                     </CardContent>
                                   </Card>
                                 );
-                              })}
-                          </div>
-                        )}
-                      </div>
-                    );
-                  });
-                })()}
-              </div>
-            </TabsContent>
+                       </div>
+                     );
+                   });
+                 })()}
+               </div>
+             </TabsContent>
 
             <TabsContent value="registrations" className="space-y-4">
               <div className="mb-6">
