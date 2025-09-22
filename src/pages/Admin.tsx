@@ -1556,11 +1556,37 @@ const Admin = () => {
                                           </span>
                                        </div>
                                        
-                                       <div className="text-xs text-muted-foreground mb-2 truncate">
-                                         {appData.city} {appData.country}
-                                       </div>
-                                       
-                                       <div className="flex-1"></div>
+                                        <div className="flex items-center justify-between text-xs text-muted-foreground mb-2">
+                                          <span className="truncate">{appData.city} {appData.country}</span>
+                                          <ChevronDown 
+                                            className={`h-4 w-4 cursor-pointer transition-transform ${
+                                              expandedMobileItems.has(application.id) ? 'rotate-180' : ''
+                                            }`}
+                                            onClick={() => {
+                                              const newExpanded = new Set(expandedMobileItems);
+                                              if (expandedMobileItems.has(application.id)) {
+                                                newExpanded.delete(application.id);
+                                              } else {
+                                                newExpanded.add(application.id);
+                                              }
+                                              setExpandedMobileItems(newExpanded);
+                                            }}
+                                          />
+                                         </div>
+                                        
+                                        {/* Expanded information */}
+                                        {expandedMobileItems.has(application.id) && (
+                                          <div className="text-xs space-y-1 mb-2 bg-muted/30 p-2 rounded">
+                                            <div>Height: {appData.height_cm}cm</div>
+                                            <div>Weight: {appData.weight_kg}kg</div>
+                                            <div>Gender: {appData.gender}</div>
+                                            <div>Birth Year: {appData.birth_year}</div>
+                                            {appData.marital_status && <div>Status: {appData.marital_status}</div>}
+                                            {appData.has_children !== undefined && <div>Children: {appData.has_children ? 'Yes' : 'No'}</div>}
+                                          </div>
+                                        )}
+                                        
+                                        <div className="flex-1"></div>
                                        
                                         {/* Status filter with admin login on the same line */}
                                          {!showDeletedApplications && (
