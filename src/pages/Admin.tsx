@@ -226,10 +226,32 @@ const Admin = () => {
 
         setFilteredWeeklyParticipants(participantsWithRatings);
       } else if (weeklyContestFilter === 'this week') {
-        // Filter participants who have 'this week' status
+        // Get current Monday for comparison
+        const now = new Date();
+        const currentMonday = new Date(now);
+        const dayOfWeek = now.getDay();
+        const daysSinceMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+        currentMonday.setDate(now.getDate() - daysSinceMonday);
+        currentMonday.setHours(0, 0, 0, 0);
+
+        // Filter participants who are from current week OR have 'this week' status manually set
         const filteredByStatus = weeklyParticipants.filter(participant => {
           const filterStatus = participantFilters[participant.id] || (participant.final_rank ? 'this week' : 'approve');
-          return filterStatus === 'this week';
+          
+          // Include if manually set to 'this week'
+          if (filterStatus === 'this week') {
+            return true;
+          }
+
+          // Also include participants created this week
+          const createdDate = new Date(participant.created_at);
+          const participantMonday = new Date(createdDate);
+          const participantDayOfWeek = createdDate.getDay();
+          const participantDaysSinceMonday = participantDayOfWeek === 0 ? 6 : participantDayOfWeek - 1;
+          participantMonday.setDate(createdDate.getDate() - participantDaysSinceMonday);
+          participantMonday.setHours(0, 0, 0, 0);
+          
+          return participantMonday.getTime() >= currentMonday.getTime();
         });
         setFilteredWeeklyParticipants(filteredByStatus);
       } else {
