@@ -21,7 +21,7 @@ import {
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import cityTimezones from 'city-timezones';
 import { PhotoModal } from '@/components/photo-modal';
-import { RejectReasonModal } from '@/components/reject-reason-modal';
+import { RejectReasonModal, REJECTION_REASONS } from '@/components/reject-reason-modal';
 import { VotersModal } from '@/components/voters-modal';
 import { ContestParticipationModal } from '@/components/contest-participation-modal';
 import { ApplicationEditHistory } from '@/components/ApplicationEditHistory';
@@ -125,18 +125,6 @@ interface WeeklyContestParticipant {
   } | null;
 }
 
-const REJECTION_REASONS = {
-  first_photo_makeup: "First photo – No makeup allowed.",
-  first_photo_id_style: "First photo – Must look like an ID photo: face straight to the camera, hands together in front.",
-  first_photo_blurry: "First photo – Photo is too blurry/low quality.",
-  first_photo_filters: "First photo – No filters or ai allowed.",
-  second_photo_makeup: "Second photo – No makeup allowed.",
-  second_photo_pose: "Second photo – Must show the whole body from head to toe, standing straight, arms at the sides.",
-  second_photo_clothing: "Second photo – Wear tight/fitted clothes (swimsuit, fitted shorts, or top). Dresses, skirts, loose tops, or high heels are not allowed.",
-  second_photo_accessories: "Second photo – No bags or backpacks.",
-  second_photo_filters: "Second photo – No filters or ai allowed.",
-  both_photos_quality: "Both photos – The quality is too low."
-};
 
 const Admin = () => {
   const [user, setUser] = useState<any>(null);
@@ -1321,20 +1309,31 @@ const Admin = () => {
                                    {!showDeletedApplications && (
                                      <Select 
                                        value={application.status} 
-                                       onValueChange={(newStatus) => {
-                                         if (newStatus === 'delete') {
-                                           const appData = typeof application.application_data === 'string' 
-                                             ? JSON.parse(application.application_data) 
-                                             : application.application_data;
-                                           setApplicationToDelete({ 
-                                             id: application.id, 
-                                             name: `${appData.firstName} ${appData.lastName}` 
-                                           });
-                                           setShowDeleteConfirmModal(true);
-                                           return;
-                                         }
-                                         reviewApplication(application.id, newStatus);
-                                       }}
+                                        onValueChange={(newStatus) => {
+                                          if (newStatus === 'delete') {
+                                            const appData = typeof application.application_data === 'string' 
+                                              ? JSON.parse(application.application_data) 
+                                              : application.application_data;
+                                            setApplicationToDelete({ 
+                                              id: application.id, 
+                                              name: `${appData.firstName} ${appData.lastName}` 
+                                            });
+                                            setShowDeleteConfirmModal(true);
+                                            return;
+                                          }
+                                          if (newStatus === 'rejected') {
+                                            const appData = typeof application.application_data === 'string' 
+                                              ? JSON.parse(application.application_data) 
+                                              : application.application_data;
+                                            setApplicationToReject({ 
+                                              id: application.id, 
+                                              name: `${appData.firstName} ${appData.lastName}` 
+                                            });
+                                            setRejectModalOpen(true);
+                                            return;
+                                          }
+                                          reviewApplication(application.id, newStatus);
+                                        }}
                                      >
                                        <SelectTrigger 
                                           className={`w-[60%] h-7 text-xs ${
@@ -1438,20 +1437,31 @@ const Admin = () => {
                                          <div className="mb-2">
                                            <Select 
                                              value={application.status}
-                                             onValueChange={(newStatus) => {
-                                               if (newStatus === 'delete') {
-                                                 const appData = typeof application.application_data === 'string' 
-                                                   ? JSON.parse(application.application_data) 
-                                                   : application.application_data;
-                                                 setApplicationToDelete({ 
-                                                   id: application.id, 
-                                                   name: `${appData.firstName} ${appData.lastName}` 
-                                                 });
-                                                 setShowDeleteConfirmModal(true);
-                                                 return;
-                                               }
-                                               reviewApplication(application.id, newStatus);
-                                             }}
+                                              onValueChange={(newStatus) => {
+                                                if (newStatus === 'delete') {
+                                                  const appData = typeof application.application_data === 'string' 
+                                                    ? JSON.parse(application.application_data) 
+                                                    : application.application_data;
+                                                  setApplicationToDelete({ 
+                                                    id: application.id, 
+                                                    name: `${appData.firstName} ${appData.lastName}` 
+                                                  });
+                                                  setShowDeleteConfirmModal(true);
+                                                  return;
+                                                }
+                                                if (newStatus === 'rejected') {
+                                                  const appData = typeof application.application_data === 'string' 
+                                                    ? JSON.parse(application.application_data) 
+                                                    : application.application_data;
+                                                  setApplicationToReject({ 
+                                                    id: application.id, 
+                                                    name: `${appData.firstName} ${appData.lastName}` 
+                                                  });
+                                                  setRejectModalOpen(true);
+                                                  return;
+                                                }
+                                                reviewApplication(application.id, newStatus);
+                                              }}
                                            >
                                              <SelectTrigger 
                                                 className={`w-full h-7 text-xs ${
@@ -1680,20 +1690,31 @@ const Admin = () => {
                                               <>
                                                  <Select 
                                                    value={prevApp.status} 
-                                                   onValueChange={(newStatus) => {
-                                                     if (newStatus === 'delete') {
-                                                       const prevAppData = typeof prevApp.application_data === 'string' 
-                                                         ? JSON.parse(prevApp.application_data) 
-                                                         : prevApp.application_data;
-                                                       setApplicationToDelete({ 
-                                                         id: prevApp.id, 
-                                                         name: `${prevAppData.firstName} ${prevAppData.lastName}` 
-                                                       });
-                                                       setShowDeleteConfirmModal(true);
-                                                       return;
-                                                     }
-                                                     reviewApplication(prevApp.id, newStatus);
-                                                   }}
+                                                    onValueChange={(newStatus) => {
+                                                      if (newStatus === 'delete') {
+                                                        const prevAppData = typeof prevApp.application_data === 'string' 
+                                                          ? JSON.parse(prevApp.application_data) 
+                                                          : prevApp.application_data;
+                                                        setApplicationToDelete({ 
+                                                          id: prevApp.id, 
+                                                          name: `${prevAppData.firstName} ${prevAppData.lastName}` 
+                                                        });
+                                                        setShowDeleteConfirmModal(true);
+                                                        return;
+                                                      }
+                                                      if (newStatus === 'rejected') {
+                                                        const prevAppData = typeof prevApp.application_data === 'string' 
+                                                          ? JSON.parse(prevApp.application_data) 
+                                                          : prevApp.application_data;
+                                                        setApplicationToReject({ 
+                                                          id: prevApp.id, 
+                                                          name: `${prevAppData.firstName} ${prevAppData.lastName}` 
+                                                        });
+                                                        setRejectModalOpen(true);
+                                                        return;
+                                                      }
+                                                      reviewApplication(prevApp.id, newStatus);
+                                                    }}
                                                  >
                                                    <SelectTrigger 
                                                       className={`w-28 h-7 text-xs ${
