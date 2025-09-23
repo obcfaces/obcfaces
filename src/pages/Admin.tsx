@@ -919,7 +919,44 @@ const Admin = () => {
             </TabsList>
 
             <TabsContent value="weekly" className="space-y-4">
-              <div className="mb-6 flex items-center justify-between">
+              <div className="mb-6">
+                <h2 className="text-xl font-semibold">This Week Participants</h2>
+                <p className="text-muted-foreground">Current week participants with voting stats</p>
+                
+                {/* Voting stats above filter */}
+                <div className="mt-4 mb-4 p-4 bg-muted rounded-lg">
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                    <div>
+                      <div className="text-sm text-muted-foreground">Total Votes</div>
+                      <div className="text-lg font-semibold">
+                        {filteredWeeklyParticipants.reduce((sum, p) => sum + (p.total_votes || 0), 0)}
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-sm text-muted-foreground">Avg Rating</div>
+                      <div className="text-lg font-semibold">
+                        {filteredWeeklyParticipants.length > 0 
+                          ? (filteredWeeklyParticipants.reduce((sum, p) => sum + (p.average_rating || 0), 0) / filteredWeeklyParticipants.length).toFixed(1)
+                          : '0.0'
+                        }
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-sm text-muted-foreground">Participants</div>
+                      <div className="text-lg font-semibold">{filteredWeeklyParticipants.length}</div>
+                    </div>
+                    <div>
+                      <div className="text-sm text-muted-foreground">Top Rating</div>
+                      <div className="text-lg font-semibold">
+                        {filteredWeeklyParticipants.length > 0 
+                          ? Math.max(...filteredWeeklyParticipants.map(p => p.average_rating || 0)).toFixed(1)
+                          : '0.0'
+                        }
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
                 <Select value={weeklyContestFilter} onValueChange={setWeeklyContestFilter}>
                   <SelectTrigger className="w-48">
                     <SelectValue />
@@ -954,7 +991,7 @@ const Admin = () => {
                   const appData = participant.application_data || {};
                   
                   return (
-                     <Card key={participant.id} className="overflow-hidden relative h-[149px]">
+                    <Card key={participant.id} className="overflow-hidden relative h-[149px]">
                       <CardContent className="p-0">
                         {/* Desktop layout */}
                         <div className="hidden md:flex">
@@ -984,20 +1021,14 @@ const Admin = () => {
                                     participantProfile?.photo_2_url || appData.photo2_url
                                   ].filter(Boolean), 1, `${participantProfile?.first_name || appData.first_name} ${participantProfile?.last_name || appData.last_name}`)}
                                 />
-                                {/* Rating in bottom right corner of second photo */}
-                                <div className="absolute bottom-2 right-2 bg-black/70 text-white px-2 py-1 rounded text-xs font-semibold">
-                                  <button
-                                    onClick={() => {
-                                      setSelectedParticipantForVoters({
-                                        id: participant.id,
-                                        name: `${participantProfile?.first_name || appData.first_name} ${participantProfile?.last_name || appData.last_name}`
-                                      });
-                                      setVotersModalOpen(true);
-                                    }}
-                                    className="hover:text-primary transition-colors cursor-pointer"
-                                  >
-                                    {(participant.average_rating || 0).toFixed(1)} ({participant.total_votes || 0})
-                                  </button>
+                                {/* User avatar positioned in top right corner */}
+                                <div className="absolute top-2 right-2">
+                                  <Avatar className="h-6 w-6 flex-shrink-0 border-2 border-white shadow-sm">
+                                    <AvatarImage src={participantProfile?.avatar_url || ''} />
+                                    <AvatarFallback className="text-xs">
+                                      {(participantProfile?.first_name || appData.first_name)?.charAt(0) || 'U'}
+                                    </AvatarFallback>
+                                  </Avatar>
                                 </div>
                               </div>
                             )}
@@ -1006,32 +1037,52 @@ const Admin = () => {
                           {/* Main info section */}
                           <div className="w-[50ch] flex-shrink-0 flex-1 min-w-0 p-4">
                             <div className="flex items-center gap-2 mb-1">
-                              <Avatar className="h-6 w-6 flex-shrink-0">
-                                <AvatarImage src={participantProfile?.avatar_url || ''} />
-                                <AvatarFallback className="text-xs">
-                                  {(participantProfile?.first_name || appData.first_name)?.charAt(0) || 'U'}
-                                </AvatarFallback>
-                              </Avatar>
-                              <span className="text-sm font-semibold whitespace-nowrap">
-                                {participantProfile?.first_name || appData.first_name} {participantProfile?.last_name || appData.last_name} {participantProfile?.age || (appData.birth_year ? new Date().getFullYear() - appData.birth_year : '')}
+                              <span className="text-xs font-semibold whitespace-nowrap">
+                                {new Date().getFullYear() - (appData.birth_year || new Date().getFullYear() - (participantProfile?.age || 25))} {participantProfile?.first_name || appData.first_name} {participantProfile?.last_name || appData.last_name}
                               </span>
                             </div>
                             
-                            <div className="text-xs text-muted-foreground mb-1">
-                              {participantProfile?.city || appData.city} {participantProfile?.state || appData.state} {participantProfile?.country || appData.country}
+                            <div 
+                              className="text-xs text-muted-foreground mb-1 cursor-pointer hover:text-foreground transition-colors"
+                              onClick={() => {
+                                const newExpanded = new Set(expandedDesktopItems);
+                                if (expandedDesktopItems.has(participant.id)) {
+                                  newExpanded.delete(participant.id);
+                                } else {
+                                  newExpanded.add(participant.id);
+                                }
+                                setExpandedDesktopItems(newExpanded);
+                              }}
+                            >
+                              {participantProfile?.city || appData.city} {participantProfile?.country || appData.country}
                             </div>
-                             
-                            <div className="text-xs text-muted-foreground mb-1">
-                              {(participantProfile?.weight_kg || appData.weight_kg)}kg • {(participantProfile?.height_cm || appData.height_cm)}cm • {participantProfile?.gender || appData.gender}
-                            </div>
-
-                            <div className="text-xs text-muted-foreground mb-1">
-                              {participantProfile?.marital_status || appData.marital_status} • {(participantProfile?.has_children || appData.has_children) ? 'Has children' : 'No children'}
-                            </div>
-
-                            <div className="text-xs text-muted-foreground mb-1">
-                              Contest Participant • Rank: {participant.final_rank || 'Unranked'} • Votes: {participant.total_votes || 0}
-                            </div>
+                            
+                            {/* Expanded information */}
+                            {expandedDesktopItems.has(participant.id) && (
+                              <div className="text-xs text-muted-foreground mb-1 space-y-0 leading-none">
+                                <div>{(participantProfile?.weight_kg || appData.weight_kg)}kg, {(participantProfile?.height_cm || appData.height_cm)}cm</div>
+                                <div>{participantProfile?.marital_status || appData.marital_status}, {(participantProfile?.has_children || appData.has_children) ? 'Has kids' : 'No kids'}</div>
+                                <div className="flex items-center gap-1">
+                                  <span>
+                                    {participantProfile?.email 
+                                      ? (participantProfile.email.length > 7 ? `${participantProfile.email.substring(0, 7)}...` : participantProfile.email)
+                                      : 'No email'
+                                    }
+                                  </span>
+                                  {participantProfile?.email && (
+                                    <Copy 
+                                      className="h-3 w-3 cursor-pointer hover:text-foreground" 
+                                      onClick={() => navigator.clipboard.writeText(participantProfile.email)}
+                                    />
+                                  )}
+                                </div>
+                                <div>
+                                  Rating: {(participant.average_rating || 0).toFixed(1)} • Votes: {participant.total_votes || 0}
+                                </div>
+                              </div>
+                            )}
+                            
+                            <div className="flex-1"></div>
                           </div>
 
                           {/* Right side actions */}
@@ -1055,16 +1106,31 @@ const Admin = () => {
                                 <SelectItem value="reject">Reject</SelectItem>
                               </SelectContent>
                             </Select>
+                            
+                            {/* Status change date with reviewer login - desktop */}
+                            <div 
+                              className="text-xs text-muted-foreground cursor-pointer hover:text-foreground"
+                              onClick={() => {
+                                setSelectedParticipantForVoters({
+                                  id: participant.id,
+                                  name: `${participantProfile?.first_name || appData.first_name} ${participantProfile?.last_name || appData.last_name}`
+                                });
+                                setVotersModalOpen(true);
+                              }}
+                            >
+                              <span className="text-blue-600">votes</span>
+                              {` ${(participant.average_rating || 0).toFixed(1)} (${participant.total_votes || 0})`}
+                            </div>
                           </div>
                         </div>
 
-                        {/* Mobile layout - full width with 2 columns */}
+                        {/* Mobile layout - horizontal with full width */}
                         <div className="md:hidden">
-                          <div className="flex w-full relative">
-                            {/* Photos section - left side, full width on mobile */}
-                            <div className="flex gap-px w-full flex-shrink-0">
+                          <div className="flex w-full">
+                            {/* Photos section - left side */}
+                            <div className="flex gap-px w-[50vw] flex-shrink-0">
                               {(participantProfile?.photo_1_url || appData.photo1_url) && (
-                                <div className="w-1/2 relative">
+                                <div className="w-1/2">
                                   <img 
                                     src={participantProfile?.photo_1_url || appData.photo1_url} 
                                     alt="Portrait" 
@@ -1074,17 +1140,6 @@ const Admin = () => {
                                       participantProfile?.photo_2_url || appData.photo2_url
                                     ].filter(Boolean), 0, `${participantProfile?.first_name || appData.first_name} ${participantProfile?.last_name || appData.last_name}`)}
                                   />
-                                  {/* Edit icon in bottom left corner of first photo */}
-                                  <button
-                                    onClick={() => {
-                                      setEditingApplicationId(participant.application_id);
-                                      setEditingApplicationData(participant);
-                                      setShowEditModal(true);
-                                    }}
-                                    className="absolute bottom-0 left-0 bg-black/70 text-white p-1.5 rounded-tr hover:bg-black/90 transition-colors"
-                                  >
-                                    <Edit className="w-4 h-4" />
-                                  </button>
                                 </div>
                               )}
                               {(participantProfile?.photo_2_url || appData.photo2_url) && (
@@ -1107,70 +1162,94 @@ const Admin = () => {
                                       </AvatarFallback>
                                     </Avatar>
                                   </div>
-                                  {/* Rating in bottom right corner of second photo - no padding */}
-                                  <div className="absolute bottom-0 right-0 bg-black/80 text-white px-2 py-1 text-xs font-semibold">
-                                    <button
-                                      onClick={() => {
-                                        setSelectedParticipantForVoters({
-                                          id: participant.id,
-                                          name: `${participantProfile?.first_name || appData.first_name} ${participantProfile?.last_name || appData.last_name}`
-                                        });
-                                        setVotersModalOpen(true);
-                                      }}
-                                      className="hover:text-primary transition-colors cursor-pointer"
-                                    >
-                                      {(participant.average_rating || 0).toFixed(1)} ({participant.total_votes || 0})
-                                    </button>
-                                  </div>
                                 </div>
                               )}
                             </div>
-                          </div>
-                          
-                          {/* Information section below photos - full width */}
-                          <div className="p-3">
-                            <div className="flex items-center gap-2 mb-1">
-                              <span className="text-sm font-semibold">
-                                {participantProfile?.first_name || appData.first_name} {participantProfile?.last_name || appData.last_name}
-                              </span>
-                              <span className="text-xs text-muted-foreground">
-                                {appData.birth_year ? new Date().getFullYear() - appData.birth_year : ''}
-                              </span>
-                            </div>
-                          
-                            <div className="text-xs text-muted-foreground mb-1">
-                              {participantProfile?.city || appData.city} {participantProfile?.country || appData.country}
-                            </div>
-                           
-                            <div className="text-xs text-muted-foreground mb-1">
-                              {(participantProfile?.weight_kg || appData.weight_kg)}kg, {(participantProfile?.height_cm || appData.height_cm)}cm
-                            </div>
-
-                            <div className="text-xs text-muted-foreground mb-3">
-                              {participantProfile?.marital_status || appData.marital_status}, {(participantProfile?.has_children || appData.has_children) ? 'Has kids' : 'No kids'}
-                            </div>
                             
-                            {/* Status filter at bottom */}
-                            <div className="flex justify-center">
-                              <Select 
-                                value={participantFilters[participant.id] || (participant.final_rank ? 'this week' : 'approve')} 
-                                onValueChange={(value) => {
-                                  setParticipantFilters(prev => ({
-                                    ...prev,
-                                    [participant.id]: value
-                                  }));
+                            {/* Information section - right side */}
+                            <div className="w-[50vw] flex-shrink-0 pl-2 flex flex-col h-48 relative">
+                              <div className="flex items-center gap-2 mb-1 mt-1">
+                                <span className="text-xs font-semibold whitespace-nowrap">
+                                  {new Date().getFullYear() - (appData.birth_year || new Date().getFullYear() - (participantProfile?.age || 25))} {participantProfile?.first_name || appData.first_name} {participantProfile?.last_name || appData.last_name}
+                                </span>
+                              </div>
+                              
+                              <div 
+                                className="text-xs text-muted-foreground mb-1 cursor-pointer hover:text-foreground transition-colors"
+                                onClick={() => {
+                                  const newExpanded = new Set(expandedMobileItems);
+                                  if (expandedMobileItems.has(participant.id)) {
+                                    newExpanded.delete(participant.id);
+                                  } else {
+                                    newExpanded.add(participant.id);
+                                  }
+                                  setExpandedMobileItems(newExpanded);
                                 }}
                               >
-                                <SelectTrigger className="w-24 h-7 text-xs">
-                                  <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent className="z-50 bg-background border shadow-md">
-                                  <SelectItem value="this week">This Week</SelectItem>
-                                  <SelectItem value="next week">Next Week</SelectItem>
-                                  <SelectItem value="approve">Approve</SelectItem>
-                                  <SelectItem value="reject">Reject</SelectItem>
-                                </SelectContent>
-                              </Select>
+                                {participantProfile?.city || appData.city} {participantProfile?.country || appData.country}
+                              </div>
+                              
+                              {/* Expanded information */}
+                              {expandedMobileItems.has(participant.id) && (
+                                <div className="text-xs text-muted-foreground mb-1 space-y-0 leading-none">
+                                  <div>{(participantProfile?.weight_kg || appData.weight_kg)}kg, {(participantProfile?.height_cm || appData.height_cm)}cm</div>
+                                  <div>{participantProfile?.marital_status || appData.marital_status}, {(participantProfile?.has_children || appData.has_children) ? 'Has kids' : 'No kids'}</div>
+                                  <div className="flex items-center gap-1">
+                                    <span>
+                                      {participantProfile?.email 
+                                        ? (participantProfile.email.length > 7 ? `${participantProfile.email.substring(0, 7)}...` : participantProfile.email)
+                                        : 'No email'
+                                      }
+                                    </span>
+                                    {participantProfile?.email && (
+                                      <Copy 
+                                        className="h-3 w-3 cursor-pointer hover:text-foreground" 
+                                        onClick={() => navigator.clipboard.writeText(participantProfile.email)}
+                                      />
+                                    )}
+                                  </div>
+                                </div>
+                              )}
+                              
+                              <div className="flex-1"></div>
+                              
+                              {/* Status filter positioned at bottom */}
+                              <div className="absolute bottom-12 right-13 flex items-center gap-2">
+                                <Select 
+                                  value={participantFilters[participant.id] || (participant.final_rank ? 'this week' : 'approve')} 
+                                  onValueChange={(value) => {
+                                    setParticipantFilters(prev => ({
+                                      ...prev,
+                                      [participant.id]: value
+                                    }));
+                                  }}
+                                >
+                                  <SelectTrigger className="w-24 h-7 text-xs">
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent className="z-50 bg-background border shadow-md">
+                                    <SelectItem value="this week">This Week</SelectItem>
+                                    <SelectItem value="next week">Next Week</SelectItem>
+                                    <SelectItem value="approve">Approve</SelectItem>
+                                    <SelectItem value="reject">Reject</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                                
+                                {/* Rating with votes */}
+                                <div 
+                                  className="text-xs text-muted-foreground -mt-[5px] cursor-pointer hover:text-foreground"
+                                  onClick={() => {
+                                    setSelectedParticipantForVoters({
+                                      id: participant.id,
+                                      name: `${participantProfile?.first_name || appData.first_name} ${participantProfile?.last_name || appData.last_name}`
+                                    });
+                                    setVotersModalOpen(true);
+                                  }}
+                                >
+                                  <span className="text-blue-600">votes</span>
+                                  {` ${(participant.average_rating || 0).toFixed(1)} (${participant.total_votes || 0})`}
+                                </div>
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -1182,10 +1261,39 @@ const Admin = () => {
             </TabsContent>
 
             <TabsContent value="pastweek" className="space-y-4">
-              <div className="mb-6 flex items-center justify-between">
+              <div className="mb-6">
                 <div>
                   <h2 className="text-xl font-semibold">Past Week Participants</h2>
                   <p className="text-muted-foreground">Participants from previous weeks with their week intervals</p>
+                </div>
+                
+                {/* Week interval filter */}
+                <div className="mt-4">
+                  <Select 
+                    value={selectedWeekOffset?.toString() || 'all'} 
+                    onValueChange={(value) => {
+                      if (value === 'all') {
+                        setSelectedWeekOffset(null);
+                      } else {
+                        setSelectedWeekOffset(parseInt(value));
+                      }
+                    }}
+                  >
+                    <SelectTrigger className="w-64">
+                      <SelectValue placeholder="Select week interval" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All weeks</SelectItem>
+                      {Array.from(new Set(pastWeekParticipants.map(p => p.weekInterval)))
+                        .sort((a, b) => b.localeCompare(a))
+                        .map((interval, index) => (
+                          <SelectItem key={interval} value={index.toString()}>
+                            {interval}
+                          </SelectItem>
+                        ))
+                      }
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
               
@@ -1198,22 +1306,32 @@ const Admin = () => {
                   );
                 }
 
-                return pastWeekParticipants.map((participant) => {
+                const filteredPastParticipants = selectedWeekOffset !== null && selectedWeekOffset !== undefined
+                  ? pastWeekParticipants.filter((_, index) => {
+                      const intervals = Array.from(new Set(pastWeekParticipants.map(p => p.weekInterval)))
+                        .sort((a, b) => b.localeCompare(a));
+                      const targetInterval = intervals[selectedWeekOffset];
+                      return pastWeekParticipants[index].weekInterval === targetInterval;
+                    })
+                  : pastWeekParticipants;
+
+                return filteredPastParticipants.map((participant) => {
                   const participantProfile = profiles.find(p => p.id === participant.user_id);
                   const appData = participant.application_data || {};
                   
                   return (
                     <Card key={participant.id} className="overflow-hidden relative h-[149px]">
                       <CardContent className="p-0">
-                        <div className="flex flex-col md:flex-row md:items-stretch">
-                          {/* Photos section */}
-                          <div className="flex gap-px md:w-[25ch] md:flex-shrink-0 p-0">
+                        {/* Desktop layout */}
+                        <div className="hidden md:flex">
+                          {/* Photos section - 2 columns */}
+                          <div className="flex gap-px w-[25ch] flex-shrink-0">
                             {(participantProfile?.photo_1_url || appData.photo1_url) && (
-                              <div className="w-24 sm:w-28 md:w-32">
+                              <div className="w-1/2">
                                 <img 
                                   src={participantProfile?.photo_1_url || appData.photo1_url} 
                                   alt="Portrait" 
-                                  className="w-full h-32 sm:h-36 md:h-[149px] object-contain cursor-pointer hover:opacity-90 transition-opacity"
+                                  className="w-full h-[149px] object-contain cursor-pointer hover:opacity-90 transition-opacity"
                                   onClick={() => openPhotoModal([
                                     participantProfile?.photo_1_url || appData.photo1_url, 
                                     participantProfile?.photo_2_url || appData.photo2_url
@@ -1222,70 +1340,96 @@ const Admin = () => {
                               </div>
                             )}
                             {(participantProfile?.photo_2_url || appData.photo2_url) && (
-                              <div className="w-24 sm:w-28 md:w-32">
+                              <div className="w-1/2 relative">
                                 <img 
                                   src={participantProfile?.photo_2_url || appData.photo2_url} 
                                   alt="Full length" 
-                                  className="w-full h-32 sm:h-36 md:h-[149px] object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                                  className="w-full h-[149px] object-cover cursor-pointer hover:opacity-90 transition-opacity"
                                   onClick={() => openPhotoModal([
                                     participantProfile?.photo_1_url || appData.photo1_url, 
                                     participantProfile?.photo_2_url || appData.photo2_url
                                   ].filter(Boolean), 1, `${participantProfile?.first_name || appData.first_name} ${participantProfile?.last_name || appData.last_name}`)}
                                 />
+                                {/* User avatar positioned in top right corner */}
+                                <div className="absolute top-2 right-2">
+                                  <Avatar className="h-6 w-6 flex-shrink-0 border-2 border-white shadow-sm">
+                                    <AvatarImage src={participantProfile?.avatar_url || ''} />
+                                    <AvatarFallback className="text-xs">
+                                      {(participantProfile?.first_name || appData.first_name)?.charAt(0) || 'U'}
+                                    </AvatarFallback>
+                                  </Avatar>
+                                </div>
                               </div>
                             )}
                           </div>
 
                           {/* Main info section */}
-                          <div className="md:w-[50ch] md:flex-shrink-0 flex-1 min-w-0 p-4">
+                          <div className="w-[50ch] flex-shrink-0 flex-1 min-w-0 p-4">
                             <div className="flex items-center gap-2 mb-1">
-                              <Avatar className="h-6 w-6 flex-shrink-0">
-                                <AvatarImage src={participantProfile?.avatar_url || ''} />
-                                <AvatarFallback className="text-xs">
-                                  {(participantProfile?.first_name || appData.first_name)?.charAt(0) || 'U'}
-                                </AvatarFallback>
-                              </Avatar>
-                              <span className="text-sm font-semibold whitespace-nowrap">
-                                {participantProfile?.first_name || appData.first_name} {participantProfile?.last_name || appData.last_name} {participantProfile?.age || (appData.birth_year ? new Date().getFullYear() - appData.birth_year : '')}
+                              <span className="text-xs font-semibold whitespace-nowrap">
+                                {new Date().getFullYear() - (appData.birth_year || new Date().getFullYear() - (participantProfile?.age || 25))} {participantProfile?.first_name || appData.first_name} {participantProfile?.last_name || appData.last_name}
                               </span>
                             </div>
                             
-                            <div className="text-xs text-muted-foreground mb-1">
-                              {participantProfile?.city || appData.city} {participantProfile?.state || appData.state} {participantProfile?.country || appData.country}
+                            <div 
+                              className="text-xs text-muted-foreground mb-1 cursor-pointer hover:text-foreground transition-colors"
+                              onClick={() => {
+                                const newExpanded = new Set(expandedDesktopItems);
+                                if (expandedDesktopItems.has(participant.id)) {
+                                  newExpanded.delete(participant.id);
+                                } else {
+                                  newExpanded.add(participant.id);
+                                }
+                                setExpandedDesktopItems(newExpanded);
+                              }}
+                            >
+                              {participantProfile?.city || appData.city} {participantProfile?.country || appData.country}
                             </div>
-                             
-                            <div className="text-xs text-muted-foreground mb-1">
-                              {(participantProfile?.weight_kg || appData.weight_kg)}kg • {(participantProfile?.height_cm || appData.height_cm)}cm • {participantProfile?.gender || appData.gender}
-                            </div>
-
-                            <div className="text-xs text-muted-foreground mb-1">
-                              {participantProfile?.marital_status || appData.marital_status} • {(participantProfile?.has_children || appData.has_children) ? 'Has children' : 'No children'}
-                            </div>
-
-                            <div className="text-xs text-muted-foreground mb-1">
-                              Past Participant • Rank: {participant.final_rank || 'Unranked'} • Votes: {participant.total_votes || 0}
-                            </div>
+                            
+                            {/* Expanded information */}
+                            {expandedDesktopItems.has(participant.id) && (
+                              <div className="text-xs text-muted-foreground mb-1 space-y-0 leading-none">
+                                <div>{(participantProfile?.weight_kg || appData.weight_kg)}kg, {(participantProfile?.height_cm || appData.height_cm)}cm</div>
+                                <div>{participantProfile?.marital_status || appData.marital_status}, {(participantProfile?.has_children || appData.has_children) ? 'Has kids' : 'No kids'}</div>
+                                <div className="flex items-center gap-1">
+                                  <span>
+                                    {participantProfile?.email 
+                                      ? (participantProfile.email.length > 7 ? `${participantProfile.email.substring(0, 7)}...` : participantProfile.email)
+                                      : 'No email'
+                                    }
+                                  </span>
+                                  {participantProfile?.email && (
+                                    <Copy 
+                                      className="h-3 w-3 cursor-pointer hover:text-foreground" 
+                                      onClick={() => navigator.clipboard.writeText(participantProfile.email)}
+                                    />
+                                  )}
+                                </div>
+                              </div>
+                            )}
+                            
+                            <div className="flex-1"></div>
                           </div>
 
-                          {/* Right side info */}
-                          <div className="p-4 md:w-auto flex flex-col justify-between gap-2">
+                          {/* Right side actions */}
+                          <div className="w-[20ch] flex-shrink-0 p-4 flex flex-col gap-2">
                             <div className="text-xs text-muted-foreground">
-                              <div className="font-semibold mb-1">Week participated:</div>
-                              <div className="bg-muted p-2 rounded text-center">
+                              <div className="font-semibold mb-1">Week:</div>
+                              <div className="bg-muted p-1 rounded text-center text-xs">
                                 {participant.weekInterval}
                               </div>
                               {participant.final_rank && (
-                                <div className="mt-2 p-2 bg-primary/10 rounded text-center">
+                                <div className="mt-1 p-1 bg-primary/10 rounded text-center text-xs">
                                   <div className="font-semibold text-primary">
-                                    {participant.final_rank === 1 ? '🏆 Winner' : `🏅 Finalist #${participant.final_rank}`}
+                                    {participant.final_rank === 1 ? '🏆' : `🏅 #${participant.final_rank}`}
                                   </div>
                                 </div>
                               )}
                             </div>
                             
-                            <Button 
-                              variant="outline" 
-                              size="sm"
+                            {/* Status change date with reviewer login - desktop */}
+                            <div 
+                              className="text-xs text-muted-foreground cursor-pointer hover:text-foreground"
                               onClick={() => {
                                 setSelectedParticipantForVoters({ 
                                   id: participant.user_id, 
@@ -1294,9 +1438,132 @@ const Admin = () => {
                                 setVotersModalOpen(true);
                               }}
                             >
-                              <Eye className="w-4 h-4 mr-1" />
-                              View Voters
-                            </Button>
+                              <span className="text-blue-600">votes</span>
+                              {` ${(participant.average_rating || 0).toFixed(1)} (${participant.total_votes || 0})`}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Mobile layout - horizontal with full width */}
+                        <div className="md:hidden">
+                          <div className="flex w-full">
+                            {/* Photos section - left side */}
+                            <div className="flex gap-px w-[50vw] flex-shrink-0">
+                              {(participantProfile?.photo_1_url || appData.photo1_url) && (
+                                <div className="w-1/2">
+                                  <img 
+                                    src={participantProfile?.photo_1_url || appData.photo1_url} 
+                                    alt="Portrait" 
+                                    className="w-full h-36 object-contain cursor-pointer hover:opacity-90 transition-opacity"
+                                    onClick={() => openPhotoModal([
+                                      participantProfile?.photo_1_url || appData.photo1_url, 
+                                      participantProfile?.photo_2_url || appData.photo2_url
+                                    ].filter(Boolean), 0, `${participantProfile?.first_name || appData.first_name} ${participantProfile?.last_name || appData.last_name}`)}
+                                  />
+                                </div>
+                              )}
+                              {(participantProfile?.photo_2_url || appData.photo2_url) && (
+                                <div className="w-1/2 relative">
+                                  <img 
+                                    src={participantProfile?.photo_2_url || appData.photo2_url} 
+                                    alt="Full length" 
+                                    className="w-full h-36 object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                                    onClick={() => openPhotoModal([
+                                      participantProfile?.photo_1_url || appData.photo1_url, 
+                                      participantProfile?.photo_2_url || appData.photo2_url
+                                    ].filter(Boolean), 1, `${participantProfile?.first_name || appData.first_name} ${participantProfile?.last_name || appData.last_name}`)}
+                                  />
+                                  {/* User avatar positioned in top right corner */}
+                                  <div className="absolute top-2 right-2">
+                                    <Avatar className="h-6 w-6 flex-shrink-0 border-2 border-white shadow-sm">
+                                      <AvatarImage src={participantProfile?.avatar_url || ''} />
+                                      <AvatarFallback className="text-xs">
+                                        {(participantProfile?.first_name || appData.first_name)?.charAt(0) || 'U'}
+                                      </AvatarFallback>
+                                    </Avatar>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                            
+                            {/* Information section - right side */}
+                            <div className="w-[50vw] flex-shrink-0 pl-2 flex flex-col h-48 relative">
+                              <div className="flex items-center gap-2 mb-1 mt-1">
+                                <span className="text-xs font-semibold whitespace-nowrap">
+                                  {new Date().getFullYear() - (appData.birth_year || new Date().getFullYear() - (participantProfile?.age || 25))} {participantProfile?.first_name || appData.first_name} {participantProfile?.last_name || appData.last_name}
+                                </span>
+                              </div>
+                              
+                              <div 
+                                className="text-xs text-muted-foreground mb-1 cursor-pointer hover:text-foreground transition-colors"
+                                onClick={() => {
+                                  const newExpanded = new Set(expandedMobileItems);
+                                  if (expandedMobileItems.has(participant.id)) {
+                                    newExpanded.delete(participant.id);
+                                  } else {
+                                    newExpanded.add(participant.id);
+                                  }
+                                  setExpandedMobileItems(newExpanded);
+                                }}
+                              >
+                                {participantProfile?.city || appData.city} {participantProfile?.country || appData.country}
+                              </div>
+                              
+                              {/* Expanded information */}
+                              {expandedMobileItems.has(participant.id) && (
+                                <div className="text-xs text-muted-foreground mb-1 space-y-0 leading-none">
+                                  <div>{(participantProfile?.weight_kg || appData.weight_kg)}kg, {(participantProfile?.height_cm || appData.height_cm)}cm</div>
+                                  <div>{participantProfile?.marital_status || appData.marital_status}, {(participantProfile?.has_children || appData.has_children) ? 'Has kids' : 'No kids'}</div>
+                                  <div className="flex items-center gap-1">
+                                    <span>
+                                      {participantProfile?.email 
+                                        ? (participantProfile.email.length > 7 ? `${participantProfile.email.substring(0, 7)}...` : participantProfile.email)
+                                        : 'No email'
+                                      }
+                                    </span>
+                                    {participantProfile?.email && (
+                                      <Copy 
+                                        className="h-3 w-3 cursor-pointer hover:text-foreground" 
+                                        onClick={() => navigator.clipboard.writeText(participantProfile.email)}
+                                      />
+                                    )}
+                                  </div>
+                                </div>
+                              )}
+                              
+                              <div className="flex-1"></div>
+                              
+                              {/* Week interval filter positioned at bottom */}
+                              <div className="absolute bottom-12 right-13 flex flex-col items-end gap-1">
+                                <div className="text-xs text-muted-foreground">
+                                  <div className="bg-muted p-1 rounded text-center text-xs">
+                                    {participant.weekInterval.split(' - ')[0]}
+                                  </div>
+                                  {participant.final_rank && (
+                                    <div className="mt-1 p-1 bg-primary/10 rounded text-center text-xs">
+                                      <div className="font-semibold text-primary">
+                                        {participant.final_rank === 1 ? '🏆' : `#${participant.final_rank}`}
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+                                
+                                {/* Rating with votes */}
+                                <div 
+                                  className="text-xs text-muted-foreground cursor-pointer hover:text-foreground"
+                                  onClick={() => {
+                                    setSelectedParticipantForVoters({ 
+                                      id: participant.user_id, 
+                                      name: `${participantProfile?.first_name || appData.first_name} ${participantProfile?.last_name || appData.last_name}` 
+                                    });
+                                    setVotersModalOpen(true);
+                                  }}
+                                >
+                                  <span className="text-blue-600">votes</span>
+                                  {` ${(participant.average_rating || 0).toFixed(1)} (${participant.total_votes || 0})`}
+                                </div>
+                              </div>
+                            </div>
                           </div>
                         </div>
                       </CardContent>
