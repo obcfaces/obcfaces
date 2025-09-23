@@ -214,9 +214,6 @@ export function FullCardLayout({
                     <div className="min-w-0 flex-1 mr-2">
                        <h3 className="font-semibold text-contest-text text-base sm:text-lg truncate">{profileId ? (<Link to={`/u/${profileId}`} className="hover:text-primary underline-offset-2 hover:underline">{name}</Link>) : name}</h3>
                        <div className="text-xs sm:text-sm text-muted-foreground font-normal">{age} yo · {weight} kg · {height} cm</div>
-                       <div className="text-sm sm:text-base text-contest-blue truncate">
-                         {getCountryDisplayName(country)} · {city}
-                       </div>
                      </div>
                     
                     <div className="text-right flex-shrink-0">

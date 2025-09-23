@@ -455,15 +455,20 @@ export function ContestantCard({
   if (viewMode === 'full') {
     return (
       <>
-        <Card className={`${isExample ? 'border-yellow-400 border-2 bg-yellow-50/50' : isWinner ? 'border-contest-blue border-2' : 'bg-card border-contest-border'} relative overflow-hidden`}>
-          {/* Rank number in top left corner - show in past weeks for all users and current week after voting */}
-          {rank > 0 && !isExample && totalVotes > 0 && (!isThisWeek || isVoted) && (
-            <div className="absolute top-0 left-0 z-20 flex items-center">
-              <div className="bg-black/70 text-white px-1 py-0.5 rounded-br text-xs font-bold">
-                {rank}
-              </div>
+          <Card className={`${isExample ? 'border-yellow-400 border-2 bg-yellow-50/50' : isWinner ? 'border-contest-blue border-2' : 'bg-card border-contest-border'} relative overflow-hidden`}>
+            {/* Location in top left corner */}
+            <div className="absolute top-0 left-0 z-30 bg-black/70 text-white px-2 py-1 text-xs font-medium">
+              {getCountryDisplayName(country)} • {city}
             </div>
-          )}
+            
+            {/* Rank number in top left corner - show in past weeks for all users and current week after voting */}
+            {rank > 0 && !isExample && totalVotes > 0 && (!isThisWeek || isVoted) && (
+              <div className="absolute top-7 left-0 z-20 flex items-center">
+                <div className="bg-black/70 text-white px-1 py-0.5 rounded-br text-xs font-bold">
+                  {rank}
+                </div>
+              </div>
+            )}
            
               {/* Rating in top right corner - show for all users in past weeks and current week after voting */}
               {rank > 0 && !isExample && (!isThisWeek || isVoted) && (
@@ -856,6 +861,13 @@ export function ContestantCard({
         
         {/* First row: Main two photos with additional photos indicator */}
         <div className={`${isWinner && viewMode !== 'compact' ? 'w-full' : 'flex h-full'} relative gap-px`}>
+          {/* Location overlay for compact cards */}
+          {viewMode === 'compact' && (
+            <div className="absolute top-0 left-0 z-30 bg-black/70 text-white px-2 py-1 text-xs font-medium">
+              {getCountryDisplayName(country)} • {city}
+            </div>
+          )}
+          
           {/* Winner cards have different layout only in full mode */}
           {isWinner && viewMode !== 'compact' ? (
             <div className="flex flex-col">
