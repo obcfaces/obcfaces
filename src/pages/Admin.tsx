@@ -1306,8 +1306,8 @@ const Admin = () => {
               })()}
             </TabsContent>
 
-            <TabsContent value="applications" className="space-y-4">
-              <div className="mb-6">
+            <TabsContent value="applications" className="space-y-4 -mx-1 md:mx-0">
+              <div className="mb-6 px-1 md:px-6">
                 <div className="flex items-center justify-between">
                   <h2 className="text-xl font-semibold">Contest Applications</h2>
                   <div className="flex gap-4 items-center">
@@ -1357,7 +1357,7 @@ const Admin = () => {
                 </div>
               </div>
 
-              <div className="space-y-4">
+              <div className="space-y-4 px-1 md:px-6">
                 {(() => {
                   console.log('Filtering applications, statusFilter:', statusFilter);
                   const filteredApplications = (showDeletedApplications ? deletedApplications : contestApplications)
