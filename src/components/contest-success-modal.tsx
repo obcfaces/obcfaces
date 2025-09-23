@@ -166,8 +166,13 @@ export const ContestSuccessModal = ({
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="text-center text-xl font-bold text-primary">
-            You're in!
+            You're in! Your Chance to Shine ✨
           </DialogTitle>
+          <div className="text-center">
+            <p className="text-sm font-bold text-black mt-2">
+              Tip: More shares = More votes = Bigger chance to win 🏆
+            </p>
+          </div>
         </DialogHeader>
         
         <div className="space-y-6 py-4">
@@ -205,7 +210,7 @@ export const ContestSuccessModal = ({
 
           <div className="text-center">
             <Button onClick={onClose} className="w-full">
-              Done
+              🔥 Invite Friends
             </Button>
           </div>
         </div>
