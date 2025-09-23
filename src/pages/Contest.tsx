@@ -119,7 +119,7 @@ const Contest = () => {
             <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-1 sm:gap-2">
               {entries.map(e => (
                 <article key={e.id} className="relative">
-                  <AspectRatio ratio={1} className="bg-gray-300">
+                  <AspectRatio ratio={1}>
                     <img
                       src={e.imageSrc}
                       alt={`Contest entry by ${e.authorName}`}

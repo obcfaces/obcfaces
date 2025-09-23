@@ -297,7 +297,7 @@ const PostCard = ({
         
         {/* Media display */}
         {displayMediaUrls.length > 0 && (
-          <div className="relative bg-gray-300">
+          <div className="relative">
             {displayMediaUrls.length === 1 ? (
               displayMediaTypes[0] === 'video' ? (
                 <video
@@ -318,7 +318,7 @@ const PostCard = ({
             ) : (
               <div className="grid grid-cols-2 gap-1">
                 {displayMediaUrls.slice(0, 4).map((url, index) => (
-                  <div key={index} className="relative aspect-square bg-gray-300">
+                  <div key={index} className="relative aspect-square">
                     {displayMediaTypes[index] === 'video' ? (
                       <video
                         src={url}
