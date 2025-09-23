@@ -37,20 +37,40 @@ export function VotingOverlay({
   if (isThisWeek && !propUser && !isExample) {
     // Show stars for unauthenticated users in THIS WEEK ONLY
     return (
-      <div className={`absolute inset-0 bg-gray-300 rounded-r flex flex-col items-center justify-center ${compact ? 'gap-6' : 'gap-12'}`}>
-        {!compact && <span className="text-lg sm:text-xl font-medium text-gray-600">Vote</span>}
-        <div className="scale-[1.5] sm:scale-[1.8]">
-          <StarRating 
-            rating={0} 
-            isVoted={false}
-            variant="white"
-            hideText={true}
-            onRate={(rating) => {
-              console.log('Unauthenticated user voting in THIS WEEK, showing login modal');
-              setShowLoginModal(true);
-            }}
-          />
-        </div>
+      <div className={`absolute inset-0 bg-gray-300 rounded-r flex flex-col items-center justify-center ${compact ? 'gap-2' : 'gap-12'}`}>
+        {compact ? (
+          <>
+            <div className="scale-[1.2] sm:scale-[1.4]">
+              <StarRating 
+                rating={0} 
+                isVoted={false}
+                variant="white"
+                hideText={true}
+                onRate={(rating) => {
+                  console.log('Unauthenticated user voting in THIS WEEK, showing login modal');
+                  setShowLoginModal(true);
+                }}
+              />
+            </div>
+            <span className="text-xs text-gray-600 text-center leading-tight">Rate from 1 (lowest)<br />to 5 (highest)</span>
+          </>
+        ) : (
+          <div className="flex items-center gap-3">
+            <span className="text-sm text-gray-600 whitespace-nowrap">Rate from 1 (lowest) 5 (highest)</span>
+            <div className="scale-[1.0] sm:scale-[1.1]">
+              <StarRating 
+                rating={0} 
+                isVoted={false}
+                variant="white"
+                hideText={true}
+                onRate={(rating) => {
+                  console.log('Unauthenticated user voting in THIS WEEK, showing login modal');
+                  setShowLoginModal(true);
+                }}
+              />
+            </div>
+          </div>
+        )}
       </div>
     );
   } else if (!isThisWeek && !propUser && !isExample) {
@@ -62,38 +82,75 @@ export function VotingOverlay({
       <div className={`absolute inset-0 bg-gray-300 rounded-r flex flex-col items-center justify-center ${compact ? 'gap-6' : 'gap-12'}`}>
         {/* Show only stars for all users in THIS WEEK, full voting UI for other sections */}
         {isThisWeek ? (
-          <>
-            {!compact && <span className="text-lg sm:text-xl font-medium text-gray-600">Vote</span>}
-            <div className="scale-[1.5] sm:scale-[1.8]">
-              <StarRating 
-                rating={0} 
-                isVoted={false}
-                variant="white"
-                hideText={true}
-                onRate={(rating) => {
-                  console.log('Authenticated user voting in THIS WEEK');
-                  handleRate(rating);
-                }}
-              />
+          compact ? (
+            <>
+              <div className="scale-[1.2] sm:scale-[1.4]">
+                <StarRating 
+                  rating={0} 
+                  isVoted={false}
+                  variant="white"
+                  hideText={true}
+                  onRate={(rating) => {
+                    console.log('Authenticated user voting in THIS WEEK');
+                    handleRate(rating);
+                  }}
+                />
+              </div>
+              <span className="text-xs text-gray-600 text-center leading-tight">Rate from 1 (lowest)<br />to 5 (highest)</span>
+            </>
+          ) : (
+            <div className="flex items-center gap-3">
+              <span className="text-sm text-gray-600 whitespace-nowrap">Rate from 1 (lowest) 5 (highest)</span>
+              <div className="scale-[1.0] sm:scale-[1.1]">
+                <StarRating 
+                  rating={0} 
+                  isVoted={false}
+                  variant="white"
+                  hideText={true}
+                  onRate={(rating) => {
+                    console.log('Authenticated user voting in THIS WEEK');
+                    handleRate(rating);
+                  }}
+                />
+              </div>
             </div>
-          </>
+          )
         ) : (
-          <>
-            <span className="text-lg sm:text-xl font-medium text-gray-600">Vote</span>
-            <div className="scale-[1.5] sm:scale-[1.8]">
-              <StarRating 
-                rating={0} 
-                isVoted={false}
-                variant="white"
-                hideText={true}
-                onRate={(rating) => {
-                  console.log('StarRating onRate called with rating:', rating);
-                  console.log('User state:', propUser);
-                  handleRate(rating);
-                }}
-              />
+          compact ? (
+            <>
+              <div className="scale-[1.2] sm:scale-[1.4]">
+                <StarRating 
+                  rating={0} 
+                  isVoted={false}
+                  variant="white"
+                  hideText={true}
+                  onRate={(rating) => {
+                    console.log('StarRating onRate called with rating:', rating);
+                    console.log('User state:', propUser);
+                    handleRate(rating);
+                  }}
+                />
+              </div>
+              <span className="text-xs text-gray-600 text-center leading-tight">Rate from 1 (lowest)<br />to 5 (highest)</span>
+            </>
+          ) : (
+            <div className="flex items-center gap-3">
+              <span className="text-sm text-gray-600 whitespace-nowrap">Rate from 1 (lowest) 5 (highest)</span>
+              <div className="scale-[1.0] sm:scale-[1.1]">
+                <StarRating 
+                  rating={0} 
+                  isVoted={false}
+                  variant="white"
+                  hideText={true}
+                  onRate={(rating) => {
+                    console.log('StarRating onRate called with rating:', rating);
+                    console.log('User state:', propUser);
+                    handleRate(rating);
+                  }}
+                />
+              </div>
             </div>
-          </>
+          )
         )}
       </div>
     );
@@ -114,28 +171,56 @@ export function VotingOverlay({
   // Re-voting overlay - shown when editing existing vote
   if (isVoted && isEditing && !showThanks && !isExample) {
     return (
-      <div className={`absolute inset-0 bg-gray-300 rounded-r flex flex-col items-center justify-center ${compact ? 'gap-6' : 'gap-12'}`}>
-        <span className="text-lg sm:text-xl font-medium text-gray-600">Vote</span>
-        <div className="scale-[1.5] sm:scale-[1.8]">
-          <StarRating 
-            rating={0} 
-            isVoted={false}
-            variant="white"
-            hideText={true}
-            onRate={(rating) => {
-              console.log('Edit mode StarRating onRate called with rating:', rating);
-              console.log('User state:', propUser);
-              if (!propUser) {
-                setShowLoginModal(true);
-                return;
-              }
-              setUserRating(rating);
-              localStorage.setItem(`rating-${name}-${propUser.id}`, rating.toString());
-              setIsEditing(false);
-              handleRate(rating);
-            }}
-          />
-        </div>
+      <div className={`absolute inset-0 bg-gray-300 rounded-r flex flex-col items-center justify-center ${compact ? 'gap-2' : 'gap-12'}`}>
+        {compact ? (
+          <>
+            <div className="scale-[1.2] sm:scale-[1.4]">
+              <StarRating 
+                rating={0} 
+                isVoted={false}
+                variant="white"
+                hideText={true}
+                onRate={(rating) => {
+                  console.log('Edit mode StarRating onRate called with rating:', rating);
+                  console.log('User state:', propUser);
+                  if (!propUser) {
+                    setShowLoginModal(true);
+                    return;
+                  }
+                  setUserRating(rating);
+                  localStorage.setItem(`rating-${name}-${propUser.id}`, rating.toString());
+                  setIsEditing(false);
+                  handleRate(rating);
+                }}
+              />
+            </div>
+            <span className="text-xs text-gray-600 text-center leading-tight">Rate from 1 (lowest)<br />to 5 (highest)</span>
+          </>
+        ) : (
+          <div className="flex items-center gap-3">
+            <span className="text-sm text-gray-600 whitespace-nowrap">Rate from 1 (lowest) 5 (highest)</span>
+            <div className="scale-[1.0] sm:scale-[1.1]">
+              <StarRating 
+                rating={0} 
+                isVoted={false}
+                variant="white"
+                hideText={true}
+                onRate={(rating) => {
+                  console.log('Edit mode StarRating onRate called with rating:', rating);
+                  console.log('User state:', propUser);
+                  if (!propUser) {
+                    setShowLoginModal(true);
+                    return;
+                  }
+                  setUserRating(rating);
+                  localStorage.setItem(`rating-${name}-${propUser.id}`, rating.toString());
+                  setIsEditing(false);
+                  handleRate(rating);
+                }}
+              />
+            </div>
+          </div>
+        )}
       </div>
     );
   }
