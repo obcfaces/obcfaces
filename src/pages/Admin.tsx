@@ -1677,7 +1677,7 @@ const Admin = () => {
                                     </div>
                                     
                                        {/* Information section - right side */}
-                                        <div className="w-[50vw] flex-shrink-0 pl-2 flex flex-col h-44">
+                                        <div className="w-[50vw] flex-shrink-0 pl-2 flex flex-col min-h-44 relative">
                                         <div className="flex items-center gap-2 mb-1 mt-1">
                                            <span className="text-xs font-semibold whitespace-nowrap">
                                              {new Date().getFullYear() - appData.birth_year} {appData.first_name} {appData.last_name}
@@ -1699,53 +1699,53 @@ const Admin = () => {
                                            {appData.city} {appData.country}
                                          </div>
                                         
-                                           {/* Expanded information */}
-                                            {expandedMobileItems.has(application.id) && (
-                                              <div className="text-xs text-muted-foreground mb-8 space-y-0 leading-none">
-                                                <div>{appData.weight_kg}kg, {appData.height_cm}cm</div>
-                                                <div>{appData.marital_status}, {appData.has_children ? 'Has kids' : 'No kids'}</div>
-                                                <div className="flex items-center gap-1">
-                                                  <span>
-                                                    {userProfile?.email 
-                                                      ? (userProfile.email.length > 7 ? `${userProfile.email.substring(0, 7)}...` : userProfile.email)
-                                                      : 'No email'
-                                                    }
-                                                  </span>
-                                                  {userProfile?.email && (
-                                                    <Copy 
-                                                      className="h-3 w-3 cursor-pointer hover:text-foreground" 
-                                                      onClick={() => navigator.clipboard.writeText(userProfile.email)}
-                                                    />
-                                                  )}
-                                                </div>
-                                                <div>
-                                                  {(() => {
-                                                    const phone = appData.phone?.country && appData.phone?.number 
-                                                      ? `${appData.phone.country} ${appData.phone.number}` 
-                                                      : 'No phone';
-                                                    const facebook = appData.facebook_url ? (
-                                                      <a
-                                                        href={appData.facebook_url}
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                        className="text-blue-600 hover:text-blue-800"
-                                                      >
-                                                        fb
-                                                      </a>
-                                                    ) : 'no fb';
-                                                    return (
-                                                      <span>
-                                                        {phone} {facebook}
-                                                      </span>
-                                                    );
-                                                  })()}
-                                                </div>
-                                              </div>
-                                            )}
+                                            {/* Expanded information */}
+                                             {expandedMobileItems.has(application.id) && (
+                                               <div className="text-xs text-muted-foreground mb-1 space-y-0 leading-none">
+                                                 <div>{appData.weight_kg}kg, {appData.height_cm}cm</div>
+                                                 <div>{appData.marital_status}, {appData.has_children ? 'Has kids' : 'No kids'}</div>
+                                                 <div className="flex items-center gap-1">
+                                                   <span>
+                                                     {userProfile?.email 
+                                                       ? (userProfile.email.length > 7 ? `${userProfile.email.substring(0, 7)}...` : userProfile.email)
+                                                       : 'No email'
+                                                     }
+                                                   </span>
+                                                   {userProfile?.email && (
+                                                     <Copy 
+                                                       className="h-3 w-3 cursor-pointer hover:text-foreground" 
+                                                       onClick={() => navigator.clipboard.writeText(userProfile.email)}
+                                                     />
+                                                   )}
+                                                 </div>
+                                                 <div>
+                                                   {(() => {
+                                                     const phone = appData.phone?.country && appData.phone?.number 
+                                                       ? `${appData.phone.country} ${appData.phone.number}` 
+                                                       : 'No phone';
+                                                     const facebook = appData.facebook_url ? (
+                                                       <a
+                                                         href={appData.facebook_url}
+                                                         target="_blank"
+                                                         rel="noopener noreferrer"
+                                                         className="text-blue-600 hover:text-blue-800"
+                                                       >
+                                                         fb
+                                                       </a>
+                                                     ) : 'no fb';
+                                                     return (
+                                                       <span>
+                                                         {phone} {facebook}
+                                                       </span>
+                                                     );
+                                                   })()}
+                                                 </div>
+                                               </div>
+                                             )}
                                           
-                                            {/* Status filter positioned at bottom */}
-                                             {!showDeletedApplications && (
-                                               <div className="mb-2 flex items-center gap-2 mt-[69px]">
+                                             {/* Status filter positioned at bottom - absolute position */}
+                                              {!showDeletedApplications && (
+                                                <div className="absolute bottom-2 right-2 flex items-center gap-2">
                                              <Select 
                                                value={application.status}
                                                 onValueChange={(newStatus) => {
@@ -2171,7 +2171,7 @@ const Admin = () => {
                                              </div>
                                              
                                                {/* Information section - right side */}
-                                               <div className="w-[50vw] flex-shrink-0 pl-2 flex flex-col h-40">
+                                               <div className="w-[50vw] flex-shrink-0 pl-2 flex flex-col min-h-40 relative">
                                                 <div className="flex items-center gap-2 mb-1 mt-1">
                                                    <span className="text-xs font-semibold whitespace-nowrap">
                                                      {new Date().getFullYear() - prevAppData.birth_year} {prevAppData.first_name} {prevAppData.last_name}
@@ -2195,7 +2195,7 @@ const Admin = () => {
                                                  
                                                   {/* Expanded information */}
                                                   {expandedMobileItems.has(prevApp.id) && (
-                                                    <div className="text-xs text-muted-foreground mb-8 space-y-0 leading-none">
+                                                    <div className="text-xs text-muted-foreground mb-1 space-y-0 leading-none">
                                                       <div>{prevAppData.weight_kg}kg, {prevAppData.height_cm}cm</div>
                                                       <div>{prevAppData.marital_status}, {prevAppData.has_children ? 'Has kids' : 'No kids'}</div>
                                                       <div className="flex items-center gap-1">
@@ -2237,11 +2237,10 @@ const Admin = () => {
                                                     </div>
                                                   )}
                                                  
-                                                 <div className="flex-1"></div>
-                                                
-                                                 {/* Status filter with admin login on the same line */}
-                                                  {!showDeletedApplications && (
-                                                    <div className="mb-2 flex items-center gap-2">
+                                                 
+                                                  {/* Status filter with admin login - absolute position */}
+                                                   {!showDeletedApplications && (
+                                                     <div className="absolute bottom-2 right-2 flex items-center gap-2">
                                                       <Select 
                                                         value={prevApp.status}
                                                          onValueChange={(newStatus) => {
