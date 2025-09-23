@@ -674,8 +674,7 @@ export function ContestantCard({
                    <span>🏆 WINNER   + 5000 PHP</span>
                  </div>
                )}
-               
-                <div className="relative">
+                
                 <div className="relative bg-gray-300">
                   <img 
                     src={faceImage} 
@@ -683,7 +682,6 @@ export function ContestantCard({
                     className="w-full aspect-[4/5] object-cover cursor-pointer hover:opacity-90 transition-opacity"
                     onClick={() => openModal(0)}
                   />
-                </div>
                   {/* Example Badge in corner of first photo */}
                   {isExample && (
                     <div className="absolute top-1 left-1 bg-yellow-500 text-white px-1.5 py-0.5 text-xs font-bold rounded">
