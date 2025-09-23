@@ -1701,7 +1701,7 @@ const Admin = () => {
                                         
                                            {/* Expanded information */}
                                             {expandedMobileItems.has(application.id) && (
-                                              <div className="text-xs text-muted-foreground mb-1 space-y-0 leading-none max-h-10 overflow-hidden">
+                                              <div className="text-xs text-muted-foreground mb-8 space-y-0 leading-none">
                                                 <div>{appData.weight_kg}kg, {appData.height_cm}cm</div>
                                                 <div>{appData.marital_status}, {appData.has_children ? 'Has kids' : 'No kids'}</div>
                                                 <div className="flex items-center gap-1">
@@ -2195,7 +2195,7 @@ const Admin = () => {
                                                  
                                                   {/* Expanded information */}
                                                   {expandedMobileItems.has(prevApp.id) && (
-                                                    <div className="text-xs text-muted-foreground mb-1 space-y-0 leading-none max-h-10 overflow-hidden">
+                                                    <div className="text-xs text-muted-foreground mb-8 space-y-0 leading-none">
                                                       <div>{prevAppData.weight_kg}kg, {prevAppData.height_cm}cm</div>
                                                       <div>{prevAppData.marital_status}, {prevAppData.has_children ? 'Has kids' : 'No kids'}</div>
                                                       <div className="flex items-center gap-1">
