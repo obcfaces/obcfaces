@@ -954,7 +954,7 @@ const Admin = () => {
                   const appData = participant.application_data || {};
                   
                   return (
-                     <Card key={participant.id} className="overflow-hidden relative h-[146px]">
+                     <Card key={participant.id} className="overflow-hidden relative h-[149px]">
                       <CardContent className="p-0">
                         {/* Desktop layout */}
                         <div className="hidden md:flex">
@@ -965,7 +965,7 @@ const Admin = () => {
                                 <img 
                                   src={participantProfile?.photo_1_url || appData.photo1_url} 
                                   alt="Portrait" 
-                                  className="w-full h-[146px] object-contain cursor-pointer hover:opacity-90 transition-opacity"
+                                  className="w-full h-[149px] object-contain cursor-pointer hover:opacity-90 transition-opacity"
                                   onClick={() => openPhotoModal([
                                     participantProfile?.photo_1_url || appData.photo1_url, 
                                     participantProfile?.photo_2_url || appData.photo2_url
@@ -978,7 +978,7 @@ const Admin = () => {
                                 <img 
                                   src={participantProfile?.photo_2_url || appData.photo2_url} 
                                   alt="Full length" 
-                                  className="w-full h-[146px] object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                                  className="w-full h-[149px] object-cover cursor-pointer hover:opacity-90 transition-opacity"
                                   onClick={() => openPhotoModal([
                                     participantProfile?.photo_1_url || appData.photo1_url, 
                                     participantProfile?.photo_2_url || appData.photo2_url
@@ -1203,7 +1203,7 @@ const Admin = () => {
                   const appData = participant.application_data || {};
                   
                   return (
-                    <Card key={participant.id} className="overflow-hidden relative h-[146px]">
+                    <Card key={participant.id} className="overflow-hidden relative h-[149px]">
                       <CardContent className="p-0">
                         <div className="flex flex-col md:flex-row md:items-stretch">
                           {/* Photos section */}
@@ -1213,7 +1213,7 @@ const Admin = () => {
                                 <img 
                                   src={participantProfile?.photo_1_url || appData.photo1_url} 
                                   alt="Portrait" 
-                                  className="w-full h-32 sm:h-36 md:h-[146px] object-contain cursor-pointer hover:opacity-90 transition-opacity"
+                                  className="w-full h-32 sm:h-36 md:h-[149px] object-contain cursor-pointer hover:opacity-90 transition-opacity"
                                   onClick={() => openPhotoModal([
                                     participantProfile?.photo_1_url || appData.photo1_url, 
                                     participantProfile?.photo_2_url || appData.photo2_url
@@ -1226,7 +1226,7 @@ const Admin = () => {
                                 <img 
                                   src={participantProfile?.photo_2_url || appData.photo2_url} 
                                   alt="Full length" 
-                                  className="w-full h-32 sm:h-36 md:h-[146px] object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                                  className="w-full h-32 sm:h-36 md:h-[149px] object-cover cursor-pointer hover:opacity-90 transition-opacity"
                                   onClick={() => openPhotoModal([
                                     participantProfile?.photo_1_url || appData.photo1_url, 
                                     participantProfile?.photo_2_url || appData.photo2_url
@@ -1424,7 +1424,7 @@ const Admin = () => {
                    
                     return (
                       <div key={application.id}>
-                         <Card className="overflow-hidden relative rounded-none border-l-0 border-r-0 md:rounded-lg md:border-l md:border-r h-[146px]">
+                         <Card className="overflow-hidden relative rounded-none border-l-0 border-r-0 md:rounded-lg md:border-l md:border-r h-[149px]">
                            {/* Edit button in bottom left corner */}
                            {!showDeletedApplications && (
                              <Button
@@ -1932,7 +1932,7 @@ const Admin = () => {
                                  const prevUserProfile = profiles.find(p => p.id === prevApp.user_id);
                                  
                                  return (
-                                   <Card key={prevApp.id} className="overflow-hidden relative mx-0 rounded-lg bg-muted/30 h-[146px]">
+                                   <Card key={prevApp.id} className="overflow-hidden relative mx-0 rounded-lg bg-muted/30 h-[149px]">
                                      {/* Edit button in bottom left corner */}
                                      {!showDeletedApplications && (
                                        <Button
