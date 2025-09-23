@@ -55,9 +55,9 @@ export function VotingOverlay({
             <span className="text-xs text-gray-600 text-center leading-tight">Rate from 1 (lowest)<br />to 5 (highest)</span>
           </>
         ) : (
-          <div className="flex items-center gap-3">
-            <span className="text-sm text-gray-600 whitespace-nowrap">Rate from 1 (lowest) 5 (highest)</span>
-            <div className="scale-[1.0] sm:scale-[1.1]">
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-gray-600 whitespace-nowrap">Rate from 1 (lowest) 5 (highest)</span>
+              <div className="scale-[0.8] sm:scale-[0.9]">
               <StarRating 
                 rating={0} 
                 isVoted={false}
@@ -79,7 +79,7 @@ export function VotingOverlay({
   } else if (!isVoted && !isEditing && !showThanks && !isExample) {
     // Show voting overlay only for authenticated users in all sections
     return (
-      <div className={`absolute inset-0 bg-gray-300 rounded-r flex flex-col items-center justify-center ${compact ? 'gap-6' : 'gap-12'}`}>
+      <div className={`absolute inset-0 bg-gray-300 rounded-r flex flex-col items-center justify-center ${compact ? 'gap-2' : 'gap-4'}`}>
         {/* Show only stars for all users in THIS WEEK, full voting UI for other sections */}
         {isThisWeek ? (
           compact ? (
@@ -99,9 +99,9 @@ export function VotingOverlay({
               <span className="text-xs text-gray-600 text-center leading-tight">Rate from 1 (lowest)<br />to 5 (highest)</span>
             </>
           ) : (
-            <div className="flex items-center gap-3">
-              <span className="text-sm text-gray-600 whitespace-nowrap">Rate from 1 (lowest) 5 (highest)</span>
-              <div className="scale-[1.0] sm:scale-[1.1]">
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-gray-600 whitespace-nowrap">Rate from 1 (lowest) 5 (highest)</span>
+              <div className="scale-[0.8] sm:scale-[0.9]">
                 <StarRating 
                   rating={0} 
                   isVoted={false}
@@ -134,9 +134,9 @@ export function VotingOverlay({
               <span className="text-xs text-gray-600 text-center leading-tight">Rate from 1 (lowest)<br />to 5 (highest)</span>
             </>
           ) : (
-            <div className="flex items-center gap-3">
-              <span className="text-sm text-gray-600 whitespace-nowrap">Rate from 1 (lowest) 5 (highest)</span>
-              <div className="scale-[1.0] sm:scale-[1.1]">
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-gray-600 whitespace-nowrap">Rate from 1 (lowest) 5 (highest)</span>
+              <div className="scale-[0.8] sm:scale-[0.9]">
                 <StarRating 
                   rating={0} 
                   isVoted={false}
