@@ -1424,7 +1424,7 @@ const Admin = () => {
                    
                     return (
                       <div key={application.id}>
-                         <Card className="overflow-hidden relative mx-0 rounded-none md:rounded-lg md:mx-0">
+                         <Card className="overflow-hidden relative rounded-none border-l-0 border-r-0 md:rounded-lg md:border-l md:border-r">
                            {/* Edit button in bottom left corner */}
                            {!showDeletedApplications && (
                              <Button
