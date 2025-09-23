@@ -55,16 +55,16 @@ export function VotingOverlay({
             <span className="text-xs text-gray-600 text-center leading-tight">Rate from 1 (lowest)<br />to 5 (highest)</span>
           </>
         ) : (
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-gray-600 whitespace-nowrap">Rate from 1 (lowest) 5 (highest)</span>
-              <div className="scale-[0.8] sm:scale-[0.9]">
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-gray-600 whitespace-nowrap">Rate from 1 (lowest) 5 (highest)</span>
+            <div className="scale-[0.8] sm:scale-[0.9]">
               <StarRating 
                 rating={0} 
                 isVoted={false}
                 variant="white"
                 hideText={true}
                 onRate={(rating) => {
-                  console.log('Unauthenticated user voting in THIS WEEK, showing login modal');
+                  console.log('Unauthenticated user voting in THIS WEEK, showing login modal - FULL MODE');
                   setShowLoginModal(true);
                 }}
               />
