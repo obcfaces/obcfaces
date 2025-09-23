@@ -165,11 +165,6 @@ export function CompactCardLayout({
                 <div className="min-w-0 flex-1 mr-2">
                    <div className="flex items-center gap-2">
                      <h3 className="font-semibold text-contest-text text-base sm:text-lg truncate">{profileId ? (<Link to={`/u/${profileId}`} className="hover:text-primary underline-offset-2 hover:underline">{name}</Link>) : name}</h3>
-                     {rank > 0 && (
-                       <span className="bg-gray-100 text-gray-800 px-1.5 py-0.5 rounded text-xs font-bold">
-                         #{rank}
-                       </span>
-                     )}
                    </div>
                    <div className="text-xs sm:text-sm text-muted-foreground font-normal">{age} yo · {weight} kg · {height} cm</div>
                    <div className="text-sm sm:text-base text-contest-blue truncate">
@@ -266,11 +261,6 @@ export function CompactCardLayout({
                 <div className="min-w-0 flex-1 mr-2">
                    <div className="flex items-center gap-2">
                      <h3 className="font-semibold text-contest-text text-base sm:text-lg truncate">{profileId ? (<Link to={`/u/${profileId}`} className="hover:text-primary underline-offset-2 hover:underline">{name}</Link>) : name}</h3>
-                     {rank > 0 && (
-                       <span className="bg-gray-100 text-gray-800 px-1.5 py-0.5 rounded text-xs font-bold">
-                         #{rank}
-                       </span>
-                     )}
                    </div>
                    <div className="text-xs sm:text-sm text-muted-foreground font-normal">{age} yo · {weight} kg · {height} cm</div>
                    <div className="text-sm sm:text-base text-contest-blue truncate">
