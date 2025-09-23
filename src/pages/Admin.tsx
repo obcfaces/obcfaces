@@ -923,39 +923,47 @@ const Admin = () => {
                 <h2 className="text-xl font-semibold">This Week Participants</h2>
                 <p className="text-muted-foreground">Current week participants with voting stats</p>
                 
-                {/* Voting stats above filter */}
-                <div className="mt-4 mb-4 p-4 bg-muted rounded-lg">
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-                    <div>
-                      <div className="text-sm text-muted-foreground">Total Votes</div>
-                      <div className="text-lg font-semibold">
-                        {filteredWeeklyParticipants.reduce((sum, p) => sum + (p.total_votes || 0), 0)}
-                      </div>
-                    </div>
-                    <div>
-                      <div className="text-sm text-muted-foreground">Avg Rating</div>
-                      <div className="text-lg font-semibold">
-                        {filteredWeeklyParticipants.length > 0 
-                          ? (filteredWeeklyParticipants.reduce((sum, p) => sum + (p.average_rating || 0), 0) / filteredWeeklyParticipants.length).toFixed(1)
-                          : '0.0'
-                        }
-                      </div>
-                    </div>
-                    <div>
-                      <div className="text-sm text-muted-foreground">Participants</div>
-                      <div className="text-lg font-semibold">{filteredWeeklyParticipants.length}</div>
-                    </div>
-                    <div>
-                      <div className="text-sm text-muted-foreground">Top Rating</div>
-                      <div className="text-lg font-semibold">
-                        {filteredWeeklyParticipants.length > 0 
-                          ? Math.max(...filteredWeeklyParticipants.map(p => p.average_rating || 0)).toFixed(1)
-                          : '0.0'
-                        }
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                 {/* Voting stats above filter */}
+                 <div className="mt-4 mb-4 p-4 bg-muted rounded-lg">
+                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                     <div>
+                       <div 
+                         className="text-2xl font-bold text-blue-600 cursor-pointer hover:text-blue-700"
+                         onClick={() => {
+                           toast({
+                             title: "Total Votes",
+                             description: `${filteredWeeklyParticipants.reduce((sum, p) => sum + (p.total_votes || 0), 0)} total votes across all participants`,
+                           });
+                         }}
+                       >
+                         {filteredWeeklyParticipants.reduce((sum, p) => sum + (p.total_votes || 0), 0)}
+                       </div>
+                       <div className="text-xs text-muted-foreground">Total Votes</div>
+                     </div>
+                     <div>
+                       <div className="text-2xl font-bold text-blue-600">
+                         {filteredWeeklyParticipants.length > 0 
+                           ? (filteredWeeklyParticipants.reduce((sum, p) => sum + (p.average_rating || 0), 0) / filteredWeeklyParticipants.length).toFixed(1)
+                           : '0.0'
+                         }
+                       </div>
+                       <div className="text-xs text-muted-foreground">Avg Rating</div>
+                     </div>
+                     <div>
+                       <div className="text-2xl font-bold">{filteredWeeklyParticipants.length}</div>
+                       <div className="text-xs text-muted-foreground">Participants</div>
+                     </div>
+                     <div>
+                       <div className="text-2xl font-bold text-blue-600">
+                         {filteredWeeklyParticipants.length > 0 
+                           ? Math.max(...filteredWeeklyParticipants.map(p => p.average_rating || 0)).toFixed(1)
+                           : '0.0'
+                         }
+                       </div>
+                       <div className="text-xs text-muted-foreground">Top Rating</div>
+                     </div>
+                   </div>
+                 </div>
                 
                 <Select value={weeklyContestFilter} onValueChange={setWeeklyContestFilter}>
                   <SelectTrigger className="w-48">
@@ -1076,9 +1084,18 @@ const Admin = () => {
                                     />
                                   )}
                                 </div>
-                                <div>
-                                  Rating: {(participant.average_rating || 0).toFixed(1)} • Votes: {participant.total_votes || 0}
-                                </div>
+                                 <div 
+                                   className="text-lg font-bold text-blue-600 cursor-pointer hover:text-blue-700"
+                                   onClick={() => {
+                                     setSelectedParticipantForVoters({
+                                       id: participant.id,
+                                       name: `${participantProfile?.first_name || appData.first_name} ${participantProfile?.last_name || appData.last_name}`
+                                     });
+                                     setVotersModalOpen(true);
+                                   }}
+                                 >
+                                   {participant.total_votes || 0} • ★ {(participant.average_rating || 0).toFixed(1)}
+                                 </div>
                               </div>
                             )}
                             
@@ -1428,19 +1445,18 @@ const Admin = () => {
                             </div>
                             
                             {/* Status change date with reviewer login - desktop */}
-                            <div 
-                              className="text-xs text-muted-foreground cursor-pointer hover:text-foreground"
-                              onClick={() => {
-                                setSelectedParticipantForVoters({ 
-                                  id: participant.user_id, 
-                                  name: `${participantProfile?.first_name || appData.first_name} ${participantProfile?.last_name || appData.last_name}` 
-                                });
-                                setVotersModalOpen(true);
-                              }}
-                            >
-                              <span className="text-blue-600">votes</span>
-                              {` ${(participant.average_rating || 0).toFixed(1)} (${participant.total_votes || 0})`}
-                            </div>
+                             <div 
+                               className="text-lg font-bold text-blue-600 cursor-pointer hover:text-blue-700"
+                               onClick={() => {
+                                 setSelectedParticipantForVoters({ 
+                                   id: participant.user_id, 
+                                   name: `${participantProfile?.first_name || appData.first_name} ${participantProfile?.last_name || appData.last_name}` 
+                                 });
+                                 setVotersModalOpen(true);
+                               }}
+                             >
+                               {participant.total_votes || 0} • ★ {(participant.average_rating || 0).toFixed(1)}
+                             </div>
                           </div>
                         </div>
 
@@ -1548,20 +1564,19 @@ const Admin = () => {
                                   )}
                                 </div>
                                 
-                                {/* Rating with votes */}
-                                <div 
-                                  className="text-xs text-muted-foreground cursor-pointer hover:text-foreground"
-                                  onClick={() => {
-                                    setSelectedParticipantForVoters({ 
-                                      id: participant.user_id, 
-                                      name: `${participantProfile?.first_name || appData.first_name} ${participantProfile?.last_name || appData.last_name}` 
-                                    });
-                                    setVotersModalOpen(true);
-                                  }}
-                                >
-                                  <span className="text-blue-600">votes</span>
-                                  {` ${(participant.average_rating || 0).toFixed(1)} (${participant.total_votes || 0})`}
-                                </div>
+                                 {/* Rating with votes */}
+                                 <div 
+                                   className="text-lg font-bold text-blue-600 cursor-pointer hover:text-blue-700"
+                                   onClick={() => {
+                                     setSelectedParticipantForVoters({ 
+                                       id: participant.user_id, 
+                                       name: `${participantProfile?.first_name || appData.first_name} ${participantProfile?.last_name || appData.last_name}` 
+                                     });
+                                     setVotersModalOpen(true);
+                                   }}
+                                 >
+                                   {participant.total_votes || 0} • ★ {(participant.average_rating || 0).toFixed(1)}
+                                 </div>
                               </div>
                             </div>
                           </div>
