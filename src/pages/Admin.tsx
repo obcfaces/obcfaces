@@ -1745,7 +1745,7 @@ const Admin = () => {
                                          
                                           {/* Status filter positioned at bottom */}
                                            {!showDeletedApplications && (
-                                             <div className="mb-2 flex items-center gap-2 mt-12">
+                                             <div className="mb-2 flex items-center gap-2 mt-[58px]">
                                              <Select 
                                                value={application.status}
                                                 onValueChange={(newStatus) => {
