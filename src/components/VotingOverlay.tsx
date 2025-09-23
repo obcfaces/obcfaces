@@ -40,7 +40,7 @@ export function VotingOverlay({
       <div className={`absolute inset-0 bg-gray-300 rounded-r flex flex-col items-center justify-center ${compact ? 'gap-2' : 'gap-12'}`}>
         {compact ? (
           <>
-            <div className="scale-[1.2] sm:scale-[1.4]">
+            <div className="scale-[1.5] sm:scale-[1.7]">
               <StarRating 
                 rating={0} 
                 isVoted={false}
@@ -52,7 +52,7 @@ export function VotingOverlay({
                 }}
               />
             </div>
-            <span className="text-xs text-gray-600 text-center leading-tight">Rate from 1 (lowest)<br />to 5 (highest)</span>
+            <span className="text-sm text-gray-600 text-center leading-tight font-medium">Rate from 1 (lowest)<br />to 5 (highest)</span>
           </>
         ) : (
           <div className="flex items-center gap-2">
@@ -84,7 +84,7 @@ export function VotingOverlay({
         {isThisWeek ? (
           compact ? (
             <>
-              <div className="scale-[1.2] sm:scale-[1.4]">
+              <div className="scale-[1.5] sm:scale-[1.7]">
                 <StarRating 
                   rating={0} 
                   isVoted={false}
@@ -96,7 +96,7 @@ export function VotingOverlay({
                   }}
                 />
               </div>
-              <span className="text-xs text-gray-600 text-center leading-tight">Rate from 1 (lowest)<br />to 5 (highest)</span>
+              <span className="text-sm text-gray-600 text-center leading-tight font-medium">Rate from 1 (lowest)<br />to 5 (highest)</span>
             </>
           ) : (
             <div className="flex items-center gap-2 bg-red-100 p-1 rounded">
@@ -118,7 +118,7 @@ export function VotingOverlay({
         ) : (
           compact ? (
             <>
-              <div className="scale-[1.2] sm:scale-[1.4]">
+              <div className="scale-[1.5] sm:scale-[1.7]">
                 <StarRating 
                   rating={0} 
                   isVoted={false}
@@ -131,7 +131,7 @@ export function VotingOverlay({
                   }}
                 />
               </div>
-              <span className="text-xs text-gray-600 text-center leading-tight">Rate from 1 (lowest)<br />to 5 (highest)</span>
+              <span className="text-sm text-gray-600 text-center leading-tight font-medium">Rate from 1 (lowest)<br />to 5 (highest)</span>
             </>
           ) : (
             <div className="flex items-center gap-2 bg-red-100 p-1 rounded">
@@ -174,7 +174,7 @@ export function VotingOverlay({
       <div className={`absolute inset-0 bg-gray-300 rounded-r flex flex-col items-center justify-center ${compact ? 'gap-2' : 'gap-4'}`}>
         {compact ? (
           <>
-            <div className="scale-[1.2] sm:scale-[1.4]">
+            <div className="scale-[1.5] sm:scale-[1.7]">
               <StarRating 
                 rating={0} 
                 isVoted={false}
@@ -194,7 +194,7 @@ export function VotingOverlay({
                 }}
               />
             </div>
-            <span className="text-xs text-gray-600 text-center leading-tight">Rate from 1 (lowest)<br />to 5 (highest)</span>
+            <span className="text-sm text-gray-600 text-center leading-tight font-medium">Rate from 1 (lowest)<br />to 5 (highest)</span>
           </>
         ) : (
           <div className="flex items-center gap-2">
