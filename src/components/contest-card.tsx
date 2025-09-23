@@ -443,8 +443,8 @@ export function ContestantCard({
 
   const allPhotos = isWinner 
     ? [faceImage, fullBodyImage, ...additionalPhotos, 
-       weekOffset === -1 ? winnerPaymentImageApril : winnerPaymentImage, 
-       weekOffset === -1 ? winnerVideoApril : winnerVideo]
+       weekOffset === 1 ? winnerPaymentImageApril : winnerPaymentImage, 
+       weekOffset === 1 ? winnerVideoApril : winnerVideo]
     : [faceImage, fullBodyImage, ...additionalPhotos];
 
   const openModal = (photoIndex: number) => {
@@ -945,13 +945,13 @@ export function ContestantCard({
         {isWinner && <div className="border-t border-gray-400 w-full"></div>}
         
         {/* Second row for winner cards only - show for winners from last week and 2+ weeks ago */}
-        {isWinner && (weekOffset === -1 || weekOffset <= -2) && (
+        {isWinner && (weekOffset === 1 || weekOffset >= 2) && (
           <>
             <div className="flex h-36 sm:h-40 md:h-44 relative gap-px">
               {/* Payment photo */}
               <div className="relative">
                 <img 
-                  src={weekOffset === -1 ? winnerPaymentImageApril : winnerPaymentImage} 
+                  src={weekOffset === 1 ? winnerPaymentImageApril : winnerPaymentImage} 
                   alt="Payment receipt"
                   className="w-24 sm:w-28 md:w-32 h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
                   onClick={() => openModal(isWinner ? additionalPhotos.length + 2 : 2)}
@@ -961,7 +961,7 @@ export function ContestantCard({
               {/* Video - clickable */}
               <div className="relative">
                 <video 
-                  src={weekOffset === -1 ? winnerVideoApril : winnerVideo}
+                  src={weekOffset === 1 ? winnerVideoApril : winnerVideo}
                   className="w-24 sm:w-28 md:w-32 h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
                   controls={false}
                   muted
@@ -972,7 +972,7 @@ export function ContestantCard({
               {/* Testimonial text */}
               <div className="flex-1 p-3 flex flex-col items-center justify-center">
                 <p className="text-sm text-gray-700 italic text-center mb-3">
-                  {weekOffset === -1 
+                  {weekOffset === 1 
                     ? "It's legit and it's really happening. Thank you so much, OBC, for this wonderful opportunity. And I'm really overwhelmed with happiness as one of your weekly winners. Thank you, everyone."
                     : "I never imagined this could be real. I'm so happy I won! All I had to do was fill out the form. Anyone can do it!"
                   }
