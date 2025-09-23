@@ -105,8 +105,8 @@ export function CompactCardLayout({
             Example
           </div>
         )}
-        {/* Rank number in top left corner without padding for past weeks */}
-        {!isExample && !isThisWeek && rank > 0 && (
+        {/* Rank number in top left corner without padding - for past weeks and current week after voting */}
+        {!isExample && rank > 0 && (!isThisWeek || isVoted) && (
           <div className="absolute top-0 left-0 bg-black/70 text-white text-xs font-bold min-w-[20px] h-[20px] flex items-center justify-center">
             {rank}
           </div>
