@@ -965,7 +965,7 @@ const Admin = () => {
                                 <img 
                                   src={participantProfile?.photo_1_url || appData.photo1_url} 
                                   alt="Portrait" 
-                                  className="w-full h-44 object-contain cursor-pointer hover:opacity-90 transition-opacity"
+                                  className="w-full h-[146px] object-contain cursor-pointer hover:opacity-90 transition-opacity"
                                   onClick={() => openPhotoModal([
                                     participantProfile?.photo_1_url || appData.photo1_url, 
                                     participantProfile?.photo_2_url || appData.photo2_url
@@ -978,7 +978,7 @@ const Admin = () => {
                                 <img 
                                   src={participantProfile?.photo_2_url || appData.photo2_url} 
                                   alt="Full length" 
-                                  className="w-full h-44 object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                                  className="w-full h-[146px] object-cover cursor-pointer hover:opacity-90 transition-opacity"
                                   onClick={() => openPhotoModal([
                                     participantProfile?.photo_1_url || appData.photo1_url, 
                                     participantProfile?.photo_2_url || appData.photo2_url
@@ -1213,7 +1213,7 @@ const Admin = () => {
                                 <img 
                                   src={participantProfile?.photo_1_url || appData.photo1_url} 
                                   alt="Portrait" 
-                                  className="w-full h-36 sm:h-40 md:h-44 object-contain cursor-pointer hover:opacity-90 transition-opacity"
+                                  className="w-full h-32 sm:h-36 md:h-[146px] object-contain cursor-pointer hover:opacity-90 transition-opacity"
                                   onClick={() => openPhotoModal([
                                     participantProfile?.photo_1_url || appData.photo1_url, 
                                     participantProfile?.photo_2_url || appData.photo2_url
@@ -1226,7 +1226,7 @@ const Admin = () => {
                                 <img 
                                   src={participantProfile?.photo_2_url || appData.photo2_url} 
                                   alt="Full length" 
-                                  className="w-full h-36 sm:h-40 md:h-44 object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                                  className="w-full h-32 sm:h-36 md:h-[146px] object-cover cursor-pointer hover:opacity-90 transition-opacity"
                                   onClick={() => openPhotoModal([
                                     participantProfile?.photo_1_url || appData.photo1_url, 
                                     participantProfile?.photo_2_url || appData.photo2_url
