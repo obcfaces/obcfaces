@@ -2448,7 +2448,7 @@ const Admin = () => {
 
       {/* Contest Participation Modal */}
       <ContestParticipationModal 
-        isOpen={weeklyContests.length > 0}
+        isOpen={false}
         onOpenChange={(open) => {
           if (!open) setWeeklyContests([]);
         }}
