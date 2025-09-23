@@ -26,7 +26,7 @@ export const ContestSuccessModal = ({
   isOpen, 
   onClose, 
   title, 
-  url = window.location.href,
+  url = "https://obcface.com",
   description = ""
 }: ContestSuccessModalProps) => {
   const { toast } = useToast();
