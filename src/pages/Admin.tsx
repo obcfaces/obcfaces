@@ -1699,53 +1699,53 @@ const Admin = () => {
                                            {appData.city} {appData.country}
                                          </div>
                                         
-                                          {/* Expanded information */}
-                                           {expandedMobileItems.has(application.id) && (
-                                             <div className="text-xs text-muted-foreground mb-2 space-y-0 leading-none">
-                                               <div>{appData.weight_kg}kg, {appData.height_cm}cm</div>
-                                               <div>{appData.marital_status}, {appData.has_children ? 'Has kids' : 'No kids'}</div>
-                                               <div className="flex items-center gap-1">
-                                                 <span>
-                                                   {userProfile?.email 
-                                                     ? (userProfile.email.length > 7 ? `${userProfile.email.substring(0, 7)}...` : userProfile.email)
-                                                     : 'No email'
-                                                   }
-                                                 </span>
-                                                 {userProfile?.email && (
-                                                   <Copy 
-                                                     className="h-3 w-3 cursor-pointer hover:text-foreground" 
-                                                     onClick={() => navigator.clipboard.writeText(userProfile.email)}
-                                                   />
-                                                 )}
-                                               </div>
-                                               <div>
-                                                 {(() => {
-                                                   const phone = appData.phone?.country && appData.phone?.number 
-                                                     ? `${appData.phone.country} ${appData.phone.number}` 
-                                                     : 'No phone';
-                                                   const facebook = appData.facebook_url ? (
-                                                     <a
-                                                       href={appData.facebook_url}
-                                                       target="_blank"
-                                                       rel="noopener noreferrer"
-                                                       className="text-blue-600 hover:text-blue-800"
-                                                     >
-                                                       fb
-                                                     </a>
-                                                   ) : 'no fb';
-                                                   return (
-                                                     <span>
-                                                       {phone} {facebook}
-                                                     </span>
-                                                   );
-                                                 })()}
-                                               </div>
-                                             </div>
-                                           )}
+                                           {/* Expanded information */}
+                                            {expandedMobileItems.has(application.id) && (
+                                              <div className="text-xs text-muted-foreground mb-1 space-y-0 leading-none max-h-10 overflow-hidden">
+                                                <div>{appData.weight_kg}kg, {appData.height_cm}cm</div>
+                                                <div>{appData.marital_status}, {appData.has_children ? 'Has kids' : 'No kids'}</div>
+                                                <div className="flex items-center gap-1">
+                                                  <span>
+                                                    {userProfile?.email 
+                                                      ? (userProfile.email.length > 7 ? `${userProfile.email.substring(0, 7)}...` : userProfile.email)
+                                                      : 'No email'
+                                                    }
+                                                  </span>
+                                                  {userProfile?.email && (
+                                                    <Copy 
+                                                      className="h-3 w-3 cursor-pointer hover:text-foreground" 
+                                                      onClick={() => navigator.clipboard.writeText(userProfile.email)}
+                                                    />
+                                                  )}
+                                                </div>
+                                                <div>
+                                                  {(() => {
+                                                    const phone = appData.phone?.country && appData.phone?.number 
+                                                      ? `${appData.phone.country} ${appData.phone.number}` 
+                                                      : 'No phone';
+                                                    const facebook = appData.facebook_url ? (
+                                                      <a
+                                                        href={appData.facebook_url}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="text-blue-600 hover:text-blue-800"
+                                                      >
+                                                        fb
+                                                      </a>
+                                                    ) : 'no fb';
+                                                    return (
+                                                      <span>
+                                                        {phone} {facebook}
+                                                      </span>
+                                                    );
+                                                  })()}
+                                                </div>
+                                              </div>
+                                            )}
                                           
-                                           {/* Status filter positioned at bottom */}
-                                            {!showDeletedApplications && (
-                                              <div className={`mb-2 flex items-center gap-2 ${expandedMobileItems.has(application.id) ? 'mt-auto' : 'mt-[69px]'}`}>
+                                            {/* Status filter positioned at bottom */}
+                                             {!showDeletedApplications && (
+                                               <div className="mb-2 flex items-center gap-2 mt-[69px]">
                                              <Select 
                                                value={application.status}
                                                 onValueChange={(newStatus) => {
@@ -2193,49 +2193,49 @@ const Admin = () => {
                                                    {prevAppData.city} {prevAppData.country}
                                                  </div>
                                                  
-                                                 {/* Expanded information */}
-                                                 {expandedMobileItems.has(prevApp.id) && (
-                                                   <div className="text-xs text-muted-foreground mb-1 space-y-0.5">
-                                                     <div>{prevAppData.weight_kg}kg, {prevAppData.height_cm}cm</div>
-                                                     <div>{prevAppData.marital_status}, {prevAppData.has_children ? 'Has kids' : 'No kids'}</div>
-                                                     <div className="flex items-center gap-1">
-                                                       <span>
-                                                         {prevUserProfile?.email 
-                                                           ? (prevUserProfile.email.length > 7 ? `${prevUserProfile.email.substring(0, 7)}...` : prevUserProfile.email)
-                                                           : 'No email'
-                                                         }
-                                                       </span>
-                                                       {prevUserProfile?.email && (
-                                                         <Copy 
-                                                           className="h-3 w-3 cursor-pointer hover:text-foreground" 
-                                                           onClick={() => navigator.clipboard.writeText(prevUserProfile.email)}
-                                                         />
-                                                       )}
-                                                     </div>
-                                                     <div>
-                                                       {(() => {
-                                                         const phone = prevAppData.phone?.country && prevAppData.phone?.number 
-                                                           ? `${prevAppData.phone.country} ${prevAppData.phone.number}` 
-                                                           : 'No phone';
-                                                         const facebook = prevAppData.facebook_url ? (
-                                                           <a
-                                                             href={prevAppData.facebook_url}
-                                                             target="_blank"
-                                                             rel="noopener noreferrer"
-                                                             className="text-blue-600 hover:text-blue-800"
-                                                           >
-                                                             fb
-                                                           </a>
-                                                         ) : 'no fb';
-                                                         return (
-                                                           <span>
-                                                             {phone} {facebook}
-                                                           </span>
-                                                         );
-                                                       })()}
-                                                     </div>
-                                                   </div>
-                                                 )}
+                                                  {/* Expanded information */}
+                                                  {expandedMobileItems.has(prevApp.id) && (
+                                                    <div className="text-xs text-muted-foreground mb-1 space-y-0 leading-none max-h-10 overflow-hidden">
+                                                      <div>{prevAppData.weight_kg}kg, {prevAppData.height_cm}cm</div>
+                                                      <div>{prevAppData.marital_status}, {prevAppData.has_children ? 'Has kids' : 'No kids'}</div>
+                                                      <div className="flex items-center gap-1">
+                                                        <span>
+                                                          {prevUserProfile?.email 
+                                                            ? (prevUserProfile.email.length > 7 ? `${prevUserProfile.email.substring(0, 7)}...` : prevUserProfile.email)
+                                                            : 'No email'
+                                                          }
+                                                        </span>
+                                                        {prevUserProfile?.email && (
+                                                          <Copy 
+                                                            className="h-3 w-3 cursor-pointer hover:text-foreground" 
+                                                            onClick={() => navigator.clipboard.writeText(prevUserProfile.email)}
+                                                          />
+                                                        )}
+                                                      </div>
+                                                      <div>
+                                                        {(() => {
+                                                          const phone = prevAppData.phone?.country && prevAppData.phone?.number 
+                                                            ? `${prevAppData.phone.country} ${prevAppData.phone.number}` 
+                                                            : 'No phone';
+                                                          const facebook = prevAppData.facebook_url ? (
+                                                            <a
+                                                              href={prevAppData.facebook_url}
+                                                              target="_blank"
+                                                              rel="noopener noreferrer"
+                                                              className="text-blue-600 hover:text-blue-800"
+                                                            >
+                                                              fb
+                                                            </a>
+                                                          ) : 'no fb';
+                                                          return (
+                                                            <span>
+                                                              {phone} {facebook}
+                                                            </span>
+                                                          );
+                                                        })()}
+                                                      </div>
+                                                    </div>
+                                                  )}
                                                  
                                                  <div className="flex-1"></div>
                                                 
