@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
@@ -27,6 +27,17 @@ import { CookieConsent } from "@/components/cookie-consent";
 
 
 const queryClient = new QueryClient();
+
+const ConditionalSocialWidgets = () => {
+  const location = useLocation();
+  
+  // Don't show social widgets on admin page
+  if (location.pathname === '/admin') {
+    return null;
+  }
+  
+  return <SocialWidgets />;
+};
 
 const App = () => {
   console.log("App component rendering");
@@ -61,7 +72,7 @@ const App = () => {
                 </Routes>
               </main>
               <Footer />
-              <SocialWidgets />
+              <ConditionalSocialWidgets />
               <CookieConsent />
               
             </BrowserRouter>
