@@ -920,10 +920,6 @@ const Admin = () => {
 
             <TabsContent value="weekly" className="space-y-4">
               <div className="mb-6 flex items-center justify-between">
-                <div>
-                  <h2 className="text-xl font-semibold">Weekly Contest Management</h2>
-                  <p className="text-muted-foreground">Manage weekly contests and participants</p>
-                </div>
                 <Select value={weeklyContestFilter} onValueChange={setWeeklyContestFilter}>
                   <SelectTrigger className="w-48">
                     <SelectValue />
