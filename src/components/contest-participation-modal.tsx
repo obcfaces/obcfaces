@@ -1344,10 +1344,6 @@ export const ContestParticipationModal = ({
                              return;
                            }
                         
-                             toast({
-                               title: "Contact information saved",
-                               description: "We will contact you in case of victory."
-                             });
                              
                              // Show success modal instead of closing immediately
                              setShowSuccessModal(true);
