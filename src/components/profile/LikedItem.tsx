@@ -847,7 +847,6 @@ const LikedItem = ({
             {/* Participant Type Badge */}
             {showStatusBadge && getParticipantBadge(currentParticipantType, true)}
             <div className="relative">
-            <div className="relative bg-gray-300">
               <img 
                 src={displayFaceImage} 
                 alt={`${authorName} face`}
@@ -855,16 +854,13 @@ const LikedItem = ({
                 onClick={() => openModal(0)}
               />
             </div>
-            </div>
             <div className="relative">
-            <div className="relative bg-gray-300">
               <img 
                 src={displayFullImage} 
                 alt={`${authorName} full body`}
                 className="w-full aspect-[4/5] object-cover cursor-pointer hover:opacity-90 transition-opacity"
                 onClick={() => openModal(1)}
               />
-            </div>
             </div>
           </div>
         </div>

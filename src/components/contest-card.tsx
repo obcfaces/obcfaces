@@ -674,8 +674,8 @@ export function ContestantCard({
                    <span>🏆 WINNER   + 5000 PHP</span>
                  </div>
                )}
-                
-                <div className="relative bg-gray-300">
+               
+                <div className="relative">
                   <img 
                     src={faceImage} 
                     alt={`${name} face`}
@@ -689,7 +689,7 @@ export function ContestantCard({
                     </div>
                   )}
                 </div>
-              <div className="relative bg-gray-300">
+              <div className="relative">
                 <img 
                   src={fullBodyImage} 
                   alt={`${name} full body`}
