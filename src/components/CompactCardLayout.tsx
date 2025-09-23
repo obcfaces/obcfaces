@@ -106,7 +106,7 @@ export function CompactCardLayout({
           </div>
         )}
         {!isExample && !isThisWeek && (
-          <div className="absolute top-0 left-0 bg-black/70 text-white text-xs font-bold px-1 py-0.5 rounded-br">
+          <div className="absolute top-0 left-0 bg-black/70 text-white text-xs font-bold min-w-[20px] h-[20px] flex items-center justify-center">
             {rank > 0 ? rank : '★'}
           </div>
         )}
