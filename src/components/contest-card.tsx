@@ -675,7 +675,7 @@ export function ContestantCard({
                  </div>
                )}
                 
-                <div className="relative bg-gray-300">
+                <div className="relative bg-red-500">
                   <img 
                     src={faceImage} 
                     alt={`${name} face`}
@@ -689,15 +689,13 @@ export function ContestantCard({
                     </div>
                   )}
                 </div>
-              <div className="relative">
-              <div className="relative bg-gray-300">
+              <div className="relative bg-red-500">
                 <img 
                   src={fullBodyImage} 
                   alt={`${name} full body`}
                   className="w-full aspect-[4/5] object-cover cursor-pointer hover:opacity-90 transition-opacity"
                   onClick={() => openModal(1)}
                 />
-              </div>
                 {additionalPhotos.length > 0 && (
                   <div 
                     className="absolute bottom-0.5 right-0.5 bg-black/40 text-white/80 text-xs px-1 py-0.5 rounded cursor-pointer hover:bg-black/60 transition-colors"
