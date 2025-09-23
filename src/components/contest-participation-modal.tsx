@@ -1032,7 +1032,7 @@ export const ContestParticipationModal = ({
           {children}
         </DialogTrigger>
       )}
-      <DialogContent className="w-full max-w-4xl mx-auto max-h-[95vh] bg-background p-0 overflow-hidden [&_button[data-radix-dialog-close]]:!hidden [&>[data-radix-dialog-close]]:!hidden [&_.lucide-x]:!hidden [&_[data-radix-dialog-close]]:!hidden [&_button]:has(.lucide-x):!hidden">
+      <DialogContent className="w-full max-w-4xl mx-auto max-h-[95vh] bg-background p-0 overflow-hidden [&_button[data-radix-dialog-close]]:!hidden [&>[data-radix-dialog-close]]:!hidden [&_.lucide-x]:!hidden [&_[data-radix-dialog-close]]:!hidden [&_button]:has(.lucide-x):!hidden [&_[data-radix-dialog-close]]:!opacity-0 [&_[data-radix-dialog-close]]:!pointer-events-none [&_[data-radix-dialog-close]]:!w-0 [&_[data-radix-dialog-close]]:!h-0 [&_button[data-radix-dialog-close]]:!w-0 [&_button[data-radix-dialog-close]]:!h-0 [&_button[data-radix-dialog-close]]:!opacity-0 [&_button[data-radix-dialog-close]]:!p-0 [&_button[data-radix-dialog-close]]:!m-0 [&_button[data-radix-dialog-close]]:!border-0">
         <div className="px-6 py-4 border-b">
           <DialogHeader>
             <DialogTitle>
