@@ -1357,7 +1357,7 @@ const Admin = () => {
                 </div>
               </div>
 
-              <div className="space-y-4 -mx-4 md:mx-0">
+              <div className="space-y-4">
                 {(() => {
                   console.log('Filtering applications, statusFilter:', statusFilter);
                   const filteredApplications = (showDeletedApplications ? deletedApplications : contestApplications)
