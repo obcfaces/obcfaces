@@ -1743,11 +1743,9 @@ const Admin = () => {
                                            </div>
                                          )}
                                         
-                                        <div className="flex-1"></div>
-                                       
-                                        {/* Status filter with admin login on the same line */}
-                                         {!showDeletedApplications && (
-                                            <div className="mb-2 flex items-center gap-2 -mt-[30px]">
+                                         {/* Status filter positioned at top */}
+                                          {!showDeletedApplications && (
+                                            <div className="mb-2 flex items-center gap-2 mt-2">
                                              <Select 
                                                value={application.status}
                                                 onValueChange={(newStatus) => {
