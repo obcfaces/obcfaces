@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { ContestantCard } from "@/components/contest-card";
+import { AdminStyleCard } from "@/components/AdminStyleCard";
 import { supabase } from "@/integrations/supabase/client";
 
 import contestant1Face from "@/assets/contestant-1-face.jpg";
@@ -436,16 +436,16 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
         <div className="px-0 sm:px-6">
           {/* Regular contestants only */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-1 sm:gap-3 max-w-full overflow-hidden">
-            {contestants.filter(c => !c.isExample).map((contestant) => (
-              <ContestantCard
-                key={contestant.rank}
-                {...contestant}
-                viewMode={viewMode}
-                onRate={(rating) => handleRate(contestant.rank, rating)}
-                isThisWeek={title === "THIS WEEK"}
-                user={user}
-                weekOffset={weekOffset}
-              />
+             {contestants.filter(c => !c.isExample).map((contestant) => (
+               <AdminStyleCard
+                 key={contestant.rank}
+                 {...contestant}
+                 viewMode={viewMode}
+                 onRate={(rating) => handleRate(contestant.rank, rating)}
+                 isThisWeek={title === "THIS WEEK"}
+                 user={user}
+                 weekOffset={weekOffset}
+               />
              ))}
            </div>
            

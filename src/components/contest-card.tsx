@@ -455,20 +455,15 @@ export function ContestantCard({
   if (viewMode === 'full') {
     return (
       <>
-          <Card className={`${isExample ? 'border-yellow-400 border-2 bg-yellow-50/50' : isWinner ? 'border-contest-blue border-2' : 'bg-card border-contest-border'} relative overflow-hidden`}>
-            {/* Location in top left corner */}
-            <div className="absolute top-0 left-0 z-30 bg-black/70 text-white px-2 py-1 text-xs font-medium">
-              {getCountryDisplayName(country)} • {city}
-            </div>
-            
-            {/* Rank number in top left corner - show in past weeks for all users and current week after voting */}
-            {rank > 0 && !isExample && totalVotes > 0 && (!isThisWeek || isVoted) && (
-              <div className="absolute top-7 left-0 z-20 flex items-center">
-                <div className="bg-black/70 text-white px-1 py-0.5 rounded-br text-xs font-bold">
-                  {rank}
-                </div>
+        <Card className={`${isExample ? 'border-yellow-400 border-2 bg-yellow-50/50' : isWinner ? 'border-contest-blue border-2' : 'bg-card border-contest-border'} relative overflow-hidden`}>
+          {/* Rank number in top left corner - show in past weeks for all users and current week after voting */}
+          {rank > 0 && !isExample && totalVotes > 0 && (!isThisWeek || isVoted) && (
+            <div className="absolute top-0 left-0 z-20 flex items-center">
+              <div className="bg-black/70 text-white px-1 py-0.5 rounded-br text-xs font-bold">
+                {rank}
               </div>
-            )}
+            </div>
+          )}
            
               {/* Rating in top right corner - show for all users in past weeks and current week after voting */}
               {rank > 0 && !isExample && (!isThisWeek || isVoted) && (
@@ -817,7 +812,7 @@ export function ContestantCard({
   return (
     <>
       
-      <Card className={`${isExample ? 'border-yellow-400 border-2 bg-yellow-50/50' : isWinner ? 'border-contest-blue border-2' : 'bg-card border-contest-border'} relative overflow-hidden ${isWinner ? 'flex flex-col' : 'h-36 sm:h-40 md:h-44'}`}>
+      <Card className={`${isExample ? 'border-yellow-400 border-2 bg-yellow-50/50' : isWinner ? 'border-contest-blue border-2' : 'bg-card border-contest-border'} relative overflow-hidden h-[149px] ${isWinner ? 'flex flex-col' : ''}`}>
         {isWinner && (
           <div className="absolute top-0 left-0 w-[193px] sm:w-[225px] md:w-[257px] bg-blue-100 text-blue-700 pl-2 pr-2 py-1 text-xs font-semibold flex items-center justify-start z-20">
             <span>🏆 WINNER   + 5000 PHP</span>
@@ -861,13 +856,6 @@ export function ContestantCard({
         
         {/* First row: Main two photos with additional photos indicator */}
         <div className={`${isWinner && viewMode !== 'compact' ? 'w-full' : 'flex h-full'} relative gap-px`}>
-          {/* Location overlay for compact cards */}
-          {viewMode === 'compact' && (
-            <div className="absolute top-0 left-0 z-30 bg-black/70 text-white px-2 py-1 text-xs font-medium">
-              {getCountryDisplayName(country)} • {city}
-            </div>
-          )}
-          
           {/* Winner cards have different layout only in full mode */}
           {isWinner && viewMode !== 'compact' ? (
             <div className="flex flex-col">

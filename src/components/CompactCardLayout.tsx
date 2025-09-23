@@ -171,6 +171,9 @@ export function CompactCardLayout({
                      )}
                    </div>
                    <div className="text-xs sm:text-sm text-muted-foreground font-normal">{age} yo · {weight} kg · {height} cm</div>
+                   <div className="text-sm sm:text-base text-contest-blue truncate">
+                     {getCountryDisplayName(country)} · {city}
+                   </div>
                 </div>
               )}
               
@@ -269,6 +272,9 @@ export function CompactCardLayout({
                      )}
                    </div>
                    <div className="text-xs sm:text-sm text-muted-foreground font-normal">{age} yo · {weight} kg · {height} cm</div>
+                   <div className="text-sm sm:text-base text-contest-blue truncate">
+                     {getCountryDisplayName(country)} · {city}
+                   </div>
                 </div>
               )}
               
