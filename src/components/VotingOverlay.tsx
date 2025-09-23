@@ -171,7 +171,7 @@ export function VotingOverlay({
   // Re-voting overlay - shown when editing existing vote
   if (isVoted && isEditing && !showThanks && !isExample) {
     return (
-      <div className={`absolute inset-0 bg-gray-300 rounded-r flex flex-col items-center justify-center ${compact ? 'gap-2' : 'gap-12'}`}>
+      <div className={`absolute inset-0 bg-gray-300 rounded-r flex flex-col items-center justify-center ${compact ? 'gap-2' : 'gap-4'}`}>
         {compact ? (
           <>
             <div className="scale-[1.2] sm:scale-[1.4]">
@@ -197,9 +197,9 @@ export function VotingOverlay({
             <span className="text-xs text-gray-600 text-center leading-tight">Rate from 1 (lowest)<br />to 5 (highest)</span>
           </>
         ) : (
-          <div className="flex items-center gap-3">
-            <span className="text-sm text-gray-600 whitespace-nowrap">Rate from 1 (lowest) 5 (highest)</span>
-            <div className="scale-[1.0] sm:scale-[1.1]">
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-gray-600 whitespace-nowrap">Rate from 1 (lowest) 5 (highest)</span>
+            <div className="scale-[0.8] sm:scale-[0.9]">
               <StarRating 
                 rating={0} 
                 isVoted={false}
