@@ -539,7 +539,7 @@ export function ContestantCard({
                     <span className="text-xs text-gray-600 text-center leading-tight">Rate from 1 (lowest)<br />to 5 (highest)</span>
                   </div>
                 ) : (
-                  <div className="flex flex-col items-center justify-center gap-0.5">
+                  <div className="flex flex-col items-center justify-center gap-1.5">
                     <span className="text-base font-medium text-gray-600 text-center">Rate from 1 (lowest) 5 (highest)</span>
                     <div className="scale-[1.6] sm:scale-[1.8]">
                       <StarRating 
@@ -611,7 +611,7 @@ export function ContestantCard({
                   <span className="text-xs text-gray-600 text-center leading-tight">Rate from 1 (lowest)<br />to 5 (highest)</span>
                 </div>
               ) : (
-                <div className="flex flex-col items-center justify-center gap-0.5">
+                <div className="flex flex-col items-center justify-center gap-1.5">
                   <span className="text-base font-medium text-gray-600 text-center">Rate from 1 (lowest) 5 (highest)</span>
                   <div className="scale-[1.6] sm:scale-[1.8]">
                     <StarRating 
