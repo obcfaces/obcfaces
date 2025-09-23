@@ -1048,28 +1048,38 @@ const Admin = () => {
                             </div>
                             
                             <div className="flex flex-col gap-1 items-center">
-                              <Badge variant={participant.is_active ? 'default' : 'secondary'}>
-                                {participant.is_active ? 'Active' : 'Inactive'}
-                              </Badge>
-                              <p className="text-xs text-muted-foreground text-center">
-                                Rating: {(participant.average_rating || 0).toFixed(1)}
-                              </p>
+                              <div className="flex items-center gap-2">
+                                <span className="text-sm font-semibold">
+                                  {(participant.average_rating || 0).toFixed(1)}
+                                </span>
+                                <button
+                                  onClick={() => {
+                                    setSelectedParticipantForVoters({
+                                      id: participant.id,
+                                      name: `${participantProfile?.first_name || appData.first_name} ${participantProfile?.last_name || appData.last_name}`
+                                    });
+                                    setVotersModalOpen(true);
+                                  }}
+                                  className="text-xs text-muted-foreground hover:text-primary transition-colors cursor-pointer"
+                                >
+                                  ({participant.total_votes || 0})
+                                </button>
+                              </div>
                             </div>
+                            
                             <div className="flex gap-1 flex-wrap justify-center">
                               <Button
                                 size="sm"
                                 variant="outline"
                                 onClick={() => {
-                                  setSelectedParticipantForVoters({
-                                    id: participant.id,
-                                    name: `${participantProfile?.first_name || appData.first_name} ${participantProfile?.last_name || appData.last_name}`
-                                  });
-                                  setVotersModalOpen(true);
+                                  setEditingApplicationId(participant.application_id);
+                                  setEditingApplicationData(participant);
+                                  setShowEditModal(true);
                                 }}
                                 className="text-xs px-2 py-1 h-7"
                               >
-                                <Eye className="w-3 h-3" />
-                                <span className="hidden sm:inline ml-1">Voters</span>
+                                <Edit className="w-3 h-3" />
+                                <span className="hidden sm:inline ml-1">Edit</span>
                               </Button>
                             </div>
                           </div>
