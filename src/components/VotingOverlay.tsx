@@ -40,7 +40,7 @@ export function VotingOverlay({
       <div className={`absolute inset-0 bg-gray-300 rounded-r flex flex-col items-center justify-center ${compact ? 'gap-2' : 'gap-12'}`}>
         {compact ? (
           <>
-            <div className="scale-[1.5] sm:scale-[1.7]">
+            <div className="scale-[1.35] sm:scale-[1.5]">
               <StarRating 
                 rating={0} 
                 isVoted={false}
@@ -84,7 +84,7 @@ export function VotingOverlay({
         {isThisWeek ? (
           compact ? (
             <>
-              <div className="scale-[1.5] sm:scale-[1.7]">
+              <div className="scale-[1.35] sm:scale-[1.5]">
                 <StarRating 
                   rating={0} 
                   isVoted={false}
@@ -118,7 +118,7 @@ export function VotingOverlay({
         ) : (
           compact ? (
             <>
-              <div className="scale-[1.5] sm:scale-[1.7]">
+              <div className="scale-[1.35] sm:scale-[1.5]">
                 <StarRating 
                   rating={0} 
                   isVoted={false}
@@ -174,7 +174,7 @@ export function VotingOverlay({
       <div className={`absolute inset-0 bg-gray-300 rounded-r flex flex-col items-center justify-center ${compact ? 'gap-2' : 'gap-4'}`}>
         {compact ? (
           <>
-            <div className="scale-[1.5] sm:scale-[1.7]">
+            <div className="scale-[1.35] sm:scale-[1.5]">
               <StarRating 
                 rating={0} 
                 isVoted={false}
