@@ -1062,9 +1062,9 @@ const Admin = () => {
                         <div className="md:hidden">
                           <div className="flex w-full relative">
                             {/* Photos section - left side, full width on mobile */}
-                            <div className="flex gap-px w-[50vw] flex-shrink-0">
+                            <div className="flex gap-px w-full flex-shrink-0">
                               {(participantProfile?.photo_1_url || appData.photo1_url) && (
-                                <div className="w-1/2">
+                                <div className="w-1/2 relative">
                                   <img 
                                     src={participantProfile?.photo_1_url || appData.photo1_url} 
                                     alt="Portrait" 
@@ -1074,6 +1074,17 @@ const Admin = () => {
                                       participantProfile?.photo_2_url || appData.photo2_url
                                     ].filter(Boolean), 0, `${participantProfile?.first_name || appData.first_name} ${participantProfile?.last_name || appData.last_name}`)}
                                   />
+                                  {/* Edit icon in bottom left corner of first photo */}
+                                  <button
+                                    onClick={() => {
+                                      setEditingApplicationId(participant.application_id);
+                                      setEditingApplicationData(participant);
+                                      setShowEditModal(true);
+                                    }}
+                                    className="absolute bottom-0 left-0 bg-black/70 text-white p-1.5 rounded-tr hover:bg-black/90 transition-colors"
+                                  >
+                                    <Edit className="w-4 h-4" />
+                                  </button>
                                 </div>
                               )}
                               {(participantProfile?.photo_2_url || appData.photo2_url) && (
@@ -1096,8 +1107,8 @@ const Admin = () => {
                                       </AvatarFallback>
                                     </Avatar>
                                   </div>
-                                  {/* Rating in bottom right corner of second photo */}
-                                  <div className="absolute bottom-2 right-2 bg-black/70 text-white px-2 py-1 rounded text-xs font-semibold">
+                                  {/* Rating in bottom right corner of second photo - no padding */}
+                                  <div className="absolute bottom-0 right-0 bg-black/80 text-white px-2 py-1 text-xs font-semibold">
                                     <button
                                       onClick={() => {
                                         setSelectedParticipantForVoters({
@@ -1114,64 +1125,53 @@ const Admin = () => {
                                 </div>
                               )}
                             </div>
-                            
-                            {/* Information section - right side */}
-                            <div className="w-[50vw] flex-shrink-0 pl-2 flex flex-col h-36">
-                              <div className="flex items-center gap-2 mb-1 mt-1">
-                                <span className="text-xs font-semibold whitespace-nowrap">
-                                  {(appData.birth_year ? new Date().getFullYear() - appData.birth_year : '')} {participantProfile?.first_name || appData.first_name} {participantProfile?.last_name || appData.last_name}
-                                </span>
-                              </div>
-                            
-                              <div className="text-xs text-muted-foreground mb-1">
-                                {participantProfile?.city || appData.city} {participantProfile?.country || appData.country}
-                              </div>
-                             
-                              <div className="text-xs text-muted-foreground mb-1">
-                                {(participantProfile?.weight_kg || appData.weight_kg)}kg, {(participantProfile?.height_cm || appData.height_cm)}cm
-                              </div>
+                          </div>
+                          
+                          {/* Information section below photos - full width */}
+                          <div className="p-3">
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="text-sm font-semibold">
+                                {participantProfile?.first_name || appData.first_name} {participantProfile?.last_name || appData.last_name}
+                              </span>
+                              <span className="text-xs text-muted-foreground">
+                                {appData.birth_year ? new Date().getFullYear() - appData.birth_year : ''}
+                              </span>
+                            </div>
+                          
+                            <div className="text-xs text-muted-foreground mb-1">
+                              {participantProfile?.city || appData.city} {participantProfile?.country || appData.country}
+                            </div>
+                           
+                            <div className="text-xs text-muted-foreground mb-1">
+                              {(participantProfile?.weight_kg || appData.weight_kg)}kg, {(participantProfile?.height_cm || appData.height_cm)}cm
+                            </div>
 
-                              <div className="text-xs text-muted-foreground mb-1">
-                                {participantProfile?.marital_status || appData.marital_status}, {(participantProfile?.has_children || appData.has_children) ? 'Has kids' : 'No kids'}
-                              </div>
-
-                              <div className="flex-1"></div>
-                              
-                              {/* Status filter at bottom */}
-                              <div className="mb-2">
-                                <Select 
-                                  value={participantFilters[participant.id] || (participant.final_rank ? 'this week' : 'approve')} 
-                                  onValueChange={(value) => {
-                                    setParticipantFilters(prev => ({
-                                      ...prev,
-                                      [participant.id]: value
-                                    }));
-                                  }}
-                                >
-                                  <SelectTrigger className="w-20 h-6 text-xs">
-                                    <SelectValue />
-                                  </SelectTrigger>
-                                  <SelectContent className="z-50 bg-background border shadow-md">
-                                    <SelectItem value="this week">This Week</SelectItem>
-                                    <SelectItem value="next week">Next Week</SelectItem>
-                                    <SelectItem value="approve">Approve</SelectItem>
-                                    <SelectItem value="reject">Reject</SelectItem>
-                                  </SelectContent>
-                                </Select>
-                              </div>
+                            <div className="text-xs text-muted-foreground mb-3">
+                              {participantProfile?.marital_status || appData.marital_status}, {(participantProfile?.has_children || appData.has_children) ? 'Has kids' : 'No kids'}
                             </div>
                             
-                            {/* Edit icon in bottom left corner of card */}
-                            <button
-                              onClick={() => {
-                                setEditingApplicationId(participant.application_id);
-                                setEditingApplicationData(participant);
-                                setShowEditModal(true);
-                              }}
-                              className="absolute bottom-2 left-2 bg-black/70 text-white p-1 rounded hover:bg-black/90 transition-colors"
-                            >
-                              <Edit className="w-3 h-3" />
-                            </button>
+                            {/* Status filter at bottom */}
+                            <div className="flex justify-center">
+                              <Select 
+                                value={participantFilters[participant.id] || (participant.final_rank ? 'this week' : 'approve')} 
+                                onValueChange={(value) => {
+                                  setParticipantFilters(prev => ({
+                                    ...prev,
+                                    [participant.id]: value
+                                  }));
+                                }}
+                              >
+                                <SelectTrigger className="w-24 h-7 text-xs">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent className="z-50 bg-background border shadow-md">
+                                  <SelectItem value="this week">This Week</SelectItem>
+                                  <SelectItem value="next week">Next Week</SelectItem>
+                                  <SelectItem value="approve">Approve</SelectItem>
+                                  <SelectItem value="reject">Reject</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
                           </div>
                         </div>
                       </CardContent>
