@@ -289,44 +289,58 @@ export const VotersModal = ({ isOpen, onClose, participantId, participantName }:
               {voters.map((voter, index) => (
                 <Collapsible key={`${voter.user_id}-${index}`} open={expandedUser === voter.user_id}>
                   <Card className="hover:shadow-md transition-shadow">
-                    <CollapsibleTrigger 
-                      className="w-full text-left"
-                      onClick={() => handleUserClick(voter.user_id)}
-                    >
-                      <CardContent className="p-4 hover:bg-muted/50 transition-colors">
-                        <div className="flex items-start gap-4">
-                          {/* Avatar */}
-                          <Avatar className="h-16 w-16 flex-shrink-0">
-                            <AvatarImage src={voter.profile?.avatar_url || ''} />
-                            <AvatarFallback className="text-lg">
-                              {getDisplayName(voter).charAt(0)}
-                            </AvatarFallback>
-                          </Avatar>
+                     <CollapsibleTrigger 
+                       className="w-full text-left"
+                       onClick={() => handleUserClick(voter.user_id)}
+                     >
+                       <CardContent className="p-4 hover:bg-muted/50 transition-colors relative">
+                         {/* Contestant badge in top-left corner */}
+                         {voter.profile?.is_contest_participant && (
+                           <Badge variant="secondary" className="absolute top-2 left-2 text-xs">
+                             Contestant
+                           </Badge>
+                         )}
+                         <div className="flex items-start gap-4 mt-4">
+                           {/* Avatar with rating below */}
+                           <div className="flex flex-col items-center gap-2 flex-shrink-0">
+                             <Avatar className="h-16 w-16">
+                               <AvatarImage src={voter.profile?.avatar_url || ''} />
+                               <AvatarFallback className="text-lg">
+                                 {getDisplayName(voter).charAt(0)}
+                               </AvatarFallback>
+                             </Avatar>
+                             <Badge 
+                               className={`${getRatingColor(voter.rating)} text-white px-2 py-1 text-sm font-semibold`}
+                             >
+                               {voter.rating}/10
+                             </Badge>
+                           </div>
                           
-                          {/* User Info */}
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-start justify-between gap-2">
-                              <div className="flex-1">
-                                <h3 className="font-semibold text-lg leading-tight">
-                                  {getDisplayName(voter)}
-                                </h3>
-                                
-                                {/* Basic Info */}
-                                <div className="flex items-center gap-3 text-sm text-muted-foreground mt-1">
-                                  {voter.profile?.age && (
-                                    <>
-                                      <span>{voter.profile.age} years old</span>
-                                      <span>•</span>
-                                    </>
-                                  )}
-                                  {voter.profile?.gender && (
-                                    <>
-                                      <span>{voter.profile.gender}</span>
-                                      <span>•</span>
-                                    </>
-                                  )}
-                                  <span>{getLocationString(voter)}</span>
-                                </div>
+                           {/* User Info */}
+                           <div className="flex-1 min-w-0">
+                             <div className="flex items-start justify-between gap-2">
+                               <div className="flex-1">
+                                 <h3 className="font-semibold text-lg leading-tight">
+                                   {getDisplayName(voter)}
+                                 </h3>
+                                 
+                                 {/* City and Country */}
+                                 <div className="text-sm text-muted-foreground mt-1">
+                                   <span>{getLocationString(voter)}</span>
+                                 </div>
+                                 
+                                 {/* Basic Info with Age first */}
+                                 <div className="flex items-center gap-3 text-sm text-muted-foreground mt-1">
+                                   {voter.profile?.age && (
+                                     <>
+                                       <span>{voter.profile.age} years old</span>
+                                       {voter.profile?.gender && <span>•</span>}
+                                     </>
+                                   )}
+                                   {voter.profile?.gender && (
+                                     <span>{voter.profile.gender}</span>
+                                   )}
+                                 </div>
                                 
                                 {/* Bio */}
                                 {voter.profile?.bio && (
@@ -355,28 +369,16 @@ export const VotersModal = ({ isOpen, onClose, participantId, participantName }:
                                 </p>
                               </div>
                               
-                              {/* Rating and Badges */}
-                              <div className="flex flex-col items-end gap-2">
-                                <div className="flex items-center gap-2">
-                                  <Star className="w-4 h-4 text-yellow-500 fill-current" />
-                                  <Badge 
-                                    className={`${getRatingColor(voter.rating)} text-white px-3 py-1 text-sm font-semibold`}
-                                  >
-                                    {voter.rating}/10
-                                  </Badge>
-                                  {expandedUser === voter.user_id ? (
-                                    <ChevronUp className="w-4 h-4 text-muted-foreground" />
-                                  ) : (
-                                    <ChevronDown className="w-4 h-4 text-muted-foreground" />
-                                  )}
-                                </div>
-                                
-                                {voter.profile?.is_contest_participant && (
-                                  <Badge variant="secondary" className="text-xs">
-                                    Contestant
-                                  </Badge>
-                                )}
-                              </div>
+                               {/* Badges and expand indicator */}
+                               <div className="flex flex-col items-end gap-2">
+                                 <div className="flex items-center gap-2">
+                                   {expandedUser === voter.user_id ? (
+                                     <ChevronUp className="w-4 h-4 text-muted-foreground" />
+                                   ) : (
+                                     <ChevronDown className="w-4 h-4 text-muted-foreground" />
+                                   )}
+                                 </div>
+                               </div>
                             </div>
                           </div>
                         </div>
