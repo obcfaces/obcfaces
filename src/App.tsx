@@ -40,7 +40,7 @@ const ConditionalSocialWidgets = () => {
 };
 
 const App = () => {
-  console.log("App component rendering");
+  console.log("App component rendering - fixed Route error");
   
   return (
     <div className="min-h-screen w-full flex flex-col">
