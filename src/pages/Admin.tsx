@@ -848,7 +848,7 @@ const Admin = () => {
       </Helmet>
 
       <div className="min-h-screen bg-gradient-to-br from-background to-muted/20 py-8 md:px-6">
-        <div className="max-w-7xl md:mx-auto px-6 md:px-0">
+        <div className="max-w-7xl md:mx-auto px-0 md:px-6">
           <div className="mb-8">
             <h1 className="text-3xl font-bold mb-2">Admin Panel</h1>
             <p className="text-muted-foreground">Manage user profiles and roles</p>
@@ -1307,7 +1307,7 @@ const Admin = () => {
             </TabsContent>
 
             <TabsContent value="applications" className="space-y-4 -mx-6 md:mx-0">
-              <div className="mb-6 px-6 md:px-0">
+              <div className="mb-6 px-0 md:px-6">
                 <div className="flex items-center justify-between">
                   <h2 className="text-xl font-semibold">Contest Applications</h2>
                   <div className="flex gap-4 items-center">
@@ -1357,7 +1357,7 @@ const Admin = () => {
                 </div>
               </div>
 
-              <div className="space-y-4 px-6 md:px-0">
+              <div className="space-y-4 px-0 md:px-6">
                 {(() => {
                   console.log('Filtering applications, statusFilter:', statusFilter);
                   const filteredApplications = (showDeletedApplications ? deletedApplications : contestApplications)
