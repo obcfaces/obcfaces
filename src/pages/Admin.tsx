@@ -1677,7 +1677,7 @@ const Admin = () => {
                                     </div>
                                     
                                        {/* Information section - right side */}
-                                       <div className="w-[50vw] flex-shrink-0 pl-2 flex flex-col h-40">
+                                        <div className="w-[50vw] flex-shrink-0 pl-2 flex flex-col h-44">
                                         <div className="flex items-center gap-2 mb-1 mt-1">
                                            <span className="text-xs font-semibold whitespace-nowrap">
                                              {new Date().getFullYear() - appData.birth_year} {appData.first_name} {appData.last_name}
@@ -1747,7 +1747,7 @@ const Admin = () => {
                                        
                                         {/* Status filter with admin login on the same line */}
                                          {!showDeletedApplications && (
-                                            <div className="mb-2 flex items-center gap-2 -mt-[50px]">
+                                            <div className="mb-2 flex items-center gap-2 -mt-[70px]">
                                              <Select 
                                                value={application.status}
                                                 onValueChange={(newStatus) => {
