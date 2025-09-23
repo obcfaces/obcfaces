@@ -954,7 +954,7 @@ const Admin = () => {
                   const appData = participant.application_data || {};
                   
                   return (
-                    <Card key={participant.id} className="overflow-hidden relative h-36">
+                    <Card key={participant.id} className="overflow-hidden relative h-40">
                       <CardContent className="p-0">
                         {/* Desktop layout */}
                         <div className="hidden md:flex">
@@ -1203,7 +1203,7 @@ const Admin = () => {
                   const appData = participant.application_data || {};
                   
                   return (
-                    <Card key={participant.id} className="overflow-hidden relative h-36">
+                    <Card key={participant.id} className="overflow-hidden relative h-40">
                       <CardContent className="p-0">
                         <div className="flex flex-col md:flex-row md:items-stretch">
                           {/* Photos section */}
@@ -1424,7 +1424,7 @@ const Admin = () => {
                    
                     return (
                       <div key={application.id}>
-                         <Card className="overflow-hidden relative rounded-none border-l-0 border-r-0 md:rounded-lg md:border-l md:border-r h-36">
+                         <Card className="overflow-hidden relative rounded-none border-l-0 border-r-0 md:rounded-lg md:border-l md:border-r h-40">
                            {/* Edit button in bottom left corner */}
                            {!showDeletedApplications && (
                              <Button
@@ -1932,7 +1932,7 @@ const Admin = () => {
                                  const prevUserProfile = profiles.find(p => p.id === prevApp.user_id);
                                  
                                  return (
-                                   <Card key={prevApp.id} className="overflow-hidden relative mx-0 rounded-lg bg-muted/30 h-36">
+                                   <Card key={prevApp.id} className="overflow-hidden relative mx-0 rounded-lg bg-muted/30 h-40">
                                      {/* Edit button in bottom left corner */}
                                      {!showDeletedApplications && (
                                        <Button
