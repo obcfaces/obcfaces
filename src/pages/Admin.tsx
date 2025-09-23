@@ -1560,7 +1560,7 @@ const Admin = () => {
                                 </div>
 
                                  {/* Column 3: Status Button (20ch) - только для десктопа */}
-                                 <div className="w-[20ch] flex-shrink-0 p-4 pl-0 flex flex-col gap-2">
+                                  <div className="w-[20ch] flex-shrink-0 p-4 pl-0 flex flex-col gap-2 -mt-[20px]">
                                    {/* Status dropdown at the top - desktop */}
                                    {!showDeletedApplications && (
                                      <Select 
