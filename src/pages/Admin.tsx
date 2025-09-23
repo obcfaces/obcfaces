@@ -21,7 +21,7 @@ import {
 import { Checkbox } from '@/components/ui/checkbox';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import cityTimezones from 'city-timezones';
-import { PhotoModal } from '@/components/photo-modal';
+import { AdminPhotoModal } from '@/components/admin-photo-modal';
 import { RejectReasonModal, REJECTION_REASONS } from '@/components/reject-reason-modal';
 import { VotersModal } from '@/components/voters-modal';
 import { ContestParticipationModal } from '@/components/contest-participation-modal';
@@ -2415,8 +2415,8 @@ const Admin = () => {
           </div>
         </div>
 
-      {/* Photo Modal */}
-      <PhotoModal
+      {/* Admin Photo Modal */}
+      <AdminPhotoModal
         photos={photoModalImages}
         currentIndex={photoModalIndex}
         isOpen={photoModalOpen}
