@@ -31,13 +31,24 @@ const AuthCallbackHandler = () => {
         
         if (error) {
           console.error('Auth callback error:', error);
-          // For critical errors, show a message but don't block the user
-          if (error.message.includes('Invalid') || error.message.includes('expired')) {
-            toast({ 
-              description: "Confirmation link is invalid or expired. Please try logging in again.",
-              variant: "destructive"
-            });
+          // Provide more specific error messages based on error type
+          let errorMessage = "Confirmation link is invalid or expired. Please try logging in again.";
+          
+          if (error.message.includes('session_not_found')) {
+            errorMessage = "Session not found. Please try logging in again.";
+          } else if (error.message.includes('invalid_grant')) {
+            errorMessage = "Invalid authorization code. Please request a new confirmation email.";
+          } else if (error.message.includes('expired')) {
+            errorMessage = "Confirmation link has expired. Please request a new one.";
+          } else if (error.message.includes('invalid_request')) {
+            errorMessage = "Invalid request. Please try logging in again.";
           }
+          
+          toast({ 
+            title: "Email Confirmation Failed",
+            description: errorMessage,
+            variant: "destructive"
+          });
           return;
         }
 
