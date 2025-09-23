@@ -42,7 +42,7 @@ export function StarRating({ rating, isVoted, onRate, readonly, variant = "defau
           >
             <Star
               className={cn(
-                "w-4 h-4 transition-colors",
+                "w-5 h-5 transition-colors",
                 variant === "white"
                   ? (star <= (hoveredRating || rating))
                     ? "fill-blue-500 text-blue-500"
