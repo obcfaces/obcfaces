@@ -16,6 +16,7 @@ import SearchableSelect from "@/components/ui/searchable-select";
 import { getCitiesForLocation } from '@/lib/location-utils';
 import testContestantFace from "@/assets/example-face-photo.jpg";
 import testContestantFull from "@/assets/example-full-photo.jpg";
+import { ContestSuccessModal } from "@/components/contest-success-modal";
 
 interface ContestParticipationModalProps {
   children?: React.ReactNode;
@@ -43,6 +44,7 @@ export const ContestParticipationModal = ({
   const [submissionSuccess, setSubmissionSuccess] = useState(false);
   const [currentApplicationId, setCurrentApplicationId] = useState<string | null>(null);
   const [authError, setAuthError] = useState<string>("");
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
   const { toast } = useToast();
 
   // Contact form state
@@ -1342,13 +1344,13 @@ export const ContestParticipationModal = ({
                              return;
                            }
                         
-                            toast({
-                              title: "Contact information saved",
-                              description: "We will contact you in case of victory."
-                            });
-                            
-                            // Close modal after successful contact update
-                            setIsOpen(false);
+                             toast({
+                               title: "Contact information saved",
+                               description: "We will contact you in case of victory."
+                             });
+                             
+                             // Show success modal instead of closing immediately
+                             setShowSuccessModal(true);
                             
                             // Reset states 
                             setSubmissionSuccess(false);
@@ -1765,6 +1767,23 @@ export const ContestParticipationModal = ({
           </div>
         </ScrollArea>
       </DialogContent>
+      
+      {/* Success Modal for sharing */}
+      <ContestSuccessModal
+        isOpen={showSuccessModal}
+        onClose={() => {
+          setShowSuccessModal(false);
+          setIsOpen(false);
+          // Reset states 
+          setSubmissionSuccess(false);
+          setCurrentApplicationId(null);
+          setSelectedContactMethod(null);
+          setContactForm({ name: "", contact: "", message: "", countryCode: "", facebookUrl: "" });
+        }}
+        title="Vote for me in the beauty contest!"
+        url={window.location.href}
+        description="Help me win by voting for me in this beauty contest. Your vote counts!"
+      />
     </Dialog>
   );
 };
