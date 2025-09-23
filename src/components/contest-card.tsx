@@ -675,7 +675,7 @@ export function ContestantCard({
                  </div>
                )}
                 
-                <div className="relative bg-red-500">
+                <div className="relative bg-gray-300">
                   <img 
                     src={faceImage} 
                     alt={`${name} face`}
@@ -689,7 +689,7 @@ export function ContestantCard({
                     </div>
                   )}
                 </div>
-              <div className="relative bg-red-500">
+              <div className="relative bg-gray-300">
                 <img 
                   src={fullBodyImage} 
                   alt={`${name} full body`}
