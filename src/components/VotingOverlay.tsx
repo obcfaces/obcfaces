@@ -99,9 +99,9 @@ export function VotingOverlay({
               <span className="text-xs text-gray-600 text-center leading-tight">Rate from 1 (lowest)<br />to 5 (highest)</span>
             </>
           ) : (
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-gray-600 whitespace-nowrap">Rate from 1 (lowest) 5 (highest)</span>
-              <div className="scale-[0.8] sm:scale-[0.9]">
+            <div className="flex items-center gap-2 bg-red-100 p-1 rounded">
+              <span className="text-xs text-gray-800 whitespace-nowrap font-bold">Rate from 1 (lowest) 5 (highest)</span>
+              <div className="scale-[0.7] sm:scale-[0.8]">
                 <StarRating 
                   rating={0} 
                   isVoted={false}
@@ -134,9 +134,9 @@ export function VotingOverlay({
               <span className="text-xs text-gray-600 text-center leading-tight">Rate from 1 (lowest)<br />to 5 (highest)</span>
             </>
           ) : (
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-gray-600 whitespace-nowrap">Rate from 1 (lowest) 5 (highest)</span>
-              <div className="scale-[0.8] sm:scale-[0.9]">
+            <div className="flex items-center gap-2 bg-red-100 p-1 rounded">
+              <span className="text-xs text-gray-800 whitespace-nowrap font-bold">Rate from 1 (lowest) 5 (highest)</span>
+              <div className="scale-[0.7] sm:scale-[0.8]">
                 <StarRating 
                   rating={0} 
                   isVoted={false}
