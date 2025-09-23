@@ -540,7 +540,7 @@ export function ContestantCard({
                   </div>
                 ) : (
                   <div className="flex flex-col items-center justify-center gap-1">
-                    <span className="text-base font-medium text-gray-600">Rate</span>
+                    <span className="text-sm font-medium text-gray-600 text-center">Rate from 1 (lowest) 5 (highest)</span>
                     <div className="scale-[1.4] sm:scale-[1.6]">
                       <StarRating 
                         rating={userRating}
@@ -612,7 +612,7 @@ export function ContestantCard({
                 </div>
               ) : (
                 <div className="flex flex-col items-center justify-center gap-1">
-                  <span className="text-base font-medium text-gray-600">Rate</span>
+                  <span className="text-sm font-medium text-gray-600 text-center">Rate from 1 (lowest) 5 (highest)</span>
                   <div className="scale-[1.4] sm:scale-[1.6]">
                     <StarRating 
                       rating={0}
