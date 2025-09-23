@@ -676,12 +676,14 @@ export function ContestantCard({
                )}
                
                 <div className="relative">
+                <div className="relative bg-gray-300">
                   <img 
                     src={faceImage} 
                     alt={`${name} face`}
                     className="w-full aspect-[4/5] object-cover cursor-pointer hover:opacity-90 transition-opacity"
                     onClick={() => openModal(0)}
                   />
+                </div>
                   {/* Example Badge in corner of first photo */}
                   {isExample && (
                     <div className="absolute top-1 left-1 bg-yellow-500 text-white px-1.5 py-0.5 text-xs font-bold rounded">
@@ -690,12 +692,14 @@ export function ContestantCard({
                   )}
                 </div>
               <div className="relative">
+              <div className="relative bg-gray-300">
                 <img 
                   src={fullBodyImage} 
                   alt={`${name} full body`}
                   className="w-full aspect-[4/5] object-cover cursor-pointer hover:opacity-90 transition-opacity"
                   onClick={() => openModal(1)}
                 />
+              </div>
                 {additionalPhotos.length > 0 && (
                   <div 
                     className="absolute bottom-0.5 right-0.5 bg-black/40 text-white/80 text-xs px-1 py-0.5 rounded cursor-pointer hover:bg-black/60 transition-colors"
