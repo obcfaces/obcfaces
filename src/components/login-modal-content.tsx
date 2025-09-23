@@ -451,16 +451,18 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
             </div>
             
             <div className="space-y-3">
+              <div className="flex items-start gap-2">
+                <Checkbox 
+                  id="terms" 
+                  checked={acceptTerms}
+                  onCheckedChange={(checked) => setAcceptTerms(!!checked)}
+                  className={`${invalidTerms ? "border-destructive" : ""} mt-0.5 flex-shrink-0`}
+                />
+                <div className="flex-1">
                   <div className="flex items-center gap-1 flex-wrap">
-                    <Checkbox 
-                      id="terms" 
-                      checked={acceptTerms}
-                      onCheckedChange={(checked) => setAcceptTerms(!!checked)}
-                      className={invalidTerms ? "border-destructive" : ""}
-                    />
                     <label
                       htmlFor="terms"
-                      className={`text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 ${invalidTerms ? 'text-destructive' : ''} flex items-center gap-1 flex-wrap`}
+                      className={`text-xs leading-relaxed peer-disabled:cursor-not-allowed peer-disabled:opacity-70 ${invalidTerms ? 'text-destructive' : ''}`}
                     >
                       I agree to the{" "}
                       <Link to="/terms" className="text-primary underline hover:no-underline" target="_blank">
@@ -470,20 +472,24 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
                       <Link to="/privacy" className="text-primary underline hover:no-underline" target="_blank">
                         Privacy Policy
                       </Link>
-                      <Collapsible open={isTermsOpen} onOpenChange={setIsTermsOpen}>
-                        <CollapsibleTrigger className="inline-flex items-center text-muted-foreground hover:text-foreground transition-colors ml-1">
-                          <ChevronDown className={`h-4 w-4 transition-transform ${isTermsOpen ? 'rotate-180' : ''}`} />
-                        </CollapsibleTrigger>
-                        <CollapsibleContent className="mt-2 w-full">
-                          <p className="text-xs text-muted-foreground">
-                            By registering, you confirm that you are at least 18 years old and agree to our community guidelines. 
-                            We may use your information to improve our services and provide personalized content. 
-                            You can delete your account at any time. We respect your privacy and will never share your personal data with third parties without your consent.
-                          </p>
-                        </CollapsibleContent>
-                      </Collapsible>
                     </label>
+                    <Collapsible open={isTermsOpen} onOpenChange={setIsTermsOpen}>
+                      <CollapsibleTrigger className="inline-flex items-center text-muted-foreground hover:text-foreground transition-colors ml-1">
+                        <ChevronDown className={`h-3 w-3 transition-transform ${isTermsOpen ? 'rotate-180' : ''}`} />
+                      </CollapsibleTrigger>
+                    </Collapsible>
                   </div>
+                  <Collapsible open={isTermsOpen} onOpenChange={setIsTermsOpen}>
+                    <CollapsibleContent className="mt-2">
+                      <p className="text-xs text-muted-foreground">
+                        By registering, you confirm that you are at least 18 years old and agree to our community guidelines. 
+                        We may use your information to improve our services and provide personalized content. 
+                        You can delete your account at any time. We respect your privacy and will never share your personal data with third parties without your consent.
+                      </p>
+                    </CollapsibleContent>
+                  </Collapsible>
+                </div>
+              </div>
             </div>
           </>
         )}
