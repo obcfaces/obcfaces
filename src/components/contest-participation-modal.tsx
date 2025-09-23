@@ -1781,7 +1781,7 @@ export const ContestParticipationModal = ({
           setContactForm({ name: "", contact: "", message: "", countryCode: "", facebookUrl: "" });
         }}
         title="Vote for me in the beauty contest!"
-        url={window.location.href}
+        url="https://obcface.com"
         description="Help me win by voting for me in this beauty contest. Your vote counts!"
       />
     </Dialog>
