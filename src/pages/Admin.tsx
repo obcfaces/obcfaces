@@ -960,15 +960,16 @@ const Admin = () => {
                   return (
                     <Card key={participant.id} className="overflow-hidden relative">
                       <CardContent className="p-0">
-                        <div className="flex flex-col md:flex-row md:items-stretch">
-                          {/* Photos section */}
-                          <div className="flex gap-px md:w-[25ch] md:flex-shrink-0 p-0">
+                        {/* Desktop layout */}
+                        <div className="hidden md:flex">
+                          {/* Photos section - 2 columns */}
+                          <div className="flex gap-px w-[25ch] flex-shrink-0">
                             {(participantProfile?.photo_1_url || appData.photo1_url) && (
-                              <div className="w-24 sm:w-28 md:w-32">
+                              <div className="w-1/2">
                                 <img 
                                   src={participantProfile?.photo_1_url || appData.photo1_url} 
                                   alt="Portrait" 
-                                  className="w-full h-36 sm:h-40 md:h-44 object-contain cursor-pointer hover:opacity-90 transition-opacity"
+                                  className="w-full h-44 object-contain cursor-pointer hover:opacity-90 transition-opacity"
                                   onClick={() => openPhotoModal([
                                     participantProfile?.photo_1_url || appData.photo1_url, 
                                     participantProfile?.photo_2_url || appData.photo2_url
@@ -977,22 +978,37 @@ const Admin = () => {
                               </div>
                             )}
                             {(participantProfile?.photo_2_url || appData.photo2_url) && (
-                              <div className="w-24 sm:w-28 md:w-32">
+                              <div className="w-1/2 relative">
                                 <img 
                                   src={participantProfile?.photo_2_url || appData.photo2_url} 
                                   alt="Full length" 
-                                  className="w-full h-36 sm:h-40 md:h-44 object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                                  className="w-full h-44 object-cover cursor-pointer hover:opacity-90 transition-opacity"
                                   onClick={() => openPhotoModal([
                                     participantProfile?.photo_1_url || appData.photo1_url, 
                                     participantProfile?.photo_2_url || appData.photo2_url
                                   ].filter(Boolean), 1, `${participantProfile?.first_name || appData.first_name} ${participantProfile?.last_name || appData.last_name}`)}
                                 />
+                                {/* Rating in bottom right corner of second photo */}
+                                <div className="absolute bottom-2 right-2 bg-black/70 text-white px-2 py-1 rounded text-xs font-semibold">
+                                  <button
+                                    onClick={() => {
+                                      setSelectedParticipantForVoters({
+                                        id: participant.id,
+                                        name: `${participantProfile?.first_name || appData.first_name} ${participantProfile?.last_name || appData.last_name}`
+                                      });
+                                      setVotersModalOpen(true);
+                                    }}
+                                    className="hover:text-primary transition-colors cursor-pointer"
+                                  >
+                                    {(participant.average_rating || 0).toFixed(1)} ({participant.total_votes || 0})
+                                  </button>
+                                </div>
                               </div>
                             )}
                           </div>
 
                           {/* Main info section */}
-                          <div className="md:w-[50ch] md:flex-shrink-0 flex-1 min-w-0 p-4">
+                          <div className="w-[50ch] flex-shrink-0 flex-1 min-w-0 p-4">
                             <div className="flex items-center gap-2 mb-1">
                               <Avatar className="h-6 w-6 flex-shrink-0">
                                 <AvatarImage src={participantProfile?.avatar_url || ''} />
@@ -1023,65 +1039,143 @@ const Admin = () => {
                           </div>
 
                           {/* Right side actions */}
-                          <div className="p-4 md:w-auto flex flex-col justify-between gap-2">
-                            {/* Contest filter dropdown */}
-                            <div className="flex flex-col gap-1 mb-2">
-                              <Select 
-                                value={participantFilters[participant.id] || (participant.final_rank ? 'this week' : 'approve')} 
-                                onValueChange={(value) => {
-                                  setParticipantFilters(prev => ({
-                                    ...prev,
-                                    [participant.id]: value
-                                  }));
-                                }}
-                              >
-                                <SelectTrigger className="w-28 h-6 text-xs">
-                                  <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent className="z-50 bg-background border shadow-md">
-                                  <SelectItem value="this week">This Week</SelectItem>
-                                  <SelectItem value="next week">Next Week</SelectItem>
-                                  <SelectItem value="approve">Approve</SelectItem>
-                                  <SelectItem value="reject">Reject</SelectItem>
-                                </SelectContent>
-                              </Select>
+                          <div className="w-[20ch] flex-shrink-0 p-4 flex flex-col gap-2">
+                            <Select 
+                              value={participantFilters[participant.id] || (participant.final_rank ? 'this week' : 'approve')} 
+                              onValueChange={(value) => {
+                                setParticipantFilters(prev => ({
+                                  ...prev,
+                                  [participant.id]: value
+                                }));
+                              }}
+                            >
+                              <SelectTrigger className="w-28 h-6 text-xs">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent className="z-50 bg-background border shadow-md">
+                                <SelectItem value="this week">This Week</SelectItem>
+                                <SelectItem value="next week">Next Week</SelectItem>
+                                <SelectItem value="approve">Approve</SelectItem>
+                                <SelectItem value="reject">Reject</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+
+                        {/* Mobile layout - full width with 2 columns */}
+                        <div className="md:hidden">
+                          <div className="flex w-full relative">
+                            {/* Photos section - left side, full width on mobile */}
+                            <div className="flex gap-px w-[50vw] flex-shrink-0">
+                              {(participantProfile?.photo_1_url || appData.photo1_url) && (
+                                <div className="w-1/2">
+                                  <img 
+                                    src={participantProfile?.photo_1_url || appData.photo1_url} 
+                                    alt="Portrait" 
+                                    className="w-full h-36 object-contain cursor-pointer hover:opacity-90 transition-opacity"
+                                    onClick={() => openPhotoModal([
+                                      participantProfile?.photo_1_url || appData.photo1_url, 
+                                      participantProfile?.photo_2_url || appData.photo2_url
+                                    ].filter(Boolean), 0, `${participantProfile?.first_name || appData.first_name} ${participantProfile?.last_name || appData.last_name}`)}
+                                  />
+                                </div>
+                              )}
+                              {(participantProfile?.photo_2_url || appData.photo2_url) && (
+                                <div className="w-1/2 relative">
+                                  <img 
+                                    src={participantProfile?.photo_2_url || appData.photo2_url} 
+                                    alt="Full length" 
+                                    className="w-full h-36 object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                                    onClick={() => openPhotoModal([
+                                      participantProfile?.photo_1_url || appData.photo1_url, 
+                                      participantProfile?.photo_2_url || appData.photo2_url
+                                    ].filter(Boolean), 1, `${participantProfile?.first_name || appData.first_name} ${participantProfile?.last_name || appData.last_name}`)}
+                                  />
+                                  {/* User avatar positioned in top right corner */}
+                                  <div className="absolute top-2 right-2">
+                                    <Avatar className="h-6 w-6 flex-shrink-0 border-2 border-white shadow-sm">
+                                      <AvatarImage src={participantProfile?.avatar_url || ''} />
+                                      <AvatarFallback className="text-xs">
+                                        {(participantProfile?.first_name || appData.first_name)?.charAt(0) || 'U'}
+                                      </AvatarFallback>
+                                    </Avatar>
+                                  </div>
+                                  {/* Rating in bottom right corner of second photo */}
+                                  <div className="absolute bottom-2 right-2 bg-black/70 text-white px-2 py-1 rounded text-xs font-semibold">
+                                    <button
+                                      onClick={() => {
+                                        setSelectedParticipantForVoters({
+                                          id: participant.id,
+                                          name: `${participantProfile?.first_name || appData.first_name} ${participantProfile?.last_name || appData.last_name}`
+                                        });
+                                        setVotersModalOpen(true);
+                                      }}
+                                      className="hover:text-primary transition-colors cursor-pointer"
+                                    >
+                                      {(participant.average_rating || 0).toFixed(1)} ({participant.total_votes || 0})
+                                    </button>
+                                  </div>
+                                </div>
+                              )}
                             </div>
                             
-                            <div className="flex flex-col gap-1 items-center">
-                              <div className="flex items-center gap-2">
-                                <span className="text-sm font-semibold">
-                                  {(participant.average_rating || 0).toFixed(1)}
+                            {/* Information section - right side */}
+                            <div className="w-[50vw] flex-shrink-0 pl-2 flex flex-col h-36">
+                              <div className="flex items-center gap-2 mb-1 mt-1">
+                                <span className="text-xs font-semibold whitespace-nowrap">
+                                  {(appData.birth_year ? new Date().getFullYear() - appData.birth_year : '')} {participantProfile?.first_name || appData.first_name} {participantProfile?.last_name || appData.last_name}
                                 </span>
-                                <button
-                                  onClick={() => {
-                                    setSelectedParticipantForVoters({
-                                      id: participant.id,
-                                      name: `${participantProfile?.first_name || appData.first_name} ${participantProfile?.last_name || appData.last_name}`
-                                    });
-                                    setVotersModalOpen(true);
+                              </div>
+                            
+                              <div className="text-xs text-muted-foreground mb-1">
+                                {participantProfile?.city || appData.city} {participantProfile?.country || appData.country}
+                              </div>
+                             
+                              <div className="text-xs text-muted-foreground mb-1">
+                                {(participantProfile?.weight_kg || appData.weight_kg)}kg, {(participantProfile?.height_cm || appData.height_cm)}cm
+                              </div>
+
+                              <div className="text-xs text-muted-foreground mb-1">
+                                {participantProfile?.marital_status || appData.marital_status}, {(participantProfile?.has_children || appData.has_children) ? 'Has kids' : 'No kids'}
+                              </div>
+
+                              <div className="flex-1"></div>
+                              
+                              {/* Status filter at bottom */}
+                              <div className="mb-2">
+                                <Select 
+                                  value={participantFilters[participant.id] || (participant.final_rank ? 'this week' : 'approve')} 
+                                  onValueChange={(value) => {
+                                    setParticipantFilters(prev => ({
+                                      ...prev,
+                                      [participant.id]: value
+                                    }));
                                   }}
-                                  className="text-xs text-muted-foreground hover:text-primary transition-colors cursor-pointer"
                                 >
-                                  ({participant.total_votes || 0})
-                                </button>
+                                  <SelectTrigger className="w-20 h-6 text-xs">
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent className="z-50 bg-background border shadow-md">
+                                    <SelectItem value="this week">This Week</SelectItem>
+                                    <SelectItem value="next week">Next Week</SelectItem>
+                                    <SelectItem value="approve">Approve</SelectItem>
+                                    <SelectItem value="reject">Reject</SelectItem>
+                                  </SelectContent>
+                                </Select>
                               </div>
                             </div>
                             
-                            <div className="flex gap-1 flex-wrap justify-center">
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => {
-                                  setEditingApplicationId(participant.application_id);
-                                  setEditingApplicationData(participant);
-                                  setShowEditModal(true);
-                                }}
-                                className="text-xs px-2 py-1 h-7"
-                              >
-                                <Edit className="w-3 h-3" />
-                                <span className="hidden sm:inline ml-1">Edit</span>
-                              </Button>
-                            </div>
+                            {/* Edit icon in bottom left corner of card */}
+                            <button
+                              onClick={() => {
+                                setEditingApplicationId(participant.application_id);
+                                setEditingApplicationData(participant);
+                                setShowEditModal(true);
+                              }}
+                              className="absolute bottom-2 left-2 bg-black/70 text-white p-1 rounded hover:bg-black/90 transition-colors"
+                            >
+                              <Edit className="w-3 h-3" />
+                            </button>
                           </div>
                         </div>
                       </CardContent>
