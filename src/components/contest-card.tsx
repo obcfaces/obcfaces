@@ -81,6 +81,9 @@ export function ContestantCard({
   user: propUser,
   weekOffset = 0
 }: ContestantCardProps) {
+  // Debug log to check weekOffset value
+  console.log(`ContestantCard ${name}: weekOffset = ${weekOffset}, isWinner = ${isWinner}`);
+  
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalStartIndex, setModalStartIndex] = useState(0);
   const [isEditing, setIsEditing] = useState(false);
@@ -942,7 +945,7 @@ export function ContestantCard({
         {isWinner && <div className="border-t border-gray-400 w-full"></div>}
         
         {/* Second row for winner cards only - show for winners from last week and 2+ weeks ago */}
-        {isWinner && (weekOffset === -1 || weekOffset >= 2) && (
+        {isWinner && (weekOffset === -1 || weekOffset <= -2) && (
           <>
             <div className="flex h-36 sm:h-40 md:h-44 relative gap-px">
               {/* Payment photo */}
