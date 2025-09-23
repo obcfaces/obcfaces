@@ -524,19 +524,35 @@ export function ContestantCard({
             {isThisWeek && !propUser && !isExample ? (
               /* Unauthorized users in THIS WEEK section only see voting (but not for test cards) */
               <div className="absolute inset-0 bg-gray-300 flex items-center justify-center h-full">
-                <div className="flex items-center gap-16">
-                  <span className="text-lg font-medium text-gray-600">Vote</span>
-                  <div className="scale-[2]">
-                    <StarRating 
-                      rating={userRating}
-                      isVoted={false}
-                      onRate={handleRate}
-                      readonly={false}
-                      hideText={true}
-                      variant="white"
-                    />
+                {(viewMode as string) === 'compact' ? (
+                  <div className="flex flex-col items-center gap-2">
+                    <div className="scale-[1.2] sm:scale-[1.4]">
+                      <StarRating 
+                        rating={userRating}
+                        isVoted={false}
+                        onRate={handleRate}
+                        readonly={false}
+                        hideText={true}
+                        variant="white"
+                      />
+                    </div>
+                    <span className="text-xs text-gray-600 text-center leading-tight">Rate from 1 (lowest)<br />to 5 (highest)</span>
                   </div>
-                </div>
+                ) : (
+                  <div className="flex items-center gap-3">
+                    <span className="text-sm text-gray-600 whitespace-nowrap">Rate from 1 (lowest) 5 (highest)</span>
+                    <div className="scale-[0.8] sm:scale-[0.9]">
+                      <StarRating 
+                        rating={userRating}
+                        isVoted={false}
+                        onRate={handleRate}
+                        readonly={false}
+                        hideText={true}
+                        variant="white"
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
             ) : (
               /* Authorized users or non-THIS WEEK sections see full content */
@@ -570,29 +586,55 @@ export function ContestantCard({
             {/* Re-voting overlay - shown when editing existing vote */}
             {isVoted && isEditing && !showThanks && (
             <div className="absolute inset-0 bg-gray-300 flex items-center justify-center h-full">
-              <div className="-translate-x-2 flex items-center gap-10">
-                <span className="text-2xl font-medium text-gray-600 mr-8">Vote</span>
-                <div className="scale-[2]">
-                   <StarRating 
-                     rating={0}
-                     isVoted={false}
-                    variant="white"
-                    hideText={true}
-                    onRate={(rating) => {
-                      console.log('Edit mode StarRating onRate called with rating:', rating);
-                      console.log('User state:', propUser);
-                      if (!propUser) {
-                        setShowLoginModal(true);
-                        return;
-                      }
-                      setUserRating(rating);
-                      localStorage.setItem(`rating-${name}-${propUser.id}`, rating.toString());
-                      setIsEditing(false);
-                      handleRate(rating); // ИСПРАВЛЕНО: вызываем handleRate для сохранения в БД
-                    }}
-                  />
+              {(viewMode as string) === 'compact' ? (
+                <div className="flex flex-col items-center gap-2">
+                  <div className="scale-[1.2] sm:scale-[1.4]">
+                    <StarRating 
+                      rating={0}
+                      isVoted={false}
+                      variant="white"
+                      hideText={true}
+                      onRate={(rating) => {
+                        console.log('Edit mode StarRating onRate called with rating:', rating);
+                        console.log('User state:', propUser);
+                        if (!propUser) {
+                          setShowLoginModal(true);
+                          return;
+                        }
+                        setUserRating(rating);
+                        localStorage.setItem(`rating-${name}-${propUser.id}`, rating.toString());
+                        setIsEditing(false);
+                        handleRate(rating);
+                      }}
+                    />
+                  </div>
+                  <span className="text-xs text-gray-600 text-center leading-tight">Rate from 1 (lowest)<br />to 5 (highest)</span>
                 </div>
-              </div>
+              ) : (
+                <div className="flex items-center gap-3">
+                  <span className="text-sm text-gray-600 whitespace-nowrap">Rate from 1 (lowest) 5 (highest)</span>
+                  <div className="scale-[0.8] sm:scale-[0.9]">
+                    <StarRating 
+                      rating={0}
+                      isVoted={false}
+                      variant="white"
+                      hideText={true}
+                      onRate={(rating) => {
+                        console.log('Edit mode StarRating onRate called with rating:', rating);
+                        console.log('User state:', propUser);
+                        if (!propUser) {
+                          setShowLoginModal(true);
+                          return;
+                        }
+                        setUserRating(rating);
+                        localStorage.setItem(`rating-${name}-${propUser.id}`, rating.toString());
+                        setIsEditing(false);
+                        handleRate(rating);
+                      }}
+                    />
+                  </div>
+                </div>
+              )}
             </div>
             )}
             
