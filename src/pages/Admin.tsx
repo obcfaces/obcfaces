@@ -1793,7 +1793,7 @@ const Admin = () => {
                                              </Select>
                                              
                                               {/* Admin login with expandable date */}
-                                              <div className="text-xs text-muted-foreground">
+                                               <div className="text-xs text-muted-foreground -mt-[5px]">
                                                  {(() => {
                                                    const statusDate = application.reviewed_at || application.approved_at || application.rejected_at || application.submitted_at;
                                                    const reviewerEmail = application.reviewed_by && profiles.find(p => p.id === application.reviewed_by)?.email;
@@ -2289,7 +2289,7 @@ const Admin = () => {
                                                       </Select>
                                                       
                                                        {/* Admin login with expandable date */}
-                                                       <div className="text-xs text-muted-foreground">
+                                                        <div className="text-xs text-muted-foreground -mt-[5px]">
                                                           {(() => {
                                                             const statusDate = prevApp.reviewed_at || prevApp.approved_at || prevApp.rejected_at || prevApp.submitted_at;
                                                             const reviewerEmail = prevApp.reviewed_by && profiles.find(p => p.id === prevApp.reviewed_by)?.email;
