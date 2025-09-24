@@ -95,7 +95,7 @@ export const SocialWidgets = () => {
       <Button
         onClick={toggleMenu}
         size="lg"
-        className="w-14 h-14 rounded-full bg-blue-600 hover:bg-blue-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 p-0"
+        className="w-14 h-14 rounded-full bg-transparent hover:bg-transparent shadow-lg hover:shadow-xl transition-all duration-300 p-0"
         aria-label="Связаться с нами"
       >
         <img 
