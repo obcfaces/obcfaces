@@ -181,92 +181,48 @@ export const VotersModal = ({ isOpen, onClose, participantId, participantName }:
         return;
       }
 
-      // Get this user's rating history for this specific participant
+      // Get ALL ratings this user gave to this specific participant (to see rating history/changes)
       const { data: ratings, error: ratingsError } = await supabase
         .from('contestant_ratings')
         .select(`
           rating,
           created_at,
+          updated_at,
           contestant_user_id,
           contestant_name,
           participant_id
         `)
         .eq('user_id', userId)
         .or(`participant_id.eq.${participantId},contestant_user_id.eq.${participantData.user_id}`)
-        .order('created_at', { ascending: false });
-
-      // Get user's likes for other participants
-      const { data: likes, error: likesError } = await supabase
-        .from('likes')
-        .select('content_id, created_at')
-        .eq('user_id', userId)
-        .eq('content_type', 'contest')
-        .ilike('content_id', 'contestant-%')
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: true }); // Show oldest first to see progression
 
       if (ratingsError) {
         console.error('Error fetching user ratings:', ratingsError);
+        setUserActivity([]);
+        setActivityLoading(false);
         return;
       }
 
-      if (likesError) {
-        console.error('Error fetching user likes:', likesError);
-        return;
-      }
-
-      // Get profiles for rated users
-      const ratedUserIds = ratings?.map(r => r.contestant_user_id).filter(Boolean) || [];
-      const { data: profiles } = await supabase
-        .from('profiles')
-        .select('id, display_name, first_name, last_name, avatar_url')
-        .in('id', ratedUserIds);
-
-      // Combine data
-      const activityMap = new Map<string, UserActivity>();
-
-      // Process ratings
-      ratings?.forEach(rating => {
-        if (rating.contestant_user_id) {
-          const profile = profiles?.find(p => p.id === rating.contestant_user_id);
-          const key = rating.contestant_user_id;
-          const name = profile?.display_name || `${profile?.first_name || ''} ${profile?.last_name || ''}`.trim() || rating.contestant_name;
-          
-          activityMap.set(key, {
-            target_name: name,
-            target_user_id: rating.contestant_user_id,
+      // Convert ratings to activity format - each rating is a separate activity entry
+      const activities: UserActivity[] = [];
+      
+      if (ratings && ratings.length > 0) {
+        ratings.forEach((rating) => {
+          activities.push({
+            target_name: participantName,
+            target_user_id: participantData.user_id,
             rating: rating.rating,
             like_count: 0,
             last_activity: rating.created_at,
-            target_avatar: profile?.avatar_url
+            target_avatar: undefined // We don't need avatar for this specific case
           });
-        }
-      });
-
-      // Process likes
-      likes?.forEach(like => {
-        // Extract user name from content_id (contestant-card-{name} or contestant-photo-{name}-{number})
-        const match = like.content_id.match(/contestant-(?:card|photo)-(.+?)(?:-\d+)?$/);
-        if (match) {
-          const targetName = match[1];
-          // Find matching activity by name
-          for (const [key, activity] of activityMap.entries()) {
-            if (activity.target_name.toLowerCase() === targetName.toLowerCase()) {
-              activity.like_count++;
-              if (like.created_at > activity.last_activity) {
-                activity.last_activity = like.created_at;
-              }
-              break;
-            }
-          }
-        }
-      });
-
-      const activities = Array.from(activityMap.values())
-        .sort((a, b) => new Date(b.last_activity).getTime() - new Date(a.last_activity).getTime());
+        });
+      }
 
       setUserActivity(activities);
     } catch (error) {
       console.error('Error fetching user activity:', error);
+      setUserActivity([]);
     } finally {
       setActivityLoading(false);
     }
@@ -393,23 +349,23 @@ export const VotersModal = ({ isOpen, onClose, participantId, participantName }:
                                      {activityLoading ? (
                                        <div className="text-xs text-muted-foreground">Loading...</div>
                                      ) : userActivity.length === 0 ? (
-                                       <div className="text-xs text-muted-foreground">No ratings found</div>
+                                       <div className="text-xs text-muted-foreground">No rating history found</div>
                                      ) : (
                                        <div className="space-y-1 max-h-24 overflow-y-auto">
                                          {userActivity.map((activity, actIndex) => (
-                                           activity.rating && (
-                                             <div key={`rating-${activity.target_user_id}-${actIndex}`} className="flex items-center justify-between text-xs">
-                                               <span className="font-medium">{activity.target_name}</span>
-                                               <div className="flex items-center gap-2">
-                                                 <span className={`px-1.5 py-0.5 rounded text-white ${getRatingColor(activity.rating)}`}>
-                                                   {activity.rating}/10
-                                                 </span>
-                                                 <span className="text-muted-foreground">
-                                                   {new Date(activity.last_activity).toLocaleDateString()}
-                                                 </span>
-                                               </div>
+                                           <div key={`rating-history-${actIndex}`} className="flex items-center justify-between text-xs">
+                                             <span className="text-muted-foreground">
+                                               Rating #{actIndex + 1}
+                                             </span>
+                                             <div className="flex items-center gap-2">
+                                               <span className={`px-1.5 py-0.5 rounded text-white ${getRatingColor(activity.rating || 0)}`}>
+                                                 {activity.rating}/10
+                                               </span>
+                                               <span className="text-muted-foreground">
+                                                 {new Date(activity.last_activity).toLocaleDateString()}
+                                               </span>
                                              </div>
-                                           )
+                                           </div>
                                          ))}
                                        </div>
                                      )}
