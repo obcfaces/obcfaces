@@ -1637,55 +1637,6 @@ const Admin = () => {
             </TabsContent>
 
             <TabsContent value="applications" className="space-y-4 -mx-2 md:mx-0">
-              <div className="mb-6 px-0 md:px-6">
-                <div className="flex items-center justify-between">
-                  <h2 className="text-xl font-semibold">Contest Applications</h2>
-                  <div className="flex gap-4 items-center">
-                    <div className="flex flex-col gap-2">
-                       <Select 
-                        value={statusFilter} 
-                        onValueChange={setStatusFilter}
-                      >
-                         <SelectTrigger 
-                          className={`w-20 md:w-32 ${
-                            statusFilter === 'approved' ? 'bg-green-100 border-green-500 text-green-700' :
-                            statusFilter === 'rejected' ? 'bg-red-100 border-red-500 text-red-700' :
-                            ''
-                          }`}
-                        >
-                          <SelectValue placeholder="Filter by status" />
-                        </SelectTrigger>
-                        <SelectContent className="z-50 bg-background border shadow-md">
-                          <SelectItem value="all">All Statuses</SelectItem>
-                          <SelectItem value="pending">Pending</SelectItem>
-                          <SelectItem value="approved">Approved</SelectItem>
-                          <SelectItem value="rejected">Rejected</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      {statusFilter !== 'all' && (
-                        <p className="text-xs text-muted-foreground">
-                          Filter: {statusFilter}
-                        </p>
-                      )}
-                    </div>
-                    <div className="hidden md:block">
-                      <Button
-                        variant={showDeletedApplications ? "default" : "outline"}
-                        onClick={async () => {
-                          if (!showDeletedApplications) {
-                            const deleted = await fetchDeletedApplications();
-                            setDeletedApplications(deleted);
-                          }
-                          setShowDeletedApplications(!showDeletedApplications);
-                        }}
-                        className="text-xs md:text-sm px-2 md:px-4"
-                      >
-                        {showDeletedApplications ? 'Show Active' : 'Show Deleted'}
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              </div>
 
               {/* Applications Stats Dashboard */}
               <div className="mb-6 px-0 md:px-6">
@@ -1705,6 +1656,54 @@ const Admin = () => {
                         </div>
                       ))}
                     </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Status Filter */}
+              <div className="mb-6 px-0 md:px-6">
+                <div className="flex gap-4 items-center justify-start">
+                  <div className="flex flex-col gap-2">
+                     <Select 
+                      value={statusFilter} 
+                      onValueChange={setStatusFilter}
+                    >
+                       <SelectTrigger 
+                        className={`w-20 md:w-32 ${
+                          statusFilter === 'approved' ? 'bg-green-100 border-green-500 text-green-700' :
+                          statusFilter === 'rejected' ? 'bg-red-100 border-red-500 text-red-700' :
+                          ''
+                        }`}
+                      >
+                        <SelectValue placeholder="Filter by status" />
+                      </SelectTrigger>
+                      <SelectContent className="z-50 bg-background border shadow-md">
+                        <SelectItem value="all">All Statuses</SelectItem>
+                        <SelectItem value="pending">Pending</SelectItem>
+                        <SelectItem value="approved">Approved</SelectItem>
+                        <SelectItem value="rejected">Rejected</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    {statusFilter !== 'all' && (
+                      <p className="text-xs text-muted-foreground">
+                        Filter: {statusFilter}
+                      </p>
+                    )}
+                  </div>
+                  <div className="hidden md:block">
+                    <Button
+                      variant={showDeletedApplications ? "default" : "outline"}
+                      onClick={async () => {
+                        if (!showDeletedApplications) {
+                          const deleted = await fetchDeletedApplications();
+                          setDeletedApplications(deleted);
+                        }
+                        setShowDeletedApplications(!showDeletedApplications);
+                      }}
+                      className="text-xs md:text-sm px-2 md:px-4"
+                    >
+                      {showDeletedApplications ? 'Show Active' : 'Show Deleted'}
+                    </Button>
                   </div>
                 </div>
               </div>
