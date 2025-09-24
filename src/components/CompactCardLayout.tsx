@@ -29,7 +29,6 @@ interface CompactCardLayoutProps {
   rank: number;
   userRating: number;
   localAverageRating: number;
-  localTotalVotes: number;
   
   // Card data
   cardData: any;
@@ -74,7 +73,6 @@ export function CompactCardLayout({
   rank,
   userRating,
   localAverageRating,
-  localTotalVotes,
   cardData,
   isLiked,
   hasCommented,
@@ -98,17 +96,19 @@ export function CompactCardLayout({
         <img 
           src={faceImage} 
           alt={`${name} face`}
-          className={`w-24 sm:w-28 md:w-32 h-full object-cover ${(isVoted || isExample || !isThisWeek) ? 'cursor-pointer hover:opacity-90' : 'cursor-not-allowed opacity-75'} transition-opacity`}
-          onClick={() => {
-            if (isVoted || isExample || !isThisWeek) {
-              openModal(0);
-            }
-          }}
-         />
+          className="w-24 sm:w-28 md:w-32 h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
+          onClick={() => openModal(0)}
+        />
         {/* Example Badge on photo for compact view */}
         {isExample && (
           <div className="absolute top-0 left-0 bg-yellow-500 text-white px-1 py-0.5 text-xs font-bold">
             Example
+          </div>
+        )}
+        {/* Rank number in top left corner without padding - for past weeks and current week after voting */}
+        {!isExample && rank > 0 && (!isThisWeek || isVoted) && (
+          <div className="absolute top-0 left-0 bg-black/70 text-white text-xs font-bold min-w-[20px] h-[20px] flex items-center justify-center">
+            {rank}
           </div>
         )}
       </div>
@@ -116,13 +116,9 @@ export function CompactCardLayout({
         <img 
           src={fullBodyImage} 
           alt={`${name} full body`}
-          className={`w-24 sm:w-28 md:w-32 h-full object-cover ${(isVoted || isExample || !isThisWeek) ? 'cursor-pointer hover:opacity-90' : 'cursor-not-allowed opacity-75'} transition-opacity`}
-          onClick={() => {
-            if (isVoted || isExample || !isThisWeek) {
-              openModal(1);
-            }
-          }}
-         />
+          className="w-24 sm:w-28 md:w-32 h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
+          onClick={() => openModal(1)}
+        />
         {additionalPhotos.length > 0 && (
           <div 
             className="absolute bottom-0.5 right-0.5 bg-black/40 text-white/80 text-xs px-1 py-0.5 rounded cursor-pointer hover:bg-black/60 transition-colors"
@@ -133,13 +129,11 @@ export function CompactCardLayout({
         )}
       </div>
       
-      {/* Rating badge in top right corner - always show for past weeks, hide when voting overlay (stars) is visible for current week */}
-      {!isEditing && !showThanks && !isExample && 
-       (!isThisWeek || !((isThisWeek && !propUser) || (!isVoted && propUser))) && (
+      {/* Rating badge in top right corner for past weeks */}
+      {!isEditing && !showThanks && !isExample && !isThisWeek && (
         <div className="absolute top-0 right-0 z-10">
           <div className="bg-contest-blue text-white px-1 py-0.5 rounded-bl text-sm sm:text-base font-bold">
             {localAverageRating > 0 ? localAverageRating.toFixed(1) : '0.0'}
-            <span className="text-xs opacity-75 ml-1 font-normal">({localTotalVotes})</span>
           </div>
         </div>
       )}
@@ -163,8 +157,8 @@ export function CompactCardLayout({
           compact={true}
         />
         
-        {/* Show info ONLY AFTER RATING - for ALL weeks including past weeks */}
-        {!isThisWeek && (isVoted || isExample) && (
+        {/* FOR PAST WEEKS: Show info ALWAYS for ALL USERS - NO CONDITIONS */}
+        {!isThisWeek && (
           <div className={`absolute inset-0 rounded-r flex flex-col justify-between p-1 sm:p-2 md:p-3 ${isExample ? 'bg-yellow-100' : 'bg-white'}`}>
             <div className="flex items-start justify-between">
               {!isExample && (
@@ -192,6 +186,10 @@ export function CompactCardLayout({
                 </div>
               )}
               
+              {!isExample && (
+                <div className="text-right flex-shrink-0">
+                </div>
+              )}
             </div>
             
             {!isExample && (
@@ -284,6 +282,10 @@ export function CompactCardLayout({
                 </div>
               )}
               
+              {!isExample && (
+                <div className="text-right flex-shrink-0">
+                </div>
+              )}
             </div>
             
             {!isExample && (

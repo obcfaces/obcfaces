@@ -281,17 +281,12 @@ const Admin = () => {
         const filteredByStatus = weeklyParticipants.filter(participant => {
           const filterStatus = participantFilters[participant.id] || (participant.final_rank ? 'this week' : 'approve');
           
-          // Exclude if manually set to 'pending' - these should appear in Card tab
-          if (filterStatus === 'pending') {
-            return false;
-          }
-          
           // Include if manually set to 'this week'
           if (filterStatus === 'this week') {
             return true;
           }
 
-          // Also include participants created this week (but not if they're marked as pending)
+          // Also include participants created this week
           const createdDate = new Date(participant.created_at);
           const participantMonday = new Date(createdDate);
           const participantDayOfWeek = createdDate.getDay();
@@ -1130,13 +1125,12 @@ const Admin = () => {
                               <SelectTrigger className="w-28 h-6 text-xs">
                                 <SelectValue />
                               </SelectTrigger>
-                                <SelectContent className="z-50 bg-background border shadow-md">
-                                  <SelectItem value="this week">This Week</SelectItem>
-                                  <SelectItem value="next week">Next Week</SelectItem>
-                                  <SelectItem value="approve">Approve</SelectItem>
-                                  <SelectItem value="reject">Reject</SelectItem>
-                                  <SelectItem value="pending">Pending</SelectItem>
-                                </SelectContent>
+                              <SelectContent className="z-50 bg-background border shadow-md">
+                                <SelectItem value="this week">This Week</SelectItem>
+                                <SelectItem value="next week">Next Week</SelectItem>
+                                <SelectItem value="approve">Approve</SelectItem>
+                                <SelectItem value="reject">Reject</SelectItem>
+                              </SelectContent>
                             </Select>
                             
                             {/* Status change date with reviewer login - desktop */}
@@ -1264,7 +1258,6 @@ const Admin = () => {
                                     <SelectItem value="next week">Next Week</SelectItem>
                                     <SelectItem value="approve">Approve</SelectItem>
                                     <SelectItem value="reject">Reject</SelectItem>
-                                    <SelectItem value="pending">Pending</SelectItem>
                                   </SelectContent>
                                 </Select>
                                 
@@ -1658,18 +1651,6 @@ const Admin = () => {
               <div className="space-y-4 px-0 md:px-6">
                 {(() => {
                   console.log('Filtering applications, statusFilter:', statusFilter);
-                  // Get participants marked as "pending" from weekly participants
-                  const pendingParticipants = weeklyParticipants
-                    .filter(participant => participantFilters[participant.id] === 'pending')
-                    .map(participant => ({
-                      id: `pending-${participant.id}`,
-                      user_id: participant.user_id,
-                      application_data: participant.application_data,
-                      status: 'pending',
-                      submitted_at: participant.created_at,
-                      isPendingFromWeekly: true
-                    }));
-
                   const filteredApplications = (showDeletedApplications ? deletedApplications : contestApplications)
                     .filter((application) => {
                       const appData = application.application_data || {};
@@ -1681,15 +1662,13 @@ const Admin = () => {
                       if (application.status === 'approved') {
                         // Check if this user is already in weekly participants (moved to "this week")
                         const isInWeeklyParticipants = weeklyParticipants.some(participant => 
-                          participant.user_id === application.user_id && participantFilters[participant.id] !== 'pending'
+                          participant.user_id === application.user_id
                         );
                         return !isInWeeklyParticipants;
                       }
                       
                       return true;
-                    })
-                    // Add pending participants from weekly to the applications list
-                    .concat(pendingParticipants);
+                    });
                   
                   const userApplicationsMap = new Map();
                   filteredApplications.forEach(app => {
@@ -1709,23 +1688,21 @@ const Admin = () => {
                     );
                    }
 
-                    // Function to render status badge
-                    const getApplicationStatusBadge = (status: string) => {
-                      const badgeVariant = status === 'approved' ? 'default' : 
-                                          status === 'rejected' ? 'destructive' :
-                                          status === 'pending' ? 'outline' :
-                                          'secondary';
-                      const badgeColor = status === 'approved' ? 'bg-green-100 text-green-700 border-green-500' :
-                                        status === 'rejected' ? 'bg-red-100 text-red-700 border-red-500' :
-                                        status === 'pending' ? 'bg-yellow-100 text-yellow-700 border-yellow-500' :
-                                        '';
-                      
-                      return (
-                        <Badge variant={badgeVariant} className={badgeColor}>
-                          {status.charAt(0).toUpperCase() + status.slice(1)}
-                        </Badge>
-                      );
-                    };
+                   // Function to render status badge
+                   const getApplicationStatusBadge = (status: string) => {
+                     const badgeVariant = status === 'approved' ? 'default' : 
+                                         status === 'rejected' ? 'destructive' : 
+                                         'secondary';
+                     const badgeColor = status === 'approved' ? 'bg-green-100 text-green-700 border-green-500' :
+                                       status === 'rejected' ? 'bg-red-100 text-red-700 border-red-500' :
+                                       '';
+                     
+                     return (
+                       <Badge variant={badgeVariant} className={badgeColor}>
+                         {status.charAt(0).toUpperCase() + status.slice(1)}
+                       </Badge>
+                     );
+                   };
 
                    return uniqueApplications.map((application) => {
                     const appData = typeof application.application_data === 'string' 
@@ -1875,44 +1852,43 @@ const Admin = () => {
 
                                  {/* Column 3: Status Button (20ch) - только для десктопа */}
                                   <div className="w-[20ch] flex-shrink-0 p-4 pl-0 flex flex-col gap-2 -mt-[20px]">
-                                    {/* Status dropdown at the top - desktop */}
-                                    {!showDeletedApplications && !application.isPendingFromWeekly && (
-                                      <Select 
-                                        value={application.status} 
-                                         onValueChange={(newStatus) => {
-                                           if (newStatus === 'delete') {
-                                             const appData = typeof application.application_data === 'string' 
-                                               ? JSON.parse(application.application_data) 
-                                               : application.application_data;
-                                             setApplicationToDelete({ 
-                                               id: application.id, 
-                                               name: `${appData.firstName} ${appData.lastName}` 
-                                             });
-                                             setShowDeleteConfirmModal(true);
-                                             return;
-                                           }
-                                           if (newStatus === 'rejected') {
-                                             const appData = typeof application.application_data === 'string' 
-                                               ? JSON.parse(application.application_data) 
-                                               : application.application_data;
-                                             setApplicationToReject({ 
-                                               id: application.id, 
-                                               name: `${appData.firstName} ${appData.lastName}` 
-                                             });
-                                             setRejectModalOpen(true);
-                                             return;
-                                           }
-                                           reviewApplication(application.id, newStatus);
-                                         }}
-                                      >
-                                        <SelectTrigger 
-                                           className={`w-[60%] h-7 text-xs ${
-                                             application.status === 'approved' ? 'bg-green-100 border-green-500 text-green-700' :
-                                             application.status === 'rejected' ? 'bg-red-100 border-red-500 text-red-700' :
-                                             application.status === 'pending' ? 'bg-yellow-100 border-yellow-500 text-yellow-700' :
-                                             ''
-                                           }`}
-                                        >
+                                   {/* Status dropdown at the top - desktop */}
+                                   {!showDeletedApplications && (
+                                     <Select 
+                                       value={application.status} 
+                                        onValueChange={(newStatus) => {
+                                          if (newStatus === 'delete') {
+                                            const appData = typeof application.application_data === 'string' 
+                                              ? JSON.parse(application.application_data) 
+                                              : application.application_data;
+                                            setApplicationToDelete({ 
+                                              id: application.id, 
+                                              name: `${appData.firstName} ${appData.lastName}` 
+                                            });
+                                            setShowDeleteConfirmModal(true);
+                                            return;
+                                          }
+                                          if (newStatus === 'rejected') {
+                                            const appData = typeof application.application_data === 'string' 
+                                              ? JSON.parse(application.application_data) 
+                                              : application.application_data;
+                                            setApplicationToReject({ 
+                                              id: application.id, 
+                                              name: `${appData.firstName} ${appData.lastName}` 
+                                            });
+                                            setRejectModalOpen(true);
+                                            return;
+                                          }
+                                          reviewApplication(application.id, newStatus);
+                                        }}
+                                     >
+                                       <SelectTrigger 
+                                          className={`w-[60%] h-7 text-xs ${
+                                            application.status === 'approved' ? 'bg-green-100 border-green-500 text-green-700' :
+                                            application.status === 'rejected' ? 'bg-red-100 border-red-500 text-red-700' :
+                                            ''
+                                          }`}
+                                       >
                                          <SelectValue />
                                        </SelectTrigger>
                                         <SelectContent>
@@ -1921,16 +1897,9 @@ const Admin = () => {
                                           <SelectItem value="rejected">Rejected</SelectItem>
                                         </SelectContent>
                                      </Select>
-                                    )}
-                                    
-                                    {/* Special indicator for pending from weekly */}
-                                    {application.isPendingFromWeekly && (
-                                      <div className="text-xs text-yellow-600 font-medium">
-                                        Moved from This Week
-                                      </div>
-                                    )}
-                                    
-                                    {/* Status change date with reviewer login - desktop */}
+                                   )}
+                                   
+                                   {/* Status change date with reviewer login - desktop */}
                                     <div 
                                       className="text-xs text-muted-foreground cursor-pointer hover:text-foreground"
                                       onClick={() => {
@@ -2067,9 +2036,9 @@ const Admin = () => {
                                            
                                              <div className="flex-1"></div>
                                           
-                                               {/* Status filter positioned at bottom */}
-                                                {!showDeletedApplications && !application.isPendingFromWeekly && (
-                                                  <div className="absolute bottom-12 right-13 flex items-center gap-2">
+                                              {/* Status filter positioned at bottom */}
+                                               {!showDeletedApplications && (
+                                                 <div className="absolute bottom-12 right-13 flex items-center gap-2">
                                              <Select 
                                                value={application.status}
                                                 onValueChange={(newStatus) => {
@@ -2098,13 +2067,12 @@ const Admin = () => {
                                                   reviewApplication(application.id, newStatus);
                                                 }}
                                              >
-                                                 <SelectTrigger 
-                                                    className={`w-24 h-7 text-xs ${
-                                                      application.status === 'approved' ? 'bg-green-100 border-green-500 text-green-700' :
-                                                      application.status === 'rejected' ? 'bg-red-100 border-red-500 text-red-700' :
-                                                      application.status === 'pending' ? 'bg-yellow-100 border-yellow-500 text-yellow-700' :
-                                                      ''
-                                                    }`}
+                                                <SelectTrigger 
+                                                   className={`w-24 h-7 text-xs ${
+                                                     application.status === 'approved' ? 'bg-green-100 border-green-500 text-green-700' :
+                                                     application.status === 'rejected' ? 'bg-red-100 border-red-500 text-red-700' :
+                                                     ''
+                                                   }`}
                                                 >
                                                  <SelectValue />
                                                </SelectTrigger>
@@ -2113,82 +2081,73 @@ const Admin = () => {
                                                   <SelectItem value="approved">Approved</SelectItem>
                                                   <SelectItem value="rejected">Rejected</SelectItem>
                                                 </SelectContent>
-                                              </Select>
-                                                    </div>
-                                                )}
-                                                
-                                                {/* Special indicator for pending from weekly - mobile */}
-                                                {application.isPendingFromWeekly && (
-                                                  <div className="absolute bottom-8 right-2 text-xs text-yellow-600 font-medium">
-                                                    From This Week
-                                                  </div>
-                                                )}
-                                              
-                                               {/* Admin login with expandable date */}
-                                                {!application.isPendingFromWeekly && (
-                                                  <div className="absolute bottom-4 right-2 text-xs text-muted-foreground">
-                                                    {(() => {
-                                                      const statusDate = application.reviewed_at || application.approved_at || application.rejected_at || application.submitted_at;
-                                                      const reviewerEmail = application.reviewed_by && profiles.find(p => p.id === application.reviewed_by)?.email;
-                                                      const reviewerLogin = reviewerEmail ? reviewerEmail.substring(0, 3) : 'sys';
-                                                      
-                                                      const showDatePopup = async () => {
-                                                        try {
-                                                          // Fetch application history
-                                                          const { data: history } = await supabase
-                                                            .from('contest_application_history')
-                                                            .select('*')
-                                                            .eq('application_id', application.id)
-                                                            .order('created_at', { ascending: true });
+                                             </Select>
+                                             
+                                              {/* Admin login with expandable date */}
+                                               <div className="text-xs text-muted-foreground -mt-[5px]">
+                                                 {(() => {
+                                                   const statusDate = application.reviewed_at || application.approved_at || application.rejected_at || application.submitted_at;
+                                                   const reviewerEmail = application.reviewed_by && profiles.find(p => p.id === application.reviewed_by)?.email;
+                                                   const reviewerLogin = reviewerEmail ? reviewerEmail.substring(0, 3) : 'sys';
+                                                   
+                                                   const showDatePopup = async () => {
+                                                     try {
+                                                       // Fetch application history
+                                                       const { data: history } = await supabase
+                                                         .from('contest_application_history')
+                                                         .select('*')
+                                                         .eq('application_id', application.id)
+                                                         .order('created_at', { ascending: true });
 
-                                                          // Remove duplicates based on status, created_at, and changed_by
-                                                          const uniqueHistory = (history || []).filter((entry, index, arr) => {
-                                                            return arr.findIndex(e => 
-                                                              e.status === entry.status &&
-                                                              e.created_at === entry.created_at &&
-                                                              e.changed_by === entry.changed_by
-                                                            ) === index;
-                                                          });
+                                                       // Remove duplicates based on status, created_at, and changed_by
+                                                       const uniqueHistory = (history || []).filter((entry, index, arr) => {
+                                                         return arr.findIndex(e => 
+                                                           e.status === entry.status &&
+                                                           e.created_at === entry.created_at &&
+                                                           e.changed_by === entry.changed_by
+                                                         ) === index;
+                                                       });
 
-                                                          // Add system entry as first only if no history exists
-                                                          const historyWithCurrent = [...uniqueHistory];
-                                                          if (historyWithCurrent.length === 0) {
-                                                            historyWithCurrent.unshift({
-                                                              id: 'system',
-                                                              application_id: application.id,
-                                                              application_data: null,
-                                                              status: 'pending',
-                                                              notes: '',
-                                                              rejection_reason_types: [],
-                                                              created_at: application.submitted_at,
-                                                              changed_by: '',
-                                                              change_reason: 'Application submitted'
-                                                            });
-                                                          }
+                                                       // Add system entry as first only if no history exists
+                                                       const historyWithCurrent = [...uniqueHistory];
+                                                       if (historyWithCurrent.length === 0) {
+                                                         historyWithCurrent.unshift({
+                                                           id: 'system',
+                                                           application_id: application.id,
+                                                           application_data: null,
+                                                           status: 'pending',
+                                                           notes: '',
+                                                           rejection_reason_types: [],
+                                                           created_at: application.submitted_at,
+                                                           changed_by: '',
+                                                           change_reason: 'Application submitted'
+                                                         });
+                                                       }
 
-                                                          setApplicationHistory(historyWithCurrent);
-                                                          setAdminDatePopup({
-                                                            show: true,
-                                                            date: '',
-                                                            admin: '',
-                                                            applicationId: application.id
-                                                          });
-                                                        } catch (error) {
-                                                          console.error('Error fetching application history:', error);
-                                                        }
-                                                      };
-                                                      
-                                                      return (
-                                                        <span 
-                                                          className="text-blue-600 cursor-pointer hover:text-blue-800"
-                                                          onClick={showDatePopup}
-                                                        >
-                                                          {reviewerLogin}
-                                                        </span>
-                                                      );
-                                                    })()}
-                                                  </div>
-                                                )}
+                                                       setApplicationHistory(historyWithCurrent);
+                                                       setAdminDatePopup({
+                                                         show: true,
+                                                         date: '',
+                                                         admin: '',
+                                                         applicationId: application.id
+                                                       });
+                                                     } catch (error) {
+                                                       console.error('Error fetching application history:', error);
+                                                     }
+                                                   };
+                                                   
+                                                   return (
+                                                     <span 
+                                                       className="text-blue-600 cursor-pointer hover:text-blue-800"
+                                                       onClick={showDatePopup}
+                                                     >
+                                                       {reviewerLogin}
+                                                     </span>
+                                                   );
+                                                 })()}
+                                              </div>
+                                           </div>
+                                         )}
                                       </div>
                                 </div>
                               </div>
