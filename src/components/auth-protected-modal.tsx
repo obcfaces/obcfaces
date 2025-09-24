@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ContestParticipationModal } from "@/components/contest-participation-modal";
 import LoginModalContent from "@/components/login-modal-content";
+import { Button } from "@/components/ui/button";
 
 interface AuthProtectedModalProps {
   children?: React.ReactNode;
@@ -12,6 +13,8 @@ export const AuthProtectedModal = ({ children }: AuthProtectedModalProps) => {
   const [session, setSession] = useState<any>(null);
   const [isParticipationOpen, setIsParticipationOpen] = useState(false);
   const [isLoginOpen, setIsLoginOpen] = useState(false);
+  const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
+  const [applicationStatus, setApplicationStatus] = useState<string | null>(null);
 
   useEffect(() => {
     // Subscribe to auth state changes
@@ -29,13 +32,44 @@ export const AuthProtectedModal = ({ children }: AuthProtectedModalProps) => {
     return () => subscription.unsubscribe();
   }, []);
 
-  const handleTriggerClick = () => {
+  const handleTriggerClick = async () => {
     console.log('Participation button clicked, session:', session?.user?.email_confirmed_at);
     
     if (session?.user?.email_confirmed_at) {
-      // User is authenticated, open participation modal
-      console.log('Opening participation modal for authenticated user');
-      setIsParticipationOpen(true);
+      // User is authenticated, check their application status
+      const { data: applications, error } = await supabase
+        .from('contest_applications')
+        .select('status')
+        .eq('user_id', session.user.id)
+        .eq('is_active', true)
+        .eq('deleted_at', null)
+        .order('created_at', { ascending: false })
+        .limit(1);
+
+      if (error) {
+        console.error('Error checking application status:', error);
+        setIsParticipationOpen(true);
+        return;
+      }
+
+      if (applications && applications.length > 0) {
+        const status = applications[0].status;
+        
+        if (status === 'rejected') {
+          // Allow new participation
+          console.log('Opening participation modal for user with rejected application');
+          setIsParticipationOpen(true);
+        } else {
+          // Show status modal
+          console.log('Showing status modal for user with existing application:', status);
+          setApplicationStatus(status);
+          setIsStatusModalOpen(true);
+        }
+      } else {
+        // No application exists, allow participation
+        console.log('Opening participation modal for user with no application');
+        setIsParticipationOpen(true);
+      }
     } else {
       // User is not authenticated, open login modal (same as header)
       console.log('Opening login modal for unauthenticated user');
@@ -66,6 +100,28 @@ export const AuthProtectedModal = ({ children }: AuthProtectedModalProps) => {
         onOpenChange={setIsParticipationOpen}
         editMode={false}
       />
+
+      {/* Status Information Modal */}
+      <Dialog open={isStatusModalOpen} onOpenChange={setIsStatusModalOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Заявка уже существует</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <p className="text-muted-foreground">
+              У вас уже есть заявка со статусом: <span className="font-semibold">{applicationStatus}</span>
+            </p>
+            <p className="text-sm text-muted-foreground mt-2">
+              Новую заявку можно подать только после отклонения предыдущей.
+            </p>
+          </div>
+          <div className="flex justify-end">
+            <Button onClick={() => setIsStatusModalOpen(false)}>
+              Понятно
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 };
