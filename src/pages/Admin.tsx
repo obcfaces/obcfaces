@@ -929,50 +929,28 @@ const Admin = () => {
 
             <TabsContent value="weekly" className="space-y-4">
               <div className="mb-6">
-                <h2 className="text-xl font-semibold">This Week Participants</h2>
-                <p className="text-muted-foreground">Current week participants with voting stats</p>
-                
-                 {/* Voting stats above filter */}
-                 <div className="mt-4 mb-4 p-4 bg-muted rounded-lg">
-                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-                     <div>
-                       <div 
-                         className="text-2xl font-bold text-blue-600 cursor-pointer hover:text-blue-700"
-                         onClick={() => {
-                           toast({
-                             title: "Total Votes",
-                             description: `${filteredWeeklyParticipants.reduce((sum, p) => sum + (p.total_votes || 0), 0)} total votes across all participants`,
-                           });
-                         }}
-                       >
-                         {filteredWeeklyParticipants.reduce((sum, p) => sum + (p.total_votes || 0), 0)}
-                       </div>
-                       <div className="text-xs text-muted-foreground">Total Votes</div>
-                     </div>
-                     <div>
-                       <div className="text-2xl font-bold text-blue-600">
-                         {filteredWeeklyParticipants.length > 0 
-                           ? (filteredWeeklyParticipants.reduce((sum, p) => sum + (p.average_rating || 0), 0) / filteredWeeklyParticipants.length).toFixed(1)
-                           : '0.0'
-                         }
-                       </div>
-                       <div className="text-xs text-muted-foreground">Avg Rating</div>
-                     </div>
-                     <div>
-                       <div className="text-2xl font-bold">{filteredWeeklyParticipants.length}</div>
-                       <div className="text-xs text-muted-foreground">Participants</div>
-                     </div>
-                     <div>
-                       <div className="text-2xl font-bold text-blue-600">
-                         {filteredWeeklyParticipants.length > 0 
-                           ? Math.max(...filteredWeeklyParticipants.map(p => p.average_rating || 0)).toFixed(1)
-                           : '0.0'
-                         }
-                       </div>
-                       <div className="text-xs text-muted-foreground">Top Rating</div>
-                     </div>
-                   </div>
-                 </div>
+                {/* Compact stats line */}
+                <div className="mb-4 p-3 bg-muted rounded-lg">
+                  <div className="text-sm text-muted-foreground space-y-1">
+                    <div className="flex items-center gap-4">
+                      <span className="font-medium">
+                        {filteredWeeklyParticipants.length} - {filteredWeeklyParticipants.reduce((sum, p) => sum + (p.total_votes || 0), 0)} all
+                      </span>
+                      <span className="text-xs">
+                        votes: {filteredWeeklyParticipants.reduce((sum, p) => sum + (p.total_votes || 0), 0)}, 
+                        likes: {filteredWeeklyParticipants.reduce((sum, p) => sum + (p.total_votes || 0), 0)}
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-7 gap-2 text-xs">
+                      {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map((day, index) => (
+                        <div key={day} className="text-center p-1 bg-background rounded">
+                          <div className="font-medium">{day.slice(0, 3)}</div>
+                          <div className="text-xs text-muted-foreground">0 - 0</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
                 
                 <Select value={weeklyContestFilter} onValueChange={setWeeklyContestFilter}>
                   <SelectTrigger className="w-48">
