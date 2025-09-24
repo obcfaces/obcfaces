@@ -167,7 +167,21 @@ export const VotersModal = ({ isOpen, onClose, participantId, participantName }:
   const fetchUserActivity = async (userId: string) => {
     setActivityLoading(true);
     try {
-      // Get user's all ratings to show their complete rating history
+      // First get the participant's user_id
+      const { data: participantData, error: participantError } = await supabase
+        .from('weekly_contest_participants')
+        .select('user_id')
+        .eq('id', participantId)
+        .single();
+
+      if (participantError || !participantData) {
+        console.error('Error fetching participant for activity:', participantError);
+        setUserActivity([]);
+        setActivityLoading(false);
+        return;
+      }
+
+      // Get this user's rating history for this specific participant
       const { data: ratings, error: ratingsError } = await supabase
         .from('contestant_ratings')
         .select(`
@@ -178,6 +192,7 @@ export const VotersModal = ({ isOpen, onClose, participantId, participantName }:
           participant_id
         `)
         .eq('user_id', userId)
+        .or(`participant_id.eq.${participantId},contestant_user_id.eq.${participantData.user_id}`)
         .order('created_at', { ascending: false });
 
       // Get user's likes for other participants
@@ -369,11 +384,11 @@ export const VotersModal = ({ isOpen, onClose, participantId, participantName }:
                                    Voted on {new Date(voter.created_at).toLocaleString()}
                                  </p>
                                  
-                                 {/* Show this user's all ratings history under their latest rating */}
+                                 {/* Show this user's rating history for this candidate */}
                                  {expandedUser === voter.user_id && (
                                    <div className="mt-3 p-2 bg-muted/30 rounded-lg">
                                      <h5 className="text-xs font-medium text-muted-foreground mb-2">
-                                       All ratings by this user:
+                                       Rating history for {participantName}:
                                      </h5>
                                      {activityLoading ? (
                                        <div className="text-xs text-muted-foreground">Loading...</div>
