@@ -101,7 +101,7 @@ export const SocialWidgets = () => {
         <img 
           src={messengerMainIcon} 
           alt="Messenger" 
-          className="w-16 h-16 object-contain"
+          className="w-20 h-20 object-contain"
         />
       </Button>
     </div>
