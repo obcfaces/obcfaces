@@ -15,6 +15,10 @@ export const SocialWidgets = () => {
     window.open(`https://wa.me/${phoneNumber.replace(/[^0-9]/g, '')}`, '_blank');
   };
 
+  const openMessenger = () => {
+    window.open('https://www.facebook.com/share/1PzEdJr8WL/?mibextid=wwXIfr', '_blank');
+  };
+
   const clearAutoCloseTimeout = () => {
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
@@ -54,9 +58,18 @@ export const SocialWidgets = () => {
 
   return (
     <div className="fixed bottom-6 right-6 flex flex-col items-end gap-3 z-50">
-      {/* Telegram and WhatsApp buttons - показываются только когда меню открыто */}
+      {/* Социальные кнопки - показываются только когда меню открыто */}
       {isOpen && (
         <>
+          <Button
+            onClick={() => handleSocialClick(openMessenger)}
+            size="lg"
+            className="w-12 h-12 rounded-full bg-blue-600 hover:bg-blue-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 animate-fade-in"
+            aria-label="Написать в Facebook Messenger"
+          >
+            <MessageCircle className="w-5 h-5" />
+          </Button>
+          
           <Button
             onClick={() => handleSocialClick(openTelegram)}
             size="lg"
@@ -77,14 +90,14 @@ export const SocialWidgets = () => {
         </>
       )}
       
-      {/* Главная кнопка Ask */}
+      {/* Главная кнопка мессенджера */}
       <Button
         onClick={toggleMenu}
         size="lg"
-        className="w-14 h-14 rounded-full bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-300"
+        className="w-14 h-14 rounded-full bg-blue-600 hover:bg-blue-700 text-white shadow-lg hover:shadow-xl transition-all duration-300"
         aria-label="Связаться с нами"
       >
-        <MessageSquare className="w-6 h-6" />
+        <MessageCircle className="w-6 h-6" />
       </Button>
     </div>
   );
