@@ -948,12 +948,12 @@ const Admin = () => {
                       votes: {filteredWeeklyParticipants.reduce((sum, p) => sum + (p.total_votes || 0), 0)}, 
                       likes: {filteredWeeklyParticipants.reduce((sum, p) => sum + (p.total_votes || 0), 0)}
                     </div>
-                    <div className="grid grid-cols-7 gap-2 text-xs">
+                    <div className="grid grid-cols-7 gap-1 text-xs">
                       {dailyStats.map((stat, index) => (
-                        <div key={index} className="text-center p-2 bg-background rounded">
-                          <div className="font-medium">{stat.day_name}</div>
+                        <div key={index} className="text-center p-1 bg-background rounded">
+                          <div className="font-medium text-xs">{stat.day_name}</div>
                           <div className="text-xs text-muted-foreground">
-                            {stat.vote_count} - {stat.like_count}
+                            {stat.vote_count}-{stat.like_count}
                           </div>
                         </div>
                       ))}
