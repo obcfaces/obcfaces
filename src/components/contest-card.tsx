@@ -104,16 +104,14 @@ export function ContestantCard({
   const [localTotalVotes, setLocalTotalVotes] = useState(totalVotes);
   const [previousUserRating, setPreviousUserRating] = useState(0);
   
-  // Use unified card data hook with stable dependencies - TEMPORARILY DISABLED
-  // const { data: cardData, loading: cardDataLoading, refresh: refreshCardData } = useCardData(name, propUser?.id, profileId);
-  const cardData = { likes: 0, comments: 0, isLiked: false, hasCommented: false };
-  const cardDataLoading = false;
+  // Use unified card data hook with stable dependencies
+  const { data: cardData, loading: cardDataLoading, refresh: refreshCardData } = useCardData(name, propUser?.id, profileId);
 
-  // Initialize local state when props change - DISABLED to prevent infinite recursion
-  // useEffect(() => {
-  //   setLocalAverageRating(averageRating);
-  //   setLocalTotalVotes(totalVotes);
-  // }, [averageRating, totalVotes]);
+  // Initialize local state when props change
+  useEffect(() => {
+    setLocalAverageRating(averageRating);
+    setLocalTotalVotes(totalVotes);
+  }, [averageRating, totalVotes]);
   
   
   // TEMPORARILY DISABLED ALL EFFECTS AND PROP SYNC TO STOP RECURSION
@@ -126,53 +124,53 @@ export function ContestantCard({
   // Local state should only be updated through user interactions, not props changes
   // This prevents infinite recursion from prop updates
 
-  // TEMPORARILY DISABLED - Check if user is admin
-  // useEffect(() => {
-  //   const checkAdminStatus = async () => {
-  //     if (!user?.id) return;
+  // Check if user is admin
+  useEffect(() => {
+    const checkAdminStatus = async () => {
+      if (!propUser?.id) return;
       
-  //     try {
-  //       const { data: roles } = await supabase
-  //         .from('user_roles')
-  //         .select('role')
-  //         .eq('user_id', user.id);
+      try {
+        const { data: roles } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', propUser.id);
         
-  //       setIsAdmin(roles?.some(r => r.role === 'admin' || r.role === 'moderator') || false);
-  //     } catch (error) {
-  //       console.error('Error checking admin status:', error);
-  //       setIsAdmin(false);
-  //     }
-  //   };
+        setIsAdmin(roles?.some(r => r.role === 'admin' || r.role === 'moderator') || false);
+      } catch (error) {
+        console.error('Error checking admin status:', error);
+        setIsAdmin(false);
+      }
+    };
 
-  //   checkAdminStatus();
-  // }, [user?.id]);
+    checkAdminStatus();
+  }, [propUser?.id]);
 
-  // TEMPORARILY DISABLED - Load user's current rating using secure function with user_id
-  // useEffect(() => {
-  //   const loadUserRating = async () => {
-  //     if (!user?.id || !profileId) return;
+  // Load user's current rating using secure function with user_id
+  useEffect(() => {
+    const loadUserRating = async () => {
+      if (!propUser?.id || !profileId) return;
 
-  //     try {
-  //       const { data: userRating } = await supabase
-  //         .rpc('get_user_rating_for_participant', { 
-  //           participant_id_param: profileId 
-  //         });
+      try {
+        const { data: userRating } = await supabase
+          .rpc('get_user_rating_for_participant', { 
+            participant_id_param: profileId 
+          });
 
-  //       if (userRating !== null && typeof userRating === 'number') {
-  //         setUserRating(userRating);
-  //         setPreviousUserRating(userRating); // Store the current rating as previous
-  //         setIsVoted(true);
-  //       } else {
-  //         setUserRating(0);
-  //         setPreviousUserRating(0);
-  //       }
-  //     } catch (error) {
-  //       console.error('Error loading user rating:', error);
-  //     }
-  //   };
+        if (userRating !== null && typeof userRating === 'number') {
+          setUserRating(userRating);
+          setPreviousUserRating(userRating); // Store the current rating as previous
+          setIsVoted(true);
+        } else {
+          setUserRating(0);
+          setPreviousUserRating(0);
+        }
+      } catch (error) {
+        console.error('Error loading user rating:', error);
+      }
+    };
 
-  //   loadUserRating();
-  // }, [user?.id, profileId]);
+    loadUserRating();
+  }, [propUser?.id, profileId]);
   // Initialize isVoted state without complex initialization
   const [isVoted, setIsVoted] = useState(propIsVoted || false);
   const [showLoginModal, setShowLoginModal] = useState(false);
@@ -208,80 +206,80 @@ export function ContestantCard({
     }
   };
 
-  // Load user's existing rating when user changes - TEMPORARILY DISABLED
-  // useEffect(() => {
-  //   if (propUser?.id && profileId) {
-  //     loadUserExistingRating(propUser.id);
-  //   } else {
-  //     // Reset rating if no user
-  //     setUserRating(0);
-  //     setIsVoted(false);
-  //   }
-  // }, [propUser?.id, profileId, name]);
+  // Load user's existing rating when user changes
+  useEffect(() => {
+    if (propUser?.id && profileId) {
+      loadUserExistingRating(propUser.id);
+    } else {
+      // Reset rating if no user
+      setUserRating(0);
+      setIsVoted(false);
+    }
+  }, [propUser?.id, profileId, name]);
 
   // Login modal removed auto-close
 
-  // TEMPORARILY DISABLED - Load user voting status and setup dislikes - only run when we have a stable user
-  // useEffect(() => {
-  //   if (!user?.id) return; // Exit early if no user
+  // Load user voting status and setup dislikes - only run when we have a stable user
+  useEffect(() => {
+    if (!propUser?.id) return; // Exit early if no user
     
-  //   const loadUserVotingData = async () => {
-  //     // Load user's likes status for card
-  //     const { data: userLikes } = await supabase
-  //       .from("likes")
-  //       .select("content_id")
-  //       .eq("content_type", "contest")
-  //       .eq("user_id", user.id)
-  //       .eq("content_id", `contestant-card-${name}`);
+    const loadUserVotingData = async () => {
+      // Load user's likes status for card
+      const { data: userLikes } = await supabase
+        .from("likes")
+        .select("content_id")
+        .eq("content_type", "contest")
+        .eq("user_id", propUser.id)
+        .eq("content_id", `contestant-card-${name}`);
       
-  //     if (userLikes && userLikes.length > 0) {
-  //       setIsLiked([true, true]); // Set both to true if user liked the card
-  //     } else {
-  //       setIsLiked([false, false]);
-  //     }
+      if (userLikes && userLikes.length > 0) {
+        setIsLiked([true, true]); // Set both to true if user liked the card
+      } else {
+        setIsLiked([false, false]);
+      }
 
-  //     // Load user's comments status
-  //     const contentIds = profileId 
-  //       ? [`contestant-user-${profileId}-0`, `contestant-user-${profileId}-1`]
-  //       : [`contestant-photo-${name}-0`, `contestant-photo-${name}-1`];
+      // Load user's comments status
+      const contentIds = profileId 
+        ? [`contestant-user-${profileId}-0`, `contestant-user-${profileId}-1`]
+        : [`contestant-photo-${name}-0`, `contestant-photo-${name}-1`];
         
-  //     const { data: userComments } = await supabase
-  //       .from("photo_comments")
-  //       .select("content_id")
-  //       .eq("content_type", "contest")
-  //       .eq("user_id", user.id)
-  //       .in("content_id", contentIds);
+      const { data: userComments } = await supabase
+        .from("photo_comments")
+        .select("content_id")
+        .eq("content_type", "contest")
+        .eq("user_id", propUser.id)
+        .in("content_id", contentIds);
       
-  //     if (userComments && userComments.length > 0) {
-  //       setHasCommented(true);
-  //     }
+      if (userComments && userComments.length > 0) {
+        setHasCommented(true);
+      }
 
-  //     // Load dislike votes for next week
-  //     const { data: dislikeVotes } = await supabase
-  //       .from("next_week_votes")
-  //       .select("vote_type")
-  //       .eq("candidate_name", name)
-  //       .eq("vote_type", "dislike");
+      // Load dislike votes for next week
+      const { data: dislikeVotes } = await supabase
+        .from("next_week_votes")
+        .select("vote_type")
+        .eq("candidate_name", name)
+        .eq("vote_type", "dislike");
       
-  //     if (dislikeVotes) {
-  //       setDislikesCount(dislikeVotes.length);
-  //     }
+      if (dislikeVotes) {
+        setDislikesCount(dislikeVotes.length);
+      }
 
-  //     // Check if current user disliked
-  //     const { data: userDislike } = await supabase
-  //       .from("next_week_votes")
-  //       .select("vote_type")
-  //       .eq("candidate_name", name)
-  //       .eq("user_id", user.id)
-  //       .eq("vote_type", "dislike");
+      // Check if current user disliked
+      const { data: userDislike } = await supabase
+        .from("next_week_votes")
+        .select("vote_type")
+        .eq("candidate_name", name)
+        .eq("user_id", propUser.id)
+        .eq("vote_type", "dislike");
       
-  //     if (userDislike && userDislike.length > 0) {
-  //       setIsDisliked(true);
-  //     }
-  //   };
+      if (userDislike && userDislike.length > 0) {
+        setIsDisliked(true);
+      }
+    };
 
-  //   loadUserVotingData();
-  // }, [user?.id, name, profileId]); // Only depend on user.id, not the full user object
+    loadUserVotingData();
+  }, [propUser?.id, name, profileId]); // Only depend on propUser.id, not the full user object
 
   const handleLike = async (index: number) => {
     if (!propUser) {
