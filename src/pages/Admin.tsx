@@ -1629,28 +1629,6 @@ const Admin = () => {
                             </div>
                           </div>
               </div>
-
-              {/* Applications Stats Dashboard */}
-              <div className="mb-6 px-0 md:px-6">
-                <div className="mb-4 p-3 bg-muted rounded-lg">
-                  <div className="text-sm text-muted-foreground space-y-2">
-                    <div className="text-xs">
-                      new applications: {dailyApplicationStats.reduce((sum, stat) => sum + (stat.new_count || 0), 0)}, 
-                      approved: {dailyApplicationStats.reduce((sum, stat) => sum + (stat.approved_count || 0), 0)}
-                    </div>
-                    <div className="grid grid-cols-7 gap-1 text-xs">
-                      {dailyApplicationStats.map((stat, index) => (
-                        <div key={index} className="text-center p-1 bg-background rounded">
-                          <div className="font-medium text-xs">{stat.day_name}</div>
-                          <div className="text-xs text-muted-foreground">
-                            {stat.new_count}-{stat.approved_count}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
                       </CardContent>
                     </Card>
                   );
@@ -1704,6 +1682,28 @@ const Admin = () => {
                       >
                         {showDeletedApplications ? 'Show Active' : 'Show Deleted'}
                       </Button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Applications Stats Dashboard */}
+              <div className="mb-6 px-0 md:px-6">
+                <div className="mb-4 p-3 bg-muted rounded-lg">
+                  <div className="text-sm text-muted-foreground space-y-2">
+                    <div className="text-xs">
+                      new applications: {dailyApplicationStats.reduce((sum, stat) => sum + (stat.new_count || 0), 0)}, 
+                      approved: {dailyApplicationStats.reduce((sum, stat) => sum + (stat.approved_count || 0), 0)}
+                    </div>
+                    <div className="grid grid-cols-7 gap-1 text-xs">
+                      {dailyApplicationStats.map((stat, index) => (
+                        <div key={index} className="text-center p-1 bg-background rounded">
+                          <div className="font-medium text-xs">{stat.day_name}</div>
+                          <div className="text-xs text-muted-foreground">
+                            {stat.new_count}-{stat.approved_count}
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 </div>
