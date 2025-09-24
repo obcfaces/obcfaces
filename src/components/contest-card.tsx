@@ -972,7 +972,7 @@ export function ContestantCard({
               </div>
               
               {/* Testimonial text */}
-              <div className="flex-1 p-3 flex flex-col items-center justify-center">
+              <div className="flex-1 p-3 flex flex-col items-center justify-center max-h-32 overflow-y-auto">
                 <p className="text-sm text-gray-700 italic text-center mb-3">
                   {weekOffset === 1 
                     ? "It's legit and it's really happening. Thank you so much, OBC, for this wonderful opportunity. And I'm really overwhelmed with happiness as one of your weekly winners. Thank you, everyone."
