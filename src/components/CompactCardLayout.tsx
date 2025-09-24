@@ -111,12 +111,6 @@ export function CompactCardLayout({
             Example
           </div>
         )}
-        {/* Rank number in top left corner without padding - for past weeks and current week after voting */}
-        {!isExample && rank > 0 && (!isThisWeek || isVoted) && (
-          <div className="absolute top-0 left-0 bg-black/70 text-white text-xs font-bold min-w-[20px] h-[20px] flex items-center justify-center">
-            {rank}
-          </div>
-        )}
       </div>
       <div className="relative">
         <img 
@@ -139,8 +133,9 @@ export function CompactCardLayout({
         )}
       </div>
       
-      {/* Rating badge in top right corner */}
-      {!isEditing && !showThanks && !isExample && (
+      {/* Rating badge in top right corner - hide when voting overlay (stars) is visible */}
+      {!isEditing && !showThanks && !isExample && 
+       !((isThisWeek && !propUser) || (!isVoted && propUser)) && (
         <div className="absolute top-0 right-0 z-10">
           <div className="bg-contest-blue text-white px-1 py-0.5 rounded-bl text-sm sm:text-base font-bold">
             {localAverageRating > 0 ? localAverageRating.toFixed(1) : '0.0'}
