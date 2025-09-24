@@ -81,8 +81,18 @@ export function ContestantCard({
   user: propUser,
   weekOffset = 0
 }: ContestantCardProps) {
-  // Debug log to check weekOffset value
-  console.log(`ContestantCard ${name}: weekOffset = ${weekOffset}, isWinner = ${isWinner}`);
+  // Debug log to check weekOffset value and prevent excessive re-renders
+  console.log(`ContestantCard ${name}: weekOffset = ${weekOffset}, isWinner = ${isWinner}, userId = ${propUser?.id || 'none'}`);
+  
+  // Add render counter to detect infinite loops
+  const renderCount = useState(0);
+  renderCount[1](prev => {
+    const newCount = prev + 1;
+    if (newCount > 50) {
+      console.error(`ContestantCard ${name} has rendered ${newCount} times - possible infinite loop!`);
+    }
+    return newCount;
+  });
   
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalStartIndex, setModalStartIndex] = useState(0);

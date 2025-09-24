@@ -77,9 +77,16 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
     
     getCurrentUser();
     
-    // Listen for auth state changes (login/logout)
+    // Listen for auth state changes (login/logout) but avoid setting same user object
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      setUser(session?.user ?? null);
+      const newUser = session?.user ?? null;
+      setUser(prevUser => {
+        // Only update if user actually changed to prevent unnecessary re-renders
+        if (prevUser?.id !== newUser?.id) {
+          return newUser;
+        }
+        return prevUser;
+      });
     });
     
     return () => subscription.unsubscribe();
