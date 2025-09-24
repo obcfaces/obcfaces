@@ -146,9 +146,22 @@ export function FullCardLayout({
           <img 
             src={faceImage} 
             alt={`${name} face`}
-            className="w-24 sm:w-28 md:w-32 h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
-            onClick={() => openModal(0)}
-          />
+            className={`w-24 sm:w-28 md:w-32 h-full object-cover ${(isVoted || isExample) ? 'cursor-pointer hover:opacity-90' : 'cursor-not-allowed opacity-75'} transition-opacity`}
+            onClick={() => {
+              if (isVoted || isExample) {
+                openModal(0);
+              }
+            }}
+           />
+          
+          {/* Rating required overlay for non-example cards */}
+          {!isVoted && !isExample && (
+            <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+              <div className="text-white text-xs font-semibold text-center px-2">
+                Rate to view
+              </div>
+            </div>
+          )}
           {!isExample && (!isThisWeek || isVoted) && (
             <div className="absolute top-0 left-0 bg-black/70 text-white text-xs font-bold px-1 py-0.5 rounded-br">
               {rank > 0 ? rank : '★'}
@@ -159,10 +172,23 @@ export function FullCardLayout({
           <img 
             src={fullBodyImage} 
             alt={`${name} full body`}
-            className="w-24 sm:w-28 md:w-32 h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
-            onClick={() => openModal(1)}
-          />
-          {(additionalPhotos.length > 0 || isWinner) && (
+            className={`w-24 sm:w-28 md:w-32 h-full object-cover ${(isVoted || isExample) ? 'cursor-pointer hover:opacity-90' : 'cursor-not-allowed opacity-75'} transition-opacity`}
+            onClick={() => {
+              if (isVoted || isExample) {
+                openModal(1);
+              }
+            }}
+           />
+          
+          {/* Rating required overlay for non-example cards */}
+          {!isVoted && !isExample && (
+            <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+              <div className="text-white text-xs font-semibold text-center px-2">
+                Rate to view
+              </div>
+            </div>
+          )}
+          {((additionalPhotos.length > 0 || isWinner) && (isVoted || isExample)) && (
             <div 
               className="absolute bottom-0.5 right-0.5 bg-black/40 text-white/80 text-xs px-1 py-0.5 rounded cursor-pointer hover:bg-black/60 transition-colors"
               onClick={() => openModal(2)}
@@ -190,8 +216,8 @@ export function FullCardLayout({
             compact={false}
           />
           
-          {/* Contestant info - shown for all users in past weeks or after voting in current week */}
-          {(!isThisWeek || isVoted) && !isEditing && !showThanks && (
+          {/* Contestant info - shown ONLY AFTER RATING for ALL weeks */}
+          {(isVoted || isExample) && !isEditing && !showThanks && (
             <div className={`absolute inset-0 rounded-r flex flex-col justify-between p-1 sm:p-2 md:p-3 bg-white`}>
               {isExample ? (
                 // For example cards, show only requirements block
