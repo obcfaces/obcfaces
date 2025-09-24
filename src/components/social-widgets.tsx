@@ -1,4 +1,4 @@
-import { MessageCircle, Send, MessageSquare, Facebook } from "lucide-react";
+import { Send, MessageSquare, MessageCircle, Facebook } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect, useRef } from "react";
 import messengerMainIcon from "@/assets/messenger-main-icon.png";
