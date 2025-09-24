@@ -107,8 +107,9 @@ export function FullCardLayout({
         </div>
       )}
       
-      {/* Rating badge in top right corner - show for everyone in past weeks */}
-      {!isEditing && !showThanks && !isExample && (!isThisWeek || isVoted) && (
+      {/* Rating badge in top right corner - hide when voting overlay (stars) is visible */}
+      {!isEditing && !showThanks && !isExample && (!isThisWeek || isVoted) &&
+       !((isThisWeek && !propUser) || (!isVoted && propUser)) && (
         <div className="absolute top-0 right-0 z-10 flex flex-col items-end">
            <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
              <PopoverTrigger asChild>
@@ -156,11 +157,6 @@ export function FullCardLayout({
               }
             }}
            />
-          {!isExample && (!isThisWeek || isVoted) && (
-            <div className="absolute top-0 left-0 bg-black/70 text-white text-xs font-bold px-1 py-0.5 rounded-br">
-              {rank > 0 ? rank : '★'}
-            </div>
-          )}
         </div>
         <div className="relative">
           <img 
