@@ -946,7 +946,7 @@ const Admin = () => {
                   <div className="text-sm text-muted-foreground space-y-2">
                     <div className="text-xs">
                       votes: {filteredWeeklyParticipants.reduce((sum, p) => sum + (p.total_votes || 0), 0)}, 
-                      likes: {filteredWeeklyParticipants.reduce((sum, p) => sum + (p.total_votes || 0), 0)}
+                      likes: {dailyStats.reduce((sum, stat) => sum + (stat.like_count || 0), 0)}
                     </div>
                     <div className="grid grid-cols-7 gap-1 text-xs">
                       {dailyStats.map((stat, index) => (
