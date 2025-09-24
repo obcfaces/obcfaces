@@ -17,7 +17,13 @@ export const SocialWidgets = () => {
   };
 
   const openMessenger = () => {
-    window.open('https://www.facebook.com/share/1PzEdJr8WL/?mibextid=wwXIfr', '_blank');
+    const link = document.createElement('a');
+    link.href = 'https://www.facebook.com/share/1PzEdJr8WL/?mibextid=wwXIfr';
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   const clearAutoCloseTimeout = () => {
