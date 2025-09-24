@@ -799,11 +799,7 @@ export const ContestParticipationModal = ({
       if (!editMode) {
         setSubmissionSuccess(true);
       } else {
-        // In edit mode, show toast and close modal
-        toast({
-          title: "Success", 
-          description: "Application updated successfully.",
-        });
+        // In edit mode, just close modal without toast
         setIsOpen(false);
       }
     } catch (error: any) {
@@ -1358,11 +1354,7 @@ export const ContestParticipationModal = ({
                               if (!editMode) {
                                 setShowSuccessModal(true);
                               } else {
-                                // In edit mode, just close the modal and show a toast
-                                toast({
-                                  title: "Success",
-                                  description: "Application updated successfully.",
-                                });
+                                // In edit mode, just close the modal without toast
                                 setIsOpen(false);
                               }
                             
