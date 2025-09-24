@@ -179,6 +179,7 @@ const Admin = () => {
   const [verifyingUsers, setVerifyingUsers] = useState<Set<string>>(new Set());
   const [dailyStats, setDailyStats] = useState<Array<{ day_name: string; vote_count: number; like_count: number }>>([]);
   const [dailyApplicationStats, setDailyApplicationStats] = useState<Array<{ day_name: string; new_count: number; approved_count: number }>>([]);
+  const [selectedDay, setSelectedDay] = useState<{ day: number; type: 'new' | 'approved' } | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -512,6 +513,49 @@ const Admin = () => {
       setDailyApplicationStats(stats);
     } catch (error) {
       console.error('Error calculating daily application stats:', error);
+    }
+  };
+
+  const getUsersForDay = (dayIndex: number, type: 'new' | 'approved') => {
+    const currentDate = new Date();
+    const weekStart = new Date(currentDate);
+    weekStart.setDate(currentDate.getDate() - currentDate.getDay() + 1); // Monday
+    weekStart.setHours(0, 0, 0, 0);
+    
+    const dayStart = new Date(weekStart);
+    dayStart.setDate(weekStart.getDate() + dayIndex);
+    const dayEnd = new Date(dayStart);
+    dayEnd.setDate(dayStart.getDate() + 1);
+    
+    // Group all applications by user_id to find first-time users
+    const userApplications = new Map<string, any[]>();
+    contestApplications.forEach(app => {
+      if (!userApplications.has(app.user_id)) {
+        userApplications.set(app.user_id, []);
+      }
+      userApplications.get(app.user_id)!.push(app);
+    });
+    
+    // Sort applications by submitted_at for each user to find first application
+    userApplications.forEach(apps => {
+      apps.sort((a, b) => new Date(a.submitted_at).getTime() - new Date(b.submitted_at).getTime());
+    });
+    
+    if (type === 'new') {
+      return Array.from(userApplications.values())
+        .map(userApps => userApps[0]) // Get first application
+        .filter(app => {
+          const appDate = new Date(app.submitted_at);
+          return appDate >= dayStart && appDate < dayEnd;
+        });
+    } else {
+      return Array.from(userApplications.values())
+        .map(userApps => userApps[0]) // Get first application
+        .filter(app => {
+          if (app.status !== 'approved' || !app.reviewed_at) return false;
+          const approvedDate = new Date(app.reviewed_at);
+          return approvedDate >= dayStart && approvedDate < dayEnd;
+        });
     }
   };
 
@@ -1666,8 +1710,36 @@ const Admin = () => {
                       {dailyApplicationStats.map((stat, index) => (
                         <div key={index} className="text-center p-1 bg-background rounded">
                           <div className="font-medium text-xs">{stat.day_name}</div>
-                          <div className="text-xs text-muted-foreground">
-                            {stat.new_count}-{stat.approved_count}
+                          <div className="text-xs text-muted-foreground flex justify-center gap-1">
+                            <span 
+                              className={`cursor-pointer hover:text-blue-600 ${
+                                selectedDay?.day === index && selectedDay?.type === 'new' ? 'text-blue-600 font-semibold' : ''
+                              }`}
+                              onClick={() => {
+                                if (selectedDay?.day === index && selectedDay?.type === 'new') {
+                                  setSelectedDay(null);
+                                } else {
+                                  setSelectedDay({ day: index, type: 'new' });
+                                }
+                              }}
+                            >
+                              {stat.new_count}
+                            </span>
+                            <span>-</span>
+                            <span 
+                              className={`cursor-pointer hover:text-green-600 ${
+                                selectedDay?.day === index && selectedDay?.type === 'approved' ? 'text-green-600 font-semibold' : ''
+                              }`}
+                              onClick={() => {
+                                if (selectedDay?.day === index && selectedDay?.type === 'approved') {
+                                  setSelectedDay(null);
+                                } else {
+                                  setSelectedDay({ day: index, type: 'approved' });
+                                }
+                              }}
+                            >
+                              {stat.approved_count}
+                            </span>
                           </div>
                         </div>
                       ))}
@@ -1675,6 +1747,232 @@ const Admin = () => {
                   </div>
                 </div>
               </div>
+
+              {/* Selected Day Users */}
+              {selectedDay && (
+                <div className="mb-6 px-0 md:px-6">
+                  <div className="space-y-4">
+                    <h3 className="text-sm font-medium">
+                      {selectedDay.type === 'new' ? 'New users' : 'Approved users'} for {dailyApplicationStats[selectedDay.day]?.day_name}
+                    </h3>
+                    <div className="space-y-4">
+                      {getUsersForDay(selectedDay.day, selectedDay.type).map((application) => {
+                        const appData = application.application_data || {};
+                        const userProfile = profiles.find(p => p.id === application.user_id);
+                        
+                        return (
+                          <Card key={application.id} className="overflow-hidden">
+                            <CardContent className="p-0">
+                              {/* Desktop layout - vertical with side-by-side photos */}
+                              <div className="hidden md:block">
+                                <div className="flex gap-px">
+                                  {/* Photos section */}
+                                  <div className="flex gap-px w-72 flex-shrink-0">
+                                    {appData.photo1_url && (
+                                      <div className="w-1/2">
+                                        <img 
+                                          src={appData.photo1_url} 
+                                          alt="Portrait" 
+                                          className="w-full h-48 object-contain cursor-pointer hover:opacity-90 transition-opacity"
+                                          onClick={() => openPhotoModal([appData.photo1_url, appData.photo2_url].filter(Boolean), 0, `${appData.first_name} ${appData.last_name}`)}
+                                        />
+                                      </div>
+                                    )}
+                                    {appData.photo2_url && (
+                                      <div className="w-1/2 relative">
+                                        <img 
+                                          src={appData.photo2_url} 
+                                          alt="Full length" 
+                                          className="w-full h-48 object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                                          onClick={() => openPhotoModal([appData.photo1_url, appData.photo2_url].filter(Boolean), 1, `${appData.first_name} ${appData.last_name}`)}
+                                        />
+                                        <div className="absolute top-2 right-2">
+                                          <Avatar className="h-6 w-6 flex-shrink-0 border-2 border-white shadow-sm">
+                                            <AvatarImage src={userProfile?.avatar_url || ''} />
+                                            <AvatarFallback className="text-xs">
+                                              {appData.first_name?.charAt(0) || 'U'}
+                                            </AvatarFallback>
+                                          </Avatar>
+                                        </div>
+                                      </div>
+                                    )}
+                                  </div>
+                                  
+                                  {/* Information section */}
+                                  <div className="flex-1 p-4 flex flex-col">
+                                    <div className="flex items-center gap-2 mb-2">
+                                      <span className="text-sm font-semibold">
+                                        {new Date().getFullYear() - appData.birth_year} {appData.first_name} {appData.last_name}
+                                      </span>
+                                    </div>
+                                    
+                                    <div className="text-sm text-muted-foreground mb-2">
+                                      {appData.city} {appData.country}
+                                    </div>
+                                    
+                                    <div className="text-sm text-muted-foreground mb-2 space-y-1">
+                                      <div>{appData.weight_kg}kg, {appData.height_cm}cm</div>
+                                      <div>{appData.marital_status}, {appData.has_children ? 'Has kids' : 'No kids'}</div>
+                                      <div className="flex items-center gap-2">
+                                        <span>
+                                          {userProfile?.email || 'No email'}
+                                        </span>
+                                        {userProfile?.email && (
+                                          <Copy 
+                                            className="h-4 w-4 cursor-pointer hover:text-foreground" 
+                                            onClick={() => navigator.clipboard.writeText(userProfile.email)}
+                                          />
+                                        )}
+                                      </div>
+                                    </div>
+                                    
+                                    <div className="flex-1"></div>
+                                    
+                                    <div className="flex items-center gap-2">
+                                      <Select 
+                                        value={application.status}
+                                        onValueChange={(newStatus) => {
+                                          if (newStatus === 'delete') {
+                                            setApplicationToDelete({ 
+                                              id: application.id, 
+                                              name: `${appData.first_name} ${appData.last_name}` 
+                                            });
+                                            setShowDeleteConfirmModal(true);
+                                            return;
+                                          }
+                                          if (newStatus === 'rejected') {
+                                            setApplicationToReject({ 
+                                              id: application.id, 
+                                              name: `${appData.first_name} ${appData.last_name}` 
+                                            });
+                                            setRejectModalOpen(true);
+                                            return;
+                                          }
+                                          reviewApplication(application.id, newStatus);
+                                        }}
+                                      >
+                                        <SelectTrigger 
+                                          className={`w-32 ${
+                                            application.status === 'approved' ? 'bg-green-100 border-green-500 text-green-700' :
+                                            application.status === 'rejected' ? 'bg-red-100 border-red-500 text-red-700' :
+                                            ''
+                                          }`}
+                                        >
+                                          <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                          <SelectItem value="pending">Pending</SelectItem>
+                                          <SelectItem value="approved">Approved</SelectItem>
+                                          <SelectItem value="rejected">Rejected</SelectItem>
+                                        </SelectContent>
+                                      </Select>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                              
+                              {/* Mobile layout - same as existing */}
+                              <div className="md:hidden">
+                                <div className="flex w-full">
+                                  <div className="flex gap-px w-[50vw] flex-shrink-0">
+                                    {appData.photo1_url && (
+                                      <div className="w-1/2">
+                                        <img 
+                                          src={appData.photo1_url} 
+                                          alt="Portrait" 
+                                          className="w-full h-36 object-contain cursor-pointer hover:opacity-90 transition-opacity"
+                                          onClick={() => openPhotoModal([appData.photo1_url, appData.photo2_url].filter(Boolean), 0, `${appData.first_name} ${appData.last_name}`)}
+                                        />
+                                      </div>
+                                    )}
+                                    {appData.photo2_url && (
+                                      <div className="w-1/2 relative">
+                                        <img 
+                                          src={appData.photo2_url} 
+                                          alt="Full length" 
+                                          className="w-full h-36 object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                                          onClick={() => openPhotoModal([appData.photo1_url, appData.photo2_url].filter(Boolean), 1, `${appData.first_name} ${appData.last_name}`)}
+                                        />
+                                        <div className="absolute top-2 right-2">
+                                          <Avatar className="h-6 w-6 flex-shrink-0 border-2 border-white shadow-sm">
+                                            <AvatarImage src={userProfile?.avatar_url || ''} />
+                                            <AvatarFallback className="text-xs">
+                                              {appData.first_name?.charAt(0) || 'U'}
+                                            </AvatarFallback>
+                                          </Avatar>
+                                        </div>
+                                      </div>
+                                    )}
+                                  </div>
+                                  
+                                  <div className="w-[50vw] flex-shrink-0 pl-2 flex flex-col h-48 relative">
+                                    <div className="flex items-center gap-2 mb-1 mt-1">
+                                      <span className="text-xs font-semibold whitespace-nowrap">
+                                        {new Date().getFullYear() - appData.birth_year} {appData.first_name} {appData.last_name}
+                                      </span>
+                                    </div>
+                                    
+                                    <div className="text-xs text-muted-foreground mb-1">
+                                      {appData.city} {appData.country}
+                                    </div>
+                                    
+                                    <div className="text-xs text-muted-foreground mb-1 space-y-0 leading-none">
+                                      <div>{appData.weight_kg}kg, {appData.height_cm}cm</div>
+                                      <div>{appData.marital_status}, {appData.has_children ? 'Has kids' : 'No kids'}</div>
+                                    </div>
+                                    
+                                    <div className="flex-1"></div>
+                                    
+                                    <div className="absolute bottom-12 right-2 flex items-center gap-2">
+                                      <Select 
+                                        value={application.status}
+                                        onValueChange={(newStatus) => {
+                                          if (newStatus === 'delete') {
+                                            setApplicationToDelete({ 
+                                              id: application.id, 
+                                              name: `${appData.first_name} ${appData.last_name}` 
+                                            });
+                                            setShowDeleteConfirmModal(true);
+                                            return;
+                                          }
+                                          if (newStatus === 'rejected') {
+                                            setApplicationToReject({ 
+                                              id: application.id, 
+                                              name: `${appData.first_name} ${appData.last_name}` 
+                                            });
+                                            setRejectModalOpen(true);
+                                            return;
+                                          }
+                                          reviewApplication(application.id, newStatus);
+                                        }}
+                                      >
+                                        <SelectTrigger 
+                                          className={`w-24 h-7 text-xs ${
+                                            application.status === 'approved' ? 'bg-green-100 border-green-500 text-green-700' :
+                                            application.status === 'rejected' ? 'bg-red-100 border-red-500 text-red-700' :
+                                            ''
+                                          }`}
+                                        >
+                                          <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                          <SelectItem value="pending">Pending</SelectItem>
+                                          <SelectItem value="approved">Approved</SelectItem>
+                                          <SelectItem value="rejected">Rejected</SelectItem>
+                                        </SelectContent>
+                                      </Select>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* Status Filter */}
               <div className="mb-6 px-0 md:px-6">
