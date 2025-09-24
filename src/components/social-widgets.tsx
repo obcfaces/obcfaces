@@ -79,18 +79,18 @@ export const SocialWidgets = () => {
           
           <Button
             onClick={() => handleSocialClick(openTelegram)}
-            className="!w-12 !h-12 !min-w-12 !min-h-12 !max-w-12 !max-h-12 rounded-full bg-blue-500 hover:bg-blue-600 transition-all duration-300 animate-fade-in flex items-center justify-center !p-0"
+            className="!w-10 !h-10 !min-w-10 !min-h-10 !max-w-10 !max-h-10 rounded-full bg-blue-500 hover:bg-blue-600 transition-all duration-300 animate-fade-in flex items-center justify-center !p-0"
             aria-label="Написать в Telegram"
           >
-            <Send className="w-6 h-6 text-white" />
+            <Send className="w-5 h-5 text-white" />
           </Button>
           
           <Button
             onClick={() => handleSocialClick(openWhatsApp)}
-            className="!w-12 !h-12 !min-w-12 !min-h-12 !max-w-12 !max-h-12 rounded-full bg-green-500 hover:bg-green-600 transition-all duration-300 animate-fade-in flex items-center justify-center !p-0"
+            className="!w-10 !h-10 !min-w-10 !min-h-10 !max-w-10 !max-h-10 rounded-full bg-green-500 hover:bg-green-600 transition-all duration-300 animate-fade-in flex items-center justify-center !p-0"
             aria-label="Написать в WhatsApp"
           >
-            <MessageCircle className="w-6 h-6 text-white" />
+            <MessageCircle className="w-5 h-5 text-white" />
           </Button>
         </>
       )}
