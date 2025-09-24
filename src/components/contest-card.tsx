@@ -99,8 +99,7 @@ export function ContestantCard({
   
   // Local state for immediate rating updates
   const [localAverageRating, setLocalAverageRating] = useState(averageRating);
-  const [localTotalVotes, setLocalTotalVotes] = useState(totalVotes || 0);
-  
+  const [localTotalVotes, setLocalTotalVotes] = useState(totalVotes);
   const [previousUserRating, setPreviousUserRating] = useState(0);
   
   // Use unified card data hook with stable dependencies
@@ -286,15 +285,6 @@ export function ContestantCard({
       return;
     }
     
-    // Require rating before allowing likes
-    if (!isVoted && !isExample) {
-      toast({ 
-        description: "Please rate this contestant first before liking!",
-        variant: "destructive"
-      });
-      return;
-    }
-    
     // Use consistent content_id format for both saving and loading
     const contentId = profileId ? `contestant-user-${profileId}` : `contestant-card-${name}`;
     const wasLiked = isLiked[0]; // Card likes are stored in first index
@@ -435,15 +425,6 @@ export function ContestantCard({
   const handleComment = () => {
     if (!propUser) {
       setShowLoginModal(true);
-      return;
-    }
-    
-    // Require rating before allowing comments
-    if (!isVoted && !isExample) {
-      toast({ 
-        description: "Please rate this contestant first before commenting!",
-        variant: "destructive"
-      });
       return;
     }
     
@@ -838,6 +819,40 @@ export function ContestantCard({
           </div>
         )}
         
+        {/* Rating badge in top right corner - show for everyone except unauthenticated users in THIS WEEK */}
+        {isVoted && !isEditing && !showThanks && !isExample && (propUser || !isThisWeek) && (
+          <div className="absolute top-0 right-0 z-10 flex flex-col items-end">
+             <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
+               <PopoverTrigger asChild>
+                  <div className="bg-contest-blue text-white px-1.5 py-1 rounded-bl-lg text-sm sm:text-base font-bold shadow-sm cursor-pointer hover:bg-contest-blue/90 transition-colors relative">
+                     {isWinner && (
+                       <Crown className="w-4 h-4 text-yellow-400 absolute -top-5 left-1/2 transform -translate-x-1/2" />
+                     )}
+                      {(() => {
+                        // Для всех пользователей (включая админов) показываем средний рейтинг
+                        return localAverageRating > 0 ? localAverageRating.toFixed(1) : '0.0';
+                      })()}
+                  </div>
+               </PopoverTrigger>
+                <PopoverContent className="w-auto p-3">
+                  <div className="text-sm">
+                    {userRating > 0 ? 
+                      `Your rating: ${userRating}` : 
+                      `No rating`
+                    }{isThisWeek && ` — `}<button 
+                      className={`text-contest-blue hover:underline ${!isThisWeek ? 'hidden' : ''}`}
+                      onClick={() => {
+                        setIsEditing(true);
+                        setIsPopoverOpen(false);
+                      }}
+                    >
+                      change
+                    </button>
+                  </div>
+                </PopoverContent>
+             </Popover>
+          </div>
+        )}
         
         {/* First row: Main two photos with additional photos indicator */}
         <div className={`${isWinner && viewMode !== 'compact' ? 'w-full' : 'flex h-full'} relative gap-px`}>
@@ -864,7 +879,6 @@ export function ContestantCard({
                 rank={rank}
                 userRating={userRating}
                 localAverageRating={localAverageRating}
-                localTotalVotes={localTotalVotes}
                 isPopoverOpen={isPopoverOpen}
                 setIsPopoverOpen={setIsPopoverOpen}
                 cardData={cardData}
@@ -907,7 +921,6 @@ export function ContestantCard({
               rank={rank}
               userRating={userRating}
               localAverageRating={localAverageRating}
-              localTotalVotes={localTotalVotes}
               cardData={cardData}
               isLiked={isLiked}
               hasCommented={hasCommented}

@@ -31,7 +31,6 @@ interface FullCardLayoutProps {
   
   // Rating display
   localAverageRating: number;
-  localTotalVotes: number;
   isPopoverOpen: boolean;
   setIsPopoverOpen: (open: boolean) => void;
   
@@ -78,7 +77,6 @@ export function FullCardLayout({
   rank,
   userRating,
   localAverageRating,
-  localTotalVotes,
   isPopoverOpen,
   setIsPopoverOpen,
   cardData,
@@ -107,9 +105,8 @@ export function FullCardLayout({
         </div>
       )}
       
-      {/* Rating badge in top right corner - always show for past weeks, hide when voting overlay (stars) is visible for current week */}
-      {!isEditing && !showThanks && !isExample && 
-       (!isThisWeek || (!((isThisWeek && !propUser) || (!isVoted && propUser)) && isVoted)) && (
+      {/* Rating badge in top right corner - show for everyone in past weeks */}
+      {!isEditing && !showThanks && !isExample && (!isThisWeek || isVoted) && (
         <div className="absolute top-0 right-0 z-10 flex flex-col items-end">
            <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
              <PopoverTrigger asChild>
@@ -117,11 +114,10 @@ export function FullCardLayout({
                    {isWinner && (
                      <Crown className="w-4 h-4 text-yellow-400 absolute -top-5 left-1/2 transform -translate-x-1/2" />
                    )}
-                     {(() => {
-                       // Для всех пользователей (включая админов) показываем средний рейтинг
-                       return localAverageRating > 0 ? localAverageRating.toFixed(1) : '0.0';
-                     })()}
-                     <span className="text-xs opacity-75 ml-1 font-normal">({localTotalVotes})</span>
+                    {(() => {
+                      // Для всех пользователей (включая админов) показываем средний рейтинг
+                      return localAverageRating > 0 ? localAverageRating.toFixed(1) : '0.0';
+                    })()}
                 </div>
              </PopoverTrigger>
               <PopoverContent className="w-auto p-3">
@@ -150,26 +146,23 @@ export function FullCardLayout({
           <img 
             src={faceImage} 
             alt={`${name} face`}
-            className={`w-24 sm:w-28 md:w-32 h-full object-cover ${(isVoted || isExample || !isThisWeek) ? 'cursor-pointer hover:opacity-90' : 'cursor-not-allowed opacity-75'} transition-opacity`}
-            onClick={() => {
-              if (isVoted || isExample || !isThisWeek) {
-                openModal(0);
-              }
-            }}
-           />
+            className="w-24 sm:w-28 md:w-32 h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
+            onClick={() => openModal(0)}
+          />
+          {!isExample && (!isThisWeek || isVoted) && (
+            <div className="absolute top-0 left-0 bg-black/70 text-white text-xs font-bold px-1 py-0.5 rounded-br">
+              {rank > 0 ? rank : '★'}
+            </div>
+          )}
         </div>
         <div className="relative">
           <img 
             src={fullBodyImage} 
             alt={`${name} full body`}
-            className={`w-24 sm:w-28 md:w-32 h-full object-cover ${(isVoted || isExample || !isThisWeek) ? 'cursor-pointer hover:opacity-90' : 'cursor-not-allowed opacity-75'} transition-opacity`}
-            onClick={() => {
-              if (isVoted || isExample || !isThisWeek) {
-                openModal(1);
-              }
-            }}
-           />
-          {((additionalPhotos.length > 0 || isWinner)) && (
+            className="w-24 sm:w-28 md:w-32 h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
+            onClick={() => openModal(1)}
+          />
+          {(additionalPhotos.length > 0 || isWinner) && (
             <div 
               className="absolute bottom-0.5 right-0.5 bg-black/40 text-white/80 text-xs px-1 py-0.5 rounded cursor-pointer hover:bg-black/60 transition-colors"
               onClick={() => openModal(2)}
@@ -197,8 +190,8 @@ export function FullCardLayout({
             compact={false}
           />
           
-          {/* Contestant info - shown ONLY AFTER RATING for ALL weeks */}
-          {(isVoted || isExample) && !isEditing && !showThanks && (
+          {/* Contestant info - shown for all users in past weeks or after voting in current week */}
+          {(!isThisWeek || isVoted) && !isEditing && !showThanks && (
             <div className={`absolute inset-0 rounded-r flex flex-col justify-between p-1 sm:p-2 md:p-3 bg-white`}>
               {isExample ? (
                 // For example cards, show only requirements block
