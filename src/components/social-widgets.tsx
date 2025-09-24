@@ -78,19 +78,19 @@ export const SocialWidgets = () => {
           <Button
             onClick={() => handleSocialClick(openTelegram)}
             size="lg"
-            className="w-12 h-12 rounded-full bg-blue-500 hover:bg-blue-600 text-white shadow-lg hover:shadow-xl transition-all duration-300 animate-fade-in"
+            className="w-12 h-12 rounded-full bg-blue-500 hover:bg-blue-600 transition-all duration-300 animate-fade-in"
             aria-label="Написать в Telegram"
           >
-            <Send className="w-5 h-5" />
+            <Send className="w-6 h-6 text-white" />
           </Button>
           
           <Button
             onClick={() => handleSocialClick(openWhatsApp)}
             size="lg"
-            className="w-12 h-12 rounded-full bg-green-500 hover:bg-green-600 text-white shadow-lg hover:shadow-xl transition-all duration-300 animate-fade-in"
+            className="w-12 h-12 rounded-full bg-green-500 hover:bg-green-600 transition-all duration-300 animate-fade-in"
             aria-label="Написать в WhatsApp"
           >
-            <MessageCircle className="w-5 h-5" />
+            <MessageCircle className="w-6 h-6 text-white" />
           </Button>
         </>
       )}
