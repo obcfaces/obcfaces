@@ -851,6 +851,15 @@ export type Database = {
         Args: { conversation_id_param: string; user_id_param: string }
         Returns: number
       }
+      get_daily_voting_stats: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          day_name: string
+          day_of_week: number
+          like_count: number
+          vote_count: number
+        }[]
+      }
       get_detailed_profile: {
         Args: { profile_user_id: string }
         Returns: {
