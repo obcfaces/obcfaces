@@ -467,22 +467,38 @@ const Admin = () => {
       const daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
       const stats = [];
       
+      // Group all applications by user_id to find first-time users
+      const userApplications = new Map<string, any[]>();
+      contestApplications.forEach(app => {
+        if (!userApplications.has(app.user_id)) {
+          userApplications.set(app.user_id, []);
+        }
+        userApplications.get(app.user_id)!.push(app);
+      });
+      
+      // Sort applications by submitted_at for each user to find first application
+      userApplications.forEach(apps => {
+        apps.sort((a, b) => new Date(a.submitted_at).getTime() - new Date(b.submitted_at).getTime());
+      });
+      
       for (let i = 0; i < 7; i++) {
         const dayStart = new Date(weekStart);
         dayStart.setDate(weekStart.getDate() + i);
         const dayEnd = new Date(dayStart);
         dayEnd.setDate(dayStart.getDate() + 1);
         
-        // Count new applications for this day
-        const newCount = contestApplications.filter(app => {
-          const appDate = new Date(app.submitted_at);
+        // Count new applications for this day (only first-time users)
+        const newCount = Array.from(userApplications.values()).filter(userApps => {
+          const firstApp = userApps[0]; // First application from this user
+          const appDate = new Date(firstApp.submitted_at);
           return appDate >= dayStart && appDate < dayEnd;
         }).length;
         
-        // Count approved applications for this day (by reviewed_at date)
-        const approvedCount = contestApplications.filter(app => {
-          if (app.status !== 'approved' || !app.reviewed_at) return false;
-          const approvedDate = new Date(app.reviewed_at);
+        // Count approved applications for this day (by reviewed_at date, only first-time users)
+        const approvedCount = Array.from(userApplications.values()).filter(userApps => {
+          const firstApp = userApps[0]; // First application from this user
+          if (firstApp.status !== 'approved' || !firstApp.reviewed_at) return false;
+          const approvedDate = new Date(firstApp.reviewed_at);
           return approvedDate >= dayStart && approvedDate < dayEnd;
         }).length;
         
