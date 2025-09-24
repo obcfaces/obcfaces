@@ -285,6 +285,15 @@ export function ContestantCard({
       return;
     }
     
+    // Require rating before allowing likes
+    if (!isVoted && !isExample) {
+      toast({ 
+        description: "Please rate this contestant first before liking!",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     // Use consistent content_id format for both saving and loading
     const contentId = profileId ? `contestant-user-${profileId}` : `contestant-card-${name}`;
     const wasLiked = isLiked[0]; // Card likes are stored in first index
@@ -425,6 +434,15 @@ export function ContestantCard({
   const handleComment = () => {
     if (!propUser) {
       setShowLoginModal(true);
+      return;
+    }
+    
+    // Require rating before allowing comments
+    if (!isVoted && !isExample) {
+      toast({ 
+        description: "Please rate this contestant first before commenting!",
+        variant: "destructive"
+      });
       return;
     }
     
