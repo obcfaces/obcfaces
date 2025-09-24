@@ -1,4 +1,4 @@
-import { MessageCircle, Send, MessageSquare } from "lucide-react";
+import { MessageCircle, Send, MessageSquare, Facebook } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect, useRef } from "react";
 
@@ -64,10 +64,10 @@ export const SocialWidgets = () => {
           <Button
             onClick={() => handleSocialClick(openMessenger)}
             size="lg"
-            className="w-12 h-12 rounded-full bg-blue-600 hover:bg-blue-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 animate-fade-in"
+            className="w-12 h-12 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 animate-fade-in"
             aria-label="Написать в Facebook Messenger"
           >
-            <MessageCircle className="w-5 h-5" />
+            <Facebook className="w-5 h-5" />
           </Button>
           
           <Button
