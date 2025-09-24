@@ -17,7 +17,9 @@ export const SocialWidgets = () => {
   };
 
   const openMessenger = () => {
-    window.location.assign('https://www.facebook.com/share/1PzEdJr8WL/?mibextid=wwXIfr');
+    setTimeout(() => {
+      window.open('https://www.facebook.com/share/1PzEdJr8WL/?mibextid=wwXIfr', '_blank', 'noopener,noreferrer');
+    }, 0);
   };
 
   const clearAutoCloseTimeout = () => {
