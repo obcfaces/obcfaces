@@ -110,19 +110,19 @@ export const AuthProtectedModal = ({ children }: AuthProtectedModalProps) => {
       <Dialog open={isStatusModalOpen} onOpenChange={setIsStatusModalOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Заявка уже существует</DialogTitle>
+            <DialogTitle>Application Already Exists</DialogTitle>
           </DialogHeader>
           <div className="py-4">
             <p className="text-muted-foreground">
-              У вас уже есть заявка со статусом: <span className="font-semibold">{applicationStatus}</span>
+              You already have an application with status: <span className="font-semibold">{applicationStatus}</span>
             </p>
             <p className="text-sm text-muted-foreground mt-2">
-              Новую заявку можно подать только после отклонения предыдущей.
+              You can only submit a new application after the previous one is rejected.
             </p>
           </div>
           <div className="flex justify-end">
             <Button onClick={() => setIsStatusModalOpen(false)}>
-              Понятно
+              Got it
             </Button>
           </div>
         </DialogContent>

@@ -72,23 +72,23 @@ export class ErrorBoundary extends Component<Props, State> {
                 <AlertTriangle className="w-6 h-6 text-red-600" />
               </div>
               <CardTitle className="text-xl font-semibold text-foreground">
-                Что-то пошло не так
+                Something went wrong
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <p className="text-muted-foreground text-center">
-                Произошла неожиданная ошибка. Мы уже работаем над её устранением.
-              </p>
+               <p className="text-muted-foreground text-center">
+                An unexpected error occurred. We are already working on fixing it.
+               </p>
               
               {process.env.NODE_ENV === 'development' && this.state.error && (
                 <details className="mt-4 p-3 bg-red-50 rounded-lg border border-red-200">
-                  <summary className="cursor-pointer text-red-700 font-medium mb-2">
-                    Детали ошибки (только в разработке)
-                  </summary>
+                   <summary className="cursor-pointer text-red-700 font-medium mb-2">
+                     Error details (development only)
+                   </summary>
                   <div className="text-sm text-red-600 space-y-2">
-                    <div>
-                      <strong>Сообщение:</strong>
-                      <pre className="mt-1 whitespace-pre-wrap">{this.state.error.message}</pre>
+                     <div>
+                       <strong>Message:</strong>
+                       <pre className="mt-1 whitespace-pre-wrap">{this.state.error.message}</pre>
                     </div>
                     {this.state.error.stack && (
                       <div>
@@ -108,17 +108,17 @@ export class ErrorBoundary extends Component<Props, State> {
                   className="flex-1"
                   variant="default"
                 >
-                  <RefreshCw className="w-4 h-4 mr-2" />
-                  Попробовать снова
-                </Button>
+                   <RefreshCw className="w-4 h-4 mr-2" />
+                   Try again
+                 </Button>
                 <Button 
                   onClick={this.handleGoHome}
                   className="flex-1"
                   variant="outline"
                 >
-                  <Home className="w-4 h-4 mr-2" />
-                  На главную
-                </Button>
+                   <Home className="w-4 h-4 mr-2" />
+                   Go to homepage
+                 </Button>
               </div>
             </CardContent>
           </Card>

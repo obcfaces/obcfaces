@@ -1133,7 +1133,7 @@ const Profile = () => {
     return (
       <div className="min-h-screen bg-background">
         <main className="container mx-auto px-6 py-8">
-          <p>Профиль не найден</p>
+          <p>Profile not found</p>
         </main>
       </div>
     );
@@ -1347,7 +1347,7 @@ const Profile = () => {
                       <img
                         src={src}
                         loading="lazy"
-                        alt={`Фото ${idx + 1} — ${profile.display_name ?? "пользователь"}`}
+                        alt={`Photo ${idx + 1} — ${profile.display_name ?? "user"}`}
                         className="w-full h-32 sm:h-36 object-cover rounded-md group-hover:opacity-90 transition-opacity"
                       />
                     </button>
@@ -2365,7 +2365,7 @@ const Profile = () => {
         onClose={() => setPhotoModalOpen(false)}
         photos={profilePhotos}
         currentIndex={selectedPhotoIndex}
-        contestantName={profile.display_name || "Пользователь"}
+        contestantName={profile.display_name || "User"}
         age={profile.birthdate ? new Date().getFullYear() - new Date(profile.birthdate).getFullYear() : undefined}
         weight={profile.weight_kg || undefined}
         height={profile.height_cm || undefined}
@@ -2380,7 +2380,7 @@ const Profile = () => {
         photos={profilePhotos}
         currentIndex={selectedPhotoIndex}
         profileId={id || ""}
-        profileName={profile.display_name || "Пользователь"}
+        profileName={profile.display_name || "User"}
       />
 
       {/* Rejection Reason Modal */}
