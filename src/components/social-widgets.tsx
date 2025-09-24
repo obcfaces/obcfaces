@@ -1,7 +1,7 @@
 import { Send, MessageSquare, MessageCircle, Facebook } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect, useRef } from "react";
-import messengerMainIcon from "@/assets/messenger-icon-simple.png";
+import messengerMainIcon from "@/assets/messenger-main-icon.png";
 
 export const SocialWidgets = () => {
   const [isOpen, setIsOpen] = useState(false);
