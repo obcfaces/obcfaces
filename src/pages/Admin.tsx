@@ -3538,203 +3538,299 @@ const Admin = () => {
 
       {/* Edit Application Modal */}
       <Dialog open={showEditModal} onOpenChange={setShowEditModal}>
-        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Edit Application</DialogTitle>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden p-0">
+          <DialogHeader className="p-6 pb-0">
+            <DialogTitle className="text-2xl font-bold text-center">Edit Application</DialogTitle>
           </DialogHeader>
           {editingApplicationData && (
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="edit-first-name">First Name</Label>
-                  <Input
-                    id="edit-first-name"
-                    value={editingApplicationData.application_data?.firstName || ''}
-                    onChange={(e) => setEditingApplicationData(prev => ({
-                      ...prev,
-                      application_data: {
-                        ...prev.application_data,
-                        firstName: e.target.value
-                      }
-                    }))}
-                  />
+            <ScrollArea className="max-h-[80vh] px-6 pb-6">
+              <div className="space-y-6">
+                {/* Personal Information */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold">Personal Information</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="edit-first-name">First Name *</Label>
+                      <Input
+                        id="edit-first-name"
+                        value={editingApplicationData.application_data?.firstName || ''}
+                        onChange={(e) => setEditingApplicationData(prev => ({
+                          ...prev,
+                          application_data: {
+                            ...prev.application_data,
+                            firstName: e.target.value
+                          }
+                        }))}
+                        className="mt-1"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="edit-last-name">Last Name *</Label>
+                      <Input
+                        id="edit-last-name"
+                        value={editingApplicationData.application_data?.lastName || ''}
+                        onChange={(e) => setEditingApplicationData(prev => ({
+                          ...prev,
+                          application_data: {
+                            ...prev.application_data,
+                            lastName: e.target.value
+                          }
+                        }))}
+                        className="mt-1"
+                      />
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <Label htmlFor="edit-last-name">Last Name</Label>
-                  <Input
-                    id="edit-last-name"
-                    value={editingApplicationData.application_data?.lastName || ''}
-                    onChange={(e) => setEditingApplicationData(prev => ({
-                      ...prev,
-                      application_data: {
-                        ...prev.application_data,
-                        lastName: e.target.value
-                      }
-                    }))}
-                  />
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="edit-age">Age</Label>
-                  <Input
-                    id="edit-age"
-                    type="number"
-                    value={editingApplicationData.application_data?.age || ''}
-                    onChange={(e) => setEditingApplicationData(prev => ({
-                      ...prev,
-                      application_data: {
-                        ...prev.application_data,
-                        age: parseInt(e.target.value) || 0
-                      }
-                    }))}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="edit-gender">Gender</Label>
-                  <Select
-                    value={editingApplicationData.application_data?.gender || ''}
-                    onValueChange={(value) => setEditingApplicationData(prev => ({
-                      ...prev,
-                      application_data: {
-                        ...prev.application_data,
-                        gender: value
-                      }
-                    }))}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select gender" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="female">Female</SelectItem>
-                      <SelectItem value="male">Male</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-              <div className="grid grid-cols-3 gap-4">
-                <div>
-                  <Label htmlFor="edit-city">City</Label>
-                  <Input
-                    id="edit-city"
-                    value={editingApplicationData.application_data?.city || ''}
-                    onChange={(e) => setEditingApplicationData(prev => ({
-                      ...prev,
-                      application_data: {
-                        ...prev.application_data,
-                        city: e.target.value
-                      }
-                    }))}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="edit-state">State</Label>
-                  <Input
-                    id="edit-state"
-                    value={editingApplicationData.application_data?.state || ''}
-                    onChange={(e) => setEditingApplicationData(prev => ({
-                      ...prev,
-                      application_data: {
-                        ...prev.application_data,
-                        state: e.target.value
-                      }
-                    }))}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="edit-country">Country</Label>
-                  <Input
-                    id="edit-country"
-                    value={editingApplicationData.application_data?.country || ''}
-                    onChange={(e) => setEditingApplicationData(prev => ({
-                      ...prev,
-                      application_data: {
-                        ...prev.application_data,
-                        country: e.target.value
-                      }
-                    }))}
-                  />
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="edit-height">Height (cm)</Label>
-                  <Input
-                    id="edit-height"
-                    type="number"
-                    value={editingApplicationData.application_data?.height || ''}
-                    onChange={(e) => setEditingApplicationData(prev => ({
-                      ...prev,
-                      application_data: {
-                        ...prev.application_data,
-                        height: parseInt(e.target.value) || 0
-                      }
-                    }))}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="edit-weight">Weight (kg)</Label>
-                  <Input
-                    id="edit-weight"
-                    type="number"
-                    value={editingApplicationData.application_data?.weight || ''}
-                    onChange={(e) => setEditingApplicationData(prev => ({
-                      ...prev,
-                      application_data: {
-                        ...prev.application_data,
-                        weight: parseInt(e.target.value) || 0
-                      }
-                    }))}
-                  />
-                </div>
-              </div>
-              <div className="flex justify-end gap-2">
-                <Button variant="outline" onClick={() => {
-                  setShowEditModal(false);
-                  setEditingApplicationData(null);
-                  setEditingApplicationId(null);
-                }}>
-                  Cancel
-                </Button>
-                <Button onClick={async () => {
-                  if (editingApplicationData && editingApplicationId) {
-                    try {
-                      const { error } = await supabase
-                        .from('contest_applications')
-                        .update({
-                          application_data: editingApplicationData.application_data
-                        })
-                        .eq('id', editingApplicationId);
 
-                      if (error) {
-                        toast({
-                          title: "Error",
-                          description: "Failed to update application",
-                          variant: "destructive"
-                        });
-                      } else {
-                        toast({
-                          title: "Success",
-                          description: "Application updated successfully"
-                        });
-                        setShowEditModal(false);
-                        setEditingApplicationData(null);
-                        setEditingApplicationId(null);
-                        fetchContestApplications();
+                {/* Location */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold">Location</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <Label htmlFor="edit-country">Country *</Label>
+                      <Select
+                        value={editingApplicationData.application_data?.country || ''}
+                        onValueChange={(value) => setEditingApplicationData(prev => ({
+                          ...prev,
+                          application_data: {
+                            ...prev.application_data,
+                            country: value
+                          }
+                        }))}
+                      >
+                        <SelectTrigger className="mt-1">
+                          <SelectValue placeholder="Select country" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="PH">Philippines</SelectItem>
+                          <SelectItem value="US">United States</SelectItem>
+                          <SelectItem value="CA">Canada</SelectItem>
+                          <SelectItem value="GB">United Kingdom</SelectItem>
+                          <SelectItem value="AU">Australia</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label htmlFor="edit-state">State/Province *</Label>
+                      <Input
+                        id="edit-state"
+                        value={editingApplicationData.application_data?.state || ''}
+                        onChange={(e) => setEditingApplicationData(prev => ({
+                          ...prev,
+                          application_data: {
+                            ...prev.application_data,
+                            state: e.target.value
+                          }
+                        }))}
+                        className="mt-1"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="edit-city">City *</Label>
+                      <Input
+                        id="edit-city"
+                        value={editingApplicationData.application_data?.city || ''}
+                        onChange={(e) => setEditingApplicationData(prev => ({
+                          ...prev,
+                          application_data: {
+                            ...prev.application_data,
+                            city: e.target.value
+                          }
+                        }))}
+                        className="mt-1"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Personal Details */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold">Personal Details</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="edit-gender">Gender *</Label>
+                      <Select
+                        value={editingApplicationData.application_data?.gender || ''}
+                        onValueChange={(value) => setEditingApplicationData(prev => ({
+                          ...prev,
+                          application_data: {
+                            ...prev.application_data,
+                            gender: value
+                          }
+                        }))}
+                      >
+                        <SelectTrigger className="mt-1">
+                          <SelectValue placeholder="Select gender" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="female">Female</SelectItem>
+                          <SelectItem value="male">Male</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label htmlFor="edit-age">Age *</Label>
+                      <Input
+                        id="edit-age"
+                        type="number"
+                        value={editingApplicationData.application_data?.age || ''}
+                        onChange={(e) => setEditingApplicationData(prev => ({
+                          ...prev,
+                          application_data: {
+                            ...prev.application_data,
+                            age: parseInt(e.target.value) || 0
+                          }
+                        }))}
+                        className="mt-1"
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="edit-marital-status">Marital Status</Label>
+                      <Select
+                        value={editingApplicationData.application_data?.marital_status || ''}
+                        onValueChange={(value) => setEditingApplicationData(prev => ({
+                          ...prev,
+                          application_data: {
+                            ...prev.application_data,
+                            marital_status: value
+                          }
+                        }))}
+                      >
+                        <SelectTrigger className="mt-1">
+                          <SelectValue placeholder="Select marital status" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="single">Single</SelectItem>
+                          <SelectItem value="married">Married</SelectItem>
+                          <SelectItem value="divorced">Divorced</SelectItem>
+                          <SelectItem value="widowed">Widowed</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label htmlFor="edit-has-children">Do you have children?</Label>
+                      <Select
+                        value={editingApplicationData.application_data?.has_children?.toString() || ''}
+                        onValueChange={(value) => setEditingApplicationData(prev => ({
+                          ...prev,
+                          application_data: {
+                            ...prev.application_data,
+                            has_children: value === 'true'
+                          }
+                        }))}
+                      >
+                        <SelectTrigger className="mt-1">
+                          <SelectValue placeholder="Select option" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="false">No</SelectItem>
+                          <SelectItem value="true">Yes</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Physical Measurements */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold">Physical Measurements</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="edit-height">Height (cm) *</Label>
+                      <Input
+                        id="edit-height"
+                        type="number"
+                        value={editingApplicationData.application_data?.height || ''}
+                        onChange={(e) => setEditingApplicationData(prev => ({
+                          ...prev,
+                          application_data: {
+                            ...prev.application_data,
+                            height: parseInt(e.target.value) || 0
+                          }
+                        }))}
+                        className="mt-1"
+                        placeholder="e.g. 165"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="edit-weight">Weight (kg) *</Label>
+                      <Input
+                        id="edit-weight"
+                        type="number"
+                        value={editingApplicationData.application_data?.weight || ''}
+                        onChange={(e) => setEditingApplicationData(prev => ({
+                          ...prev,
+                          application_data: {
+                            ...prev.application_data,
+                            weight: parseInt(e.target.value) || 0
+                          }
+                        }))}
+                        className="mt-1"
+                        placeholder="e.g. 55"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex flex-col sm:flex-row gap-3 pt-4">
+                  <Button 
+                    variant="outline" 
+                    className="flex-1"
+                    onClick={() => {
+                      setShowEditModal(false);
+                      setEditingApplicationData(null);
+                      setEditingApplicationId(null);
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                  <Button 
+                    className="flex-1 bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white"
+                    onClick={async () => {
+                      if (editingApplicationData && editingApplicationId) {
+                        try {
+                          const { error } = await supabase
+                            .from('contest_applications')
+                            .update({
+                              application_data: editingApplicationData.application_data
+                            })
+                            .eq('id', editingApplicationId);
+
+                          if (error) {
+                            toast({
+                              title: "Error",
+                              description: "Failed to update application",
+                              variant: "destructive"
+                            });
+                          } else {
+                            toast({
+                              title: "Success",
+                              description: "Application updated successfully"
+                            });
+                            setShowEditModal(false);
+                            setEditingApplicationData(null);
+                            setEditingApplicationId(null);
+                            fetchContestApplications();
+                          }
+                        } catch (err) {
+                          toast({
+                            title: "Error",
+                            description: "An unexpected error occurred",
+                            variant: "destructive"
+                          });
+                        }
                       }
-                    } catch (err) {
-                      toast({
-                        title: "Error",
-                        description: "An unexpected error occurred",
-                        variant: "destructive"
-                      });
-                    }
-                  }
-                }}>
-                  Save Changes
-                </Button>
+                    }}
+                  >
+                    Save Changes
+                  </Button>
+                </div>
               </div>
-            </div>
+            </ScrollArea>
           )}
         </DialogContent>
       </Dialog>
