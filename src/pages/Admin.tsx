@@ -1131,8 +1131,7 @@ const Admin = () => {
                                 setVotersModalOpen(true);
                               }}
                             >
-                              <span className="text-blue-600">votes</span>
-                              {` ${(participant.average_rating || 0).toFixed(1)} (${participant.total_votes || 0})`}
+                              {`${(participant.average_rating || 0).toFixed(1)} (${participant.total_votes || 0})`}
                             </div>
                           </div>
                         </div>
@@ -1259,8 +1258,7 @@ const Admin = () => {
                                     setVotersModalOpen(true);
                                   }}
                                 >
-                                  <span className="text-blue-600">votes</span>
-                                  {` ${(participant.average_rating || 0).toFixed(1)} (${participant.total_votes || 0})`}
+                                  {`${(participant.average_rating || 0).toFixed(1)} (${participant.total_votes || 0})`}
                                 </div>
                               </div>
                             </div>
