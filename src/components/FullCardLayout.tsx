@@ -120,7 +120,7 @@ export function FullCardLayout({
                        // Для всех пользователей (включая админов) показываем средний рейтинг
                        return localAverageRating > 0 ? localAverageRating.toFixed(1) : '0.0';
                      })()}
-                     <span className="text-xs opacity-75 ml-1">({localTotalVotes})</span>
+                     <span className="text-xs opacity-75 ml-1 font-normal">({localTotalVotes})</span>
                 </div>
              </PopoverTrigger>
               <PopoverContent className="w-auto p-3">

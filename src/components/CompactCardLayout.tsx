@@ -162,7 +162,7 @@ export function CompactCardLayout({
         <div className="absolute top-0 right-0 z-10">
           <div className="bg-contest-blue text-white px-1 py-0.5 rounded-bl text-sm sm:text-base font-bold">
             {localAverageRating > 0 ? localAverageRating.toFixed(1) : '0.0'}
-            <span className="text-xs opacity-75 ml-1">({localTotalVotes})</span>
+            <span className="text-xs opacity-75 ml-1 font-normal">({localTotalVotes})</span>
           </div>
         </div>
       )}
@@ -215,10 +215,6 @@ export function CompactCardLayout({
                 </div>
               )}
               
-              {!isExample && (
-                <div className="text-right flex-shrink-0">
-                </div>
-              )}
             </div>
             
             {!isExample && (
@@ -311,10 +307,6 @@ export function CompactCardLayout({
                 </div>
               )}
               
-              {!isExample && (
-                <div className="text-right flex-shrink-0">
-                </div>
-              )}
             </div>
             
             {!isExample && (
