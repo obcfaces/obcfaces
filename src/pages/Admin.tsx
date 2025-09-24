@@ -161,6 +161,8 @@ const Admin = () => {
   const [editingApplicationId, setEditingApplicationId] = useState<string | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingApplicationData, setEditingApplicationData] = useState<any>(null);
+  const [showParticipationModal, setShowParticipationModal] = useState(false);
+  const [editingParticipantData, setEditingParticipantData] = useState<any>(null);
   const [showEditHistory, setShowEditHistory] = useState(false);
   const [editHistoryApplicationId, setEditHistoryApplicationId] = useState<string | null>(null);
   const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false);
@@ -1854,9 +1856,8 @@ const Admin = () => {
                                 size="sm"
                                 variant="outline"
                                 onClick={() => {
-                                  setEditingApplicationId(application.id);
-                                  setEditingApplicationData(application);
-                                  setShowEditModal(true);
+                                  setEditingParticipantData(application);
+                                  setShowParticipationModal(true);
                                 }}
                                 className="absolute bottom-0 left-0 z-20 p-1 m-0 rounded-none rounded-tr-md border-0 border-t border-r bg-background/90 hover:bg-background"
                                 title="Edit Application"
@@ -2431,11 +2432,10 @@ const Admin = () => {
                              <Button
                                size="sm"
                                variant="outline"
-                               onClick={() => {
-                                 setEditingApplicationId(application.id);
-                                 setEditingApplicationData(application);
-                                 setShowEditModal(true);
-                               }}
+                                onClick={() => {
+                                  setEditingParticipantData(application);
+                                  setShowParticipationModal(true);
+                                }}
                                className="absolute bottom-0 left-0 z-20 p-1 m-0 rounded-none rounded-tr-md border-0 border-t border-r bg-background/90 hover:bg-background"
                                title="Edit Application"
                              >
@@ -2939,11 +2939,10 @@ const Admin = () => {
                                        <Button
                                          size="sm"
                                          variant="outline"
-                                         onClick={() => {
-                                           setEditingApplicationId(prevApp.id);
-                                           setEditingApplicationData(prevApp);
-                                           setShowEditModal(true);
-                                         }}
+                                          onClick={() => {
+                                            setEditingParticipantData(prevApp);
+                                            setShowParticipationModal(true);
+                                          }}
                                          className="absolute bottom-0 left-0 z-20 p-1 m-0 rounded-none rounded-tr-md border-0 border-t border-r bg-background/90 hover:bg-background"
                                          title="Edit Application"
                                        >
@@ -3567,12 +3566,17 @@ const Admin = () => {
         participantName={selectedParticipantForVoters?.name || ''}
       />
 
-      {/* Contest Participation Modal */}
+      {/* Contest Participation Modal for editing */}
       <ContestParticipationModal 
-        isOpen={false}
+        isOpen={showParticipationModal}
         onOpenChange={(open) => {
-          if (!open) setWeeklyContests([]);
+          setShowParticipationModal(open);
+          if (!open) {
+            setEditingParticipantData(null);
+          }
         }}
+        editMode={true}
+        existingData={editingParticipantData}
       />
 
       {/* Delete Confirmation Modal */}
