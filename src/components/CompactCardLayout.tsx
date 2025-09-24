@@ -105,15 +105,6 @@ export function CompactCardLayout({
             }
           }}
          />
-        
-        {/* Rating required overlay for non-example cards */}
-        {!isVoted && !isExample && (
-          <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-            <div className="text-white text-xs font-semibold text-center px-2">
-              Rate to view
-            </div>
-          </div>
-        )}
         {/* Example Badge on photo for compact view */}
         {isExample && (
           <div className="absolute top-0 left-0 bg-yellow-500 text-white px-1 py-0.5 text-xs font-bold">
@@ -138,16 +129,7 @@ export function CompactCardLayout({
             }
           }}
          />
-        
-        {/* Rating required overlay for non-example cards */}
-        {!isVoted && !isExample && (
-          <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-            <div className="text-white text-xs font-semibold text-center px-2">
-              Rate to view
-            </div>
-          </div>
-        )}
-        {additionalPhotos.length > 0 && (isVoted || isExample) && (
+        {additionalPhotos.length > 0 && (
           <div 
             className="absolute bottom-0.5 right-0.5 bg-black/40 text-white/80 text-xs px-1 py-0.5 rounded cursor-pointer hover:bg-black/60 transition-colors"
             onClick={() => openModal(2)}
