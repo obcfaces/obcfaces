@@ -795,8 +795,17 @@ export const ContestParticipationModal = ({
         }
       }
       
-      // Set submission success to show contact form for both new and edited applications
-      setSubmissionSuccess(true);
+      // Set submission success to show contact form for new applications, or close for edit mode
+      if (!editMode) {
+        setSubmissionSuccess(true);
+      } else {
+        // In edit mode, show toast and close modal
+        toast({
+          title: "Success", 
+          description: "Application updated successfully.",
+        });
+        setIsOpen(false);
+      }
     } catch (error: any) {
       console.error('Submission error:', error);
       console.error('Error stack:', error.stack);
@@ -1344,9 +1353,18 @@ export const ContestParticipationModal = ({
                              return;
                            }
                         
-                             
-                             // Show success modal instead of closing immediately
-                             setShowSuccessModal(true);
+                              
+                              // Show success modal only if not in edit mode
+                              if (!editMode) {
+                                setShowSuccessModal(true);
+                              } else {
+                                // In edit mode, just close the modal and show a toast
+                                toast({
+                                  title: "Success",
+                                  description: "Application updated successfully.",
+                                });
+                                setIsOpen(false);
+                              }
                             
                             // Reset states 
                             setSubmissionSuccess(false);
@@ -1766,9 +1784,10 @@ export const ContestParticipationModal = ({
         </ScrollArea>
       </DialogContent>
       
-      {/* Success Modal for sharing */}
-      <ContestSuccessModal
-        isOpen={showSuccessModal}
+      {/* Success Modal for sharing - only show if not in edit mode */}
+      {!editMode && (
+        <ContestSuccessModal
+          isOpen={showSuccessModal}
         onClose={() => {
           setShowSuccessModal(false);
           setIsOpen(false);
@@ -1778,10 +1797,11 @@ export const ContestParticipationModal = ({
           setSelectedContactMethod(null);
           setContactForm({ name: "", contact: "", message: "", countryCode: "", facebookUrl: "" });
         }}
-        title="Vote for me in the beauty contest!"
-        url="https://obcface.com"
-        description="Help me win by voting for me in this beauty contest. Your vote counts!"
-      />
+          title="Vote for me in the beauty contest!"
+          url="https://obcface.com"
+          description="Help me win by voting for me in this beauty contest. Your vote counts!"
+        />
+      )}
     </Dialog>
   );
 };
