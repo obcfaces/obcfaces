@@ -97,7 +97,7 @@ export function ContestantCard({
   const [isAdmin, setIsAdmin] = useState(false);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   
-  // Local state for immediate rating updates
+  // Local state for immediate rating updates - initialize from props
   const [localAverageRating, setLocalAverageRating] = useState(averageRating);
   const [localTotalVotes, setLocalTotalVotes] = useState(totalVotes);
   const [previousUserRating, setPreviousUserRating] = useState(0);
@@ -105,11 +105,11 @@ export function ContestantCard({
   // Use unified card data hook with stable dependencies
   const { data: cardData, loading: cardDataLoading, refresh: refreshCardData } = useCardData(name, propUser?.id, profileId);
 
-  // Initialize local state when props change
-  useEffect(() => {
-    setLocalAverageRating(averageRating);
-    setLocalTotalVotes(totalVotes);
-  }, [averageRating, totalVotes]);
+  // Initialize local state when props change - DISABLED to prevent infinite recursion
+  // useEffect(() => {
+  //   setLocalAverageRating(averageRating);
+  //   setLocalTotalVotes(totalVotes);
+  // }, [averageRating, totalVotes]);
   
   
   // TEMPORARILY DISABLED ALL EFFECTS AND PROP SYNC TO STOP RECURSION
