@@ -419,9 +419,9 @@ const LikedItem = ({
       
       setIsLiked(false);
       onUnlike?.(likeId);
-      toast({ description: "Лайк убран" });
+      toast({ description: "Like removed" });
     } catch (error) {
-      toast({ description: "Не удалось убрать лайк" });
+      toast({ description: "Failed to remove like" });
     } finally {
       setIsUnliking(false);
     }
@@ -521,7 +521,7 @@ const LikedItem = ({
                 try {
                   const { data: { session } } = await supabase.auth.getSession();
                   if (!session) {
-                    toast({ description: "Необходимо войти в систему" });
+                     toast({ description: "Please log in to continue" });
                     return;
                   }
 
@@ -537,13 +537,13 @@ const LikedItem = ({
                    
                    if (error) {
                      console.error('Error loading application:', error);
-                     toast({ description: "Ошибка загрузки данных заявки" });
+                      toast({ description: "Error loading application data" });
                      return;
                    }
 
                    if (!latestApplication) {
                      console.log('No application found for user');
-                     toast({ description: "Заявка не найдена" });
+                     toast({ description: "Application not found" });
                      return;
                    }
 
@@ -564,7 +564,7 @@ const LikedItem = ({
                    }));
                 } catch (error) {
                   console.error('Error loading application data:', error);
-                  toast({ description: "Ошибка загрузки данных" });
+                   toast({ description: "Error loading data" });
                 }
               }}
               size="sm"
@@ -785,7 +785,7 @@ const LikedItem = ({
                 try {
                   const { data: { session } } = await supabase.auth.getSession();
                   if (!session) {
-                    toast({ description: "Необходимо войти в систему" });
+                    toast({ description: "Please log in to continue" });
                     return;
                   }
 
@@ -799,7 +799,7 @@ const LikedItem = ({
 
                   if (error) {
                     console.error('Error loading application:', error);
-                    toast({ description: "Ошибка загрузки данных заявки" });
+                    toast({ description: "Error loading application data" });
                     return;
                   }
 
@@ -812,7 +812,7 @@ const LikedItem = ({
                   }));
                 } catch (error) {
                   console.error('Error loading application data:', error);
-                  toast({ description: "Ошибка загрузки данных" });
+                  toast({ description: "Error loading data" });
                 }
               }}
               size="sm"
