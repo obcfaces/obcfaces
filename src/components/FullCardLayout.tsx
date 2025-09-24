@@ -107,9 +107,9 @@ export function FullCardLayout({
         </div>
       )}
       
-      {/* Rating badge in top right corner - hide when voting overlay (stars) is visible */}
-      {!isEditing && !showThanks && !isExample && (!isThisWeek || isVoted) &&
-       !((isThisWeek && !propUser) || (!isVoted && propUser)) && (
+      {/* Rating badge in top right corner - always show for past weeks, hide when voting overlay (stars) is visible for current week */}
+      {!isEditing && !showThanks && !isExample && 
+       (!isThisWeek || (!((isThisWeek && !propUser) || (!isVoted && propUser)) && isVoted)) && (
         <div className="absolute top-0 right-0 z-10 flex flex-col items-end">
            <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
              <PopoverTrigger asChild>
@@ -150,9 +150,9 @@ export function FullCardLayout({
           <img 
             src={faceImage} 
             alt={`${name} face`}
-            className={`w-24 sm:w-28 md:w-32 h-full object-cover ${(isVoted || isExample) ? 'cursor-pointer hover:opacity-90' : 'cursor-not-allowed opacity-75'} transition-opacity`}
+            className={`w-24 sm:w-28 md:w-32 h-full object-cover ${(isVoted || isExample || !isThisWeek) ? 'cursor-pointer hover:opacity-90' : 'cursor-not-allowed opacity-75'} transition-opacity`}
             onClick={() => {
-              if (isVoted || isExample) {
+              if (isVoted || isExample || !isThisWeek) {
                 openModal(0);
               }
             }}
@@ -162,9 +162,9 @@ export function FullCardLayout({
           <img 
             src={fullBodyImage} 
             alt={`${name} full body`}
-            className={`w-24 sm:w-28 md:w-32 h-full object-cover ${(isVoted || isExample) ? 'cursor-pointer hover:opacity-90' : 'cursor-not-allowed opacity-75'} transition-opacity`}
+            className={`w-24 sm:w-28 md:w-32 h-full object-cover ${(isVoted || isExample || !isThisWeek) ? 'cursor-pointer hover:opacity-90' : 'cursor-not-allowed opacity-75'} transition-opacity`}
             onClick={() => {
-              if (isVoted || isExample) {
+              if (isVoted || isExample || !isThisWeek) {
                 openModal(1);
               }
             }}
