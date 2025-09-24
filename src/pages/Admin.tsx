@@ -1274,25 +1274,35 @@ const Admin = () => {
 
                           {/* Right side actions */}
                           <div className="w-[20ch] flex-shrink-0 p-4 flex flex-col gap-2">
-                            <Select 
-                              value={participantFilters[participant.id] || (participant.final_rank ? 'this week' : 'approve')} 
-                              onValueChange={(value) => {
-                                setParticipantFilters(prev => ({
-                                  ...prev,
-                                  [participant.id]: value
-                                }));
-                              }}
-                            >
-                              <SelectTrigger className="w-28 h-6 text-xs">
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent className="z-50 bg-background border shadow-md">
-                                <SelectItem value="this week">This Week</SelectItem>
-                                <SelectItem value="next week">Next Week</SelectItem>
-                                <SelectItem value="approve">Approve</SelectItem>
-                                <SelectItem value="reject">Reject</SelectItem>
-                              </SelectContent>
-                            </Select>
+                             <Select 
+                               value={participantFilters[participant.id] || (participant.final_rank ? 'this week' : 'approve')} 
+                               onValueChange={(value) => {
+                                 if (value === 'reject') {
+                                   // Open reject modal for this participant
+                                   setApplicationToReject({
+                                     id: participant.id,
+                                     name: `${participantProfile?.first_name || appData.first_name} ${participantProfile?.last_name || appData.last_name}`
+                                   });
+                                   setRejectModalOpen(true);
+                                   return;
+                                 }
+                                 
+                                 setParticipantFilters(prev => ({
+                                   ...prev,
+                                   [participant.id]: value
+                                 }));
+                               }}
+                             >
+                               <SelectTrigger className="w-28 h-6 text-xs">
+                                 <SelectValue />
+                               </SelectTrigger>
+                               <SelectContent className="z-50 bg-background border shadow-md">
+                                 <SelectItem value="this week">This Week</SelectItem>
+                                 <SelectItem value="next week">Next Week</SelectItem>
+                                 <SelectItem value="approve">Approve</SelectItem>
+                                 <SelectItem value="reject">Reject</SelectItem>
+                               </SelectContent>
+                             </Select>
                             
                             {/* Status change date with reviewer login - desktop */}
                             <div 
@@ -1401,25 +1411,35 @@ const Admin = () => {
                               
                               {/* Status filter positioned at bottom */}
                               <div className="absolute bottom-12 right-13 flex items-center gap-2">
-                                <Select 
-                                  value={participantFilters[participant.id] || (participant.final_rank ? 'this week' : 'approve')} 
-                                  onValueChange={(value) => {
-                                    setParticipantFilters(prev => ({
-                                      ...prev,
-                                      [participant.id]: value
-                                    }));
-                                  }}
-                                >
-                                  <SelectTrigger className="w-24 h-7 text-xs">
-                                    <SelectValue />
-                                  </SelectTrigger>
-                                  <SelectContent className="z-50 bg-background border shadow-md">
-                                    <SelectItem value="this week">This Week</SelectItem>
-                                    <SelectItem value="next week">Next Week</SelectItem>
-                                    <SelectItem value="approve">Approve</SelectItem>
-                                    <SelectItem value="reject">Reject</SelectItem>
-                                  </SelectContent>
-                                </Select>
+                                 <Select 
+                                   value={participantFilters[participant.id] || (participant.final_rank ? 'this week' : 'approve')} 
+                                   onValueChange={(value) => {
+                                     if (value === 'reject') {
+                                       // Open reject modal for this participant
+                                       setApplicationToReject({
+                                         id: participant.id,
+                                         name: `${participantProfile?.first_name || appData.first_name} ${participantProfile?.last_name || appData.last_name}`
+                                       });
+                                       setRejectModalOpen(true);
+                                       return;
+                                     }
+                                     
+                                     setParticipantFilters(prev => ({
+                                       ...prev,
+                                       [participant.id]: value
+                                     }));
+                                   }}
+                                 >
+                                   <SelectTrigger className="w-24 h-7 text-xs">
+                                     <SelectValue />
+                                   </SelectTrigger>
+                                   <SelectContent className="z-50 bg-background border shadow-md">
+                                     <SelectItem value="this week">This Week</SelectItem>
+                                     <SelectItem value="next week">Next Week</SelectItem>
+                                     <SelectItem value="approve">Approve</SelectItem>
+                                     <SelectItem value="reject">Reject</SelectItem>
+                                   </SelectContent>
+                                 </Select>
                                 
                                 {/* Rating with votes */}
                                 <div 
@@ -3467,13 +3487,76 @@ const Admin = () => {
       <RejectReasonModal
         isOpen={rejectModalOpen}
         onClose={() => setRejectModalOpen(false)}
-        onConfirm={async (reasonTypes, notes) => {
-          if (applicationToReject) {
-            await reviewApplication(applicationToReject.id, 'rejected', { reasonTypes, notes });
-            setApplicationToReject(null);
-            setRejectModalOpen(false);
-          }
-        }}
+         onConfirm={async (reasonTypes, notes) => {
+           if (applicationToReject) {
+             // Check if this is a weekly contest participant or regular application
+             const isWeeklyParticipant = filteredWeeklyParticipants.some(p => p.id === applicationToReject.id);
+             
+             if (isWeeklyParticipant) {
+               // For weekly contest participants, remove them from the contest and reject their application
+               const participant = filteredWeeklyParticipants.find(p => p.id === applicationToReject.id);
+               if (participant) {
+                 try {
+                   // Remove from weekly contest
+                   const { error: removeError } = await supabase
+                     .from('weekly_contest_participants')
+                     .update({ is_active: false })
+                     .eq('id', participant.id);
+                   
+                   if (removeError) {
+                     console.error('Error removing from weekly contest:', removeError);
+                     toast({
+                       title: "Error",
+                       description: `Failed to remove from weekly contest: ${removeError.message}`,
+                       variant: "destructive"
+                     });
+                     return;
+                   }
+                   
+                   // Update the corresponding application status to rejected
+                   if (participant.user_id) {
+                     const { data: applications } = await supabase
+                       .from('contest_applications')
+                       .select('id')
+                       .eq('user_id', participant.user_id)
+                       .eq('status', 'approved')
+                       .order('created_at', { ascending: false })
+                       .limit(1);
+                     
+                     if (applications && applications.length > 0) {
+                       await reviewApplication(applications[0].id, 'rejected', { reasonTypes, notes });
+                     }
+                   }
+                   
+                   // Remove participant filter
+                   setParticipantFilters(prev => {
+                     const newFilters = { ...prev };
+                     delete newFilters[participant.id];
+                     return newFilters;
+                   });
+                   
+                   toast({
+                     title: "Success",
+                     description: "Participant rejected and moved to Card section",
+                   });
+                 } catch (error) {
+                   console.error('Error rejecting participant:', error);
+                   toast({
+                     title: "Error",
+                     description: "Failed to reject participant",
+                     variant: "destructive"
+                   });
+                 }
+               }
+             } else {
+               // Regular application rejection
+               await reviewApplication(applicationToReject.id, 'rejected', { reasonTypes, notes });
+             }
+             
+             setApplicationToReject(null);
+             setRejectModalOpen(false);
+           }
+         }}
       />
 
       {/* Voters Modal */}
