@@ -37,14 +37,18 @@ export const AuthProtectedModal = ({ children }: AuthProtectedModalProps) => {
     
     if (session?.user?.email_confirmed_at) {
       // User is authenticated, check their application status
+      console.log('Checking application status for user:', session.user.id);
+      
       const { data: applications, error } = await supabase
         .from('contest_applications')
         .select('status')
         .eq('user_id', session.user.id)
         .eq('is_active', true)
-        .eq('deleted_at', null)
+        .is('deleted_at', null)
         .order('created_at', { ascending: false })
         .limit(1);
+
+      console.log('Application check result:', { applications, error });
 
       if (error) {
         console.error('Error checking application status:', error);
@@ -54,6 +58,7 @@ export const AuthProtectedModal = ({ children }: AuthProtectedModalProps) => {
 
       if (applications && applications.length > 0) {
         const status = applications[0].status;
+        console.log('Found application with status:', status);
         
         if (status === 'rejected') {
           // Allow new participation
