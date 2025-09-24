@@ -1,7 +1,6 @@
-import { MessageCircle, Send, MessageSquare } from "lucide-react";
+import { MessageCircle, Send, MessageSquare, Facebook } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect, useRef } from "react";
-import messengerIcon from "@/assets/messenger-icon.png";
 
 export const SocialWidgets = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -65,10 +64,10 @@ export const SocialWidgets = () => {
           <Button
             onClick={() => handleSocialClick(openMessenger)}
             size="lg"
-            className="w-12 h-12 rounded-full bg-white hover:bg-gray-50 shadow-lg hover:shadow-xl transition-all duration-300 animate-fade-in p-0"
+            className="w-12 h-12 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 animate-fade-in"
             aria-label="Написать в Facebook Messenger"
           >
-            <img src={messengerIcon} alt="Messenger" className="w-12 h-12 rounded-full" />
+            <Facebook className="w-5 h-5" />
           </Button>
           
           <Button
