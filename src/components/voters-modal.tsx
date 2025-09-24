@@ -167,14 +167,15 @@ export const VotersModal = ({ isOpen, onClose, participantId, participantName }:
   const fetchUserActivity = async (userId: string) => {
     setActivityLoading(true);
     try {
-      // Get user's ratings for other participants
+      // Get user's all ratings to show their complete rating history
       const { data: ratings, error: ratingsError } = await supabase
         .from('contestant_ratings')
         .select(`
           rating,
           created_at,
           contestant_user_id,
-          contestant_name
+          contestant_name,
+          participant_id
         `)
         .eq('user_id', userId)
         .order('created_at', { ascending: false });
@@ -363,10 +364,42 @@ export const VotersModal = ({ isOpen, onClose, participantId, participantName }:
                                   </p>
                                 )}
                                 
-                                {/* Vote Date */}
-                                <p className="text-xs text-muted-foreground mt-1">
-                                  Voted on {new Date(voter.created_at).toLocaleString()}
-                                </p>
+                                 {/* Vote Date */}
+                                 <p className="text-xs text-muted-foreground mt-1">
+                                   Voted on {new Date(voter.created_at).toLocaleString()}
+                                 </p>
+                                 
+                                 {/* Show this user's all ratings history under their latest rating */}
+                                 {expandedUser === voter.user_id && (
+                                   <div className="mt-3 p-2 bg-muted/30 rounded-lg">
+                                     <h5 className="text-xs font-medium text-muted-foreground mb-2">
+                                       All ratings by this user:
+                                     </h5>
+                                     {activityLoading ? (
+                                       <div className="text-xs text-muted-foreground">Loading...</div>
+                                     ) : userActivity.length === 0 ? (
+                                       <div className="text-xs text-muted-foreground">No ratings found</div>
+                                     ) : (
+                                       <div className="space-y-1 max-h-24 overflow-y-auto">
+                                         {userActivity.map((activity, actIndex) => (
+                                           activity.rating && (
+                                             <div key={`rating-${activity.target_user_id}-${actIndex}`} className="flex items-center justify-between text-xs">
+                                               <span className="font-medium">{activity.target_name}</span>
+                                               <div className="flex items-center gap-2">
+                                                 <span className={`px-1.5 py-0.5 rounded text-white ${getRatingColor(activity.rating)}`}>
+                                                   {activity.rating}/10
+                                                 </span>
+                                                 <span className="text-muted-foreground">
+                                                   {new Date(activity.last_activity).toLocaleDateString()}
+                                                 </span>
+                                               </div>
+                                             </div>
+                                           )
+                                         ))}
+                                       </div>
+                                     )}
+                                   </div>
+                                 )}
                               </div>
                               
                                {/* Badges and expand indicator */}
