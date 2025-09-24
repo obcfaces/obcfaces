@@ -65,10 +65,14 @@ export const SocialWidgets = () => {
           <Button
             onClick={() => handleSocialClick(openMessenger)}
             size="lg"
-            className="w-12 h-12 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 animate-fade-in"
+            className="w-12 h-12 rounded-full bg-transparent hover:bg-transparent transition-all duration-300 animate-fade-in p-0"
             aria-label="Написать в Facebook Messenger"
           >
-            <Facebook className="w-5 h-5" />
+            <img 
+              src={messengerMainIcon} 
+              alt="Facebook Messenger" 
+              className="w-12 h-12 object-contain"
+            />
           </Button>
           
           <Button
