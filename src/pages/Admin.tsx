@@ -189,12 +189,72 @@ const Admin = () => {
     checkAdminAccess();
     fetchDailyStats();
     fetchDailyApplicationStats();
+    
+    // Set up real-time subscriptions for automatic updates
+    const contestAppsChannel = supabase
+      .channel('contest-applications-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'contest_applications'
+        },
+        (payload) => {
+          console.log('Contest applications changed:', payload);
+          // Refresh contest applications and stats
+          fetchContestApplications();
+          fetchDailyApplicationStats();
+        }
+      )
+      .subscribe();
+
+    const votesChannel = supabase
+      .channel('votes-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'votes'
+        },
+        (payload) => {
+          console.log('Votes changed:', payload);
+          // Refresh daily voting stats
+          fetchDailyStats();
+        }
+      )
+      .subscribe();
+
+    const ratingsChannel = supabase
+      .channel('ratings-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'ratings'
+        },
+        (payload) => {
+          console.log('Ratings changed:', payload);
+          // Refresh daily voting stats
+          fetchDailyStats();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(contestAppsChannel);
+      supabase.removeChannel(votesChannel);
+      supabase.removeChannel(ratingsChannel);
+    };
   }, []);
 
   // Recalculate application stats when contestApplications change
   useEffect(() => {
     if (contestApplications.length > 0) {
       fetchDailyApplicationStats();
+      fetchDailyStats(); // Also refresh daily voting stats
     }
   }, [contestApplications]);
 
