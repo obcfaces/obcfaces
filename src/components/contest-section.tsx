@@ -443,9 +443,9 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
         <div className="px-0 sm:px-6">
           {/* Regular contestants only */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-1 sm:gap-3 max-w-full overflow-hidden">
-            {contestants.filter(c => !c.isExample).map((contestant) => (
+            {contestants.filter(c => !c.isExample).map((contestant, index) => (
               <ContestantCard
-                key={contestant.rank}
+                key={`${contestant.profileId || contestant.name}-${index}`}
                 {...contestant}
                 viewMode={viewMode}
                 onRate={(rating) => handleRate(contestant.rank, rating)}
