@@ -178,6 +178,7 @@ const Admin = () => {
   const [verificationFilter, setVerificationFilter] = useState<string>('all');
   const [verifyingUsers, setVerifyingUsers] = useState<Set<string>>(new Set());
   const [dailyStats, setDailyStats] = useState<Array<{ day_name: string; vote_count: number; like_count: number }>>([]);
+  const [dailyApplicationStats, setDailyApplicationStats] = useState<Array<{ day_name: string; new_count: number; approved_count: number }>>([]);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -186,7 +187,15 @@ const Admin = () => {
   useEffect(() => {
     checkAdminAccess();
     fetchDailyStats();
+    fetchDailyApplicationStats();
   }, []);
+
+  // Recalculate application stats when contestApplications change
+  useEffect(() => {
+    if (contestApplications.length > 0) {
+      fetchDailyApplicationStats();
+    }
+  }, [contestApplications]);
 
   // Handle Weekly Contest participants filtering with async rating fetching
   useEffect(() => {
@@ -442,6 +451,51 @@ const Admin = () => {
       setDailyStats(data || []);
     } catch (error) {
       console.error('Error fetching daily stats:', error);
+    }
+  };
+
+  const fetchDailyApplicationStats = async () => {
+    try {
+      const currentDate = new Date();
+      const weekStart = new Date(currentDate);
+      weekStart.setDate(currentDate.getDate() - currentDate.getDay() + 1); // Monday
+      weekStart.setHours(0, 0, 0, 0);
+      
+      const weekEnd = new Date(weekStart);
+      weekEnd.setDate(weekStart.getDate() + 7);
+      
+      const daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+      const stats = [];
+      
+      for (let i = 0; i < 7; i++) {
+        const dayStart = new Date(weekStart);
+        dayStart.setDate(weekStart.getDate() + i);
+        const dayEnd = new Date(dayStart);
+        dayEnd.setDate(dayStart.getDate() + 1);
+        
+        // Count new applications for this day
+        const newCount = contestApplications.filter(app => {
+          const appDate = new Date(app.submitted_at);
+          return appDate >= dayStart && appDate < dayEnd;
+        }).length;
+        
+        // Count approved applications for this day (by reviewed_at date)
+        const approvedCount = contestApplications.filter(app => {
+          if (app.status !== 'approved' || !app.reviewed_at) return false;
+          const approvedDate = new Date(app.reviewed_at);
+          return approvedDate >= dayStart && approvedDate < dayEnd;
+        }).length;
+        
+        stats.push({
+          day_name: daysOfWeek[i],
+          new_count: newCount,
+          approved_count: approvedCount
+        });
+      }
+      
+      setDailyApplicationStats(stats);
+    } catch (error) {
+      console.error('Error calculating daily application stats:', error);
     }
   };
 
@@ -1574,7 +1628,29 @@ const Admin = () => {
                               </div>
                             </div>
                           </div>
+              </div>
+
+              {/* Applications Stats Dashboard */}
+              <div className="mb-6 px-0 md:px-6">
+                <div className="mb-4 p-3 bg-muted rounded-lg">
+                  <div className="text-sm text-muted-foreground space-y-2">
+                    <div className="text-xs">
+                      new applications: {dailyApplicationStats.reduce((sum, stat) => sum + (stat.new_count || 0), 0)}, 
+                      approved: {dailyApplicationStats.reduce((sum, stat) => sum + (stat.approved_count || 0), 0)}
+                    </div>
+                    <div className="grid grid-cols-7 gap-1 text-xs">
+                      {dailyApplicationStats.map((stat, index) => (
+                        <div key={index} className="text-center p-1 bg-background rounded">
+                          <div className="font-medium text-xs">{stat.day_name}</div>
+                          <div className="text-xs text-muted-foreground">
+                            {stat.new_count}-{stat.approved_count}
+                          </div>
                         </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
                       </CardContent>
                     </Card>
                   );
