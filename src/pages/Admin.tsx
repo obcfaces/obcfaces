@@ -1223,59 +1223,62 @@ const Admin = () => {
                             </div>
                             
                             <div 
-                              className="text-xs text-muted-foreground mb-1 cursor-pointer hover:text-foreground transition-colors"
-                              onClick={() => {
-                                const newExpanded = new Set(expandedDesktopItems);
-                                if (expandedDesktopItems.has(participant.id)) {
-                                  newExpanded.delete(participant.id);
-                                } else {
-                                  newExpanded.add(participant.id);
-                                }
-                                setExpandedDesktopItems(newExpanded);
-                              }}
+                              className="text-xs text-muted-foreground mb-1"
                             >
                               {participantProfile?.city || appData.city} {participantProfile?.country || appData.country}
                             </div>
                             
-                            {/* Expanded information */}
-                            {expandedDesktopItems.has(participant.id) && (
-                              <div className="text-xs text-muted-foreground mb-1 space-y-0 leading-none">
-                                <div>{(participantProfile?.weight_kg || appData.weight_kg)}kg, {(participantProfile?.height_cm || appData.height_cm)}cm</div>
-                                <div>{participantProfile?.marital_status || appData.marital_status}, {(participantProfile?.has_children || appData.has_children) ? 'Has kids' : 'No kids'}</div>
-                                <div className="flex items-center gap-1">
-                                  <span>
-                                    {participantProfile?.email 
-                                      ? (participantProfile.email.length > 7 ? `${participantProfile.email.substring(0, 7)}...` : participantProfile.email)
-                                      : 'No email'
-                                    }
-                                  </span>
-                                  {participantProfile?.email && (
-                                    <Copy 
-                                      className="h-3 w-3 cursor-pointer hover:text-foreground" 
-                                      onClick={() => navigator.clipboard.writeText(participantProfile.email)}
-                                    />
-                                  )}
-                                </div>
-                                 <div 
-                                   className="text-lg font-bold text-blue-600 cursor-pointer hover:text-blue-700"
-                                   onClick={() => {
-                                     setSelectedParticipantForVoters({
-                                       id: participant.id,
-                                       name: `${participantProfile?.first_name || appData.first_name} ${participantProfile?.last_name || appData.last_name}`
-                                     });
-                                     setVotersModalOpen(true);
-                                   }}
-                                 >
-                                   {participant.total_votes || 0} • ★ {(participant.average_rating || 0).toFixed(1)}
-                                 </div>
+                            {/* Always show full information - like mobile version */}
+                            <div className="text-xs text-muted-foreground mb-1 space-y-0 leading-none">
+                              <div>{(participantProfile?.weight_kg || appData.weight_kg)}kg, {(participantProfile?.height_cm || appData.height_cm)}cm</div>
+                              <div>{participantProfile?.marital_status || appData.marital_status}, {(participantProfile?.has_children || appData.has_children) ? 'Has kids' : 'No kids'}</div>
+                              <div className="flex items-center gap-1">
+                                <span>
+                                  {participantProfile?.email 
+                                    ? (participantProfile.email.length > 7 ? `${participantProfile.email.substring(0, 7)}...` : participantProfile.email)
+                                    : 'No email'
+                                  }
+                                </span>
+                                {participantProfile?.email && (
+                                  <Copy 
+                                    className="h-3 w-3 cursor-pointer hover:text-foreground" 
+                                    onClick={() => navigator.clipboard.writeText(participantProfile.email)}
+                                  />
+                                )}
                               </div>
-                            )}
+                               <div 
+                                 className="text-lg font-bold text-blue-600 cursor-pointer hover:text-blue-700"
+                                 onClick={() => {
+                                   setSelectedParticipantForVoters({
+                                     id: participant.id,
+                                     name: `${participantProfile?.first_name || appData.first_name} ${participantProfile?.last_name || appData.last_name}`
+                                   });
+                                   setVotersModalOpen(true);
+                                 }}
+                               >
+                                 {participant.total_votes || 0} • ★ {(participant.average_rating || 0).toFixed(1)}
+                               </div>
+                            </div>
                             
                             <div className="flex-1"></div>
                           </div>
 
                           {/* Right side actions */}
                           <div className="w-[20ch] flex-shrink-0 p-4 flex flex-col gap-2">
+                            {/* Edit button */}
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="p-1 h-6 w-6"
+                              onClick={() => {
+                                setEditingParticipantData(participant);
+                                setShowEditModal(true);
+                              }}
+                              title="Edit Application"
+                            >
+                              <Edit className="w-4 h-4" />
+                            </Button>
+                            
                              <Select 
                                value={participantFilters[participant.id] || (participant.final_rank ? 'this week' : 'approve')} 
                                onValueChange={(value) => {
@@ -1319,20 +1322,6 @@ const Admin = () => {
                             >
                               {`${(participant.average_rating || 0).toFixed(1)} (${participant.total_votes || 0})`}
                             </div>
-
-                            {/* Edit button */}
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="p-1 h-6 w-6"
-                              onClick={() => {
-                                setEditingParticipantData(participant);
-                                setShowEditModal(true);
-                              }}
-                              title="Edit Application"
-                            >
-                              <Edit className="w-4 h-4" />
-                            </Button>
                           </div>
                         </div>
 
