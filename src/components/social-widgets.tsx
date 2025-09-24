@@ -17,7 +17,7 @@ export const SocialWidgets = () => {
   };
 
   const openMessenger = () => {
-    window.open('https://www.facebook.com/share/1PzEdJr8WL/?mibextid=wwXIfr', '_blank');
+    window.open('https://m.me/obcfaces', '_blank');
   };
 
   const clearAutoCloseTimeout = () => {
