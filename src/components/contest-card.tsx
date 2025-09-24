@@ -897,6 +897,7 @@ export function ContestantCard({
                 rank={rank}
                 userRating={userRating}
                 localAverageRating={localAverageRating}
+                localTotalVotes={localTotalVotes}
                 isPopoverOpen={isPopoverOpen}
                 setIsPopoverOpen={setIsPopoverOpen}
                 cardData={cardData}
@@ -939,6 +940,7 @@ export function ContestantCard({
               rank={rank}
               userRating={userRating}
               localAverageRating={localAverageRating}
+              localTotalVotes={localTotalVotes}
               cardData={cardData}
               isLiked={isLiked}
               hasCommented={hasCommented}
