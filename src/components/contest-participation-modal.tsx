@@ -795,11 +795,11 @@ export const ContestParticipationModal = ({
         }
       }
       
-      // Set submission success to show contact form for new applications, or close for edit mode
+      // Set submission success to show contact form for new applications only
       if (!editMode) {
         setSubmissionSuccess(true);
       } else {
-        // In edit mode, just close modal without toast
+        // In edit mode, just close modal 
         setIsOpen(false);
       }
     } catch (error: any) {
@@ -1354,7 +1354,7 @@ export const ContestParticipationModal = ({
                               if (!editMode) {
                                 setShowSuccessModal(true);
                               } else {
-                                // In edit mode, just close the modal without toast
+                                // In edit mode, just close the modal
                                 setIsOpen(false);
                               }
                             

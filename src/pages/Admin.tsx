@@ -1319,6 +1319,20 @@ const Admin = () => {
                             >
                               {`${(participant.average_rating || 0).toFixed(1)} (${participant.total_votes || 0})`}
                             </div>
+
+                            {/* Edit button */}
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="p-1 h-6 w-6"
+                              onClick={() => {
+                                setEditingParticipantData(participant);
+                                setShowEditModal(true);
+                              }}
+                              title="Edit Application"
+                            >
+                              <Edit className="w-4 h-4" />
+                            </Button>
                           </div>
                         </div>
 
