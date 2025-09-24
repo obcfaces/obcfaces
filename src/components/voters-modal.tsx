@@ -387,61 +387,7 @@ export const VotersModal = ({ isOpen, onClose, participantId, participantName }:
                           </div>
                         </div>
                       </CardContent>
-                    </CollapsibleTrigger>
-                    
-                    {/* User Activity History */}
-                    <CollapsibleContent>
-                      <CardContent className="px-4 pb-4 pt-0 border-t">
-                        <h4 className="font-medium text-sm mb-3 text-muted-foreground">
-                          Rating & Like History
-                        </h4>
-                        
-                        {activityLoading ? (
-                          <div className="flex items-center justify-center py-4">
-                            <div className="text-sm text-muted-foreground">Loading activity...</div>
-                          </div>
-                        ) : userActivity.length === 0 ? (
-                          <div className="text-sm text-muted-foreground py-2">
-                            No activity found for other participants
-                          </div>
-                        ) : (
-                          <div className="space-y-2 max-h-40 overflow-y-auto">
-                            {userActivity.map((activity, actIndex) => (
-                              <div key={`${activity.target_user_id}-${actIndex}`} className="flex items-center gap-3 p-2 bg-muted/30 rounded-lg">
-                                <Avatar className="h-8 w-8">
-                                  <AvatarImage src={activity.target_avatar || ''} />
-                                  <AvatarFallback className="text-xs">
-                                    {activity.target_name.charAt(0)}
-                                  </AvatarFallback>
-                                </Avatar>
-                                
-                                <div className="flex-1 min-w-0">
-                                  <p className="text-sm font-medium truncate">
-                                    {activity.target_name}
-                                  </p>
-                                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                                    {activity.rating && (
-                                      <span className="flex items-center gap-1">
-                                        <Star className="w-3 h-3 fill-current text-yellow-500" />
-                                        {activity.rating}/10
-                                      </span>
-                                    )}
-                                    {activity.like_count > 0 && (
-                                      <span className="flex items-center gap-1">
-                                        <Heart className="w-3 h-3 fill-current text-red-500" />
-                                        {activity.like_count}
-                                      </span>
-                                    )}
-                                    <span>•</span>
-                                    <span>{new Date(activity.last_activity).toLocaleDateString()}</span>
-                                  </div>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                      </CardContent>
-                    </CollapsibleContent>
+                     </CollapsibleTrigger>
                   </Card>
                 </Collapsible>
               ))}
