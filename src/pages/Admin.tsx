@@ -1744,6 +1744,11 @@ const Admin = () => {
                         </div>
                       ))}
                     </div>
+                    <div className="text-xs pt-1 border-t border-border/50">
+                      {contestApplications.filter(app => app.status === 'pending').length} pending, {' '}
+                      {contestApplications.filter(app => app.status === 'approved').length} approved, {' '}
+                      {contestApplications.filter(app => app.status === 'rejected').length} rejected
+                    </div>
                   </div>
                 </div>
               </div>
