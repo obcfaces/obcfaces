@@ -838,40 +838,6 @@ export function ContestantCard({
           </div>
         )}
         
-        {/* Rating badge in top right corner - show for everyone except unauthenticated users in THIS WEEK */}
-        {isVoted && !isEditing && !showThanks && !isExample && (propUser || !isThisWeek) && (
-          <div className="absolute top-0 right-0 z-10 flex flex-col items-end">
-             <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
-               <PopoverTrigger asChild>
-                  <div className="bg-contest-blue text-white px-1.5 py-1 rounded-bl-lg text-sm sm:text-base font-bold shadow-sm cursor-pointer hover:bg-contest-blue/90 transition-colors relative">
-                     {isWinner && (
-                       <Crown className="w-4 h-4 text-yellow-400 absolute -top-5 left-1/2 transform -translate-x-1/2" />
-                     )}
-                      {(() => {
-                        // Для всех пользователей (включая админов) показываем средний рейтинг
-                        return localAverageRating > 0 ? localAverageRating.toFixed(1) : '0.0';
-                      })()}
-                  </div>
-               </PopoverTrigger>
-                <PopoverContent className="w-auto p-3">
-                  <div className="text-sm">
-                    {userRating > 0 ? 
-                      `Your rating: ${userRating}` : 
-                      `No rating`
-                    }{isThisWeek && ` — `}<button 
-                      className={`text-contest-blue hover:underline ${!isThisWeek ? 'hidden' : ''}`}
-                      onClick={() => {
-                        setIsEditing(true);
-                        setIsPopoverOpen(false);
-                      }}
-                    >
-                      change
-                    </button>
-                  </div>
-                </PopoverContent>
-             </Popover>
-          </div>
-        )}
         
         {/* First row: Main two photos with additional photos indicator */}
         <div className={`${isWinner && viewMode !== 'compact' ? 'w-full' : 'flex h-full'} relative gap-px`}>
