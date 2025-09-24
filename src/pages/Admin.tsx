@@ -2349,13 +2349,12 @@ const Admin = () => {
                       if (genderFilter !== 'all' && appData.gender !== genderFilter) return false;
                       if (statusFilter !== 'all' && application.status !== statusFilter) return false;
                       
-                      // Don't show approved applications in the cards section if they were moved to "this week"
-                      if (application.status === 'approved') {
-                        // Check if this user is already in weekly participants (moved to "this week")
-                        const isInWeeklyParticipants = weeklyParticipants.some(participant => 
-                          participant.user_id === application.user_id
-                        );
-                        return !isInWeeklyParticipants;
+                      // Don't show any applications in the cards section if the user is already in "this week"
+                      const isInWeeklyParticipants = weeklyParticipants.some(participant => 
+                        participant.user_id === application.user_id
+                      );
+                      if (isInWeeklyParticipants) {
+                        return false;
                       }
                       
                       return true;
