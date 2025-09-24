@@ -1,6 +1,7 @@
 import { MessageCircle, Send, MessageSquare, Facebook } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect, useRef } from "react";
+import messengerMainIcon from "@/assets/messenger-main-icon.png";
 
 export const SocialWidgets = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -94,10 +95,14 @@ export const SocialWidgets = () => {
       <Button
         onClick={toggleMenu}
         size="lg"
-        className="w-14 h-14 rounded-full bg-blue-600 hover:bg-blue-700 text-white shadow-lg hover:shadow-xl transition-all duration-300"
+        className="w-14 h-14 rounded-full bg-blue-600 hover:bg-blue-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 p-0"
         aria-label="Связаться с нами"
       >
-        <MessageCircle className="w-6 h-6" />
+        <img 
+          src={messengerMainIcon} 
+          alt="Messenger" 
+          className="w-8 h-8 object-contain"
+        />
       </Button>
     </div>
   );
