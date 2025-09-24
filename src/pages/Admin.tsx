@@ -177,6 +177,7 @@ const Admin = () => {
    const [applicationHistory, setApplicationHistory] = useState<any[]>([]);
   const [verificationFilter, setVerificationFilter] = useState<string>('all');
   const [verifyingUsers, setVerifyingUsers] = useState<Set<string>>(new Set());
+  const [dailyStats, setDailyStats] = useState<Array<{ day_name: string; vote_count: number; like_count: number }>>([]);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -184,6 +185,7 @@ const Admin = () => {
 
   useEffect(() => {
     checkAdminAccess();
+    fetchDailyStats();
   }, []);
 
   // Handle Weekly Contest participants filtering with async rating fetching
@@ -430,6 +432,16 @@ const Admin = () => {
         newSet.delete(userId);
         return newSet;
       });
+    }
+  };
+
+  const fetchDailyStats = async () => {
+    try {
+      const { data, error } = await supabase.rpc('get_daily_voting_stats');
+      if (error) throw error;
+      setDailyStats(data || []);
+    } catch (error) {
+      console.error('Error fetching daily stats:', error);
     }
   };
 
@@ -931,21 +943,14 @@ const Admin = () => {
               <div className="mb-6">
                 {/* Compact stats line */}
                 <div className="mb-4 p-3 bg-muted rounded-lg">
-                  <div className="text-sm text-muted-foreground space-y-1">
-                    <div className="flex items-center gap-4">
-                      <span className="font-medium">
-                        {filteredWeeklyParticipants.length} - {filteredWeeklyParticipants.reduce((sum, p) => sum + (p.total_votes || 0), 0)} all
-                      </span>
-                      <span className="text-xs">
-                        votes: {filteredWeeklyParticipants.reduce((sum, p) => sum + (p.total_votes || 0), 0)}, 
-                        likes: {filteredWeeklyParticipants.reduce((sum, p) => sum + (p.total_votes || 0), 0)}
-                      </span>
-                    </div>
+                  <div className="text-sm text-muted-foreground space-y-2">
                     <div className="grid grid-cols-7 gap-2 text-xs">
-                      {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map((day, index) => (
-                        <div key={day} className="text-center p-1 bg-background rounded">
-                          <div className="font-medium">{day.slice(0, 3)}</div>
-                          <div className="text-xs text-muted-foreground">0 - 0</div>
+                      {dailyStats.map((stat, index) => (
+                        <div key={index} className="text-center p-2 bg-background rounded">
+                          <div className="font-medium">{stat.day_name}</div>
+                          <div className="text-xs text-muted-foreground">
+                            {stat.vote_count} - {stat.like_count}
+                          </div>
                         </div>
                       ))}
                     </div>
