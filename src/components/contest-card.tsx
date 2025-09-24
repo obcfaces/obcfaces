@@ -99,7 +99,10 @@ export function ContestantCard({
   
   // Local state for immediate rating updates
   const [localAverageRating, setLocalAverageRating] = useState(averageRating);
-  const [localTotalVotes, setLocalTotalVotes] = useState(totalVotes);
+  const [localTotalVotes, setLocalTotalVotes] = useState(totalVotes || 0);
+  
+  // Debug log to check totalVotes
+  console.log(`Card ${name}: totalVotes=${totalVotes}, localTotalVotes=${localTotalVotes}`);
   const [previousUserRating, setPreviousUserRating] = useState(0);
   
   // Use unified card data hook with stable dependencies
