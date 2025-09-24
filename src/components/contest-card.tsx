@@ -112,8 +112,10 @@ export function ContestantCard({
   const [localTotalVotes, setLocalTotalVotes] = useState(totalVotes);
   const [previousUserRating, setPreviousUserRating] = useState(0);
   
-  // Use unified card data hook with stable dependencies
-  const { data: cardData, loading: cardDataLoading, refresh: refreshCardData } = useCardData(name, propUser?.id, profileId);
+  // Use unified card data hook with stable dependencies - TEMPORARILY DISABLED
+  // const { data: cardData, loading: cardDataLoading, refresh: refreshCardData } = useCardData(name, propUser?.id, profileId);
+  const cardData = { likes: 0, comments: 0, isLiked: false, hasCommented: false };
+  const cardDataLoading = false;
 
   // Initialize local state when props change - DISABLED to prevent infinite recursion
   // useEffect(() => {
@@ -214,16 +216,16 @@ export function ContestantCard({
     }
   };
 
-  // Load user's existing rating when user changes
-  useEffect(() => {
-    if (propUser?.id && profileId) {
-      loadUserExistingRating(propUser.id);
-    } else {
-      // Reset rating if no user
-      setUserRating(0);
-      setIsVoted(false);
-    }
-  }, [propUser?.id, profileId, name]);
+  // Load user's existing rating when user changes - TEMPORARILY DISABLED
+  // useEffect(() => {
+  //   if (propUser?.id && profileId) {
+  //     loadUserExistingRating(propUser.id);
+  //   } else {
+  //     // Reset rating if no user
+  //     setUserRating(0);
+  //     setIsVoted(false);
+  //   }
+  // }, [propUser?.id, profileId, name]);
 
   // Login modal removed auto-close
 
