@@ -19,7 +19,7 @@ export const SocialWidgets = () => {
   const openMessenger = () => {
     setTimeout(() => {
       window.open('https://www.facebook.com/share/1PzEdJr8WL/?mibextid=wwXIfr', '_blank', 'noopener,noreferrer');
-    }, 0);
+    }, 200);
   };
 
   const clearAutoCloseTimeout = () => {
