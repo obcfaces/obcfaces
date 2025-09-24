@@ -632,7 +632,7 @@ const Admin = () => {
     }
   };
 
-  const reviewApplication = async (applicationId: string, newStatus: string) => {
+  const reviewApplication = async (applicationId: string, newStatus: string, rejectionData?: { reasonTypes: string[], notes: string }) => {
     const application = contestApplications.find(app => app.id === applicationId);
     
     try {
@@ -641,15 +641,21 @@ const Admin = () => {
       
       console.log('Updating application:', applicationId, 'to status:', newStatus);
       
+      const updateData: any = {
+        status: newStatus,
+        reviewed_at: currentTime,
+        reviewed_by: user?.id,
+        ...(newStatus === 'approved' && { approved_at: currentTime }),
+        ...(newStatus === 'rejected' && { 
+          rejected_at: currentTime,
+          rejection_reason_types: rejectionData?.reasonTypes || null,
+          notes: rejectionData?.notes || null
+        })
+      };
+      
       const { data, error } = await supabase
         .from('contest_applications')
-        .update({
-          status: newStatus,
-          reviewed_at: currentTime,
-          reviewed_by: user?.id,
-          ...(newStatus === 'approved' && { approved_at: currentTime }),
-          ...(newStatus === 'rejected' && { rejected_at: currentTime })
-        })
+        .update(updateData)
         .eq('id', applicationId)
         .select();
 
@@ -733,10 +739,13 @@ const Admin = () => {
       }
     }
 
-    toast({
-      title: "Success",
-      description: `Application ${newStatus}`,
-    });
+    // Only show toast for approvals, not rejections
+    if (newStatus === 'approved') {
+      toast({
+        title: "Success",
+        description: "Application approved",
+      });
+    }
 
     fetchContestApplications();
     fetchWeeklyParticipants();
@@ -2596,11 +2605,66 @@ const Admin = () => {
                                                </div>
                                          </div>
                                        </div>
-                                     </CardContent>
-                                   </Card>
-                                 );
-                               })}
-                           </div>
+                                      </CardContent>
+                                    </Card>
+                                    
+                                    {/* Rejection reason under the card for previous applications */}
+                                    {prevApp.status === 'rejected' && ((prevApp as any).rejection_reason_types || prevApp.rejection_reason) && (
+                                      <div className="p-2 bg-destructive/10 border border-destructive/20 rounded-b-lg -mt-1">
+                                         <div className="space-y-1 text-xs leading-tight">
+                                           {(prevApp as any).rejection_reason_types && (prevApp as any).rejection_reason_types.length > 0 && (
+                                             <div className="text-destructive/80">
+                                               {/* Always show date and admin info if available */}
+                                               {(prevApp.rejected_at || prevApp.reviewed_at) && (
+                                                  <TooltipProvider>
+                                                    <Tooltip>
+                                                      <TooltipTrigger asChild>
+                                                        <span className="text-black font-medium cursor-help">
+                                                          {new Date(prevApp.rejected_at || prevApp.reviewed_at).toLocaleDateString('en-GB', { 
+                                                            day: 'numeric', 
+                                                            month: 'short' 
+                                                          }).toLowerCase()}{' '}
+                                                          {prevApp.reviewed_by && profiles.find(p => p.id === prevApp.reviewed_by)?.email ? 
+                                                            profiles.find(p => p.id === prevApp.reviewed_by)?.email?.substring(0, 4) + ' ' : 
+                                                            'unkn '}
+                                                        </span>
+                                                      </TooltipTrigger>
+                                                      <TooltipContent>
+                                                        <p>
+                                                          {new Date(prevApp.rejected_at || prevApp.reviewed_at).toLocaleDateString('en-GB', { 
+                                                            day: 'numeric', 
+                                                            month: 'short',
+                                                            year: 'numeric'
+                                                          }).toLowerCase()}{' '}
+                                                          {new Date(prevApp.rejected_at || prevApp.reviewed_at).toLocaleTimeString('en-GB', {
+                                                            hour: '2-digit',
+                                                            minute: '2-digit'
+                                                          })}
+                                                          {prevApp.reviewed_by && profiles.find(p => p.id === prevApp.reviewed_by)?.email && (
+                                                            <><br />Admin: {profiles.find(p => p.id === prevApp.reviewed_by)?.email}</>
+                                                          )}
+                                                        </p>
+                                                      </TooltipContent>
+                                                    </Tooltip>
+                                                  </TooltipProvider>
+                                               )}
+                                               {(prevApp as any).rejection_reason_types
+                                                 .filter((type: string) => type && REJECTION_REASONS[type as keyof typeof REJECTION_REASONS])
+                                                 .map((type: string) => REJECTION_REASONS[type as keyof typeof REJECTION_REASONS])
+                                                 .join(', ')}
+                                             </div>
+                                           )}
+                                           {prevApp.rejection_reason && prevApp.rejection_reason.trim() && !isReasonDuplicate(prevApp.rejection_reason, (prevApp as any).rejection_reason_types) && (
+                                             <div className="text-destructive/70">
+                                               <span className="font-medium">Additional comments:</span> {prevApp.rejection_reason}
+                                             </div>
+                                           )}
+                                        </div>
+                                      </div>
+                                    )}
+                                  );
+                                })}
+                            </div>
                          )}
                         
                        </div>
@@ -2715,8 +2779,9 @@ const Admin = () => {
         onClose={() => setRejectModalOpen(false)}
         onConfirm={async (reasonTypes, notes) => {
           if (applicationToReject) {
-            reviewApplication(applicationToReject.id, 'rejected');
+            await reviewApplication(applicationToReject.id, 'rejected', { reasonTypes, notes });
             setApplicationToReject(null);
+            setRejectModalOpen(false);
           }
         }}
       />
