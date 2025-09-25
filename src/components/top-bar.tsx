@@ -60,7 +60,7 @@ const TopBar = () => {
           
           {/* Facebook Link */}
           <a
-            href="https://facebook.com/your-page"
+            href="https://www.facebook.com/share/14N76M6vuPC/?mibextid=wwXIfr"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center justify-center h-10 w-10 rounded-full hover:bg-accent transition-colors"
