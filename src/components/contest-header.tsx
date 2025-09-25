@@ -59,9 +59,9 @@ export function ContestHeader({ activeSection, onSectionChange }: ContestHeaderP
         </div>
         
         {/* Social media links section */}
-        <div className="mt-6">
-          <Separator className="mb-4" />
-          <div className="space-y-3 text-sm text-contest-text">
+        <div className="mt-4">
+          <Separator className="mb-3" />
+          <div className="space-y-1 text-sm text-contest-text">
             <div className="flex items-center gap-2">
               <Facebook className="h-4 w-4" />
               <a 

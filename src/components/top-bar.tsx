@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { MessageCircle, Heart, Facebook } from "lucide-react";
+import { MessageCircle, Heart } from "lucide-react";
 import AuthNav from "@/components/auth-nav";
 import GlobalSearch from "@/components/global-search";
 import LanguageSelector from "@/components/language-selector";
@@ -58,16 +58,6 @@ const TopBar = () => {
             )}
           </Link>
           
-          {/* Facebook Link */}
-          <a
-            href="https://www.facebook.com/share/14N76M6vuPC/?mibextid=wwXIfr"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center justify-center h-10 w-10 rounded-full hover:bg-accent transition-colors"
-            aria-label="Follow us on Facebook"
-          >
-            <Facebook className="h-5 w-5 text-muted-foreground" strokeWidth={1} />
-          </a>
           
           <AuthNav />
         </div>
