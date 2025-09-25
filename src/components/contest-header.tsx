@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Camera, Upload } from "lucide-react";
+import { Camera, Upload, Facebook } from "lucide-react";
 import { AuthProtectedModal } from "@/components/auth-protected-modal";
 
 interface ContestHeaderProps {
@@ -54,6 +54,17 @@ export function ContestHeader({ activeSection, onSectionChange }: ContestHeaderP
           <div className="flex items-center gap-2">
             <span>💰</span>
             <span>Annual winner takes 200,000 PHP</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Facebook className="h-4 w-4" />
+            <a 
+              href="https://www.facebook.com/share/14N76M6vuPC/?mibextid=wwXIfr"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-600 hover:text-blue-800 hover:underline transition-colors"
+            >
+              Follow us on Facebook
+            </a>
           </div>
         </div>
         
