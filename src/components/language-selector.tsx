@@ -1,4 +1,4 @@
-import { ChevronDown, Globe } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,11 +21,10 @@ const LanguageSelector = () => {
         <Button 
           variant="ghost" 
           size="sm"
-          className="h-8 px-2 text-xs font-bold text-muted-foreground hover:text-foreground"
+          className="h-8 px-2 text-xs font-normal text-muted-foreground hover:text-foreground"
         >
-          <Globe className="h-3 w-3 mr-1" />
           {currentLanguage.code.toUpperCase()}
-          <ChevronDown className="h-3 w-3 ml-1" />
+          <ChevronDown className="h-3 w-3 ml-0.5" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent 
