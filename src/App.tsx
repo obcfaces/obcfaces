@@ -23,6 +23,7 @@ import { Footer } from "@/components/footer";
 import { SocialWidgets } from "@/components/social-widgets";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { CookieConsent } from "@/components/cookie-consent";
+import { ReferralBanner } from "@/components/referral-banner";
 
 
 
@@ -52,6 +53,7 @@ const App = () => {
             <Sonner />
             <BrowserRouter>
               <AuthCallbackHandler />
+              <ReferralBanner />
               <TopBar />
               <main className="w-full flex-1">
                 <Routes>
