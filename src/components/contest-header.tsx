@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Camera, Upload, Facebook, Instagram } from "lucide-react";
 import { AuthProtectedModal } from "@/components/auth-protected-modal";
+import { Separator } from "@/components/ui/separator";
 
 interface ContestHeaderProps {
   activeSection: string;
@@ -55,27 +56,34 @@ export function ContestHeader({ activeSection, onSectionChange }: ContestHeaderP
             <span>💰</span>
             <span>Annual winner takes 200,000 PHP</span>
           </div>
-          <div className="flex items-center gap-2">
-            <Facebook className="h-4 w-4" />
-            <a 
-              href="https://www.facebook.com/share/14N76M6vuPC/?mibextid=wwXIfr"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-blue-600 hover:text-blue-800 hover:underline transition-colors"
-            >
-              Follow us on Facebook
-            </a>
-          </div>
-          <div className="flex items-center gap-2">
-            <Instagram className="h-4 w-4" />
-            <a 
-              href="https://www.instagram.com/obcfacesph?igsh=NTEyeGpkaW81anR5&utm_source=qr"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-pink-600 hover:text-pink-800 hover:underline transition-colors"
-            >
-              Follow us on Instagram
-            </a>
+        </div>
+        
+        {/* Social media links section */}
+        <div className="mt-6">
+          <Separator className="mb-4" />
+          <div className="space-y-3 text-sm text-contest-text">
+            <div className="flex items-center gap-2">
+              <Facebook className="h-4 w-4" />
+              <a 
+                href="https://www.facebook.com/share/14N76M6vuPC/?mibextid=wwXIfr"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 hover:text-blue-800 hover:underline transition-colors"
+              >
+                Follow us on Facebook
+              </a>
+            </div>
+            <div className="flex items-center gap-2">
+              <Instagram className="h-4 w-4" />
+              <a 
+                href="https://www.instagram.com/obcfacesph?igsh=NTEyeGpkaW81anR5&utm_source=qr"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-pink-600 hover:text-pink-800 hover:underline transition-colors"
+              >
+                Follow us on Instagram
+              </a>
+            </div>
           </div>
         </div>
         
