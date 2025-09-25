@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Camera, Upload, Facebook } from "lucide-react";
+import { Camera, Upload, Facebook, Instagram } from "lucide-react";
 import { AuthProtectedModal } from "@/components/auth-protected-modal";
 
 interface ContestHeaderProps {
@@ -64,6 +64,17 @@ export function ContestHeader({ activeSection, onSectionChange }: ContestHeaderP
               className="text-blue-600 hover:text-blue-800 hover:underline transition-colors"
             >
               Follow us on Facebook
+            </a>
+          </div>
+          <div className="flex items-center gap-2">
+            <Instagram className="h-4 w-4" />
+            <a 
+              href="https://www.instagram.com/obcfacesph?igsh=NTEyeGpkaW81anR5&utm_source=qr"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-pink-600 hover:text-pink-800 hover:underline transition-colors"
+            >
+              Follow us on Instagram
             </a>
           </div>
         </div>
