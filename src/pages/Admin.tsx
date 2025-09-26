@@ -1726,54 +1726,47 @@ const Admin = () => {
                   const appData = participant.application_data || {};
                   
                   return (
-                    <Card key={participant.id} className="overflow-hidden relative h-[149px]">
+                    <Card key={participant.participant_id} className="overflow-hidden relative mx-0 rounded-lg h-[149px]">
                       <CardContent className="p-0">
                         {/* Desktop layout */}
-                        <div className="hidden md:flex">
-                          {/* Photos section - 2 columns */}
-                          <div className="flex gap-px w-[25ch] flex-shrink-0">
-                            {(participantProfile?.photo_1_url || appData.photo1_url) && (
-                              <div className="w-1/2">
-                                <img 
-                                  src={participantProfile?.photo_1_url || appData.photo1_url} 
-                                  alt="Portrait" 
-                                  className="w-full h-[149px] object-contain cursor-pointer hover:opacity-90 transition-opacity"
-                                  onClick={() => openPhotoModal([
-                                    participantProfile?.photo_1_url || appData.photo1_url, 
-                                    participantProfile?.photo_2_url || appData.photo2_url
-                                  ].filter(Boolean), 0, `${participantProfile?.first_name || appData.first_name} ${participantProfile?.last_name || appData.last_name}`)}
-                                />
-                              </div>
-                            )}
-                            {(participantProfile?.photo_2_url || appData.photo2_url) && (
-                              <div className="w-1/2 relative">
-                                <img 
-                                  src={participantProfile?.photo_2_url || appData.photo2_url} 
-                                  alt="Full length" 
-                                  className="w-full h-[149px] object-cover cursor-pointer hover:opacity-90 transition-opacity"
-                                  onClick={() => openPhotoModal([
-                                    participantProfile?.photo_1_url || appData.photo1_url, 
-                                    participantProfile?.photo_2_url || appData.photo2_url
-                                  ].filter(Boolean), 1, `${participantProfile?.first_name || appData.first_name} ${participantProfile?.last_name || appData.last_name}`)}
-                                />
-                                {/* User avatar positioned in top right corner */}
-                                <div className="absolute top-2 right-2">
-                                  <Avatar className="h-6 w-6 flex-shrink-0 border-2 border-white shadow-sm">
-                                    <AvatarImage src={participantProfile?.avatar_url || ''} />
-                                    <AvatarFallback className="text-xs">
-                                      {(participantProfile?.first_name || appData.first_name)?.charAt(0) || 'U'}
-                                    </AvatarFallback>
-                                  </Avatar>
+                        <div className="hidden md:flex md:overflow-visible">
+                          {/* Column 1: Photos (25ch) */}
+                          <div className="w-[25ch] flex-shrink-0 p-0">
+                            <div className="flex gap-px">
+                              {(appData.photo1_url || appData.photo_1_url) && (
+                                <div className="w-full">
+                                  <img 
+                                    src={appData.photo1_url || appData.photo_1_url} 
+                                    alt="Portrait" 
+                                    className="w-full h-36 object-contain cursor-pointer hover:opacity-90 transition-opacity"
+                                    onClick={() => openPhotoModal([appData.photo1_url || appData.photo_1_url, appData.photo2_url || appData.photo_2_url].filter(Boolean), 0, `${appData.first_name} ${appData.last_name}`)}
+                                  />
                                 </div>
-                              </div>
-                            )}
+                              )}
+                              {(appData.photo2_url || appData.photo_2_url) && (
+                                <div className="w-full">
+                                  <img 
+                                    src={appData.photo2_url || appData.photo_2_url} 
+                                    alt="Full length" 
+                                    className="w-full h-36 object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                                    onClick={() => openPhotoModal([appData.photo1_url || appData.photo_1_url, appData.photo2_url || appData.photo_2_url].filter(Boolean), 1, `${appData.first_name} ${appData.last_name}`)}
+                                  />
+                                </div>
+                              )}
+                            </div>
                           </div>
 
-                          {/* Main info section */}
-                          <div className="w-[50ch] flex-shrink-0 flex-1 min-w-0 p-4">
+                          {/* Column 2: Information (25ch) */}
+                          <div className="w-[25ch] flex-shrink-0 p-4">
                             <div className="flex items-center gap-2 mb-1">
-                              <span className="text-xs font-semibold whitespace-nowrap">
-                                {new Date().getFullYear() - (appData.birth_year || new Date().getFullYear() - (participantProfile?.age || 25))} {participantProfile?.first_name || appData.first_name} {participantProfile?.last_name || appData.last_name}
+                              <Avatar className="h-6 w-6 flex-shrink-0">
+                                <AvatarImage src={participantProfile?.avatar_url || ''} />
+                                <AvatarFallback className="text-xs">
+                                  {appData.first_name?.charAt(0) || 'U'}
+                                </AvatarFallback>
+                              </Avatar>
+                              <span className="text-sm font-semibold whitespace-nowrap">
+                                {appData.first_name} {appData.last_name} {new Date().getFullYear() - appData.birth_year}
                               </span>
                             </div>
                             
@@ -1781,195 +1774,189 @@ const Admin = () => {
                               className="text-xs text-muted-foreground mb-1 cursor-pointer hover:text-foreground transition-colors"
                               onClick={() => {
                                 const newExpanded = new Set(expandedDesktopItems);
-                                if (expandedDesktopItems.has(participant.id)) {
-                                  newExpanded.delete(participant.id);
+                                if (expandedDesktopItems.has(participant.participant_id)) {
+                                  newExpanded.delete(participant.participant_id);
                                 } else {
-                                  newExpanded.add(participant.id);
+                                  newExpanded.add(participant.participant_id);
                                 }
                                 setExpandedDesktopItems(newExpanded);
                               }}
                             >
-                              {participantProfile?.city || appData.city} {participantProfile?.country || appData.country}
+                              {appData.city} {appData.state} {appData.country}
                             </div>
                             
-                            {/* Expanded information */}
-                            {expandedDesktopItems.has(participant.id) && (
-                              <div className="text-xs text-muted-foreground mb-1 space-y-0 leading-none">
-                                <div>{(participantProfile?.weight_kg || appData.weight_kg)}kg, {(participantProfile?.height_cm || appData.height_cm)}cm</div>
-                                <div>{participantProfile?.marital_status || appData.marital_status}, {(participantProfile?.has_children || appData.has_children) ? 'Has kids' : 'No kids'}</div>
-                                <div className="flex items-center gap-1">
-                                  <span>
-                                    {participantProfile?.email 
-                                      ? (participantProfile.email.length > 7 ? `${participantProfile.email.substring(0, 7)}...` : participantProfile.email)
-                                      : 'No email'
-                                    }
-                                  </span>
-                                  {participantProfile?.email && (
-                                    <Copy 
-                                      className="h-3 w-3 cursor-pointer hover:text-foreground" 
-                                      onClick={() => navigator.clipboard.writeText(participantProfile.email)}
-                                    />
-                                  )}
-                                </div>
+                            {/* Expanded information - desktop */}
+                            {expandedDesktopItems.has(participant.participant_id) && (
+                              <div className="text-xs text-muted-foreground mb-1">
+                                {appData.weight_kg}kg • {appData.height_cm}cm • {appData.gender} • {appData.birth_year} • {appData.marital_status} • {appData.has_children ? 'Has children' : 'No children'}
                               </div>
                             )}
-                            
-                            <div className="flex-1"></div>
-                          </div>
 
-                          {/* Right side actions */}
-                          <div className="w-[20ch] flex-shrink-0 p-4 flex flex-col gap-2">
-                            <div className="text-xs text-muted-foreground">
-                              <div className="font-semibold mb-1">Week:</div>
-                              <div className="bg-muted p-1 rounded text-center text-xs">
+                            <div className="text-xs text-muted-foreground mb-1">
+                              {participantProfile?.email && (
+                                <div className="flex items-center gap-1">
+                                  <span 
+                                    className="cursor-pointer" 
+                                    title={participantProfile.email}
+                                  >
+                                    {participantProfile.email.length > 25 ? `${participantProfile.email.substring(0, 25)}...` : participantProfile.email}
+                                  </span>
+                                  <Copy 
+                                    className="h-3 w-3 cursor-pointer hover:text-foreground" 
+                                    onClick={() => navigator.clipboard.writeText(participantProfile.email)}
+                                  />
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Phone and Social Media */}
+                            <div className="text-xs text-muted-foreground mb-3">
+                              <div className="flex items-center gap-2">
+                                {(() => {
+                                  const phone = appData.phone?.country && appData.phone?.number 
+                                    ? `${appData.phone.country} ${appData.phone.number}` 
+                                    : 'Not provided';
+                                  return <span>{phone}</span>;
+                                })()}
+                                {appData.facebook_url && (
+                                  <a
+                                    href={appData.facebook_url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-blue-600 hover:underline"
+                                  >
+                                    FB
+                                  </a>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                      
+                          {/* Column 3: Voting stats and actions (20ch) */}
+                          <div className="w-[20ch] flex-shrink-0 p-4 flex flex-col justify-between">
+                            {/* Week interval display */}
+                            <div className="text-xs text-muted-foreground mb-2">
+                              <div className="font-semibold mb-1">Contest Week:</div>
+                              <div className="bg-muted p-2 rounded text-center text-xs font-medium">
                                 {participant.weekInterval}
                               </div>
                               {participant.final_rank && (
-                                <div className="mt-1 p-1 bg-primary/10 rounded text-center text-xs">
+                                <div className="mt-2 p-2 bg-primary/10 rounded text-center text-xs">
                                   <div className="font-semibold text-primary">
-                                    {participant.final_rank === 1 ? '🏆' : `🏅 #${participant.final_rank}`}
+                                    {participant.final_rank === 1 ? '🏆 Winner' : `🏅 Rank #${participant.final_rank}`}
                                   </div>
                                 </div>
                               )}
                             </div>
                             
-                            {/* Status change date with reviewer login - desktop */}
-                             <div 
-                               className="text-lg font-bold text-blue-600 cursor-pointer hover:text-blue-700"
-                               onClick={() => {
-                                 setSelectedParticipantForVoters({ 
-                                   id: participant.user_id, 
-                                   name: `${participantProfile?.first_name || appData.first_name} ${participantProfile?.last_name || appData.last_name}` 
-                                 });
-                                 setVotersModalOpen(true);
-                               }}
-                             >
-                               {participant.total_votes || 0} • ★ {(participant.average_rating || 0).toFixed(1)}
-                             </div>
+                            {/* Voting stats */}
+                            <div 
+                              className="text-lg font-bold text-blue-600 cursor-pointer hover:text-blue-700 transition-colors text-center"
+                              onClick={() => {
+                                setSelectedParticipantForVoters({ 
+                                  id: participant.user_id, 
+                                  name: `${appData.first_name} ${appData.last_name}` 
+                                });
+                                setVotersModalOpen(true);
+                              }}
+                              title="Click to view voters"
+                            >
+                              {participant.total_votes || 0} votes
+                              <div className="text-sm text-muted-foreground">
+                                ★ {(participant.average_rating || 0).toFixed(1)}
+                              </div>
+                            </div>
                           </div>
                         </div>
 
-                        {/* Mobile layout - horizontal with full width */}
-                        <div className="md:hidden">
-                          <div className="flex w-full">
-                            {/* Photos section - left side */}
-                            <div className="flex gap-px w-[50vw] flex-shrink-0">
-                              {(participantProfile?.photo_1_url || appData.photo1_url) && (
-                                <div className="w-1/2">
-                                  <img 
-                                    src={participantProfile?.photo_1_url || appData.photo1_url} 
-                                    alt="Portrait" 
-                                    className="w-full h-36 object-contain cursor-pointer hover:opacity-90 transition-opacity"
-                                    onClick={() => openPhotoModal([
-                                      participantProfile?.photo_1_url || appData.photo1_url, 
-                                      participantProfile?.photo_2_url || appData.photo2_url
-                                    ].filter(Boolean), 0, `${participantProfile?.first_name || appData.first_name} ${participantProfile?.last_name || appData.last_name}`)}
-                                  />
-                                </div>
-                              )}
-                              {(participantProfile?.photo_2_url || appData.photo2_url) && (
-                                <div className="w-1/2 relative">
-                                  <img 
-                                    src={participantProfile?.photo_2_url || appData.photo2_url} 
-                                    alt="Full length" 
-                                    className="w-full h-36 object-cover cursor-pointer hover:opacity-90 transition-opacity"
-                                    onClick={() => openPhotoModal([
-                                      participantProfile?.photo_1_url || appData.photo1_url, 
-                                      participantProfile?.photo_2_url || appData.photo2_url
-                                    ].filter(Boolean), 1, `${participantProfile?.first_name || appData.first_name} ${participantProfile?.last_name || appData.last_name}`)}
-                                  />
-                                  {/* User avatar positioned in top right corner */}
-                                  <div className="absolute top-2 right-2">
-                                    <Avatar className="h-6 w-6 flex-shrink-0 border-2 border-white shadow-sm">
-                                      <AvatarImage src={participantProfile?.avatar_url || ''} />
-                                      <AvatarFallback className="text-xs">
-                                        {(participantProfile?.first_name || appData.first_name)?.charAt(0) || 'U'}
-                                      </AvatarFallback>
-                                    </Avatar>
-                                  </div>
-                                </div>
+                        {/* Mobile layout */}
+                        <div className="md:hidden flex">
+                          {/* Photos section */}
+                          <div className="w-24 flex-shrink-0">
+                            {(appData.photo1_url || appData.photo_1_url) && (
+                              <img 
+                                src={appData.photo1_url || appData.photo_1_url} 
+                                alt="Portrait" 
+                                className="w-full h-[149px] object-cover rounded-l-lg cursor-pointer hover:opacity-90 transition-opacity"
+                                onClick={() => openPhotoModal([appData.photo1_url || appData.photo_1_url, appData.photo2_url || appData.photo_2_url].filter(Boolean), 0, `${appData.first_name} ${appData.last_name}`)}
+                              />
+                            )}
+                          </div>
+                          
+                          {/* Info section - mobile */}
+                          <div className="flex-1 p-3">
+                            <div className="flex items-center gap-2 mb-1">
+                              <Avatar className="h-5 w-5 flex-shrink-0">
+                                <AvatarImage src={participantProfile?.avatar_url || ''} />
+                                <AvatarFallback className="text-xs">
+                                  {appData.first_name?.charAt(0) || 'U'}
+                                </AvatarFallback>
+                              </Avatar>
+                              <span className="text-sm font-semibold">
+                                {appData.first_name} {appData.last_name}
+                              </span>
+                              <span className="text-xs text-muted-foreground">
+                                {new Date().getFullYear() - appData.birth_year}
+                              </span>
+                            </div>
+                            
+                            <div 
+                              className="text-xs text-muted-foreground mb-2 cursor-pointer"
+                              onClick={() => {
+                                const newExpanded = new Set(expandedMobileItems);
+                                if (expandedMobileItems.has(participant.participant_id)) {
+                                  newExpanded.delete(participant.participant_id);
+                                } else {
+                                  newExpanded.add(participant.participant_id);
+                                }
+                                setExpandedMobileItems(newExpanded);
+                              }}
+                            >
+                              {appData.city}, {appData.country}
+                            </div>
+                            
+                            {/* Week interval - mobile */}
+                            <div className="text-xs text-muted-foreground mb-2">
+                              <span className="font-semibold">Week: </span>
+                              <span className="bg-muted px-2 py-1 rounded text-xs">
+                                {participant.weekInterval}
+                              </span>
+                              {participant.final_rank && (
+                                <span className="ml-2 bg-primary/10 px-2 py-1 rounded text-xs text-primary font-semibold">
+                                  {participant.final_rank === 1 ? '🏆' : `#${participant.final_rank}`}
+                                </span>
                               )}
                             </div>
                             
-                            {/* Information section - right side */}
-                            <div className="w-[50vw] flex-shrink-0 pl-2 flex flex-col h-48 relative">
-                              <div className="flex items-center gap-2 mb-1 mt-1">
-                                <span className="text-xs font-semibold whitespace-nowrap">
-                                  {new Date().getFullYear() - (appData.birth_year || new Date().getFullYear() - (participantProfile?.age || 25))} {participantProfile?.first_name || appData.first_name} {participantProfile?.last_name || appData.last_name}
-                                </span>
-                              </div>
-                              
-                              <div 
-                                className="text-xs text-muted-foreground mb-1 cursor-pointer hover:text-foreground transition-colors"
-                                onClick={() => {
-                                  const newExpanded = new Set(expandedMobileItems);
-                                  if (expandedMobileItems.has(participant.id)) {
-                                    newExpanded.delete(participant.id);
-                                  } else {
-                                    newExpanded.add(participant.id);
-                                  }
-                                  setExpandedMobileItems(newExpanded);
-                                }}
-                              >
-                                {participantProfile?.city || appData.city} {participantProfile?.country || appData.country}
-                              </div>
-                              
-                              {/* Expanded information */}
-                              {expandedMobileItems.has(participant.id) && (
-                                <div className="text-xs text-muted-foreground mb-1 space-y-0 leading-none">
-                                  <div>{(participantProfile?.weight_kg || appData.weight_kg)}kg, {(participantProfile?.height_cm || appData.height_cm)}cm</div>
-                                  <div>{participantProfile?.marital_status || appData.marital_status}, {(participantProfile?.has_children || appData.has_children) ? 'Has kids' : 'No kids'}</div>
+                            {/* Expanded mobile info */}
+                            {expandedMobileItems.has(participant.participant_id) && (
+                              <div className="text-xs text-muted-foreground space-y-1">
+                                <div>{appData.weight_kg}kg • {appData.height_cm}cm • {appData.gender}</div>
+                                <div>{appData.marital_status} • {appData.has_children ? 'Has children' : 'No children'}</div>
+                                {participantProfile?.email && (
                                   <div className="flex items-center gap-1">
-                                    <span>
-                                      {participantProfile?.email 
-                                        ? (participantProfile.email.length > 7 ? `${participantProfile.email.substring(0, 7)}...` : participantProfile.email)
-                                        : 'No email'
-                                      }
-                                    </span>
-                                    {participantProfile?.email && (
-                                      <Copy 
-                                        className="h-3 w-3 cursor-pointer hover:text-foreground" 
-                                        onClick={() => navigator.clipboard.writeText(participantProfile.email)}
-                                      />
-                                    )}
+                                    <span>{participantProfile.email.length > 20 ? `${participantProfile.email.substring(0, 20)}...` : participantProfile.email}</span>
+                                    <Copy className="h-3 w-3 cursor-pointer" onClick={() => navigator.clipboard.writeText(participantProfile.email)} />
                                   </div>
-                                </div>
-                              )}
-                              
-                              <div className="flex-1"></div>
-                              
-                              {/* Week interval filter positioned at bottom */}
-                              <div className="absolute bottom-12 right-13 flex flex-col items-end gap-1">
-                                <div className="text-xs text-muted-foreground">
-                                  <div className="bg-muted p-1 rounded text-center text-xs">
-                                    {participant.weekInterval.split(' - ')[0]}
-                                  </div>
-                                  {participant.final_rank && (
-                                    <div className="mt-1 p-1 bg-primary/10 rounded text-center text-xs">
-                                      <div className="font-semibold text-primary">
-                                        {participant.final_rank === 1 ? '🏆' : `#${participant.final_rank}`}
-                                      </div>
-                                    </div>
-                                  )}
-                                </div>
-                                
-                                 {/* Rating with votes */}
-                                 <div 
-                                   className="text-lg font-bold text-blue-600 cursor-pointer hover:text-blue-700"
-                                   onClick={() => {
-                                     setSelectedParticipantForVoters({ 
-                                       id: participant.user_id, 
-                                       name: `${participantProfile?.first_name || appData.first_name} ${participantProfile?.last_name || appData.last_name}` 
-                                     });
-                                     setVotersModalOpen(true);
-                                   }}
-                                 >
-                                   {participant.total_votes || 0} • ★ {(participant.average_rating || 0).toFixed(1)}
-                                 </div>
+                                )}
                               </div>
+                            )}
+                            
+                            {/* Voting stats - mobile */}
+                            <div 
+                              className="mt-2 text-sm font-bold text-blue-600 cursor-pointer"
+                              onClick={() => {
+                                setSelectedParticipantForVoters({ 
+                                  id: participant.user_id, 
+                                  name: `${appData.first_name} ${appData.last_name}` 
+                                });
+                                setVotersModalOpen(true);
+                              }}
+                            >
+                              {participant.total_votes || 0} votes • ★ {(participant.average_rating || 0).toFixed(1)}
                             </div>
                           </div>
-              </div>
+                        </div>
                       </CardContent>
                     </Card>
                   );
