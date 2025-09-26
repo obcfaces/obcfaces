@@ -3730,44 +3730,48 @@ const Admin = () => {
             
             {/* Desktop verified badge, role selector and buttons - hidden on mobile */}
             <div className="hidden md:flex items-center gap-2">
-              {profile.email_confirmed_at ? (
-                <Badge variant="default" className="bg-green-100 text-green-700">
-                  Verified
-                </Badge>
-              ) : (
-                <>
+              {/* Role selector positioned above verified badge */}
+              <div className="flex flex-col items-center gap-1">
+                <Select
+                  value={userRoleMap[profile.id] || 'usual'}
+                  onValueChange={(value) => handleRoleChange(
+                    profile.id, 
+                    profile.display_name || `${profile.first_name} ${profile.last_name}`,
+                    value
+                  )}
+                  disabled={assigningRoles.has(profile.id)}
+                >
+                  <SelectTrigger className="w-24 h-8">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="bg-background border shadow-md z-50">
+                    <SelectItem value="usual">Usual</SelectItem>
+                    <SelectItem value="admin">Admin</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                {profile.email_confirmed_at ? (
+                  <Badge variant="default" className="bg-green-100 text-green-700">
+                    Verified
+                  </Badge>
+                ) : (
                   <Badge variant="secondary">
                     Unverified
                   </Badge>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => handleEmailVerification(profile.id)}
-                    disabled={verifyingUsers.has(profile.id)}
-                  >
-                    {verifyingUsers.has(profile.id) ? 'Verifying...' : 'Verify'}
-                  </Button>
-                </>
-              )}
-
-              {/* Role selector */}
-              <Select
-                value={userRoleMap[profile.id] || 'usual'}
-                onValueChange={(value) => handleRoleChange(
-                  profile.id, 
-                  profile.display_name || `${profile.first_name} ${profile.last_name}`,
-                  value
                 )}
-                disabled={assigningRoles.has(profile.id)}
-              >
-                <SelectTrigger className="w-24 h-8">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="bg-background border shadow-md z-50">
-                  <SelectItem value="usual">Usual</SelectItem>
-                  <SelectItem value="admin">Admin</SelectItem>
-                </SelectContent>
-              </Select>
+              </div>
+
+              {/* Verify button - only shown for unverified users */}
+              {!profile.email_confirmed_at && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => handleEmailVerification(profile.id)}
+                  disabled={verifyingUsers.has(profile.id)}
+                >
+                  {verifyingUsers.has(profile.id) ? 'Verifying...' : 'Verify'}
+                </Button>
+              )}
             </div>
             
             {/* Mobile controls */}
