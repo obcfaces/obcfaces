@@ -1127,7 +1127,6 @@ const Admin = () => {
         <div className="max-w-7xl md:mx-auto px-2 md:px-6">
           <div className="mb-8">
             <h1 className="text-3xl font-bold mb-2">Admin Panel</h1>
-            <p className="text-muted-foreground">Manage user profiles and roles</p>
           </div>
 
           <Tabs defaultValue="applications" className="space-y-6">
