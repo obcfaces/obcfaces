@@ -266,37 +266,50 @@ const Admin = () => {
   useEffect(() => {
     const filterWeeklyParticipants = async () => {
       if (weeklyContestFilter === 'approve') {
+        // Get approved applications
         const approvedApps = contestApplications
           .filter(app => app.status === 'approved')
           .filter((app, index, arr) => arr.findIndex(a => a.user_id === app.user_id) === index);
 
+        // Get weekly participants with "pending" status
+        const pendingParticipants = weeklyParticipants.filter(participant => {
+          const filterStatus = participantFilters[participant.id];
+          return filterStatus === 'pending';
+        });
+
+        // Combine both approved applications and pending participants
+        const allParticipants = [...approvedApps, ...pendingParticipants];
+
         const participantsWithRatings = await Promise.all(
-          approvedApps.map(async (app) => {
-            const appData = app.application_data || {};
+          allParticipants.map(async (item) => {
+            // Handle both application and participant data structures
+            const isFromApplication = 'application_data' in item && item.application_data;
+            const appData = isFromApplication ? item.application_data : item.application_data || {};
+            const userId = item.user_id;
             
             try {
               const { data: ratingStats } = await supabase
-                .rpc('get_user_rating_stats', { target_user_id: app.user_id });
+                .rpc('get_user_rating_stats', { target_user_id: userId });
               
               return {
-                id: `app-${app.id}`,
-                user_id: app.user_id,
+                id: isFromApplication ? `app-${item.id}` : item.id,
+                user_id: userId,
                 application_data: appData,
                 average_rating: ratingStats?.[0]?.average_rating || 0,
                 total_votes: ratingStats?.[0]?.total_votes || 0,
                 final_rank: null,
-                fromApplication: true
+                fromApplication: isFromApplication
               };
             } catch (error) {
               console.error('Error fetching rating stats:', error);
               return {
-                id: `app-${app.id}`,
-                user_id: app.user_id,
+                id: isFromApplication ? `app-${item.id}` : item.id,
+                user_id: userId,
                 application_data: appData,
                 average_rating: 0,
                 total_votes: 0,
                 final_rank: null,
-                fromApplication: true
+                fromApplication: isFromApplication
               };
             }
           })
@@ -357,12 +370,17 @@ const Admin = () => {
         const filteredByStatus = weeklyParticipants.filter(participant => {
           const filterStatus = participantFilters[participant.id] || (participant.final_rank ? 'this week' : 'approve');
           
+          // Exclude if manually set to 'pending'
+          if (filterStatus === 'pending') {
+            return false;
+          }
+          
           // Include if manually set to 'this week'
           if (filterStatus === 'this week') {
             return true;
           }
 
-          // Also include participants created this week
+          // Also include participants created this week if not set to pending
           const createdDate = new Date(participant.created_at);
           const participantMonday = new Date(createdDate);
           const participantDayOfWeek = createdDate.getDay();
@@ -1314,12 +1332,13 @@ const Admin = () => {
                                <SelectTrigger className="w-28 h-6 text-xs">
                                  <SelectValue />
                                </SelectTrigger>
-                               <SelectContent className="z-50 bg-background border shadow-md">
-                                 <SelectItem value="this week">This Week</SelectItem>
-                                 <SelectItem value="next week">Next Week</SelectItem>
-                                 <SelectItem value="approve">Approve</SelectItem>
-                                 <SelectItem value="reject">Reject</SelectItem>
-                               </SelectContent>
+                                <SelectContent className="z-50 bg-background border shadow-md">
+                                  <SelectItem value="this week">This Week</SelectItem>
+                                  <SelectItem value="next week">Next Week</SelectItem>
+                                  <SelectItem value="approve">Approve</SelectItem>
+                                  <SelectItem value="pending">Pending</SelectItem>
+                                  <SelectItem value="reject">Reject</SelectItem>
+                                </SelectContent>
                              </Select>
                             
                             {/* Status change date with reviewer login - desktop */}
@@ -1451,12 +1470,13 @@ const Admin = () => {
                                    <SelectTrigger className="w-24 h-7 text-xs">
                                      <SelectValue />
                                    </SelectTrigger>
-                                   <SelectContent className="z-50 bg-background border shadow-md">
-                                     <SelectItem value="this week">This Week</SelectItem>
-                                     <SelectItem value="next week">Next Week</SelectItem>
-                                     <SelectItem value="approve">Approve</SelectItem>
-                                     <SelectItem value="reject">Reject</SelectItem>
-                                   </SelectContent>
+                                    <SelectContent className="z-50 bg-background border shadow-md">
+                                      <SelectItem value="this week">This Week</SelectItem>
+                                      <SelectItem value="next week">Next Week</SelectItem>
+                                      <SelectItem value="approve">Approve</SelectItem>
+                                      <SelectItem value="pending">Pending</SelectItem>
+                                      <SelectItem value="reject">Reject</SelectItem>
+                                    </SelectContent>
                                  </Select>
                                 
                                 {/* Rating with votes */}
