@@ -3685,57 +3685,60 @@ const Admin = () => {
                     })
                      .map(profile => (
                        <Card key={profile.id} className="p-4 relative overflow-hidden">
-                          {/* Registration date badge in top left corner without padding */}
-                          <Badge 
-                            variant="outline" 
-                            className="absolute top-0 left-0 text-xs bg-background/50 backdrop-blur-sm font-normal rounded-none rounded-br-md"
-                          >
-                            {new Date(profile.created_at).toLocaleDateString('en-GB', { 
-                              day: 'numeric', 
-                              month: 'short' 
-                            })}
-                          </Badge>
-                          
-                          {/* Role selector, verified badge, and verify button row - 5px from top */}
-                          <div className="flex items-center gap-2 mb-3" style={{ marginTop: '5px' }}>
-                            <Select
-                              value={userRoleMap[profile.id] || 'usual'}
-                              onValueChange={(value) => handleRoleChange(
-                                profile.id, 
-                                profile.display_name || `${profile.first_name} ${profile.last_name}`,
-                                value
-                              )}
-                              disabled={assigningRoles.has(profile.id)}
+                          {/* Top row: Registration date on left, controls on right */}
+                          <div className="flex items-center justify-between mb-3">
+                            {/* Registration date badge */}
+                            <Badge 
+                              variant="outline" 
+                              className="text-xs bg-background/50 backdrop-blur-sm font-normal"
                             >
-                              <SelectTrigger className="w-20 h-6 text-xs">
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent className="bg-background border shadow-md z-50">
-                                <SelectItem value="usual">Usual</SelectItem>
-                                <SelectItem value="admin">Admin</SelectItem>
-                              </SelectContent>
-                            </Select>
+                              {new Date(profile.created_at).toLocaleDateString('en-GB', { 
+                                day: 'numeric', 
+                                month: 'short' 
+                              })}
+                            </Badge>
                             
-                            {profile.email_confirmed_at ? (
-                              <Badge variant="default" className="bg-green-100 text-green-700 text-xs">
-                                Verified
-                              </Badge>
-                            ) : (
-                              <>
-                                <Badge variant="secondary" className="text-xs">
-                                  Unverified
+                            {/* Role selector, verified badge, and verify button */}
+                            <div className="flex items-center gap-2">
+                              <Select
+                                value={userRoleMap[profile.id] || 'usual'}
+                                onValueChange={(value) => handleRoleChange(
+                                  profile.id, 
+                                  profile.display_name || `${profile.first_name} ${profile.last_name}`,
+                                  value
+                                )}
+                                disabled={assigningRoles.has(profile.id)}
+                              >
+                                <SelectTrigger className="w-20 h-6 text-xs">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent className="bg-background border shadow-md z-50">
+                                  <SelectItem value="usual">Usual</SelectItem>
+                                  <SelectItem value="admin">Admin</SelectItem>
+                                </SelectContent>
+                              </Select>
+                              
+                              {profile.email_confirmed_at ? (
+                                <Badge variant="default" className="bg-green-100 text-green-700 text-xs">
+                                  Verified
                                 </Badge>
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() => handleEmailVerification(profile.id)}
-                                  disabled={verifyingUsers.has(profile.id)}
-                                  className="h-6 px-2 text-xs"
-                                >
-                                  {verifyingUsers.has(profile.id) ? 'Verifying...' : 'Verify'}
-                                </Button>
-                              </>
-                            )}
+                              ) : (
+                                <>
+                                  <Badge variant="secondary" className="text-xs">
+                                    Unverified
+                                  </Badge>
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => handleEmailVerification(profile.id)}
+                                    disabled={verifyingUsers.has(profile.id)}
+                                    className="h-6 px-2 text-xs"
+                                  >
+                                    {verifyingUsers.has(profile.id) ? 'Verifying...' : 'Verify'}
+                                  </Button>
+                                </>
+                              )}
+                            </div>
                           </div>
                           
                           <div className="flex items-center justify-between">
