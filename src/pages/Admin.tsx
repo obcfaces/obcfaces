@@ -925,6 +925,25 @@ const Admin = () => {
       return;
     }
 
+    // If user is in weekly contest participants, update admin_status
+    const weeklyParticipant = weeklyParticipants.find(p => p.user_id === application?.user_id);
+    if (weeklyParticipant) {
+      try {
+        const { error: updateError } = await supabase
+          .from('weekly_contest_participants')
+          .update({ admin_status: newStatus === 'approved' ? 'this week' : newStatus })
+          .eq('user_id', application.user_id);
+
+        if (updateError) {
+          console.error('Error updating weekly participant admin_status:', updateError);
+        } else {
+          console.log('Successfully updated weekly participant admin_status to:', newStatus === 'approved' ? 'this week' : newStatus);
+        }
+      } catch (error) {
+        console.error('Error updating weekly participant:', error);
+      }
+    }
+
     // If status is approved, automatically add to weekly contest
     if (newStatus === 'approved' && application) {
       try {
