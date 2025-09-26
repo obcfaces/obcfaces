@@ -647,6 +647,7 @@ export type Database = {
       }
       weekly_contest_participants: {
         Row: {
+          admin_status: string | null
           application_data: Json | null
           average_rating: number | null
           contest_id: string
@@ -658,6 +659,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          admin_status?: string | null
           application_data?: Json | null
           average_rating?: number | null
           contest_id: string
@@ -669,6 +671,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          admin_status?: string | null
           application_data?: Json | null
           average_rating?: number | null
           contest_id?: string
@@ -1143,6 +1146,7 @@ export type Database = {
       get_weekly_participants_by_admin_status: {
         Args: { weeks_offset?: number }
         Returns: {
+          admin_status: string
           age: number
           avatar_url: string
           average_rating: number

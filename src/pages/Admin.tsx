@@ -117,6 +117,7 @@ interface WeeklyContestParticipant {
   average_rating?: number;
   created_at?: string;
   is_active: boolean;
+  admin_status?: string;
   profiles?: {
     first_name: string;
     last_name: string;
@@ -273,8 +274,8 @@ const Admin = () => {
 
         // Get weekly participants with "pending" status
         const pendingParticipants = weeklyParticipants.filter(participant => {
-          const filterStatus = participantFilters[participant.id];
-          return filterStatus === 'pending';
+          const adminStatus = participant.admin_status || participantFilters[participant.id];
+          return adminStatus === 'pending';
         });
 
         // Combine both approved applications and pending participants
@@ -368,15 +369,15 @@ const Admin = () => {
 
         // Filter participants who are from current week OR have 'this week' status manually set
         const filteredByStatus = weeklyParticipants.filter(participant => {
-          const filterStatus = participantFilters[participant.id] || (participant.final_rank ? 'this week' : 'approve');
+          const adminStatus = participant.admin_status || participantFilters[participant.id] || (participant.final_rank ? 'this week' : 'approve');
           
           // Exclude if manually set to 'pending'
-          if (filterStatus === 'pending') {
+          if (adminStatus === 'pending') {
             return false;
           }
           
           // Include if manually set to 'this week'
-          if (filterStatus === 'this week') {
+          if (adminStatus === 'this week') {
             return true;
           }
 
@@ -801,17 +802,42 @@ const Admin = () => {
   const fetchWeeklyParticipants = async () => {
     try {
       const { data, error } = await supabase
-        .from('weekly_contest_participants')
-        .select('*')
-        .eq('is_active', true)
-        .order('created_at', { ascending: false });
+        .rpc('get_weekly_participants_by_admin_status', { weeks_offset: 0 });
 
       if (error) {
         console.error('Error fetching weekly participants:', error);
         return;
       }
 
-      setWeeklyParticipants(data || []);
+      // Transform the data to match the interface
+      const participants = data?.map((item: any) => ({
+        id: item.participant_id,
+        contest_id: item.contest_id,
+        user_id: item.user_id,
+        application_data: {
+          first_name: item.first_name,
+          last_name: item.last_name,
+          age: item.age,
+          country: item.country,
+          state: item.state,
+          city: item.city,
+          height_cm: item.height_cm,
+          weight_kg: item.weight_kg,
+          gender: item.gender,
+          marital_status: item.marital_status,
+          has_children: item.has_children,
+          photo1_url: item.photo_1_url,
+          photo2_url: item.photo_2_url
+        },
+        final_rank: item.final_rank,
+        total_votes: item.total_votes,
+        average_rating: item.average_rating,
+        created_at: item.contest_start_date,
+        is_active: true,
+        admin_status: item.admin_status || 'this week'
+      })) || [];
+
+      setWeeklyParticipants(participants);
     } catch (error) {
       console.error('Error in fetchWeeklyParticipants:', error);
     }
@@ -1311,7 +1337,7 @@ const Admin = () => {
                             </Button>
                             
                              <Select 
-                               value={participantFilters[participant.id] || (participant.final_rank ? 'this week' : 'approve')} 
+                                value={participant.admin_status || participantFilters[participant.id] || (participant.final_rank ? 'this week' : 'approve')}
                                onValueChange={(value) => {
                                  if (value === 'reject') {
                                    // Open reject modal for this participant
@@ -1344,6 +1370,9 @@ const Admin = () => {
                                           description: "Failed to update participant status",
                                           variant: "destructive"
                                         });
+                                      } else {
+                                        // Refresh the participants data
+                                        fetchWeeklyParticipants();
                                       }
                                     } catch (error) {
                                       console.error('Error updating participant status:', error);
@@ -1473,7 +1502,7 @@ const Admin = () => {
                               {/* Status filter positioned at bottom */}
                               <div className="absolute bottom-12 right-13 flex items-center gap-2">
                                  <Select 
-                                   value={participantFilters[participant.id] || (participant.final_rank ? 'this week' : 'approve')} 
+                                   value={participant.admin_status || participantFilters[participant.id] || (participant.final_rank ? 'this week' : 'approve')} 
                                    onValueChange={(value) => {
                                      if (value === 'reject') {
                                        // Open reject modal for this participant
@@ -1506,6 +1535,9 @@ const Admin = () => {
                                               description: "Failed to update participant status",
                                               variant: "destructive"
                                             });
+                                          } else {
+                                            // Refresh the participants data
+                                            fetchWeeklyParticipants();
                                           }
                                         } catch (error) {
                                           console.error('Error updating participant status:', error);
