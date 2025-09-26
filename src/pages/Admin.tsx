@@ -3428,11 +3428,11 @@ const Admin = () => {
                       return true;
                     })
                      .map(profile => (
-                       <Card key={profile.id} className="p-4 relative">
-                         {/* Registration date badge in top left corner */}
+                       <Card key={profile.id} className="p-4 relative overflow-hidden">
+                         {/* Registration date badge in top left corner without padding */}
                          <Badge 
                            variant="outline" 
-                           className="absolute top-2 left-2 text-xs bg-background/50 backdrop-blur-sm"
+                           className="absolute top-0 left-0 text-xs bg-background/50 backdrop-blur-sm font-normal rounded-none rounded-br-md"
                          >
                            {new Date(profile.created_at).toLocaleDateString('en-GB', { 
                              day: 'numeric', 
