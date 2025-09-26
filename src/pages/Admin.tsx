@@ -1488,7 +1488,6 @@ const Admin = () => {
                                    <SelectContent className="z-50 bg-background border shadow-md">
                                      <SelectItem value="this week">This Week</SelectItem>
                                      <SelectItem value="next">Next</SelectItem>
-                                     <SelectItem value="past">Past</SelectItem>
                                      <SelectItem value="approve">Approve</SelectItem>
                                      <SelectItem value="pending">Pending</SelectItem>
                                      <SelectItem value="inactive">Inactive</SelectItem>
@@ -1651,13 +1650,12 @@ const Admin = () => {
                                    <SelectTrigger className="w-24 h-7 text-xs">
                                      <SelectValue />
                                    </SelectTrigger>
-                                      <SelectContent className="z-50 bg-background border shadow-md">
-                                        <SelectItem value="this week">This Week</SelectItem>
-                                        <SelectItem value="next">Next</SelectItem>
-                                        <SelectItem value="past">Past</SelectItem>
-                                        <SelectItem value="approve">Approve</SelectItem>
-                                        <SelectItem value="pending">Pending</SelectItem>
-                                        <SelectItem value="inactive">Inactive</SelectItem>
+                                        <SelectContent className="z-50 bg-background border shadow-md">
+                                          <SelectItem value="this week">This Week</SelectItem>
+                                          <SelectItem value="next">Next</SelectItem>
+                                          <SelectItem value="approve">Approve</SelectItem>
+                                          <SelectItem value="pending">Pending</SelectItem>
+                                          <SelectItem value="inactive">Inactive</SelectItem>
                                       </SelectContent>
                                  </Select>
                                 
