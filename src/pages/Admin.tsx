@@ -181,6 +181,7 @@ const Admin = () => {
   const [verifyingUsers, setVerifyingUsers] = useState<Set<string>>(new Set());
   const [dailyStats, setDailyStats] = useState<Array<{ day_name: string; vote_count: number; like_count: number }>>([]);
   const [dailyApplicationStats, setDailyApplicationStats] = useState<Array<{ day_name: string; new_count: number; approved_count: number }>>([]);
+  const [dailyRegistrationStats, setDailyRegistrationStats] = useState<Array<{ day_name: string; registration_count: number; verified_count: number }>>([]);
   const [selectedDay, setSelectedDay] = useState<{ day: number; type: 'new' | 'approved' } | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -191,6 +192,7 @@ const Admin = () => {
     checkAdminAccess();
     fetchDailyStats();
     fetchDailyApplicationStats();
+    fetchDailyRegistrationStats();
     
     // Set up real-time subscriptions for automatic updates
     const contestAppsChannel = supabase
@@ -575,6 +577,16 @@ const Admin = () => {
       setDailyApplicationStats(stats);
     } catch (error) {
       console.error('Error calculating daily application stats:', error);
+    }
+  };
+
+  const fetchDailyRegistrationStats = async () => {
+    try {
+      const { data, error } = await supabase.rpc('get_daily_registration_stats');
+      if (error) throw error;
+      setDailyRegistrationStats(data || []);
+    } catch (error) {
+      console.error('Error fetching daily registration stats:', error);
     }
   };
 
@@ -3390,6 +3402,28 @@ const Admin = () => {
                 <div className="mb-6">
                   <h2 className="text-xl font-semibold">All User Registrations</h2>
                   <p className="text-muted-foreground">Complete list of all registered users</p>
+                </div>
+                
+                {/* Weekly Registration Stats Dashboard */}
+                <div className="mb-6">
+                  <div className="mb-4 p-3 bg-muted rounded-lg">
+                    <div className="text-sm text-muted-foreground space-y-2">
+                      <div className="text-xs">
+                        total registrations: {dailyRegistrationStats.reduce((sum, stat) => sum + (stat.registration_count || 0), 0)}, 
+                        verified: {dailyRegistrationStats.reduce((sum, stat) => sum + (stat.verified_count || 0), 0)}
+                      </div>
+                      <div className="grid grid-cols-7 gap-1 text-xs">
+                        {dailyRegistrationStats.map((stat, index) => (
+                          <div key={index} className="text-center p-1 bg-background rounded">
+                            <div className="font-medium text-xs">{stat.day_name}</div>
+                            <div className="text-xs text-muted-foreground">
+                              {stat.registration_count}-{stat.verified_count}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
                 </div>
                 
                 {/* Verification filters */}
