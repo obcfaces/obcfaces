@@ -2486,11 +2486,11 @@ const Admin = () => {
                       if (genderFilter !== 'all' && appData.gender !== genderFilter) return false;
                       if (statusFilter !== 'all' && application.status !== statusFilter) return false;
                       
-                      // Don't show any applications in the cards section if the user is already in "this week"
-                      const isInWeeklyParticipants = weeklyParticipants.some(participant => 
+                      // Don't show applications in the cards section if the user is already in "this week" (but show if they have "pending" status)
+                      const weeklyParticipant = weeklyParticipants.find(participant => 
                         participant.user_id === application.user_id
                       );
-                      if (isInWeeklyParticipants) {
+                      if (weeklyParticipant && weeklyParticipant.admin_status !== 'pending') {
                         return false;
                       }
                       
