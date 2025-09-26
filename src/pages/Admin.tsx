@@ -3400,10 +3400,6 @@ const Admin = () => {
               </TabsContent>
 
               <TabsContent value="registrations" className="space-y-4">
-                <div className="mb-6">
-                  <h2 className="text-xl font-semibold">All User Registrations</h2>
-                  <p className="text-muted-foreground">Complete list of all registered users</p>
-                </div>
                 
                 {/* Weekly Registration Stats Dashboard */}
                 <div className="mb-6">
