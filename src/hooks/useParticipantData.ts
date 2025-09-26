@@ -79,6 +79,26 @@ export const useParticipantData = (participantName?: string, userId?: string) =>
     };
 
     loadParticipantData();
+
+    // Set up real-time subscription for weekly contest participants changes
+    const subscription = supabase
+      .channel('weekly_contest_participants_changes')
+      .on('postgres_changes', 
+        { 
+          event: '*', 
+          schema: 'public', 
+          table: 'weekly_contest_participants' 
+        }, 
+        () => {
+          console.log('Weekly contest participants changed, refreshing data...');
+          loadParticipantData();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, [participantName, userId]);
 
   const getParticipantByName = (name: string): ParticipantData | null => {
