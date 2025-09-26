@@ -16,7 +16,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/hooks/use-toast';
 import { 
   Calendar, FileText, UserCog, Eye, Edit, Check, X, Trash2, 
-  RotateCcw, Copy, Facebook, Minus, AlertCircle, Trophy, ChevronDown, ChevronUp
+  RotateCcw, Copy, Facebook, Minus, AlertCircle, Trophy, ChevronDown, ChevronUp, Shield
 } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
@@ -180,6 +180,11 @@ const Admin = () => {
    const [applicationHistory, setApplicationHistory] = useState<any[]>([]);
   const [verificationFilter, setVerificationFilter] = useState<string>('all');
   const [verifyingUsers, setVerifyingUsers] = useState<Set<string>>(new Set());
+  const [roleFilter, setRoleFilter] = useState<string>('all');
+  const [userRoleMap, setUserRoleMap] = useState<{ [key: string]: string }>({});
+  const [showRoleConfirmModal, setShowRoleConfirmModal] = useState(false);
+  const [roleChangeUser, setRoleChangeUser] = useState<{ id: string; name: string; newRole: string } | null>(null);
+  const [assigningRoles, setAssigningRoles] = useState<Set<string>>(new Set());
   const [dailyStats, setDailyStats] = useState<Array<{ day_name: string; vote_count: number; like_count: number }>>([]);
   const [dailyApplicationStats, setDailyApplicationStats] = useState<Array<{ day_name: string; new_count: number; approved_count: number }>>([]);
   const [dailyRegistrationStats, setDailyRegistrationStats] = useState<Array<{ day_name: string; registration_count: number; verified_count: number }>>([]);
@@ -191,6 +196,7 @@ const Admin = () => {
 
   useEffect(() => {
     checkAdminAccess();
+    fetchUserRoles();
     fetchDailyStats();
     fetchDailyApplicationStats();
     fetchDailyRegistrationStats();
@@ -528,6 +534,76 @@ const Admin = () => {
     }
   };
 
+  const handleRoleChange = (userId: string, userName: string, newRole: string) => {
+    if (newRole === 'admin') {
+      setRoleChangeUser({ id: userId, name: userName, newRole });
+      setShowRoleConfirmModal(true);
+    } else {
+      assignUserRole(userId, newRole);
+    }
+  };
+
+  const assignUserRole = async (userId: string, role: string) => {
+    try {
+      setAssigningRoles(prev => new Set(prev).add(userId));
+
+      // Сначала удаляем существующие роли пользователя
+      const { error: deleteError } = await supabase
+        .from('user_roles')
+        .delete()
+        .eq('user_id', userId);
+
+      if (deleteError) throw deleteError;
+
+      // Если роль не 'usual', добавляем новую роль
+      if (role !== 'usual') {
+        const { error: insertError } = await supabase
+          .from('user_roles')
+          .insert([{ 
+            user_id: userId, 
+            role: role as 'admin' | 'moderator' | 'user'
+          }]);
+
+        if (insertError) throw insertError;
+      }
+
+      // Обновляем локальное состояние
+      setUserRoleMap(prev => ({
+        ...prev,
+        [userId]: role
+      }));
+
+      toast({
+        title: "Success",
+        description: `User role updated to ${role === 'usual' ? 'usual user' : role}`,
+      });
+
+      // Обновляем данные
+      fetchUserRoles();
+    } catch (error: any) {
+      console.error('Error updating user role:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update user role",
+        variant: "destructive"
+      });
+    } finally {
+      setAssigningRoles(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(userId);
+        return newSet;
+      });
+    }
+  };
+
+  const confirmRoleChange = () => {
+    if (roleChangeUser) {
+      assignUserRole(roleChangeUser.id, roleChangeUser.newRole);
+      setShowRoleConfirmModal(false);
+      setRoleChangeUser(null);
+    }
+  };
+
   const fetchDailyStats = async () => {
     try {
       const { data, error } = await supabase.rpc('get_daily_voting_stats');
@@ -745,6 +821,13 @@ const Admin = () => {
     }
 
     setUserRoles(data || []);
+    
+    // Создаем мапу ролей для быстрого доступа
+    const roleMap: { [key: string]: string } = {};
+    (data || []).forEach(userRole => {
+      roleMap[userRole.user_id] = userRole.role;
+    });
+    setUserRoleMap(roleMap);
   };
 
   const fetchContestApplications = async () => {
@@ -3501,7 +3584,7 @@ const Admin = () => {
                                                   .filter((type: string) => type && REJECTION_REASONS[type as keyof typeof REJECTION_REASONS])
                                                   .map((type: string) => REJECTION_REASONS[type as keyof typeof REJECTION_REASONS])
                                                   .join(', ')}
-                                              </div>
+                </div>
                                             )}
                                             {prevApp.rejection_reason && prevApp.rejection_reason.trim() && !isReasonDuplicate(prevApp.rejection_reason, (prevApp as any).rejection_reason_types) && (
                                               <div className="text-destructive/70">
@@ -3573,14 +3656,49 @@ const Admin = () => {
                   </Button>
                 </div>
 
+                {/* Role filters */}
+                <div className="flex gap-2 mb-4">
+                  <Button
+                    variant={roleFilter === 'all' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setRoleFilter('all')}
+                  >
+                    All Roles
+                  </Button>
+                  <Button
+                    variant={roleFilter === 'usual' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setRoleFilter('usual')}
+                  >
+                    Usual
+                  </Button>
+                  <Button
+                    variant={roleFilter === 'admin' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setRoleFilter('admin')}
+                  >
+                    Admin
+                  </Button>
+                </div>
+
                 <div className="grid gap-4">
                   {profiles
                     .filter(profile => {
+                      // Фильтр верификации
                       if (verificationFilter === 'verified') {
-                        return profile.email_confirmed_at;
+                        if (!profile.email_confirmed_at) return false;
                       } else if (verificationFilter === 'unverified') {
-                        return !profile.email_confirmed_at;
+                        if (profile.email_confirmed_at) return false;
                       }
+                      
+                      // Фильтр ролей
+                      const userRole = userRoleMap[profile.id] || 'usual';
+                      if (roleFilter === 'admin') {
+                        return userRole === 'admin';
+                      } else if (roleFilter === 'usual') {
+                        return userRole === 'usual' || !userRole;
+                      }
+                      
                       return true;
                     })
                      .map(profile => (
@@ -3627,43 +3745,82 @@ const Admin = () => {
                                </div>
                              </div>
                            </div>
-                           
-                           {/* Desktop verified badge and buttons - hidden on mobile */}
-                           <div className="hidden md:flex items-center gap-2">
-                             {profile.email_confirmed_at ? (
-                               <Badge variant="default" className="bg-green-100 text-green-700">
-                                 Verified
-                               </Badge>
-                             ) : (
-                               <>
-                                 <Badge variant="secondary">
-                                   Unverified
-                                 </Badge>
-                                 <Button
-                                   size="sm"
-                                   variant="outline"
-                                   onClick={() => handleEmailVerification(profile.id)}
-                                   disabled={verifyingUsers.has(profile.id)}
-                                 >
-                                   {verifyingUsers.has(profile.id) ? 'Verifying...' : 'Verify'}
-                                 </Button>
-                               </>
-                             )}
-                           </div>
-                           
-                           {/* Mobile verify button - shown only if unverified */}
-                           {!profile.email_confirmed_at && (
-                             <div className="block md:hidden">
-                               <Button
-                                 size="sm"
-                                 variant="outline"
-                                 onClick={() => handleEmailVerification(profile.id)}
-                                 disabled={verifyingUsers.has(profile.id)}
-                               >
-                                 {verifyingUsers.has(profile.id) ? 'Verifying...' : 'Verify'}
-                               </Button>
-                             </div>
-                           )}
+            
+            {/* Desktop verified badge, role selector and buttons - hidden on mobile */}
+            <div className="hidden md:flex items-center gap-2">
+              {/* Role selector */}
+              <Select
+                value={userRoleMap[profile.id] || 'usual'}
+                onValueChange={(value) => handleRoleChange(
+                  profile.id, 
+                  profile.display_name || `${profile.first_name} ${profile.last_name}`,
+                  value
+                )}
+                disabled={assigningRoles.has(profile.id)}
+              >
+                <SelectTrigger className="w-24 h-8">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="usual">Usual</SelectItem>
+                  <SelectItem value="admin">Admin</SelectItem>
+                </SelectContent>
+              </Select>
+
+              {profile.email_confirmed_at ? (
+                <Badge variant="default" className="bg-green-100 text-green-700">
+                  Verified
+                </Badge>
+              ) : (
+                <>
+                  <Badge variant="secondary">
+                    Unverified
+                  </Badge>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => handleEmailVerification(profile.id)}
+                    disabled={verifyingUsers.has(profile.id)}
+                  >
+                    {verifyingUsers.has(profile.id) ? 'Verifying...' : 'Verify'}
+                  </Button>
+                </>
+              )}
+            </div>
+            
+            {/* Mobile controls */}
+            <div className="block md:hidden space-y-2">
+              <div className="flex items-center gap-2">
+                <Select
+                  value={userRoleMap[profile.id] || 'usual'}
+                  onValueChange={(value) => handleRoleChange(
+                    profile.id, 
+                    profile.display_name || `${profile.first_name} ${profile.last_name}`,
+                    value
+                  )}
+                  disabled={assigningRoles.has(profile.id)}
+                >
+                  <SelectTrigger className="w-20 h-8 text-xs">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="usual">Usual</SelectItem>
+                    <SelectItem value="admin">Admin</SelectItem>
+                  </SelectContent>
+                </Select>
+                
+                {!profile.email_confirmed_at && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => handleEmailVerification(profile.id)}
+                    disabled={verifyingUsers.has(profile.id)}
+                  >
+                    {verifyingUsers.has(profile.id) ? 'Verifying...' : 'Verify'}
+                  </Button>
+                )}
+              </div>
+            </div>
                          </div>
                        </Card>
                     ))}
@@ -4147,6 +4304,47 @@ const Admin = () => {
         isOpen={showEditHistory}
         onClose={() => setShowEditHistory(false)}
       />
+      {/* Role Change Confirmation Modal */}
+      <Dialog open={showRoleConfirmModal} onOpenChange={setShowRoleConfirmModal}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Shield className="w-5 h-5 text-orange-500" />
+              Confirm Admin Role Assignment
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="text-sm text-muted-foreground">
+              You are about to assign administrator privileges to:
+            </div>
+            <div className="p-3 bg-muted rounded-lg">
+              <div className="font-medium">{roleChangeUser?.name}</div>
+              <div className="text-sm text-muted-foreground">This will grant full administrative access to the system.</div>
+            </div>
+            <div className="text-sm text-orange-600 bg-orange-50 p-3 rounded-lg">
+              <strong>Warning:</strong> Administrators have full access to all system functions including user management, contest controls, and sensitive data.
+            </div>
+          </div>
+          <div className="flex justify-end gap-2 mt-6">
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                setShowRoleConfirmModal(false);
+                setRoleChangeUser(null);
+              }}
+            >
+              Cancel
+            </Button>
+            <Button 
+              variant="destructive" 
+              onClick={confirmRoleChange}
+              className="bg-orange-600 hover:bg-orange-700"
+            >
+              Confirm Admin Assignment
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 };
