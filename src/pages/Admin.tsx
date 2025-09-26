@@ -590,6 +590,7 @@ const Admin = () => {
     }
   };
 
+
   const getUsersForDay = (dayIndex: number, type: 'new' | 'approved') => {
     const currentDate = new Date();
     const weekStart = new Date(currentDate);
