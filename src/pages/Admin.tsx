@@ -1213,26 +1213,9 @@ const Admin = () => {
           </div>
 
           <Tabs defaultValue="applications" className="space-y-6">
-            {/* Mobile layout: Two rows of tabs */}
-            <div className="md:hidden space-y-2">
-              {/* First row - secondary tabs */}
-              <TabsList className="grid grid-cols-3 w-full">
-                <TabsTrigger value="registrations" className="flex items-center gap-1 text-xs">
-                  <UserCog className="w-3 h-3" />
-                  Reg
-                </TabsTrigger>
-                <TabsTrigger value="moderation" className="flex items-center gap-1 text-xs">
-                  <Eye className="w-3 h-3" />
-                  Moderate
-                </TabsTrigger>
-                <TabsTrigger value="roles" className="flex items-center gap-1 text-xs">
-                  <UserCog className="w-3 h-3" />
-                  Role
-                </TabsTrigger>
-              </TabsList>
-              
-              {/* Second row - main tabs */}
-              <TabsList className="grid grid-cols-3 w-full">
+            {/* Mobile layout: Single row of tabs */}
+            <div className="md:hidden">
+              <TabsList className="grid grid-cols-4 w-full">
                 <TabsTrigger value="applications" className="flex items-center gap-1 text-xs">
                   <FileText className="w-3 h-3" />
                   Card
@@ -1244,6 +1227,10 @@ const Admin = () => {
                 <TabsTrigger value="pastweek" className="flex items-center gap-1 text-xs">
                   <Trophy className="w-3 h-3" />
                   Past
+                </TabsTrigger>
+                <TabsTrigger value="registrations" className="flex items-center gap-1 text-xs">
+                  <UserCog className="w-3 h-3" />
+                  Reg
                 </TabsTrigger>
               </TabsList>
             </div>
@@ -1265,14 +1252,6 @@ const Admin = () => {
               <TabsTrigger value="registrations" className="flex items-center gap-2">
                 <UserCog className="w-4 h-4" />
                 Регистрации
-              </TabsTrigger>
-              <TabsTrigger value="moderation" className="flex items-center gap-2">
-                <Eye className="w-4 h-4" />
-                Profile Moderation
-              </TabsTrigger>
-              <TabsTrigger value="roles" className="flex items-center gap-2">
-                <UserCog className="w-4 h-4" />
-                User Roles
               </TabsTrigger>
             </TabsList>
 
@@ -3771,25 +3750,6 @@ const Admin = () => {
                 </div>
               </TabsContent>
 
-              {/* Profile Moderation Tab */}
-              <TabsContent value="moderation" className="space-y-4">
-                <div className="text-center py-12">
-                  <Eye className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
-                  <h3 className="text-xl font-semibold mb-2">Profile Moderation</h3>
-                  <p className="text-muted-foreground">This section is under development</p>
-                  <p className="text-sm text-muted-foreground mt-2">Features for moderating user profiles will be available here</p>
-                </div>
-              </TabsContent>
-
-              {/* User Roles Tab */}
-              <TabsContent value="roles" className="space-y-4">
-                <div className="text-center py-12">
-                  <UserCog className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
-                  <h3 className="text-xl font-semibold mb-2">User Roles Management</h3>
-                  <p className="text-muted-foreground">This section is under development</p>
-                  <p className="text-sm text-muted-foreground mt-2">Features for managing user roles and permissions will be available here</p>
-                </div>
-              </TabsContent>
             </Tabs>
           </div>
         </div>
