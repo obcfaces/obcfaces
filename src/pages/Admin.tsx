@@ -884,16 +884,33 @@ const Admin = () => {
 
   const fetchWeeklyParticipants = async () => {
     try {
-      const { data, error } = await supabase
+      // Fetch current week participants
+      const { data: currentWeekData, error: currentWeekError } = await supabase
         .rpc('get_weekly_participants_by_admin_status', { weeks_offset: 0 });
 
-      if (error) {
-        console.error('Error fetching weekly participants:', error);
+      if (currentWeekError) {
+        console.error('Error fetching current week participants:', currentWeekError);
         return;
       }
 
+      // Fetch past weeks participants (up to 12 weeks back)
+      const pastWeeksPromises = [];
+      for (let i = 1; i <= 12; i++) {
+        pastWeeksPromises.push(
+          supabase.rpc('get_weekly_participants_by_admin_status', { weeks_offset: i })
+        );
+      }
+
+      const pastWeeksResults = await Promise.all(pastWeeksPromises);
+      const allPastWeeksData = pastWeeksResults
+        .filter(result => !result.error && result.data)
+        .flatMap(result => result.data);
+
+      // Combine current week and past weeks data
+      const allParticipantsData = [...(currentWeekData || []), ...allPastWeeksData];
+
       // Transform the data to match the interface
-      const participants = data?.map((item: any) => ({
+      const participants = allParticipantsData?.map((item: any) => ({
         id: item.participant_id,
         contest_id: item.contest_id,
         user_id: item.user_id,
