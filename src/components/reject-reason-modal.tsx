@@ -17,24 +17,36 @@ export type RejectionReasonType =
   | 'first_photo_id_style'
   | 'first_photo_blurry'
   | 'first_photo_filters'
+  | 'first_photo_collages'
+  | 'first_photo_editing'
   | 'second_photo_makeup'
   | 'second_photo_pose'
   | 'second_photo_clothing'
   | 'second_photo_accessories'
   | 'second_photo_filters'
-  | 'both_photos_quality';
+  | 'second_photo_collages'
+  | 'second_photo_scaled'
+  | 'second_photo_editing'
+  | 'both_photos_quality'
+  | 'suspicion_not_own_photos';
 
 const REJECTION_REASONS = {
   first_photo_makeup: "First photo – No makeup allowed.",
   first_photo_id_style: "First photo – Must look like an ID photo: face straight to the camera, hands together in front.",
   first_photo_blurry: "First photo – Photo is too blurry/low quality.",
   first_photo_filters: "First photo – No filters or ai allowed.",
+  first_photo_collages: "First photo – Collages are not allowed.",
+  first_photo_editing: "First photo – Photo editing and filters are not allowed.",
   second_photo_makeup: "Second photo – No makeup allowed.",
   second_photo_pose: "Second photo – Must show the whole body from head to toe, standing straight, arms at the sides.",
   second_photo_clothing: "Second photo – Wear tight/fitted clothes (swimsuit, fitted shorts, or top). Dresses, skirts, loose tops, or high heels are not allowed.",
   second_photo_accessories: "Second photo – No bags or backpacks.",
   second_photo_filters: "Second photo – No filters or ai allowed.",
-  both_photos_quality: "Both photos – The quality is too low."
+  second_photo_collages: "Second photo – Collages are not allowed.",
+  second_photo_scaled: "Second photo – Scaled photos (e.g., 0.5x zoom) are not allowed.",
+  second_photo_editing: "Second photo – Photo editing and filters are not allowed.",
+  both_photos_quality: "Both photos – The quality is too low.",
+  suspicion_not_own_photos: "Suspicion that the user is not using their own photos."
 };
 
 interface RejectReasonModalProps {
