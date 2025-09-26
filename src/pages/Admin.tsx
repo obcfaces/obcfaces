@@ -3669,6 +3669,26 @@ const Admin = () => {
                     ))}
                 </div>
               </TabsContent>
+
+              {/* Profile Moderation Tab */}
+              <TabsContent value="moderation" className="space-y-4">
+                <div className="text-center py-12">
+                  <Eye className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
+                  <h3 className="text-xl font-semibold mb-2">Profile Moderation</h3>
+                  <p className="text-muted-foreground">This section is under development</p>
+                  <p className="text-sm text-muted-foreground mt-2">Features for moderating user profiles will be available here</p>
+                </div>
+              </TabsContent>
+
+              {/* User Roles Tab */}
+              <TabsContent value="roles" className="space-y-4">
+                <div className="text-center py-12">
+                  <UserCog className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
+                  <h3 className="text-xl font-semibold mb-2">User Roles Management</h3>
+                  <p className="text-muted-foreground">This section is under development</p>
+                  <p className="text-sm text-muted-foreground mt-2">Features for managing user roles and permissions will be available here</p>
+                </div>
+              </TabsContent>
             </Tabs>
           </div>
         </div>
