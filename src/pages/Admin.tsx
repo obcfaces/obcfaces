@@ -3632,7 +3632,7 @@ const Admin = () => {
                 </div>
                 
                 {/* Combined filters in one row */}
-                <div className="flex gap-2 mb-4 flex-wrap">
+                <div className="flex gap-2 mb-4">
                   <Button
                     variant={verificationFilter === 'all' ? 'default' : 'outline'}
                     size="sm"
