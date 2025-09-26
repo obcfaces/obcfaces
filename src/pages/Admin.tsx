@@ -1360,7 +1360,7 @@ const Admin = () => {
                                     try {
                                       const { error } = await supabase
                                         .from('weekly_contest_participants')
-                                        .update({ admin_status: value })
+                                         .update({ admin_status: value } as any)
                                         .eq('id', participant.id);
                                       
                                       if (error) {
@@ -1525,7 +1525,7 @@ const Admin = () => {
                                         try {
                                           const { error } = await supabase
                                             .from('weekly_contest_participants')
-                                            .update({ admin_status: value })
+                                            .update({ admin_status: value } as any)
                                             .eq('id', participant.id);
                                           
                                           if (error) {
