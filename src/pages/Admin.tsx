@@ -3427,48 +3427,89 @@ const Admin = () => {
                       }
                       return true;
                     })
-                    .map(profile => (
-                      <Card key={profile.id} className="p-4">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-3">
-                            <Avatar>
-                              <AvatarImage src={profile.avatar_url || ''} />
-                              <AvatarFallback>
-                                {profile.display_name?.charAt(0) || profile.first_name?.charAt(0) || 'U'}
-                              </AvatarFallback>
-                            </Avatar>
-                            <div>
-                              <div className="font-medium">
-                                {profile.display_name || `${profile.first_name} ${profile.last_name}`}
-                              </div>
-                              <div className="text-sm text-muted-foreground">
-                                {profile.email}
-                              </div>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            {profile.email_confirmed_at ? (
-                              <Badge variant="default" className="bg-green-100 text-green-700">
-                                Verified
-                              </Badge>
-                            ) : (
-                              <>
-                                <Badge variant="secondary">
-                                  Unverified
-                                </Badge>
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() => handleEmailVerification(profile.id)}
-                                  disabled={verifyingUsers.has(profile.id)}
-                                >
-                                  {verifyingUsers.has(profile.id) ? 'Verifying...' : 'Verify'}
-                                </Button>
-                              </>
-                            )}
-                          </div>
-                        </div>
-                      </Card>
+                     .map(profile => (
+                       <Card key={profile.id} className="p-4 relative">
+                         {/* Registration date badge in top left corner */}
+                         <Badge 
+                           variant="outline" 
+                           className="absolute top-2 left-2 text-xs bg-background/50 backdrop-blur-sm"
+                         >
+                           {new Date(profile.created_at).toLocaleDateString('en-GB', { 
+                             day: 'numeric', 
+                             month: 'short' 
+                           })}
+                         </Badge>
+                         
+                         <div className="flex items-center justify-between pt-4">
+                           <div className="flex items-center gap-3">
+                             <Avatar>
+                               <AvatarImage src={profile.avatar_url || ''} />
+                               <AvatarFallback>
+                                 {profile.display_name?.charAt(0) || profile.first_name?.charAt(0) || 'U'}
+                               </AvatarFallback>
+                             </Avatar>
+                             <div>
+                               <div className="flex items-center gap-2">
+                                 <span className="font-medium">
+                                   {profile.display_name || `${profile.first_name} ${profile.last_name}`}
+                                 </span>
+                                 {/* Mobile verified badge - placed right after name */}
+                                 <div className="block md:hidden">
+                                   {profile.email_confirmed_at ? (
+                                     <Badge variant="default" className="bg-green-100 text-green-700 text-xs">
+                                       Verified
+                                     </Badge>
+                                   ) : (
+                                     <Badge variant="secondary" className="text-xs">
+                                       Unverified
+                                     </Badge>
+                                   )}
+                                 </div>
+                               </div>
+                               <div className="text-sm text-muted-foreground">
+                                 {profile.email}
+                               </div>
+                             </div>
+                           </div>
+                           
+                           {/* Desktop verified badge and buttons - hidden on mobile */}
+                           <div className="hidden md:flex items-center gap-2">
+                             {profile.email_confirmed_at ? (
+                               <Badge variant="default" className="bg-green-100 text-green-700">
+                                 Verified
+                               </Badge>
+                             ) : (
+                               <>
+                                 <Badge variant="secondary">
+                                   Unverified
+                                 </Badge>
+                                 <Button
+                                   size="sm"
+                                   variant="outline"
+                                   onClick={() => handleEmailVerification(profile.id)}
+                                   disabled={verifyingUsers.has(profile.id)}
+                                 >
+                                   {verifyingUsers.has(profile.id) ? 'Verifying...' : 'Verify'}
+                                 </Button>
+                               </>
+                             )}
+                           </div>
+                           
+                           {/* Mobile verify button - shown only if unverified */}
+                           {!profile.email_confirmed_at && (
+                             <div className="block md:hidden">
+                               <Button
+                                 size="sm"
+                                 variant="outline"
+                                 onClick={() => handleEmailVerification(profile.id)}
+                                 disabled={verifyingUsers.has(profile.id)}
+                               >
+                                 {verifyingUsers.has(profile.id) ? 'Verifying...' : 'Verify'}
+                               </Button>
+                             </div>
+                           )}
+                         </div>
+                       </Card>
                     ))}
                 </div>
               </TabsContent>
