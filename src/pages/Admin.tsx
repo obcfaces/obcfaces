@@ -2680,8 +2680,12 @@ const Admin = () => {
                                   <div className="w-[20ch] flex-shrink-0 p-4 pl-0 flex flex-col gap-2 -mt-[20px]">
                                    {/* Status dropdown at the top - desktop */}
                                    {!showDeletedApplications && (
-                                     <Select 
-                                       value={application.status} 
+                                      <Select 
+                                        value={(() => {
+                                          // If user is in weekly contest participants, show admin_status as the status
+                                          const weeklyParticipant = weeklyParticipants.find(p => p.user_id === application.user_id);
+                                          return weeklyParticipant ? weeklyParticipant.admin_status : application.status;
+                                        })()} 
                                         onValueChange={(newStatus) => {
                                           if (newStatus === 'delete') {
                                             const appData = typeof application.application_data === 'string' 
