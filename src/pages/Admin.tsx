@@ -3631,8 +3631,8 @@ const Admin = () => {
                   </div>
                 </div>
                 
-                {/* Verification filters */}
-                <div className="flex gap-2 mb-4">
+                {/* Combined filters in one row */}
+                <div className="flex gap-2 mb-4 flex-wrap">
                   <Button
                     variant={verificationFilter === 'all' ? 'default' : 'outline'}
                     size="sm"
@@ -3641,36 +3641,18 @@ const Admin = () => {
                     All Users
                   </Button>
                   <Button
-                    variant={verificationFilter === 'verified' ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => setVerificationFilter('verified')}
-                  >
-                    Verified
-                  </Button>
-                  <Button
                     variant={verificationFilter === 'unverified' ? 'default' : 'outline'}
                     size="sm"
                     onClick={() => setVerificationFilter('unverified')}
                   >
                     Unverified
                   </Button>
-                </div>
-
-                {/* Role filters */}
-                <div className="flex gap-2 mb-4">
                   <Button
                     variant={roleFilter === 'all' ? 'default' : 'outline'}
                     size="sm"
                     onClick={() => setRoleFilter('all')}
                   >
                     All Roles
-                  </Button>
-                  <Button
-                    variant={roleFilter === 'usual' ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => setRoleFilter('usual')}
-                  >
-                    Usual
                   </Button>
                   <Button
                     variant={roleFilter === 'admin' ? 'default' : 'outline'}
