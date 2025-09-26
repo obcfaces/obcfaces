@@ -94,11 +94,11 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
 
   const loadContestParticipants = async (weekOffset: number = 0) => {
     try {
-      // Use the public function that now only shows 'this week' status participants
+      // For now, use the existing function and filter on admin_status later
       const { data, error } = await supabase
         .rpc('get_weekly_contest_participants_public', { weeks_offset: weekOffset });
 
-      console.log(`Loading participants for week offset ${weekOffset}:`, data);
+      console.log(`Loading participants for ${title} with week offset ${weekOffset}:`, data);
       console.log('Weekly contest participants error:', error);
 
       if (error) {
@@ -107,10 +107,10 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
       }
 
       if (data && Array.isArray(data)) {
-        console.log(`Found ${data.length} real participants for week offset ${weekOffset}`);
+        console.log(`Found ${data.length} real participants for ${title} with week offset ${weekOffset}`);
         return data;
       } else {
-        console.warn('No weekly contest participants found for week offset:', weekOffset);
+        console.warn(`No weekly contest participants found for ${title} with week offset:`, weekOffset);
         return [];
       }
     } catch (err) {
