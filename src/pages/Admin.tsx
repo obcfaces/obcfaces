@@ -1323,10 +1323,34 @@ const Admin = () => {
                                    return;
                                  }
                                  
-                                 setParticipantFilters(prev => ({
-                                   ...prev,
-                                   [participant.id]: value
-                                 }));
+                                  // Update the filter state
+                                  setParticipantFilters(prev => ({
+                                    ...prev,
+                                    [participant.id]: value
+                                  }));
+
+                                  // Update the database with the new admin_status
+                                  const updateParticipantStatus = async () => {
+                                    try {
+                                      const { error } = await supabase
+                                        .from('weekly_contest_participants')
+                                        .update({ admin_status: value })
+                                        .eq('id', participant.id);
+                                      
+                                      if (error) {
+                                        console.error('Error updating participant status:', error);
+                                        toast({
+                                          title: "Error",
+                                          description: "Failed to update participant status",
+                                          variant: "destructive"
+                                        });
+                                      }
+                                    } catch (error) {
+                                      console.error('Error updating participant status:', error);
+                                    }
+                                  };
+
+                                  updateParticipantStatus();
                                }}
                              >
                                <SelectTrigger className="w-28 h-6 text-xs">
@@ -1461,10 +1485,34 @@ const Admin = () => {
                                        return;
                                      }
                                      
-                                     setParticipantFilters(prev => ({
-                                       ...prev,
-                                       [participant.id]: value
-                                     }));
+                                      // Update the filter state
+                                      setParticipantFilters(prev => ({
+                                        ...prev,
+                                        [participant.id]: value
+                                      }));
+
+                                      // Update the database with the new admin_status
+                                      const updateParticipantStatus = async () => {
+                                        try {
+                                          const { error } = await supabase
+                                            .from('weekly_contest_participants')
+                                            .update({ admin_status: value })
+                                            .eq('id', participant.id);
+                                          
+                                          if (error) {
+                                            console.error('Error updating participant status:', error);
+                                            toast({
+                                              title: "Error",
+                                              description: "Failed to update participant status",
+                                              variant: "destructive"
+                                            });
+                                          }
+                                        } catch (error) {
+                                          console.error('Error updating participant status:', error);
+                                        }
+                                      };
+
+                                      updateParticipantStatus();
                                    }}
                                  >
                                    <SelectTrigger className="w-24 h-7 text-xs">
