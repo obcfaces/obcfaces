@@ -1704,7 +1704,40 @@ const Admin = () => {
               </div>
               
               {(() => {
-                if (pastWeekParticipants.length === 0) {
+                // Get all past week participants by fetching participants not from current week
+                const allPastParticipants = weeklyParticipants.filter(participant => {
+                  const now = new Date();
+                  const currentMonday = new Date(now);
+                  const dayOfWeek = now.getDay();
+                  const daysSinceMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+                  currentMonday.setDate(now.getDate() - daysSinceMonday);
+                  currentMonday.setHours(0, 0, 0, 0);
+
+                  const createdDate = new Date(participant.created_at);
+                  const participantMonday = new Date(createdDate);
+                  const participantDayOfWeek = createdDate.getDay();
+                  const participantDaysSinceMonday = participantDayOfWeek === 0 ? 6 : participantDayOfWeek - 1;
+                  participantMonday.setDate(createdDate.getDate() - participantDaysSinceMonday);
+                  participantMonday.setHours(0, 0, 0, 0);
+                  
+                  return participantMonday.getTime() < currentMonday.getTime();
+                }).map(participant => ({
+                  ...participant,
+                  weekInterval: (() => {
+                    const createdDate = new Date(participant.created_at);
+                    const monday = new Date(createdDate);
+                    const dayOfWeek = createdDate.getDay();
+                    const daysSinceMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+                    monday.setDate(createdDate.getDate() - daysSinceMonday);
+                    
+                    const sunday = new Date(monday);
+                    sunday.setDate(monday.getDate() + 6);
+                    
+                    return `${monday.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit' })} - ${sunday.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })}`;
+                  })()
+                }));
+
+                if (allPastParticipants.length === 0) {
                   return (
                     <div className="text-center py-8 text-muted-foreground">
                       <p className="text-lg">No past week participants found</p>
@@ -1713,20 +1746,20 @@ const Admin = () => {
                 }
 
                 const filteredPastParticipants = selectedWeekOffset !== null && selectedWeekOffset !== undefined
-                  ? pastWeekParticipants.filter((_, index) => {
-                      const intervals = Array.from(new Set(pastWeekParticipants.map(p => p.weekInterval)))
+                  ? allPastParticipants.filter(p => {
+                      const intervals = Array.from(new Set(allPastParticipants.map(p => p.weekInterval)))
                         .sort((a, b) => b.localeCompare(a));
                       const targetInterval = intervals[selectedWeekOffset];
-                      return pastWeekParticipants[index].weekInterval === targetInterval;
+                      return p.weekInterval === targetInterval;
                     })
-                  : pastWeekParticipants;
+                  : allPastParticipants;
 
                 return filteredPastParticipants.map((participant) => {
                   const participantProfile = profiles.find(p => p.id === participant.user_id);
                   const appData = participant.application_data || {};
                   
                   return (
-                    <Card key={participant.participant_id} className="overflow-hidden relative mx-0 rounded-lg h-[149px]">
+                    <Card key={participant.id} className="overflow-hidden relative mx-0 rounded-lg h-[149px]">
                       <CardContent className="p-0">
                         {/* Desktop layout */}
                         <div className="hidden md:flex md:overflow-visible">
@@ -1774,10 +1807,10 @@ const Admin = () => {
                               className="text-xs text-muted-foreground mb-1 cursor-pointer hover:text-foreground transition-colors"
                               onClick={() => {
                                 const newExpanded = new Set(expandedDesktopItems);
-                                if (expandedDesktopItems.has(participant.participant_id)) {
-                                  newExpanded.delete(participant.participant_id);
+                                if (expandedDesktopItems.has(participant.id)) {
+                                  newExpanded.delete(participant.id);
                                 } else {
-                                  newExpanded.add(participant.participant_id);
+                                  newExpanded.add(participant.id);
                                 }
                                 setExpandedDesktopItems(newExpanded);
                               }}
@@ -1786,7 +1819,7 @@ const Admin = () => {
                             </div>
                             
                             {/* Expanded information - desktop */}
-                            {expandedDesktopItems.has(participant.participant_id) && (
+                            {expandedDesktopItems.has(participant.id) && (
                               <div className="text-xs text-muted-foreground mb-1">
                                 {appData.weight_kg}kg • {appData.height_cm}cm • {appData.gender} • {appData.birth_year} • {appData.marital_status} • {appData.has_children ? 'Has children' : 'No children'}
                               </div>
@@ -1904,10 +1937,10 @@ const Admin = () => {
                               className="text-xs text-muted-foreground mb-2 cursor-pointer"
                               onClick={() => {
                                 const newExpanded = new Set(expandedMobileItems);
-                                if (expandedMobileItems.has(participant.participant_id)) {
-                                  newExpanded.delete(participant.participant_id);
+                                if (expandedMobileItems.has(participant.id)) {
+                                  newExpanded.delete(participant.id);
                                 } else {
-                                  newExpanded.add(participant.participant_id);
+                                  newExpanded.add(participant.id);
                                 }
                                 setExpandedMobileItems(newExpanded);
                               }}
@@ -1929,7 +1962,7 @@ const Admin = () => {
                             </div>
                             
                             {/* Expanded mobile info */}
-                            {expandedMobileItems.has(participant.participant_id) && (
+                            {expandedMobileItems.has(participant.id) && (
                               <div className="text-xs text-muted-foreground space-y-1">
                                 <div>{appData.weight_kg}kg • {appData.height_cm}cm • {appData.gender}</div>
                                 <div>{appData.marital_status} • {appData.has_children ? 'Has children' : 'No children'}</div>
