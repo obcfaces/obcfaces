@@ -1302,8 +1302,8 @@ const Admin = () => {
                     <SelectItem value="approve">Approve</SelectItem>
                     <SelectItem value="reject">Reject</SelectItem>
                     <SelectItem value="this week">This Week</SelectItem>
-                    <SelectItem value="next">Next</SelectItem>
-                    <SelectItem value="after next week">After Next Week</SelectItem>
+                    <SelectItem value="next">Next Week</SelectItem>
+                    <SelectItem value="past">Past Week</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -1485,14 +1485,14 @@ const Admin = () => {
                                <SelectTrigger className="w-28 h-6 text-xs">
                                  <SelectValue />
                                </SelectTrigger>
-                                  <SelectContent className="z-50 bg-background border shadow-md">
-                                    <SelectItem value="this week">This Week</SelectItem>
-                                    <SelectItem value="next">Next</SelectItem>
-                                    <SelectItem value="approve">Approve</SelectItem>
-                                    <SelectItem value="pending">Pending</SelectItem>
-                                    <SelectItem value="inactive">Inactive</SelectItem>
-                                    <SelectItem value="reject">Reject</SelectItem>
-                                  </SelectContent>
+                                   <SelectContent className="z-50 bg-background border shadow-md">
+                                     <SelectItem value="this week">This Week</SelectItem>
+                                     <SelectItem value="next">Next</SelectItem>
+                                     <SelectItem value="past">Past</SelectItem>
+                                     <SelectItem value="approve">Approve</SelectItem>
+                                     <SelectItem value="pending">Pending</SelectItem>
+                                     <SelectItem value="inactive">Inactive</SelectItem>
+                                   </SelectContent>
                              </Select>
                             
                             {/* Status change date with reviewer login - desktop */}
@@ -1651,14 +1651,14 @@ const Admin = () => {
                                    <SelectTrigger className="w-24 h-7 text-xs">
                                      <SelectValue />
                                    </SelectTrigger>
-                                     <SelectContent className="z-50 bg-background border shadow-md">
-                                       <SelectItem value="this week">This Week</SelectItem>
-                                       <SelectItem value="next week">Next Week</SelectItem>
-                                       <SelectItem value="approve">Approve</SelectItem>
-                                       <SelectItem value="pending">Pending</SelectItem>
-                                       <SelectItem value="inactive">Inactive</SelectItem>
-                                       <SelectItem value="reject">Reject</SelectItem>
-                                     </SelectContent>
+                                      <SelectContent className="z-50 bg-background border shadow-md">
+                                        <SelectItem value="this week">This Week</SelectItem>
+                                        <SelectItem value="next">Next</SelectItem>
+                                        <SelectItem value="past">Past</SelectItem>
+                                        <SelectItem value="approve">Approve</SelectItem>
+                                        <SelectItem value="pending">Pending</SelectItem>
+                                        <SelectItem value="inactive">Inactive</SelectItem>
+                                      </SelectContent>
                                  </Select>
                                 
                                 {/* Rating with votes */}
