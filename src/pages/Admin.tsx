@@ -3705,7 +3705,7 @@ const Admin = () => {
                                </AvatarFallback>
                              </Avatar>
                               <div>
-                                {/* Role selector and verified badge in one row above name */}
+                                {/* Role selector, verified badge, and verify button in one row above name */}
                                 <div className="flex items-center gap-2 mb-1">
                                   <Select
                                     value={userRoleMap[profile.id] || 'usual'}
@@ -3730,9 +3730,20 @@ const Admin = () => {
                                       Verified
                                     </Badge>
                                   ) : (
-                                    <Badge variant="secondary" className="text-xs">
-                                      Unverified
-                                    </Badge>
+                                    <>
+                                      <Badge variant="secondary" className="text-xs">
+                                        Unverified
+                                      </Badge>
+                                      <Button
+                                        size="sm"
+                                        variant="outline"
+                                        onClick={() => handleEmailVerification(profile.id)}
+                                        disabled={verifyingUsers.has(profile.id)}
+                                        className="h-6 px-2 text-xs"
+                                      >
+                                        {verifyingUsers.has(profile.id) ? 'Verifying...' : 'Verify'}
+                                      </Button>
+                                    </>
                                   )}
                                 </div>
                                 
@@ -3747,32 +3758,12 @@ const Admin = () => {
                               </div>
                            </div>
             
-            {/* Desktop verify button - only for unverified users */}
+            {/* Right side - empty now since controls moved above name */}
             <div className="hidden md:flex items-center gap-2">
-              {!profile.email_confirmed_at && (
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => handleEmailVerification(profile.id)}
-                  disabled={verifyingUsers.has(profile.id)}
-                >
-                  {verifyingUsers.has(profile.id) ? 'Verifying...' : 'Verify'}
-                </Button>
-              )}
             </div>
             
-            {/* Mobile verify button - only for unverified users */}
+            {/* Mobile - empty now since controls moved above name */}
             <div className="block md:hidden">
-              {!profile.email_confirmed_at && (
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => handleEmailVerification(profile.id)}
-                  disabled={verifyingUsers.has(profile.id)}
-                >
-                  {verifyingUsers.has(profile.id) ? 'Verifying...' : 'Verify'}
-                </Button>
-              )}
             </div>
                          </div>
                        </Card>
