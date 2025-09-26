@@ -3775,26 +3775,40 @@ const Admin = () => {
             </div>
             
             {/* Mobile controls */}
-            <div className="block md:hidden space-y-2">
+            <div className="block md:hidden">
               <div className="flex items-center gap-2">
-                <Select
-                  value={userRoleMap[profile.id] || 'usual'}
-                  onValueChange={(value) => handleRoleChange(
-                    profile.id, 
-                    profile.display_name || `${profile.first_name} ${profile.last_name}`,
-                    value
+                {/* Role selector positioned above verified badge */}
+                <div className="flex flex-col items-center gap-1">
+                  <Select
+                    value={userRoleMap[profile.id] || 'usual'}
+                    onValueChange={(value) => handleRoleChange(
+                      profile.id, 
+                      profile.display_name || `${profile.first_name} ${profile.last_name}`,
+                      value
+                    )}
+                    disabled={assigningRoles.has(profile.id)}
+                  >
+                    <SelectTrigger className="w-20 h-8 text-xs">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="bg-background border shadow-md z-50">
+                      <SelectItem value="usual">Usual</SelectItem>
+                      <SelectItem value="admin">Admin</SelectItem>
+                    </SelectContent>
+                  </Select>
+
+                  {profile.email_confirmed_at ? (
+                    <Badge variant="default" className="bg-green-100 text-green-700 text-xs">
+                      Verified
+                    </Badge>
+                  ) : (
+                    <Badge variant="secondary" className="text-xs">
+                      Unverified
+                    </Badge>
                   )}
-                  disabled={assigningRoles.has(profile.id)}
-                >
-                  <SelectTrigger className="w-20 h-8 text-xs">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="bg-background border shadow-md z-50">
-                    <SelectItem value="usual">Usual</SelectItem>
-                    <SelectItem value="admin">Admin</SelectItem>
-                  </SelectContent>
-                </Select>
+                </div>
                 
+                {/* Verify button - only shown for unverified users */}
                 {!profile.email_confirmed_at && (
                   <Button
                     size="sm"
