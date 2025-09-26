@@ -377,8 +377,8 @@ const Admin = () => {
         const filteredByStatus = weeklyParticipants.filter(participant => {
           const adminStatus = participant.admin_status || participantFilters[participant.id] || (participant.final_rank ? 'this week' : 'approve');
           
-          // Exclude if manually set to 'pending'
-          if (adminStatus === 'pending') {
+          // Exclude if manually set to 'pending' or 'inactive'
+          if (adminStatus === 'pending' || adminStatus === 'inactive') {
             return false;
           }
           
@@ -1485,13 +1485,14 @@ const Admin = () => {
                                <SelectTrigger className="w-28 h-6 text-xs">
                                  <SelectValue />
                                </SelectTrigger>
-                                <SelectContent className="z-50 bg-background border shadow-md">
-                                  <SelectItem value="this week">This Week</SelectItem>
-                                  <SelectItem value="next week">Next Week</SelectItem>
-                                  <SelectItem value="approve">Approve</SelectItem>
-                                  <SelectItem value="pending">Pending</SelectItem>
-                                  <SelectItem value="reject">Reject</SelectItem>
-                                </SelectContent>
+                                 <SelectContent className="z-50 bg-background border shadow-md">
+                                   <SelectItem value="this week">This Week</SelectItem>
+                                   <SelectItem value="next week">Next Week</SelectItem>
+                                   <SelectItem value="approve">Approve</SelectItem>
+                                   <SelectItem value="pending">Pending</SelectItem>
+                                   <SelectItem value="inactive">Inactive</SelectItem>
+                                   <SelectItem value="reject">Reject</SelectItem>
+                                 </SelectContent>
                              </Select>
                             
                             {/* Status change date with reviewer login - desktop */}
@@ -1650,13 +1651,14 @@ const Admin = () => {
                                    <SelectTrigger className="w-24 h-7 text-xs">
                                      <SelectValue />
                                    </SelectTrigger>
-                                    <SelectContent className="z-50 bg-background border shadow-md">
-                                      <SelectItem value="this week">This Week</SelectItem>
-                                      <SelectItem value="next week">Next Week</SelectItem>
-                                      <SelectItem value="approve">Approve</SelectItem>
-                                      <SelectItem value="pending">Pending</SelectItem>
-                                      <SelectItem value="reject">Reject</SelectItem>
-                                    </SelectContent>
+                                     <SelectContent className="z-50 bg-background border shadow-md">
+                                       <SelectItem value="this week">This Week</SelectItem>
+                                       <SelectItem value="next week">Next Week</SelectItem>
+                                       <SelectItem value="approve">Approve</SelectItem>
+                                       <SelectItem value="pending">Pending</SelectItem>
+                                       <SelectItem value="inactive">Inactive</SelectItem>
+                                       <SelectItem value="reject">Reject</SelectItem>
+                                     </SelectContent>
                                  </Select>
                                 
                                 {/* Rating with votes */}
