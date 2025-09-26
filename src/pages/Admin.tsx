@@ -3709,18 +3709,7 @@ const Admin = () => {
                                  <span className="font-medium">
                                    {profile.display_name || `${profile.first_name} ${profile.last_name}`}
                                  </span>
-                                 {/* Mobile verified badge - placed right after name */}
-                                 <div className="block md:hidden">
-                                   {profile.email_confirmed_at ? (
-                                     <Badge variant="default" className="bg-green-100 text-green-700 text-xs">
-                                       Verified
-                                     </Badge>
-                                   ) : (
-                                     <Badge variant="secondary" className="text-xs">
-                                       Unverified
-                                     </Badge>
-                                   )}
-                                 </div>
+                                  {/* Mobile verified badge removed - now shown under role selector */}
                                </div>
                                <div className="text-sm text-muted-foreground">
                                  {profile.email}
