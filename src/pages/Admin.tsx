@@ -938,6 +938,9 @@ const Admin = () => {
           console.error('Error updating weekly participant admin_status:', updateError);
         } else {
           console.log('Successfully updated weekly participant admin_status to:', newStatus === 'approved' ? 'this week' : newStatus);
+          // Immediately refresh the data
+          fetchWeeklyParticipants();
+          fetchContestApplications();
         }
       } catch (error) {
         console.error('Error updating weekly participant:', error);
