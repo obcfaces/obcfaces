@@ -2070,26 +2070,9 @@ const Admin = () => {
                   
                   return participantMonday.getTime() < currentMonday.getTime();
                 }).map(participant => {
-                  // Use contest_start_date if available, otherwise fall back to created_at
-                  const contestDate = participant.contest_start_date ? 
-                    new Date(participant.contest_start_date) : 
-                    new Date(participant.created_at);
-                  
-                  const monday = new Date(contestDate);
-                  const dayOfWeek = contestDate.getDay();
-                  const daysSinceMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
-                  monday.setDate(contestDate.getDate() - daysSinceMonday);
-                  
-                  const sunday = new Date(monday);
-                  sunday.setDate(monday.getDate() + 6);
-                  
-                  const weekInterval = `${monday.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit' })} - ${sunday.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })}`;
-                  
-                  console.log(`Participant ${participant.id}: contest_start_date=${participant.contest_start_date}, created_at=${participant.created_at}, weekInterval=${weekInterval}`);
-                  
                   return {
                     ...participant,
-                    weekInterval
+                    weekInterval: getParticipantWeekInterval(participant)
                   };
                 });
 
