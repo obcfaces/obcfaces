@@ -455,7 +455,7 @@ const Admin = () => {
     };
 
     filterPastWeekParticipants();
-  }, [weeklyParticipants, participantFilters]);
+  }, [weeklyParticipants, participantFilters, pastWeekFilter]);
 
   // Helper function to determine week interval for participant based on admin_status
   const getParticipantWeekInterval = (participant: any) => {
@@ -2094,8 +2094,68 @@ const Admin = () => {
                 
                 {/* Past week filter */}
                 <div className="mt-4">
-                  <div className="text-sm text-muted-foreground">
-                    Все участники предыдущих недель
+                  {/* Desktop filters */}
+                  <div className="hidden md:flex gap-2">
+                    <Button
+                      variant={pastWeekFilter === 'all' ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setPastWeekFilter('all')}
+                    >
+                      All Past Weeks
+                    </Button>
+                    <Button
+                      variant={pastWeekFilter === 'past week 1' ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setPastWeekFilter('past week 1')}
+                    >
+                      1 week ago (15-21 Sep)
+                    </Button>
+                    <Button
+                      variant={pastWeekFilter === 'past week 2' ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setPastWeekFilter('past week 2')}
+                    >
+                      2 weeks ago (8-14 Sep)
+                    </Button>
+                    <Button
+                      variant={pastWeekFilter === 'past week 3' ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setPastWeekFilter('past week 3')}
+                    >
+                      3+ weeks ago
+                    </Button>
+                  </div>
+                  
+                  {/* Mobile filters */}
+                  <div className="md:hidden grid grid-cols-2 gap-2">
+                    <Button
+                      variant={pastWeekFilter === 'all' ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setPastWeekFilter('all')}
+                    >
+                      All Past
+                    </Button>
+                    <Button
+                      variant={pastWeekFilter === 'past week 1' ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setPastWeekFilter('past week 1')}
+                    >
+                      1 week ago
+                    </Button>
+                    <Button
+                      variant={pastWeekFilter === 'past week 2' ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setPastWeekFilter('past week 2')}
+                    >
+                      2 weeks ago
+                    </Button>
+                    <Button
+                      variant={pastWeekFilter === 'past week 3' ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setPastWeekFilter('past week 3')}
+                    >
+                      3+ weeks
+                    </Button>
                   </div>
                 </div>
               </div>
@@ -2117,20 +2177,31 @@ const Admin = () => {
                 // Use actual past participants if available, otherwise use debug participants for display
                 const participantsToShow = pastWeekParticipants.length > 0 ? pastWeekParticipants : debugPastParticipants;
                 
-                if (participantsToShow.length === 0) {
+                // Apply past week filter
+                const filteredByWeek = participantsToShow.filter(participant => {
+                  if (pastWeekFilter === 'all') return true;
+                  
+                  const adminStatus = participant.admin_status || 'this week';
+                  
+                  if (pastWeekFilter === 'past week 3') {
+                    return adminStatus.startsWith('past week') && adminStatus !== 'past week 1' && adminStatus !== 'past week 2';
+                  }
+                  
+                  return adminStatus === pastWeekFilter;
+                });
+                
+                if (filteredByWeek.length === 0) {
                   return (
                     <div className="text-center py-8 text-muted-foreground">
-                      <p className="text-lg">Нет участников предыдущих недель</p>
+                      <p className="text-lg">Нет участников для выбранного периода</p>
                       <p className="text-xs mt-2 text-muted-foreground/70">
-                        Всего участников: {weeklyParticipants.length}, доступные статусы: {[...new Set(weeklyParticipants.map(p => p.admin_status))].join(', ')}
+                        Фильтр: {pastWeekFilter}, всего участников: {participantsToShow.length}
                       </p>
                     </div>
                   );
                 }
 
-                const filteredPastParticipants = participantsToShow;
-
-                return filteredPastParticipants.map((participant) => {
+                return filteredByWeek.map((participant) => {
                   const participantProfile = profiles.find(p => p.id === participant.user_id);
                   const appData = participant.application_data || {};
                   
