@@ -109,6 +109,8 @@ const Index = () => {
             />
           </div>
           
+          <NextWeekSection viewMode={viewMode} />
+          
           <section className="max-w-6xl mx-auto pt-2 mb-1 sm:mb-3 mt-2 bg-background rounded-lg shadow-sm shadow-foreground/10">
           <ContestSection
             title="THIS WEEK"
