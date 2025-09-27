@@ -655,6 +655,9 @@ export type Database = {
           final_rank: number | null
           id: string
           is_active: boolean
+          participant_status:
+            | Database["public"]["Enums"]["participant_status"]
+            | null
           total_votes: number | null
           user_id: string
         }
@@ -667,6 +670,9 @@ export type Database = {
           final_rank?: number | null
           id?: string
           is_active?: boolean
+          participant_status?:
+            | Database["public"]["Enums"]["participant_status"]
+            | null
           total_votes?: number | null
           user_id: string
         }
@@ -679,6 +685,9 @@ export type Database = {
           final_rank?: number | null
           id?: string
           is_active?: boolean
+          participant_status?:
+            | Database["public"]["Enums"]["participant_status"]
+            | null
           total_votes?: number | null
           user_id?: string
         }
@@ -1261,6 +1270,14 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
+      participant_status:
+        | "pending"
+        | "rejected"
+        | "approved"
+        | "this week"
+        | "next week"
+        | "next week on site"
+        | "past week"
       rejection_reason_type:
         | "first_photo_makeup"
         | "first_photo_id_style"
@@ -1399,6 +1416,15 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "moderator", "user"],
+      participant_status: [
+        "pending",
+        "rejected",
+        "approved",
+        "this week",
+        "next week",
+        "next week on site",
+        "past week",
+      ],
       rejection_reason_type: [
         "first_photo_makeup",
         "first_photo_id_style",
