@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { ContestSection } from "@/components/contest-section";
 import { ContestHeader } from "@/components/contest-header";
+import { NextWeekSection } from "@/components/next-week-section";
 
 type ViewMode = 'compact' | 'full';
 
@@ -28,6 +29,8 @@ const Contest = () => {
         <ContestHeader activeSection={activeSection} onSectionChange={setActiveSection} />
         
         <div className="space-y-8">
+          <NextWeekSection viewMode={viewMode} />
+          
           <ContestSection
             title="THIS WEEK"
             subtitle="Help us choose the winner"
