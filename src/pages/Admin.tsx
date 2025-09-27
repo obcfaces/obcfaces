@@ -1230,9 +1230,9 @@ const Admin = () => {
           </div>
 
           <Tabs defaultValue="applications" className="space-y-6">
-            {/* Mobile layout: Two rows of tabs */}
-            <div className="md:hidden space-y-2">
-              <TabsList className="grid grid-cols-4 w-full">
+            {/* Mobile layout: Single row with all tabs */}
+            <div className="md:hidden">
+              <TabsList className="grid grid-cols-5 w-full">
                 <TabsTrigger value="applications" className="flex items-center gap-1 text-xs">
                   <FileText className="w-3 h-3" />
                   Card
@@ -1249,8 +1249,6 @@ const Admin = () => {
                   <Trophy className="w-3 h-3" />
                   Past
                 </TabsTrigger>
-              </TabsList>
-              <TabsList className="grid grid-cols-1 w-full">
                 <TabsTrigger value="registrations" className="flex items-center gap-1 text-xs">
                   <UserCog className="w-3 h-3" />
                   Reg
