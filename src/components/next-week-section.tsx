@@ -104,7 +104,7 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
     return () => subscription.unsubscribe();
   }, []);
 
-  // Filter candidates based on user's previous votes
+  // Filter candidates based on user's previous votes and next week participants
   useEffect(() => {
     const filterCandidates = async () => {
       setIsLoading(true);
@@ -117,22 +117,54 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
       }
 
       try {
+        // Get participants with "next week" or "next week on site" status
+        const { data: nextWeekParticipants } = await supabase
+          .rpc('get_weekly_contest_participants_public', { weeks_offset: 1 });
+
+        // Filter by participant_status
+        const actualNextWeekCandidates = nextWeekParticipants?.filter(participant => {
+          const status = participant.participant_status || 'next week';
+          return status === 'next week' || status === 'next week on site';
+        }) || [];
+
+        // Get user's votes
         const { data: votes } = await supabase
           .from('next_week_votes')
           .select('candidate_name')
           .eq('user_id', user.id);
 
         const votedNames = votes?.map(vote => vote.candidate_name) || [];
-        const unvoted = candidates.filter(candidate => !votedNames.includes(candidate.name));
         
-        setFilteredCandidates(unvoted);
-        setRemainingCandidates(unvoted.length);
+        // Convert database participants to candidate format
+        const candidatesFromDB = actualNextWeekCandidates.map(participant => ({
+          id: participant.participant_id,
+          name: `${participant.first_name} ${participant.last_name}`,
+          age: participant.age,
+          location: `${participant.city}, ${participant.country}`,
+          facePhoto: participant.photo_1_url,
+          fullPhoto: participant.photo_2_url
+        }));
+
+        // Filter out voted candidates
+        const unvotedCandidatesFromDB = candidatesFromDB.filter(candidate => 
+          !votedNames.includes(candidate.name)
+        );
+        
+        // If no real candidates available, use test candidates
+        const finalCandidates = unvotedCandidatesFromDB.length > 0 
+          ? unvotedCandidatesFromDB 
+          : candidates.filter(candidate => !votedNames.includes(candidate.name));
+        
+        setFilteredCandidates(finalCandidates);
+        setRemainingCandidates(finalCandidates.length);
         setCurrentIndex(0);
         setHistory([]);
       } catch (error) {
-        console.error('Error fetching votes:', error);
-        setFilteredCandidates(candidates);
-        setRemainingCandidates(candidates.length);
+        console.error('Error fetching participants and votes:', error);
+        // Fallback to test candidates
+        const unvoted = candidates.filter(candidate => true); // Show all test candidates for now
+        setFilteredCandidates(unvoted);
+        setRemainingCandidates(unvoted.length);
       }
       
       setIsLoading(false);

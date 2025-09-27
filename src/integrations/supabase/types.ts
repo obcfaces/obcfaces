@@ -1166,7 +1166,6 @@ export type Database = {
       get_weekly_contest_participants_public: {
         Args: { weeks_offset?: number }
         Returns: {
-          admin_status: string
           age: number
           avatar_url: string
           average_rating: number
@@ -1186,6 +1185,7 @@ export type Database = {
           last_name: string
           marital_status: string
           participant_id: string
+          participant_status: string
           participant_type: string
           photo_1_url: string
           photo_2_url: string
