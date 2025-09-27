@@ -174,7 +174,7 @@ const Admin = () => {
   const [expandedDesktopItems, setExpandedDesktopItems] = useState<Set<string>>(new Set());
   const [participantFilters, setParticipantFilters] = useState<{ [key: string]: string }>({});
   const [pastWeekParticipants, setPastWeekParticipants] = useState<any[]>([]);
-  const [pastWeekFilter, setPastWeekFilter] = useState<string>('past week 1');
+  const [pastWeekFilter, setPastWeekFilter] = useState<string>('past week 2');
    const [expandedAdminDates, setExpandedAdminDates] = useState<Set<string>>(new Set());
    const [adminDatePopup, setAdminDatePopup] = useState<{ show: boolean; date: string; admin: string; applicationId: string }>({ 
      show: false, date: '', admin: '', applicationId: '' 
@@ -929,7 +929,7 @@ const Admin = () => {
             status
           )
         `)
-        .eq('is_active', true)
+        // Load all participants including inactive ones for past weeks display
         .order('created_at', { ascending: false });
 
       if (error) {
@@ -2067,9 +2067,9 @@ const Admin = () => {
                       <SelectValue placeholder="Выберите неделю" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="past week 1">Прошлая неделя (15.09-21.09)</SelectItem>
-                      <SelectItem value="past week 2">Позапрошлая неделя (08.09-14.09)</SelectItem>
-                      <SelectItem value="past week 3">Старые недели (18.08-24.08)</SelectItem>
+                      <SelectItem value="past week 2">Прошлая неделя (08.09-14.09)</SelectItem>
+                      <SelectItem value="past week 3">Старая неделя (18.08-24.08)</SelectItem>
+                      <SelectItem value="this week">Текущая неделя (22.09-28.09)</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
