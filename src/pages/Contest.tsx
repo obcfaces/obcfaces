@@ -42,16 +42,6 @@ const Contest = () => {
           />
           
           <ContestSection
-            title="NEXT WEEK"
-            subtitle="Get ready for next week"
-            description="Upcoming contestants"
-            isActive={false}
-            showWinner={false}
-            viewMode={viewMode}
-            weekOffset={1}
-          />
-          
-          <ContestSection
             title="1 WEEK AGO"
             subtitle="Previous week results"
             description="See who won last week"
@@ -69,16 +59,6 @@ const Contest = () => {
             showWinner={true}
             viewMode={viewMode}
             weekOffset={-2}
-          />
-          
-          <ContestSection
-            title="3 WEEKS AGO"
-            subtitle="Three weeks ago results"
-            description="See the winners from 3 weeks ago"
-            isActive={false}
-            showWinner={true}
-            viewMode={viewMode}
-            weekOffset={-3}
           />
         </div>
       </main>
