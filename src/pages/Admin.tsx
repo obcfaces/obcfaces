@@ -116,6 +116,7 @@ interface WeeklyContestParticipant {
   total_votes?: number;
   average_rating?: number;
   created_at?: string;
+  contest_start_date?: string; // Add this field for filtering by week
   is_active: boolean;
   admin_status?: string;
   profiles?: {
@@ -373,29 +374,32 @@ const Admin = () => {
         currentMonday.setDate(now.getDate() - daysSinceMonday);
         currentMonday.setHours(0, 0, 0, 0);
 
-        // Filter participants who are from current week OR have 'this week' status manually set
+        // Filter participants who belong to current week's contest AND have 'this week' status
         const filteredByStatus = weeklyParticipants.filter(participant => {
           const adminStatus = participant.admin_status || participantFilters[participant.id] || (participant.final_rank ? 'this week' : 'approve');
           
-          // Exclude if manually set to 'pending' or 'inactive'
-          if (adminStatus === 'pending' || adminStatus === 'inactive') {
+          // Exclude if manually set to 'pending', 'inactive', or 'next'
+          if (adminStatus === 'pending' || adminStatus === 'inactive' || adminStatus === 'next') {
             return false;
           }
           
-          // Include if manually set to 'this week'
-          if (adminStatus === 'this week') {
-            return true;
+          // Only include participants with 'this week' status
+          if (adminStatus !== 'this week') {
+            return false;
           }
 
-          // Also include participants created this week if not set to pending
-          const createdDate = new Date(participant.created_at);
-          const participantMonday = new Date(createdDate);
-          const participantDayOfWeek = createdDate.getDay();
-          const participantDaysSinceMonday = participantDayOfWeek === 0 ? 6 : participantDayOfWeek - 1;
-          participantMonday.setDate(createdDate.getDate() - participantDaysSinceMonday);
-          participantMonday.setHours(0, 0, 0, 0);
+          // Check if participant belongs to current week's contest
+          // This checks if the participant's contest week matches current week
+          if (participant.contest_start_date) {
+            const contestDate = new Date(participant.contest_start_date);
+            const contestMonday = new Date(contestDate);
+            contestMonday.setHours(0, 0, 0, 0);
+            
+            // Only include if contest is for current week
+            return contestMonday.getTime() === currentMonday.getTime();
+          }
           
-          return participantMonday.getTime() >= currentMonday.getTime();
+          return false;
         });
 
         // Remove duplicates based on user_id
@@ -936,6 +940,7 @@ const Admin = () => {
         total_votes: item.total_votes,
         average_rating: item.average_rating,
         created_at: item.contest_start_date,
+        contest_start_date: item.contest_start_date, // Add this field for filtering
         is_active: true,
         admin_status: item.admin_status || 'this week'
       })) || [];
