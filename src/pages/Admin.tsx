@@ -415,21 +415,27 @@ const Admin = () => {
       const pastParticipants = weeklyParticipants.filter(participant => {
         const adminStatus = participant.admin_status || participantFilters[participant.id] || 'this week';
         
-        // Include participants with week-specific statuses or past-related statuses
+        // Include participants with week-specific statuses (past weeks)
         if (adminStatus.startsWith('week-') || adminStatus === 'past' || adminStatus === 'inactive') {
           return true;
         }
         
-        // Also include participants from previous weeks (fallback for old data)
-        const createdDate = new Date(participant.created_at);
-        const participantMonday = new Date(createdDate);
-        const participantDayOfWeek = createdDate.getDay();
+        // Exclude participants with 'this week' status from past section
+        if (adminStatus === 'this week') {
+          return false;
+        }
+        
+        // Fallback: check dates for participants without proper admin_status
+        const contestDate = participant.contest_start_date ? 
+          new Date(participant.contest_start_date) : 
+          new Date(participant.created_at);
+        const participantMonday = new Date(contestDate);
+        const participantDayOfWeek = contestDate.getDay();
         const participantDaysSinceMonday = participantDayOfWeek === 0 ? 6 : participantDayOfWeek - 1;
-        participantMonday.setDate(createdDate.getDate() - participantDaysSinceMonday);
+        participantMonday.setDate(contestDate.getDate() - participantDaysSinceMonday);
         participantMonday.setHours(0, 0, 0, 0);
         
-        // Only include participants from previous weeks that don't have 'this week' status
-        return participantMonday.getTime() < currentMonday.getTime() && adminStatus !== 'this week';
+        return participantMonday.getTime() < currentMonday.getTime();
       }).map(participant => ({
         ...participant,
         weekInterval: getParticipantWeekInterval(participant)
