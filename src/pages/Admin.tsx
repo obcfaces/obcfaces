@@ -2061,11 +2061,15 @@ const Admin = () => {
                   currentMonday.setDate(now.getDate() - daysSinceMonday);
                   currentMonday.setHours(0, 0, 0, 0);
 
-                  const createdDate = new Date(participant.created_at);
-                  const participantMonday = new Date(createdDate);
-                  const participantDayOfWeek = createdDate.getDay();
+                  // Use contest_start_date if available, otherwise fall back to created_at
+                  const contestDate = participant.contest_start_date ? 
+                    new Date(participant.contest_start_date) : 
+                    new Date(participant.created_at);
+                  
+                  const participantMonday = new Date(contestDate);
+                  const participantDayOfWeek = contestDate.getDay();
                   const participantDaysSinceMonday = participantDayOfWeek === 0 ? 6 : participantDayOfWeek - 1;
-                  participantMonday.setDate(createdDate.getDate() - participantDaysSinceMonday);
+                  participantMonday.setDate(contestDate.getDate() - participantDaysSinceMonday);
                   participantMonday.setHours(0, 0, 0, 0);
                   
                   return participantMonday.getTime() < currentMonday.getTime();
