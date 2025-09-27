@@ -467,15 +467,15 @@ export function ContestantCard({
             </div>
           )}
            
-              {/* Rating in top right corner - show for all users in past weeks and current week after voting */}
-              {rank > 0 && !isExample && (!isThisWeek || isVoted) && (
-                <div className="absolute top-0 right-0 z-20 flex items-center">
-                  <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
-                    <PopoverTrigger asChild>
-                      <div className="bg-contest-blue text-white px-2 py-1.5 rounded-bl-lg text-sm sm:text-base font-bold cursor-pointer hover:bg-contest-blue/90 transition-colors">
-                        {localAverageRating > 0 ? localAverageRating.toFixed(1) : '0.0'}
-                      </div>
-                    </PopoverTrigger>
+          {/* Rating in top right corner - always visible for non-example cards */}
+          {!isExample && (
+            <div className="absolute top-0 right-0 z-20 flex items-center">
+              <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
+                <PopoverTrigger asChild>
+                  <div className="bg-contest-blue text-white px-2 py-1.5 rounded-bl-lg text-sm sm:text-base font-bold cursor-pointer hover:bg-contest-blue/90 transition-colors">
+                    {localAverageRating > 0 ? localAverageRating.toFixed(1) : '0.0'}
+                  </div>
+                </PopoverTrigger>
                     <PopoverContent className="w-auto p-3">
                       <div className="text-sm">
                         {userRating > 0 ? 
@@ -821,8 +821,8 @@ export function ContestantCard({
           </div>
         )}
         
-        {/* Rating badge in top right corner - show for everyone except unauthenticated users in THIS WEEK */}
-        {isVoted && !isEditing && !showThanks && !isExample && (propUser || !isThisWeek) && (
+        {/* Rating badge in top right corner - always visible for non-example cards */}
+        {!isEditing && !showThanks && !isExample && (
           <div className="absolute top-0 right-0 z-10 flex flex-col items-end">
              <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
                <PopoverTrigger asChild>
