@@ -925,6 +925,7 @@ export function ContestantCard({
               rank={rank}
               userRating={userRating}
               localAverageRating={localAverageRating}
+              hideCardActions={hideCardActions}
               cardData={cardData}
               isLiked={isLiked}
               hasCommented={hasCommented}
