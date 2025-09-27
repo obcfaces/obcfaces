@@ -2038,14 +2038,24 @@ const Admin = () => {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">All weeks</SelectItem>
-                      {Array.from(new Set(pastWeekParticipants.map(p => p.weekInterval)))
-                        .sort((a, b) => b.localeCompare(a))
-                        .map((interval, index) => (
-                          <SelectItem key={interval} value={interval}>
-                            {interval}
-                          </SelectItem>
-                        ))
-                      }
+                      {(() => {
+                        // Get current week interval to exclude it from dropdown
+                        const now = new Date();
+                        const currentMonday = new Date(now);
+                        const dayOfWeek = now.getDay();
+                        const daysSinceMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+                        currentMonday.setDate(now.getDate() - daysSinceMonday);
+                        const currentWeekInterval = formatWeekInterval(currentMonday);
+                        
+                        return Array.from(new Set(pastWeekParticipants.map(p => p.weekInterval)))
+                          .filter(interval => interval !== currentWeekInterval) // Exclude current week
+                          .sort((a, b) => b.localeCompare(a))
+                          .map((interval, index) => (
+                            <SelectItem key={interval} value={interval}>
+                              {interval}
+                            </SelectItem>
+                          ));
+                      })()}
                     </SelectContent>
                   </Select>
                 </div>
