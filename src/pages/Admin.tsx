@@ -276,6 +276,8 @@ const Admin = () => {
   // Handle Weekly Contest participants filtering with async rating fetching
   useEffect(() => {
     const filterWeeklyParticipants = async () => {
+      console.log('filterWeeklyParticipants called with weeklyContestFilter:', weeklyContestFilter);
+      
       if (weeklyContestFilter === 'approve') {
         // Get approved applications
         const approvedApps = contestApplications
@@ -370,13 +372,19 @@ const Admin = () => {
         setFilteredWeeklyParticipants(rejectedParticipantsWithRatings);
       } else {
         // Filter participants based on admin_status - strictly filter for 'this week' block
+        console.log('Filtering participants for weeklyContestFilter:', weeklyContestFilter);
+        console.log('Total weeklyParticipants before filtering:', weeklyParticipants.length);
+        
         const filteredByStatus = weeklyParticipants.filter(participant => {
           const status = participant.admin_status || participantFilters[participant.id];
+          console.log(`Participant ${participant.id}: admin_status = ${participant.admin_status}, status = ${status}`);
           
           switch (weeklyContestFilter) {
             case 'this week':
               // Only show participants explicitly marked as 'this week'
-              return status === 'this week';
+              const shouldInclude = status === 'this week';
+              console.log(`Should include for 'this week': ${shouldInclude}`);
+              return shouldInclude;
             case 'next week':
               return status === 'next week';
             case 'next week on site':
@@ -388,11 +396,14 @@ const Admin = () => {
           }
         });
 
+        console.log('Filtered participants count:', filteredByStatus.length);
+
         // Remove duplicates based on user_id
         const uniqueParticipants = filteredByStatus.filter((participant, index, arr) => 
           arr.findIndex(p => p.user_id === participant.user_id) === index
         );
         
+        console.log('Unique participants count:', uniqueParticipants.length);
         setFilteredWeeklyParticipants(uniqueParticipants);
       }
     };
@@ -1015,6 +1026,7 @@ const Admin = () => {
         }, {}));
 
       setWeeklyParticipants(participants);
+      console.log('Set weeklyParticipants, current weeklyContestFilter:', weeklyContestFilter);
     } catch (error) {
       console.error('Error in fetchWeeklyParticipants:', error);
     }
