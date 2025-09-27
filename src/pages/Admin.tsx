@@ -2934,10 +2934,18 @@ const Admin = () => {
                         }
                       }
                       
-                      // Don't show applications in the cards section if the user is already in "this week" (but show if they have "pending" status)
+                      // Don't show applications in the cards section if the user is already in "this week" or "next"
+                      // UNLESS the user is specifically filtering by "next"
                       const weeklyParticipant = weeklyParticipants.find(participant => 
                         participant.user_id === application.user_id
                       );
+                      
+                      // Exclude applications with status="next" from Card section (unless filtering by "next")
+                      if (application.status === 'next' && statusFilter !== 'next') {
+                        return false;
+                      }
+                      
+                      // Exclude applications already in weekly contest (unless they have "pending" status or we're filtering by "next")
                       if (weeklyParticipant && weeklyParticipant.admin_status !== 'pending' && statusFilter !== 'next') {
                         return false;
                       }
