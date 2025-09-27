@@ -233,15 +233,15 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
   const currentCandidate = filteredCandidates[currentIndex];
 
   return (
-    <section className="max-w-6xl mx-auto pt-8 pb-0 mb-2 mt-2 bg-background rounded-lg shadow-lg shadow-foreground/15">
+    <section className="max-w-6xl mx-auto pt-8 pb-0 mb-2 mt-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg shadow-lg shadow-foreground/15 border border-blue-200 dark:border-blue-800">
       <div className="mb-8 px-6">
         <div className="mb-4">
           <div className="flex items-baseline gap-3 mb-1">
             <div className="inline-flex flex-col w-fit items-start">
-              <h2 className="text-3xl font-bold text-contest-text whitespace-nowrap">NEXT WEEK</h2>
+              <h2 className="text-3xl font-bold text-blue-800 dark:text-blue-200 whitespace-nowrap">NEXT WEEK</h2>
               <p className="text-muted-foreground italic -mt-1">{getNextWeekRange()}</p>
             </div>
-            <span className="text-lg font-normal text-contest-text">
+            <span className="text-lg font-normal text-blue-700 dark:text-blue-300">
               Choose next week's finalists
             </span>
           </div>
@@ -267,7 +267,7 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
           
           <div className="flex items-center justify-center gap-6 mt-6">
             <div className="flex items-center gap-4">
-              <span className="text-lg text-contest-text font-medium">
+              <span className="text-lg text-blue-800 dark:text-blue-200 font-medium">
                 {remainingCandidates} left
               </span>
               {history.length > 0 && (
@@ -303,7 +303,7 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
         </div>
       ) : (
         <div className="text-center py-4">
-          <p className="text-base text-contest-text lowercase">New ones will auto-update.</p>
+          <p className="text-base text-blue-700 dark:text-blue-300 lowercase">New ones will auto-update.</p>
         </div>
       )}
 
