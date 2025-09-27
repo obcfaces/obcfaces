@@ -237,13 +237,13 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
       <div className="mb-4 px-6">
         <div className="mb-4">
           <div className="flex items-center gap-3 mb-1">
-            <h2 className="text-3xl font-bold text-blue-800 dark:text-blue-200 whitespace-nowrap">NEXT WEEK</h2>
+            <div className="inline-flex flex-col w-fit items-center">
+              <h2 className="text-3xl font-bold text-blue-800 dark:text-blue-200 whitespace-nowrap">NEXT WEEK</h2>
+              <p className="text-sm text-blue-600 dark:text-blue-400 italic -mt-1">{getNextWeekRange()}</p>
+            </div>
             <span className="text-base font-normal text-blue-700 dark:text-blue-300 leading-tight">
               Choose next week's finalists
             </span>
-          </div>
-          <div className="text-center">
-            <p className="text-sm text-blue-600 dark:text-blue-400 italic -mt-1">{getNextWeekRange()}</p>
           </div>
         </div>
       </div>
