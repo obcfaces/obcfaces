@@ -444,7 +444,7 @@ const Admin = () => {
       case 'past week 1':
         return '15/09 - 21/09/2025'; // Contest id: aa89cda5-e0f7-4421-bdf2-372f406959e7
       case 'past week 2':
-        return '08/09 - 14/09/2025'; // Contest id: 292653f9-3e93-486e-a531-bd324afaf40e
+        return '08/09 - 14/09/2025'; // Contest id: 292653f9-3e93-486e-a531-bd324afaf40e  
       case 'past week 3':
         return '18/08 - 24/08/2025'; // Contest id: fc81b526-c732-43f2-9cc2-c46c696e5343
       case 'this week':
@@ -455,6 +455,21 @@ const Admin = () => {
           new Date(participant.contest_start_date) : 
           new Date(participant.created_at);
         return formatWeekInterval(contestDate);
+    }
+  };
+
+  // Helper function to get participant display info with winner indication
+  const getParticipantDisplayInfo = (participant: any) => {
+    const appData = participant.application_data || {};
+    const name = `${appData.first_name || ''} ${appData.last_name || ''}`.trim();
+    const weekInterval = getParticipantWeekInterval(participant);
+    
+    if (participant.final_rank === 1) {
+      return `🏆 WINNER - ${name} - Week: ${weekInterval}`;
+    } else if (participant.final_rank) {
+      return `🥈 FINALIST - ${name} - Week: ${weekInterval}`;  
+    } else {
+      return `${name} - Week: ${weekInterval}`;
     }
   };
 
@@ -2137,9 +2152,11 @@ const Admin = () => {
                                   {appData.first_name?.charAt(0) || 'U'}
                                 </AvatarFallback>
                               </Avatar>
-                              <span className="text-sm font-semibold whitespace-nowrap">
-                                {appData.first_name} {appData.last_name} {new Date().getFullYear() - appData.birth_year}
-                              </span>
+                               <span className="text-sm font-semibold whitespace-nowrap flex items-center gap-1">
+                                 {participant.final_rank === 1 && <span className="text-yellow-500">🏆</span>}
+                                 {participant.final_rank > 1 && <span className="text-slate-500">🥈</span>}
+                                 {appData.first_name} {appData.last_name} {new Date().getFullYear() - appData.birth_year}
+                               </span>
                             </div>
                             
                             <div 
@@ -3584,9 +3601,10 @@ const Admin = () => {
                                                  {prevAppData.first_name?.charAt(0) || 'U'}
                                                </AvatarFallback>
                                              </Avatar>
-                                             <span className="text-sm font-semibold whitespace-nowrap">
-                                               {prevAppData.first_name} {prevAppData.last_name} {new Date().getFullYear() - prevAppData.birth_year}
-                                             </span>
+                                               <span className="text-sm font-semibold whitespace-nowrap flex items-center gap-1">
+                                                 {/* Check if this participant is a winner - we'll need to look this up from weekly_contest_participants */}
+                                                 {prevAppData.first_name} {prevAppData.last_name} {new Date().getFullYear() - prevAppData.birth_year}
+                                               </span>
                                            </div>
                                            
                                            <div 
