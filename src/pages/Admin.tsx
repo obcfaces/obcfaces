@@ -1425,7 +1425,7 @@ const Admin = () => {
                                 {/* User avatar positioned in top right corner */}
                                 <div className="absolute top-2 right-2">
                                   <Avatar className="h-6 w-6 flex-shrink-0 border-2 border-white shadow-sm">
-                                    <AvatarImage src={participantProfile?.avatar_url || ''} />
+                                    <AvatarImage src={participantProfile?.photo_1_url || appData.photo1_url || participantProfile?.avatar_url || ''} />
                                     <AvatarFallback className="text-xs">
                                       {(participantProfile?.first_name || appData.first_name)?.charAt(0) || 'U'}
                                     </AvatarFallback>
@@ -1609,7 +1609,7 @@ const Admin = () => {
                                   {/* User avatar positioned in top right corner */}
                                   <div className="absolute top-2 right-2">
                                     <Avatar className="h-6 w-6 flex-shrink-0 border-2 border-white shadow-sm">
-                                      <AvatarImage src={participantProfile?.avatar_url || ''} />
+                                      <AvatarImage src={participantProfile?.photo_1_url || appData.photo1_url || participantProfile?.avatar_url || ''} />
                                       <AvatarFallback className="text-xs">
                                         {(participantProfile?.first_name || appData.first_name)?.charAt(0) || 'U'}
                                       </AvatarFallback>
@@ -1819,7 +1819,7 @@ const Admin = () => {
                                 {/* User avatar positioned in top right corner */}
                                 <div className="absolute top-2 right-2">
                                   <Avatar className="h-6 w-6 flex-shrink-0 border-2 border-white shadow-sm">
-                                    <AvatarImage src={participantProfile?.avatar_url || ''} />
+                                    <AvatarImage src={participantProfile?.photo_1_url || appData.photo1_url || participantProfile?.avatar_url || ''} />
                                     <AvatarFallback className="text-xs">
                                       {(participantProfile?.first_name || appData.first_name)?.charAt(0) || 'U'}
                                     </AvatarFallback>
@@ -1954,7 +1954,7 @@ const Admin = () => {
                                 />
                                 <div className="absolute top-2 right-2">
                                   <Avatar className="h-6 w-6 flex-shrink-0 border-2 border-white shadow-sm">
-                                    <AvatarImage src={participantProfile?.avatar_url || ''} />
+                                    <AvatarImage src={participantProfile?.photo_1_url || appData.photo1_url || participantProfile?.avatar_url || ''} />
                                     <AvatarFallback className="text-xs">
                                       {(participantProfile?.first_name || appData.first_name)?.charAt(0) || 'U'}
                                     </AvatarFallback>
@@ -2125,7 +2125,7 @@ const Admin = () => {
                           <div className="w-[25ch] flex-shrink-0 p-4">
                             <div className="flex items-center gap-2 mb-1">
                               <Avatar className="h-6 w-6 flex-shrink-0">
-                                <AvatarImage src={participantProfile?.avatar_url || ''} />
+                                <AvatarImage src={appData.photo1_url || appData.photo_1_url || participantProfile?.avatar_url || ''} />
                                 <AvatarFallback className="text-xs">
                                   {appData.first_name?.charAt(0) || 'U'}
                                 </AvatarFallback>
@@ -2252,7 +2252,7 @@ const Admin = () => {
                           <div className="flex-1 p-3">
                             <div className="flex items-center gap-2 mb-1">
                               <Avatar className="h-5 w-5 flex-shrink-0">
-                                <AvatarImage src={participantProfile?.avatar_url || ''} />
+                                <AvatarImage src={appData.photo1_url || appData.photo_1_url || participantProfile?.avatar_url || ''} />
                                 <AvatarFallback className="text-xs">
                                   {appData.first_name?.charAt(0) || 'U'}
                                 </AvatarFallback>
@@ -3567,8 +3567,8 @@ const Admin = () => {
                                          {/* Column 2: Information (25ch) */}
                                          <div className="w-[25ch] flex-shrink-0 p-4">
                                            <div className="flex items-center gap-2 mb-1">
-                                             <Avatar className="h-6 w-6 flex-shrink-0">
-                                               <AvatarImage src={prevUserProfile?.avatar_url || ''} />
+                                              <Avatar className="h-6 w-6 flex-shrink-0">
+                                                <AvatarImage src={prevAppData.photo1_url || prevAppData.photo_1_url || prevUserProfile?.avatar_url || ''} />
                                                <AvatarFallback className="text-xs">
                                                  {prevAppData.first_name?.charAt(0) || 'U'}
                                                </AvatarFallback>
@@ -3746,8 +3746,8 @@ const Admin = () => {
                                                     />
                                                     {/* User avatar positioned in top right corner */}
                                                     <div className="absolute top-2 right-2">
-                                                      <Avatar className="h-6 w-6 flex-shrink-0 border-2 border-white shadow-sm">
-                                                        <AvatarImage src={prevUserProfile?.avatar_url || ''} />
+                                                       <Avatar className="h-6 w-6 flex-shrink-0 border-2 border-white shadow-sm">
+                                                         <AvatarImage src={prevAppData.photo1_url || prevAppData.photo_1_url || prevUserProfile?.avatar_url || ''} />
                                                         <AvatarFallback className="text-xs">
                                                           {prevAppData.first_name?.charAt(0) || 'U'}
                                                         </AvatarFallback>
