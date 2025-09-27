@@ -52,6 +52,7 @@ interface ContestantCardProps {
   isThisWeek?: boolean; // Add prop to identify THIS WEEK contests
   user?: any; // Add user prop to avoid individual auth calls
   weekOffset?: number; // Add prop to identify which week offset this card is from
+  hideCardActions?: boolean; // Add prop to hide like/dislike actions in card
 }
 
 export function ContestantCard({
@@ -79,7 +80,8 @@ export function ContestantCard({
   isExample = false,
   isThisWeek = false,
   user: propUser,
-  weekOffset = 0
+  weekOffset = 0,
+  hideCardActions = false
 }: ContestantCardProps) {
   // Debug log to check weekOffset value and prevent excessive re-renders
   console.log(`ContestantCard ${name}: weekOffset = ${weekOffset}, isWinner = ${isWinner}, userId = ${propUser?.id || 'none'}`);
@@ -716,7 +718,7 @@ export function ContestantCard({
               </div>
             </div>
            </div>
-           {!isExample && (
+           {!isExample && !hideCardActions && (
              <div className="border-t border-contest-border px-4 py-2 flex items-center justify-evenly gap-4">
                 <button
                  type="button"
