@@ -374,12 +374,34 @@ const Admin = () => {
         currentMonday.setDate(now.getDate() - daysSinceMonday);
         currentMonday.setHours(0, 0, 0, 0);
 
-        // Filter participants with 'this week' status (from any week)
+        // Filter participants with 'this week' status from current week only
         const filteredByStatus = weeklyParticipants.filter(participant => {
           const adminStatus = participant.admin_status || participantFilters[participant.id] || (participant.final_rank ? 'this week' : 'approve');
           
-          // For "This" section, show all participants with 'this week' status
-          return adminStatus === 'this week';
+          // Must have 'this week' status
+          if (adminStatus !== 'this week') {
+            return false;
+          }
+
+          // Check if participant belongs to current week's contest
+          if (participant.contest_start_date) {
+            const contestDate = new Date(participant.contest_start_date);
+            const contestMonday = new Date(contestDate);
+            contestMonday.setHours(0, 0, 0, 0);
+            
+            // Only include if contest is for current week
+            return contestMonday.getTime() === currentMonday.getTime();
+          }
+          
+          // If no contest_start_date, fall back to checking created_at
+          const createdDate = new Date(participant.created_at);
+          const participantMonday = new Date(createdDate);
+          const participantDayOfWeek = createdDate.getDay();
+          const participantDaysSinceMonday = participantDayOfWeek === 0 ? 6 : participantDayOfWeek - 1;
+          participantMonday.setDate(createdDate.getDate() - participantDaysSinceMonday);
+          participantMonday.setHours(0, 0, 0, 0);
+          
+          return participantMonday.getTime() === currentMonday.getTime();
         });
 
         // Remove duplicates based on user_id
