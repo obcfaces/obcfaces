@@ -90,12 +90,12 @@ serve(async (req) => {
     );
 
   } catch (error) {
-    console.error('[ERROR] Function error:', error.message);
-    console.error('[ERROR] Stack:', error.stack);
+    console.error('[ERROR] Function error:', (error as Error).message);
+    console.error('[ERROR] Stack:', (error as Error).stack);
     
     return new Response(
       JSON.stringify({ 
-        error: error.message,
+        error: (error as Error).message,
         timestamp: new Date().toISOString()
       }), 
       {
