@@ -403,28 +403,89 @@ const Admin = () => {
 
   // Handle Past Week participants filtering  
   useEffect(() => {
-    const filterPastWeekParticipants = () => {
-      // Filter participants based on their admin_status
-      const pastParticipants = weeklyParticipants.filter(participant => {
-        const adminStatus = participant.admin_status || participantFilters[participant.id];
+    const filterPastWeekParticipants = async () => {
+      try {
+        console.log('Filtering past week participants with filter:', pastWeekFilter);
+        console.log('All weekly participants:', weeklyParticipants.length);
+        console.log('Admin statuses in data:', weeklyParticipants.map(p => ({ id: p.id, status: p.admin_status })));
         
-        // Filter based on selected past week
+        // Use the database function to get past week participants  
+        let weekOffset = 1; // Default to 1 week ago
         if (pastWeekFilter === 'past week 1') {
-          return adminStatus === 'past week 1';
+          weekOffset = 1;
         } else if (pastWeekFilter === 'past week 2') {
-          return adminStatus === 'past week 2';
+          weekOffset = 2; 
         } else if (pastWeekFilter === 'past week 3') {
-          return adminStatus === 'past week 3';
+          weekOffset = 3;
         }
         
-        // Default: show all past weeks
-        return adminStatus?.startsWith('past week') || adminStatus?.startsWith('week-');
-      }).map(participant => ({
-        ...participant,
-        weekInterval: getParticipantWeekInterval(participant)
-      }));
-
-      setPastWeekParticipants(pastParticipants);
+        const { data: pastData, error } = await supabase
+          .rpc('get_weekly_participants_by_admin_status', { weeks_offset: weekOffset });
+          
+        if (error) {
+          console.error('Error fetching past week participants:', error);
+          // Fallback to local filtering
+          const pastParticipants = weeklyParticipants.filter(participant => {
+            const adminStatus = participant.admin_status || participantFilters[participant.id];
+            
+            // Filter based on selected past week
+            if (pastWeekFilter === 'past week 1') {
+              return adminStatus === 'past week 1';
+            } else if (pastWeekFilter === 'past week 2') {
+              return adminStatus === 'past week 2';
+            } else if (pastWeekFilter === 'past week 3') {
+              return adminStatus === 'past week 3';
+            }
+            
+            // Default: show all past weeks
+            return adminStatus?.startsWith('past week') || adminStatus?.startsWith('week-');
+          }).map(participant => ({
+            ...participant,
+            weekInterval: getParticipantWeekInterval(participant)
+          }));
+          
+          console.log('Fallback filtered participants:', pastParticipants.length);
+          setPastWeekParticipants(pastParticipants);
+          return;
+        }
+        
+        // Transform database results to match our participant structure
+        const transformedParticipants = (pastData || []).map((item: any) => ({
+          id: item.participant_id,
+          contest_id: item.contest_id,
+          user_id: item.user_id,
+          application_data: {
+            first_name: item.first_name,
+            last_name: item.last_name,
+            age: item.age,
+            country: item.country,
+            state: item.state,
+            city: item.city,
+            height_cm: item.height_cm,
+            weight_kg: item.weight_kg,
+            gender: item.gender,
+            marital_status: item.marital_status,
+            has_children: item.has_children,
+            photo1_url: item.photo_1_url,
+            photo2_url: item.photo_2_url
+          },
+          final_rank: item.final_rank,
+          total_votes: item.total_votes,
+          average_rating: item.average_rating,
+          created_at: item.contest_start_date,
+          contest_start_date: item.contest_start_date,
+          is_active: item.is_active,
+          admin_status: item.admin_status,
+          weekInterval: getParticipantWeekInterval({ contest_start_date: item.contest_start_date })
+        }));
+        
+        console.log('Transformed past week participants:', transformedParticipants.length);
+        setPastWeekParticipants(transformedParticipants);
+        
+      } catch (error) {
+        console.error('Error in filterPastWeekParticipants:', error);
+        setPastWeekParticipants([]);
+      }
     };
 
     filterPastWeekParticipants();
@@ -2044,21 +2105,39 @@ const Admin = () => {
               </div>
               
               {(() => {
-                // Фильтруем участников по выбранной прошлой неделе
-                if (pastWeekParticipants.length === 0) {
+                // Debug: show all available admin statuses
+                console.log('All admin statuses available:', 
+                  [...new Set(weeklyParticipants.map(p => p.admin_status))]);
+                
+                // For debugging, let's show some past participants even if the filter doesn't match exactly
+                const debugPastParticipants = weeklyParticipants.filter(p => {
+                  const status = p.admin_status || 'this week';
+                  return status !== 'this week' && status !== 'next week' && status !== 'pending';
+                });
+                
+                console.log('Debug past participants found:', debugPastParticipants.length);
+                console.log('Past week participants from state:', pastWeekParticipants.length);
+                
+                // Use actual past participants if available, otherwise use debug participants for display
+                const participantsToShow = pastWeekParticipants.length > 0 ? pastWeekParticipants : debugPastParticipants;
+                
+                if (participantsToShow.length === 0) {
                   return (
                     <div className="text-center py-8 text-muted-foreground">
                       <p className="text-lg">Участники для выбранной недели не найдены</p>
                       <p className="text-sm mt-2">
-                        {pastWeekFilter === 'past week 1' && 'Прошлая неделя: 15.09-21.09'}
-                        {pastWeekFilter === 'past week 2' && 'Позапрошлая неделя: 08.09-14.09'}
-                        {pastWeekFilter === 'past week 3' && 'Старые недели: 18.08-24.08'}
+                        {pastWeekFilter === 'past week 1' && 'Прошлая неделя: 16.09-22.09'}
+                        {pastWeekFilter === 'past week 2' && 'Позапрошлая неделя: 09.09-15.09'}
+                        {pastWeekFilter === 'past week 3' && 'Старые недели: 02.09-08.09'}
+                      </p>
+                      <p className="text-xs mt-2 text-muted-foreground/70">
+                        Всего участников: {weeklyParticipants.length}, доступные статусы: {[...new Set(weeklyParticipants.map(p => p.admin_status))].join(', ')}
                       </p>
                     </div>
                   );
                 }
 
-                const filteredPastParticipants = pastWeekParticipants;
+                const filteredPastParticipants = participantsToShow;
 
                 return filteredPastParticipants.map((participant) => {
                   const participantProfile = profiles.find(p => p.id === participant.user_id);
