@@ -2855,12 +2855,13 @@ const Admin = () => {
                       >
                         <SelectValue placeholder="Filter by status" />
                       </SelectTrigger>
-                      <SelectContent className="z-50 bg-background border shadow-md">
+                       <SelectContent className="z-50 bg-background border shadow-md">
                         <SelectItem value="all">All Statuses</SelectItem>
                         <SelectItem value="pending">Pending</SelectItem>
                         <SelectItem value="approved">Approved</SelectItem>
                         <SelectItem value="rejected">Rejected</SelectItem>
-                      </SelectContent>
+                        <SelectItem value="next">Next</SelectItem>
+                       </SelectContent>
                     </Select>
                     {statusFilter !== 'all' && (
                       <p className="text-xs text-muted-foreground">
