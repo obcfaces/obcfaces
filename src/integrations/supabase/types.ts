@@ -755,6 +755,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      auto_assign_weekly_status: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       auto_transition_weekly_contests: {
         Args: Record<PropertyKey, never>
         Returns: undefined
@@ -1112,9 +1116,30 @@ export type Database = {
           weight_kg: number
         }[]
       }
+      get_weekly_contest_participants_next: {
+        Args: { week_offset?: number }
+        Returns: {
+          age: number
+          average_rating: number
+          city: string
+          country: string
+          created_at: string
+          final_rank: number
+          first_name: string
+          height_cm: number
+          last_name: string
+          participant_id: string
+          photo_1_url: string
+          photo_2_url: string
+          total_votes: number
+          user_id: string
+          weight_kg: number
+        }[]
+      }
       get_weekly_contest_participants_public: {
         Args: { weeks_offset?: number }
         Returns: {
+          admin_status: string
           age: number
           avatar_url: string
           average_rating: number

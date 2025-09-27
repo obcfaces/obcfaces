@@ -94,11 +94,11 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
 
   const loadContestParticipants = async (weekOffset: number = 0) => {
     try {
-      // Use the new function that respects admin filtering
+      // For now, use the existing function and filter on admin_status later
       const { data, error } = await supabase
-        .rpc('get_weekly_participants_by_admin_status', { weeks_offset: weekOffset });
+        .rpc('get_weekly_contest_participants_public', { weeks_offset: weekOffset });
 
-      console.log(`Loading participants for week offset ${weekOffset}:`, data);
+      console.log(`Loading participants for ${title} with week offset ${weekOffset}:`, data);
       console.log('Weekly contest participants error:', error);
 
       if (error) {
@@ -107,10 +107,10 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
       }
 
       if (data && Array.isArray(data)) {
-        console.log(`Found ${data.length} real participants for week offset ${weekOffset}`);
+        console.log(`Found ${data.length} real participants for ${title} with week offset ${weekOffset}`);
         return data;
       } else {
-        console.warn('No weekly contest participants found for week offset:', weekOffset);
+        console.warn(`No weekly contest participants found for ${title} with week offset:`, weekOffset);
         return [];
       }
     } catch (err) {
@@ -125,11 +125,12 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
       setIsLoading(true);
       let weekOffset = 0;
       if (title === "THIS WEEK") weekOffset = 0;  // Current week - participants with "this week" status
+      else if (title === "NEXT WEEK") weekOffset = 1;  // Next week - participants with "next" status
       else if (title === "1 WEEK AGO") weekOffset = -1;  // 15/09 - 21/09/2025 range  
       else if (title === "2 WEEKS AGO") weekOffset = -2;  // 08/09 - 14/09/2025 range
       else if (title === "3 WEEKS AGO") weekOffset = -3;
       
-      if (["THIS WEEK", "1 WEEK AGO", "2 WEEKS AGO", "3 WEEKS AGO"].includes(title)) {
+      if (["THIS WEEK", "NEXT WEEK", "1 WEEK AGO", "2 WEEKS AGO", "3 WEEKS AGO"].includes(title)) {
         const participants = await loadContestParticipants(weekOffset);
         setRealContestants(participants);
         
@@ -147,7 +148,7 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
     loadParticipants();
 
     // Set up real-time subscription for contest participant updates
-    if (["THIS WEEK", "1 WEEK AGO", "2 WEEKS AGO", "3 WEEKS AGO"].includes(title)) {
+    if (["THIS WEEK", "NEXT WEEK", "1 WEEK AGO", "2 WEEKS AGO", "3 WEEKS AGO"].includes(title)) {
       const channel = supabase
         .channel('contest_participant_updates')
         .on(
@@ -309,8 +310,8 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
       }
     }
     
-    // Use real contestants from weekly contests if available for other weeks
-    if (["1 WEEK AGO", "2 WEEKS AGO", "3 WEEKS AGO"].includes(title) && actualParticipants.length > 0) {
+    // Use real contestants from weekly contests if available for other weeks and NEXT WEEK
+    if (["NEXT WEEK", "1 WEEK AGO", "2 WEEKS AGO", "3 WEEKS AGO"].includes(title) && actualParticipants.length > 0) {
       console.log(`Using real contestants for ${title}:`, actualParticipants.length);
       const contestantsWithRatings = await Promise.all(
         actualParticipants.map(async (contestant) => {
