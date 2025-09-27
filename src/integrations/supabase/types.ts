@@ -755,10 +755,6 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
-      auto_assign_weekly_status: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
       auto_transition_weekly_contests: {
         Args: Record<PropertyKey, never>
         Returns: undefined
@@ -1139,7 +1135,6 @@ export type Database = {
       get_weekly_contest_participants_public: {
         Args: { weeks_offset?: number }
         Returns: {
-          admin_status: string
           age: number
           avatar_url: string
           average_rating: number

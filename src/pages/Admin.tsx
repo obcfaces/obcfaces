@@ -116,7 +116,6 @@ interface WeeklyContestParticipant {
   total_votes?: number;
   average_rating?: number;
   created_at?: string;
-  contest_start_date?: string; // Add this field for filtering by week
   is_active: boolean;
   admin_status?: string;
   profiles?: {
@@ -145,7 +144,7 @@ const Admin = () => {
   const [weeklyContests, setWeeklyContests] = useState<WeeklyContest[]>([]);
   const [weeklyParticipants, setWeeklyParticipants] = useState<WeeklyContestParticipant[]>([]);
   const [selectedContest, setSelectedContest] = useState<string | null>(null);
-  const [selectedWeekOffset, setSelectedWeekOffset] = useState<string | null>('all');
+  const [selectedWeekOffset, setSelectedWeekOffset] = useState<number>(0);
   const [photoModalOpen, setPhotoModalOpen] = useState(false);
   const [photoModalImages, setPhotoModalImages] = useState<string[]>([]);
   const [photoModalIndex, setPhotoModalIndex] = useState(0);
@@ -173,8 +172,7 @@ const Admin = () => {
   const [expandedMobileItems, setExpandedMobileItems] = useState<Set<string>>(new Set());
   const [expandedDesktopItems, setExpandedDesktopItems] = useState<Set<string>>(new Set());
   const [participantFilters, setParticipantFilters] = useState<{ [key: string]: string }>({});
-  const [pastWeekParticipants, setPastWeekParticipants] = useState<any[]>([]);
-  const [pastWeekFilter, setPastWeekFilter] = useState<string>('past week 1');
+   const [pastWeekParticipants, setPastWeekParticipants] = useState<any[]>([]);
    const [expandedAdminDates, setExpandedAdminDates] = useState<Set<string>>(new Set());
    const [adminDatePopup, setAdminDatePopup] = useState<{ show: boolean; date: string; admin: string; applicationId: string }>({ 
      show: false, date: '', admin: '', applicationId: '' 
@@ -375,12 +373,29 @@ const Admin = () => {
         currentMonday.setDate(now.getDate() - daysSinceMonday);
         currentMonday.setHours(0, 0, 0, 0);
 
-        // Filter participants with 'this week' status from current week only
+        // Filter participants who are from current week OR have 'this week' status manually set
         const filteredByStatus = weeklyParticipants.filter(participant => {
-          const adminStatus = participant.admin_status || participantFilters[participant.id] || 'this week';
+          const adminStatus = participant.admin_status || participantFilters[participant.id] || (participant.final_rank ? 'this week' : 'approve');
           
-          // For "This" section, only show participants with 'this week' status
-          return adminStatus === 'this week';
+          // Exclude if manually set to 'pending' or 'inactive'
+          if (adminStatus === 'pending' || adminStatus === 'inactive') {
+            return false;
+          }
+          
+          // Include if manually set to 'this week'
+          if (adminStatus === 'this week') {
+            return true;
+          }
+
+          // Also include participants created this week if not set to pending
+          const createdDate = new Date(participant.created_at);
+          const participantMonday = new Date(createdDate);
+          const participantDayOfWeek = createdDate.getDay();
+          const participantDaysSinceMonday = participantDayOfWeek === 0 ? 6 : participantDayOfWeek - 1;
+          participantMonday.setDate(createdDate.getDate() - participantDaysSinceMonday);
+          participantMonday.setHours(0, 0, 0, 0);
+          
+          return participantMonday.getTime() >= currentMonday.getTime();
         });
 
         // Remove duplicates based on user_id
@@ -403,61 +418,47 @@ const Admin = () => {
 
   // Handle Past Week participants filtering  
   useEffect(() => {
-    const filterPastWeekParticipants = async () => {
-      try {
-        console.log('Filtering past week participants with filter:', pastWeekFilter);
-        console.log('All weekly participants:', weeklyParticipants.length);
+    const filterPastWeekParticipants = () => {
+      // Get current Monday for comparison
+      const now = new Date();
+      const currentMonday = new Date(now);
+      const dayOfWeek = now.getDay();
+      const daysSinceMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+      currentMonday.setDate(now.getDate() - daysSinceMonday);
+      currentMonday.setHours(0, 0, 0, 0);
+
+      // Filter participants who are from previous weeks (not current week)
+      const pastParticipants = weeklyParticipants.filter(participant => {
+        const createdDate = new Date(participant.created_at);
+        const participantMonday = new Date(createdDate);
+        const participantDayOfWeek = createdDate.getDay();
+        const participantDaysSinceMonday = participantDayOfWeek === 0 ? 6 : participantDayOfWeek - 1;
+        participantMonday.setDate(createdDate.getDate() - participantDaysSinceMonday);
+        participantMonday.setHours(0, 0, 0, 0);
         
-        // Filter participants based on their admin_status directly from the loaded data
-        const pastParticipants = weeklyParticipants.filter(participant => {
-          const adminStatus = participant.admin_status || participantFilters[participant.id];
-          
-          console.log(`Participant ${participant.id}: status = ${adminStatus}`);
-          
-          // Filter based on selected past week
-          if (pastWeekFilter === 'past week 1') {
-            return adminStatus === 'past week 1';
-          } else if (pastWeekFilter === 'past week 2') {
-            return adminStatus === 'past week 2';
-          } else if (pastWeekFilter === 'past week 3') {
-            return adminStatus === 'past week 3';
-          }
-          
-          // Default: show all past weeks
-          return adminStatus?.startsWith('past week') || adminStatus?.startsWith('week-');
-        }).map(participant => ({
-          ...participant,
-          weekInterval: getParticipantWeekInterval(participant)
-        }));
-        
-        console.log('Filtered past week participants:', pastParticipants.length);
-        console.log('Past participants admin statuses:', pastParticipants.map(p => p.admin_status));
-        
-        setPastWeekParticipants(pastParticipants);
-        
-      } catch (error) {
-        console.error('Error in filterPastWeekParticipants:', error);
-        setPastWeekParticipants([]);
-      }
+        // Only include participants from previous weeks
+        return participantMonday.getTime() < currentMonday.getTime();
+      }).map(participant => ({
+        ...participant,
+        weekInterval: getParticipantWeekInterval(participant)
+      }));
+
+      setPastWeekParticipants(pastParticipants);
     };
 
     filterPastWeekParticipants();
-  }, [weeklyParticipants, participantFilters, pastWeekFilter]);
+  }, [weeklyParticipants, participantFilters]);
 
   // Helper function to determine week interval for participant
   const getParticipantWeekInterval = (participant: any) => {
-    // Use contest_start_date if available, otherwise fall back to created_at
-    const contestDate = participant.contest_start_date ? 
-      new Date(participant.contest_start_date) : 
-      new Date(participant.created_at);
-    
     // If participant has final_rank, they were a finalist in their week
     if (participant.final_rank) {
-      return `Week ${participant.final_rank === 1 ? 'Winner' : 'Finalist'} - ${formatWeekInterval(contestDate)}`;
+      return `Week ${participant.final_rank === 1 ? 'Winner' : 'Finalist'} - ${formatWeekInterval(participant.created_at)}`;
     }
     
-    // Otherwise, assign based on contest date
-    return formatWeekInterval(contestDate);
+    // Otherwise, assign based on creation date
+    const createdDate = new Date(participant.created_at);
+    return formatWeekInterval(createdDate);
   };
 
   // Helper function to format week interval
@@ -762,26 +763,7 @@ const Admin = () => {
       fetchUserRoles();
       fetchContestApplications();
       fetchWeeklyContests();
-      
-      // Auto-assign weekly statuses and then fetch participants
-      const autoAssignAndFetch = async () => {
-        try {
-          console.log('Auto-assigning weekly statuses...');
-          const { error } = await supabase.rpc('auto_assign_weekly_status');
-          if (error) {
-            console.error('Error auto-assigning statuses:', error);
-          } else {
-            console.log('Successfully auto-assigned weekly statuses');
-          }
-        } catch (error) {
-          console.error('Error calling auto_assign_weekly_status:', error);
-        } finally {
-          // Fetch participants after status assignment
-          fetchWeeklyParticipants();
-        }
-      };
-      
-      autoAssignAndFetch();
+      fetchWeeklyParticipants();
     } catch (error) {
       console.error('Error checking admin access:', error);
       navigate('/');
@@ -849,7 +831,6 @@ const Admin = () => {
   };
 
   const fetchContestApplications = async () => {
-    console.log('Fetching contest applications...');
     const { data, error } = await supabase
       .from('contest_applications')
       .select('*')
@@ -857,7 +838,6 @@ const Admin = () => {
       .order('submitted_at', { ascending: false });
 
     if (error) {
-      console.error('Error fetching contest applications:', error);
       toast({
         title: "Error",
         description: "Failed to fetch contest applications",
@@ -866,7 +846,6 @@ const Admin = () => {
       return;
     }
 
-    console.log('Fetched contest applications:', data?.length, 'applications');
     setContestApplications(data || []);
   };
 
@@ -905,80 +884,58 @@ const Admin = () => {
 
   const fetchWeeklyParticipants = async () => {
     try {
-      console.log('Fetching weekly participants from database...');
-      
-      // Fetch all weekly contest participants with their contests data
-      const { data: allParticipants, error } = await supabase
-        .from('weekly_contest_participants')
-        .select(`
-          id,
-          contest_id,
-          user_id,
-          application_data,
-          final_rank,
-          total_votes,
-          average_rating,
-          created_at,
-          is_active,
-          admin_status,
-          weekly_contests!inner(
-            id,
-            week_start_date,
-            week_end_date,
-            title,
-            status
-          )
-        `)
-        // Load all participants including inactive ones for past weeks display
-        .order('created_at', { ascending: false });
+      // Fetch current week participants
+      const { data: currentWeekData, error: currentWeekError } = await supabase
+        .rpc('get_weekly_participants_by_admin_status', { weeks_offset: 0 });
 
-      if (error) {
-        console.error('Error fetching participants:', error);
+      if (currentWeekError) {
+        console.error('Error fetching current week participants:', currentWeekError);
         return;
       }
 
-      console.log('Raw participants data:', allParticipants?.length || 0);
-      
-      // Transform data to match our interface
-      const participants = (allParticipants || []).map((item: any) => {
-        const contest = item.weekly_contests;
-        const appData = item.application_data || {};
-        
-        return {
-          id: item.id,
-          contest_id: item.contest_id,
-          user_id: item.user_id,
-          application_data: {
-            first_name: appData.first_name || '',
-            last_name: appData.last_name || '',
-            age: appData.age || null,
-            country: appData.country || '',
-            state: appData.state || '',
-            city: appData.city || '',
-            height_cm: appData.height_cm || null,
-            weight_kg: appData.weight_kg || null,
-            gender: appData.gender || '',
-            marital_status: appData.marital_status || '',
-            has_children: appData.has_children || false,
-            photo1_url: appData.photo1_url || '',
-            photo2_url: appData.photo2_url || ''
-          },
-          final_rank: item.final_rank,
-          total_votes: item.total_votes || 0,
-          average_rating: item.average_rating || 0,
-          created_at: contest?.week_start_date || item.created_at,
-          contest_start_date: contest?.week_start_date,
-          is_active: item.is_active,
-          admin_status: item.admin_status || 'this week'
-        };
-      });
+      // Fetch past weeks participants (up to 12 weeks back)
+      const pastWeeksPromises = [];
+      for (let i = 1; i <= 12; i++) {
+        pastWeeksPromises.push(
+          supabase.rpc('get_weekly_participants_by_admin_status', { weeks_offset: i })
+        );
+      }
 
-      console.log('Total participants after transformation:', participants.length);
-      console.log('Admin statuses distribution:', 
-        participants.reduce((acc: any, p: any) => {
-          acc[p.admin_status] = (acc[p.admin_status] || 0) + 1;
-          return acc;
-        }, {}));
+      const pastWeeksResults = await Promise.all(pastWeeksPromises);
+      const allPastWeeksData = pastWeeksResults
+        .filter(result => !result.error && result.data)
+        .flatMap(result => result.data);
+
+      // Combine current week and past weeks data
+      const allParticipantsData = [...(currentWeekData || []), ...allPastWeeksData];
+
+      // Transform the data to match the interface
+      const participants = allParticipantsData?.map((item: any) => ({
+        id: item.participant_id,
+        contest_id: item.contest_id,
+        user_id: item.user_id,
+        application_data: {
+          first_name: item.first_name,
+          last_name: item.last_name,
+          age: item.age,
+          country: item.country,
+          state: item.state,
+          city: item.city,
+          height_cm: item.height_cm,
+          weight_kg: item.weight_kg,
+          gender: item.gender,
+          marital_status: item.marital_status,
+          has_children: item.has_children,
+          photo1_url: item.photo_1_url,
+          photo2_url: item.photo_2_url
+        },
+        final_rank: item.final_rank,
+        total_votes: item.total_votes,
+        average_rating: item.average_rating,
+        created_at: item.contest_start_date,
+        is_active: true,
+        admin_status: item.admin_status || 'this week'
+      })) || [];
 
       setWeeklyParticipants(participants);
     } catch (error) {
@@ -1028,7 +985,6 @@ const Admin = () => {
       const currentTime = new Date().toISOString();
       
       console.log('Updating application:', applicationId, 'to status:', newStatus);
-      console.log('Application data:', application);
       
       const updateData: any = {
         status: newStatus,
@@ -1091,8 +1047,8 @@ const Admin = () => {
       }
     }
 
-    // If status is approved or next, automatically add to weekly contest
-    if ((newStatus === 'approved' || newStatus === 'next') && application) {
+    // If status is approved, automatically add to weekly contest
+    if (newStatus === 'approved' && application) {
       try {
         const appData = typeof application.application_data === 'string' 
           ? JSON.parse(application.application_data) 
@@ -1131,42 +1087,22 @@ const Admin = () => {
           }
         }
 
-        // Add participant to weekly contest (check if already exists)
+        // Add participant to weekly contest
         if (contestId) {
-          const { data: existingParticipant } = await supabase
+          const { error: participantError } = await supabase
             .from('weekly_contest_participants')
-            .select('id')
-            .eq('user_id', application.user_id)
-            .eq('contest_id', contestId)
-            .single();
+            .insert({
+              contest_id: contestId,
+              user_id: application.user_id,
+              application_data: application.application_data
+            });
 
-          if (!existingParticipant) {
-            const { error: participantError } = await supabase
-              .from('weekly_contest_participants')
-              .insert({
-                contest_id: contestId,
-                user_id: application.user_id,
-                application_data: application.application_data,
-                admin_status: newStatus === 'approved' ? 'this week' : 'next'
-              });
-
-            if (participantError) {
-              console.error('Error adding participant to weekly contest:', participantError);
-            }
-          } else {
-            // Update existing participant's admin_status
-            const { error: updateError } = await supabase
-              .from('weekly_contest_participants')
-              .update({ admin_status: newStatus === 'approved' ? 'this week' : 'next' })
-              .eq('id', existingParticipant.id);
-
-            if (updateError) {
-              console.error('Error updating participant admin_status:', updateError);
-            }
+          if (participantError) {
+            console.error('Error adding participant to weekly contest:', participantError);
           }
         }
       } catch (error) {
-        console.error('Error handling approved/next status:', error);
+        console.error('Error handling approved status:', error);
       }
     }
 
@@ -1178,7 +1114,6 @@ const Admin = () => {
       });
     }
 
-    console.log('Refreshing data after status change...');
     fetchContestApplications();
     fetchWeeklyParticipants();
   };
@@ -1558,16 +1493,13 @@ const Admin = () => {
                                <SelectTrigger className="w-28 h-6 text-xs">
                                  <SelectValue />
                                </SelectTrigger>
-                                    <SelectContent className="z-50 bg-background border shadow-md">
-                                      <SelectItem value="this week">This Week</SelectItem>
-                                      <SelectItem value="next week">Next Week</SelectItem>
-                                      <SelectItem value="past week 1">Past Week 1 (15.09-21.09)</SelectItem>
-                                      <SelectItem value="past week 2">Past Week 2 (08.09-14.09)</SelectItem>
-                                      <SelectItem value="past week 3">Past Week 3 (18.08-24.08)</SelectItem>
-                                      <SelectItem value="approve">Approve</SelectItem>
-                                      <SelectItem value="pending">Pending</SelectItem>
-                                      <SelectItem value="inactive">Inactive</SelectItem>
-                                    </SelectContent>
+                                   <SelectContent className="z-50 bg-background border shadow-md">
+                                     <SelectItem value="this week">This Week</SelectItem>
+                                     <SelectItem value="next">Next</SelectItem>
+                                     <SelectItem value="approve">Approve</SelectItem>
+                                     <SelectItem value="pending">Pending</SelectItem>
+                                     <SelectItem value="inactive">Inactive</SelectItem>
+                                   </SelectContent>
                              </Select>
                             
                             {/* Status change date with reviewer login - desktop */}
@@ -1726,16 +1658,13 @@ const Admin = () => {
                                    <SelectTrigger className="w-24 h-7 text-xs">
                                      <SelectValue />
                                    </SelectTrigger>
-                                         <SelectContent className="z-50 bg-background border shadow-md">
-                                           <SelectItem value="this week">This Week</SelectItem>
-                                           <SelectItem value="next week">Next Week</SelectItem>
-                                           <SelectItem value="past week 1">Past Week 1 (15.09-21.09)</SelectItem>
-                                           <SelectItem value="past week 2">Past Week 2 (08.09-14.09)</SelectItem>
-                                           <SelectItem value="past week 3">Past Week 3 (18.08-24.08)</SelectItem>
-                                           <SelectItem value="approve">Approve</SelectItem>
-                                           <SelectItem value="pending">Pending</SelectItem>
-                                           <SelectItem value="inactive">Inactive</SelectItem>
-                                       </SelectContent>
+                                        <SelectContent className="z-50 bg-background border shadow-md">
+                                          <SelectItem value="this week">This Week</SelectItem>
+                                          <SelectItem value="next">Next</SelectItem>
+                                          <SelectItem value="approve">Approve</SelectItem>
+                                          <SelectItem value="pending">Pending</SelectItem>
+                                          <SelectItem value="inactive">Inactive</SelectItem>
+                                      </SelectContent>
                                  </Select>
                                 
                                 {/* Rating with votes */}
@@ -1768,7 +1697,7 @@ const Admin = () => {
                 <div className="mb-4 p-3 bg-muted rounded-lg">
                   <div className="text-sm text-muted-foreground space-y-2">
                     <div className="text-xs">
-                      Next week participants: {weeklyParticipants.filter(p => p.admin_status === 'next week').length}
+                      Next week participants: {weeklyParticipants.filter(p => p.admin_status === 'next').length}
                     </div>
                   </div>
                 </div>
@@ -1780,7 +1709,7 @@ const Admin = () => {
               </div>
               
               {(() => {
-                const nextWeekParticipants = weeklyParticipants.filter(p => p.admin_status === 'next week');
+                const nextWeekParticipants = weeklyParticipants.filter(p => p.admin_status === 'next');
                 
                 if (nextWeekParticipants.length === 0) {
                   return (
@@ -1900,10 +1829,7 @@ const Admin = () => {
                                   </SelectTrigger>
                                   <SelectContent className="z-50 bg-background border shadow-md">
                                     <SelectItem value="this week">This Week</SelectItem>
-                                    <SelectItem value="next week">Next Week</SelectItem>
-                                    <SelectItem value="past week 1">Past Week 1 (15.09-21.09)</SelectItem>
-                                    <SelectItem value="past week 2">Past Week 2 (08.09-14.09)</SelectItem>
-                                    <SelectItem value="past week 3">Past Week 3 (18.08-24.08)</SelectItem>
+                                    <SelectItem value="next">Next</SelectItem>
                                     <SelectItem value="approve">Approve</SelectItem>
                                     <SelectItem value="pending">Pending</SelectItem>
                                     <SelectItem value="inactive">Inactive</SelectItem>
@@ -2031,10 +1957,7 @@ const Admin = () => {
                                 </SelectTrigger>
                                 <SelectContent className="z-50 bg-background border shadow-md">
                                   <SelectItem value="this week">This Week</SelectItem>
-                                  <SelectItem value="next week">Next Week</SelectItem>
-                                  <SelectItem value="past week 1">Past Week 1 (15.09-21.09)</SelectItem>
-                                  <SelectItem value="past week 2">Past Week 2 (08.09-14.09)</SelectItem>
-                                  <SelectItem value="past week 3">Past Week 3 (18.08-24.08)</SelectItem>
+                                  <SelectItem value="next">Next</SelectItem>
                                   <SelectItem value="approve">Approve</SelectItem>
                                   <SelectItem value="pending">Pending</SelectItem>
                                   <SelectItem value="inactive">Inactive</SelectItem>
@@ -2054,61 +1977,89 @@ const Admin = () => {
               <div className="mb-6">
                 <div>
                   <h2 className="text-xl font-semibold">Past Week Participants</h2>
-                  <p className="text-muted-foreground">Участники из прошлых недель с правильными статусами</p>
+                  <p className="text-muted-foreground">Participants from previous weeks with their week intervals</p>
                 </div>
                 
-                {/* Past week filter */}
+                {/* Week interval filter */}
                 <div className="mt-4">
                   <Select 
-                    value={pastWeekFilter} 
-                    onValueChange={setPastWeekFilter}
+                    value={selectedWeekOffset?.toString() || 'all'} 
+                    onValueChange={(value) => {
+                      if (value === 'all') {
+                        setSelectedWeekOffset(null);
+                      } else {
+                        setSelectedWeekOffset(parseInt(value));
+                      }
+                    }}
                   >
                     <SelectTrigger className="w-64">
-                      <SelectValue placeholder="Выберите неделю" />
+                      <SelectValue placeholder="Select week interval" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="past week 1">Прошлая неделя (15.09-21.09)</SelectItem>
-                      <SelectItem value="past week 2">2 недели назад (08.09-14.09)</SelectItem>
-                      <SelectItem value="past week 3">Старые недели (18.08-24.08)</SelectItem>
+                      <SelectItem value="all">All weeks</SelectItem>
+                      {Array.from(new Set(pastWeekParticipants.map(p => p.weekInterval)))
+                        .sort((a, b) => b.localeCompare(a))
+                        .map((interval, index) => (
+                          <SelectItem key={interval} value={index.toString()}>
+                            {interval}
+                          </SelectItem>
+                        ))
+                      }
                     </SelectContent>
                   </Select>
                 </div>
               </div>
               
               {(() => {
-                // Debug: show all available admin statuses
-                console.log('All admin statuses available:', 
-                  [...new Set(weeklyParticipants.map(p => p.admin_status))]);
-                
-                // For debugging, let's show some past participants even if the filter doesn't match exactly
-                const debugPastParticipants = weeklyParticipants.filter(p => {
-                  const status = p.admin_status || 'this week';
-                  return status !== 'this week' && status !== 'next week' && status !== 'pending';
-                });
-                
-                console.log('Debug past participants found:', debugPastParticipants.length);
-                console.log('Past week participants from state:', pastWeekParticipants.length);
-                
-                // Use actual past participants if available, otherwise use debug participants for display
-                const participantsToShow = pastWeekParticipants.length > 0 ? pastWeekParticipants : debugPastParticipants;
-                
-                if (participantsToShow.length === 0) {
+                // Get all past week participants by fetching participants not from current week
+                const allPastParticipants = weeklyParticipants.filter(participant => {
+                  const now = new Date();
+                  const currentMonday = new Date(now);
+                  const dayOfWeek = now.getDay();
+                  const daysSinceMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+                  currentMonday.setDate(now.getDate() - daysSinceMonday);
+                  currentMonday.setHours(0, 0, 0, 0);
+
+                  const createdDate = new Date(participant.created_at);
+                  const participantMonday = new Date(createdDate);
+                  const participantDayOfWeek = createdDate.getDay();
+                  const participantDaysSinceMonday = participantDayOfWeek === 0 ? 6 : participantDayOfWeek - 1;
+                  participantMonday.setDate(createdDate.getDate() - participantDaysSinceMonday);
+                  participantMonday.setHours(0, 0, 0, 0);
+                  
+                  return participantMonday.getTime() < currentMonday.getTime();
+                }).map(participant => ({
+                  ...participant,
+                  weekInterval: (() => {
+                    const createdDate = new Date(participant.created_at);
+                    const monday = new Date(createdDate);
+                    const dayOfWeek = createdDate.getDay();
+                    const daysSinceMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+                    monday.setDate(createdDate.getDate() - daysSinceMonday);
+                    
+                    const sunday = new Date(monday);
+                    sunday.setDate(monday.getDate() + 6);
+                    
+                    return `${monday.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit' })} - ${sunday.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })}`;
+                  })()
+                }));
+
+                if (allPastParticipants.length === 0) {
                   return (
                     <div className="text-center py-8 text-muted-foreground">
-                      <p className="text-lg">Участники для выбранной недели не найдены</p>
-                      <p className="text-sm mt-2">
-                        {pastWeekFilter === 'past week 1' && 'Прошлая неделя: 15.09-21.09'}
-                        {pastWeekFilter === 'past week 2' && '2 недели назад: 08.09-14.09'}
-                        {pastWeekFilter === 'past week 3' && 'Старые недели: 18.08-24.08'}
-                      </p>
-                      <p className="text-xs mt-2 text-muted-foreground/70">
-                        Всего участников: {weeklyParticipants.length}, доступные статусы: {[...new Set(weeklyParticipants.map(p => p.admin_status))].join(', ')}
-                      </p>
+                      <p className="text-lg">No past week participants found</p>
                     </div>
                   );
                 }
 
-                const filteredPastParticipants = participantsToShow;
+                const filteredPastParticipants = selectedWeekOffset !== null && selectedWeekOffset !== undefined
+                  ? allPastParticipants.filter(p => {
+                      const intervals = Array.from(new Set(allPastParticipants.map(p => p.weekInterval)))
+                        .sort((a, b) => b.localeCompare(a));
+                      const targetInterval = intervals[selectedWeekOffset];
+                      return p.weekInterval === targetInterval;
+                    })
+                  : allPastParticipants;
 
                 return filteredPastParticipants.map((participant) => {
                   const participantProfile = profiles.find(p => p.id === participant.user_id);
@@ -2562,27 +2513,25 @@ const Admin = () => {
                                      {/* Status dropdown at the top - desktop */}
                                      <Select 
                                        value={application.status} 
-                                         onValueChange={(newStatus) => {
-                                           console.log('Status change requested:', newStatus, 'for application:', application.id);
-                                           if (newStatus === 'delete') {
-                                             setApplicationToDelete({ 
-                                               id: application.id, 
-                                               name: `${appData.first_name} ${appData.last_name}` 
-                                             });
-                                             setShowDeleteConfirmModal(true);
-                                             return;
-                                           }
-                                           if (newStatus === 'rejected') {
-                                             setApplicationToReject({ 
-                                               id: application.id, 
-                                               name: `${appData.first_name} ${appData.last_name}` 
-                                             });
-                                             setRejectModalOpen(true);
-                                             return;
-                                           }
-                                           console.log('Calling reviewApplication for status:', newStatus);
-                                           reviewApplication(application.id, newStatus);
-                                         }}
+                                        onValueChange={(newStatus) => {
+                                          if (newStatus === 'delete') {
+                                            setApplicationToDelete({ 
+                                              id: application.id, 
+                                              name: `${appData.first_name} ${appData.last_name}` 
+                                            });
+                                            setShowDeleteConfirmModal(true);
+                                            return;
+                                          }
+                                          if (newStatus === 'rejected') {
+                                            setApplicationToReject({ 
+                                              id: application.id, 
+                                              name: `${appData.first_name} ${appData.last_name}` 
+                                            });
+                                            setRejectModalOpen(true);
+                                            return;
+                                          }
+                                          reviewApplication(application.id, newStatus);
+                                        }}
                                      >
                                         <SelectTrigger 
                                            className={`w-24 ${
@@ -2593,12 +2542,11 @@ const Admin = () => {
                                         >
                                           <SelectValue />
                                         </SelectTrigger>
-                                         <SelectContent>
-                                           <SelectItem value="pending">Pending</SelectItem>
-                                           <SelectItem value="approved">Approved</SelectItem>
-                                           <SelectItem value="rejected">Rejected</SelectItem>
-                                           <SelectItem value="next">Next</SelectItem>
-                                         </SelectContent>
+                                        <SelectContent>
+                                          <SelectItem value="pending">Pending</SelectItem>
+                                          <SelectItem value="approved">Approved</SelectItem>
+                                          <SelectItem value="rejected">Rejected</SelectItem>
+                                        </SelectContent>
                                      </Select>
                                      
                                      {/* Admin info and date at the bottom */}
@@ -2809,12 +2757,11 @@ const Admin = () => {
                                                  >
                                                   <SelectValue />
                                                 </SelectTrigger>
-                                                  <SelectContent>
-                                                    <SelectItem value="pending">Pending</SelectItem>
-                                                    <SelectItem value="approved">Approved</SelectItem>
-                                                    <SelectItem value="rejected">Rejected</SelectItem>
-                                                    <SelectItem value="next">Next</SelectItem>
-                                                  </SelectContent>
+                                                 <SelectContent>
+                                                   <SelectItem value="pending">Pending</SelectItem>
+                                                   <SelectItem value="approved">Approved</SelectItem>
+                                                   <SelectItem value="rejected">Rejected</SelectItem>
+                                                 </SelectContent>
                                               </Select>
                                               
                                                {/* Admin login with expandable date */}
@@ -2908,12 +2855,11 @@ const Admin = () => {
                       >
                         <SelectValue placeholder="Filter by status" />
                       </SelectTrigger>
-                      <SelectContent className="z-[100] bg-background border shadow-lg min-w-[160px]">
+                      <SelectContent className="z-50 bg-background border shadow-md">
                         <SelectItem value="all">All Statuses</SelectItem>
                         <SelectItem value="pending">Pending</SelectItem>
                         <SelectItem value="approved">Approved</SelectItem>
                         <SelectItem value="rejected">Rejected</SelectItem>
-                        <SelectItem value="next">Next</SelectItem>
                       </SelectContent>
                     </Select>
                     {statusFilter !== 'all' && (
@@ -2948,36 +2894,13 @@ const Admin = () => {
                       const appData = application.application_data || {};
                       if (countryFilter !== 'all' && appData.country !== countryFilter) return false;
                       if (genderFilter !== 'all' && appData.gender !== genderFilter) return false;
+                      if (statusFilter !== 'all' && application.status !== statusFilter) return false;
                       
-                      // Handle status filtering
-                      if (statusFilter !== 'all') {
-                        if (statusFilter === 'next') {
-                          // Show applications for users with admin_status === 'next'
-                          const weeklyParticipant = weeklyParticipants.find(participant => 
-                            participant.user_id === application.user_id
-                          );
-                          if (!weeklyParticipant || weeklyParticipant.admin_status !== 'next') {
-                            return false;
-                          }
-                        } else {
-                          // Handle regular status filtering
-                          if (application.status !== statusFilter) return false;
-                        }
-                      }
-                      
-                      // Don't show applications in the cards section if the user is already in "this week" or "next"
-                      // UNLESS the user is specifically filtering by "next"
+                      // Don't show applications in the cards section if the user is already in "this week" (but show if they have "pending" status)
                       const weeklyParticipant = weeklyParticipants.find(participant => 
                         participant.user_id === application.user_id
                       );
-                      
-                      // Exclude applications with status="next" from Card section (unless filtering by "next")
-                      if (application.status === 'next' && statusFilter !== 'next') {
-                        return false;
-                      }
-                      
-                      // Exclude applications already in weekly contest (unless they have "pending" status or we're filtering by "next")
-                      if (weeklyParticipant && weeklyParticipant.admin_status !== 'pending' && statusFilter !== 'next') {
+                      if (weeklyParticipant && weeklyParticipant.admin_status !== 'pending') {
                         return false;
                       }
                       
@@ -3208,12 +3131,11 @@ const Admin = () => {
                                        >
                                          <SelectValue />
                                        </SelectTrigger>
-                                         <SelectContent>
-                                           <SelectItem value="pending">Pending</SelectItem>
-                                           <SelectItem value="approved">Approved</SelectItem>
-                                           <SelectItem value="rejected">Rejected</SelectItem>
-                                           <SelectItem value="next">Next</SelectItem>
-                                         </SelectContent>
+                                        <SelectContent>
+                                          <SelectItem value="pending">Pending</SelectItem>
+                                          <SelectItem value="approved">Approved</SelectItem>
+                                          <SelectItem value="rejected">Rejected</SelectItem>
+                                        </SelectContent>
                                      </Select>
                                    )}
                                    
@@ -3394,12 +3316,11 @@ const Admin = () => {
                                                 >
                                                  <SelectValue />
                                                </SelectTrigger>
-                                                 <SelectContent>
-                                                   <SelectItem value="pending">Pending</SelectItem>
-                                                   <SelectItem value="approved">Approved</SelectItem>
-                                                   <SelectItem value="rejected">Rejected</SelectItem>
-                                                   <SelectItem value="next">Next</SelectItem>
-                                                 </SelectContent>
+                                                <SelectContent>
+                                                  <SelectItem value="pending">Pending</SelectItem>
+                                                  <SelectItem value="approved">Approved</SelectItem>
+                                                  <SelectItem value="rejected">Rejected</SelectItem>
+                                                </SelectContent>
                                              </Select>
                                              
                                               {/* Admin login with expandable date */}
