@@ -910,7 +910,7 @@ const Admin = () => {
     try {
       // Fetch current week participants
       const { data: currentWeekData, error: currentWeekError } = await supabase
-        .rpc('get_weekly_participants_by_admin_status', { weeks_offset: 0 });
+        .rpc('get_weekly_contest_participants_admin', { weeks_offset: 0 });
 
       if (currentWeekError) {
         console.error('Error fetching current week participants:', currentWeekError);
@@ -921,7 +921,7 @@ const Admin = () => {
       const pastWeeksPromises = [];
       for (let i = 1; i <= 12; i++) {
         pastWeeksPromises.push(
-          supabase.rpc('get_weekly_participants_by_admin_status', { weeks_offset: i })
+          supabase.rpc('get_weekly_contest_participants_admin', { weeks_offset: i })
         );
       }
 
@@ -958,9 +958,12 @@ const Admin = () => {
         average_rating: item.average_rating,
         created_at: item.contest_start_date,
         contest_start_date: item.contest_start_date, // Add this field for filtering
-        is_active: true,
+        is_active: item.is_active,
         admin_status: item.admin_status || 'this week'
       })) || [];
+
+      console.log('Fetched weekly participants:', participants.length);
+      console.log('Admin statuses:', participants.map(p => p.admin_status));
 
       setWeeklyParticipants(participants);
     } catch (error) {
