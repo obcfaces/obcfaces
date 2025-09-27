@@ -403,7 +403,7 @@ const Admin = () => {
 
   // Handle Past Week participants filtering  
   useEffect(() => {
-    const filterPastWeekParticipants = async () => {
+  const filterPastWeekParticipants = async () => {
       try {
         console.log('Filtering past week participants - showing all past weeks');
         console.log('All weekly participants:', weeklyParticipants.length);
@@ -416,15 +416,37 @@ const Admin = () => {
           
           // Include all past week participants
           return adminStatus && adminStatus.startsWith('past week');
-        }).map(participant => ({
-          ...participant,
-          weekInterval: getParticipantWeekInterval(participant)
-        }));
+        });
+
+        // Load rating stats for each past participant
+        const pastParticipantsWithRatings = await Promise.all(
+          pastParticipants.map(async (participant) => {
+            try {
+              const { data: ratingStats } = await supabase
+                .rpc('get_user_rating_stats', { target_user_id: participant.user_id });
+              
+              return {
+                ...participant,
+                average_rating: ratingStats?.[0]?.average_rating || 0,
+                total_votes: ratingStats?.[0]?.total_votes || 0,
+                weekInterval: getParticipantWeekInterval(participant)
+              };
+            } catch (error) {
+              console.error('Error fetching rating stats for participant:', error);
+              return {
+                ...participant,
+                average_rating: 0,
+                total_votes: 0,
+                weekInterval: getParticipantWeekInterval(participant)
+              };
+            }
+          })
+        );
         
-        console.log('Filtered past week participants:', pastParticipants.length);
-        console.log('Past participants admin statuses:', pastParticipants.map(p => p.admin_status));
+        console.log('Filtered past week participants:', pastParticipantsWithRatings.length);
+        console.log('Past participants admin statuses:', pastParticipantsWithRatings.map(p => p.admin_status));
         
-        setPastWeekParticipants(pastParticipants);
+        setPastWeekParticipants(pastParticipantsWithRatings);
         
       } catch (error) {
         console.error('Error in filterPastWeekParticipants:', error);
@@ -2153,10 +2175,10 @@ const Admin = () => {
                                 </AvatarFallback>
                               </Avatar>
                                <span className="text-sm font-semibold whitespace-nowrap flex items-center gap-1">
-                                 {participant.final_rank === 1 && <span className="text-yellow-500">🏆</span>}
-                                 {participant.final_rank > 1 && <span className="text-slate-500">🥈</span>}
-                                 {appData.first_name} {appData.last_name} {new Date().getFullYear() - appData.birth_year}
-                               </span>
+                                  {participant.final_rank === 1 && <span className="text-yellow-500">🏆</span>}
+                                  {participant.final_rank > 1 && <span className="text-slate-500">🥈</span>}
+                                  {appData.first_name} {appData.last_name} {appData.birth_year ? new Date().getFullYear() - parseInt(appData.birth_year) : ''}
+                                </span>
                             </div>
                             
                             <div 
@@ -2285,7 +2307,7 @@ const Admin = () => {
                                 {appData.first_name} {appData.last_name}
                               </span>
                               <span className="text-xs text-muted-foreground">
-                                {new Date().getFullYear() - appData.birth_year}
+                                {appData.birth_year ? new Date().getFullYear() - parseInt(appData.birth_year) : ''}
                               </span>
                             </div>
                             
