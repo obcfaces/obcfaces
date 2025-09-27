@@ -2054,14 +2054,6 @@ const Admin = () => {
               {(() => {
                 // Get all past week participants by fetching participants not from current week
                 const allPastParticipants = weeklyParticipants.filter(participant => {
-                  const adminStatus = participant.admin_status || participantFilters[participant.id] || 'this week';
-                  
-                  // Include participants with week-specific statuses or past-related statuses
-                  if (adminStatus.startsWith('week-') || adminStatus === 'past' || adminStatus === 'inactive') {
-                    return true;
-                  }
-                  
-                  // For participants without specific status, check if they're from previous weeks
                   const now = new Date();
                   const currentMonday = new Date(now);
                   const dayOfWeek = now.getDay();
@@ -2069,25 +2061,14 @@ const Admin = () => {
                   currentMonday.setDate(now.getDate() - daysSinceMonday);
                   currentMonday.setHours(0, 0, 0, 0);
 
-                  // Use contest_start_date if available, otherwise fall back to created_at
-                  const contestDate = participant.contest_start_date ? 
-                    new Date(participant.contest_start_date) : 
-                    new Date(participant.created_at);
-                  
-                  const participantMonday = new Date(contestDate);
-                  const participantDayOfWeek = contestDate.getDay();
+                  const createdDate = new Date(participant.created_at);
+                  const participantMonday = new Date(createdDate);
+                  const participantDayOfWeek = createdDate.getDay();
                   const participantDaysSinceMonday = participantDayOfWeek === 0 ? 6 : participantDayOfWeek - 1;
-                  participantMonday.setDate(contestDate.getDate() - participantDaysSinceMonday);
+                  participantMonday.setDate(createdDate.getDate() - participantDaysSinceMonday);
                   participantMonday.setHours(0, 0, 0, 0);
                   
-                  // IMPORTANT: Only include participants from PREVIOUS weeks (strictly less than current Monday)
-                  // This excludes current week participants AND those with 'this week' status
-                  const isFromPreviousWeek = participantMonday.getTime() < currentMonday.getTime();
-                  const notThisWeekStatus = adminStatus !== 'this week';
-                  
-                  console.log(`Past filter - Participant ${participant.id}: contestDate=${contestDate.toDateString()}, participantMonday=${participantMonday.toDateString()}, currentMonday=${currentMonday.toDateString()}, isFromPreviousWeek=${isFromPreviousWeek}, adminStatus=${adminStatus}, notThisWeekStatus=${notThisWeekStatus}, included=${isFromPreviousWeek && notThisWeekStatus}`);
-                  
-                  return isFromPreviousWeek && notThisWeekStatus;
+                  return participantMonday.getTime() < currentMonday.getTime();
                 }).map(participant => {
                   // Use contest_start_date if available, otherwise fall back to created_at
                   const contestDate = participant.contest_start_date ? 
