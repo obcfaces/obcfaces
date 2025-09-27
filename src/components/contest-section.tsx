@@ -394,7 +394,7 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
     <section className={`max-w-6xl mx-auto mb-2 rounded-lg shadow-lg shadow-foreground/15 ${title === "THIS WEEK" ? "bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800" : "bg-background"} pt-4 pb-0`}>
       <div className="mb-4 px-6">
         <div className="mb-4">
-          <div className="flex items-baseline gap-3 mb-1">
+          <div className="flex items-center gap-3 mb-1">
             <div className={`inline-flex flex-col w-fit ${centerSubtitle ? "items-center" : "items-center"}`}>
               <h2 className={`text-3xl font-bold ${title === "THIS WEEK" ? "text-green-800 dark:text-green-200" : "text-contest-text"} ${noWrapTitle ? "whitespace-nowrap" : ""}`}>{title}</h2>
               <p className={`text-sm ${title === "THIS WEEK" ? "text-green-600 dark:text-green-400" : "text-muted-foreground/70"} italic -mt-1`}>{subtitle}</p>
@@ -403,7 +403,7 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
               <span className="text-2xl font-normal text-muted-foreground">{titleSuffix}</span>
             )}
             {isActive && description && (
-              <span className={`text-base font-normal ${title === "THIS WEEK" ? "text-green-700 dark:text-green-300" : "text-contest-text"}`}>
+              <span className={`text-base font-normal ${title === "THIS WEEK" ? "text-green-700 dark:text-green-300" : "text-contest-text"} flex items-center`}>
                 {description}
               </span>
             )}
