@@ -2895,13 +2895,28 @@ const Admin = () => {
                       const appData = application.application_data || {};
                       if (countryFilter !== 'all' && appData.country !== countryFilter) return false;
                       if (genderFilter !== 'all' && appData.gender !== genderFilter) return false;
-                      if (statusFilter !== 'all' && application.status !== statusFilter) return false;
+                      
+                      // Handle status filtering
+                      if (statusFilter !== 'all') {
+                        if (statusFilter === 'next') {
+                          // Show applications for users with admin_status === 'next'
+                          const weeklyParticipant = weeklyParticipants.find(participant => 
+                            participant.user_id === application.user_id
+                          );
+                          if (!weeklyParticipant || weeklyParticipant.admin_status !== 'next') {
+                            return false;
+                          }
+                        } else {
+                          // Handle regular status filtering
+                          if (application.status !== statusFilter) return false;
+                        }
+                      }
                       
                       // Don't show applications in the cards section if the user is already in "this week" (but show if they have "pending" status)
                       const weeklyParticipant = weeklyParticipants.find(participant => 
                         participant.user_id === application.user_id
                       );
-                      if (weeklyParticipant && weeklyParticipant.admin_status !== 'pending') {
+                      if (weeklyParticipant && weeklyParticipant.admin_status !== 'pending' && statusFilter !== 'next') {
                         return false;
                       }
                       
