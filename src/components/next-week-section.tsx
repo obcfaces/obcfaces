@@ -260,6 +260,7 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
           <div className="w-full px-0 sm:px-6 max-w-full overflow-hidden">
             <ContestantCard
               {...currentCandidate}
+              rank={0}
               viewMode={viewMode}
               showDislike={true}
               hideCardActions={true}
