@@ -443,14 +443,18 @@ const Admin = () => {
 
   // Helper function to determine week interval for participant
   const getParticipantWeekInterval = (participant: any) => {
+    // Use contest_start_date if available, otherwise fall back to created_at
+    const contestDate = participant.contest_start_date ? 
+      new Date(participant.contest_start_date) : 
+      new Date(participant.created_at);
+    
     // If participant has final_rank, they were a finalist in their week
     if (participant.final_rank) {
-      return `Week ${participant.final_rank === 1 ? 'Winner' : 'Finalist'} - ${formatWeekInterval(participant.created_at)}`;
+      return `Week ${participant.final_rank === 1 ? 'Winner' : 'Finalist'} - ${formatWeekInterval(contestDate)}`;
     }
     
-    // Otherwise, assign based on creation date
-    const createdDate = new Date(participant.created_at);
-    return formatWeekInterval(createdDate);
+    // Otherwise, assign based on contest date
+    return formatWeekInterval(contestDate);
   };
 
   // Helper function to format week interval
@@ -2068,11 +2072,15 @@ const Admin = () => {
                 }).map(participant => ({
                   ...participant,
                   weekInterval: (() => {
-                    const createdDate = new Date(participant.created_at);
-                    const monday = new Date(createdDate);
-                    const dayOfWeek = createdDate.getDay();
+                    // Use contest_start_date if available, otherwise fall back to created_at
+                    const contestDate = participant.contest_start_date ? 
+                      new Date(participant.contest_start_date) : 
+                      new Date(participant.created_at);
+                    
+                    const monday = new Date(contestDate);
+                    const dayOfWeek = contestDate.getDay();
                     const daysSinceMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
-                    monday.setDate(createdDate.getDate() - daysSinceMonday);
+                    monday.setDate(contestDate.getDate() - daysSinceMonday);
                     
                     const sunday = new Date(monday);
                     sunday.setDate(monday.getDate() + 6);
