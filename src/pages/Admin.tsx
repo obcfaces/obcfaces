@@ -407,80 +407,33 @@ const Admin = () => {
       try {
         console.log('Filtering past week participants with filter:', pastWeekFilter);
         console.log('All weekly participants:', weeklyParticipants.length);
-        console.log('Admin statuses in data:', weeklyParticipants.map(p => ({ id: p.id, status: p.admin_status })));
         
-        // Use the database function to get past week participants  
-        let weekOffset = 1; // Default to 1 week ago
-        if (pastWeekFilter === 'past week 1') {
-          weekOffset = 1;
-        } else if (pastWeekFilter === 'past week 2') {
-          weekOffset = 2; 
-        } else if (pastWeekFilter === 'past week 3') {
-          weekOffset = 3;
-        }
-        
-        const { data: pastData, error } = await supabase
-          .rpc('get_weekly_participants_by_admin_status', { weeks_offset: weekOffset });
+        // Filter participants based on their admin_status directly from the loaded data
+        const pastParticipants = weeklyParticipants.filter(participant => {
+          const adminStatus = participant.admin_status || participantFilters[participant.id];
           
-        if (error) {
-          console.error('Error fetching past week participants:', error);
-          // Fallback to local filtering
-          const pastParticipants = weeklyParticipants.filter(participant => {
-            const adminStatus = participant.admin_status || participantFilters[participant.id];
-            
-            // Filter based on selected past week
-            if (pastWeekFilter === 'past week 1') {
-              return adminStatus === 'past week 1';
-            } else if (pastWeekFilter === 'past week 2') {
-              return adminStatus === 'past week 2';
-            } else if (pastWeekFilter === 'past week 3') {
-              return adminStatus === 'past week 3';
-            }
-            
-            // Default: show all past weeks
-            return adminStatus?.startsWith('past week') || adminStatus?.startsWith('week-');
-          }).map(participant => ({
-            ...participant,
-            weekInterval: getParticipantWeekInterval(participant)
-          }));
+          console.log(`Participant ${participant.id}: status = ${adminStatus}`);
           
-          console.log('Fallback filtered participants:', pastParticipants.length);
-          setPastWeekParticipants(pastParticipants);
-          return;
-        }
-        
-        // Transform database results to match our participant structure
-        const transformedParticipants = (pastData || []).map((item: any) => ({
-          id: item.participant_id,
-          contest_id: item.contest_id,
-          user_id: item.user_id,
-          application_data: {
-            first_name: item.first_name,
-            last_name: item.last_name,
-            age: item.age,
-            country: item.country,
-            state: item.state,
-            city: item.city,
-            height_cm: item.height_cm,
-            weight_kg: item.weight_kg,
-            gender: item.gender,
-            marital_status: item.marital_status,
-            has_children: item.has_children,
-            photo1_url: item.photo_1_url,
-            photo2_url: item.photo_2_url
-          },
-          final_rank: item.final_rank,
-          total_votes: item.total_votes,
-          average_rating: item.average_rating,
-          created_at: item.contest_start_date,
-          contest_start_date: item.contest_start_date,
-          is_active: item.is_active,
-          admin_status: item.admin_status,
-          weekInterval: getParticipantWeekInterval({ contest_start_date: item.contest_start_date })
+          // Filter based on selected past week
+          if (pastWeekFilter === 'past week 1') {
+            return adminStatus === 'past week 1';
+          } else if (pastWeekFilter === 'past week 2') {
+            return adminStatus === 'past week 2';
+          } else if (pastWeekFilter === 'past week 3') {
+            return adminStatus === 'past week 3';
+          }
+          
+          // Default: show all past weeks
+          return adminStatus?.startsWith('past week') || adminStatus?.startsWith('week-');
+        }).map(participant => ({
+          ...participant,
+          weekInterval: getParticipantWeekInterval(participant)
         }));
         
-        console.log('Transformed past week participants:', transformedParticipants.length);
-        setPastWeekParticipants(transformedParticipants);
+        console.log('Filtered past week participants:', pastParticipants.length);
+        console.log('Past participants admin statuses:', pastParticipants.map(p => p.admin_status));
+        
+        setPastWeekParticipants(pastParticipants);
         
       } catch (error) {
         console.error('Error in filterPastWeekParticipants:', error);
@@ -952,16 +905,17 @@ const Admin = () => {
 
   const fetchWeeklyParticipants = async () => {
     try {
-      // Fetch current week participants
+      console.log('Fetching weekly participants for all weeks...');
+      
+      // Fetch current week participants (weeks_offset: 0)
       const { data: currentWeekData, error: currentWeekError } = await supabase
         .rpc('get_weekly_contest_participants_admin', { weeks_offset: 0 });
 
       if (currentWeekError) {
         console.error('Error fetching current week participants:', currentWeekError);
-        return;
       }
 
-      // Fetch past weeks participants (up to 12 weeks back)
+      // Fetch past weeks participants (weeks_offset: 1, 2, 3, etc.)
       const pastWeeksPromises = [];
       for (let i = 1; i <= 12; i++) {
         pastWeeksPromises.push(
@@ -972,7 +926,10 @@ const Admin = () => {
       const pastWeeksResults = await Promise.all(pastWeeksPromises);
       const allPastWeeksData = pastWeeksResults
         .filter(result => !result.error && result.data)
-        .flatMap(result => result.data);
+        .flatMap(result => result.data || []);
+
+      console.log('Current week data:', currentWeekData?.length || 0);
+      console.log('Past weeks data:', allPastWeeksData.length);
 
       // Combine current week and past weeks data
       const allParticipantsData = [...(currentWeekData || []), ...allPastWeeksData];
@@ -1001,13 +958,17 @@ const Admin = () => {
         total_votes: item.total_votes,
         average_rating: item.average_rating,
         created_at: item.contest_start_date,
-        contest_start_date: item.contest_start_date, // Add this field for filtering
+        contest_start_date: item.contest_start_date,
         is_active: item.is_active,
         admin_status: item.admin_status || 'this week'
       })) || [];
 
-      console.log('Fetched weekly participants:', participants.length);
-      console.log('Admin statuses:', participants.map(p => p.admin_status));
+      console.log('Total participants after transformation:', participants.length);
+      console.log('Admin statuses distribution:', 
+        participants.reduce((acc: any, p: any) => {
+          acc[p.admin_status] = (acc[p.admin_status] || 0) + 1;
+          return acc;
+        }, {}));
 
       setWeeklyParticipants(participants);
     } catch (error) {
