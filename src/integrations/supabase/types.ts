@@ -1136,6 +1136,38 @@ export type Database = {
           weight_kg: number
         }[]
       }
+      get_weekly_contest_participants_public: {
+        Args: { weeks_offset?: number }
+        Returns: {
+          admin_status: string
+          age: number
+          avatar_url: string
+          average_rating: number
+          city: string
+          contest_end_date: string
+          contest_id: string
+          contest_start_date: string
+          contest_status: string
+          contest_title: string
+          country: string
+          display_name: string
+          final_rank: number
+          first_name: string
+          gender: string
+          has_children: boolean
+          height_cm: number
+          last_name: string
+          marital_status: string
+          participant_id: string
+          participant_type: string
+          photo_1_url: string
+          photo_2_url: string
+          state: string
+          total_votes: number
+          user_id: string
+          weight_kg: number
+        }[]
+      }
       get_weekly_participants_by_admin_status: {
         Args: { weeks_offset?: number }
         Returns: {
