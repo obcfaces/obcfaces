@@ -241,7 +241,7 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
               <h2 className="text-3xl font-bold text-blue-800 dark:text-blue-200 whitespace-nowrap">NEXT WEEK</h2>
               <p className="text-sm text-blue-600 dark:text-blue-400 italic -mt-1">{getNextWeekRange()}</p>
             </div>
-            <span className="text-lg font-normal text-blue-700 dark:text-blue-300 flex items-center">
+            <span className="text-base font-normal text-blue-700 dark:text-blue-300 flex items-center leading-tight">
               Choose next week's finalists
             </span>
           </div>
