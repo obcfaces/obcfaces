@@ -235,20 +235,17 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
               console.warn('Invalid contestant data:', contestant);
               return null;
             }
-             
-             // Get simple average rating directly from contestant_ratings table
-             const { data: ratings } = await supabase
-               .from('contestant_ratings')
-               .select('rating')
-               .eq('contestant_user_id', contestant.user_id);
-             
-             let averageRating = 0;
-             let totalVotes = 0;
-             
-             if (ratings && ratings.length > 0) {
-               const totalRating = ratings.reduce((sum, r) => sum + r.rating, 0);
-               averageRating = totalRating / ratings.length;
-               totalVotes = ratings.length;
+              
+              // Get rating stats using secure function
+              const { data: ratingStats } = await supabase
+                .rpc('get_public_participant_rating_stats', { target_participant_id: contestant.user_id });
+              
+              let averageRating = 0;
+              let totalVotes = 0;
+              
+              if (ratingStats && ratingStats.length > 0) {
+                averageRating = ratingStats[0].average_rating;
+                totalVotes = ratingStats[0].total_votes;
              }
             
             const contestantData = {
@@ -321,19 +318,16 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
             return null;
           }
           
-          // Get simple average rating directly from contestant_ratings table
-          const { data: ratings } = await supabase
-            .from('contestant_ratings')
-            .select('rating')
-            .eq('contestant_user_id', contestant.user_id);
+          // Get rating stats using secure function
+          const { data: ratingStats } = await supabase
+            .rpc('get_public_participant_rating_stats', { target_participant_id: contestant.user_id });
           
           let averageRating = 0;
           let totalVotes = 0;
           
-          if (ratings && ratings.length > 0) {
-            const totalRating = ratings.reduce((sum, r) => sum + r.rating, 0);
-            averageRating = totalRating / ratings.length;
-            totalVotes = ratings.length;
+          if (ratingStats && ratingStats.length > 0) {
+            averageRating = ratingStats[0].average_rating;
+            totalVotes = ratingStats[0].total_votes;
           }
           
           const contestantData = {
