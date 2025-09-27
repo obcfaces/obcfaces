@@ -1618,15 +1618,16 @@ const Admin = () => {
                                <SelectTrigger className="w-28 h-6 text-xs">
                                  <SelectValue />
                                </SelectTrigger>
-                                    <SelectContent className="z-50 bg-background border shadow-md">
-                                      <SelectItem value="this week">This Week</SelectItem>
-                                      <SelectItem value="next week">Next Week</SelectItem>
-                                      <SelectItem value="past week 1">Past Week 1 (15.09-21.09)</SelectItem>
-                                      <SelectItem value="past week 2">Past Week 2 (08.09-14.09)</SelectItem>
-                                      <SelectItem value="past week 3">Past Week 3 (18.08-24.08)</SelectItem>
-                                      <SelectItem value="approve">Approve</SelectItem>
-                                      <SelectItem value="pending">Pending</SelectItem>
-                                      <SelectItem value="inactive">Inactive</SelectItem>
+                                     <SelectContent className="z-50 bg-background border shadow-md">
+                                       <SelectItem value="this week">This Week</SelectItem>
+                                       <SelectItem value="next week">Next Week</SelectItem>
+                                       <SelectItem value="past week 1">Past Week 1 (15.09-21.09)</SelectItem>
+                                       <SelectItem value="past week 2">Past Week 2 (08.09-14.09)</SelectItem>
+                                       <SelectItem value="past week 3">Past Week 3 (18.08-24.08)</SelectItem>
+                                       <SelectItem value="pending">Pending</SelectItem>
+                                       <SelectItem value="approved">Approved</SelectItem>
+                                       <SelectItem value="rejected">Rejected</SelectItem>
+                                       <SelectItem value="next">Next</SelectItem>
                                     </SelectContent>
                              </Select>
                             
@@ -1786,15 +1787,16 @@ const Admin = () => {
                                    <SelectTrigger className="w-24 h-7 text-xs">
                                      <SelectValue />
                                    </SelectTrigger>
-                                         <SelectContent className="z-50 bg-background border shadow-md">
-                                           <SelectItem value="this week">This Week</SelectItem>
-                                           <SelectItem value="next week">Next Week</SelectItem>
-                                           <SelectItem value="past week 1">Past Week 1 (15.09-21.09)</SelectItem>
-                                           <SelectItem value="past week 2">Past Week 2 (08.09-14.09)</SelectItem>
-                                           <SelectItem value="past week 3">Past Week 3 (18.08-24.08)</SelectItem>
-                                           <SelectItem value="approve">Approve</SelectItem>
-                                           <SelectItem value="pending">Pending</SelectItem>
-                                           <SelectItem value="inactive">Inactive</SelectItem>
+                                          <SelectContent className="z-50 bg-background border shadow-md">
+                                            <SelectItem value="this week">This Week</SelectItem>
+                                            <SelectItem value="next week">Next Week</SelectItem>
+                                            <SelectItem value="past week 1">Past Week 1 (15.09-21.09)</SelectItem>
+                                            <SelectItem value="past week 2">Past Week 2 (08.09-14.09)</SelectItem>
+                                            <SelectItem value="past week 3">Past Week 3 (18.08-24.08)</SelectItem>
+                                            <SelectItem value="pending">Pending</SelectItem>
+                                            <SelectItem value="approved">Approved</SelectItem>
+                                            <SelectItem value="rejected">Rejected</SelectItem>
+                                            <SelectItem value="next">Next</SelectItem>
                                        </SelectContent>
                                  </Select>
                                 
@@ -1958,15 +1960,16 @@ const Admin = () => {
                                   <SelectTrigger className="w-24 h-7 text-xs">
                                     <SelectValue />
                                   </SelectTrigger>
-                                  <SelectContent className="z-50 bg-background border shadow-md">
-                                    <SelectItem value="this week">This Week</SelectItem>
-                                    <SelectItem value="next week">Next Week</SelectItem>
-                                    <SelectItem value="past week 1">Past Week 1 (15.09-21.09)</SelectItem>
-                                    <SelectItem value="past week 2">Past Week 2 (08.09-14.09)</SelectItem>
-                                    <SelectItem value="past week 3">Past Week 3 (18.08-24.08)</SelectItem>
-                                    <SelectItem value="approve">Approve</SelectItem>
-                                    <SelectItem value="pending">Pending</SelectItem>
-                                    <SelectItem value="inactive">Inactive</SelectItem>
+                                   <SelectContent className="z-50 bg-background border shadow-md">
+                                     <SelectItem value="this week">This Week</SelectItem>
+                                     <SelectItem value="next week">Next Week</SelectItem>
+                                     <SelectItem value="past week 1">Past Week 1 (15.09-21.09)</SelectItem>
+                                     <SelectItem value="past week 2">Past Week 2 (08.09-14.09)</SelectItem>
+                                     <SelectItem value="past week 3">Past Week 3 (18.08-24.08)</SelectItem>
+                                     <SelectItem value="pending">Pending</SelectItem>
+                                     <SelectItem value="approved">Approved</SelectItem>
+                                     <SelectItem value="rejected">Rejected</SelectItem>
+                                     <SelectItem value="next">Next</SelectItem>
                                   </SelectContent>
                                 </Select>
                               </div>
@@ -2089,15 +2092,16 @@ const Admin = () => {
                                 <SelectTrigger className="w-16 h-6 text-xs">
                                   <SelectValue />
                                 </SelectTrigger>
-                                <SelectContent className="z-50 bg-background border shadow-md">
-                                  <SelectItem value="this week">This Week</SelectItem>
-                                  <SelectItem value="next week">Next Week</SelectItem>
-                                  <SelectItem value="past week 1">Past Week 1 (15.09-21.09)</SelectItem>
-                                  <SelectItem value="past week 2">Past Week 2 (08.09-14.09)</SelectItem>
-                                  <SelectItem value="past week 3">Past Week 3 (18.08-24.08)</SelectItem>
-                                  <SelectItem value="approve">Approve</SelectItem>
-                                  <SelectItem value="pending">Pending</SelectItem>
-                                  <SelectItem value="inactive">Inactive</SelectItem>
+                                 <SelectContent className="z-50 bg-background border shadow-md">
+                                   <SelectItem value="this week">This Week</SelectItem>
+                                   <SelectItem value="next week">Next Week</SelectItem>
+                                   <SelectItem value="past week 1">Past Week 1 (15.09-21.09)</SelectItem>
+                                   <SelectItem value="past week 2">Past Week 2 (08.09-14.09)</SelectItem>
+                                   <SelectItem value="past week 3">Past Week 3 (18.08-24.08)</SelectItem>
+                                   <SelectItem value="pending">Pending</SelectItem>
+                                   <SelectItem value="approved">Approved</SelectItem>
+                                   <SelectItem value="rejected">Rejected</SelectItem>
+                                   <SelectItem value="next">Next</SelectItem>
                                 </SelectContent>
                               </Select>
                             </div>
