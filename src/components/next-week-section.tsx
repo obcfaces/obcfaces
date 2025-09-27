@@ -265,7 +265,7 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
             />
           </div>
           
-          <div className="flex items-center justify-center gap-6 mt-6">
+          <div className="flex items-center justify-center gap-6 mt-6 pb-8">
             <div className="flex items-center gap-4">
               <span className="text-lg text-blue-800 dark:text-blue-200 font-medium">
                 {remainingCandidates} left
