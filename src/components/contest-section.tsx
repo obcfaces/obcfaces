@@ -251,7 +251,7 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
             const contestantData = {
               rank: contestant.final_rank || 0,
               name: `${contestant.first_name || 'Unknown'} ${contestant.last_name || ''}`.trim(),
-              profileId: contestant.user_id,
+              profileId: contestant.participant_id, // Use participant_id for rating queries
               country: contestant.country || 'Unknown',
               city: contestant.city || 'Unknown',
               age: contestant.age || 0,
@@ -333,7 +333,7 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
           const contestantData = {
             rank: contestant.final_rank || 0,
             name: `${contestant.first_name || 'Unknown'} ${contestant.last_name || ''}`.trim(),
-            profileId: contestant.user_id,
+            profileId: contestant.participant_id, // Use participant_id for rating queries
             country: contestant.country || 'Unknown',
             city: contestant.city || 'Unknown',
             age: contestant.age || 0,
