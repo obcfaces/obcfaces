@@ -905,63 +905,73 @@ const Admin = () => {
 
   const fetchWeeklyParticipants = async () => {
     try {
-      console.log('Fetching weekly participants for all weeks...');
+      console.log('Fetching weekly participants from database...');
       
-      // Fetch current week participants (weeks_offset: 0)
-      const { data: currentWeekData, error: currentWeekError } = await supabase
-        .rpc('get_weekly_contest_participants_admin', { weeks_offset: 0 });
+      // Fetch all weekly contest participants with their contests data
+      const { data: allParticipants, error } = await supabase
+        .from('weekly_contest_participants')
+        .select(`
+          id,
+          contest_id,
+          user_id,
+          application_data,
+          final_rank,
+          total_votes,
+          average_rating,
+          created_at,
+          is_active,
+          admin_status,
+          weekly_contests!inner(
+            id,
+            week_start_date,
+            week_end_date,
+            title,
+            status
+          )
+        `)
+        .eq('is_active', true)
+        .order('created_at', { ascending: false });
 
-      if (currentWeekError) {
-        console.error('Error fetching current week participants:', currentWeekError);
+      if (error) {
+        console.error('Error fetching participants:', error);
+        return;
       }
 
-      // Fetch past weeks participants (weeks_offset: 1, 2, 3, etc.)
-      const pastWeeksPromises = [];
-      for (let i = 1; i <= 12; i++) {
-        pastWeeksPromises.push(
-          supabase.rpc('get_weekly_contest_participants_admin', { weeks_offset: i })
-        );
-      }
-
-      const pastWeeksResults = await Promise.all(pastWeeksPromises);
-      const allPastWeeksData = pastWeeksResults
-        .filter(result => !result.error && result.data)
-        .flatMap(result => result.data || []);
-
-      console.log('Current week data:', currentWeekData?.length || 0);
-      console.log('Past weeks data:', allPastWeeksData.length);
-
-      // Combine current week and past weeks data
-      const allParticipantsData = [...(currentWeekData || []), ...allPastWeeksData];
-
-      // Transform the data to match the interface
-      const participants = allParticipantsData?.map((item: any) => ({
-        id: item.participant_id,
-        contest_id: item.contest_id,
-        user_id: item.user_id,
-        application_data: {
-          first_name: item.first_name,
-          last_name: item.last_name,
-          age: item.age,
-          country: item.country,
-          state: item.state,
-          city: item.city,
-          height_cm: item.height_cm,
-          weight_kg: item.weight_kg,
-          gender: item.gender,
-          marital_status: item.marital_status,
-          has_children: item.has_children,
-          photo1_url: item.photo_1_url,
-          photo2_url: item.photo_2_url
-        },
-        final_rank: item.final_rank,
-        total_votes: item.total_votes,
-        average_rating: item.average_rating,
-        created_at: item.contest_start_date,
-        contest_start_date: item.contest_start_date,
-        is_active: item.is_active,
-        admin_status: item.admin_status || 'this week'
-      })) || [];
+      console.log('Raw participants data:', allParticipants?.length || 0);
+      
+      // Transform data to match our interface
+      const participants = (allParticipants || []).map((item: any) => {
+        const contest = item.weekly_contests;
+        const appData = item.application_data || {};
+        
+        return {
+          id: item.id,
+          contest_id: item.contest_id,
+          user_id: item.user_id,
+          application_data: {
+            first_name: appData.first_name || '',
+            last_name: appData.last_name || '',
+            age: appData.age || null,
+            country: appData.country || '',
+            state: appData.state || '',
+            city: appData.city || '',
+            height_cm: appData.height_cm || null,
+            weight_kg: appData.weight_kg || null,
+            gender: appData.gender || '',
+            marital_status: appData.marital_status || '',
+            has_children: appData.has_children || false,
+            photo1_url: appData.photo1_url || '',
+            photo2_url: appData.photo2_url || ''
+          },
+          final_rank: item.final_rank,
+          total_votes: item.total_votes || 0,
+          average_rating: item.average_rating || 0,
+          created_at: contest?.week_start_date || item.created_at,
+          contest_start_date: contest?.week_start_date,
+          is_active: item.is_active,
+          admin_status: item.admin_status || 'this week'
+        };
+      });
 
       console.log('Total participants after transformation:', participants.length);
       console.log('Admin statuses distribution:', 
