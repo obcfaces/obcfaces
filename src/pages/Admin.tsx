@@ -1230,8 +1230,8 @@ const Admin = () => {
           </div>
 
           <Tabs defaultValue="applications" className="space-y-6">
-            {/* Mobile layout: Single row of tabs */}
-            <div className="md:hidden">
+            {/* Mobile layout: Two rows of tabs */}
+            <div className="md:hidden space-y-2">
               <TabsList className="grid grid-cols-4 w-full">
                 <TabsTrigger value="applications" className="flex items-center gap-1 text-xs">
                   <FileText className="w-3 h-3" />
@@ -1241,10 +1241,16 @@ const Admin = () => {
                   <Calendar className="w-3 h-3" />
                   This
                 </TabsTrigger>
+                <TabsTrigger value="nextweek" className="flex items-center gap-1 text-xs">
+                  <Calendar className="w-3 h-3" />
+                  Next
+                </TabsTrigger>
                 <TabsTrigger value="pastweek" className="flex items-center gap-1 text-xs">
                   <Trophy className="w-3 h-3" />
                   Past
                 </TabsTrigger>
+              </TabsList>
+              <TabsList className="grid grid-cols-1 w-full">
                 <TabsTrigger value="registrations" className="flex items-center gap-1 text-xs">
                   <UserCog className="w-3 h-3" />
                   Reg
@@ -1257,6 +1263,10 @@ const Admin = () => {
               <TabsTrigger value="weekly" className="flex items-center gap-2">
                 <Calendar className="w-4 h-4" />
                 Weekly Contests
+              </TabsTrigger>
+              <TabsTrigger value="nextweek" className="flex items-center gap-2">
+                <Calendar className="w-4 h-4" />
+                Next Week
               </TabsTrigger>
               <TabsTrigger value="pastweek" className="flex items-center gap-2">
                 <Trophy className="w-4 h-4" />
@@ -1673,6 +1683,288 @@ const Admin = () => {
                                   {`${(participant.average_rating || 0).toFixed(1)} (${participant.total_votes || 0})`}
                                 </div>
                               </div>
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                });
+              })()}
+            </TabsContent>
+
+            <TabsContent value="nextweek" className="space-y-4">
+              <div className="mb-6">
+                {/* Stats for next week */}
+                <div className="mb-4 p-3 bg-muted rounded-lg">
+                  <div className="text-sm text-muted-foreground space-y-2">
+                    <div className="text-xs">
+                      Next week participants: {weeklyParticipants.filter(p => p.admin_status === 'next').length}
+                    </div>
+                  </div>
+                </div>
+                
+                <div>
+                  <h2 className="text-xl font-semibold">Next Week Participants</h2>
+                  <p className="text-muted-foreground">Participants scheduled for next week's contest</p>
+                </div>
+              </div>
+              
+              {(() => {
+                const nextWeekParticipants = weeklyParticipants.filter(p => p.admin_status === 'next');
+                
+                if (nextWeekParticipants.length === 0) {
+                  return (
+                    <div className="text-center py-8 text-muted-foreground">
+                      No participants scheduled for next week
+                    </div>
+                  );
+                }
+                
+                return nextWeekParticipants.map((participant) => {
+                  const participantProfile = profiles.find(p => p.id === participant.user_id);
+                  const appData = participant.application_data || {};
+                  
+                  return (
+                    <Card key={participant.id} className="overflow-hidden relative h-[149px]">
+                      <CardContent className="p-0">
+                        {/* Desktop layout */}
+                        <div className="hidden md:flex">
+                          {/* Photos section - 2 columns */}
+                          <div className="flex gap-px w-[25ch] flex-shrink-0">
+                            {(participantProfile?.photo_1_url || appData.photo1_url) && (
+                              <div className="w-1/2">
+                                <img 
+                                  src={participantProfile?.photo_1_url || appData.photo1_url} 
+                                  alt="Portrait" 
+                                  className="w-full h-[149px] object-contain cursor-pointer hover:opacity-90 transition-opacity"
+                                  onClick={() => openPhotoModal([
+                                    participantProfile?.photo_1_url || appData.photo1_url, 
+                                    participantProfile?.photo_2_url || appData.photo2_url
+                                  ].filter(Boolean), 0, `${participantProfile?.first_name || appData.first_name} ${participantProfile?.last_name || appData.last_name}`)}
+                                />
+                              </div>
+                            )}
+                            {(participantProfile?.photo_2_url || appData.photo2_url) && (
+                              <div className="w-1/2 relative">
+                                <img 
+                                  src={participantProfile?.photo_2_url || appData.photo2_url} 
+                                  alt="Full length" 
+                                  className="w-full h-[149px] object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                                  onClick={() => openPhotoModal([
+                                    participantProfile?.photo_1_url || appData.photo1_url, 
+                                    participantProfile?.photo_2_url || appData.photo2_url
+                                  ].filter(Boolean), 1, `${participantProfile?.first_name || appData.first_name} ${participantProfile?.last_name || appData.last_name}`)}
+                                />
+                                {/* User avatar positioned in top right corner */}
+                                <div className="absolute top-2 right-2">
+                                  <Avatar className="h-6 w-6 flex-shrink-0 border-2 border-white shadow-sm">
+                                    <AvatarImage src={participantProfile?.avatar_url || ''} />
+                                    <AvatarFallback className="text-xs">
+                                      {(participantProfile?.first_name || appData.first_name)?.charAt(0) || 'U'}
+                                    </AvatarFallback>
+                                  </Avatar>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                          
+                          {/* Content section - takes remaining space */}
+                          <div className="flex-1 p-3 flex flex-col justify-between">
+                            <div className="flex items-start justify-between">
+                              <div className="min-w-0 flex-1">
+                                {/* Name and basic info */}
+                                <div className="space-y-1">
+                                  <h3 className="font-semibold text-sm truncate">
+                                    {participantProfile?.display_name || `${participantProfile?.first_name || appData.first_name} ${participantProfile?.last_name || appData.last_name}` || 'Unnamed participant'}
+                                  </h3>
+                                  
+                                  {/* Basic details row */}
+                                  <div className="text-xs text-muted-foreground space-y-0.5">
+                                    <div className="flex items-center gap-2 flex-wrap">
+                                      <span>{participantProfile?.age || appData.age || 'Unknown'} лет</span>
+                                      <span>•</span>
+                                      <span>{participantProfile?.city || appData.city || 'Unknown'}, {participantProfile?.country || appData.country || 'Unknown'}</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                      <span>{participantProfile?.height_cm || appData.height_cm || 'Unknown'}см</span>
+                                      <span>•</span>
+                                      <span>{participantProfile?.weight_kg || appData.weight_kg || 'Unknown'}кг</span>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                              
+                              {/* Status controls */}
+                              <div className="flex items-center gap-2 ml-2 flex-shrink-0">
+                                <Select 
+                                  value={participant.admin_status || 'next'} 
+                                  onValueChange={async (value) => {
+                                    try {
+                                      const { error } = await supabase
+                                        .from('weekly_contest_participants')
+                                        .update({ admin_status: value } as any)
+                                        .eq('id', participant.id);
+                                      
+                                      if (error) {
+                                        console.error('Error updating participant status:', error);
+                                        toast({
+                                          title: "Error",
+                                          description: "Failed to update participant status",
+                                          variant: "destructive",
+                                        });
+                                      } else {
+                                        // Refresh the data
+                                        await fetchWeeklyParticipants();
+                                        toast({
+                                          title: "Success",
+                                          description: "Participant status updated successfully",
+                                        });
+                                      }
+                                    } catch (error) {
+                                      console.error('Error updating participant status:', error);
+                                    }
+                                  }}
+                                >
+                                  <SelectTrigger className="w-24 h-7 text-xs">
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent className="z-50 bg-background border shadow-md">
+                                    <SelectItem value="this week">This Week</SelectItem>
+                                    <SelectItem value="next">Next</SelectItem>
+                                    <SelectItem value="approve">Approve</SelectItem>
+                                    <SelectItem value="pending">Pending</SelectItem>
+                                    <SelectItem value="inactive">Inactive</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                            </div>
+                            
+                            {/* Bottom row - Rating, votes, actions */}
+                            <div className="flex items-center justify-between mt-auto pt-2">
+                              <div className="text-xs text-muted-foreground">
+                                Rating: 
+                                <span 
+                                  className="ml-1 cursor-pointer hover:underline text-primary"
+                                  onClick={() => {
+                                    setSelectedParticipantForVoters({
+                                      id: participant.id,
+                                      name: participantProfile?.display_name || `${participantProfile?.first_name || appData.first_name} ${participantProfile?.last_name || appData.last_name}` || 'Unnamed'
+                                    });
+                                    setVotersModalOpen(true);
+                                  }}
+                                >
+                                  {`${(participant.average_rating || 0).toFixed(1)} (${participant.total_votes || 0})`}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        {/* Mobile layout */}
+                        <div className="md:hidden flex">
+                          {/* Photos section - compact */}
+                          <div className="flex gap-px w-[20ch] flex-shrink-0">
+                            {(participantProfile?.photo_1_url || appData.photo1_url) && (
+                              <div className="w-1/2">
+                                <img 
+                                  src={participantProfile?.photo_1_url || appData.photo1_url} 
+                                  alt="Portrait" 
+                                  className="w-full h-[149px] object-contain cursor-pointer"
+                                  onClick={() => openPhotoModal([
+                                    participantProfile?.photo_1_url || appData.photo1_url, 
+                                    participantProfile?.photo_2_url || appData.photo2_url
+                                  ].filter(Boolean), 0, `${participantProfile?.first_name || appData.first_name} ${participantProfile?.last_name || appData.last_name}`)}
+                                />
+                              </div>
+                            )}
+                            {(participantProfile?.photo_2_url || appData.photo2_url) && (
+                              <div className="w-1/2 relative">
+                                <img 
+                                  src={participantProfile?.photo_2_url || appData.photo2_url} 
+                                  alt="Full length" 
+                                  className="w-full h-[149px] object-cover cursor-pointer"
+                                  onClick={() => openPhotoModal([
+                                    participantProfile?.photo_1_url || appData.photo1_url, 
+                                    participantProfile?.photo_2_url || appData.photo2_url
+                                  ].filter(Boolean), 1, `${participantProfile?.first_name || appData.first_name} ${participantProfile?.last_name || appData.last_name}`)}
+                                />
+                                <div className="absolute top-2 right-2">
+                                  <Avatar className="h-6 w-6 flex-shrink-0 border-2 border-white shadow-sm">
+                                    <AvatarImage src={participantProfile?.avatar_url || ''} />
+                                    <AvatarFallback className="text-xs">
+                                      {(participantProfile?.first_name || appData.first_name)?.charAt(0) || 'U'}
+                                    </AvatarFallback>
+                                  </Avatar>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                          
+                          {/* Content - mobile */}
+                          <div className="flex-1 p-2 text-xs space-y-1">
+                            <div className="font-medium truncate">
+                              {participantProfile?.display_name || `${participantProfile?.first_name || appData.first_name} ${participantProfile?.last_name || appData.last_name}` || 'Unnamed'}
+                            </div>
+                            <div className="text-muted-foreground space-y-0.5">
+                              <div>{participantProfile?.age || appData.age}л, {participantProfile?.city || appData.city}</div>
+                              <div>{participantProfile?.height_cm || appData.height_cm}см, {participantProfile?.weight_kg || appData.weight_kg}кг</div>
+                            </div>
+                            <div className="flex items-center justify-between pt-1">
+                              <div className="text-muted-foreground">
+                                <span 
+                                  className="cursor-pointer hover:underline text-primary"
+                                  onClick={() => {
+                                    setSelectedParticipantForVoters({
+                                      id: participant.id,
+                                      name: participantProfile?.display_name || `${participantProfile?.first_name || appData.first_name} ${participantProfile?.last_name || appData.last_name}` || 'Unnamed'
+                                    });
+                                    setVotersModalOpen(true);
+                                  }}
+                                >
+                                  {`${(participant.average_rating || 0).toFixed(1)} (${participant.total_votes || 0})`}
+                                </span>
+                              </div>
+                              <Select 
+                                value={participant.admin_status || 'next'} 
+                                onValueChange={async (value) => {
+                                  try {
+                                    const { error } = await supabase
+                                      .from('weekly_contest_participants')
+                                      .update({ admin_status: value } as any)
+                                      .eq('id', participant.id);
+                                    
+                                    if (error) {
+                                      console.error('Error updating participant status:', error);
+                                      toast({
+                                        title: "Error",
+                                        description: "Failed to update participant status",
+                                        variant: "destructive",
+                                      });
+                                    } else {
+                                      // Refresh the data
+                                      await fetchWeeklyParticipants();
+                                      toast({
+                                        title: "Success",
+                                        description: "Participant status updated successfully",
+                                      });
+                                    }
+                                  } catch (error) {
+                                    console.error('Error updating participant status:', error);
+                                  }
+                                }}
+                              >
+                                <SelectTrigger className="w-16 h-6 text-xs">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent className="z-50 bg-background border shadow-md">
+                                  <SelectItem value="this week">This Week</SelectItem>
+                                  <SelectItem value="next">Next</SelectItem>
+                                  <SelectItem value="approve">Approve</SelectItem>
+                                  <SelectItem value="pending">Pending</SelectItem>
+                                  <SelectItem value="inactive">Inactive</SelectItem>
+                                </SelectContent>
+                              </Select>
                             </div>
                           </div>
                         </div>
