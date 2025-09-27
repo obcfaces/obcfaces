@@ -395,8 +395,12 @@ const Admin = () => {
               return status === 'past week 3';
             case 'pending':
               return status === 'pending';
-            case 'inactive':
-              return status === 'inactive';
+            case 'approved':
+              return status === 'approved';
+            case 'rejected':
+              return status === 'rejected';
+            case 'next':
+              return status === 'next';
             default:
               return true;
           }
@@ -1429,9 +1433,10 @@ const Admin = () => {
                     <SelectItem value="past week 1">Past Week 1 (15.09-21.09)</SelectItem>
                     <SelectItem value="past week 2">Past Week 2 (08.09-14.09)</SelectItem>
                     <SelectItem value="past week 3">Past Week 3 (18.08-24.08)</SelectItem>
-                    <SelectItem value="approve">Approve</SelectItem>
                     <SelectItem value="pending">Pending</SelectItem>
-                    <SelectItem value="inactive">Inactive</SelectItem>
+                    <SelectItem value="approved">Approved</SelectItem>
+                    <SelectItem value="rejected">Rejected</SelectItem>
+                    <SelectItem value="next">Next</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
