@@ -13,7 +13,41 @@ import contestant2Full from "@/assets/contestant-2-full.jpg";
 import contestant3Face from "@/assets/contestant-3-face.jpg";
 import contestant3Full from "@/assets/contestant-3-full.jpg";
 
-const candidates: any[] = [];
+const candidates: any[] = [
+  {
+    name: "Test Candidate 1",
+    country: "Philippines", 
+    city: "Manila",
+    age: 22,
+    weight: 51,
+    height: 170,
+    faceImage: contestant1Face,
+    fullBodyImage: contestant1Full,
+    additionalPhotos: []
+  },
+  {
+    name: "Test Candidate 2", 
+    country: "Philippines",
+    city: "Cebu",
+    age: 24,
+    weight: 47,
+    height: 155,
+    faceImage: contestant2Face,
+    fullBodyImage: contestant2Full,
+    additionalPhotos: []
+  },
+  {
+    name: "Test Candidate 3",
+    country: "Philippines", 
+    city: "Davao",
+    age: 23,
+    weight: 49,
+    height: 162,
+    faceImage: contestant3Face,
+    fullBodyImage: contestant3Full,
+    additionalPhotos: []
+  }
+];
 
 interface NextWeekSectionProps {
   viewMode?: 'compact' | 'full';
