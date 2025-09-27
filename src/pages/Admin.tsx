@@ -2069,25 +2069,29 @@ const Admin = () => {
                   participantMonday.setHours(0, 0, 0, 0);
                   
                   return participantMonday.getTime() < currentMonday.getTime();
-                }).map(participant => ({
-                  ...participant,
-                  weekInterval: (() => {
-                    // Use contest_start_date if available, otherwise fall back to created_at
-                    const contestDate = participant.contest_start_date ? 
-                      new Date(participant.contest_start_date) : 
-                      new Date(participant.created_at);
-                    
-                    const monday = new Date(contestDate);
-                    const dayOfWeek = contestDate.getDay();
-                    const daysSinceMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
-                    monday.setDate(contestDate.getDate() - daysSinceMonday);
-                    
-                    const sunday = new Date(monday);
-                    sunday.setDate(monday.getDate() + 6);
-                    
-                    return `${monday.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit' })} - ${sunday.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })}`;
-                  })()
-                }));
+                }).map(participant => {
+                  // Use contest_start_date if available, otherwise fall back to created_at
+                  const contestDate = participant.contest_start_date ? 
+                    new Date(participant.contest_start_date) : 
+                    new Date(participant.created_at);
+                  
+                  const monday = new Date(contestDate);
+                  const dayOfWeek = contestDate.getDay();
+                  const daysSinceMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+                  monday.setDate(contestDate.getDate() - daysSinceMonday);
+                  
+                  const sunday = new Date(monday);
+                  sunday.setDate(monday.getDate() + 6);
+                  
+                  const weekInterval = `${monday.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit' })} - ${sunday.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })}`;
+                  
+                  console.log(`Participant ${participant.id}: contest_start_date=${participant.contest_start_date}, created_at=${participant.created_at}, weekInterval=${weekInterval}`);
+                  
+                  return {
+                    ...participant,
+                    weekInterval
+                  };
+                });
 
                 if (allPastParticipants.length === 0) {
                   return (
@@ -2098,12 +2102,24 @@ const Admin = () => {
                 }
 
                 const filteredPastParticipants = selectedWeekOffset !== null && selectedWeekOffset !== undefined
-                  ? allPastParticipants.filter(p => {
+                  ? (() => {
                       const intervals = Array.from(new Set(allPastParticipants.map(p => p.weekInterval)))
                         .sort((a, b) => b.localeCompare(a));
+                      
+                      console.log('All intervals:', intervals);
+                      console.log('Selected week offset:', selectedWeekOffset);
+                      
                       const targetInterval = intervals[selectedWeekOffset];
-                      return p.weekInterval === targetInterval;
-                    })
+                      console.log('Target interval:', targetInterval);
+                      
+                      const filteredParticipants = allPastParticipants.filter(p => {
+                        console.log(`Filtering participant: weekInterval=${p.weekInterval}, matches target=${p.weekInterval === targetInterval}`);
+                        return p.weekInterval === targetInterval;
+                      });
+                      
+                      console.log('Filtered participants count:', filteredParticipants.length);
+                      return filteredParticipants;
+                    })()
                   : allPastParticipants;
 
                 return filteredPastParticipants.map((participant) => {
