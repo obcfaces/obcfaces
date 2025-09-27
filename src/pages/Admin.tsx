@@ -173,7 +173,8 @@ const Admin = () => {
   const [expandedMobileItems, setExpandedMobileItems] = useState<Set<string>>(new Set());
   const [expandedDesktopItems, setExpandedDesktopItems] = useState<Set<string>>(new Set());
   const [participantFilters, setParticipantFilters] = useState<{ [key: string]: string }>({});
-   const [pastWeekParticipants, setPastWeekParticipants] = useState<any[]>([]);
+  const [pastWeekParticipants, setPastWeekParticipants] = useState<any[]>([]);
+  const [pastWeekFilter, setPastWeekFilter] = useState<string>('past week 1');
    const [expandedAdminDates, setExpandedAdminDates] = useState<Set<string>>(new Set());
    const [adminDatePopup, setAdminDatePopup] = useState<{ show: boolean; date: string; admin: string; applicationId: string }>({ 
      show: false, date: '', admin: '', applicationId: '' 
@@ -403,39 +404,21 @@ const Admin = () => {
   // Handle Past Week participants filtering  
   useEffect(() => {
     const filterPastWeekParticipants = () => {
-      // Get current Monday for comparison
-      const now = new Date();
-      const currentMonday = new Date(now);
-      const dayOfWeek = now.getDay();
-      const daysSinceMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
-      currentMonday.setDate(now.getDate() - daysSinceMonday);
-      currentMonday.setHours(0, 0, 0, 0);
-
-      // Filter participants who are from previous weeks (not current week)
+      // Filter participants based on their admin_status
       const pastParticipants = weeklyParticipants.filter(participant => {
-        const adminStatus = participant.admin_status || participantFilters[participant.id] || 'this week';
+        const adminStatus = participant.admin_status || participantFilters[participant.id];
         
-        // Include participants with week-specific statuses (past weeks)
-        if (adminStatus.startsWith('week-') || adminStatus === 'past' || adminStatus === 'inactive') {
-          return true;
+        // Filter based on selected past week
+        if (pastWeekFilter === 'past week 1') {
+          return adminStatus === 'past week 1';
+        } else if (pastWeekFilter === 'past week 2') {
+          return adminStatus === 'past week 2';
+        } else if (pastWeekFilter === 'past week 3') {
+          return adminStatus === 'past week 3';
         }
         
-        // Exclude participants with 'this week' status from past section
-        if (adminStatus === 'this week') {
-          return false;
-        }
-        
-        // Fallback: check dates for participants without proper admin_status
-        const contestDate = participant.contest_start_date ? 
-          new Date(participant.contest_start_date) : 
-          new Date(participant.created_at);
-        const participantMonday = new Date(contestDate);
-        const participantDayOfWeek = contestDate.getDay();
-        const participantDaysSinceMonday = participantDayOfWeek === 0 ? 6 : participantDayOfWeek - 1;
-        participantMonday.setDate(contestDate.getDate() - participantDaysSinceMonday);
-        participantMonday.setHours(0, 0, 0, 0);
-        
-        return participantMonday.getTime() < currentMonday.getTime();
+        // Default: show all past weeks
+        return adminStatus?.startsWith('past week') || adminStatus?.startsWith('week-');
       }).map(participant => ({
         ...participant,
         weekInterval: getParticipantWeekInterval(participant)
@@ -445,7 +428,7 @@ const Admin = () => {
     };
 
     filterPastWeekParticipants();
-  }, [weeklyParticipants, participantFilters]);
+  }, [weeklyParticipants, participantFilters, pastWeekFilter]);
 
   // Helper function to determine week interval for participant
   const getParticipantWeekInterval = (participant: any) => {
@@ -2027,107 +2010,43 @@ const Admin = () => {
               <div className="mb-6">
                 <div>
                   <h2 className="text-xl font-semibold">Past Week Participants</h2>
-                  <p className="text-muted-foreground">Participants from previous weeks with their week intervals</p>
+                  <p className="text-muted-foreground">Участники из прошлых недель с правильными статусами</p>
                 </div>
                 
-                {/* Week interval filter */}
+                {/* Past week filter */}
                 <div className="mt-4">
                   <Select 
-                    value={selectedWeekOffset || 'all'} 
-                    onValueChange={(value) => {
-                      if (value === 'all') {
-                        setSelectedWeekOffset(null);
-                      } else {
-                        setSelectedWeekOffset(value);
-                      }
-                    }}
+                    value={pastWeekFilter} 
+                    onValueChange={setPastWeekFilter}
                   >
                     <SelectTrigger className="w-64">
-                      <SelectValue placeholder="Select week interval" />
+                      <SelectValue placeholder="Выберите неделю" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="all">All weeks</SelectItem>
-                      {(() => {
-                        // Get current week interval to exclude it from dropdown
-                        const now = new Date();
-                        const currentMonday = new Date(now);
-                        const dayOfWeek = now.getDay();
-                        const daysSinceMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
-                        currentMonday.setDate(now.getDate() - daysSinceMonday);
-                        const currentWeekInterval = formatWeekInterval(currentMonday);
-                        
-                        return Array.from(new Set(pastWeekParticipants.map(p => p.weekInterval)))
-                          .filter(interval => interval !== currentWeekInterval) // Exclude current week
-                          .sort((a, b) => b.localeCompare(a))
-                          .map((interval, index) => (
-                            <SelectItem key={interval} value={interval}>
-                              {interval}
-                            </SelectItem>
-                          ));
-                      })()}
+                      <SelectItem value="past week 1">Прошлая неделя (15.09-21.09)</SelectItem>
+                      <SelectItem value="past week 2">Позапрошлая неделя (08.09-14.09)</SelectItem>
+                      <SelectItem value="past week 3">Старые недели (18.08-24.08)</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
               </div>
               
               {(() => {
-                // Get all past week participants by fetching participants not from current week
-                const allPastParticipants = weeklyParticipants.filter(participant => {
-                  const now = new Date();
-                  const currentMonday = new Date(now);
-                  const dayOfWeek = now.getDay();
-                  const daysSinceMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
-                  currentMonday.setDate(now.getDate() - daysSinceMonday);
-                  currentMonday.setHours(0, 0, 0, 0);
-
-                  // Use contest_start_date if available, otherwise fall back to created_at
-                  const contestDate = participant.contest_start_date ? 
-                    new Date(participant.contest_start_date) : 
-                    new Date(participant.created_at);
-                  
-                  const participantMonday = new Date(contestDate);
-                  const participantDayOfWeek = contestDate.getDay();
-                  const participantDaysSinceMonday = participantDayOfWeek === 0 ? 6 : participantDayOfWeek - 1;
-                  participantMonday.setDate(contestDate.getDate() - participantDaysSinceMonday);
-                  participantMonday.setHours(0, 0, 0, 0);
-                  
-                  return participantMonday.getTime() < currentMonday.getTime();
-                }).map(participant => {
-                  return {
-                    ...participant,
-                    weekInterval: getParticipantWeekInterval(participant)
-                  };
-                });
-
-                if (allPastParticipants.length === 0) {
+                // Фильтруем участников по выбранной прошлой неделе
+                if (pastWeekParticipants.length === 0) {
                   return (
                     <div className="text-center py-8 text-muted-foreground">
-                      <p className="text-lg">No past week participants found</p>
+                      <p className="text-lg">Участники для выбранной недели не найдены</p>
+                      <p className="text-sm mt-2">
+                        {pastWeekFilter === 'past week 1' && 'Прошлая неделя: 15.09-21.09'}
+                        {pastWeekFilter === 'past week 2' && 'Позапрошлая неделя: 08.09-14.09'}
+                        {pastWeekFilter === 'past week 3' && 'Старые недели: 18.08-24.08'}
+                      </p>
                     </div>
                   );
                 }
 
-                const filteredPastParticipants = selectedWeekOffset && selectedWeekOffset !== 'all'
-                  ? (() => {
-                      const intervals = Array.from(new Set(allPastParticipants.map(p => p.weekInterval)))
-                        .sort((a, b) => b.localeCompare(a));
-                      
-                      console.log('All intervals:', intervals);
-                      console.log('Selected week offset:', selectedWeekOffset);
-                      
-                      // selectedWeekOffset is now the actual interval string, not an index
-                      const targetInterval = selectedWeekOffset;
-                      console.log('Target interval:', targetInterval);
-                      
-                      const filteredParticipants = allPastParticipants.filter(p => {
-                        console.log(`Filtering participant: weekInterval=${p.weekInterval}, matches target=${p.weekInterval === targetInterval}`);
-                        return p.weekInterval === targetInterval;
-                      });
-                      
-                      console.log('Filtered participants count:', filteredParticipants.length);
-                      return filteredParticipants;
-                    })()
-                  : allPastParticipants;
+                const filteredPastParticipants = pastWeekParticipants;
 
                 return filteredPastParticipants.map((participant) => {
                   const participantProfile = profiles.find(p => p.id === participant.user_id);
