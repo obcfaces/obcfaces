@@ -831,6 +831,7 @@ const Admin = () => {
   };
 
   const fetchContestApplications = async () => {
+    console.log('Fetching contest applications...');
     const { data, error } = await supabase
       .from('contest_applications')
       .select('*')
@@ -838,6 +839,7 @@ const Admin = () => {
       .order('submitted_at', { ascending: false });
 
     if (error) {
+      console.error('Error fetching contest applications:', error);
       toast({
         title: "Error",
         description: "Failed to fetch contest applications",
@@ -846,6 +848,7 @@ const Admin = () => {
       return;
     }
 
+    console.log('Fetched contest applications:', data?.length, 'applications');
     setContestApplications(data || []);
   };
 
@@ -985,6 +988,7 @@ const Admin = () => {
       const currentTime = new Date().toISOString();
       
       console.log('Updating application:', applicationId, 'to status:', newStatus);
+      console.log('Application data:', application);
       
       const updateData: any = {
         status: newStatus,
@@ -1134,6 +1138,7 @@ const Admin = () => {
       });
     }
 
+    console.log('Refreshing data after status change...');
     fetchContestApplications();
     fetchWeeklyParticipants();
   };
@@ -2533,25 +2538,27 @@ const Admin = () => {
                                      {/* Status dropdown at the top - desktop */}
                                      <Select 
                                        value={application.status} 
-                                        onValueChange={(newStatus) => {
-                                          if (newStatus === 'delete') {
-                                            setApplicationToDelete({ 
-                                              id: application.id, 
-                                              name: `${appData.first_name} ${appData.last_name}` 
-                                            });
-                                            setShowDeleteConfirmModal(true);
-                                            return;
-                                          }
-                                          if (newStatus === 'rejected') {
-                                            setApplicationToReject({ 
-                                              id: application.id, 
-                                              name: `${appData.first_name} ${appData.last_name}` 
-                                            });
-                                            setRejectModalOpen(true);
-                                            return;
-                                          }
-                                          reviewApplication(application.id, newStatus);
-                                        }}
+                                         onValueChange={(newStatus) => {
+                                           console.log('Status change requested:', newStatus, 'for application:', application.id);
+                                           if (newStatus === 'delete') {
+                                             setApplicationToDelete({ 
+                                               id: application.id, 
+                                               name: `${appData.first_name} ${appData.last_name}` 
+                                             });
+                                             setShowDeleteConfirmModal(true);
+                                             return;
+                                           }
+                                           if (newStatus === 'rejected') {
+                                             setApplicationToReject({ 
+                                               id: application.id, 
+                                               name: `${appData.first_name} ${appData.last_name}` 
+                                             });
+                                             setRejectModalOpen(true);
+                                             return;
+                                           }
+                                           console.log('Calling reviewApplication for status:', newStatus);
+                                           reviewApplication(application.id, newStatus);
+                                         }}
                                      >
                                         <SelectTrigger 
                                            className={`w-24 ${
