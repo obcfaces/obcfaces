@@ -1047,8 +1047,8 @@ const Admin = () => {
       }
     }
 
-    // If status is approved, automatically add to weekly contest
-    if (newStatus === 'approved' && application) {
+    // If status is approved or next, automatically add to weekly contest
+    if ((newStatus === 'approved' || newStatus === 'next') && application) {
       try {
         const appData = typeof application.application_data === 'string' 
           ? JSON.parse(application.application_data) 
@@ -1087,22 +1087,42 @@ const Admin = () => {
           }
         }
 
-        // Add participant to weekly contest
+        // Add participant to weekly contest (check if already exists)
         if (contestId) {
-          const { error: participantError } = await supabase
+          const { data: existingParticipant } = await supabase
             .from('weekly_contest_participants')
-            .insert({
-              contest_id: contestId,
-              user_id: application.user_id,
-              application_data: application.application_data
-            });
+            .select('id')
+            .eq('user_id', application.user_id)
+            .eq('contest_id', contestId)
+            .single();
 
-          if (participantError) {
-            console.error('Error adding participant to weekly contest:', participantError);
+          if (!existingParticipant) {
+            const { error: participantError } = await supabase
+              .from('weekly_contest_participants')
+              .insert({
+                contest_id: contestId,
+                user_id: application.user_id,
+                application_data: application.application_data,
+                admin_status: newStatus === 'approved' ? 'this week' : 'next'
+              });
+
+            if (participantError) {
+              console.error('Error adding participant to weekly contest:', participantError);
+            }
+          } else {
+            // Update existing participant's admin_status
+            const { error: updateError } = await supabase
+              .from('weekly_contest_participants')
+              .update({ admin_status: newStatus === 'approved' ? 'this week' : 'next' })
+              .eq('id', existingParticipant.id);
+
+            if (updateError) {
+              console.error('Error updating participant admin_status:', updateError);
+            }
           }
         }
       } catch (error) {
-        console.error('Error handling approved status:', error);
+        console.error('Error handling approved/next status:', error);
       }
     }
 
