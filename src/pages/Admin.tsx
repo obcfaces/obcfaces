@@ -298,7 +298,7 @@ const Admin = () => {
             
             try {
               const { data: ratingStats } = await supabase
-                .rpc('get_user_rating_stats', { target_user_id: userId });
+                .rpc('get_public_participant_rating_stats', { target_participant_id: userId });
               
               return {
                 id: isFromApplication ? `app-${item.id}` : item.id,
@@ -337,7 +337,7 @@ const Admin = () => {
             
             try {
               const { data: ratingStats } = await supabase
-                .rpc('get_user_rating_stats', { target_user_id: app.user_id });
+                .rpc('get_public_participant_rating_stats', { target_participant_id: app.user_id });
               
               return {
                 id: `rejected-${app.id}`,
@@ -423,7 +423,7 @@ const Admin = () => {
           pastParticipants.map(async (participant) => {
             try {
               const { data: ratingStats } = await supabase
-                .rpc('get_user_rating_stats', { target_user_id: participant.user_id });
+                .rpc('get_public_participant_rating_stats', { target_participant_id: participant.user_id });
               
               return {
                 ...participant,
