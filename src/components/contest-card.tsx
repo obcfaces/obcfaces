@@ -378,17 +378,17 @@ export function ContestantCard({
       const ratingData = {
         user_id: propUser.id,
         contestant_name: name,
-        contestant_user_id: profileId || null,
+        participant_id: profileId, // Use participant_id for the rating
         rating: rating
       };
       
       console.log('Saving rating to database:', ratingData);
       
-      // Use upsert to handle one rating per user per contestant
+      // Use upsert to handle one rating per user per participant
       const { data, error } = await supabase
         .from('contestant_ratings')
         .upsert(ratingData, { 
-          onConflict: 'user_id,contestant_user_id',
+          onConflict: 'user_id,participant_id',
           ignoreDuplicates: false 
         })
         .select();
