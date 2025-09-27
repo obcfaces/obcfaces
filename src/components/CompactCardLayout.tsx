@@ -29,6 +29,7 @@ interface CompactCardLayoutProps {
   rank: number;
   userRating: number;
   localAverageRating: number;
+  hideCardActions?: boolean;
   
   // Card data
   cardData: any;
@@ -73,6 +74,7 @@ export function CompactCardLayout({
   rank,
   userRating,
   localAverageRating,
+  hideCardActions,
   cardData,
   isLiked,
   hasCommented,
@@ -130,7 +132,7 @@ export function CompactCardLayout({
       </div>
       
       {/* Rating badge in top right corner for past weeks */}
-      {!isEditing && !showThanks && !isExample && !isThisWeek && (
+      {!isEditing && !showThanks && !isExample && !isThisWeek && !hideCardActions && (
         <div className="absolute top-0 right-0 z-10">
           <div className="bg-contest-blue text-white px-1 py-0.5 rounded-bl text-sm sm:text-base font-bold">
             {localAverageRating > 0 ? localAverageRating.toFixed(1) : '0.0'}
@@ -192,7 +194,7 @@ export function CompactCardLayout({
               )}
             </div>
             
-            {!isExample && (
+            {!isExample && !hideCardActions && (
               <div className="flex items-center justify-end gap-2 sm:gap-4">
                  <button
                    type="button"
@@ -288,7 +290,7 @@ export function CompactCardLayout({
               )}
             </div>
             
-            {!isExample && (
+            {!isExample && !hideCardActions && (
               <div className="flex items-center justify-end gap-2 sm:gap-4">
                  <button
                    type="button"
