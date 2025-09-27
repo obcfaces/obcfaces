@@ -403,7 +403,7 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
               <span className="text-2xl font-normal text-muted-foreground">{titleSuffix}</span>
             )}
             {isActive && description && (
-              <span className={`text-base font-normal ${title === "THIS WEEK" ? "text-green-700 dark:text-green-300" : "text-contest-text"} flex items-center leading-tight`}>
+              <span className={`text-base font-normal ${title === "THIS WEEK" ? "text-green-700 dark:text-green-300" : "text-contest-text"} leading-tight`}>
                 {description}
               </span>
             )}
