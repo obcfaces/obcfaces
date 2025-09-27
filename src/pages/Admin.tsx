@@ -369,12 +369,13 @@ const Admin = () => {
 
         setFilteredWeeklyParticipants(rejectedParticipantsWithRatings);
       } else {
-        // Filter participants based on participant_status
+        // Filter participants based on participant_status - strictly filter for 'this week' block
         const filteredByStatus = weeklyParticipants.filter(participant => {
-          const status = participant.participant_status || participantFilters[participant.id] || 'this week';
+          const status = participant.participant_status || participantFilters[participant.id];
           
           switch (weeklyContestFilter) {
             case 'this week':
+              // Only show participants explicitly marked as 'this week'
               return status === 'this week';
             case 'next week':
               return status === 'next week';
