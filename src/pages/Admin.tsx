@@ -387,10 +387,16 @@ const Admin = () => {
               return shouldInclude;
             case 'next week':
               return status === 'next week';
-            case 'next week on site':
-              return status === 'next week on site';
-            case 'past week':
-              return status === 'past week';
+            case 'past week 1':
+              return status === 'past week 1';
+            case 'past week 2':
+              return status === 'past week 2';
+            case 'past week 3':
+              return status === 'past week 3';
+            case 'pending':
+              return status === 'pending';
+            case 'inactive':
+              return status === 'inactive';
             default:
               return true;
           }
@@ -1418,12 +1424,14 @@ const Admin = () => {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="approve">Pending (needs approval)</SelectItem>
-                    <SelectItem value="reject">Rejected</SelectItem>
                     <SelectItem value="this week">This Week</SelectItem>
                     <SelectItem value="next week">Next Week</SelectItem>
-                    <SelectItem value="next week on site">Next Week On Site</SelectItem>
-                    <SelectItem value="past week">Past Week</SelectItem>
+                    <SelectItem value="past week 1">Past Week 1 (15.09-21.09)</SelectItem>
+                    <SelectItem value="past week 2">Past Week 2 (08.09-14.09)</SelectItem>
+                    <SelectItem value="past week 3">Past Week 3 (18.08-24.08)</SelectItem>
+                    <SelectItem value="approve">Approve</SelectItem>
+                    <SelectItem value="pending">Pending</SelectItem>
+                    <SelectItem value="inactive">Inactive</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
