@@ -158,6 +158,7 @@ const Admin = () => {
   const [genderFilter, setGenderFilter] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [weeklyContestFilter, setWeeklyContestFilter] = useState<string>('this week');
+  const [participantStatusFilter, setParticipantStatusFilter] = useState<string>('all');
   const [filteredWeeklyParticipants, setFilteredWeeklyParticipants] = useState<any[]>([]);
   const [selectedUserApplications, setSelectedUserApplications] = useState<string | null>(null);
   const [editingApplicationId, setEditingApplicationId] = useState<string | null>(null);

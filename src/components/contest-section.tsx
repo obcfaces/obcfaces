@@ -94,7 +94,7 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
 
   const loadContestParticipants = async (weekOffset: number = 0) => {
     try {
-      // For now, use the existing function and filter on admin_status later
+      // Use the existing function and filter by participant_status
       const { data, error } = await supabase
         .rpc('get_weekly_contest_participants_public', { weeks_offset: weekOffset });
 
