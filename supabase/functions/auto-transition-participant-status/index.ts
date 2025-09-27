@@ -102,10 +102,12 @@ Deno.serve(async (req) => {
   } catch (error) {
     console.error('Error in auto-transition-participant-status:', error)
     
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred'
+    
     return new Response(
       JSON.stringify({ 
         success: false,
-        error: error.message 
+        error: errorMessage 
       }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },

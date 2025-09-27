@@ -119,6 +119,7 @@ interface WeeklyContestParticipant {
   contest_start_date?: string; // Add this field for filtering by week
   is_active: boolean;
   admin_status?: string;
+  participant_status?: string; // Add participant_status field
   profiles?: {
     first_name: string;
     last_name: string;
@@ -283,8 +284,8 @@ const Admin = () => {
 
         // Get weekly participants with "pending" status
         const pendingParticipants = weeklyParticipants.filter(participant => {
-          const adminStatus = participant.admin_status || participantFilters[participant.id];
-          return adminStatus === 'pending';
+          const status = participant.participant_status || participantFilters[participant.id];
+          return status === 'pending';
         });
 
         // Combine both approved applications and pending participants
@@ -367,21 +368,23 @@ const Admin = () => {
         );
 
         setFilteredWeeklyParticipants(rejectedParticipantsWithRatings);
-      } else if (weeklyContestFilter === 'this week') {
-        // Get current Monday for comparison
-        const now = new Date();
-        const currentMonday = new Date(now);
-        const dayOfWeek = now.getDay();
-        const daysSinceMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
-        currentMonday.setDate(now.getDate() - daysSinceMonday);
-        currentMonday.setHours(0, 0, 0, 0);
-
-        // Filter participants with 'this week' status from current week only
+      } else {
+        // Filter participants based on participant_status
         const filteredByStatus = weeklyParticipants.filter(participant => {
-          const adminStatus = participant.admin_status || participantFilters[participant.id] || 'this week';
+          const status = participant.participant_status || participantFilters[participant.id] || 'this week';
           
-          // For "This" section, only show participants with 'this week' status
-          return adminStatus === 'this week';
+          switch (weeklyContestFilter) {
+            case 'this week':
+              return status === 'this week';
+            case 'next week':
+              return status === 'next week';
+            case 'next week on site':
+              return status === 'next week on site';
+            case 'past week':
+              return status === 'past week';
+            default:
+              return true;
+          }
         });
 
         // Remove duplicates based on user_id
@@ -390,12 +393,6 @@ const Admin = () => {
         );
         
         setFilteredWeeklyParticipants(uniqueParticipants);
-      } else {
-        const filtered = weeklyParticipants.filter(participant => {
-          const index = weeklyParticipants.findIndex(p => p.user_id === participant.user_id);
-          return weeklyParticipants.indexOf(participant) === index;
-        });
-        setFilteredWeeklyParticipants(filtered);
       }
     };
 
@@ -1408,11 +1405,12 @@ const Admin = () => {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="approve">Approve</SelectItem>
-                    <SelectItem value="reject">Reject</SelectItem>
+                    <SelectItem value="approve">Pending (needs approval)</SelectItem>
+                    <SelectItem value="reject">Rejected</SelectItem>
                     <SelectItem value="this week">This Week</SelectItem>
-                    <SelectItem value="next">Next Week</SelectItem>
-                    <SelectItem value="past">Past Week</SelectItem>
+                    <SelectItem value="next week">Next Week</SelectItem>
+                    <SelectItem value="next week on site">Next Week On Site</SelectItem>
+                    <SelectItem value="past week">Past Week</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
