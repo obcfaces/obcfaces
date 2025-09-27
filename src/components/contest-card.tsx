@@ -532,7 +532,7 @@ export function ContestantCard({
           {/* Header with content or voting overlay */}
           <div className="relative px-6 py-3 border-b border-contest-border h-[80px]">
             {/* Show different content based on user auth status and contest type */}
-            {isThisWeek && !propUser && !isExample ? (
+            {isThisWeek && !propUser && !isExample && !hideCardActions ? (
               /* Unauthorized users in THIS WEEK section only see voting (but not for test cards) */
               <div className="absolute inset-0 bg-gray-300 flex items-center justify-center h-full">
                 {(viewMode as string) === 'compact' ? (
@@ -595,7 +595,7 @@ export function ContestantCard({
             )}
             
             {/* Re-voting overlay - shown when editing existing vote */}
-            {isVoted && isEditing && !showThanks && (
+            {isVoted && isEditing && !showThanks && !hideCardActions && (
             <div className="absolute inset-0 bg-gray-300 flex items-center justify-center h-full">
               {(viewMode as string) === 'compact' ? (
                 <div className="flex flex-col items-center gap-2">
@@ -824,7 +824,7 @@ export function ContestantCard({
         )}
         
         {/* Rating badge in top right corner - show for everyone except unauthenticated users in THIS WEEK */}
-        {isVoted && !isEditing && !showThanks && !isExample && (propUser || !isThisWeek) && (
+        {isVoted && !isEditing && !showThanks && !isExample && (propUser || !isThisWeek) && !hideCardActions && (
           <div className="absolute top-0 right-0 z-10 flex flex-col items-end">
              <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
                <PopoverTrigger asChild>
