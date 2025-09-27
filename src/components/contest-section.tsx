@@ -238,7 +238,7 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
               
               // Get rating stats using secure function
               const { data: ratingStats } = await supabase
-                .rpc('get_public_participant_rating_stats', { target_participant_id: contestant.user_id });
+                .rpc('get_public_participant_rating_stats', { target_participant_id: contestant.participant_id });
               
               let averageRating = 0;
               let totalVotes = 0;
@@ -320,7 +320,7 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
           
           // Get rating stats using secure function
           const { data: ratingStats } = await supabase
-            .rpc('get_public_participant_rating_stats', { target_participant_id: contestant.user_id });
+            .rpc('get_public_participant_rating_stats', { target_participant_id: contestant.participant_id });
           
           let averageRating = 0;
           let totalVotes = 0;
