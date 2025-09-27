@@ -771,6 +771,10 @@ export type Database = {
         Args: { conversation_id_param: string; user_id_param: string }
         Returns: boolean
       }
+      check_user_has_voted_for_participant: {
+        Args: { target_participant_id: string }
+        Returns: boolean
+      }
       check_user_in_conversation_safe: {
         Args: { conversation_id_param: string; user_id_param: string }
         Returns: boolean
@@ -952,12 +956,26 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
+      get_public_participant_rating_stats: {
+        Args: { target_participant_id: string }
+        Returns: {
+          average_rating: number
+          total_votes: number
+        }[]
+      }
       get_public_profile_summary: {
         Args: { profile_user_id: string }
         Returns: {
           avatar_url: string
           display_name: string
           id: string
+        }[]
+      }
+      get_public_rating_stats: {
+        Args: { target_contestant_name: string }
+        Returns: {
+          average_rating: number
+          total_votes: number
         }[]
       }
       get_rating_stats: {
