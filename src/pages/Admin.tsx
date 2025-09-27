@@ -435,23 +435,30 @@ const Admin = () => {
     filterPastWeekParticipants();
   }, [weeklyParticipants, participantFilters]);
 
-  // Helper function to determine week interval for participant
+  // Helper function to determine week interval for participant based on admin_status
   const getParticipantWeekInterval = (participant: any) => {
-    // Use contest_start_date if available, otherwise fall back to created_at
-    const contestDate = participant.contest_start_date ? 
-      new Date(participant.contest_start_date) : 
-      new Date(participant.created_at);
+    const adminStatus = participant.admin_status || participantFilters[participant.id];
     
-    // If participant has final_rank, they were a finalist in their week
-    if (participant.final_rank) {
-      return `Week ${participant.final_rank === 1 ? 'Winner' : 'Finalist'} - ${formatWeekInterval(contestDate)}`;
+    // Map admin_status to specific week dates based on your contest data
+    switch (adminStatus) {
+      case 'past week 1':
+        return '15/09 - 21/09/2025'; // Contest id: aa89cda5-e0f7-4421-bdf2-372f406959e7
+      case 'past week 2':
+        return '08/09 - 14/09/2025'; // Contest id: 292653f9-3e93-486e-a531-bd324afaf40e
+      case 'past week 3':
+        return '18/08 - 24/08/2025'; // Contest id: fc81b526-c732-43f2-9cc2-c46c696e5343
+      case 'this week':
+        return '22/09 - 28/09/2025'; // Current week
+      default:
+        // Fallback to dynamic calculation for any other cases
+        const contestDate = participant.contest_start_date ? 
+          new Date(participant.contest_start_date) : 
+          new Date(participant.created_at);
+        return formatWeekInterval(contestDate);
     }
-    
-    // Otherwise, assign based on contest date
-    return formatWeekInterval(contestDate);
   };
 
-  // Helper function to format week interval
+  // Helper function to format week interval (fallback)
   const formatWeekInterval = (date: Date | string) => {
     const d = new Date(date);
     const monday = new Date(d);
@@ -3567,8 +3574,12 @@ const Admin = () => {
                                          {/* Column 2: Information (25ch) */}
                                          <div className="w-[25ch] flex-shrink-0 p-4">
                                            <div className="flex items-center gap-2 mb-1">
-                                              <Avatar className="h-6 w-6 flex-shrink-0">
-                                                <AvatarImage src={prevAppData.photo1_url || prevAppData.photo_1_url || prevUserProfile?.avatar_url || ''} />
+                                               <Avatar className="h-6 w-6 flex-shrink-0">
+                                                 <AvatarImage src={(() => {
+                                                   const photoUrl = prevAppData.photo1_url || prevAppData.photo_1_url || prevUserProfile?.avatar_url || '';
+                                                   console.log(`Photo URL for ${prevAppData.first_name}: photo1_url=${prevAppData.photo1_url}, photo_1_url=${prevAppData.photo_1_url}, avatar_url=${prevUserProfile?.avatar_url}, final=${photoUrl}`);
+                                                   return photoUrl;
+                                                 })()} />
                                                <AvatarFallback className="text-xs">
                                                  {prevAppData.first_name?.charAt(0) || 'U'}
                                                </AvatarFallback>
@@ -3747,7 +3758,11 @@ const Admin = () => {
                                                     {/* User avatar positioned in top right corner */}
                                                     <div className="absolute top-2 right-2">
                                                        <Avatar className="h-6 w-6 flex-shrink-0 border-2 border-white shadow-sm">
-                                                         <AvatarImage src={prevAppData.photo1_url || prevAppData.photo_1_url || prevUserProfile?.avatar_url || ''} />
+                                                          <AvatarImage src={(() => {
+                                                            const photoUrl = prevAppData.photo1_url || prevAppData.photo_1_url || prevUserProfile?.avatar_url || '';
+                                                            console.log(`Avatar photo URL for ${prevAppData.first_name}: photo1_url=${prevAppData.photo1_url}, photo_1_url=${prevAppData.photo_1_url}, avatar_url=${prevUserProfile?.avatar_url}, final=${photoUrl}`);
+                                                            return photoUrl;
+                                                          })()} />
                                                         <AvatarFallback className="text-xs">
                                                           {prevAppData.first_name?.charAt(0) || 'U'}
                                                         </AvatarFallback>
