@@ -376,32 +376,10 @@ const Admin = () => {
 
         // Filter participants with 'this week' status from current week only
         const filteredByStatus = weeklyParticipants.filter(participant => {
-          const adminStatus = participant.admin_status || participantFilters[participant.id] || (participant.final_rank ? 'this week' : 'approve');
+          const adminStatus = participant.admin_status || participantFilters[participant.id] || 'this week';
           
-          // Must have 'this week' status
-          if (adminStatus !== 'this week') {
-            return false;
-          }
-
-          // Check if participant belongs to current week's contest
-          if (participant.contest_start_date) {
-            const contestDate = new Date(participant.contest_start_date);
-            const contestMonday = new Date(contestDate);
-            contestMonday.setHours(0, 0, 0, 0);
-            
-            // Only include if contest is for current week
-            return contestMonday.getTime() === currentMonday.getTime();
-          }
-          
-          // If no contest_start_date, fall back to checking created_at
-          const createdDate = new Date(participant.created_at);
-          const participantMonday = new Date(createdDate);
-          const participantDayOfWeek = createdDate.getDay();
-          const participantDaysSinceMonday = participantDayOfWeek === 0 ? 6 : participantDayOfWeek - 1;
-          participantMonday.setDate(createdDate.getDate() - participantDaysSinceMonday);
-          participantMonday.setHours(0, 0, 0, 0);
-          
-          return participantMonday.getTime() === currentMonday.getTime();
+          // For "This" section, only show participants with 'this week' status
+          return adminStatus === 'this week';
         });
 
         // Remove duplicates based on user_id
@@ -435,6 +413,14 @@ const Admin = () => {
 
       // Filter participants who are from previous weeks (not current week)
       const pastParticipants = weeklyParticipants.filter(participant => {
+        const adminStatus = participant.admin_status || participantFilters[participant.id] || 'this week';
+        
+        // Include participants with week-specific statuses or past-related statuses
+        if (adminStatus.startsWith('week-') || adminStatus === 'past' || adminStatus === 'inactive') {
+          return true;
+        }
+        
+        // Also include participants from previous weeks (fallback for old data)
         const createdDate = new Date(participant.created_at);
         const participantMonday = new Date(createdDate);
         const participantDayOfWeek = createdDate.getDay();
@@ -442,8 +428,8 @@ const Admin = () => {
         participantMonday.setDate(createdDate.getDate() - participantDaysSinceMonday);
         participantMonday.setHours(0, 0, 0, 0);
         
-        // Only include participants from previous weeks
-        return participantMonday.getTime() < currentMonday.getTime();
+        // Only include participants from previous weeks that don't have 'this week' status
+        return participantMonday.getTime() < currentMonday.getTime() && adminStatus !== 'this week';
       }).map(participant => ({
         ...participant,
         weekInterval: getParticipantWeekInterval(participant)
@@ -769,7 +755,26 @@ const Admin = () => {
       fetchUserRoles();
       fetchContestApplications();
       fetchWeeklyContests();
-      fetchWeeklyParticipants();
+      
+      // Auto-assign weekly statuses and then fetch participants
+      const autoAssignAndFetch = async () => {
+        try {
+          console.log('Auto-assigning weekly statuses...');
+          const { error } = await supabase.rpc('auto_assign_weekly_status');
+          if (error) {
+            console.error('Error auto-assigning statuses:', error);
+          } else {
+            console.log('Successfully auto-assigned weekly statuses');
+          }
+        } catch (error) {
+          console.error('Error calling auto_assign_weekly_status:', error);
+        } finally {
+          // Fetch participants after status assignment
+          fetchWeeklyParticipants();
+        }
+      };
+      
+      autoAssignAndFetch();
     } catch (error) {
       console.error('Error checking admin access:', error);
       navigate('/');

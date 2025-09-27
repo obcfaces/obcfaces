@@ -755,6 +755,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      auto_assign_weekly_status: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       auto_transition_weekly_contests: {
         Args: Record<PropertyKey, never>
         Returns: undefined
