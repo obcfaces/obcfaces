@@ -2250,9 +2250,9 @@ const Admin = () => {
                               }}
                               title="Click to view voters"
                             >
-                              {participant.total_votes || 0} votes
+                              {Number.isInteger(participant.total_votes) ? participant.total_votes : 0} votes
                               <div className="text-sm text-muted-foreground">
-                                ★ {(participant.average_rating || 0).toFixed(1)}
+                                ★ {Number.isFinite(participant.average_rating) ? Number(participant.average_rating).toFixed(1) : '0.0'}
                               </div>
                             </div>
                           </div>
@@ -2342,7 +2342,7 @@ const Admin = () => {
                                 setVotersModalOpen(true);
                               }}
                             >
-                              {participant.total_votes || 0} votes • ★ {(participant.average_rating || 0).toFixed(1)}
+                              {Number.isInteger(participant.total_votes) ? participant.total_votes : 0} votes • ★ {Number.isFinite(participant.average_rating) ? Number(participant.average_rating).toFixed(1) : '0.0'}
                             </div>
                           </div>
                         </div>
