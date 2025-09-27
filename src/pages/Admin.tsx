@@ -2542,11 +2542,12 @@ const Admin = () => {
                                         >
                                           <SelectValue />
                                         </SelectTrigger>
-                                        <SelectContent>
-                                          <SelectItem value="pending">Pending</SelectItem>
-                                          <SelectItem value="approved">Approved</SelectItem>
-                                          <SelectItem value="rejected">Rejected</SelectItem>
-                                        </SelectContent>
+                                         <SelectContent>
+                                           <SelectItem value="pending">Pending</SelectItem>
+                                           <SelectItem value="approved">Approved</SelectItem>
+                                           <SelectItem value="rejected">Rejected</SelectItem>
+                                           <SelectItem value="next">Next</SelectItem>
+                                         </SelectContent>
                                      </Select>
                                      
                                      {/* Admin info and date at the bottom */}
@@ -2757,11 +2758,12 @@ const Admin = () => {
                                                  >
                                                   <SelectValue />
                                                 </SelectTrigger>
-                                                 <SelectContent>
-                                                   <SelectItem value="pending">Pending</SelectItem>
-                                                   <SelectItem value="approved">Approved</SelectItem>
-                                                   <SelectItem value="rejected">Rejected</SelectItem>
-                                                 </SelectContent>
+                                                  <SelectContent>
+                                                    <SelectItem value="pending">Pending</SelectItem>
+                                                    <SelectItem value="approved">Approved</SelectItem>
+                                                    <SelectItem value="rejected">Rejected</SelectItem>
+                                                    <SelectItem value="next">Next</SelectItem>
+                                                  </SelectContent>
                                               </Select>
                                               
                                                {/* Admin login with expandable date */}
@@ -3147,11 +3149,12 @@ const Admin = () => {
                                        >
                                          <SelectValue />
                                        </SelectTrigger>
-                                        <SelectContent>
-                                          <SelectItem value="pending">Pending</SelectItem>
-                                          <SelectItem value="approved">Approved</SelectItem>
-                                          <SelectItem value="rejected">Rejected</SelectItem>
-                                        </SelectContent>
+                                         <SelectContent>
+                                           <SelectItem value="pending">Pending</SelectItem>
+                                           <SelectItem value="approved">Approved</SelectItem>
+                                           <SelectItem value="rejected">Rejected</SelectItem>
+                                           <SelectItem value="next">Next</SelectItem>
+                                         </SelectContent>
                                      </Select>
                                    )}
                                    
@@ -3332,11 +3335,12 @@ const Admin = () => {
                                                 >
                                                  <SelectValue />
                                                </SelectTrigger>
-                                                <SelectContent>
-                                                  <SelectItem value="pending">Pending</SelectItem>
-                                                  <SelectItem value="approved">Approved</SelectItem>
-                                                  <SelectItem value="rejected">Rejected</SelectItem>
-                                                </SelectContent>
+                                                 <SelectContent>
+                                                   <SelectItem value="pending">Pending</SelectItem>
+                                                   <SelectItem value="approved">Approved</SelectItem>
+                                                   <SelectItem value="rejected">Rejected</SelectItem>
+                                                   <SelectItem value="next">Next</SelectItem>
+                                                 </SelectContent>
                                              </Select>
                                              
                                               {/* Admin login with expandable date */}
