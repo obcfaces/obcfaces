@@ -145,7 +145,7 @@ const Admin = () => {
   const [weeklyContests, setWeeklyContests] = useState<WeeklyContest[]>([]);
   const [weeklyParticipants, setWeeklyParticipants] = useState<WeeklyContestParticipant[]>([]);
   const [selectedContest, setSelectedContest] = useState<string | null>(null);
-  const [selectedWeekOffset, setSelectedWeekOffset] = useState<number>(0);
+  const [selectedWeekOffset, setSelectedWeekOffset] = useState<string | null>('all');
   const [photoModalOpen, setPhotoModalOpen] = useState(false);
   const [photoModalImages, setPhotoModalImages] = useState<string[]>([]);
   const [photoModalIndex, setPhotoModalIndex] = useState(0);
@@ -2024,12 +2024,12 @@ const Admin = () => {
                 {/* Week interval filter */}
                 <div className="mt-4">
                   <Select 
-                    value={selectedWeekOffset?.toString() || 'all'} 
+                    value={selectedWeekOffset || 'all'} 
                     onValueChange={(value) => {
                       if (value === 'all') {
                         setSelectedWeekOffset(null);
                       } else {
-                        setSelectedWeekOffset(parseInt(value));
+                        setSelectedWeekOffset(value);
                       }
                     }}
                   >
@@ -2041,7 +2041,7 @@ const Admin = () => {
                       {Array.from(new Set(pastWeekParticipants.map(p => p.weekInterval)))
                         .sort((a, b) => b.localeCompare(a))
                         .map((interval, index) => (
-                          <SelectItem key={interval} value={index.toString()}>
+                          <SelectItem key={interval} value={interval}>
                             {interval}
                           </SelectItem>
                         ))
@@ -2088,7 +2088,7 @@ const Admin = () => {
                   );
                 }
 
-                const filteredPastParticipants = selectedWeekOffset !== null && selectedWeekOffset !== undefined
+                const filteredPastParticipants = selectedWeekOffset && selectedWeekOffset !== 'all'
                   ? (() => {
                       const intervals = Array.from(new Set(allPastParticipants.map(p => p.weekInterval)))
                         .sort((a, b) => b.localeCompare(a));
@@ -2096,7 +2096,8 @@ const Admin = () => {
                       console.log('All intervals:', intervals);
                       console.log('Selected week offset:', selectedWeekOffset);
                       
-                      const targetInterval = intervals[selectedWeekOffset];
+                      // selectedWeekOffset is now the actual interval string, not an index
+                      const targetInterval = selectedWeekOffset;
                       console.log('Target interval:', targetInterval);
                       
                       const filteredParticipants = allPastParticipants.filter(p => {
