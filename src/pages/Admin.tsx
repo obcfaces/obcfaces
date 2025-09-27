@@ -174,7 +174,7 @@ const Admin = () => {
   const [expandedDesktopItems, setExpandedDesktopItems] = useState<Set<string>>(new Set());
   const [participantFilters, setParticipantFilters] = useState<{ [key: string]: string }>({});
   const [pastWeekParticipants, setPastWeekParticipants] = useState<any[]>([]);
-  const [pastWeekFilter, setPastWeekFilter] = useState<string>('past week 2');
+  const [pastWeekFilter, setPastWeekFilter] = useState<string>('past week 1');
    const [expandedAdminDates, setExpandedAdminDates] = useState<Set<string>>(new Set());
    const [adminDatePopup, setAdminDatePopup] = useState<{ show: boolean; date: string; admin: string; applicationId: string }>({ 
      show: false, date: '', admin: '', applicationId: '' 
@@ -2067,9 +2067,9 @@ const Admin = () => {
                       <SelectValue placeholder="Выберите неделю" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="past week 2">Прошлая неделя (08.09-14.09)</SelectItem>
-                      <SelectItem value="past week 3">Старая неделя (18.08-24.08)</SelectItem>
-                      <SelectItem value="this week">Текущая неделя (22.09-28.09)</SelectItem>
+                      <SelectItem value="past week 1">Прошлая неделя (15.09-21.09)</SelectItem>
+                      <SelectItem value="past week 2">2 недели назад (08.09-14.09)</SelectItem>
+                      <SelectItem value="past week 3">Старые недели (18.08-24.08)</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -2097,9 +2097,9 @@ const Admin = () => {
                     <div className="text-center py-8 text-muted-foreground">
                       <p className="text-lg">Участники для выбранной недели не найдены</p>
                       <p className="text-sm mt-2">
-                        {pastWeekFilter === 'past week 1' && 'Прошлая неделя: 16.09-22.09'}
-                        {pastWeekFilter === 'past week 2' && 'Позапрошлая неделя: 09.09-15.09'}
-                        {pastWeekFilter === 'past week 3' && 'Старые недели: 02.09-08.09'}
+                        {pastWeekFilter === 'past week 1' && 'Прошлая неделя: 15.09-21.09'}
+                        {pastWeekFilter === 'past week 2' && '2 недели назад: 08.09-14.09'}
+                        {pastWeekFilter === 'past week 3' && 'Старые недели: 18.08-24.08'}
                       </p>
                       <p className="text-xs mt-2 text-muted-foreground/70">
                         Всего участников: {weeklyParticipants.length}, доступные статусы: {[...new Set(weeklyParticipants.map(p => p.admin_status))].join(', ')}
