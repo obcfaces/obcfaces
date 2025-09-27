@@ -405,26 +405,17 @@ const Admin = () => {
   useEffect(() => {
     const filterPastWeekParticipants = async () => {
       try {
-        console.log('Filtering past week participants with filter:', pastWeekFilter);
+        console.log('Filtering past week participants - showing all past weeks');
         console.log('All weekly participants:', weeklyParticipants.length);
         
-        // Filter participants based on their admin_status directly from the loaded data
+        // Show all participants from all past weeks (any status that starts with "past week")
         const pastParticipants = weeklyParticipants.filter(participant => {
           const adminStatus = participant.admin_status || participantFilters[participant.id];
           
           console.log(`Participant ${participant.id}: status = ${adminStatus}`);
           
-          // Filter based on selected past week
-          if (pastWeekFilter === 'past week 1') {
-            return adminStatus === 'past week 1';
-          } else if (pastWeekFilter === 'past week 2') {
-            return adminStatus === 'past week 2';
-          } else if (pastWeekFilter === 'past week 3') {
-            return adminStatus === 'past week 3';
-          }
-          
-          // Default: show all past weeks
-          return adminStatus?.startsWith('past week') || adminStatus?.startsWith('week-');
+          // Include all past week participants
+          return adminStatus && adminStatus.startsWith('past week');
         }).map(participant => ({
           ...participant,
           weekInterval: getParticipantWeekInterval(participant)
@@ -442,7 +433,7 @@ const Admin = () => {
     };
 
     filterPastWeekParticipants();
-  }, [weeklyParticipants, participantFilters, pastWeekFilter]);
+  }, [weeklyParticipants, participantFilters]);
 
   // Helper function to determine week interval for participant
   const getParticipantWeekInterval = (participant: any) => {
@@ -2059,19 +2050,9 @@ const Admin = () => {
                 
                 {/* Past week filter */}
                 <div className="mt-4">
-                  <Select 
-                    value={pastWeekFilter} 
-                    onValueChange={setPastWeekFilter}
-                  >
-                    <SelectTrigger className="w-64">
-                      <SelectValue placeholder="Выберите неделю" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="past week 1">Прошлая неделя (15.09-21.09)</SelectItem>
-                      <SelectItem value="past week 2">2 недели назад (08.09-14.09)</SelectItem>
-                      <SelectItem value="past week 3">Старые недели (18.08-24.08)</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <div className="text-sm text-muted-foreground">
+                    Все участники предыдущих недель
+                  </div>
                 </div>
               </div>
               
@@ -2095,12 +2076,7 @@ const Admin = () => {
                 if (participantsToShow.length === 0) {
                   return (
                     <div className="text-center py-8 text-muted-foreground">
-                      <p className="text-lg">Участники для выбранной недели не найдены</p>
-                      <p className="text-sm mt-2">
-                        {pastWeekFilter === 'past week 1' && 'Прошлая неделя: 15.09-21.09'}
-                        {pastWeekFilter === 'past week 2' && '2 недели назад: 08.09-14.09'}
-                        {pastWeekFilter === 'past week 3' && 'Старые недели: 18.08-24.08'}
-                      </p>
+                      <p className="text-lg">Нет участников предыдущих недель</p>
                       <p className="text-xs mt-2 text-muted-foreground/70">
                         Всего участников: {weeklyParticipants.length}, доступные статусы: {[...new Set(weeklyParticipants.map(p => p.admin_status))].join(', ')}
                       </p>
