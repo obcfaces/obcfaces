@@ -67,7 +67,7 @@ const getNextWeekRange = () => {
   
   const formatDate = (date: Date, includeYear: boolean = false) => {
     const day = date.getDate();
-    const month = date.toLocaleDateString('en-US', { month: 'long' });
+    const month = date.toLocaleDateString('en-US', { month: 'short' });
     const year = date.getFullYear();
     return includeYear ? `${day} ${month} ${year}` : `${day} ${month}`;
   };
@@ -77,7 +77,7 @@ const getNextWeekRange = () => {
   
   // If same month, show "1-7 September 2025", otherwise "31 August - 6 September 2025"
   if (nextMonday.getMonth() === nextSunday.getMonth()) {
-    return `${nextMonday.getDate()}-${nextSunday.getDate()} ${nextSunday.toLocaleDateString('en-US', { month: 'long' })} ${nextSunday.getFullYear()}`;
+    return `${nextMonday.getDate()}-${nextSunday.getDate()} ${nextSunday.toLocaleDateString('en-US', { month: 'short' })} ${nextSunday.getFullYear()}`;
   } else {
     return `${mondayFormatted} - ${sundayFormatted}`;
   }
