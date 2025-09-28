@@ -1400,7 +1400,6 @@ export type Database = {
           last_name: string
           marital_status: string
           participant_id: string
-          participant_status: string
           participant_type: string
           photo_1_url: string
           photo_2_url: string
