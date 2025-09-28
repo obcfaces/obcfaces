@@ -13,6 +13,8 @@ interface VoterData {
   ratings: Array<{
     rating: number;
     created_at: string;
+    action_type?: string;
+    old_rating?: number;
   }>;
   latest_rating: {
     rating: number;
@@ -89,40 +91,92 @@ export const VotersModal = ({ isOpen, onClose, participantId, participantName }:
         return;
       }
 
-      // Get all ratings for this participant from multiple sources
-      const { data: ratingsById, error: ratingsError1 } = await supabase
-        .from('contestant_ratings')
-        .select('user_id, rating, created_at')
-        .eq('participant_id', participantId)
+      // Get rating history for this participant
+      const { data: ratingHistory, error: historyError } = await supabase
+        .from('contestant_rating_history')
+        .select('user_id, old_rating, new_rating, action_type, changed_at')
+        .or(`participant_id.eq.${participantId},contestant_user_id.eq.${participantData.user_id}`)
         .order('user_id', { ascending: true })
-        .order('created_at', { ascending: false });
+        .order('changed_at', { ascending: false });
 
-      const { data: ratingsByUserId, error: ratingsError2 } = await supabase
-        .from('contestant_ratings')
-        .select('user_id, rating, created_at')
-        .eq('contestant_user_id', participantData.user_id)
-        .order('user_id', { ascending: true })
-        .order('created_at', { ascending: false });
+      console.log('Rating history query result:', { ratingHistory, historyError });
 
-      const ratingsError = ratingsError1 || ratingsError2;
-      // Combine and deduplicate ratings
-      const allRatings = [...(ratingsById || []), ...(ratingsByUserId || [])];
-      const ratings = allRatings;
+      if (historyError) {
+        console.error('Error fetching rating history:', historyError);
+        // Fallback to current ratings if history fails
+        const { data: currentRatings, error: currentRatingsError } = await supabase
+          .from('contestant_ratings')
+          .select('user_id, rating, created_at')
+          .or(`participant_id.eq.${participantId},contestant_user_id.eq.${participantData.user_id}`)
+          .order('user_id', { ascending: true })
+          .order('created_at', { ascending: false });
+        
+        if (currentRatingsError) {
+          console.error('Error fetching current ratings:', currentRatingsError);
+          setVoters([]);
+          return;
+        }
+        
+        if (!currentRatings || currentRatings.length === 0) {
+          setVoters([]);
+          return;
+        }
 
-      console.log('Ratings query result:', { ratings, ratingsError });
+        // Get unique user IDs for profile fetching
+        const userIds = [...new Set(currentRatings.map(r => r.user_id))];
+        const { data: profiles, error: profilesError } = await supabase
+          .from('profiles')
+          .select('id, display_name, first_name, last_name, avatar_url, country, city, age, gender, bio, is_contest_participant, created_at')
+          .in('id', userIds);
 
-      if (ratingsError) {
-        console.error('Error fetching ratings:', ratingsError);
+        // Get auth data for emails
+        const { data: authData, error: authError } = await supabase
+          .rpc('get_user_auth_data_admin');
+
+        if (profilesError || authError) {
+          console.error('Error fetching profiles or auth data:', { profilesError, authError });
+          setVoters([]);
+          return;
+        }
+
+        // Use current ratings as fallback
+        const ratingsByUser = currentRatings?.reduce((acc: { [key: string]: any }, rating: any) => {
+          if (!acc[rating.user_id] || new Date(rating.created_at) > new Date(acc[rating.user_id].created_at)) {
+            acc[rating.user_id] = rating;
+          }
+          return acc;
+        }, {}) || {};
+
+        const votersWithProfiles = Object.keys(ratingsByUser).map(userId => {
+          const latestRating = ratingsByUser[userId];
+          const profile = profiles?.find(p => p.id === userId);
+          const auth = authData?.find(a => a.user_id === userId);
+          
+          return {
+            user_id: userId,
+            ratings: [{
+              rating: latestRating.rating,
+              created_at: latestRating.created_at,
+              action_type: 'current'
+            }],
+            latest_rating: latestRating,
+            profile,
+            email: auth?.email,
+            registration_date: auth?.created_at || profile?.created_at
+          };
+        });
+
+        setVoters(votersWithProfiles);
         return;
       }
 
-      if (!ratings || ratings.length === 0) {
+      if (!ratingHistory || ratingHistory.length === 0) {
         setVoters([]);
         return;
       }
 
       // Get unique user IDs for profile fetching
-      const userIds = [...new Set(ratings.map(r => r.user_id))];
+      const userIds = [...new Set(ratingHistory.map(r => r.user_id))];
       const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
         .select('id, display_name, first_name, last_name, avatar_url, country, city, age, gender, bio, is_contest_participant, created_at')
@@ -141,28 +195,41 @@ export const VotersModal = ({ isOpen, onClose, participantId, participantName }:
         return;
       }
 
-      // Group ratings by user and keep only the most recent rating per user
-      const ratingsByUser = ratings?.reduce((acc: { [key: string]: any }, rating: any) => {
-        if (!acc[rating.user_id] || new Date(rating.created_at) > new Date(acc[rating.user_id].created_at)) {
-          acc[rating.user_id] = rating;
+      // Group rating history by user
+      const historyByUser = ratingHistory?.reduce((acc: { [key: string]: any[] }, historyItem: any) => {
+        if (!acc[historyItem.user_id]) {
+          acc[historyItem.user_id] = [];
         }
+        acc[historyItem.user_id].push(historyItem);
         return acc;
       }, {}) || {};
 
-      console.log('Latest ratings by user:', ratingsByUser);
+      console.log('Rating history grouped by user:', historyByUser);
 
-      // Create voter entries with only the latest rating per user
-      const votersWithProfiles = Object.keys(ratingsByUser).map(userId => {
-        const latestRating = ratingsByUser[userId];
+      // Create voter entries with full rating history per user
+      const votersWithProfiles = Object.keys(historyByUser).map(userId => {
+        const userHistory = historyByUser[userId];
         const profile = profiles?.find(p => p.id === userId);
         const auth = authData?.find(a => a.user_id === userId);
         
-        console.log(`User ${userId} latest rating:`, latestRating);
+        // Get the latest rating (most recent new_rating or current value)
+        const latestHistoryItem = userHistory[0];
+        const latestRating = latestHistoryItem.new_rating || latestHistoryItem.old_rating;
+        
+        console.log(`User ${userId} rating history:`, userHistory);
         
         return {
           user_id: userId,
-          ratings: [latestRating], // Store only the latest rating
-          latest_rating: latestRating,
+          ratings: userHistory.map(h => ({
+            rating: h.new_rating || h.old_rating,
+            created_at: h.changed_at,
+            action_type: h.action_type,
+            old_rating: h.old_rating
+          })), // Store full history
+          latest_rating: {
+            rating: latestRating,
+            created_at: latestHistoryItem.changed_at
+          },
           profile,
           email: auth?.email,
           registration_date: auth?.created_at || profile?.created_at
@@ -413,24 +480,31 @@ export const VotersModal = ({ isOpen, onClose, participantId, participantName }:
                                    Latest vote: {formatRatingTime(voter.latest_rating.created_at)}
                                  </p>
                                  
-                                 {/* All ratings for this user */}
+                                 {/* All ratings history for this user */}
                                  {voter.ratings && voter.ratings.length > 0 && (
                                    <div className="mt-2 space-y-1">
                                      <p className="text-xs font-medium text-muted-foreground">
-                                       All ratings for this participant ({voter.ratings.length} total):
+                                       Complete rating history ({voter.ratings.length} total):
                                      </p>
-                                     <div className="flex flex-wrap gap-1">
+                                     <div className="flex flex-col gap-1">
                                        {voter.ratings.map((rating, idx) => (
-                                         <div key={idx} className="flex flex-col items-center">
+                                         <div key={idx} className="flex items-center gap-2">
                                            <Badge 
                                              variant="outline"
                                              className={`${getRatingColor(rating.rating)} text-white border-none text-xs px-1.5 py-0.5`}
                                            >
-                                             {rating.rating}
+                                             {rating.old_rating ? `${rating.old_rating} → ${rating.rating}` : rating.rating}
                                            </Badge>
-                                           <span className="text-[10px] text-muted-foreground mt-0.5">
+                                           <span className="text-[10px] text-muted-foreground">
                                              {formatRatingTime(rating.created_at)}
                                            </span>
+                                           {rating.action_type && rating.action_type !== 'current' && (
+                                             <span className="text-[9px] text-muted-foreground bg-muted/50 px-1 rounded">
+                                               {rating.action_type === 'insert' ? 'New' : 
+                                                rating.action_type === 'update' ? 'Changed' : 
+                                                rating.action_type === 'delete' ? 'Deleted' : rating.action_type}
+                                             </span>
+                                           )}
                                          </div>
                                        ))}
                                      </div>

@@ -118,6 +118,48 @@ export type Database = {
         }
         Relationships: []
       }
+      contestant_rating_history: {
+        Row: {
+          action_type: string
+          changed_at: string
+          contestant_name: string
+          contestant_user_id: string | null
+          created_at: string
+          id: string
+          new_rating: number
+          old_rating: number | null
+          participant_id: string | null
+          rating_id: string
+          user_id: string
+        }
+        Insert: {
+          action_type?: string
+          changed_at?: string
+          contestant_name: string
+          contestant_user_id?: string | null
+          created_at?: string
+          id?: string
+          new_rating: number
+          old_rating?: number | null
+          participant_id?: string | null
+          rating_id: string
+          user_id: string
+        }
+        Update: {
+          action_type?: string
+          changed_at?: string
+          contestant_name?: string
+          contestant_user_id?: string | null
+          created_at?: string
+          id?: string
+          new_rating?: number
+          old_rating?: number | null
+          participant_id?: string | null
+          rating_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       contestant_ratings: {
         Row: {
           contestant_name: string
