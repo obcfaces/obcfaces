@@ -359,7 +359,7 @@ const Admin = () => {
             
             try {
               const { data: ratingStats } = await supabase
-                .rpc('get_public_participant_rating_stats', { target_participant_id: userId });
+                .rpc('get_user_rating_stats', { target_user_id: userId });
               
               return {
                 id: isFromApplication ? `app-${item.id}` : item.id,
