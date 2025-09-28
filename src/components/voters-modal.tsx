@@ -138,11 +138,15 @@ export const VotersModal = ({ isOpen, onClose, participantId, participantName }:
         return acc;
       }, {}) || {};
 
+      console.log('Ratings grouped by user:', ratingsByUser);
+
       // Create voter entries with all ratings per user
       const votersWithProfiles = Object.keys(ratingsByUser).map(userId => {
         const userRatings = ratingsByUser[userId];
         const profile = profiles?.find(p => p.id === userId);
         const auth = authData?.find(a => a.user_id === userId);
+        
+        console.log(`User ${userId} has ${userRatings.length} ratings:`, userRatings);
         
         return {
           user_id: userId,
@@ -399,10 +403,10 @@ export const VotersModal = ({ isOpen, onClose, participantId, participantName }:
                                  </p>
                                  
                                  {/* All ratings for this user */}
-                                 {voter.ratings.length > 1 && (
+                                 {voter.ratings && voter.ratings.length > 0 && (
                                    <div className="mt-2 space-y-1">
                                      <p className="text-xs font-medium text-muted-foreground">
-                                       All ratings ({voter.ratings.length} total):
+                                       All ratings for this participant ({voter.ratings.length} total):
                                      </p>
                                      <div className="flex flex-wrap gap-1">
                                        {voter.ratings.map((rating, idx) => (
