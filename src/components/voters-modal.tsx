@@ -404,12 +404,10 @@ export const VotersModal = ({ isOpen, onClose, participantId, participantName }:
               <div className="text-muted-foreground">No votes yet for this participant</div>
             </div>
           ) : (
-            <div className="grid gap-3">
-              {voters
-                .sort((a, b) => new Date(b.latest_rating.created_at).getTime() - new Date(a.latest_rating.created_at).getTime())
-                .map((voter, index) => (
+            <div className="grid gap-4">
+              {voters.map((voter, index) => (
                 <Collapsible key={`${voter.user_id}-${index}`} open={expandedUser === voter.user_id}>
-                  <Card className="hover:shadow-md transition-shadow w-full">
+                  <Card className="hover:shadow-md transition-shadow">
                      <CollapsibleTrigger 
                        className="w-full text-left"
                        onClick={() => handleUserClick(voter.user_id)}
