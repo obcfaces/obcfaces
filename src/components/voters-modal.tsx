@@ -498,8 +498,8 @@ export const VotersModal = ({ isOpen, onClose, participantId, participantName }:
                                           <div key={idx} className="flex items-center justify-between text-xs p-2 bg-muted/30 rounded">
                                             <div className="flex items-center gap-2">
                                               {historyItem.action_type === 'existing' ? (
-                                                <Badge variant="outline" className="bg-green-500 text-white border-none text-xs px-1.5 py-0.5">
-                                                  Initial: {historyItem.new_rating}
+                                                <Badge variant="outline" className="bg-gray-500 text-white border-none text-xs px-1.5 py-0.5">
+                                                  Rated: {historyItem.new_rating}
                                                 </Badge>
                                               ) : historyItem.action_type === 'update' ? (
                                                 <div className="flex items-center gap-1">
