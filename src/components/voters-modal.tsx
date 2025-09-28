@@ -494,7 +494,7 @@ export const VotersModal = ({ isOpen, onClose, participantId, participantName }:
                                         Complete rating history ({voter.rating_history.length} changes):
                                       </p>
                                       <div className="flex items-start gap-2 max-h-32 overflow-x-auto">
-                                        {voter.rating_history.map((historyItem, idx) => {
+                                        {voter.rating_history.slice().reverse().map((historyItem, idx) => {
                                           const nextItem = voter.rating_history[idx + 1];
                                           const isUpdate = historyItem.action_type === 'update' && historyItem.old_rating;
                                           
