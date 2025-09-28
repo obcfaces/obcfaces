@@ -2006,14 +2006,26 @@ const Admin = () => {
                               
                               {/* Status controls */}
                                <div className="flex items-center gap-2 ml-2 flex-shrink-0">
-                                  <Select 
-                                    value={participant.admin_status || 'next week'}
-                                    onValueChange={async (value) => {
-                                     try {
-                                        const { error } = await supabase
-                                          .from('weekly_contest_participants')
-                                          .update({ admin_status: value } as any)
-                                          .eq('id', participant.participant_id);
+                                   <Select 
+                                     value={participant.admin_status || 'next week'}
+                                     onValueChange={async (value) => {
+                                      try {
+                                         console.log('Updating participant:', participant);
+                                         console.log('participant.participant_id:', participant.participant_id);
+                                         console.log('participant.id:', participant.id);
+                                         console.log('participant.user_id:', participant.user_id);
+                                         
+                                         const participantId = participant.participant_id || participant.id;
+                                         console.log('Using participantId:', participantId);
+                                         
+                                         if (!participantId) {
+                                           throw new Error('No valid participant ID found');
+                                         }
+                                         
+                                         const { error } = await supabase
+                                           .from('weekly_contest_participants')
+                                           .update({ admin_status: value } as any)
+                                           .eq('id', participantId);
                                       
                                       if (error) {
                                         console.error('Error updating participant status:', error);
