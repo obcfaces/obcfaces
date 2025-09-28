@@ -944,8 +944,8 @@ export type Database = {
           created_at: string
           first_name: string
           height_cm: number
+          id: string
           last_name: string
-          participant_id: string
           photo_1_url: string
           photo_2_url: string
           status_assigned_date: string
