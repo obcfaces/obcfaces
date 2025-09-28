@@ -753,7 +753,14 @@ const Admin = () => {
     try {
       const { data, error } = await supabase.rpc('get_daily_voting_stats');
       if (error) throw error;
-      setDailyStats(data || []);
+      
+      // Ensure proper ordering: Monday to Sunday
+      const dayOrder = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+      const sortedData = (data || []).sort((a, b) => {
+        return dayOrder.indexOf(a.day_name) - dayOrder.indexOf(b.day_name);
+      });
+      
+      setDailyStats(sortedData);
     } catch (error) {
       console.error('Error fetching daily stats:', error);
     }
@@ -768,7 +775,13 @@ const Admin = () => {
         return;
       }
 
-      setDailyApplicationStats(data || []);
+      // Ensure proper ordering: Monday to Sunday
+      const dayOrder = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+      const sortedData = (data || []).sort((a, b) => {
+        return dayOrder.indexOf(a.day_name) - dayOrder.indexOf(b.day_name);
+      });
+
+      setDailyApplicationStats(sortedData);
     } catch (error) {
       console.error('Error in fetchDailyApplicationStats:', error);
     }
@@ -778,7 +791,14 @@ const Admin = () => {
     try {
       const { data, error } = await supabase.rpc('get_daily_registration_stats');
       if (error) throw error;
-      setDailyRegistrationStats(data || []);
+      
+      // Ensure proper ordering: Monday to Sunday
+      const dayOrder = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+      const sortedData = (data || []).sort((a, b) => {
+        return dayOrder.indexOf(a.day_name) - dayOrder.indexOf(b.day_name);
+      });
+      
+      setDailyRegistrationStats(sortedData);
     } catch (error) {
       console.error('Error fetching daily registration stats:', error);
     }
@@ -1166,7 +1186,13 @@ const Admin = () => {
         return;
       }
 
-      setNextWeekDailyStats(data || []);
+      // Ensure proper ordering: Monday to Sunday
+      const dayOrder = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+      const sortedData = (data || []).sort((a, b) => {
+        return dayOrder.indexOf(a.day_name) - dayOrder.indexOf(b.day_name);
+      });
+
+      setNextWeekDailyStats(sortedData);
     } catch (error) {
       console.error('Error in fetchNextWeekDailyStats:', error);
     }
