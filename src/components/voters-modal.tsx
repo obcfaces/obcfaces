@@ -420,26 +420,23 @@ export const VotersModal = ({ isOpen, onClose, participantId, participantName }:
                            </Badge>
                          )}
                          <div className="flex items-start gap-4 mt-4">
-                           {/* Avatar with rating below */}
-                           <div className="flex flex-col items-center gap-2 flex-shrink-0 relative">
-                             <Avatar className="h-16 w-16">
-                               <AvatarImage src={voter.profile?.avatar_url || ''} />
-                               <AvatarFallback className="text-lg">
-                                 {getDisplayName(voter).charAt(0)}
-                               </AvatarFallback>
-                             </Avatar>
-                             {/* Registration date badge under avatar */}
-                             {voter.registration_date && (
-                               <Badge variant="outline" className="text-xs px-1 py-0.5 absolute -bottom-6 bg-background">
-                                 {new Date(voter.registration_date).toLocaleDateString()}
-                               </Badge>
-                             )}
-                              <Badge 
-                                className={`${getRatingColor(voter.latest_rating.rating)} text-white px-2 py-1 text-sm font-semibold`}
-                              >
-                                {voter.latest_rating.rating}/10
-                              </Badge>
-                           </div>
+                            {/* Avatar with registration date overlay */}
+                            <div className="flex flex-col items-center gap-2 flex-shrink-0 relative">
+                              <div className="relative">
+                                <Avatar className="h-16 w-16">
+                                  <AvatarImage src={voter.profile?.avatar_url || ''} />
+                                  <AvatarFallback className="text-lg">
+                                    {getDisplayName(voter).charAt(0)}
+                                  </AvatarFallback>
+                                </Avatar>
+                                {/* Registration date badge overlaying bottom of avatar */}
+                                {voter.registration_date && (
+                                  <Badge variant="outline" className="text-xs px-1 py-0.5 absolute bottom-0 left-1/2 transform -translate-x-1/2 bg-background">
+                                    {new Date(voter.registration_date).toLocaleDateString()}
+                                  </Badge>
+                                )}
+                              </div>
+                            </div>
                           
                            {/* User Info */}
                            <div className="flex-1 min-w-0">
