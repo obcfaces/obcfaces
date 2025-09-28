@@ -661,6 +661,7 @@ export type Database = {
           status_history: Json | null
           total_votes: number | null
           user_id: string
+          week_interval: string | null
         }
         Insert: {
           admin_status?: string | null
@@ -677,6 +678,7 @@ export type Database = {
           status_history?: Json | null
           total_votes?: number | null
           user_id: string
+          week_interval?: string | null
         }
         Update: {
           admin_status?: string | null
@@ -693,6 +695,7 @@ export type Database = {
           status_history?: Json | null
           total_votes?: number | null
           user_id?: string
+          week_interval?: string | null
         }
         Relationships: [
           {
@@ -930,6 +933,27 @@ export type Database = {
         Args: { target_user_id: string }
         Returns: number
       }
+      get_next_week_participants_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          age: number
+          average_rating: number
+          city: string
+          country: string
+          created_at: string
+          first_name: string
+          height_cm: number
+          last_name: string
+          participant_id: string
+          photo_1_url: string
+          photo_2_url: string
+          status_assigned_date: string
+          total_votes: number
+          user_id: string
+          week_interval: string
+          weight_kg: number
+        }[]
+      }
       get_next_week_participants_public: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -946,6 +970,7 @@ export type Database = {
           photo_2_url: string
           total_votes: number
           user_id: string
+          week_interval: string
           weight_kg: number
         }[]
       }

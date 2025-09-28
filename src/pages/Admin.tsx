@@ -210,6 +210,8 @@ const Admin = () => {
   const [showRoleConfirmModal, setShowRoleConfirmModal] = useState(false);
   const [roleChangeUser, setRoleChangeUser] = useState<{ id: string; name: string; newRole: string } | null>(null);
   const [assigningRoles, setAssigningRoles] = useState<Set<string>>(new Set());
+  const [nextWeekFilter, setNextWeekFilter] = useState<string>('all'); // Новый фильтр для next week
+  const [nextWeekParticipants, setNextWeekParticipants] = useState<any[]>([]);
   const [dailyStats, setDailyStats] = useState<Array<{ day_name: string; vote_count: number; like_count: number }>>([]);
   const [dailyApplicationStats, setDailyApplicationStats] = useState<Array<{ day_name: string; new_count: number; approved_count: number }>>([]);
   const [dailyRegistrationStats, setDailyRegistrationStats] = useState<Array<{ day_name: string; registration_count: number; verified_count: number }>>([]);
@@ -225,6 +227,7 @@ const Admin = () => {
     fetchDailyStats();
     fetchDailyApplicationStats();
     fetchDailyRegistrationStats();
+    fetchNextWeekParticipants(); // Добавляем загрузку next week участников
     
     // Set up real-time subscriptions for automatic updates
     const contestAppsChannel = supabase
@@ -1061,6 +1064,25 @@ const Admin = () => {
     }
   };
 
+  // Новая функция для загрузки участников next week с интервалами
+  const fetchNextWeekParticipants = async () => {
+    try {
+      console.log('Fetching next week participants with intervals...');
+      
+      const { data: participants, error } = await supabase.rpc('get_next_week_participants_admin');
+      
+      if (error) {
+        console.error('Error fetching next week participants:', error);
+        throw error;
+      }
+
+      console.log('Fetched next week participants:', participants?.length || 0);
+      setNextWeekParticipants(participants || []);
+    } catch (error) {
+      console.error('Error in fetchNextWeekParticipants:', error);
+    }
+  };
+
 
   // Helper function to get the next Monday based on timezone
   const getNextMondayForCountry = (country: string) => {
@@ -1845,11 +1867,30 @@ const Admin = () => {
 
             <TabsContent value="nextweek" className="space-y-4">
               <div className="mb-6">
+                {/* Фильтр по неделям для next week */}
+                <div className="mb-4 flex gap-4">
+                  <Select value={nextWeekFilter} onValueChange={setNextWeekFilter}>
+                    <SelectTrigger className="w-48">
+                      <SelectValue placeholder="Filter by week" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All weeks</SelectItem>
+                      <SelectItem value="current">Current week only</SelectItem>
+                      {/* Динамические недели на основе данных */}
+                      {Array.from(new Set(nextWeekParticipants.map(p => p.week_interval))).map(interval => (
+                        <SelectItem key={interval} value={interval}>{interval}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
                 {/* Stats for next week */}
                 <div className="mb-4 p-3 bg-muted rounded-lg">
                   <div className="text-sm text-muted-foreground space-y-2">
                     <div className="text-xs">
-                      Next week participants: {weeklyParticipants.filter(p => p.admin_status === 'next week' || p.admin_status === 'next week on site').length}
+                      Next week participants: {nextWeekFilter === 'all' 
+                        ? nextWeekParticipants.length 
+                        : nextWeekParticipants.filter(p => nextWeekFilter === 'current' || p.week_interval === nextWeekFilter).length}
                     </div>
                   </div>
                 </div>
@@ -1861,17 +1902,29 @@ const Admin = () => {
               </div>
               
               {(() => {
-                const nextWeekParticipants = weeklyParticipants.filter(p => p.admin_status === 'next week' || p.admin_status === 'next week on site');
+                // Фильтруем участников по выбранной неделе
+                const filteredParticipants = nextWeekParticipants.filter(p => {
+                  if (nextWeekFilter === 'all') return true;
+                  if (nextWeekFilter === 'current') {
+                    // Показываем только текущую неделю
+                    const currentWeekStart = new Date();
+                    const currentDay = currentWeekStart.getDay();
+                    const mondayOffset = currentDay === 0 ? -6 : 1 - currentDay;
+                    currentWeekStart.setDate(currentWeekStart.getDate() + mondayOffset);
+                    return p.status_assigned_date >= currentWeekStart.toISOString().split('T')[0];
+                  }
+                  return p.week_interval === nextWeekFilter;
+                });
                 
-                if (nextWeekParticipants.length === 0) {
+                if (filteredParticipants.length === 0) {
                   return (
                     <div className="text-center py-8 text-muted-foreground">
-                      No participants scheduled for next week
+                      No participants found for selected week filter
                     </div>
                   );
                 }
                 
-                return nextWeekParticipants.map((participant) => {
+                return filteredParticipants.map((participant) => {
                   const participantProfile = profiles.find(p => p.id === participant.user_id);
                   const appData = participant.application_data || {};
                   
@@ -1929,19 +1982,25 @@ const Admin = () => {
                                     {participantProfile?.display_name || `${participantProfile?.first_name || appData.first_name} ${participantProfile?.last_name || appData.last_name}` || 'Unnamed participant'}
                                   </h3>
                                   
-                                  {/* Basic details row */}
-                                  <div className="text-xs text-muted-foreground space-y-0.5">
-                                    <div className="flex items-center gap-2 flex-wrap">
-                                      <span>{participantProfile?.age || appData.age || 'Unknown'} лет</span>
-                                      <span>•</span>
-                                      <span>{participantProfile?.city || appData.city || 'Unknown'}, {participantProfile?.country || appData.country || 'Unknown'}</span>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                      <span>{participantProfile?.height_cm || appData.height_cm || 'Unknown'}см</span>
-                                      <span>•</span>
-                                      <span>{participantProfile?.weight_kg || appData.weight_kg || 'Unknown'}кг</span>
-                                    </div>
-                                  </div>
+                                   {/* Basic details row */}
+                                   <div className="text-xs text-muted-foreground space-y-0.5">
+                                     <div className="flex items-center gap-2 flex-wrap">
+                                       <span>{participant.age || 'Unknown'} лет</span>
+                                       <span>•</span>
+                                       <span>{participant.city || 'Unknown'}, {participant.country || 'Unknown'}</span>
+                                     </div>
+                                     <div className="flex items-center gap-2">
+                                       <span>{participant.height_cm || 'Unknown'}см</span>
+                                       <span>•</span>
+                                       <span>{participant.weight_kg || 'Unknown'}кг</span>
+                                     </div>
+                                     {/* Интервал недели */}
+                                     <div className="flex items-center gap-2">
+                                       <Badge variant="outline" className="text-xs px-1 py-0">
+                                         Week: {participant.week_interval}
+                                       </Badge>
+                                     </div>
+                                   </div>
                                 </div>
                               </div>
                               
@@ -1964,8 +2023,8 @@ const Admin = () => {
                                           variant: "destructive",
                                         });
                                       } else {
-                                        // Refresh the data
-                                        await fetchWeeklyParticipants();
+                                         // Refresh the data
+                                         await fetchNextWeekParticipants();
                                         toast({
                                           title: "Success",
                                           description: "Participant status updated successfully",
