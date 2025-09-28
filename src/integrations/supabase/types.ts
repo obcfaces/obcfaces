@@ -893,9 +893,11 @@ export type Database = {
       get_daily_application_stats: {
         Args: Record<PropertyKey, never>
         Returns: {
-          approved_count: number
+          approved_applications: number
           day_name: string
-          new_count: number
+          day_of_week: number
+          sort_order: number
+          total_applications: number
         }[]
       }
       get_daily_registration_stats: {
@@ -904,7 +906,7 @@ export type Database = {
           day_name: string
           day_of_week: number
           registration_count: number
-          verified_count: number
+          sort_order: number
         }[]
       }
       get_daily_voting_stats: {
@@ -913,6 +915,7 @@ export type Database = {
           day_name: string
           day_of_week: number
           like_count: number
+          sort_order: number
           vote_count: number
         }[]
       }
