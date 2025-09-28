@@ -1059,10 +1059,25 @@ const Admin = () => {
 
       console.log('Raw participants data:', allParticipants?.length || 0);
       
-      // Transform data to match our interface
-      const participants = (allParticipants || []).map((item: any) => {
+      // Transform data to match our interface and fetch real-time rating data
+      const participants = await Promise.all((allParticipants || []).map(async (item: any) => {
         const contest = item.weekly_contests;
         const appData = item.application_data || {};
+        
+        // Fetch real-time rating stats for this user
+        let realTimeRatings = { average_rating: 0, total_votes: 0 };
+        try {
+          const { data: ratingStats } = await supabase
+            .rpc('get_user_rating_stats', { target_user_id: item.user_id });
+          if (ratingStats?.[0]) {
+            realTimeRatings = {
+              average_rating: ratingStats[0].average_rating || 0,
+              total_votes: ratingStats[0].total_votes || 0
+            };
+          }
+        } catch (error) {
+          console.error('Error fetching real-time ratings for user:', item.user_id, error);
+        }
         
         return {
           id: item.id,
@@ -1084,14 +1099,14 @@ const Admin = () => {
             photo2_url: appData.photo2_url || ''
           },
           final_rank: item.final_rank,
-          total_votes: item.total_votes || 0,
-          average_rating: item.average_rating || 0,
+          total_votes: realTimeRatings.total_votes,
+          average_rating: realTimeRatings.average_rating,
           created_at: contest?.week_start_date || item.created_at,
           contest_start_date: contest?.week_start_date,
           is_active: item.is_active,
           admin_status: item.admin_status || 'this week'
         };
-      });
+      }));
 
       console.log('Total participants after transformation:', participants.length);
       console.log('Admin statuses distribution:', 
