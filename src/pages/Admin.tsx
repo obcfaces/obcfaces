@@ -220,6 +220,7 @@ const Admin = () => {
   const [dailyRegistrationStats, setDailyRegistrationStats] = useState<Array<{ day_name: string; registration_count: number; verified_count: number }>>([]);
   const [nextWeekDailyStats, setNextWeekDailyStats] = useState<Array<{ day_name: string; like_count: number; dislike_count: number; total_votes: number }>>([]);
   const [selectedDay, setSelectedDay] = useState<{ day: number; type: 'new' | 'approved' } | null>(null);
+  const [nextWeekApplicationsCount, setNextWeekApplicationsCount] = useState<{ total: number; next_week: number }>({ total: 0, next_week: 0 });
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -233,6 +234,7 @@ const Admin = () => {
     fetchDailyRegistrationStats();
     fetchNextWeekParticipants(); // Добавляем загрузку next week участников
     fetchNextWeekDailyStats();
+    fetchNextWeekApplicationsCount();
     
     
     // Set up real-time subscriptions for automatic updates
@@ -250,6 +252,7 @@ const Admin = () => {
           // Refresh contest applications and stats
           fetchContestApplications();
           fetchDailyApplicationStats();
+          fetchNextWeekApplicationsCount();
         }
       )
       .subscribe();
@@ -1097,6 +1100,26 @@ const Admin = () => {
       setNextWeekParticipants(participants || []);
     } catch (error) {
       console.error('Error in fetchNextWeekParticipants:', error);
+    }
+  };
+
+  const fetchNextWeekApplicationsCount = async () => {
+    try {
+      const { data, error } = await supabase.rpc('get_next_week_applications_count');
+      
+      if (error) {
+        console.error('Error fetching next week applications count:', error);
+        return;
+      }
+
+      if (data && data.length > 0) {
+        setNextWeekApplicationsCount({
+          total: Number(data[0].total_applications || 0),
+          next_week: Number(data[0].next_week_applications || 0)
+        });
+      }
+    } catch (error) {
+      console.error('Error in fetchNextWeekApplicationsCount:', error);
     }
   };
 
@@ -2641,10 +2664,10 @@ const Admin = () => {
               <div className="mb-6 px-0 md:px-6">
                 <div className="mb-4 p-3 bg-muted rounded-lg">
                   <div className="text-sm text-muted-foreground space-y-2">
-                    <div className="text-xs">
-                      new applications: {dailyApplicationStats.reduce((sum, stat) => sum + (stat.new_count || 0), 0)}, 
-                      approved: {dailyApplicationStats.reduce((sum, stat) => sum + (stat.approved_count || 0), 0)}
-                    </div>
+                     <div className="text-xs">
+                       new applications: {dailyApplicationStats.reduce((sum, stat) => sum + (stat.new_count || 0), 0)} - {nextWeekApplicationsCount.next_week}, 
+                       approved: {dailyApplicationStats.reduce((sum, stat) => sum + (stat.approved_count || 0), 0)}
+                     </div>
                     <div className="grid grid-cols-7 gap-1 text-xs">
                       {dailyApplicationStats.map((stat, index) => (
                         <div key={index} className="text-center p-1 bg-background rounded">
