@@ -141,29 +141,28 @@ export const VotersModal = ({ isOpen, onClose, participantId, participantName }:
         return;
       }
 
-      // Group ratings by user and keep all ratings for each user
-      const ratingsByUser = ratings?.reduce((acc: { [key: string]: any[] }, rating: any) => {
-        if (!acc[rating.user_id]) {
-          acc[rating.user_id] = [];
+      // Group ratings by user and keep only the most recent rating per user
+      const ratingsByUser = ratings?.reduce((acc: { [key: string]: any }, rating: any) => {
+        if (!acc[rating.user_id] || new Date(rating.created_at) > new Date(acc[rating.user_id].created_at)) {
+          acc[rating.user_id] = rating;
         }
-        acc[rating.user_id].push(rating);
         return acc;
       }, {}) || {};
 
-      console.log('Ratings grouped by user:', ratingsByUser);
+      console.log('Latest ratings by user:', ratingsByUser);
 
-      // Create voter entries with all ratings per user
+      // Create voter entries with only the latest rating per user
       const votersWithProfiles = Object.keys(ratingsByUser).map(userId => {
-        const userRatings = ratingsByUser[userId];
+        const latestRating = ratingsByUser[userId];
         const profile = profiles?.find(p => p.id === userId);
         const auth = authData?.find(a => a.user_id === userId);
         
-        console.log(`User ${userId} has ${userRatings.length} ratings:`, userRatings);
+        console.log(`User ${userId} latest rating:`, latestRating);
         
         return {
           user_id: userId,
-          ratings: userRatings, // Store all ratings for this user
-          latest_rating: userRatings[0], // First one is the latest due to ordering
+          ratings: [latestRating], // Store only the latest rating
+          latest_rating: latestRating,
           profile,
           email: auth?.email,
           registration_date: auth?.created_at || profile?.created_at
