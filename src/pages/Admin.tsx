@@ -14,6 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/hooks/use-toast';
+import { MiniStars } from '@/components/mini-stars';
 import { 
   Calendar, FileText, UserCog, Eye, Edit, Check, X, Trash2, 
   RotateCcw, Copy, Facebook, Minus, AlertCircle, Trophy, ChevronDown, ChevronUp, Shield
@@ -2556,8 +2557,9 @@ const Admin = () => {
                               title="Click to view voters"
                             >
                               {Number.isInteger(participant.total_votes) ? participant.total_votes : 0} votes
-                              <div className="text-sm text-muted-foreground">
-                                ★ {Number.isFinite(participant.average_rating) ? Number(participant.average_rating).toFixed(1) : '0.0'}
+                              <div className="text-sm text-muted-foreground flex items-center gap-1">
+                                <MiniStars rating={Number.isFinite(participant.average_rating) ? Number(participant.average_rating) : 0} />
+                                <span>{Number.isFinite(participant.average_rating) ? Number(participant.average_rating).toFixed(1) : '0.0'}</span>
                               </div>
                             </div>
                           </div>
@@ -2647,7 +2649,13 @@ const Admin = () => {
                                 setVotersModalOpen(true);
                               }}
                             >
-                              {Number.isInteger(participant.total_votes) ? participant.total_votes : 0} votes • ★ {Number.isFinite(participant.average_rating) ? Number(participant.average_rating).toFixed(1) : '0.0'}
+                              <div className="flex items-center gap-2">
+                                <span>{Number.isInteger(participant.total_votes) ? participant.total_votes : 0} votes</span>
+                                <div className="flex items-center gap-1">
+                                  <MiniStars rating={Number.isFinite(participant.average_rating) ? Number(participant.average_rating) : 0} />
+                                  <span>{Number.isFinite(participant.average_rating) ? Number(participant.average_rating).toFixed(1) : '0.0'}</span>
+                                </div>
+                              </div>
                             </div>
                           </div>
                         </div>
