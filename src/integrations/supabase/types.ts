@@ -939,6 +939,16 @@ export type Database = {
         Args: { target_user_id: string }
         Returns: number
       }
+      get_next_week_daily_stats: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          day_name: string
+          day_of_week: number
+          dislike_count: number
+          like_count: number
+          total_votes: number
+        }[]
+      }
       get_next_week_participants_admin: {
         Args: Record<PropertyKey, never>
         Returns: {

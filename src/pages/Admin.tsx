@@ -218,6 +218,7 @@ const Admin = () => {
   const [dailyStats, setDailyStats] = useState<Array<{ day_name: string; vote_count: number; like_count: number }>>([]);
   const [dailyApplicationStats, setDailyApplicationStats] = useState<Array<{ day_name: string; new_count: number; approved_count: number }>>([]);
   const [dailyRegistrationStats, setDailyRegistrationStats] = useState<Array<{ day_name: string; registration_count: number; verified_count: number }>>([]);
+  const [nextWeekDailyStats, setNextWeekDailyStats] = useState<Array<{ day_name: string; like_count: number; dislike_count: number; total_votes: number }>>([]);
   const [selectedDay, setSelectedDay] = useState<{ day: number; type: 'new' | 'approved' } | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -231,6 +232,7 @@ const Admin = () => {
     fetchDailyApplicationStats();
     fetchDailyRegistrationStats();
     fetchNextWeekParticipants(); // Добавляем загрузку next week участников
+    fetchNextWeekDailyStats(); // Добавляем загрузку статистики next week
     
     // Set up real-time subscriptions for automatic updates
     const contestAppsChannel = supabase
@@ -1096,6 +1098,21 @@ const Admin = () => {
     }
   };
 
+  const fetchNextWeekDailyStats = async () => {
+    try {
+      const { data, error } = await supabase.rpc('get_next_week_daily_stats');
+      
+      if (error) {
+        console.error('Error fetching next week daily stats:', error);
+        return;
+      }
+
+      setNextWeekDailyStats(data || []);
+    } catch (error) {
+      console.error('Error in fetchNextWeekDailyStats:', error);
+    }
+  };
+
 
   // Helper function to get the next Monday based on timezone
   const getNextMondayForCountry = (country: string) => {
@@ -1900,10 +1917,17 @@ const Admin = () => {
                 {/* Stats for next week */}
                 <div className="mb-4 p-3 bg-muted rounded-lg">
                   <div className="text-sm text-muted-foreground space-y-2">
-                    <div className="text-xs">
-                      Next week participants: {nextWeekFilter === 'all' 
-                        ? nextWeekParticipants.length 
-                        : nextWeekParticipants.filter(p => nextWeekFilter === 'current' || p.week_interval === nextWeekFilter).length}
+                    <div className="flex justify-between items-center">
+                      <span>likes: {nextWeekDailyStats.reduce((sum, day) => sum + day.like_count, 0)}, dislikes: {nextWeekDailyStats.reduce((sum, day) => sum + day.dislike_count, 0)}</span>
+                    </div>
+                    <div className="grid grid-cols-7 gap-1 text-xs">
+                      {nextWeekDailyStats.map((day) => (
+                        <div key={day.day_name} className="bg-background p-2 rounded text-center">
+                          <div className="font-medium">{day.day_name}</div>
+                          <div className="text-green-600">{day.like_count}</div>
+                          <div className="text-red-600">{day.dislike_count}</div>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 </div>
