@@ -959,19 +959,15 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: {
           age: number
-          average_rating: number
           city: string
           country: string
-          created_at: string
           first_name: string
           height_cm: number
           last_name: string
           participant_id: string
           photo_1_url: string
           photo_2_url: string
-          total_votes: number
           user_id: string
-          week_interval: string
           weight_kg: number
         }[]
       }
