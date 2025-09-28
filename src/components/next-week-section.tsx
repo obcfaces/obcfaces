@@ -283,14 +283,14 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
         </div>
       </div>
 
-      {isLoading ? (
+      {!hasInitialized || isLoading ? (
         <div className="text-center py-12">
           <div className="animate-pulse">
             <div className="h-8 bg-muted rounded w-32 mx-auto mb-2"></div>
             <div className="h-4 bg-muted rounded w-48 mx-auto"></div>
           </div>
         </div>
-      ) : hasInitialized && currentIndex < filteredCandidates.length ? (
+      ) : filteredCandidates.length > 0 && currentIndex < filteredCandidates.length ? (
         <div className="flex flex-col items-center">
           <div className="w-full px-0 sm:px-6 max-w-full overflow-hidden">
             <ContestantCard
