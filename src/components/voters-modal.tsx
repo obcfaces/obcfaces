@@ -494,34 +494,42 @@ export const VotersModal = ({ isOpen, onClose, participantId, participantName }:
                                        Complete rating history ({voter.rating_history.length} changes):
                                      </p>
                                      <div className="flex flex-col gap-1 max-h-32 overflow-y-auto">
-                                       {voter.rating_history.map((historyItem, idx) => (
-                                         <div key={idx} className="flex items-center justify-between text-xs p-2 bg-muted/30 rounded">
-                                           <div className="flex items-center gap-2">
-                                             {historyItem.action_type === 'insert' ? (
-                                               <Badge variant="outline" className="bg-green-500 text-white border-none text-xs px-1.5 py-0.5">
-                                                 New: {historyItem.new_rating}
-                                               </Badge>
-                                             ) : historyItem.action_type === 'update' ? (
-                                               <div className="flex items-center gap-1">
-                                                 <Badge variant="outline" className="bg-orange-500 text-white border-none text-xs px-1.5 py-0.5">
-                                                   {historyItem.old_rating}
-                                                 </Badge>
-                                                 <span>→</span>
-                                                 <Badge variant="outline" className="bg-blue-500 text-white border-none text-xs px-1.5 py-0.5">
-                                                   {historyItem.new_rating}
-                                                 </Badge>
-                                               </div>
-                                             ) : (
-                                               <Badge variant="outline" className="bg-red-500 text-white border-none text-xs px-1.5 py-0.5">
-                                                 Deleted: {historyItem.old_rating}
-                                               </Badge>
-                                             )}
-                                           </div>
-                                           <span className="text-[10px] text-muted-foreground">
-                                             {formatRatingTime(historyItem.changed_at)}
-                                           </span>
-                                         </div>
-                                       ))}
+                                        {voter.rating_history.map((historyItem, idx) => (
+                                          <div key={idx} className="flex items-center justify-between text-xs p-2 bg-muted/30 rounded">
+                                            <div className="flex items-center gap-2">
+                                              {historyItem.action_type === 'existing' ? (
+                                                <Badge variant="outline" className="bg-green-500 text-white border-none text-xs px-1.5 py-0.5">
+                                                  Initial: {historyItem.new_rating}
+                                                </Badge>
+                                              ) : historyItem.action_type === 'update' ? (
+                                                <div className="flex items-center gap-1">
+                                                  <Badge variant="outline" className="bg-orange-500 text-white border-none text-xs px-1.5 py-0.5">
+                                                    {historyItem.old_rating}
+                                                  </Badge>
+                                                  <span>→</span>
+                                                  <Badge variant="outline" className="bg-blue-500 text-white border-none text-xs px-1.5 py-0.5">
+                                                    {historyItem.new_rating}
+                                                  </Badge>
+                                                </div>
+                                              ) : historyItem.action_type === 'insert' ? (
+                                                <Badge variant="outline" className="bg-green-500 text-white border-none text-xs px-1.5 py-0.5">
+                                                  New: {historyItem.new_rating}
+                                                </Badge>
+                                              ) : historyItem.action_type === 'delete' ? (
+                                                <Badge variant="outline" className="bg-red-500 text-white border-none text-xs px-1.5 py-0.5">
+                                                  Deleted: {historyItem.old_rating}
+                                                </Badge>
+                                              ) : (
+                                                <Badge variant="outline" className="bg-gray-500 text-white border-none text-xs px-1.5 py-0.5">
+                                                  {historyItem.action_type}: {historyItem.new_rating || historyItem.old_rating}
+                                                </Badge>
+                                              )}
+                                            </div>
+                                            <span className="text-[10px] text-muted-foreground">
+                                              {formatRatingTime(historyItem.changed_at)}
+                                            </span>
+                                          </div>
+                                        ))}
                                      </div>
                                    </div>
                                  )}
