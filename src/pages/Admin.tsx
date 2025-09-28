@@ -1147,8 +1147,8 @@ const Admin = () => {
       }
     }
 
-    // If status is approved or next, automatically add to weekly contest
-    if ((newStatus === 'approved' || newStatus === 'next') && application) {
+    // If status is approved or next week, automatically add to weekly contest
+    if ((newStatus === 'approved' || newStatus === 'next week') && application) {
       try {
         const appData = typeof application.application_data === 'string' 
           ? JSON.parse(application.application_data) 
@@ -1436,7 +1436,6 @@ const Admin = () => {
                     <SelectItem value="pending">Pending</SelectItem>
                     <SelectItem value="approved">Approved</SelectItem>
                     <SelectItem value="rejected">Rejected</SelectItem>
-                    <SelectItem value="next">Next</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -1627,7 +1626,6 @@ const Admin = () => {
                                        <SelectItem value="pending">Pending</SelectItem>
                                        <SelectItem value="approved">Approved</SelectItem>
                                        <SelectItem value="rejected">Rejected</SelectItem>
-                                       <SelectItem value="next">Next</SelectItem>
                                     </SelectContent>
                              </Select>
                             
@@ -1796,7 +1794,6 @@ const Admin = () => {
                                             <SelectItem value="pending">Pending</SelectItem>
                                             <SelectItem value="approved">Approved</SelectItem>
                                             <SelectItem value="rejected">Rejected</SelectItem>
-                                            <SelectItem value="next">Next</SelectItem>
                                        </SelectContent>
                                  </Select>
                                 
@@ -1969,7 +1966,6 @@ const Admin = () => {
                                      <SelectItem value="pending">Pending</SelectItem>
                                      <SelectItem value="approved">Approved</SelectItem>
                                      <SelectItem value="rejected">Rejected</SelectItem>
-                                     <SelectItem value="next">Next</SelectItem>
                                   </SelectContent>
                                 </Select>
                               </div>
@@ -2101,7 +2097,6 @@ const Admin = () => {
                                    <SelectItem value="pending">Pending</SelectItem>
                                    <SelectItem value="approved">Approved</SelectItem>
                                    <SelectItem value="rejected">Rejected</SelectItem>
-                                   <SelectItem value="next">Next</SelectItem>
                                 </SelectContent>
                               </Select>
                             </div>
@@ -2719,7 +2714,6 @@ const Admin = () => {
                                            <SelectItem value="pending">Pending</SelectItem>
                                            <SelectItem value="approved">Approved</SelectItem>
                                            <SelectItem value="rejected">Rejected</SelectItem>
-                                           <SelectItem value="next">Next</SelectItem>
                                          </SelectContent>
                                      </Select>
                                      
@@ -2935,7 +2929,6 @@ const Admin = () => {
                                                     <SelectItem value="pending">Pending</SelectItem>
                                                     <SelectItem value="approved">Approved</SelectItem>
                                                     <SelectItem value="rejected">Rejected</SelectItem>
-                                                    <SelectItem value="next">Next</SelectItem>
                                                   </SelectContent>
                                               </Select>
                                               
@@ -3040,7 +3033,6 @@ const Admin = () => {
                         <SelectItem value="pending">Pending</SelectItem>
                         <SelectItem value="approved">Approved</SelectItem>
                         <SelectItem value="rejected">Rejected</SelectItem>
-                        <SelectItem value="next">Next</SelectItem>
                       </SelectContent>
                     </Select>
                     {statusFilter !== 'all' && (
@@ -3078,8 +3070,8 @@ const Admin = () => {
                       
                       // Handle status filtering
                       if (statusFilter !== 'all') {
-                        if (statusFilter === 'next') {
-                          // Show applications for users with admin_status === 'next'
+                        if (statusFilter === 'next week') {
+                          // Show applications for users with admin_status === 'next'  
                           const weeklyParticipant = weeklyParticipants.find(participant => 
                             participant.user_id === application.user_id
                           );
@@ -3093,18 +3085,18 @@ const Admin = () => {
                       }
                       
                       // Don't show applications in the cards section if the user is already in "this week" or "next"
-                      // UNLESS the user is specifically filtering by "next"
+                      // UNLESS the user is specifically filtering by "next week"
                       const weeklyParticipant = weeklyParticipants.find(participant => 
                         participant.user_id === application.user_id
                       );
                       
-                      // Exclude applications with status="next" from Card section (unless filtering by "next")
-                      if (application.status === 'next' && statusFilter !== 'next') {
+                      // Exclude applications with status="next" from Card section (unless filtering by "next week")
+                      if (application.status === 'next' && statusFilter !== 'next week') {
                         return false;
                       }
                       
-                      // Exclude applications already in weekly contest (unless they have "pending" status or we're filtering by "next")
-                      if (weeklyParticipant && weeklyParticipant.admin_status !== 'pending' && statusFilter !== 'next') {
+                      // Exclude applications already in weekly contest (unless they have "pending" status or we're filtering by "next week")
+                      if (weeklyParticipant && weeklyParticipant.admin_status !== 'pending' && statusFilter !== 'next week') {
                         return false;
                       }
                       
@@ -3339,7 +3331,6 @@ const Admin = () => {
                                            <SelectItem value="pending">Pending</SelectItem>
                                            <SelectItem value="approved">Approved</SelectItem>
                                            <SelectItem value="rejected">Rejected</SelectItem>
-                                           <SelectItem value="next">Next</SelectItem>
                                          </SelectContent>
                                      </Select>
                                    )}
@@ -3530,7 +3521,7 @@ const Admin = () => {
                                                     <SelectItem value="pending">Pending</SelectItem>
                                                     <SelectItem value="approved">Approved</SelectItem>
                                                     <SelectItem value="rejected">Rejected</SelectItem>
-                                                    <SelectItem value="next">Next</SelectItem>
+                                                    
                                                   </SelectContent>
                                              </Select>
                                              
