@@ -1222,7 +1222,7 @@ const Admin = () => {
                 contest_id: contestId,
                 user_id: application.user_id,
                 application_data: application.application_data,
-                admin_status: newStatus === 'approved' ? 'this week' : 'next week'
+                admin_status: newStatus === 'approved' ? 'this week' : 'next week on site'
               });
 
             if (participantError) {
@@ -1232,7 +1232,7 @@ const Admin = () => {
             // Update existing participant's admin_status
             const { error: updateError } = await supabase
               .from('weekly_contest_participants')
-              .update({ admin_status: newStatus === 'approved' ? 'this week' : 'next week' })
+              .update({ admin_status: newStatus === 'approved' ? 'this week' : 'next week on site' })
               .eq('id', existingParticipant.id);
 
             if (updateError) {
@@ -1449,6 +1449,7 @@ const Admin = () => {
                   <SelectContent>
                     <SelectItem value="this week">This Week</SelectItem>
                     <SelectItem value="next week">Next Week</SelectItem>
+                    <SelectItem value="next week on site">Next Week On Site</SelectItem>
                     <SelectItem value="past week 1">{`Past Week 1 (${getWeekInterval(1)})`}</SelectItem>
                     <SelectItem value="past week 2">{`Past Week 2 (${getWeekInterval(2)})`}</SelectItem>
                     <SelectItem value="past week 3">{`Past Week 3 (${getWeekInterval(3)})`}</SelectItem>
@@ -1638,7 +1639,8 @@ const Admin = () => {
                                </SelectTrigger>
                                      <SelectContent className="z-50 bg-background border shadow-md">
                                        <SelectItem value="this week">This Week</SelectItem>
-                                       <SelectItem value="next week">Next Week</SelectItem>
+                                        <SelectItem value="next week">Next Week</SelectItem>
+                                        <SelectItem value="next week on site">Next Week On Site</SelectItem>
                                         <SelectItem value="past week 1">{`Past Week 1 (${getWeekInterval(1)})`}</SelectItem>
                                         <SelectItem value="past week 2">{`Past Week 2 (${getWeekInterval(2)})`}</SelectItem>
                                         <SelectItem value="past week 3">{`Past Week 3 (${getWeekInterval(3)})`}</SelectItem>
@@ -1806,7 +1808,8 @@ const Admin = () => {
                                    </SelectTrigger>
                                           <SelectContent className="z-50 bg-background border shadow-md">
                                             <SelectItem value="this week">This Week</SelectItem>
-                                            <SelectItem value="next week">Next Week</SelectItem>
+                                             <SelectItem value="next week">Next Week</SelectItem>
+                                             <SelectItem value="next week on site">Next Week On Site</SelectItem>
                                              <SelectItem value="past week 1">{`Past Week 1 (${getWeekInterval(1)})`}</SelectItem>
                                              <SelectItem value="past week 2">{`Past Week 2 (${getWeekInterval(2)})`}</SelectItem>
                                              <SelectItem value="past week 3">{`Past Week 3 (${getWeekInterval(3)})`}</SelectItem>
@@ -1846,7 +1849,7 @@ const Admin = () => {
                 <div className="mb-4 p-3 bg-muted rounded-lg">
                   <div className="text-sm text-muted-foreground space-y-2">
                     <div className="text-xs">
-                      Next week participants: {weeklyParticipants.filter(p => p.admin_status === 'next week').length}
+                      Next week participants: {weeklyParticipants.filter(p => p.admin_status === 'next week' || p.admin_status === 'next week on site').length}
                     </div>
                   </div>
                 </div>
@@ -1858,7 +1861,7 @@ const Admin = () => {
               </div>
               
               {(() => {
-                const nextWeekParticipants = weeklyParticipants.filter(p => p.admin_status === 'next week');
+                const nextWeekParticipants = weeklyParticipants.filter(p => p.admin_status === 'next week' || p.admin_status === 'next week on site');
                 
                 if (nextWeekParticipants.length === 0) {
                   return (
@@ -1945,7 +1948,7 @@ const Admin = () => {
                               {/* Status controls */}
                               <div className="flex items-center gap-2 ml-2 flex-shrink-0">
                                 <Select 
-                                  value={participant.admin_status || 'next week'}
+                                  value={participant.admin_status || 'next week on site'}
                                   onValueChange={async (value) => {
                                     try {
                                       const { error } = await supabase
@@ -1978,7 +1981,8 @@ const Admin = () => {
                                   </SelectTrigger>
                                    <SelectContent className="z-50 bg-background border shadow-md">
                                      <SelectItem value="this week">This Week</SelectItem>
-                                     <SelectItem value="next week">Next Week</SelectItem>
+                                      <SelectItem value="next week">Next Week</SelectItem>
+                                      <SelectItem value="next week on site">Next Week On Site</SelectItem>
                                       <SelectItem value="past week 1">{`Past Week 1 (${getWeekInterval(1)})`}</SelectItem>
                                       <SelectItem value="past week 2">{`Past Week 2 (${getWeekInterval(2)})`}</SelectItem>
                                       <SelectItem value="past week 3">{`Past Week 3 (${getWeekInterval(3)})`}</SelectItem>
@@ -2076,7 +2080,7 @@ const Admin = () => {
                                 </span>
                               </div>
                               <Select 
-                                value={participant.admin_status || 'next week'} 
+                                value={participant.admin_status || 'next week on site'} 
                                 onValueChange={async (value) => {
                                   try {
                                     const { error } = await supabase
@@ -2109,7 +2113,8 @@ const Admin = () => {
                                 </SelectTrigger>
                                  <SelectContent className="z-50 bg-background border shadow-md">
                                    <SelectItem value="this week">This Week</SelectItem>
-                                   <SelectItem value="next week">Next Week</SelectItem>
+                                    <SelectItem value="next week">Next Week</SelectItem>
+                                    <SelectItem value="next week on site">Next Week On Site</SelectItem>
                                     <SelectItem value="past week 1">{`Past Week 1 (${getWeekInterval(1)})`}</SelectItem>
                                     <SelectItem value="past week 2">{`Past Week 2 (${getWeekInterval(2)})`}</SelectItem>
                                     <SelectItem value="past week 3">{`Past Week 3 (${getWeekInterval(3)})`}</SelectItem>
@@ -2731,7 +2736,8 @@ const Admin = () => {
                                         </SelectTrigger>
                                           <SelectContent>
                                             <SelectItem value="this week">This Week</SelectItem>
-                                            <SelectItem value="next week">Next Week</SelectItem>
+                                             <SelectItem value="next week">Next Week</SelectItem>
+                                             <SelectItem value="next week on site">Next Week On Site</SelectItem>
                                             <SelectItem value="past week 1">{`Past Week 1 (${getWeekInterval(1)})`}</SelectItem>
                                             <SelectItem value="past week 2">{`Past Week 2 (${getWeekInterval(2)})`}</SelectItem>
                                             <SelectItem value="past week 3">{`Past Week 3 (${getWeekInterval(3)})`}</SelectItem>
@@ -2951,7 +2957,8 @@ const Admin = () => {
                                                 </SelectTrigger>
                                                    <SelectContent>
                                                      <SelectItem value="this week">This Week</SelectItem>
-                                                     <SelectItem value="next week">Next Week</SelectItem>
+                                                      <SelectItem value="next week">Next Week</SelectItem>
+                                                      <SelectItem value="next week on site">Next Week On Site</SelectItem>
                                                      <SelectItem value="past week 1">{`Past Week 1 (${getWeekInterval(1)})`}</SelectItem>
                                                      <SelectItem value="past week 2">{`Past Week 2 (${getWeekInterval(2)})`}</SelectItem>
                                                      <SelectItem value="past week 3">{`Past Week 3 (${getWeekInterval(3)})`}</SelectItem>
@@ -3055,7 +3062,7 @@ const Admin = () => {
                       <SelectContent className="z-[100] bg-background border shadow-lg min-w-[160px]">
                         <SelectItem value="all">All Statuses</SelectItem>
                         <SelectItem value="this week">This Week</SelectItem>
-                        <SelectItem value="next week">Next Week</SelectItem>
+                         <SelectItem value="next week">Next Week</SelectItem>
                         <SelectItem value="past week 1">{`Past Week 1 (${getWeekInterval(1)})`}</SelectItem>
                         <SelectItem value="past week 2">{`Past Week 2 (${getWeekInterval(2)})`}</SelectItem>
                         <SelectItem value="past week 3">{`Past Week 3 (${getWeekInterval(3)})`}</SelectItem>
@@ -3100,11 +3107,11 @@ const Admin = () => {
                       // Handle status filtering
                       if (statusFilter !== 'all') {
                         if (statusFilter === 'next week') {
-                          // Show applications for users with admin_status === 'next week'  
+                          // Show applications for users with admin_status === 'next week' or 'next week on site'
                           const weeklyParticipant = weeklyParticipants.find(participant => 
                             participant.user_id === application.user_id
                           );
-                          if (!weeklyParticipant || weeklyParticipant.admin_status !== 'next week') {
+                          if (!weeklyParticipant || (weeklyParticipant.admin_status !== 'next week' && weeklyParticipant.admin_status !== 'next week on site')) {
                             return false;
                           }
                         } else {
@@ -3543,7 +3550,8 @@ const Admin = () => {
                                                </SelectTrigger>
                                                   <SelectContent>
                                                     <SelectItem value="this week">This Week</SelectItem>
-                                                    <SelectItem value="next week">Next Week</SelectItem>
+                                                     <SelectItem value="next week">Next Week</SelectItem>
+                                                     <SelectItem value="next week on site">Next Week On Site</SelectItem>
                                                     <SelectItem value="past week 1">{`Past Week 1 (${getWeekInterval(1)})`}</SelectItem>
                                                     <SelectItem value="past week 2">{`Past Week 2 (${getWeekInterval(2)})`}</SelectItem>
                                                     <SelectItem value="past week 3">{`Past Week 3 (${getWeekInterval(3)})`}</SelectItem>
