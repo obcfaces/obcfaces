@@ -1629,101 +1629,136 @@ const Admin = () => {
                   );
                 }
 
-                return filteredWeeklyParticipants.map((participant) => {
+                return filteredWeeklyParticipants
+                  .sort((a, b) => {
+                    // Сортировка по дате последней оценки (от новых к старым)
+                    const aLastRating = new Date(a.updated_at || a.created_at || 0).getTime();
+                    const bLastRating = new Date(b.updated_at || b.created_at || 0).getTime();
+                    return bLastRating - aLastRating;
+                  })
+                  .map((participant, index) => {
                   const participantProfile = profiles.find(p => p.id === participant.user_id);
                   const appData = participant.application_data || {};
+                  const age = new Date().getFullYear() - (appData.birth_year || new Date().getFullYear() - (participantProfile?.age || 25));
+                  const registrationDate = new Date(participantProfile?.created_at || participant.created_at || '').toLocaleDateString('en-GB', { 
+                    day: '2-digit', 
+                    month: '2-digit', 
+                    year: '2-digit' 
+                  });
+                  
+                  // Определяем интервал недели для участника контеста
+                  const weekInterval = participant.admin_status && participant.admin_status.includes('past week') 
+                    ? participant.admin_status.replace('past week ', '').split(' ')[0]
+                    : participant.admin_status === 'this week' ? 'THIS' : null;
                   
                   return (
-                    <Card key={participant.id} className="overflow-hidden relative h-[149px]">
+                    <Card key={participant.id} className="overflow-hidden relative w-full">
                       <CardContent className="p-0">
-                        {/* Desktop layout */}
-                        <div className="hidden md:flex">
+                        {/* Компактная карточка на всю ширину */}
+                        <div className="flex w-full">
+                          {/* Нумерация */}
+                          <div className="absolute top-1 left-1 bg-black/70 text-white text-xs font-bold px-1.5 py-0.5 rounded z-10">
+                            {index + 1}
+                          </div>
+                          
                           {/* Photos section - 2 columns */}
-                          <div className="flex gap-px w-[25ch] flex-shrink-0">
+                          <div className="flex gap-px w-48 flex-shrink-0 relative">
+                            {/* Интервал недели над аватаром */}
+                            {weekInterval && (
+                              <div className="absolute top-1 right-1 bg-blue-600 text-white text-xs px-1 py-0.5 rounded z-10">
+                                {weekInterval}
+                              </div>
+                            )}
+                            
                             {(participantProfile?.photo_1_url || appData.photo1_url) && (
-                              <div className="w-1/2">
+                              <div className="w-1/2 relative">
                                 <img 
                                   src={participantProfile?.photo_1_url || appData.photo1_url} 
                                   alt="Portrait" 
-                                  className="w-full h-[149px] object-contain cursor-pointer hover:opacity-90 transition-opacity"
+                                  className="w-full h-32 object-cover cursor-pointer hover:opacity-90 transition-opacity"
                                   onClick={() => openPhotoModal([
                                     participantProfile?.photo_1_url || appData.photo1_url, 
                                     participantProfile?.photo_2_url || appData.photo2_url
                                   ].filter(Boolean), 0, `${participantProfile?.first_name || appData.first_name} ${participantProfile?.last_name || appData.last_name}`)}
                                 />
+                                {/* Дата регистрации в нижнем углу аватара */}
+                                <div className="absolute bottom-0 left-0 bg-black/70 text-white text-xs px-1 py-0.5">
+                                  {registrationDate}
+                                </div>
                               </div>
                             )}
                             {(participantProfile?.photo_2_url || appData.photo2_url) && (
-                              <div className="w-1/2 relative">
+                              <div className="w-1/2">
                                 <img 
                                   src={participantProfile?.photo_2_url || appData.photo2_url} 
                                   alt="Full length" 
-                                  className="w-full h-[149px] object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                                  className="w-full h-32 object-cover cursor-pointer hover:opacity-90 transition-opacity"
                                   onClick={() => openPhotoModal([
                                     participantProfile?.photo_1_url || appData.photo1_url, 
                                     participantProfile?.photo_2_url || appData.photo2_url
                                   ].filter(Boolean), 1, `${participantProfile?.first_name || appData.first_name} ${participantProfile?.last_name || appData.last_name}`)}
                                 />
-                                {/* User avatar positioned in top right corner */}
-                                <div className="absolute top-2 right-2">
-                                  <Avatar className="h-6 w-6 flex-shrink-0 border-2 border-white shadow-sm">
-                                    <AvatarImage src={participantProfile?.photo_1_url || appData.photo1_url || participantProfile?.avatar_url || ''} />
-                                    <AvatarFallback className="text-xs">
-                                      {(participantProfile?.first_name || appData.first_name)?.charAt(0) || 'U'}
-                                    </AvatarFallback>
-                                  </Avatar>
-                                </div>
                               </div>
                             )}
                           </div>
 
-                          {/* Main info section */}
-                          <div className="w-[50ch] flex-shrink-0 flex-1 min-w-0 p-4">
-                            <div className="flex items-center gap-2 mb-1">
-                              <span className="text-xs font-semibold whitespace-nowrap">
-                                {new Date().getFullYear() - (appData.birth_year || new Date().getFullYear() - (participantProfile?.age || 25))} {participantProfile?.first_name || appData.first_name} {participantProfile?.last_name || appData.last_name}
+                          {/* Main info section - компактная версия */}
+                          <div className="flex-1 p-3">
+                            {/* Возраст и имя в одной строке */}
+                            <div className="flex items-center gap-1 mb-0.5">
+                              <span className="text-sm font-semibold">
+                                {age} {participantProfile?.first_name || appData.first_name} {participantProfile?.last_name || appData.last_name}
                               </span>
                             </div>
                             
-                            <div 
-                              className="text-xs text-muted-foreground mb-1"
-                            >
-                              {participantProfile?.city || appData.city} {participantProfile?.country || appData.country}
+                            {/* Адрес - уменьшенный интервал */}
+                            <div className="text-xs text-muted-foreground mb-0.5 leading-tight">
+                              {participantProfile?.city || appData.city}, {participantProfile?.country || appData.country}
                             </div>
                             
-                            {/* Always show full information - like mobile version */}
-                            <div className="text-xs text-muted-foreground mb-1 space-y-0 leading-none">
-                              <div>{(participantProfile?.weight_kg || appData.weight_kg)}kg, {(participantProfile?.height_cm || appData.height_cm)}cm</div>
-                              <div>{participantProfile?.marital_status || appData.marital_status}, {(participantProfile?.has_children || appData.has_children) ? 'Has kids' : 'No kids'}</div>
-                              <div className="flex items-center gap-1">
-                                <span>
-                                  {participantProfile?.email 
-                                    ? (participantProfile.email.length > 7 ? `${participantProfile.email.substring(0, 7)}...` : participantProfile.email)
-                                    : 'No email'
-                                  }
-                                </span>
-                                {participantProfile?.email && (
-                                  <Copy 
-                                    className="h-3 w-3 cursor-pointer hover:text-foreground" 
-                                    onClick={() => navigator.clipboard.writeText(participantProfile.email)}
-                                  />
-                                )}
+                            {/* Email - уменьшенный интервал */}
+                            <div className="flex items-center gap-1 mb-2">
+                              <span className="text-xs text-muted-foreground">
+                                {participantProfile?.email 
+                                  ? (participantProfile.email.length > 12 ? `${participantProfile.email.substring(0, 12)}...` : participantProfile.email)
+                                  : 'No email'
+                                }
+                              </span>
+                              {participantProfile?.email && (
+                                <Copy 
+                                  className="h-3 w-3 cursor-pointer hover:text-foreground" 
+                                  onClick={() => navigator.clipboard.writeText(participantProfile.email)}
+                                />
+                              )}
+                            </div>
+                            
+                            {/* Кружки рейтинга на всю ширину */}
+                            <div className="flex justify-between items-center w-full">
+                              <div className="flex-1 grid grid-cols-5 gap-1">
+                                {[1, 2, 3, 4, 5].map((rating) => (
+                                  <div 
+                                    key={rating}
+                                    className={`h-8 rounded-full flex items-center justify-center text-white font-bold text-sm cursor-pointer transition-colors ${
+                                      rating <= (participant.average_rating || 0) 
+                                        ? 'bg-blue-600' 
+                                        : 'bg-gray-300'
+                                    }`}
+                                    onClick={() => {
+                                      setSelectedParticipantForVoters({
+                                        id: participant.id,
+                                        name: `${participantProfile?.first_name || appData.first_name} ${participantProfile?.last_name || appData.last_name}`
+                                      });
+                                      setVotersModalOpen(true);
+                                    }}
+                                  >
+                                    {rating}
+                                  </div>
+                                ))}
                               </div>
-                               <div 
-                                 className="text-lg font-bold text-blue-600 cursor-pointer hover:text-blue-700"
-                                 onClick={() => {
-                                   setSelectedParticipantForVoters({
-                                     id: participant.id,
-                                     name: `${participantProfile?.first_name || appData.first_name} ${participantProfile?.last_name || appData.last_name}`
-                                   });
-                                   setVotersModalOpen(true);
-                                 }}
-                               >
-                                 {participant.total_votes || 0} • ★ {(participant.average_rating || 0).toFixed(1)}
-                               </div>
+                              <div className="ml-3 text-xs text-muted-foreground">
+                                {participant.total_votes || 0} votes
+                              </div>
                             </div>
-                            
-                            <div className="flex-1"></div>
                           </div>
 
                           {/* Right side actions */}
@@ -1817,182 +1852,11 @@ const Admin = () => {
                             >
                               {`${(participant.average_rating || 0).toFixed(1)} (${participant.total_votes || 0})`}
                             </div>
-                          </div>
-                        </div>
-
-                        {/* Mobile layout - horizontal with full width */}
-                        <div className="md:hidden">
-                          <div className="flex w-full">
-                            {/* Photos section - left side */}
-                            <div className="flex gap-px w-[50vw] flex-shrink-0">
-                              {(participantProfile?.photo_1_url || appData.photo1_url) && (
-                                <div className="w-1/2">
-                                  <img 
-                                    src={participantProfile?.photo_1_url || appData.photo1_url} 
-                                    alt="Portrait" 
-                                    className="w-full h-36 object-contain cursor-pointer hover:opacity-90 transition-opacity"
-                                    onClick={() => openPhotoModal([
-                                      participantProfile?.photo_1_url || appData.photo1_url, 
-                                      participantProfile?.photo_2_url || appData.photo2_url
-                                    ].filter(Boolean), 0, `${participantProfile?.first_name || appData.first_name} ${participantProfile?.last_name || appData.last_name}`)}
-                                  />
-                                </div>
-                              )}
-                              {(participantProfile?.photo_2_url || appData.photo2_url) && (
-                                <div className="w-1/2 relative">
-                                  <img 
-                                    src={participantProfile?.photo_2_url || appData.photo2_url} 
-                                    alt="Full length" 
-                                    className="w-full h-36 object-cover cursor-pointer hover:opacity-90 transition-opacity"
-                                    onClick={() => openPhotoModal([
-                                      participantProfile?.photo_1_url || appData.photo1_url, 
-                                      participantProfile?.photo_2_url || appData.photo2_url
-                                    ].filter(Boolean), 1, `${participantProfile?.first_name || appData.first_name} ${participantProfile?.last_name || appData.last_name}`)}
-                                  />
-                                  {/* User avatar positioned in top right corner */}
-                                  <div className="absolute top-2 right-2">
-                                    <Avatar className="h-6 w-6 flex-shrink-0 border-2 border-white shadow-sm">
-                                      <AvatarImage src={participantProfile?.photo_1_url || appData.photo1_url || participantProfile?.avatar_url || ''} />
-                                      <AvatarFallback className="text-xs">
-                                        {(participantProfile?.first_name || appData.first_name)?.charAt(0) || 'U'}
-                                      </AvatarFallback>
-                                    </Avatar>
-                                  </div>
-                                </div>
-                              )}
-                            </div>
-                            
-                            {/* Information section - right side */}
-                            <div className="w-[50vw] flex-shrink-0 pl-2 flex flex-col h-48 relative">
-                              <div className="flex items-center gap-2 mb-1 mt-1">
-                                <span className="text-xs font-semibold whitespace-nowrap">
-                                  {new Date().getFullYear() - (appData.birth_year || new Date().getFullYear() - (participantProfile?.age || 25))} {participantProfile?.first_name || appData.first_name} {participantProfile?.last_name || appData.last_name}
-                                </span>
-                              </div>
-                              
-                              <div 
-                                className="text-xs text-muted-foreground mb-1 cursor-pointer hover:text-foreground transition-colors"
-                                onClick={() => {
-                                  const newExpanded = new Set(expandedMobileItems);
-                                  if (expandedMobileItems.has(participant.id)) {
-                                    newExpanded.delete(participant.id);
-                                  } else {
-                                    newExpanded.add(participant.id);
-                                  }
-                                  setExpandedMobileItems(newExpanded);
-                                }}
-                              >
-                                {participantProfile?.city || appData.city} {participantProfile?.country || appData.country}
-                              </div>
-                              
-                              {/* Expanded information */}
-                              {expandedMobileItems.has(participant.id) && (
-                                <div className="text-xs text-muted-foreground mb-1 space-y-0 leading-none">
-                                  <div>{(participantProfile?.weight_kg || appData.weight_kg)}kg, {(participantProfile?.height_cm || appData.height_cm)}cm</div>
-                                  <div>{participantProfile?.marital_status || appData.marital_status}, {(participantProfile?.has_children || appData.has_children) ? 'Has kids' : 'No kids'}</div>
-                                  <div className="flex items-center gap-1">
-                                    <span>
-                                      {participantProfile?.email 
-                                        ? (participantProfile.email.length > 7 ? `${participantProfile.email.substring(0, 7)}...` : participantProfile.email)
-                                        : 'No email'
-                                      }
-                                    </span>
-                                    {participantProfile?.email && (
-                                      <Copy 
-                                        className="h-3 w-3 cursor-pointer hover:text-foreground" 
-                                        onClick={() => navigator.clipboard.writeText(participantProfile.email)}
-                                      />
-                                    )}
-                                  </div>
-                                </div>
-                              )}
-                              
-                              <div className="flex-1"></div>
-                              
-                              {/* Status filter positioned at bottom */}
-                              <div className="absolute bottom-12 right-13 flex items-center gap-2">
-                                 <Select 
-                                   value={participant.admin_status || participantFilters[participant.id] || (participant.final_rank ? 'this week' : 'approve')} 
-                                   onValueChange={(value) => {
-                                     if (value === 'reject') {
-                                       // Open reject modal for this participant
-                                       setApplicationToReject({
-                                         id: participant.id,
-                                         name: `${participantProfile?.first_name || appData.first_name} ${participantProfile?.last_name || appData.last_name}`
-                                       });
-                                       setRejectModalOpen(true);
-                                       return;
-                                     }
-                                     
-                                      // Update the filter state
-                                      setParticipantFilters(prev => ({
-                                        ...prev,
-                                        [participant.id]: value
-                                      }));
-
-                                      // Update the database with the new admin_status
-                                      const updateParticipantStatus = async () => {
-                                        try {
-                                          const { error } = await supabase
-                                            .from('weekly_contest_participants')
-                                            .update({ admin_status: value } as any)
-                                            .eq('id', participant.id);
-                                          
-                                          if (error) {
-                                            console.error('Error updating participant status:', error);
-                                            toast({
-                                              title: "Error",
-                                              description: "Failed to update participant status",
-                                              variant: "destructive"
-                                            });
-                                          } else {
-                                            // Refresh the participants data
-                                            fetchWeeklyParticipants();
-                                          }
-                                        } catch (error) {
-                                          console.error('Error updating participant status:', error);
-                                        }
-                                      };
-
-                                      updateParticipantStatus();
-                                   }}
-                                 >
-                                   <SelectTrigger className="w-24 h-7 text-xs">
-                                     <SelectValue />
-                                   </SelectTrigger>
-                                          <SelectContent className="z-50 bg-background border shadow-md">
-                                            <SelectItem value="this week">This Week</SelectItem>
-                                             <SelectItem value="next week">Next Week</SelectItem>
-                                             <SelectItem value="next week on site">Next Week On Site</SelectItem>
-                                             <SelectItem value="past week 1">{`Past Week 1 (${getWeekInterval(1)})`}</SelectItem>
-                                             <SelectItem value="past week 2">{`Past Week 2 (${getWeekInterval(2)})`}</SelectItem>
-                                             <SelectItem value="past week 3">{`Past Week 3 (${getWeekInterval(3)})`}</SelectItem>
-                                            <SelectItem value="pending">Pending</SelectItem>
-                                            <SelectItem value="approved">Approved</SelectItem>
-                                            <SelectItem value="rejected">Rejected</SelectItem>
-                                       </SelectContent>
-                                 </Select>
-                                
-                                {/* Rating with votes */}
-                                <div 
-                                  className="text-xs text-muted-foreground -mt-[5px] cursor-pointer hover:text-foreground"
-                                  onClick={() => {
-                                    setSelectedParticipantForVoters({
-                                      id: participant.id,
-                                      name: `${participantProfile?.first_name || appData.first_name} ${participantProfile?.last_name || appData.last_name}`
-                                    });
-                                    setVotersModalOpen(true);
-                                  }}
-                                >
-                                  {`${(participant.average_rating || 0).toFixed(1)} (${participant.total_votes || 0})`}
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  );
+                           </div>
+                         </div>
+                       </CardContent>
+                     </Card>
+                   );
                 });
               })()}
             </TabsContent>
