@@ -89,13 +89,25 @@ export const VotersModal = ({ isOpen, onClose, participantId, participantName }:
         return;
       }
 
-      // Get all ratings for this participant (not just latest)
-      const { data: ratings, error: ratingsError } = await supabase
+      // Get all ratings for this participant from multiple sources
+      const { data: ratingsById, error: ratingsError1 } = await supabase
         .from('contestant_ratings')
         .select('user_id, rating, created_at')
-        .or(`participant_id.eq.${participantId},contestant_user_id.eq.${participantData.user_id}`)
+        .eq('participant_id', participantId)
         .order('user_id', { ascending: true })
         .order('created_at', { ascending: false });
+
+      const { data: ratingsByUserId, error: ratingsError2 } = await supabase
+        .from('contestant_ratings')
+        .select('user_id, rating, created_at')
+        .eq('contestant_user_id', participantData.user_id)
+        .order('user_id', { ascending: true })
+        .order('created_at', { ascending: false });
+
+      const ratingsError = ratingsError1 || ratingsError2;
+      // Combine and deduplicate ratings
+      const allRatings = [...(ratingsById || []), ...(ratingsByUserId || [])];
+      const ratings = allRatings;
 
       console.log('Ratings query result:', { ratings, ratingsError });
 
