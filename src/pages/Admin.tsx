@@ -399,8 +399,6 @@ const Admin = () => {
               return status === 'approved';
             case 'rejected':
               return status === 'rejected';
-            case 'next':
-              return status === 'next';
             default:
               return true;
           }
@@ -1926,7 +1924,7 @@ const Admin = () => {
                               {/* Status controls */}
                               <div className="flex items-center gap-2 ml-2 flex-shrink-0">
                                 <Select 
-                                  value={participant.admin_status || 'next'} 
+                                  value={participant.admin_status || 'next week'}
                                   onValueChange={async (value) => {
                                     try {
                                       const { error } = await supabase
@@ -2057,7 +2055,7 @@ const Admin = () => {
                                 </span>
                               </div>
                               <Select 
-                                value={participant.admin_status || 'next'} 
+                                value={participant.admin_status || 'next week'} 
                                 onValueChange={async (value) => {
                                   try {
                                     const { error } = await supabase
