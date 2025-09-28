@@ -2006,14 +2006,14 @@ const Admin = () => {
                               
                               {/* Status controls */}
                                <div className="flex items-center gap-2 ml-2 flex-shrink-0">
-                                 <Select 
-                                   value={participant.admin_status || 'next week'}
-                                   onValueChange={async (value) => {
-                                    try {
-                                       const { error } = await supabase
-                                         .from('weekly_contest_participants')
-                                         .update({ admin_status: value } as any)
-                                         .eq('id', participant.participant_id);
+                                  <Select 
+                                    value={participant.admin_status || 'next week'}
+                                    onValueChange={async (value) => {
+                                     try {
+                                        const { error } = await supabase
+                                          .from('weekly_contest_participants')
+                                          .update({ admin_status: value } as any)
+                                          .eq('id', participant.id);
                                       
                                       if (error) {
                                         console.error('Error updating participant status:', error);
