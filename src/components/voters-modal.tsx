@@ -421,13 +421,19 @@ export const VotersModal = ({ isOpen, onClose, participantId, participantName }:
                          )}
                          <div className="flex items-start gap-4 mt-4">
                            {/* Avatar with rating below */}
-                           <div className="flex flex-col items-center gap-2 flex-shrink-0">
+                           <div className="flex flex-col items-center gap-2 flex-shrink-0 relative">
                              <Avatar className="h-16 w-16">
                                <AvatarImage src={voter.profile?.avatar_url || ''} />
                                <AvatarFallback className="text-lg">
                                  {getDisplayName(voter).charAt(0)}
                                </AvatarFallback>
                              </Avatar>
+                             {/* Registration date badge under avatar */}
+                             {voter.registration_date && (
+                               <Badge variant="outline" className="text-xs px-1 py-0.5 absolute -bottom-6 bg-background">
+                                 {new Date(voter.registration_date).toLocaleDateString()}
+                               </Badge>
+                             )}
                               <Badge 
                                 className={`${getRatingColor(voter.latest_rating.rating)} text-white px-2 py-1 text-sm font-semibold`}
                               >
@@ -441,7 +447,7 @@ export const VotersModal = ({ isOpen, onClose, participantId, participantName }:
                                <div className="flex-1">
                                   <h3 className="font-semibold text-lg leading-tight">
                                     {voter.profile?.age && (
-                                      <span className="text-muted-foreground font-normal">{voter.profile.age} лет • </span>
+                                      <span className="text-muted-foreground font-normal">{voter.profile.age} • </span>
                                     )}
                                     {getDisplayName(voter)}
                                   </h3>
@@ -457,25 +463,10 @@ export const VotersModal = ({ isOpen, onClose, participantId, participantName }:
                                      📧 {voter.email}
                                    </div>
                                  )}
-                                
-                                {/* Registration Date */}
-                                {voter.registration_date && (
-                                  <p className="text-xs text-muted-foreground mt-1">
-                                    Registered: {new Date(voter.registration_date).toLocaleDateString()}
-                                  </p>
-                                )}
-                                
-                                 {/* Latest Vote Date */}
-                                 <p className="text-xs text-muted-foreground mt-1">
-                                   Latest vote: {formatRatingTime(voter.latest_rating.created_at)}
-                                 </p>
                                  
-                                  {/* Complete rating history for this user */}
+                                  {/* Rating history circles */}
                                   {voter.rating_history && voter.rating_history.length > 1 && (
-                                    <div className="mt-2 space-y-1">
-                                      <p className="text-xs font-medium text-muted-foreground">
-                                        Complete rating history ({voter.rating_history.length} changes):
-                                      </p>
+                                    <div className="mt-2">
                                       <div className="flex items-start gap-2 max-h-32 overflow-x-auto">
                                         {voter.rating_history.slice().reverse().map((historyItem, idx) => {
                                           const isUpdate = historyItem.action_type === 'update' && historyItem.old_rating;
@@ -483,7 +474,7 @@ export const VotersModal = ({ isOpen, onClose, participantId, participantName }:
                                           if (isUpdate) {
                                             // Show both old and new rating for updates
                                             return (
-                                              <>
+                                              <React.Fragment key={`${voter.user_id}-${idx}`}>
                                                 <div className="flex flex-col items-center flex-shrink-0">
                                                   <div className="w-6 h-6 rounded-full bg-orange-500 text-white flex items-center justify-center text-xs font-semibold">
                                                     {historyItem.old_rating}
@@ -525,12 +516,12 @@ export const VotersModal = ({ isOpen, onClose, participantId, participantName }:
                                                     })}
                                                   </span>
                                                 </div>
-                                              </>
+                                              </React.Fragment>
                                             );
                                           } else {
                                             // Show single rating for existing/insert/delete actions
                                             return (
-                                              <div key={idx} className="flex flex-col items-center flex-shrink-0">
+                                              <div key={`${voter.user_id}-${idx}`} className="flex flex-col items-center flex-shrink-0">
                                                 <div className={`w-6 h-6 rounded-full text-white flex items-center justify-center text-xs font-semibold ${
                                                   historyItem.action_type === 'existing' ? 'bg-gray-500' : 'bg-green-500'
                                                 }`}>
@@ -558,77 +549,62 @@ export const VotersModal = ({ isOpen, onClose, participantId, participantName }:
                                       </div>
                                     </div>
                                   )}
-                              </div>
-                              
-                               {/* Badges and expand indicator */}
-                               <div className="flex flex-col items-end gap-2">
-                                 <div className="flex items-center gap-2">
-                                   {expandedUser === voter.user_id ? (
-                                     <ChevronUp className="w-4 h-4 text-muted-foreground" />
-                                   ) : (
-                                     <ChevronDown className="w-4 h-4 text-muted-foreground" />
-                                   )}
-                                 </div>
                                </div>
-                            </div>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </CollapsibleTrigger>
-                    
-                    {/* User Activity History */}
-                    <CollapsibleContent>
-                      <CardContent className="px-4 pb-4 pt-0 border-t">
-                        <h4 className="font-medium text-sm mb-3 text-muted-foreground">
-                          Rating & Like History
-                        </h4>
-                        
-                        {activityLoading ? (
-                          <div className="flex items-center justify-center py-4">
-                            <div className="text-sm text-muted-foreground">Loading activity...</div>
-                          </div>
-                        ) : userActivity.length === 0 ? (
-                          <div className="text-sm text-muted-foreground py-2">
-                            No activity found for other participants
-                          </div>
-                        ) : (
-                          <div className="space-y-2 max-h-40 overflow-y-auto">
-                            {userActivity.map((activity, actIndex) => (
-                              <div key={`${activity.target_user_id}-${actIndex}`} className="flex items-center gap-3 p-2 bg-muted/30 rounded-lg">
-                                <Avatar className="h-8 w-8">
-                                  <AvatarImage src={activity.target_avatar || ''} />
-                                  <AvatarFallback className="text-xs">
-                                    {activity.target_name.charAt(0)}
-                                  </AvatarFallback>
-                                </Avatar>
-                                
-                                <div className="flex-1 min-w-0">
-                                  <p className="text-sm font-medium truncate">
-                                    {activity.target_name}
-                                  </p>
-                                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                                    {activity.rating && (
-                                      <span className="flex items-center gap-1">
-                                        <Star className="w-3 h-3 fill-current text-yellow-500" />
-                                        {activity.rating}/10
-                                      </span>
-                                    )}
-                                    {activity.like_count > 0 && (
-                                      <span className="flex items-center gap-1">
-                                        <Heart className="w-3 h-3 fill-current text-red-500" />
-                                        {activity.like_count}
-                                      </span>
-                                    )}
-                                    <span>•</span>
-                                    <span>{new Date(activity.last_activity).toLocaleDateString()}</span>
-                                  </div>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                      </CardContent>
-                    </CollapsibleContent>
+                               <div className="flex items-center gap-2 text-muted-foreground">
+                                 {expandedUser === voter.user_id ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                               </div>
+                             </div>
+                           </div>
+                         </div>
+                       </CardContent>
+                     </CollapsibleTrigger>
+                     
+                     <CollapsibleContent>
+                       <CardContent className="px-6 pb-4 pt-0 border-t">
+                         <div className="space-y-4">
+                           <h4 className="font-semibold text-sm text-muted-foreground">User Activity Overview</h4>
+                           
+                           {activityLoading ? (
+                             <div className="text-sm text-muted-foreground">Loading activity...</div>
+                           ) : userActivity.length === 0 ? (
+                             <div className="text-sm text-muted-foreground">No activity found</div>
+                           ) : (
+                             <div className="grid gap-3 max-h-60 overflow-y-auto">
+                               {userActivity.map((activity, idx) => (
+                                 <div key={idx} className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
+                                   <Avatar className="h-8 w-8 flex-shrink-0">
+                                     <AvatarImage src={activity.target_avatar || ''} />
+                                     <AvatarFallback className="text-xs">
+                                       {activity.target_name.charAt(0)}
+                                     </AvatarFallback>
+                                   </Avatar>
+                                   <div className="flex-1 min-w-0">
+                                     <div className="text-sm font-medium truncate">{activity.target_name}</div>
+                                     <div className="text-xs text-muted-foreground">
+                                       Last activity: {formatRatingTime(activity.last_activity)}
+                                     </div>
+                                   </div>
+                                   <div className="flex items-center gap-2 text-xs">
+                                     {activity.rating && (
+                                       <div className="flex items-center gap-1">
+                                         <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                                         <span>{activity.rating}/10</span>
+                                       </div>
+                                     )}
+                                     {activity.like_count > 0 && (
+                                       <div className="flex items-center gap-1">
+                                         <Heart className="h-3 w-3 fill-red-400 text-red-400" />
+                                         <span>{activity.like_count}</span>
+                                       </div>
+                                     )}
+                                   </div>
+                                 </div>
+                               ))}
+                             </div>
+                           )}
+                         </div>
+                       </CardContent>
+                     </CollapsibleContent>
                   </Card>
                 </Collapsible>
               ))}
