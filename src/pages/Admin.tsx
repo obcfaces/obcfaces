@@ -2093,22 +2093,22 @@ const Admin = () => {
                                     className="flex items-center gap-1 text-green-600 hover:underline cursor-pointer"
                                     onClick={() => {
                                       const participantName = participantProfile?.display_name || `${participantProfile?.first_name || appData.first_name} ${participantProfile?.last_name || appData.last_name}` || 'Unnamed';
+                                      console.log('Opening NextWeekVotersModal for likes:', participantName);
                                       setSelectedParticipantForNextWeekVoters(participantName);
                                       setNextWeekVotersModalOpen(true);
                                     }}
                                   >
-                                    <span>👍</span>
                                     <span className="font-medium">{participant.like_count || 0}</span>
                                   </button>
                                   <button
                                     className="flex items-center gap-1 text-red-600 hover:underline cursor-pointer"
                                     onClick={() => {
                                       const participantName = participantProfile?.display_name || `${participantProfile?.first_name || appData.first_name} ${participantProfile?.last_name || appData.last_name}` || 'Unnamed';
+                                      console.log('Opening NextWeekVotersModal for dislikes:', participantName);
                                       setSelectedParticipantForNextWeekVoters(participantName);
                                       setNextWeekVotersModalOpen(true);
                                     }}
                                   >
-                                    <span>👎</span>
                                     <span className="font-medium">{participant.dislike_count || 0}</span>
                                   </button>
                                 </div>
@@ -2171,22 +2171,22 @@ const Admin = () => {
                                     className="flex items-center gap-1 text-green-600 hover:underline cursor-pointer"
                                     onClick={() => {
                                       const participantName = participantProfile?.display_name || `${participantProfile?.first_name || appData.first_name} ${participantProfile?.last_name || appData.last_name}` || 'Unnamed';
+                                      console.log('Opening NextWeekVotersModal for likes (mobile):', participantName);
                                       setSelectedParticipantForNextWeekVoters(participantName);
                                       setNextWeekVotersModalOpen(true);
                                     }}
                                   >
-                                    <span>👍</span>
                                     <span className="font-medium">{participant.like_count || 0}</span>
                                   </button>
                                   <button
                                     className="flex items-center gap-1 text-red-600 hover:underline cursor-pointer"
                                     onClick={() => {
                                       const participantName = participantProfile?.display_name || `${participantProfile?.first_name || appData.first_name} ${participantProfile?.last_name || appData.last_name}` || 'Unnamed';
+                                      console.log('Opening NextWeekVotersModal for dislikes (mobile):', participantName);
                                       setSelectedParticipantForNextWeekVoters(participantName);
                                       setNextWeekVotersModalOpen(true);
                                     }}
                                   >
-                                    <span>👎</span>
                                     <span className="font-medium">{participant.dislike_count || 0}</span>
                                   </button>
                                 </div>
