@@ -91,15 +91,18 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
   const [filteredCandidates, setFilteredCandidates] = useState<any[]>([]);
   const [remainingCandidates, setRemainingCandidates] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
-  const [hasInitialized, setHasInitialized] = useState(false);
+  const [isVotesLoaded, setIsVotesLoaded] = useState(false);
+  const [userInitialized, setUserInitialized] = useState(false);
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
       setUser(session?.user ?? null);
+      setUserInitialized(true);
     });
 
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
+      setUserInitialized(true);
     });
 
     return () => subscription.unsubscribe();
@@ -108,8 +111,11 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
   // Filter candidates based on user's previous votes and next week participants
   useEffect(() => {
     const filterCandidates = async () => {
+      // Don't start until user state is determined
+      if (!userInitialized) return;
+      
       setIsLoading(true);
-      setHasInitialized(false);
+      setIsVotesLoaded(false);
       
       try {
         // Get participants with "next week" or "next week on site" admin_status
@@ -139,6 +145,7 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
           setFilteredCandidates(candidatesFromDB);
           setRemainingCandidates(candidatesFromDB.length);
           setCurrentIndex(0);
+          setIsVotesLoaded(true);
         } else {
           // Get user's votes first, then filter candidates
           const { data: votes } = await supabase
@@ -160,6 +167,7 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
           setRemainingCandidates(finalCandidates.length);
           setCurrentIndex(0);
           setHistory([]);
+          setIsVotesLoaded(true);
         }
       } catch (error) {
         console.error('Error fetching participants and votes:', error);
@@ -167,14 +175,14 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
         setFilteredCandidates([]);
         setRemainingCandidates(0);
         setCurrentIndex(0);
+        setIsVotesLoaded(true);
       }
       
       setIsLoading(false);
-      setHasInitialized(true);
     };
 
     filterCandidates();
-  }, [user]);
+  }, [user, userInitialized]);
 
   const handleLike = async () => {
     if (!user) {
@@ -283,7 +291,7 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
         </div>
       </div>
 
-      {!hasInitialized || isLoading ? (
+      {!userInitialized || isLoading || !isVotesLoaded ? (
         <div className="text-center py-12">
           <div className="animate-pulse">
             <div className="h-8 bg-muted rounded w-32 mx-auto mb-2"></div>
