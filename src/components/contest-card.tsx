@@ -450,10 +450,28 @@ export function ContestantCard({
 
 
 
+  // Helper function to resolve asset names to actual imports
+  const resolveAsset = (assetName: string) => {
+    switch (assetName) {
+      case 'jasmin-payment-proof':
+        return jasminPaymentProof;
+      case 'winner-payment-april':
+        return winnerPaymentImageApril;
+      case 'winner-video-april':
+        return winnerVideoApril;
+      case 'winner-payment':
+        return winnerPaymentImage;
+      case 'winner-video':
+        return winnerVideo;
+      default:
+        return assetName; // Return as-is if it's already a URL
+    }
+  };
+
   const allPhotos = isWinner && winnerContent
     ? [faceImage, fullBodyImage, ...additionalPhotos, 
-       winnerContent.payment_proof_url, 
-       winnerContent.testimonial_video_url]
+       resolveAsset(winnerContent.payment_proof_url), 
+       resolveAsset(winnerContent.testimonial_video_url)]
     : [faceImage, fullBodyImage, ...additionalPhotos];
 
   const openModal = (photoIndex: number) => {
@@ -961,7 +979,7 @@ export function ContestantCard({
                {/* Payment photo - use winner content from database only */}
                <div className="relative">
                  <img 
-                   src={winnerContent.payment_proof_url} 
+                   src={resolveAsset(winnerContent.payment_proof_url)} 
                    alt="Payment receipt"
                    className="w-24 sm:w-28 md:w-32 h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
                    onClick={() => openModal(isWinner ? additionalPhotos.length + 2 : 2)}
@@ -971,7 +989,7 @@ export function ContestantCard({
                {/* Video - use winner content from database only */}
                <div className="relative">
                  <video 
-                   src={winnerContent.testimonial_video_url}
+                   src={resolveAsset(winnerContent.testimonial_video_url)}
                    className="w-24 sm:w-28 md:w-32 h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
                    controls={false}
                    muted
