@@ -67,32 +67,34 @@ serve(async (req) => {
       console.log(`Moved ${thisWeekParticipants.length} participants from "this week" to "past week 1"`)
     }
 
-    // 4. Move "next week" to "this week"
-    const { data: nextWeekParticipants, error: fetchNextError } = await supabaseClient
+    // 4. Move "next week on site" to "this week" (only these cards transition)
+    const { data: nextWeekOnSiteParticipants, error: fetchNextOnSiteError } = await supabaseClient
       .from('weekly_contest_participants')
       .select('*')
-      .eq('admin_status', 'next week')
+      .eq('admin_status', 'next week on site')
 
-    if (fetchNextError) {
-      console.error('Error fetching next week participants:', fetchNextError)
-      throw fetchNextError
+    if (fetchNextOnSiteError) {
+      console.error('Error fetching next week on site participants:', fetchNextOnSiteError)
+      throw fetchNextOnSiteError
     }
 
-    console.log(`Found ${nextWeekParticipants?.length || 0} participants in "next week"`)
+    console.log(`Found ${nextWeekOnSiteParticipants?.length || 0} participants in "next week on site"`)
 
-    if (nextWeekParticipants && nextWeekParticipants.length > 0) {
-      const { error: moveNextWeekError } = await supabaseClient
+    if (nextWeekOnSiteParticipants && nextWeekOnSiteParticipants.length > 0) {
+      const { error: moveNextWeekOnSiteError } = await supabaseClient
         .from('weekly_contest_participants')
         .update({ admin_status: 'this week' })
-        .eq('admin_status', 'next week')
+        .eq('admin_status', 'next week on site')
 
-      if (moveNextWeekError) {
-        console.error('Error moving next week to this week:', moveNextWeekError)
-        throw moveNextWeekError
+      if (moveNextWeekOnSiteError) {
+        console.error('Error moving next week on site to this week:', moveNextWeekOnSiteError)
+        throw moveNextWeekOnSiteError
       }
 
-      console.log(`Moved ${nextWeekParticipants.length} participants from "next week" to "this week"`)
+      console.log(`Moved ${nextWeekOnSiteParticipants.length} participants from "next week on site" to "this week"`)
     }
+
+    // Note: "next week" status participants remain unchanged but get updated date intervals
 
     // 5. Update contest applications statuses accordingly
     const { error: updateApplicationsError } = await supabaseClient
@@ -113,7 +115,7 @@ serve(async (req) => {
         message: 'Weekly status transition completed',
         transitions: {
           thisWeekToPastWeek1: thisWeekParticipants?.length || 0,
-          nextWeekToThisWeek: nextWeekParticipants?.length || 0
+          nextWeekOnSiteToThisWeek: nextWeekOnSiteParticipants?.length || 0
         }
       }),
       { 
