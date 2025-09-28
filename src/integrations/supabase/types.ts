@@ -344,21 +344,27 @@ export type Database = {
           candidate_name: string
           created_at: string
           id: string
+          updated_at: string | null
           user_id: string
+          vote_count: number | null
           vote_type: string
         }
         Insert: {
           candidate_name: string
           created_at?: string
           id?: string
+          updated_at?: string | null
           user_id: string
+          vote_count?: number | null
           vote_type: string
         }
         Update: {
           candidate_name?: string
           created_at?: string
           id?: string
+          updated_at?: string | null
           user_id?: string
+          vote_count?: number | null
           vote_type?: string
         }
         Relationships: []
@@ -969,6 +975,43 @@ export type Database = {
           photo_2_url: string
           user_id: string
           weight_kg: number
+        }[]
+      }
+      get_next_week_participants_with_votes: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          age: number
+          avatar_url: string
+          average_rating: number
+          city: string
+          country: string
+          dislike_count: number
+          display_name: string
+          first_name: string
+          gender: string
+          has_children: boolean
+          height_cm: number
+          last_name: string
+          like_count: number
+          marital_status: string
+          participant_id: string
+          participant_status: string
+          photo_1_url: string
+          photo_2_url: string
+          state: string
+          total_votes: number
+          user_id: string
+          vote_total: number
+          weight_kg: number
+        }[]
+      }
+      get_next_week_vote_stats: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          candidate_name: string
+          dislike_count: number
+          like_count: number
+          total_votes: number
         }[]
       }
       get_or_create_conversation: {

@@ -1067,9 +1067,9 @@ const Admin = () => {
   // Новая функция для загрузки участников next week с интервалами
   const fetchNextWeekParticipants = async () => {
     try {
-      console.log('Fetching next week participants with intervals...');
+      console.log('Fetching next week participants with votes...');
       
-      const { data: participants, error } = await supabase.rpc('get_next_week_participants_admin');
+      const { data: participants, error } = await supabase.rpc('get_next_week_participants_with_votes');
       
       if (error) {
         console.error('Error fetching next week participants:', error);
@@ -1079,7 +1079,13 @@ const Admin = () => {
       console.log('Fetched next week participants:', participants?.length || 0);
       if (participants && participants.length > 0) {
         console.log('First participant structure:', participants[0]);
-        console.log('All participant IDs:', participants.map(p => ({ id: p.id, user_id: p.user_id })));
+        console.log('Like/Dislike counts:', participants.map(p => ({ 
+          id: p.participant_id, 
+          name: p.display_name,
+          likes: p.like_count,
+          dislikes: p.dislike_count,
+          total: p.vote_total
+        })));
       }
       setNextWeekParticipants(participants || []);
     } catch (error) {
@@ -1933,7 +1939,7 @@ const Admin = () => {
                   const appData = participant.application_data || {};
                   
                   return (
-                    <Card key={participant.id} className="overflow-hidden relative h-[149px]">
+                    <Card key={participant.participant_id} className="overflow-hidden relative h-[149px]">
                       <CardContent className="p-0">
                         {/* Desktop layout */}
                         <div className="hidden md:flex">
@@ -2014,31 +2020,31 @@ const Admin = () => {
                                      value={participant.admin_status || 'next week'}
                                      onValueChange={async (value) => {
                                       try {
-                                         console.log('=== Status Update Debug ===');
-                                         console.log('Full participant object:', JSON.stringify(participant, null, 2));
-                                         console.log('participant.id:', participant.id);
-                                         console.log('typeof participant.id:', typeof participant.id);
-                                         console.log('participant keys:', Object.keys(participant));
-                                         console.log('New status value:', value);
-                                         
-                                         if (!participant.id) {
-                                           console.error('participant.id is falsy:', participant.id);
-                                           throw new Error('No participant ID found in participant object');
-                                         }
-                                         
-                                         console.log('About to update with ID:', participant.id);
-                                         const { error } = await supabase
-                                           .from('weekly_contest_participants')
-                                           .update({ admin_status: value } as any)
-                                           .eq('id', participant.id);
+                                          console.log('=== Status Update Debug ===');
+                                          console.log('Full participant object:', JSON.stringify(participant, null, 2));
+                                          console.log('participant.participant_id:', participant.participant_id);
+                                          console.log('typeof participant.participant_id:', typeof participant.participant_id);
+                                          console.log('participant keys:', Object.keys(participant));
+                                          console.log('New status value:', value);
+                                          
+                                          if (!participant.participant_id) {
+                                            console.error('participant.participant_id is falsy:', participant.participant_id);
+                                            throw new Error('No participant ID found in participant object');
+                                          }
+                                          
+                                          console.log('About to update with ID:', participant.participant_id);
+                                          const { error } = await supabase
+                                            .from('weekly_contest_participants')
+                                            .update({ admin_status: value } as any)
+                                            .eq('id', participant.participant_id);
                                       
                                        if (error) {
                                          console.error('=== Supabase Error Details ===');
                                          console.error('Full error object:', error);
                                          console.error('Error code:', error.code);
                                          console.error('Error message:', error.message);
-                                         console.error('Error details:', error.details);
-                                         console.error('participant.id used in query:', participant.id);
+                                          console.error('Error details:', error.details);
+                                          console.error('participant.participant_id used in query:', participant.participant_id);
                                          toast({
                                            title: "Error",
                                            description: "Failed to update participant status",
@@ -2077,24 +2083,30 @@ const Admin = () => {
                               </div>
                             </div>
                             
-                            {/* Bottom row - Rating, votes, actions */}
-                            <div className="flex items-center justify-between mt-auto pt-2">
-                              <div className="text-xs text-muted-foreground">
-                                Rating: 
-                                <span 
-                                  className="ml-1 cursor-pointer hover:underline text-primary"
-                                  onClick={() => {
-                                    setSelectedParticipantForVoters({
-                                      id: participant.id,
-                                      name: participantProfile?.display_name || `${participantProfile?.first_name || appData.first_name} ${participantProfile?.last_name || appData.last_name}` || 'Unnamed'
-                                    });
-                                    setVotersModalOpen(true);
-                                  }}
-                                >
-                                  {`${(participant.average_rating || 0).toFixed(1)} (${participant.total_votes || 0})`}
-                                </span>
-                              </div>
-                            </div>
+                             {/* Bottom row - Rating, votes, like/dislike counts */}
+                             <div className="flex items-center justify-between mt-auto pt-2">
+                               <div className="text-xs text-muted-foreground flex items-center gap-3">
+                                 <span>
+                                   Rating: 
+                                   <span 
+                                     className="ml-1 cursor-pointer hover:underline text-primary"
+                                     onClick={() => {
+                                       setSelectedParticipantForVoters({
+                                         id: participant.participant_id,
+                                         name: participantProfile?.display_name || `${participantProfile?.first_name || appData.first_name} ${participantProfile?.last_name || appData.last_name}` || 'Unnamed'
+                                       });
+                                       setVotersModalOpen(true);
+                                     }}
+                                   >
+                                     {`${(participant.average_rating || 0).toFixed(1)} (${participant.total_votes || 0})`}
+                                   </span>
+                                 </span>
+                                 <span className="flex items-center gap-2">
+                                   <span className="text-green-600">👍 {participant.like_count || 0}</span>
+                                   <span className="text-red-600">👎 {participant.dislike_count || 0}</span>
+                                 </span>
+                               </div>
+                             </div>
                           </div>
                         </div>
                         
@@ -2147,21 +2159,23 @@ const Admin = () => {
                               <div>{participantProfile?.age || appData.age}л, {participantProfile?.city || appData.city}</div>
                               <div>{participantProfile?.height_cm || appData.height_cm}см, {participantProfile?.weight_kg || appData.weight_kg}кг</div>
                             </div>
-                            <div className="flex items-center justify-between pt-1">
-                              <div className="text-muted-foreground">
-                                <span 
-                                  className="cursor-pointer hover:underline text-primary"
-                                  onClick={() => {
-                                    setSelectedParticipantForVoters({
-                                      id: participant.id,
-                                      name: participantProfile?.display_name || `${participantProfile?.first_name || appData.first_name} ${participantProfile?.last_name || appData.last_name}` || 'Unnamed'
-                                    });
-                                    setVotersModalOpen(true);
-                                  }}
-                                >
-                                  {`${(participant.average_rating || 0).toFixed(1)} (${participant.total_votes || 0})`}
-                                </span>
-                              </div>
+                             <div className="flex items-center justify-between pt-1">
+                               <div className="text-muted-foreground flex items-center gap-2">
+                                 <span 
+                                   className="cursor-pointer hover:underline text-primary"
+                                   onClick={() => {
+                                     setSelectedParticipantForVoters({
+                                       id: participant.participant_id,
+                                       name: participantProfile?.display_name || `${participantProfile?.first_name || appData.first_name} ${participantProfile?.last_name || appData.last_name}` || 'Unnamed'
+                                     });
+                                     setVotersModalOpen(true);
+                                   }}
+                                 >
+                                   {`${(participant.average_rating || 0).toFixed(1)} (${participant.total_votes || 0})`}
+                                 </span>
+                                 <span className="text-green-600">👍{participant.like_count || 0}</span>
+                                 <span className="text-red-600">👎{participant.dislike_count || 0}</span>
+                               </div>
                               <Select 
                                 value={participant.admin_status || 'next week on site'} 
                                 onValueChange={async (value) => {
