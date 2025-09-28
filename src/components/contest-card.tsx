@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { ThumbsUp, MessageCircle, Star, Pencil, Send, Share, Share2, ExternalLink, Upload, ArrowUpRight, ThumbsDown, Crown } from "lucide-react";
+import { useWinnerContent } from "@/hooks/useWinnerContent";
 
 import winnerPaymentImage from "@/assets/winner-payment.jpg";
 import winnerVideo from "@/assets/winner-video.mp4";
@@ -108,6 +109,9 @@ export function ContestantCard({
   
   // Use unified card data hook with stable dependencies
   const { data: cardData, loading: cardDataLoading, refresh: refreshCardData } = useCardData(name, propUser?.id, profileId);
+  
+  // Get winner content for this participant
+  const { winnerContent } = useWinnerContent(profileId, propUser?.id);
 
   // Initialize local state when props change
   useEffect(() => {
@@ -447,8 +451,8 @@ export function ContestantCard({
 
   const allPhotos = isWinner 
     ? [faceImage, fullBodyImage, ...additionalPhotos, 
-       weekOffset === 1 ? winnerPaymentImageApril : winnerPaymentImage, 
-       weekOffset === 1 ? winnerVideoApril : winnerVideo]
+       winnerContent?.payment_proof_url || (weekOffset === 1 ? winnerPaymentImageApril : winnerPaymentImage), 
+       winnerContent?.testimonial_video_url || (weekOffset === 1 ? winnerVideoApril : winnerVideo)]
     : [faceImage, fullBodyImage, ...additionalPhotos];
 
   const openModal = (photoIndex: number) => {
@@ -953,20 +957,20 @@ export function ContestantCard({
         {isWinner && (weekOffset === 1 || weekOffset >= 2) && (
           <>
             <div className="flex h-36 sm:h-40 md:h-44 relative gap-px">
-              {/* Payment photo */}
+              {/* Payment photo - use winner content from database or fallback to static */}
               <div className="relative">
                 <img 
-                  src={weekOffset === 1 ? winnerPaymentImageApril : winnerPaymentImage} 
+                  src={winnerContent?.payment_proof_url || (weekOffset === 1 ? winnerPaymentImageApril : winnerPaymentImage)} 
                   alt="Payment receipt"
                   className="w-24 sm:w-28 md:w-32 h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
                   onClick={() => openModal(isWinner ? additionalPhotos.length + 2 : 2)}
                 />
               </div>
               
-              {/* Video - clickable */}
+              {/* Video - use winner content from database or fallback to static */}
               <div className="relative">
                 <video 
-                  src={weekOffset === 1 ? winnerVideoApril : winnerVideo}
+                  src={winnerContent?.testimonial_video_url || (weekOffset === 1 ? winnerVideoApril : winnerVideo)}
                   className="w-24 sm:w-28 md:w-32 h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
                   controls={false}
                   muted
@@ -974,13 +978,13 @@ export function ContestantCard({
                 />
               </div>
               
-              {/* Testimonial text */}
+              {/* Testimonial text - use winner content from database or fallback to static */}
               <div className="flex-1 p-3 flex flex-col items-center justify-start max-h-32 overflow-y-auto scroll-smooth">
                 <p className="text-sm text-gray-700 italic text-center mb-3">
-                  {weekOffset === 1 
+                  {winnerContent?.testimonial_text || (weekOffset === 1 
                     ? "It's legit and it's really happening. Thank you so much, OBC, for this wonderful opportunity. And I'm really overwhelmed with happiness as one of your weekly winners. Thank you, everyone."
                     : "I never imagined this could be real. I'm so happy I won! All I had to do was fill out the form. Anyone can do it!"
-                  }
+                  )}
                 </p>
                 <p className="text-xs text-gray-600 font-bold italic self-end uppercase">{name}</p>
               </div>

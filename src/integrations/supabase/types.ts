@@ -788,6 +788,39 @@ export type Database = {
         }
         Relationships: []
       }
+      winner_content: {
+        Row: {
+          created_at: string
+          id: string
+          participant_id: string
+          payment_proof_url: string | null
+          testimonial_text: string | null
+          testimonial_video_url: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          participant_id: string
+          payment_proof_url?: string | null
+          testimonial_text?: string | null
+          testimonial_video_url?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          participant_id?: string
+          payment_proof_url?: string | null
+          testimonial_text?: string | null
+          testimonial_video_url?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       participant_stats: {
