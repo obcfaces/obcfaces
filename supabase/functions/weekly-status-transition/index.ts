@@ -94,9 +94,44 @@ serve(async (req) => {
       console.log(`Moved ${nextWeekOnSiteParticipants.length} participants from "next week on site" to "this week"`)
     }
 
-    // Note: "next week" status participants remain unchanged but get updated date intervals
+    // 5. Handle "old" next week participants (those assigned in previous weeks)
+    // Get current week start date
+    const currentWeekStart = new Date()
+    const currentDay = currentWeekStart.getDay()
+    const mondayOffset = currentDay === 0 ? -6 : 1 - currentDay
+    currentWeekStart.setDate(currentWeekStart.getDate() + mondayOffset)
+    currentWeekStart.setHours(0, 0, 0, 0)
 
-    // 5. Update contest applications statuses accordingly
+    // Find "next week" participants who got this status before current week
+    const { data: oldNextWeekParticipants, error: fetchOldNextWeekError } = await supabaseClient
+      .from('weekly_contest_participants')
+      .select('*')
+      .eq('admin_status', 'next week')
+      .or(`status_history->next_week->>week_start_date.lt.${currentWeekStart.toISOString().split('T')[0]},created_at.lt.${currentWeekStart.toISOString()}`)
+
+    if (fetchOldNextWeekError) {
+      console.error('Error fetching old next week participants:', fetchOldNextWeekError)
+      // Don't throw here as this is not critical
+    } else {
+      console.log(`Found ${oldNextWeekParticipants?.length || 0} old "next week" participants`)
+      
+      // Move old "next week" participants back to candidate pool (remove status)
+      if (oldNextWeekParticipants && oldNextWeekParticipants.length > 0) {
+        const { error: resetOldNextWeekError } = await supabaseClient
+          .from('weekly_contest_participants')
+          .update({ admin_status: 'candidate' })
+          .in('id', oldNextWeekParticipants.map(p => p.id))
+
+        if (resetOldNextWeekError) {
+          console.error('Error resetting old next week participants:', resetOldNextWeekError)
+          // Don't throw here as this is not critical
+        } else {
+          console.log(`Reset ${oldNextWeekParticipants.length} old "next week" participants to "candidate" status`)
+        }
+      }
+    }
+
+    // 6. Update contest applications statuses accordingly
     const { error: updateApplicationsError } = await supabaseClient
       .from('contest_applications')
       .update({ status: 'next week' })
