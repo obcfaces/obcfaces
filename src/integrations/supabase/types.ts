@@ -820,6 +820,13 @@ export type Database = {
         Args: { contest_date?: string }
         Returns: string
       }
+      get_card_section_stats: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          moved_to_next_week_count: number
+          new_applications_count: number
+        }[]
+      }
       get_contest_applications_admin: {
         Args: { include_deleted?: boolean }
         Returns: {
