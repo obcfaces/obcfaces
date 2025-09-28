@@ -17,6 +17,7 @@ import Messages from "./pages/Messages";
 import Likes from "./pages/Likes";
 import Admin from "./pages/Admin";
 import ResetPassword from "./pages/ResetPassword";
+import TestTransition from "./pages/TestTransition";
 import AuthCallbackHandler from "@/components/auth-callback-handler";
 import TopBar from "@/components/top-bar";
 import { Footer } from "@/components/footer";
@@ -69,6 +70,7 @@ const App = () => {
                   <Route path="/cookie-policy" element={<CookiePolicy />} />
                   <Route path="/likes" element={<Likes />} />
                   <Route path="/reset-password" element={<ResetPassword />} />
+                  <Route path="/test-transition" element={<TestTransition />} />
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<NotFound />} />
                 </Routes>
