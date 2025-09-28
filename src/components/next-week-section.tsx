@@ -348,7 +348,7 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
         </div>
       ) : (
         <div className="text-center py-4">
-          <p className="text-base text-blue-700 dark:text-blue-300 lowercase">New ones will auto-update.</p>
+          <p className="text-base text-blue-700 dark:text-blue-300">You've rated all cards in this block. New ones auto-update.</p>
         </div>
       )}
 
