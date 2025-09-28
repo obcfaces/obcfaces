@@ -1079,7 +1079,7 @@ const Admin = () => {
       console.log('Fetched next week participants:', participants?.length || 0);
       if (participants && participants.length > 0) {
         console.log('First participant structure:', participants[0]);
-        console.log('participant_id field:', participants[0]?.participant_id);
+        console.log('All participant IDs:', participants.map(p => ({ id: p.id, user_id: p.user_id })));
       }
       setNextWeekParticipants(participants || []);
     } catch (error) {
@@ -2014,35 +2014,49 @@ const Admin = () => {
                                      value={participant.admin_status || 'next week'}
                                      onValueChange={async (value) => {
                                       try {
-                                         console.log('Updating participant status for ID:', participant.id);
+                                         console.log('=== Status Update Debug ===');
+                                         console.log('Full participant object:', JSON.stringify(participant, null, 2));
+                                         console.log('participant.id:', participant.id);
+                                         console.log('typeof participant.id:', typeof participant.id);
+                                         console.log('participant keys:', Object.keys(participant));
+                                         console.log('New status value:', value);
                                          
                                          if (!participant.id) {
+                                           console.error('participant.id is falsy:', participant.id);
                                            throw new Error('No participant ID found in participant object');
                                          }
                                          
+                                         console.log('About to update with ID:', participant.id);
                                          const { error } = await supabase
                                            .from('weekly_contest_participants')
                                            .update({ admin_status: value } as any)
                                            .eq('id', participant.id);
                                       
-                                      if (error) {
-                                        console.error('Error updating participant status:', error);
-                                        toast({
-                                          title: "Error",
-                                          description: "Failed to update participant status",
-                                          variant: "destructive",
-                                        });
-                                      } else {
-                                         // Refresh the data
-                                         await fetchNextWeekParticipants();
-                                        toast({
-                                          title: "Success",
-                                          description: "Participant status updated successfully",
-                                        });
-                                      }
-                                    } catch (error) {
-                                      console.error('Error updating participant status:', error);
-                                    }
+                                       if (error) {
+                                         console.error('=== Supabase Error Details ===');
+                                         console.error('Full error object:', error);
+                                         console.error('Error code:', error.code);
+                                         console.error('Error message:', error.message);
+                                         console.error('Error details:', error.details);
+                                         console.error('participant.id used in query:', participant.id);
+                                         toast({
+                                           title: "Error",
+                                           description: "Failed to update participant status",
+                                           variant: "destructive",
+                                         });
+                                       } else {
+                                          // Refresh the data
+                                          await fetchNextWeekParticipants();
+                                         toast({
+                                           title: "Success",
+                                           description: "Participant status updated successfully",
+                                         });
+                                       }
+                                     } catch (error) {
+                                       console.error('=== Catch Block Error ===');
+                                       console.error('Error updating participant status:', error);
+                                       console.error('participant object when error occurred:', participant);
+                                     }
                                   }}
                                 >
                                   <SelectTrigger className="w-24 h-7 text-xs">
