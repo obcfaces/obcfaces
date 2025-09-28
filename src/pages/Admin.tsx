@@ -3521,12 +3521,17 @@ const Admin = () => {
                                                 >
                                                  <SelectValue />
                                                </SelectTrigger>
-                                                 <SelectContent>
-                                                   <SelectItem value="pending">Pending</SelectItem>
-                                                   <SelectItem value="approved">Approved</SelectItem>
-                                                   <SelectItem value="rejected">Rejected</SelectItem>
-                                                   <SelectItem value="next">Next</SelectItem>
-                                                 </SelectContent>
+                                                  <SelectContent>
+                                                    <SelectItem value="this week">This Week</SelectItem>
+                                                    <SelectItem value="next week">Next Week</SelectItem>
+                                                    <SelectItem value="past week 1">Past Week 1</SelectItem>
+                                                    <SelectItem value="past week 2">Past Week 2</SelectItem>
+                                                    <SelectItem value="past week 3">Past Week 3</SelectItem>
+                                                    <SelectItem value="pending">Pending</SelectItem>
+                                                    <SelectItem value="approved">Approved</SelectItem>
+                                                    <SelectItem value="rejected">Rejected</SelectItem>
+                                                    <SelectItem value="next">Next</SelectItem>
+                                                  </SelectContent>
                                              </Select>
                                              
                                               {/* Admin login with expandable date */}
