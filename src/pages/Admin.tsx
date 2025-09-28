@@ -1644,121 +1644,116 @@ const Admin = () => {
                     day: '2-digit', 
                     month: '2-digit', 
                     year: '2-digit' 
-                  });
-                  
-                  // Определяем интервал недели для участника контеста
-                  const weekInterval = participant.admin_status && participant.admin_status.includes('past week') 
-                    ? participant.admin_status.replace('past week ', '').split(' ')[0]
-                    : participant.admin_status === 'this week' ? 'THIS' : null;
-                  
-                  return (
-                     <Card key={participant.id} className="overflow-hidden relative">
-                       <CardContent className="p-0">
-                         <div className="w-full">
-                           <div className="grid grid-cols-2 gap-1">
-                             {(participantProfile?.photo_1_url || appData.photo1_url) && (
-                               <div className="relative">
-                                 <img 
-                                   src={participantProfile?.photo_1_url || appData.photo1_url} 
-                                   alt="Portrait" 
-                                   className="w-full h-20 object-cover rounded cursor-pointer hover:opacity-90 transition-opacity"
-                                   onClick={() => openPhotoModal([
-                                     participantProfile?.photo_1_url || appData.photo1_url, 
-                                     participantProfile?.photo_2_url || appData.photo2_url
-                                   ].filter(Boolean), 0, `${participantProfile?.first_name || appData.first_name} ${participantProfile?.last_name || appData.last_name}`)}
-                                 />
-                               </div>
-                             )}
-                             {(participantProfile?.photo_2_url || appData.photo2_url) && (
-                               <div className="relative">
-                                 <img 
-                                   src={participantProfile?.photo_2_url || appData.photo2_url} 
-                                   alt="Full length" 
-                                   className="w-full h-20 object-cover rounded cursor-pointer hover:opacity-90 transition-opacity"
-                                   onClick={() => openPhotoModal([
-                                     participantProfile?.photo_1_url || appData.photo1_url, 
-                                     participantProfile?.photo_2_url || appData.photo2_url
-                                   ].filter(Boolean), 1, `${participantProfile?.first_name || appData.first_name} ${participantProfile?.last_name || appData.last_name}`)}
-                                 />
-                               </div>
-                             )}
-                           </div>
-                           
-                           <div className="p-3 space-y-1">
-                             <div className="flex justify-between items-start">
-                               <div>
-                                 <h3 className="font-semibold text-sm">
-                                   {participantProfile?.first_name || appData.first_name} {participantProfile?.last_name || appData.last_name}
-                                 </h3>
-                                 <p className="text-xs text-muted-foreground">
-                                   {participantProfile?.city || appData.city}, {participantProfile?.country || appData.country}
-                                 </p>
-                                 <p className="text-xs text-muted-foreground">
-                                   {age} лет
-                                 </p>
-                                 <p className="text-xs text-muted-foreground">
-                                   {participantProfile?.gender || appData.gender}
-                                 </p>
-                                 <div className="flex items-center gap-1">
-                                   <span className="text-xs text-muted-foreground">
-                                     {participantProfile?.email 
-                                       ? (participantProfile.email.length > 12 ? `${participantProfile.email.substring(0, 12)}...` : participantProfile.email)
-                                       : 'No email'
-                                     }
-                                   </span>
-                                   {participantProfile?.email && (
-                                     <Copy 
-                                       className="h-3 w-3 cursor-pointer hover:text-foreground" 
-                                       onClick={() => navigator.clipboard.writeText(participantProfile.email)}
-                                     />
-                                   )}
-                                 </div>
-                                 {participantProfile?.bio && (
-                                   <p className="text-xs text-muted-foreground line-clamp-2 mt-1">
-                                     {participantProfile.bio}
-                                   </p>
-                                 )}
-                                 <p className="text-xs text-muted-foreground mt-1">
-                                   Registered: {registrationDate}
-                                 </p>
-                               </div>
-                               <Badge variant="secondary" className="text-xs">
-                                 Contestant
-                               </Badge>
-                             </div>
-                             
-                             {/* Average Rating */}
-                             <div className="flex items-center gap-2 mt-2">
-                               <span className="text-sm text-muted-foreground">Avg Rating:</span>
-                               <Badge 
-                                 className={`${
-                                   participant.average_rating >= 8 ? 'bg-green-500' :
-                                   participant.average_rating >= 6 ? 'bg-yellow-500' :
-                                   participant.average_rating >= 4 ? 'bg-orange-500' : 'bg-red-500'
-                                 } text-white`}
-                               >
-                                 {participant.average_rating?.toFixed(1) || 'N/A'}
-                               </Badge>
-                               <span className="text-xs text-muted-foreground">
-                                 ({participant.total_votes || 0} votes)
-                               </span>
-                             </div>
-                             
+                   });
+                   
+                   // Определяем интервал недели для участника контеста
+                   const weekInterval = participant.admin_status && participant.admin_status.includes('past week') 
+                     ? participant.admin_status.replace('past week ', '').split(' ')[0]
+                     : participant.admin_status === 'this week' ? 'THIS' : null;
+                   
+                   return (
+                      <Card key={participant.id} className="overflow-hidden relative">
+                        <CardContent className="p-0">
+                          <div className="w-full">
+                            <div className="grid grid-cols-2 gap-1">
+                              {(participantProfile?.photo_1_url || appData.photo1_url) && (
+                                <div className="relative">
+                                  <img 
+                                    src={participantProfile?.photo_1_url || appData.photo1_url} 
+                                    alt="Portrait" 
+                                    className="w-full h-20 object-cover rounded cursor-pointer hover:opacity-90 transition-opacity"
+                                    onClick={() => openPhotoModal([
+                                      participantProfile?.photo_1_url || appData.photo1_url, 
+                                      participantProfile?.photo_2_url || appData.photo2_url
+                                    ].filter(Boolean), 0, `${participantProfile?.first_name || appData.first_name} ${participantProfile?.last_name || appData.last_name}`)}
+                                  />
+                                </div>
+                              )}
+                              {(participantProfile?.photo_2_url || appData.photo2_url) && (
+                                <div className="relative">
+                                  <img 
+                                    src={participantProfile?.photo_2_url || appData.photo2_url} 
+                                    alt="Full length" 
+                                    className="w-full h-20 object-cover rounded cursor-pointer hover:opacity-90 transition-opacity"
+                                    onClick={() => openPhotoModal([
+                                      participantProfile?.photo_1_url || appData.photo1_url, 
+                                      participantProfile?.photo_2_url || appData.photo2_url
+                                    ].filter(Boolean), 1, `${participantProfile?.first_name || appData.first_name} ${participantProfile?.last_name || appData.last_name}`)}
+                                  />
+                                </div>
+                              )}
+                            </div>
+                            
+                            <div className="p-3 space-y-1">
+                              <div className="flex justify-between items-start">
+                                <div>
+                                  <h3 className="font-semibold text-sm">
+                                    {participantProfile?.first_name || appData.first_name} {participantProfile?.last_name || appData.last_name}
+                                  </h3>
+                                  <p className="text-xs text-muted-foreground">
+                                    {participantProfile?.city || appData.city}, {participantProfile?.country || appData.country}
+                                  </p>
+                                  <p className="text-xs text-muted-foreground">
+                                    {age} лет
+                                  </p>
+                                  <p className="text-xs text-muted-foreground">
+                                    {participantProfile?.gender || appData.gender}
+                                  </p>
+                                  <div className="flex items-center gap-1">
+                                    <span className="text-xs text-muted-foreground">
+                                      {participantProfile?.email 
+                                        ? (participantProfile.email.length > 12 ? `${participantProfile.email.substring(0, 12)}...` : participantProfile.email)
+                                        : 'No email'
+                                      }
+                                    </span>
+                                    {participantProfile?.email && (
+                                      <Copy 
+                                        className="h-3 w-3 cursor-pointer hover:text-foreground" 
+                                        onClick={() => navigator.clipboard.writeText(participantProfile.email)}
+                                      />
+                                    )}
+                                  </div>
+                                  {participantProfile?.bio && (
+                                    <p className="text-xs text-muted-foreground line-clamp-2 mt-1">
+                                      {participantProfile.bio}
+                                    </p>
+                                  )}
+                                  <p className="text-xs text-muted-foreground mt-1">
+                                    Registered: {registrationDate}
+                                  </p>
+                                </div>
+                                <Badge variant="secondary" className="text-xs">
+                                  Contestant
+                                </Badge>
+                              </div>
+                              
+                              {/* Average Rating */}
+                              <div className="flex items-center gap-2 mt-2">
+                                <span className="text-sm text-muted-foreground">Avg Rating:</span>
+                                <Badge 
+                                  className={`${
+                                    participant.average_rating >= 8 ? 'bg-green-500' :
+                                    participant.average_rating >= 6 ? 'bg-yellow-500' :
+                                    participant.average_rating >= 4 ? 'bg-orange-500' : 'bg-red-500'
+                                  } text-white`}
+                                >
+                                  {participant.average_rating?.toFixed(1) || 'N/A'}
+                                </Badge>
+                                <span className="text-xs text-muted-foreground">
+                                  ({participant.total_votes || 0} votes)
+                                </span>
+                              </div>
+                              
                               {/* Rating Distribution */}
                               <div className="flex gap-1 mt-2">
                                 {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((rating) => {
-                                  const count = ratingCounts?.[rating] || 0;
-                                  const maxCount = Math.max(...Object.values(ratingCounts || {}));
-                                  const relativeSize = maxCount > 0 ? (count / maxCount) * 100 : 0;
-                                  const minSize = 8;
-                                  const maxSize = 20;
-                                  const size = count > 0 ? Math.max(minSize, (relativeSize / 100) * maxSize) : minSize;
+                                  const isHighlighted = rating <= Math.round(participant.average_rating || 0);
                                   
                                   return (
                                     <div
                                       key={rating}
-                                      className={`rounded-full border flex items-center justify-center text-xs font-medium transition-all ${
-                                        count > 0 
+                                      className={`w-4 h-4 rounded-full border flex items-center justify-center text-xs font-medium transition-all cursor-pointer ${
+                                        isHighlighted
                                           ? rating >= 8 
                                             ? 'bg-green-500 border-green-600 text-white' 
                                             : rating >= 6 
@@ -1768,12 +1763,7 @@ const Admin = () => {
                                             : 'bg-red-500 border-red-600 text-white'
                                           : 'bg-gray-100 border-gray-300 text-gray-400'
                                       }`}
-                                      style={{ 
-                                        width: `${size}px`, 
-                                        height: `${size}px`,
-                                        fontSize: size > 12 ? '10px' : '8px'
-                                      }}
-                                      title={`Rating ${rating}: ${count} votes`}
+                                      title={`Rating ${rating}`}
                                       onClick={() => {
                                         setSelectedParticipantForVoters({
                                           id: participant.id,
@@ -1782,7 +1772,7 @@ const Admin = () => {
                                         setVotersModalOpen(true);
                                       }}
                                     >
-                                      {count > 0 ? count : rating}
+                                      {rating}
                                     </div>
                                   );
                                 })}
@@ -1792,111 +1782,7 @@ const Admin = () => {
                         </CardContent>
                       </Card>
                     );
-                  })}
-                </div>
-              )}
-            </TabsContent>
-
-            <TabsContent value="nextweek" className="space-y-4">
-              {/* Next week content continues here */}
-            </TabsContent>
-          </Tabs>
-        </div>
-                            {/* Edit button */}
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="p-1 h-6 w-6"
-                              onClick={() => {
-                                setEditingParticipantData(participant);
-                                setShowEditModal(true);
-                              }}
-                              title="Edit Application"
-                            >
-                              <Edit className="w-4 h-4" />
-                            </Button>
-                            
-                             <Select 
-                                value={participant.admin_status || participantFilters[participant.id] || (participant.final_rank ? 'this week' : 'approve')}
-                               onValueChange={(value) => {
-                                 if (value === 'reject') {
-                                   // Open reject modal for this participant
-                                   setApplicationToReject({
-                                     id: participant.id,
-                                     name: `${participantProfile?.first_name || appData.first_name} ${participantProfile?.last_name || appData.last_name}`
-                                   });
-                                   setRejectModalOpen(true);
-                                   return;
-                                 }
-                                 
-                                  // Update the filter state
-                                  setParticipantFilters(prev => ({
-                                    ...prev,
-                                    [participant.id]: value
-                                  }));
-
-                                  // Update the database with the new admin_status
-                                  const updateParticipantStatus = async () => {
-                                    try {
-                                      const { error } = await supabase
-                                        .from('weekly_contest_participants')
-                                         .update({ admin_status: value } as any)
-                                        .eq('id', participant.id);
-                                      
-                                      if (error) {
-                                        console.error('Error updating participant status:', error);
-                                        toast({
-                                          title: "Error",
-                                          description: "Failed to update participant status",
-                                          variant: "destructive"
-                                        });
-                                      } else {
-                                        // Refresh the participants data
-                                        fetchWeeklyParticipants();
-                                      }
-                                    } catch (error) {
-                                      console.error('Error updating participant status:', error);
-                                    }
-                                  };
-
-                                  updateParticipantStatus();
-                               }}
-                             >
-                               <SelectTrigger className="w-28 h-6 text-xs">
-                                 <SelectValue />
-                               </SelectTrigger>
-                                     <SelectContent className="z-50 bg-background border shadow-md">
-                                       <SelectItem value="this week">This Week</SelectItem>
-                                        <SelectItem value="next week">Next Week</SelectItem>
-                                        <SelectItem value="next week on site">Next Week On Site</SelectItem>
-                                        <SelectItem value="past week 1">{`Past Week 1 (${getWeekInterval(1)})`}</SelectItem>
-                                        <SelectItem value="past week 2">{`Past Week 2 (${getWeekInterval(2)})`}</SelectItem>
-                                        <SelectItem value="past week 3">{`Past Week 3 (${getWeekInterval(3)})`}</SelectItem>
-                                       <SelectItem value="pending">Pending</SelectItem>
-                                       <SelectItem value="approved">Approved</SelectItem>
-                                       <SelectItem value="rejected">Rejected</SelectItem>
-                                    </SelectContent>
-                             </Select>
-                            
-                            {/* Status change date with reviewer login - desktop */}
-                            <div 
-                              className="text-xs text-muted-foreground cursor-pointer hover:text-foreground"
-                              onClick={() => {
-                                setSelectedParticipantForVoters({
-                                  id: participant.id,
-                                  name: `${participantProfile?.first_name || appData.first_name} ${participantProfile?.last_name || appData.last_name}`
-                                });
-                                setVotersModalOpen(true);
-                              }}
-                            >
-                              {`${(participant.average_rating || 0).toFixed(1)} (${participant.total_votes || 0})`}
-                            </div>
-                           </div>
-                         </div>
-                       </CardContent>
-                     </Card>
-                   );
-                });
+                  });
               })()}
             </TabsContent>
 
