@@ -109,23 +109,39 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
     const filterCandidates = async () => {
       setIsLoading(true);
       
-      if (!user) {
-        setFilteredCandidates(candidates);
-        setRemainingCandidates(candidates.length);
-        setIsLoading(false);
-        return;
-      }
-
       try {
-        // Get participants with "next week" or "next week on site" status
+        // Get participants with "next week" or "next week on site" admin_status
         const { data: nextWeekParticipants } = await supabase
-          .rpc('get_weekly_contest_participants_public', { weeks_offset: 1 });
+          .rpc('get_weekly_participants_by_admin_status', { weeks_offset: 0 });
 
-        // Filter by participant_status
+        // Filter by admin_status for next week participants
         const actualNextWeekCandidates = nextWeekParticipants?.filter(participant => {
-          const status = participant.participant_status || 'next week';
+          const status = participant.admin_status;
           return status === 'next week' || status === 'next week on site';
         }) || [];
+
+        // Convert database participants to candidate format
+        const candidatesFromDB = actualNextWeekCandidates.map(participant => ({
+          id: participant.participant_id,
+          name: `${participant.first_name} ${participant.last_name}`,
+          age: participant.age,
+          country: participant.country,
+          city: participant.city,
+          location: `${participant.city}, ${participant.country}`,
+          facePhoto: participant.photo_1_url,
+          fullPhoto: participant.photo_2_url,
+          faceImage: participant.photo_1_url,
+          fullBodyImage: participant.photo_2_url,
+          height: participant.height_cm,
+          weight: participant.weight_kg
+        }));
+
+        if (!user) {
+          setFilteredCandidates(candidatesFromDB);
+          setRemainingCandidates(candidatesFromDB.length);
+          setIsLoading(false);
+          return;
+        }
 
         // Get user's votes
         const { data: votes } = await supabase
@@ -134,26 +150,14 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
           .eq('user_id', user.id);
 
         const votedNames = votes?.map(vote => vote.candidate_name) || [];
-        
-        // Convert database participants to candidate format
-        const candidatesFromDB = actualNextWeekCandidates.map(participant => ({
-          id: participant.participant_id,
-          name: `${participant.first_name} ${participant.last_name}`,
-          age: participant.age,
-          location: `${participant.city}, ${participant.country}`,
-          facePhoto: participant.photo_1_url,
-          fullPhoto: participant.photo_2_url
-        }));
 
         // Filter out voted candidates
         const unvotedCandidatesFromDB = candidatesFromDB.filter(candidate => 
           !votedNames.includes(candidate.name)
         );
         
-        // If no real candidates available, use test candidates
-        const finalCandidates = unvotedCandidatesFromDB.length > 0 
-          ? unvotedCandidatesFromDB 
-          : candidates.filter(candidate => !votedNames.includes(candidate.name));
+        // Show only real candidates, no fallback to test candidates
+        const finalCandidates = unvotedCandidatesFromDB;
         
         setFilteredCandidates(finalCandidates);
         setRemainingCandidates(finalCandidates.length);
@@ -161,10 +165,9 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
         setHistory([]);
       } catch (error) {
         console.error('Error fetching participants and votes:', error);
-        // Fallback to test candidates
-        const unvoted = candidates.filter(candidate => true); // Show all test candidates for now
-        setFilteredCandidates(unvoted);
-        setRemainingCandidates(unvoted.length);
+        // Show empty list instead of fallback to test candidates
+        setFilteredCandidates([]);
+        setRemainingCandidates(0);
       }
       
       setIsLoading(false);
