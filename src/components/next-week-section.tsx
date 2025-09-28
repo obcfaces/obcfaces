@@ -112,13 +112,10 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
       try {
         // Get participants with "next week" or "next week on site" admin_status
         const { data: nextWeekParticipants } = await supabase
-          .rpc('get_weekly_participants_by_admin_status', { weeks_offset: 0 });
+          .rpc('get_next_week_participants_public');
 
-        // Filter by admin_status for next week participants
-        const actualNextWeekCandidates = nextWeekParticipants?.filter(participant => {
-          const status = participant.admin_status;
-          return status === 'next week' || status === 'next week on site';
-        }) || [];
+        // All returned participants have next week status already
+        const actualNextWeekCandidates = nextWeekParticipants || [];
 
         // Convert database participants to candidate format
         const candidatesFromDB = actualNextWeekCandidates.map(participant => ({
