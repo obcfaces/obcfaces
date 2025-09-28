@@ -1927,8 +1927,11 @@ const Admin = () => {
                       {nextWeekDailyStats.map((day) => (
                         <div key={day.day_name} className="bg-background p-2 rounded text-center">
                           <div className="font-medium">{day.day_name}</div>
-                          <div className="text-green-600">{day.like_count}</div>
-                          <div className="text-red-600">{day.dislike_count}</div>
+                          <div>
+                            <span className="text-green-600">{day.like_count}</span>
+                            <span className="mx-1">-</span>
+                            <span className="text-red-600">{day.dislike_count}</span>
+                          </div>
                         </div>
                       ))}
                     </div>
