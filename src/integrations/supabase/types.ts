@@ -1014,6 +1014,24 @@ export type Database = {
           total_votes: number
         }[]
       }
+      get_next_week_voters: {
+        Args: { participant_name_param: string; vote_type_param?: string }
+        Returns: {
+          age: number
+          avatar_url: string
+          city: string
+          country: string
+          created_at: string
+          display_name: string
+          first_name: string
+          last_name: string
+          photo_1_url: string
+          photo_2_url: string
+          user_id: string
+          vote_count: number
+          vote_type: string
+        }[]
+      }
       get_or_create_conversation: {
         Args: { user1_id: string; user2_id: string }
         Returns: string
