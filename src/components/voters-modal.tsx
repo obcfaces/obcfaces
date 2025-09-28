@@ -387,14 +387,14 @@ export const VotersModal = ({ isOpen, onClose, participantId, participantName }:
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-5xl max-h-[90vh] flex flex-col p-0">
-        <DialogHeader className="px-6 pt-6 pb-2 flex-shrink-0">
+      <DialogContent className="max-w-5xl max-h-[90vh] flex flex-col p-0 md:p-6 w-full">
+        <DialogHeader className="px-6 md:px-6 px-4 pt-6 pb-2 flex-shrink-0">
           <DialogTitle className="text-xl">
             Voters for {participantName} ({voters.length} total)
           </DialogTitle>
         </DialogHeader>
         
-        <ScrollArea className="flex-1 overflow-auto px-6 pb-6" style={{ maxHeight: 'calc(90vh - 100px)', minHeight: '400px' }}>
+        <ScrollArea className="flex-1 overflow-auto px-0 md:px-6 pb-6" style={{ maxHeight: 'calc(90vh - 100px)', minHeight: '400px' }}>
           {loading ? (
             <div className="flex items-center justify-center py-8">
               <div className="text-muted-foreground">Loading voters...</div>
