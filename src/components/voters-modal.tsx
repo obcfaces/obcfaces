@@ -487,52 +487,97 @@ export const VotersModal = ({ isOpen, onClose, participantId, participantName }:
                                    Latest vote: {formatRatingTime(voter.latest_rating.created_at)}
                                  </p>
                                  
-                                 {/* Complete rating history for this user */}
-                                 {voter.rating_history && voter.rating_history.length > 0 && (
-                                   <div className="mt-2 space-y-1">
-                                     <p className="text-xs font-medium text-muted-foreground">
-                                       Complete rating history ({voter.rating_history.length} changes):
-                                     </p>
-                                     <div className="flex flex-col gap-1 max-h-32 overflow-y-auto">
-                                        {voter.rating_history.map((historyItem, idx) => (
-                                          <div key={idx} className="flex items-center justify-between text-xs p-2 bg-muted/30 rounded">
-                                            <div className="flex items-center gap-2">
-                                              {historyItem.action_type === 'existing' ? (
-                                                <Badge variant="outline" className="bg-gray-500 text-white border-none text-xs px-1.5 py-0.5">
-                                                  Rated: {historyItem.new_rating}
-                                                </Badge>
-                                              ) : historyItem.action_type === 'update' ? (
-                                                <div className="flex items-center gap-1">
-                                                  <Badge variant="outline" className="bg-orange-500 text-white border-none text-xs px-1.5 py-0.5">
-                                                    {historyItem.old_rating}
-                                                  </Badge>
-                                                  <span>→</span>
-                                                  <Badge variant="outline" className="bg-blue-500 text-white border-none text-xs px-1.5 py-0.5">
-                                                    {historyItem.new_rating}
-                                                  </Badge>
+                                  {/* Complete rating history for this user */}
+                                  {voter.rating_history && voter.rating_history.length > 1 && (
+                                    <div className="mt-2 space-y-1">
+                                      <p className="text-xs font-medium text-muted-foreground">
+                                        Complete rating history ({voter.rating_history.length} changes):
+                                      </p>
+                                      <div className="flex flex-col gap-2 max-h-32 overflow-y-auto">
+                                        {voter.rating_history.map((historyItem, idx) => {
+                                          const nextItem = voter.rating_history[idx + 1];
+                                          const isUpdate = historyItem.action_type === 'update' && historyItem.old_rating;
+                                          
+                                          if (isUpdate) {
+                                            return (
+                                              <div key={idx} className="flex items-center gap-2 text-xs">
+                                                <div className="flex items-center gap-2">
+                                                  <div className="flex flex-col items-center">
+                                                    <div className="w-6 h-6 rounded-full bg-orange-500 text-white flex items-center justify-center text-xs font-semibold">
+                                                      {historyItem.old_rating}
+                                                    </div>
+                                                    <span 
+                                                      className="text-[10px] text-muted-foreground mt-1 cursor-help"
+                                                      title={new Date(historyItem.changed_at).toLocaleString('en-US', {
+                                                        hour: '2-digit',
+                                                        minute: '2-digit',
+                                                        day: 'numeric',
+                                                        month: 'short',
+                                                        year: 'numeric'
+                                                      })}
+                                                    >
+                                                      {new Date(historyItem.changed_at).toLocaleDateString('en-US', {
+                                                        day: 'numeric',
+                                                        month: 'short'
+                                                      })}
+                                                    </span>
+                                                  </div>
+                                                  <span className="text-muted-foreground">→</span>
+                                                  <div className="flex flex-col items-center">
+                                                    <div className="w-6 h-6 rounded-full bg-blue-500 text-white flex items-center justify-center text-xs font-semibold">
+                                                      {historyItem.new_rating}
+                                                    </div>
+                                                    <span 
+                                                      className="text-[10px] text-muted-foreground mt-1 cursor-help"
+                                                      title={new Date(historyItem.changed_at).toLocaleString('en-US', {
+                                                        hour: '2-digit',
+                                                        minute: '2-digit',
+                                                        day: 'numeric',
+                                                        month: 'short',
+                                                        year: 'numeric'
+                                                      })}
+                                                    >
+                                                      {new Date(historyItem.changed_at).toLocaleDateString('en-US', {
+                                                        day: 'numeric',
+                                                        month: 'short'
+                                                      })}
+                                                    </span>
+                                                  </div>
                                                 </div>
-                                              ) : historyItem.action_type === 'insert' ? (
-                                                <Badge variant="outline" className="bg-green-500 text-white border-none text-xs px-1.5 py-0.5">
-                                                  New: {historyItem.new_rating}
-                                                </Badge>
-                                              ) : historyItem.action_type === 'delete' ? (
-                                                <Badge variant="outline" className="bg-red-500 text-white border-none text-xs px-1.5 py-0.5">
-                                                  Deleted: {historyItem.old_rating}
-                                                </Badge>
-                                              ) : (
-                                                <Badge variant="outline" className="bg-gray-500 text-white border-none text-xs px-1.5 py-0.5">
-                                                  {historyItem.action_type}: {historyItem.new_rating || historyItem.old_rating}
-                                                </Badge>
-                                              )}
-                                            </div>
-                                            <span className="text-[10px] text-muted-foreground">
-                                              {formatRatingTime(historyItem.changed_at)}
-                                            </span>
-                                          </div>
-                                        ))}
-                                     </div>
-                                   </div>
-                                 )}
+                                              </div>
+                                            );
+                                          } else if (historyItem.action_type === 'existing' && !nextItem) {
+                                            // Show single rating for existing ratings without changes
+                                            return (
+                                              <div key={idx} className="flex items-center gap-2 text-xs">
+                                                <div className="flex flex-col items-center">
+                                                  <div className="w-6 h-6 rounded-full bg-gray-500 text-white flex items-center justify-center text-xs font-semibold">
+                                                    {historyItem.new_rating}
+                                                  </div>
+                                                  <span 
+                                                    className="text-[10px] text-muted-foreground mt-1 cursor-help"
+                                                    title={new Date(historyItem.changed_at).toLocaleString('en-US', {
+                                                      hour: '2-digit',
+                                                      minute: '2-digit',
+                                                      day: 'numeric',
+                                                      month: 'short',
+                                                      year: 'numeric'
+                                                    })}
+                                                  >
+                                                    {new Date(historyItem.changed_at).toLocaleDateString('en-US', {
+                                                      day: 'numeric',
+                                                      month: 'short'
+                                                    })}
+                                                  </span>
+                                                </div>
+                                              </div>
+                                            );
+                                          }
+                                          return null;
+                                        })}
+                                      </div>
+                                    </div>
+                                  )}
                               </div>
                               
                                {/* Badges and expand indicator */}
