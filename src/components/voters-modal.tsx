@@ -10,8 +10,14 @@ import { Star, ChevronDown, ChevronUp, Heart } from "lucide-react";
 
 interface VoterData {
   user_id: string;
-  rating: number;
-  created_at: string;
+  ratings: Array<{
+    rating: number;
+    created_at: string;
+  }>;
+  latest_rating: {
+    rating: number;
+    created_at: string;
+  };
   email?: string;
   registration_date?: string;
   profile?: {
@@ -83,8 +89,7 @@ export const VotersModal = ({ isOpen, onClose, participantId, participantName }:
         return;
       }
 
-      // Get ratings for this participant using both participant_id and user_id
-      // Only get the latest rating from each user to avoid duplicates
+      // Get all ratings for this participant (not just latest)
       const { data: ratings, error: ratingsError } = await supabase
         .from('contestant_ratings')
         .select('user_id, rating, created_at')
@@ -104,20 +109,8 @@ export const VotersModal = ({ isOpen, onClose, participantId, participantName }:
         return;
       }
 
-      // Filter to get only the latest rating from each user
-      const latestRatings = ratings.reduce((acc: any[], rating) => {
-        const existingRating = acc.find(r => r.user_id === rating.user_id);
-        if (!existingRating || new Date(rating.created_at) > new Date(existingRating.created_at)) {
-          if (existingRating) {
-            acc.splice(acc.indexOf(existingRating), 1);
-          }
-          acc.push(rating);
-        }
-        return acc;
-      }, []);
-
-      // Get user profiles for all voters
-      const userIds = latestRatings.map(r => r.user_id);
+      // Get unique user IDs for profile fetching
+      const userIds = [...new Set(ratings.map(r => r.user_id))];
       const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
         .select('id, display_name, first_name, last_name, avatar_url, country, city, age, gender, bio, is_contest_participant, created_at')
@@ -136,23 +129,25 @@ export const VotersModal = ({ isOpen, onClose, participantId, participantName }:
         return;
       }
 
-      // Combine ratings with profiles and auth data
-      // Filter to get only the latest rating from each user
-      const uniqueRatings = ratings?.reduce((acc: any[], rating: any) => {
-        const existingIndex = acc.findIndex(r => r.user_id === rating.user_id);
-        if (existingIndex === -1) {
-          acc.push(rating);
-        } else if (new Date(rating.created_at) > new Date(acc[existingIndex].created_at)) {
-          acc[existingIndex] = rating;
+      // Group ratings by user and keep all ratings for each user
+      const ratingsByUser = ratings?.reduce((acc: { [key: string]: any[] }, rating: any) => {
+        if (!acc[rating.user_id]) {
+          acc[rating.user_id] = [];
         }
+        acc[rating.user_id].push(rating);
         return acc;
-      }, []) || [];
+      }, {}) || {};
 
-      const votersWithProfiles = uniqueRatings.map(rating => {
-        const profile = profiles?.find(p => p.id === rating.user_id);
-        const auth = authData?.find(a => a.user_id === rating.user_id);
+      // Create voter entries with all ratings per user
+      const votersWithProfiles = Object.keys(ratingsByUser).map(userId => {
+        const userRatings = ratingsByUser[userId];
+        const profile = profiles?.find(p => p.id === userId);
+        const auth = authData?.find(a => a.user_id === userId);
+        
         return {
-          ...rating,
+          user_id: userId,
+          ratings: userRatings, // Store all ratings for this user
+          latest_rating: userRatings[0], // First one is the latest due to ordering
           profile,
           email: auth?.email,
           registration_date: auth?.created_at || profile?.created_at
@@ -187,6 +182,16 @@ export const VotersModal = ({ isOpen, onClose, participantId, participantName }:
     if (rating >= 7) return 'bg-yellow-500';
     if (rating >= 5) return 'bg-orange-500';
     return 'bg-red-500';
+  };
+
+  const formatRatingTime = (dateString: string) => {
+    return new Date(dateString).toLocaleString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
   };
 
   const fetchUserActivity = async (userId: string) => {
@@ -334,11 +339,11 @@ export const VotersModal = ({ isOpen, onClose, participantId, participantName }:
                                  {getDisplayName(voter).charAt(0)}
                                </AvatarFallback>
                              </Avatar>
-                             <Badge 
-                               className={`${getRatingColor(voter.rating)} text-white px-2 py-1 text-sm font-semibold`}
-                             >
-                               {voter.rating}/10
-                             </Badge>
+                              <Badge 
+                                className={`${getRatingColor(voter.latest_rating.rating)} text-white px-2 py-1 text-sm font-semibold`}
+                              >
+                                {voter.latest_rating.rating}/10
+                              </Badge>
                            </div>
                           
                            {/* User Info */}
@@ -388,10 +393,34 @@ export const VotersModal = ({ isOpen, onClose, participantId, participantName }:
                                   </p>
                                 )}
                                 
-                                {/* Vote Date */}
-                                <p className="text-xs text-muted-foreground mt-1">
-                                  Voted on {new Date(voter.created_at).toLocaleString()}
-                                </p>
+                                 {/* Latest Vote Date */}
+                                 <p className="text-xs text-muted-foreground mt-1">
+                                   Latest vote: {formatRatingTime(voter.latest_rating.created_at)}
+                                 </p>
+                                 
+                                 {/* All ratings for this user */}
+                                 {voter.ratings.length > 1 && (
+                                   <div className="mt-2 space-y-1">
+                                     <p className="text-xs font-medium text-muted-foreground">
+                                       All ratings ({voter.ratings.length} total):
+                                     </p>
+                                     <div className="flex flex-wrap gap-1">
+                                       {voter.ratings.map((rating, idx) => (
+                                         <div key={idx} className="flex flex-col items-center">
+                                           <Badge 
+                                             variant="outline"
+                                             className={`${getRatingColor(rating.rating)} text-white border-none text-xs px-1.5 py-0.5`}
+                                           >
+                                             {rating.rating}
+                                           </Badge>
+                                           <span className="text-[10px] text-muted-foreground mt-0.5">
+                                             {formatRatingTime(rating.created_at)}
+                                           </span>
+                                         </div>
+                                       ))}
+                                     </div>
+                                   </div>
+                                 )}
                               </div>
                               
                                {/* Badges and expand indicator */}
