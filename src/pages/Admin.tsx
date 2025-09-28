@@ -761,62 +761,16 @@ const Admin = () => {
 
   const fetchDailyApplicationStats = async () => {
     try {
-      const currentDate = new Date();
-      const weekStart = new Date(currentDate);
-      weekStart.setDate(currentDate.getDate() - currentDate.getDay() + 1); // Monday
-      weekStart.setHours(0, 0, 0, 0);
+      const { data, error } = await supabase.rpc('get_daily_application_stats');
       
-      const weekEnd = new Date(weekStart);
-      weekEnd.setDate(weekStart.getDate() + 7);
-      
-      const daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-      const stats = [];
-      
-      // Group all applications by user_id to find first-time users
-      const userApplications = new Map<string, any[]>();
-      contestApplications.forEach(app => {
-        if (!userApplications.has(app.user_id)) {
-          userApplications.set(app.user_id, []);
-        }
-        userApplications.get(app.user_id)!.push(app);
-      });
-      
-      // Sort applications by submitted_at for each user to find first application
-      userApplications.forEach(apps => {
-        apps.sort((a, b) => new Date(a.submitted_at).getTime() - new Date(b.submitted_at).getTime());
-      });
-      
-      for (let i = 0; i < 7; i++) {
-        const dayStart = new Date(weekStart);
-        dayStart.setDate(weekStart.getDate() + i);
-        const dayEnd = new Date(dayStart);
-        dayEnd.setDate(dayStart.getDate() + 1);
-        
-        // Count new applications for this day (only first-time users)
-        const newCount = Array.from(userApplications.values()).filter(userApps => {
-          const firstApp = userApps[0]; // First application from this user
-          const appDate = new Date(firstApp.submitted_at);
-          return appDate >= dayStart && appDate < dayEnd;
-        }).length;
-        
-        // Count approved applications for this day (by reviewed_at date, only first-time users)
-        const approvedCount = Array.from(userApplications.values()).filter(userApps => {
-          const firstApp = userApps[0]; // First application from this user
-          if (firstApp.status !== 'approved' || !firstApp.reviewed_at) return false;
-          const approvedDate = new Date(firstApp.reviewed_at);
-          return approvedDate >= dayStart && approvedDate < dayEnd;
-        }).length;
-        
-        stats.push({
-          day_name: daysOfWeek[i],
-          new_count: newCount,
-          approved_count: approvedCount
-        });
+      if (error) {
+        console.error('Error fetching daily application stats:', error);
+        return;
       }
-      
-      setDailyApplicationStats(stats);
+
+      setDailyApplicationStats(data || []);
     } catch (error) {
-      console.error('Error calculating daily application stats:', error);
+      console.error('Error in fetchDailyApplicationStats:', error);
     }
   };
 
