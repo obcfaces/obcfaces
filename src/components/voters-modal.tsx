@@ -16,6 +16,12 @@ interface VoterData {
     action_type?: string;
     old_rating?: number;
   }>;
+  rating_history?: Array<{
+    old_rating?: number;
+    new_rating: number;
+    action_type: string;
+    changed_at: string;
+  }>;
   latest_rating: {
     rating: number;
     created_at: string;
@@ -480,31 +486,39 @@ export const VotersModal = ({ isOpen, onClose, participantId, participantName }:
                                    Latest vote: {formatRatingTime(voter.latest_rating.created_at)}
                                  </p>
                                  
-                                 {/* All ratings history for this user */}
-                                 {voter.ratings && voter.ratings.length > 0 && (
+                                 {/* Complete rating history for this user */}
+                                 {voter.rating_history && voter.rating_history.length > 0 && (
                                    <div className="mt-2 space-y-1">
                                      <p className="text-xs font-medium text-muted-foreground">
-                                       Complete rating history ({voter.ratings.length} total):
+                                       Complete rating history ({voter.rating_history.length} changes):
                                      </p>
-                                     <div className="flex flex-col gap-1">
-                                       {voter.ratings.map((rating, idx) => (
-                                         <div key={idx} className="flex items-center gap-2">
-                                           <Badge 
-                                             variant="outline"
-                                             className={`${getRatingColor(rating.rating)} text-white border-none text-xs px-1.5 py-0.5`}
-                                           >
-                                             {rating.old_rating ? `${rating.old_rating} → ${rating.rating}` : rating.rating}
-                                           </Badge>
+                                     <div className="flex flex-col gap-1 max-h-32 overflow-y-auto">
+                                       {voter.rating_history.map((historyItem, idx) => (
+                                         <div key={idx} className="flex items-center justify-between text-xs p-2 bg-muted/30 rounded">
+                                           <div className="flex items-center gap-2">
+                                             {historyItem.action_type === 'insert' ? (
+                                               <Badge variant="outline" className="bg-green-500 text-white border-none text-xs px-1.5 py-0.5">
+                                                 New: {historyItem.new_rating}
+                                               </Badge>
+                                             ) : historyItem.action_type === 'update' ? (
+                                               <div className="flex items-center gap-1">
+                                                 <Badge variant="outline" className="bg-orange-500 text-white border-none text-xs px-1.5 py-0.5">
+                                                   {historyItem.old_rating}
+                                                 </Badge>
+                                                 <span>→</span>
+                                                 <Badge variant="outline" className="bg-blue-500 text-white border-none text-xs px-1.5 py-0.5">
+                                                   {historyItem.new_rating}
+                                                 </Badge>
+                                               </div>
+                                             ) : (
+                                               <Badge variant="outline" className="bg-red-500 text-white border-none text-xs px-1.5 py-0.5">
+                                                 Deleted: {historyItem.old_rating}
+                                               </Badge>
+                                             )}
+                                           </div>
                                            <span className="text-[10px] text-muted-foreground">
-                                             {formatRatingTime(rating.created_at)}
+                                             {formatRatingTime(historyItem.changed_at)}
                                            </span>
-                                           {rating.action_type && rating.action_type !== 'current' && (
-                                             <span className="text-[9px] text-muted-foreground bg-muted/50 px-1 rounded">
-                                               {rating.action_type === 'insert' ? 'New' : 
-                                                rating.action_type === 'update' ? 'Changed' : 
-                                                rating.action_type === 'delete' ? 'Deleted' : rating.action_type}
-                                             </span>
-                                           )}
                                          </div>
                                        ))}
                                      </div>
