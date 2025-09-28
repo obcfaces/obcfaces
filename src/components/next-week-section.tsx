@@ -142,8 +142,10 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
         }));
 
         if (!user) {
-          setFilteredCandidates(candidatesFromDB);
-          setRemainingCandidates(candidatesFromDB.length);
+          // Show only first candidate for non-authenticated users
+          const firstCandidate = candidatesFromDB.length > 0 ? [candidatesFromDB[0]] : [];
+          setFilteredCandidates(firstCandidate);
+          setRemainingCandidates(firstCandidate.length);
           setCurrentIndex(0);
           setIsVotesLoaded(true);
         } else {
