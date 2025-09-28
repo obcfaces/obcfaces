@@ -1203,7 +1203,7 @@ const Admin = () => {
                 contest_id: contestId,
                 user_id: application.user_id,
                 application_data: application.application_data,
-                admin_status: newStatus === 'approved' ? 'this week' : 'next'
+                admin_status: newStatus === 'approved' ? 'this week' : 'next week'
               });
 
             if (participantError) {
@@ -1213,7 +1213,7 @@ const Admin = () => {
             // Update existing participant's admin_status
             const { error: updateError } = await supabase
               .from('weekly_contest_participants')
-              .update({ admin_status: newStatus === 'approved' ? 'this week' : 'next' })
+              .update({ admin_status: newStatus === 'approved' ? 'this week' : 'next week' })
               .eq('id', existingParticipant.id);
 
             if (updateError) {
@@ -3071,11 +3071,11 @@ const Admin = () => {
                       // Handle status filtering
                       if (statusFilter !== 'all') {
                         if (statusFilter === 'next week') {
-                          // Show applications for users with admin_status === 'next'  
+                          // Show applications for users with admin_status === 'next week'  
                           const weeklyParticipant = weeklyParticipants.find(participant => 
                             participant.user_id === application.user_id
                           );
-                          if (!weeklyParticipant || weeklyParticipant.admin_status !== 'next') {
+                          if (!weeklyParticipant || weeklyParticipant.admin_status !== 'next week') {
                             return false;
                           }
                         } else {
@@ -3090,8 +3090,8 @@ const Admin = () => {
                         participant.user_id === application.user_id
                       );
                       
-                      // Exclude applications with status="next" from Card section (unless filtering by "next week")
-                      if (application.status === 'next' && statusFilter !== 'next week') {
+                      // Exclude applications with status="next week" from Card section (unless filtering by "next week")
+                      if (application.status === 'next week' && statusFilter !== 'next week') {
                         return false;
                       }
                       
