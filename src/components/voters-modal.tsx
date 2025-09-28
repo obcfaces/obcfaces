@@ -214,7 +214,7 @@ export const VotersModal = ({ isOpen, onClose, participantId, participantName }:
 
       // Create voter entries with full rating history per user
       const votersWithProfiles = Object.keys(historyByUser).map(userId => {
-        const userHistory = historyByUser[userId];
+        const userHistory = historyByUser[userId].sort((a, b) => new Date(b.changed_at).getTime() - new Date(a.changed_at).getTime());
         const profile = profiles?.find(p => p.id === userId);
         const auth = authData?.find(a => a.user_id === userId);
         
@@ -232,6 +232,7 @@ export const VotersModal = ({ isOpen, onClose, participantId, participantName }:
             action_type: h.action_type,
             old_rating: h.old_rating
           })), // Store full history
+          rating_history: userHistory, // Add explicit rating_history property
           latest_rating: {
             rating: latestRating,
             created_at: latestHistoryItem.changed_at
