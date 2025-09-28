@@ -493,35 +493,21 @@ export const VotersModal = ({ isOpen, onClose, participantId, participantName }:
                                </div>
                              </div>
 
-                             {/* Rating change circles */}
+                             {/* Rating circles showing user's score */}
                              <div className="flex items-center gap-1 mt-2 w-full">
-                               {voter.rating_history && voter.rating_history.length > 0 ? (
-                                 <>
-                                   {voter.rating_history.slice().reverse().slice(0, 10).map((historyItem, i) => {
-                                     const rating = historyItem.new_rating || historyItem.old_rating || 0;
-                                     return (
-                                       <div
-                                         key={i}
-                                         className={`h-3 w-3 rounded-full flex-1 max-w-[20px] ${getRatingColor(rating)}`}
-                                         title={`Rating: ${rating}/10 on ${new Date(historyItem.changed_at).toLocaleDateString()}`}
-                                       />
-                                     );
-                                   })}
-                                   <span className="ml-2 text-sm font-medium">
-                                     {voter.rating_history.length} changes
-                                   </span>
-                                 </>
-                               ) : (
-                                 <>
-                                   <div
-                                     className={`h-3 w-3 rounded-full flex-1 max-w-[20px] ${getRatingColor(voter.latest_rating.rating)}`}
-                                     title={`Rating: ${voter.latest_rating.rating}/10`}
-                                   />
-                                   <span className="ml-2 text-sm font-medium">
-                                     {voter.latest_rating.rating}/10
-                                   </span>
-                                 </>
-                               )}
+                               {Array.from({ length: 10 }, (_, i) => (
+                                 <div
+                                   key={i}
+                                   className={`h-3 w-3 rounded-full flex-1 max-w-[20px] ${
+                                     i < voter.latest_rating.rating
+                                       ? getRatingColor(voter.latest_rating.rating)
+                                       : 'bg-gray-200'
+                                   }`}
+                                 />
+                               ))}
+                               <span className="ml-2 text-sm font-medium">
+                                 {voter.latest_rating.rating}/10
+                               </span>
                              </div>
                            </div>
                          </div>
