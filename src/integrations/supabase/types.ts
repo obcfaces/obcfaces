@@ -927,6 +927,23 @@ export type Database = {
         Args: { target_user_id: string }
         Returns: number
       }
+      get_next_week_participants_public: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          admin_status: string
+          age: number
+          city: string
+          country: string
+          first_name: string
+          height_cm: number
+          last_name: string
+          participant_id: string
+          photo_1_url: string
+          photo_2_url: string
+          user_id: string
+          weight_kg: number
+        }[]
+      }
       get_or_create_conversation: {
         Args: { user1_id: string; user2_id: string }
         Returns: string
