@@ -449,10 +449,10 @@ export function ContestantCard({
 
 
 
-  const allPhotos = isWinner 
+  const allPhotos = isWinner && winnerContent
     ? [faceImage, fullBodyImage, ...additionalPhotos, 
-       winnerContent?.payment_proof_url || (weekOffset === 1 ? winnerPaymentImageApril : winnerPaymentImage), 
-       winnerContent?.testimonial_video_url || (weekOffset === 1 ? winnerVideoApril : winnerVideo)]
+       winnerContent.payment_proof_url, 
+       winnerContent.testimonial_video_url]
     : [faceImage, fullBodyImage, ...additionalPhotos];
 
   const openModal = (photoIndex: number) => {
@@ -953,41 +953,38 @@ export function ContestantCard({
         {/* Divider line between rows */}
         {isWinner && <div className="border-t border-gray-400 w-full"></div>}
         
-        {/* Second row for winner cards only - show for winners from last week and 2+ weeks ago */}
-        {isWinner && (weekOffset === 1 || weekOffset >= 2) && (
+        {/* Second row for winner cards only - show ONLY if winner content exists in database */}
+        {isWinner && winnerContent && (weekOffset === 1 || weekOffset >= 2) && (
           <>
             <div className="flex h-36 sm:h-40 md:h-44 relative gap-px">
-              {/* Payment photo - use winner content from database or fallback to static */}
-              <div className="relative">
-                <img 
-                  src={winnerContent?.payment_proof_url || (weekOffset === 1 ? winnerPaymentImageApril : winnerPaymentImage)} 
-                  alt="Payment receipt"
-                  className="w-24 sm:w-28 md:w-32 h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
-                  onClick={() => openModal(isWinner ? additionalPhotos.length + 2 : 2)}
-                />
-              </div>
+               {/* Payment photo - use winner content from database only */}
+               <div className="relative">
+                 <img 
+                   src={winnerContent.payment_proof_url} 
+                   alt="Payment receipt"
+                   className="w-24 sm:w-28 md:w-32 h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                   onClick={() => openModal(isWinner ? additionalPhotos.length + 2 : 2)}
+                 />
+               </div>
               
-              {/* Video - use winner content from database or fallback to static */}
-              <div className="relative">
-                <video 
-                  src={winnerContent?.testimonial_video_url || (weekOffset === 1 ? winnerVideoApril : winnerVideo)}
-                  className="w-24 sm:w-28 md:w-32 h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
-                  controls={false}
-                  muted
-                  onClick={() => openModal(isWinner ? additionalPhotos.length + 3 : 3)}
-                />
-              </div>
+               {/* Video - use winner content from database only */}
+               <div className="relative">
+                 <video 
+                   src={winnerContent.testimonial_video_url}
+                   className="w-24 sm:w-28 md:w-32 h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                   controls={false}
+                   muted
+                   onClick={() => openModal(isWinner ? additionalPhotos.length + 3 : 3)}
+                 />
+               </div>
               
-              {/* Testimonial text - use winner content from database or fallback to static */}
-              <div className="flex-1 p-3 flex flex-col items-center justify-start max-h-32 overflow-y-auto scroll-smooth">
-                <p className="text-sm text-gray-700 italic text-center mb-3">
-                  {winnerContent?.testimonial_text || (weekOffset === 1 
-                    ? "It's legit and it's really happening. Thank you so much, OBC, for this wonderful opportunity. And I'm really overwhelmed with happiness as one of your weekly winners. Thank you, everyone."
-                    : "I never imagined this could be real. I'm so happy I won! All I had to do was fill out the form. Anyone can do it!"
-                  )}
-                </p>
-                <p className="text-xs text-gray-600 font-bold italic self-end uppercase">{name}</p>
-              </div>
+               {/* Testimonial text - use winner content from database only */}
+               <div className="flex-1 p-3 flex flex-col items-center justify-start max-h-32 overflow-y-auto scroll-smooth">
+                 <p className="text-sm text-gray-700 italic text-center mb-3">
+                   {winnerContent.testimonial_text}
+                 </p>
+                 <p className="text-xs text-gray-600 font-bold italic self-end uppercase">{name}</p>
+               </div>
             </div>
             
             {/* Winner cards end after second row - no extra content area */}
