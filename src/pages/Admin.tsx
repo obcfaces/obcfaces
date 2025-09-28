@@ -2014,16 +2014,16 @@ const Admin = () => {
                                      value={participant.admin_status || 'next week'}
                                      onValueChange={async (value) => {
                                       try {
-                                         console.log('Updating participant status for participant_id:', participant.participant_id);
+                                         console.log('Updating participant status for ID:', participant.id);
                                          
-                                         if (!participant.participant_id) {
-                                           throw new Error('No participant_id found in participant object');
+                                         if (!participant.id) {
+                                           throw new Error('No participant ID found in participant object');
                                          }
                                          
                                          const { error } = await supabase
                                            .from('weekly_contest_participants')
                                            .update({ admin_status: value } as any)
-                                           .eq('id', participant.participant_id);
+                                           .eq('id', participant.id);
                                       
                                       if (error) {
                                         console.error('Error updating participant status:', error);
