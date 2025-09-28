@@ -439,41 +439,24 @@ export const VotersModal = ({ isOpen, onClose, participantId, participantName }:
                            <div className="flex-1 min-w-0">
                              <div className="flex items-start justify-between gap-2">
                                <div className="flex-1">
-                                 <h3 className="font-semibold text-lg leading-tight">
-                                   {getDisplayName(voter)}
-                                 </h3>
+                                  <h3 className="font-semibold text-lg leading-tight">
+                                    {voter.profile?.age && (
+                                      <span className="text-muted-foreground font-normal">{voter.profile.age} лет • </span>
+                                    )}
+                                    {getDisplayName(voter)}
+                                  </h3>
+                                  
+                                  {/* City and Country */}
+                                  <div className="text-sm text-muted-foreground leading-tight">
+                                    <span>{getLocationString(voter)}</span>
+                                  </div>
                                  
-                                 {/* City and Country */}
-                                 <div className="text-sm text-muted-foreground mt-1">
-                                   <span>{getLocationString(voter)}</span>
-                                 </div>
-                                 
-                                 {/* Basic Info with Age first */}
-                                 <div className="flex items-center gap-3 text-sm text-muted-foreground mt-1">
-                                   {voter.profile?.age && (
-                                     <>
-                                       <span>{voter.profile.age} years old</span>
-                                       {voter.profile?.gender && <span>•</span>}
-                                     </>
-                                   )}
-                                   {voter.profile?.gender && (
-                                     <span>{voter.profile.gender}</span>
-                                   )}
-                                 </div>
-                                
-                                {/* Bio */}
-                                {voter.profile?.bio && (
-                                  <p className="text-sm text-muted-foreground mt-2 line-clamp-2">
-                                    {voter.profile.bio}
-                                  </p>
-                                )}
-                                
-                                {/* Email */}
-                                {voter.email && (
-                                  <p className="text-sm text-muted-foreground mt-2 break-all">
-                                    📧 {voter.email}
-                                  </p>
-                                )}
+                                 {/* Email */}
+                                 {voter.email && (
+                                   <div className="text-sm text-muted-foreground leading-tight">
+                                     📧 {voter.email}
+                                   </div>
+                                 )}
                                 
                                 {/* Registration Date */}
                                 {voter.registration_date && (
