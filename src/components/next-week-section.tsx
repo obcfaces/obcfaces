@@ -119,8 +119,20 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
       
       try {
         // Get participants with "next week" or "next week on site" admin_status
-        const { data: nextWeekParticipants } = await supabase
+        const { data: nextWeekParticipants, error } = await supabase
           .rpc('get_next_week_participants_public');
+
+        if (error) {
+          console.error('Error fetching next week participants:', error);
+          setFilteredCandidates([]);
+          setRemainingCandidates(0);
+          setCurrentIndex(0);
+          setIsVotesLoaded(true);
+          setIsLoading(false);
+          return;
+        }
+
+        console.log('Next week participants fetched:', nextWeekParticipants);
 
         // All returned participants have next week status already
         const actualNextWeekCandidates = nextWeekParticipants || [];
@@ -141,9 +153,12 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
           weight: participant.weight_kg
         }));
 
+        console.log('Candidates from DB:', candidatesFromDB);
+
         if (!user) {
           // Show only first candidate for non-authenticated users
           const firstCandidate = candidatesFromDB.length > 0 ? [candidatesFromDB[0]] : [];
+          console.log('Showing first candidate for non-auth user:', firstCandidate);
           setFilteredCandidates(firstCandidate);
           setRemainingCandidates(firstCandidate.length);
           setCurrentIndex(0);
@@ -156,6 +171,7 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
             .eq('user_id', user.id);
 
           const votedNames = votes?.map(vote => vote.candidate_name) || [];
+          console.log('User voted names:', votedNames);
 
           // Filter out voted candidates
           const unvotedCandidatesFromDB = candidatesFromDB.filter(candidate => 
@@ -165,6 +181,7 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
           // Show only real candidates, no fallback to test candidates
           const finalCandidates = unvotedCandidatesFromDB;
           
+          console.log('Final candidates for auth user:', finalCandidates);
           setFilteredCandidates(finalCandidates);
           setRemainingCandidates(finalCandidates.length);
           setCurrentIndex(0);
