@@ -104,8 +104,20 @@ export const VotersModal = ({ isOpen, onClose, participantId, participantName }:
         return;
       }
 
+      // Filter to get only the latest rating from each user
+      const latestRatings = ratings.reduce((acc: any[], rating) => {
+        const existingRating = acc.find(r => r.user_id === rating.user_id);
+        if (!existingRating || new Date(rating.created_at) > new Date(existingRating.created_at)) {
+          if (existingRating) {
+            acc.splice(acc.indexOf(existingRating), 1);
+          }
+          acc.push(rating);
+        }
+        return acc;
+      }, []);
+
       // Get user profiles for all voters
-      const userIds = ratings.map(r => r.user_id);
+      const userIds = latestRatings.map(r => r.user_id);
       const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
         .select('id, display_name, first_name, last_name, avatar_url, country, city, age, gender, bio, is_contest_participant, created_at')
