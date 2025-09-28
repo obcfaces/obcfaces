@@ -420,175 +420,222 @@ export const VotersModal = ({ isOpen, onClose, participantId, participantName }:
                            </Badge>
                          )}
                          <div className="flex items-start gap-4 mt-4">
-                           {/* Avatar with rating below and date badge */}
+                           {/* Avatar with rating below */}
                            <div className="flex flex-col items-center gap-2 flex-shrink-0">
-                             <div className="relative">
-                               <Avatar className="h-16 w-16">
-                                 <AvatarImage src={voter.profile?.avatar_url || ''} />
-                                 <AvatarFallback className="text-lg">
-                                   {getDisplayName(voter).charAt(0)}
-                                 </AvatarFallback>
-                               </Avatar>
-                               {/* Registration date badge */}
-                               {voter.registration_date && (
-                                 <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 bg-muted text-muted-foreground text-xs px-1 py-0.5 rounded text-center min-w-max">
-                                   {new Date(voter.registration_date).toLocaleDateString()}
-                                 </div>
-                               )}
-                             </div>
-                             <Badge 
-                               className={`${getRatingColor(voter.latest_rating.rating)} text-white px-2 py-1 text-sm font-semibold`}
-                             >
-                               {voter.latest_rating.rating}/10
-                             </Badge>
+                             <Avatar className="h-16 w-16">
+                               <AvatarImage src={voter.profile?.avatar_url || ''} />
+                               <AvatarFallback className="text-lg">
+                                 {getDisplayName(voter).charAt(0)}
+                               </AvatarFallback>
+                             </Avatar>
+                              <Badge 
+                                className={`${getRatingColor(voter.latest_rating.rating)} text-white px-2 py-1 text-sm font-semibold`}
+                              >
+                                {voter.latest_rating.rating}/10
+                              </Badge>
                            </div>
                           
                            {/* User Info */}
                            <div className="flex-1 min-w-0">
                              <div className="flex items-start justify-between gap-2">
                                <div className="flex-1">
-                                 <h3 className="font-semibold text-lg leading-tight">
-                                   {voter.profile?.age && (
-                                     <span className="text-muted-foreground font-normal">{voter.profile.age} • </span>
-                                   )}
-                                   {getDisplayName(voter)}
-                                 </h3>
-                                 
-                                 {/* City and Country */}
-                                 <div className="text-sm text-muted-foreground leading-tight">
-                                   <span>{getLocationString(voter)}</span>
-                                 </div>
-                                
-                                {/* Email */}
-                                {voter.email && (
+                                  <h3 className="font-semibold text-lg leading-tight">
+                                    {voter.profile?.age && (
+                                      <span className="text-muted-foreground font-normal">{voter.profile.age} лет • </span>
+                                    )}
+                                    {getDisplayName(voter)}
+                                  </h3>
+                                  
+                                  {/* City and Country */}
                                   <div className="text-sm text-muted-foreground leading-tight">
-                                    📧 {voter.email}
+                                    <span>{getLocationString(voter)}</span>
                                   </div>
-                                )}
-                               </div>
-                               
-                               <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                                 <ChevronDown className="h-4 w-4" />
-                                 <span>Click to see activity</span>
-                               </div>
-                             </div>
-                           </div>
-                         </div>
-                       </CardContent>
-                     </CollapsibleTrigger>
-
-                     <CollapsibleContent>
-                       <CardContent className="pt-0 px-4 pb-4">
-                         {/* Complete rating history for this user */}
-                         {voter.rating_history && voter.rating_history.length > 1 && (
-                           <div className="mt-2 space-y-1">
-                             <p className="text-xs font-medium text-muted-foreground">
-                               Complete rating history ({voter.rating_history.length} changes):
-                             </p>
-                             <div className="flex items-start gap-2 max-h-32 overflow-x-auto">
-                               {voter.rating_history.slice().reverse().map((historyItem, idx) => {
-                                 const isUpdate = historyItem.action_type === 'update' && historyItem.old_rating;
                                  
-                                 if (isUpdate) {
-                                   // Show both old and new rating for updates
-                                   return (
-                                     <React.Fragment key={idx}>
-                                       <div className="flex flex-col items-center flex-shrink-0">
-                                         <div className="w-6 h-6 rounded-full bg-orange-500 text-white flex items-center justify-center text-xs font-semibold">
-                                           {historyItem.old_rating}
-                                         </div>
-                                         <div className="text-xs text-muted-foreground mt-1 text-center">
-                                           {formatRatingTime(historyItem.changed_at).split(' ')[0]}
-                                         </div>
-                                       </div>
-                                       <div className="text-muted-foreground self-center">→</div>
-                                       <div className="flex flex-col items-center flex-shrink-0">
-                                         <div className={`w-6 h-6 rounded-full ${getRatingColor(historyItem.new_rating)} text-white flex items-center justify-center text-xs font-semibold`}>
-                                           {historyItem.new_rating}
-                                         </div>
-                                         <div className="text-xs text-muted-foreground mt-1 text-center">
-                                           {formatRatingTime(historyItem.changed_at).split(' ')[1]}
-                                         </div>
-                                       </div>
-                                     </React.Fragment>
-                                   );
-                                 } else {
-                                   // Show just the new rating for inserts
-                                   return (
-                                     <div key={idx} className="flex flex-col items-center flex-shrink-0">
-                                       <div className={`w-6 h-6 rounded-full ${getRatingColor(historyItem.new_rating)} text-white flex items-center justify-center text-xs font-semibold`}>
-                                         {historyItem.new_rating}
-                                       </div>
-                                       <div className="text-xs text-muted-foreground mt-1 text-center">
-                                         {formatRatingTime(historyItem.changed_at)}
-                                       </div>
-                                     </div>
-                                   );
-                                 }
-                               })}
-                             </div>
-                           </div>
-                         )}
-
-                         {/* User Activity Section */}
-                         <div className="mt-4 border-t pt-4">
-                           <div className="flex items-center justify-between mb-3">
-                             <h4 className="font-medium text-sm flex items-center gap-2">
-                               <Heart className="h-4 w-4" />
-                               User's Activity
-                             </h4>
-                             {expandedUser === voter.user_id && (
-                               <ChevronUp className="h-4 w-4 text-muted-foreground" />
-                             )}
-                           </div>
-                           
-                           {activityLoading ? (
-                             <div className="text-xs text-muted-foreground">Loading activity...</div>
-                           ) : userActivity.length === 0 ? (
-                             <div className="text-xs text-muted-foreground">No activity found</div>
-                           ) : (
-                             <div className="space-y-2">
-                               {userActivity.slice(0, 5).map((activity, idx) => (
-                                 <div key={idx} className="flex items-center gap-3 p-2 bg-muted/30 rounded text-xs">
-                                   <Avatar className="h-6 w-6">
-                                     <AvatarImage src={activity.target_avatar || ''} />
-                                     <AvatarFallback className="text-xs">
-                                       {activity.target_name.charAt(0)}
-                                     </AvatarFallback>
-                                   </Avatar>
-                                   <div className="flex-1">
-                                     <span className="font-medium">{activity.target_name}</span>
-                                     <div className="text-muted-foreground">
-                                       {activity.rating && (
-                                         <span className="mr-2">★ {activity.rating}/10</span>
-                                       )}
-                                       {activity.like_count > 0 && (
-                                         <span>❤️ {activity.like_count}</span>
-                                       )}
-                                     </div>
+                                 {/* Email */}
+                                 {voter.email && (
+                                   <div className="text-sm text-muted-foreground leading-tight">
+                                     📧 {voter.email}
                                    </div>
-                                   <div className="text-muted-foreground">
-                                     {formatRatingTime(activity.last_activity)}
-                                   </div>
+                                 )}
+                                
+                                {/* Registration Date */}
+                                {voter.registration_date && (
+                                  <p className="text-xs text-muted-foreground mt-1">
+                                    Registered: {new Date(voter.registration_date).toLocaleDateString()}
+                                  </p>
+                                )}
+                                
+                                 {/* Latest Vote Date */}
+                                 <p className="text-xs text-muted-foreground mt-1">
+                                   Latest vote: {formatRatingTime(voter.latest_rating.created_at)}
+                                 </p>
+                                 
+                                  {/* Complete rating history for this user */}
+                                  {voter.rating_history && voter.rating_history.length > 1 && (
+                                    <div className="mt-2 space-y-1">
+                                      <p className="text-xs font-medium text-muted-foreground">
+                                        Complete rating history ({voter.rating_history.length} changes):
+                                      </p>
+                                      <div className="flex items-start gap-2 max-h-32 overflow-x-auto">
+                                        {voter.rating_history.slice().reverse().map((historyItem, idx) => {
+                                          const isUpdate = historyItem.action_type === 'update' && historyItem.old_rating;
+                                          
+                                          if (isUpdate) {
+                                            // Show both old and new rating for updates
+                                            return (
+                                              <>
+                                                <div className="flex flex-col items-center flex-shrink-0">
+                                                  <div className="w-6 h-6 rounded-full bg-orange-500 text-white flex items-center justify-center text-xs font-semibold">
+                                                    {historyItem.old_rating}
+                                                  </div>
+                                                  <span 
+                                                    className="text-[10px] text-muted-foreground mt-1 cursor-help whitespace-nowrap"
+                                                    title={new Date(historyItem.changed_at).toLocaleString('en-US', {
+                                                      hour: '2-digit',
+                                                      minute: '2-digit',
+                                                      day: 'numeric',
+                                                      month: 'short',
+                                                      year: 'numeric'
+                                                    })}
+                                                  >
+                                                    {new Date(historyItem.changed_at).toLocaleDateString('en-US', {
+                                                      day: 'numeric',
+                                                      month: 'short'
+                                                    })}
+                                                  </span>
+                                                </div>
+                                                <span className="text-muted-foreground self-start mt-3">→</span>
+                                                <div className="flex flex-col items-center flex-shrink-0">
+                                                  <div className="w-6 h-6 rounded-full bg-blue-500 text-white flex items-center justify-center text-xs font-semibold">
+                                                    {historyItem.new_rating}
+                                                  </div>
+                                                  <span 
+                                                    className="text-[10px] text-muted-foreground mt-1 cursor-help whitespace-nowrap"
+                                                    title={new Date(historyItem.changed_at).toLocaleString('en-US', {
+                                                      hour: '2-digit',
+                                                      minute: '2-digit',
+                                                      day: 'numeric',
+                                                      month: 'short',
+                                                      year: 'numeric'
+                                                    })}
+                                                  >
+                                                    {new Date(historyItem.changed_at).toLocaleDateString('en-US', {
+                                                      day: 'numeric',
+                                                      month: 'short'
+                                                    })}
+                                                  </span>
+                                                </div>
+                                              </>
+                                            );
+                                          } else {
+                                            // Show single rating for existing/insert/delete actions
+                                            return (
+                                              <div key={idx} className="flex flex-col items-center flex-shrink-0">
+                                                <div className={`w-6 h-6 rounded-full text-white flex items-center justify-center text-xs font-semibold ${
+                                                  historyItem.action_type === 'existing' ? 'bg-gray-500' : 'bg-green-500'
+                                                }`}>
+                                                  {historyItem.new_rating || historyItem.old_rating}
+                                                </div>
+                                                <span 
+                                                  className="text-[10px] text-muted-foreground mt-1 cursor-help whitespace-nowrap"
+                                                  title={new Date(historyItem.changed_at).toLocaleString('en-US', {
+                                                    hour: '2-digit',
+                                                    minute: '2-digit',
+                                                    day: 'numeric',
+                                                    month: 'short',
+                                                    year: 'numeric'
+                                                  })}
+                                                >
+                                                  {new Date(historyItem.changed_at).toLocaleDateString('en-US', {
+                                                    day: 'numeric',
+                                                    month: 'short'
+                                                  })}
+                                                </span>
+                                              </div>
+                                            );
+                                          }
+                                        })}
+                                      </div>
+                                    </div>
+                                  )}
+                              </div>
+                              
+                               {/* Badges and expand indicator */}
+                               <div className="flex flex-col items-end gap-2">
+                                 <div className="flex items-center gap-2">
+                                   {expandedUser === voter.user_id ? (
+                                     <ChevronUp className="w-4 h-4 text-muted-foreground" />
+                                   ) : (
+                                     <ChevronDown className="w-4 h-4 text-muted-foreground" />
+                                   )}
                                  </div>
-                               ))}
-                               {userActivity.length > 5 && (
-                                 <div className="text-xs text-muted-foreground text-center">
-                                   ... and {userActivity.length - 5} more
-                                 </div>
-                               )}
-                             </div>
-                           )}
-                         </div>
-                       </CardContent>
-                     </CollapsibleContent>
-                   </Card>
-                 </Collapsible>
-               ))}
-             </div>
-           )}
-         </ScrollArea>
-       </DialogContent>
-     </Dialog>
-   );
+                               </div>
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </CollapsibleTrigger>
+                    
+                    {/* User Activity History */}
+                    <CollapsibleContent>
+                      <CardContent className="px-4 pb-4 pt-0 border-t">
+                        <h4 className="font-medium text-sm mb-3 text-muted-foreground">
+                          Rating & Like History
+                        </h4>
+                        
+                        {activityLoading ? (
+                          <div className="flex items-center justify-center py-4">
+                            <div className="text-sm text-muted-foreground">Loading activity...</div>
+                          </div>
+                        ) : userActivity.length === 0 ? (
+                          <div className="text-sm text-muted-foreground py-2">
+                            No activity found for other participants
+                          </div>
+                        ) : (
+                          <div className="space-y-2 max-h-40 overflow-y-auto">
+                            {userActivity.map((activity, actIndex) => (
+                              <div key={`${activity.target_user_id}-${actIndex}`} className="flex items-center gap-3 p-2 bg-muted/30 rounded-lg">
+                                <Avatar className="h-8 w-8">
+                                  <AvatarImage src={activity.target_avatar || ''} />
+                                  <AvatarFallback className="text-xs">
+                                    {activity.target_name.charAt(0)}
+                                  </AvatarFallback>
+                                </Avatar>
+                                
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-sm font-medium truncate">
+                                    {activity.target_name}
+                                  </p>
+                                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                    {activity.rating && (
+                                      <span className="flex items-center gap-1">
+                                        <Star className="w-3 h-3 fill-current text-yellow-500" />
+                                        {activity.rating}/10
+                                      </span>
+                                    )}
+                                    {activity.like_count > 0 && (
+                                      <span className="flex items-center gap-1">
+                                        <Heart className="w-3 h-3 fill-current text-red-500" />
+                                        {activity.like_count}
+                                      </span>
+                                    )}
+                                    <span>•</span>
+                                    <span>{new Date(activity.last_activity).toLocaleDateString()}</span>
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </CardContent>
+                    </CollapsibleContent>
+                  </Card>
+                </Collapsible>
+              ))}
+            </div>
+          )}
+        </ScrollArea>
+      </DialogContent>
+    </Dialog>
+  );
 };
