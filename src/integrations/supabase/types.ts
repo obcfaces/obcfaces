@@ -1466,6 +1466,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      transition_weekly_participant_statuses: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       update_application_status: {
         Args: {
           application_id_param: string
