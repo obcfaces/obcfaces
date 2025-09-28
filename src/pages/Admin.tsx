@@ -217,12 +217,12 @@ const Admin = () => {
   const [nextWeekFilter, setNextWeekFilter] = useState<string>('all'); // Новый фильтр для next week
   const [nextWeekParticipants, setNextWeekParticipants] = useState<any[]>([]);
   const [dailyStats, setDailyStats] = useState<Array<{ day_name: string; vote_count: number; like_count: number }>>([]);
-  const [dailyApplicationStats, setDailyApplicationStats] = useState<Array<{ day_name: string; new_count: number; approved_count: number }>>([]);
-  const [dailyRegistrationStats, setDailyRegistrationStats] = useState<Array<{ day_name: string; registration_count: number; verified_count: number }>>([]);
+  const [dailyApplicationStats, setDailyApplicationStats] = useState<Array<{ day_name: string; total_applications: number; approved_applications: number; day_of_week: number; sort_order: number }>>([]);
+  const [dailyRegistrationStats, setDailyRegistrationStats] = useState<Array<{ day_name: string; registration_count: number; day_of_week: number; sort_order: number }>>([]);
   const [nextWeekDailyStats, setNextWeekDailyStats] = useState<Array<{ day_name: string; like_count: number; dislike_count: number; total_votes: number }>>([]);
   const [selectedDay, setSelectedDay] = useState<{ day: number; type: 'new' | 'approved' } | null>(null);
   const [nextWeekApplicationsCount, setNextWeekApplicationsCount] = useState<{ total: number; next_week: number }>({ total: 0, next_week: 0 });
-  const [cardSectionStats, setCardSectionStats] = useState<{ newApplications: number; movedToNextWeek: number }>({ newApplications: 0, movedToNextWeek: 0 });
+  const [cardSectionStats, setCardSectionStats] = useState<{ newApplications: number; movedToNextWeek: number; new_applications_count: number; moved_to_next_week_count: number }>({ newApplications: 0, movedToNextWeek: 0, new_applications_count: 0, moved_to_next_week_count: 0 });
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -1168,7 +1168,9 @@ const Admin = () => {
       if (data && data.length > 0) {
         setCardSectionStats({
           newApplications: Number(data[0].new_applications_count || 0),
-          movedToNextWeek: Number(data[0].moved_to_next_week_count || 0)
+          movedToNextWeek: Number(data[0].moved_to_next_week_count || 0),
+          new_applications_count: Number(data[0].new_applications_count || 0),
+          moved_to_next_week_count: Number(data[0].moved_to_next_week_count || 0)
         });
       }
     } catch (error) {
@@ -2731,8 +2733,8 @@ const Admin = () => {
                 <div className="mb-4 p-3 bg-muted rounded-lg">
                   <div className="text-sm text-muted-foreground space-y-2">
                      <div className="text-xs">
-                       new applications: {cardSectionStats.newApplications} - {cardSectionStats.movedToNextWeek}, 
-                       approved: {dailyApplicationStats.reduce((sum, stat) => sum + (stat.approved_count || 0), 0)}
+                       new applications: {dailyApplicationStats.reduce((sum, day) => sum + day.total_applications, 0)} - {dailyApplicationStats.reduce((sum, day) => sum + day.approved_applications, 0)}, 
+                       approved: {cardSectionStats.moved_to_next_week_count || cardSectionStats.movedToNextWeek}
                      </div>
                     <div className="grid grid-cols-7 gap-1 text-xs">
                       {dailyApplicationStats.map((stat, index) => (
@@ -2751,7 +2753,7 @@ const Admin = () => {
                                 }
                               }}
                             >
-                              {stat.new_count}
+                              {stat.total_applications}
                             </span>
                             <span>-</span>
                             <span 
@@ -2766,7 +2768,7 @@ const Admin = () => {
                                 }
                               }}
                             >
-                              {stat.approved_count}
+                              {stat.approved_applications}
                             </span>
                           </div>
                         </div>
@@ -4399,14 +4401,14 @@ const Admin = () => {
                     <div className="text-sm text-muted-foreground space-y-2">
                       <div className="text-xs">
                         total registrations: {dailyRegistrationStats.reduce((sum, stat) => sum + (stat.registration_count || 0), 0)}, 
-                        verified: {dailyRegistrationStats.reduce((sum, stat) => sum + (stat.verified_count || 0), 0)}
+                        verified: {profiles.filter(p => p.is_approved).length}
                       </div>
                       <div className="grid grid-cols-7 gap-1 text-xs">
                         {dailyRegistrationStats.map((stat, index) => (
                           <div key={index} className="text-center p-1 bg-background rounded">
                             <div className="font-medium text-xs">{stat.day_name}</div>
                             <div className="text-xs text-muted-foreground">
-                              {stat.registration_count}-{stat.verified_count}
+                              {stat.registration_count}
                             </div>
                           </div>
                         ))}
