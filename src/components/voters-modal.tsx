@@ -84,10 +84,12 @@ export const VotersModal = ({ isOpen, onClose, participantId, participantName }:
       }
 
       // Get ratings for this participant using both participant_id and user_id
+      // Only get the latest rating from each user to avoid duplicates
       const { data: ratings, error: ratingsError } = await supabase
         .from('contestant_ratings')
         .select('user_id, rating, created_at')
         .or(`participant_id.eq.${participantId},contestant_user_id.eq.${participantData.user_id}`)
+        .order('user_id', { ascending: true })
         .order('created_at', { ascending: false });
 
       console.log('Ratings query result:', { ratings, ratingsError });
@@ -123,7 +125,18 @@ export const VotersModal = ({ isOpen, onClose, participantId, participantName }:
       }
 
       // Combine ratings with profiles and auth data
-      const votersWithProfiles = ratings.map(rating => {
+      // Filter to get only the latest rating from each user
+      const uniqueRatings = ratings?.reduce((acc: any[], rating: any) => {
+        const existingIndex = acc.findIndex(r => r.user_id === rating.user_id);
+        if (existingIndex === -1) {
+          acc.push(rating);
+        } else if (new Date(rating.created_at) > new Date(acc[existingIndex].created_at)) {
+          acc[existingIndex] = rating;
+        }
+        return acc;
+      }, []) || [];
+
+      const votersWithProfiles = uniqueRatings.map(rating => {
         const profile = profiles?.find(p => p.id === rating.user_id);
         const auth = authData?.find(a => a.user_id === rating.user_id);
         return {
