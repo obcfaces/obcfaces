@@ -136,30 +136,28 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
         if (!user) {
           setFilteredCandidates(candidatesFromDB);
           setRemainingCandidates(candidatesFromDB.length);
-          setIsLoading(false);
-          return;
+        } else {
+          // Get user's votes first, then filter candidates
+          const { data: votes } = await supabase
+            .from('next_week_votes')
+            .select('candidate_name')
+            .eq('user_id', user.id);
+
+          const votedNames = votes?.map(vote => vote.candidate_name) || [];
+
+          // Filter out voted candidates
+          const unvotedCandidatesFromDB = candidatesFromDB.filter(candidate => 
+            !votedNames.includes(candidate.name)
+          );
+          
+          // Show only real candidates, no fallback to test candidates
+          const finalCandidates = unvotedCandidatesFromDB;
+          
+          setFilteredCandidates(finalCandidates);
+          setRemainingCandidates(finalCandidates.length);
+          setCurrentIndex(0);
+          setHistory([]);
         }
-
-        // Get user's votes
-        const { data: votes } = await supabase
-          .from('next_week_votes')
-          .select('candidate_name')
-          .eq('user_id', user.id);
-
-        const votedNames = votes?.map(vote => vote.candidate_name) || [];
-
-        // Filter out voted candidates
-        const unvotedCandidatesFromDB = candidatesFromDB.filter(candidate => 
-          !votedNames.includes(candidate.name)
-        );
-        
-        // Show only real candidates, no fallback to test candidates
-        const finalCandidates = unvotedCandidatesFromDB;
-        
-        setFilteredCandidates(finalCandidates);
-        setRemainingCandidates(finalCandidates.length);
-        setCurrentIndex(0);
-        setHistory([]);
       } catch (error) {
         console.error('Error fetching participants and votes:', error);
         // Show empty list instead of fallback to test candidates
