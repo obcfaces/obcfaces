@@ -385,16 +385,36 @@ export const VotersModal = ({ isOpen, onClose, participantId, participantName }:
     }
   };
 
+  // Sort voters by latest rating date
+  const sortedVoters = [...voters].sort((a, b) => 
+    new Date(b.latest_rating.created_at).getTime() - new Date(a.latest_rating.created_at).getTime()
+  );
+
+  const formatRegistrationDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-GB', {
+      day: '2-digit',
+      month: '2-digit',
+      year: '2-digit'
+    });
+  };
+
+  const getWeekInterval = (voter: VoterData) => {
+    // Check if user participated in contest and get week interval
+    // For now, return a placeholder - this would need to be fetched from contest data
+    return voter.profile?.is_contest_participant ? "Week 40" : null;
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-5xl max-h-[90vh] flex flex-col p-0">
-        <DialogHeader className="px-6 pt-6 pb-2 flex-shrink-0">
+      <DialogContent className="max-w-full max-h-[90vh] flex flex-col p-0 md:max-w-5xl">
+        <DialogHeader className="px-4 md:px-6 pt-6 pb-2 flex-shrink-0">
           <DialogTitle className="text-xl">
             Voters for {participantName} ({voters.length} total)
           </DialogTitle>
         </DialogHeader>
         
-        <ScrollArea className="flex-1 overflow-auto px-6 pb-6" style={{ maxHeight: 'calc(90vh - 100px)', minHeight: '400px' }}>
+        <ScrollArea className="flex-1 overflow-auto px-4 md:px-6 pb-6" style={{ maxHeight: 'calc(90vh - 100px)', minHeight: '400px' }}>
           {loading ? (
             <div className="flex items-center justify-center py-8">
               <div className="text-muted-foreground">Loading voters...</div>
@@ -404,248 +424,155 @@ export const VotersModal = ({ isOpen, onClose, participantId, participantName }:
               <div className="text-muted-foreground">No votes yet for this participant</div>
             </div>
           ) : (
-            <div className="grid gap-4">
-              {voters.map((voter, index) => (
+            <div className="grid gap-3">
+              {sortedVoters.map((voter, index) => (
                 <Collapsible key={`${voter.user_id}-${index}`} open={expandedUser === voter.user_id}>
-                  <Card className="hover:shadow-md transition-shadow">
+                  <Card className="hover:shadow-md transition-shadow w-full">
                      <CollapsibleTrigger 
                        className="w-full text-left"
                        onClick={() => handleUserClick(voter.user_id)}
                      >
-                       <CardContent className="p-4 hover:bg-muted/50 transition-colors relative">
-                         {/* Contestant badge in top-left corner */}
-                         {voter.profile?.is_contest_participant && (
-                           <Badge variant="secondary" className="absolute top-2 left-2 text-xs">
-                             Contestant
+                       <CardContent className="p-3 hover:bg-muted/50 transition-colors relative">
+                         {/* Card number */}
+                         <div className="absolute top-2 left-2 z-10">
+                           <Badge variant="outline" className="text-xs font-bold">
+                             #{index + 1}
                            </Badge>
-                         )}
-                         <div className="flex items-start gap-4 mt-4">
-                           {/* Avatar with rating below */}
-                           <div className="flex flex-col items-center gap-2 flex-shrink-0">
-                             <Avatar className="h-16 w-16">
-                               <AvatarImage src={voter.profile?.avatar_url || ''} />
-                               <AvatarFallback className="text-lg">
-                                 {getDisplayName(voter).charAt(0)}
-                               </AvatarFallback>
-                             </Avatar>
-                              <Badge 
-                                className={`${getRatingColor(voter.latest_rating.rating)} text-white px-2 py-1 text-sm font-semibold`}
-                              >
-                                {voter.latest_rating.rating}/10
-                              </Badge>
+                         </div>
+
+                         <div className="flex items-start gap-3">
+                           {/* Avatar with registration date badge and week interval */}
+                           <div className="flex flex-col items-center gap-1 flex-shrink-0 relative">
+                             {/* Week interval above avatar */}
+                             {getWeekInterval(voter) && (
+                               <Badge variant="secondary" className="text-xs mb-1">
+                                 {getWeekInterval(voter)}
+                               </Badge>
+                             )}
+                             
+                             <div className="relative">
+                               <Avatar className="h-14 w-14">
+                                 <AvatarImage src={voter.profile?.avatar_url || ''} />
+                                 <AvatarFallback className="text-base">
+                                   {getDisplayName(voter).charAt(0)}
+                                 </AvatarFallback>
+                               </Avatar>
+                               
+                               {/* Registration date badge at bottom of avatar */}
+                               {voter.registration_date && (
+                                 <Badge 
+                                   variant="outline" 
+                                   className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 text-xs px-1 py-0 bg-background"
+                                 >
+                                   {formatRegistrationDate(voter.registration_date)}
+                                 </Badge>
+                               )}
+                             </div>
                            </div>
                           
                            {/* User Info */}
                            <div className="flex-1 min-w-0">
                              <div className="flex items-start justify-between gap-2">
                                <div className="flex-1">
-                                 <h3 className="font-semibold text-lg leading-tight">
-                                   {getDisplayName(voter)}
+                                 <h3 className="font-semibold text-base leading-tight">
+                                   {voter.profile?.age && `${voter.profile.age}, `}{getDisplayName(voter)}
                                  </h3>
                                  
-                                 {/* City and Country */}
-                                 <div className="text-sm text-muted-foreground mt-1">
+                                 {/* City and Country - reduced margin */}
+                                 <div className="text-sm text-muted-foreground mt-0.5">
                                    <span>{getLocationString(voter)}</span>
                                  </div>
                                  
-                                 {/* Basic Info with Age first */}
-                                 <div className="flex items-center gap-3 text-sm text-muted-foreground mt-1">
-                                   {voter.profile?.age && (
-                                     <>
-                                       <span>{voter.profile.age} years old</span>
-                                       {voter.profile?.gender && <span>•</span>}
-                                     </>
-                                   )}
-                                   {voter.profile?.gender && (
-                                     <span>{voter.profile.gender}</span>
-                                   )}
-                                 </div>
-                                
-                                {/* Bio */}
-                                {voter.profile?.bio && (
-                                  <p className="text-sm text-muted-foreground mt-2 line-clamp-2">
-                                    {voter.profile.bio}
-                                  </p>
-                                )}
-                                
-                                {/* Email */}
-                                {voter.email && (
-                                  <p className="text-sm text-muted-foreground mt-2 break-all">
-                                    📧 {voter.email}
-                                  </p>
-                                )}
-                                
-                                {/* Registration Date */}
-                                {voter.registration_date && (
-                                  <p className="text-xs text-muted-foreground mt-1">
-                                    Registered: {new Date(voter.registration_date).toLocaleDateString()}
-                                  </p>
-                                )}
-                                
-                                 {/* Latest Vote Date */}
-                                 <p className="text-xs text-muted-foreground mt-1">
-                                   Latest vote: {formatRatingTime(voter.latest_rating.created_at)}
-                                 </p>
-                                 
-                                  {/* Complete rating history for this user */}
-                                  {voter.rating_history && voter.rating_history.length > 1 && (
-                                    <div className="mt-2 space-y-1">
-                                      <p className="text-xs font-medium text-muted-foreground">
-                                        Complete rating history ({voter.rating_history.length} changes):
-                                      </p>
-                                      <div className="flex items-start gap-2 max-h-32 overflow-x-auto">
-                                        {voter.rating_history.slice().reverse().map((historyItem, idx) => {
-                                          const isUpdate = historyItem.action_type === 'update' && historyItem.old_rating;
-                                          
-                                          if (isUpdate) {
-                                            // Show both old and new rating for updates
-                                            return (
-                                              <>
-                                                <div className="flex flex-col items-center flex-shrink-0">
-                                                  <div className="w-6 h-6 rounded-full bg-orange-500 text-white flex items-center justify-center text-xs font-semibold">
-                                                    {historyItem.old_rating}
-                                                  </div>
-                                                  <span 
-                                                    className="text-[10px] text-muted-foreground mt-1 cursor-help whitespace-nowrap"
-                                                    title={new Date(historyItem.changed_at).toLocaleString('en-US', {
-                                                      hour: '2-digit',
-                                                      minute: '2-digit',
-                                                      day: 'numeric',
-                                                      month: 'short',
-                                                      year: 'numeric'
-                                                    })}
-                                                  >
-                                                    {new Date(historyItem.changed_at).toLocaleDateString('en-US', {
-                                                      day: 'numeric',
-                                                      month: 'short'
-                                                    })}
-                                                  </span>
-                                                </div>
-                                                <span className="text-muted-foreground self-start mt-3">→</span>
-                                                <div className="flex flex-col items-center flex-shrink-0">
-                                                  <div className="w-6 h-6 rounded-full bg-blue-500 text-white flex items-center justify-center text-xs font-semibold">
-                                                    {historyItem.new_rating}
-                                                  </div>
-                                                  <span 
-                                                    className="text-[10px] text-muted-foreground mt-1 cursor-help whitespace-nowrap"
-                                                    title={new Date(historyItem.changed_at).toLocaleString('en-US', {
-                                                      hour: '2-digit',
-                                                      minute: '2-digit',
-                                                      day: 'numeric',
-                                                      month: 'short',
-                                                      year: 'numeric'
-                                                    })}
-                                                  >
-                                                    {new Date(historyItem.changed_at).toLocaleDateString('en-US', {
-                                                      day: 'numeric',
-                                                      month: 'short'
-                                                    })}
-                                                  </span>
-                                                </div>
-                                              </>
-                                            );
-                                          } else {
-                                            // Show single rating for existing/insert/delete actions
-                                            return (
-                                              <div key={idx} className="flex flex-col items-center flex-shrink-0">
-                                                <div className={`w-6 h-6 rounded-full text-white flex items-center justify-center text-xs font-semibold ${
-                                                  historyItem.action_type === 'existing' ? 'bg-gray-500' : 'bg-green-500'
-                                                }`}>
-                                                  {historyItem.new_rating || historyItem.old_rating}
-                                                </div>
-                                                <span 
-                                                  className="text-[10px] text-muted-foreground mt-1 cursor-help whitespace-nowrap"
-                                                  title={new Date(historyItem.changed_at).toLocaleString('en-US', {
-                                                    hour: '2-digit',
-                                                    minute: '2-digit',
-                                                    day: 'numeric',
-                                                    month: 'short',
-                                                    year: 'numeric'
-                                                  })}
-                                                >
-                                                  {new Date(historyItem.changed_at).toLocaleDateString('en-US', {
-                                                    day: 'numeric',
-                                                    month: 'short'
-                                                  })}
-                                                </span>
-                                              </div>
-                                            );
-                                          }
-                                        })}
-                                      </div>
-                                    </div>
-                                  )}
-                              </div>
-                              
-                               {/* Badges and expand indicator */}
-                               <div className="flex flex-col items-end gap-2">
-                                 <div className="flex items-center gap-2">
-                                   {expandedUser === voter.user_id ? (
-                                     <ChevronUp className="w-4 h-4 text-muted-foreground" />
-                                   ) : (
-                                     <ChevronDown className="w-4 h-4 text-muted-foreground" />
-                                   )}
-                                 </div>
+                                 {/* Email - reduced margin */}
+                                 {voter.email && (
+                                   <div className="text-sm text-muted-foreground mt-0.5 flex items-center gap-1">
+                                     <span>📧</span>
+                                     <span className="truncate">{voter.email}</span>
+                                   </div>
+                                 )}
                                </div>
-                            </div>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </CollapsibleTrigger>
-                    
-                    {/* User Activity History */}
-                    <CollapsibleContent>
-                      <CardContent className="px-4 pb-4 pt-0 border-t">
-                        <h4 className="font-medium text-sm mb-3 text-muted-foreground">
-                          Rating & Like History
-                        </h4>
-                        
-                        {activityLoading ? (
-                          <div className="flex items-center justify-center py-4">
-                            <div className="text-sm text-muted-foreground">Loading activity...</div>
-                          </div>
-                        ) : userActivity.length === 0 ? (
-                          <div className="text-sm text-muted-foreground py-2">
-                            No activity found for other participants
-                          </div>
-                        ) : (
-                          <div className="space-y-2 max-h-40 overflow-y-auto">
-                            {userActivity.map((activity, actIndex) => (
-                              <div key={`${activity.target_user_id}-${actIndex}`} className="flex items-center gap-3 p-2 bg-muted/30 rounded-lg">
-                                <Avatar className="h-8 w-8">
-                                  <AvatarImage src={activity.target_avatar || ''} />
-                                  <AvatarFallback className="text-xs">
-                                    {activity.target_name.charAt(0)}
-                                  </AvatarFallback>
-                                </Avatar>
-                                
-                                <div className="flex-1 min-w-0">
-                                  <p className="text-sm font-medium truncate">
-                                    {activity.target_name}
-                                  </p>
-                                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                                    {activity.rating && (
-                                      <span className="flex items-center gap-1">
-                                        <Star className="w-3 h-3 fill-current text-yellow-500" />
-                                        {activity.rating}/10
-                                      </span>
-                                    )}
-                                    {activity.like_count > 0 && (
-                                      <span className="flex items-center gap-1">
-                                        <Heart className="w-3 h-3 fill-current text-red-500" />
-                                        {activity.like_count}
-                                      </span>
-                                    )}
-                                    <span>•</span>
-                                    <span>{new Date(activity.last_activity).toLocaleDateString()}</span>
-                                  </div>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                      </CardContent>
-                    </CollapsibleContent>
+                             </div>
+
+                             {/* Full-width rating circles */}
+                             <div className="flex items-center gap-1 mt-2 w-full">
+                               {Array.from({ length: 10 }, (_, i) => (
+                                 <div
+                                   key={i}
+                                   className={`h-3 w-3 rounded-full flex-1 max-w-[20px] ${
+                                     i < voter.latest_rating.rating
+                                       ? getRatingColor(voter.latest_rating.rating)
+                                       : 'bg-gray-200'
+                                   }`}
+                                 />
+                               ))}
+                               <span className="ml-2 text-sm font-medium">
+                                 {voter.latest_rating.rating}/10
+                               </span>
+                             </div>
+                           </div>
+                         </div>
+                       </CardContent>
+                     </CollapsibleTrigger>
+
+                     <CollapsibleContent className="data-[state=open]:animate-collapsible-down data-[state=closed]:animate-collapsible-up">
+                       <CardContent className="pt-0 px-4 pb-4">
+                         <div className="border-t pt-4">
+                           <div className="flex items-center gap-2 mb-3">
+                             <span className="text-sm font-medium">User Activity</span>
+                             {expandedUser === voter.user_id && (
+                               <ChevronUp className="h-4 w-4" />
+                             )}
+                           </div>
+                           
+                           {activityLoading ? (
+                             <div className="text-sm text-muted-foreground">Loading activity...</div>
+                           ) : userActivity.length > 0 ? (
+                             <div className="space-y-2">
+                               {userActivity.slice(0, 10).map((activity, idx) => (
+                                 <div key={idx} className="flex items-center gap-2 p-2 bg-muted/50 rounded-lg">
+                                   <Avatar className="h-8 w-8 flex-shrink-0">
+                                     <AvatarImage src={activity.target_avatar || ''} />
+                                     <AvatarFallback className="text-xs">
+                                       {activity.target_name.charAt(0)}
+                                     </AvatarFallback>
+                                   </Avatar>
+                                   <div className="flex-1 min-w-0">
+                                     <div className="flex items-center gap-2">
+                                       <span className="text-sm font-medium truncate">
+                                         {activity.target_name}
+                                       </span>
+                                       <div className="flex items-center gap-1 flex-shrink-0">
+                                         {activity.rating && (
+                                           <Badge variant="outline" className="text-xs">
+                                             ⭐ {activity.rating}/10
+                                           </Badge>
+                                         )}
+                                         {activity.like_count > 0 && (
+                                           <Badge variant="outline" className="text-xs">
+                                             <Heart className="h-3 w-3 mr-1" />
+                                             {activity.like_count}
+                                           </Badge>
+                                         )}
+                                       </div>
+                                     </div>
+                                     <div className="text-xs text-muted-foreground">
+                                       {formatRatingTime(activity.last_activity)}
+                                     </div>
+                                   </div>
+                                 </div>
+                               ))}
+                               {userActivity.length > 10 && (
+                                 <div className="text-xs text-muted-foreground text-center">
+                                   ... and {userActivity.length - 10} more activities
+                                 </div>
+                               )}
+                             </div>
+                           ) : (
+                             <div className="text-sm text-muted-foreground">No activity found</div>
+                           )}
+                         </div>
+                       </CardContent>
+                     </CollapsibleContent>
                   </Card>
                 </Collapsible>
               ))}
