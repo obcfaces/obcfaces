@@ -433,14 +433,14 @@ export const VotersModal = ({ isOpen, onClose, participantId, participantName }:
                        onClick={() => handleUserClick(voter.user_id)}
                      >
                        <CardContent className="p-3 hover:bg-muted/50 transition-colors relative">
-                         {/* Card number */}
-                         <div className="absolute top-2 left-2 z-10">
-                           <Badge variant="outline" className="text-xs font-bold">
+                         {/* Card number positioned at very top-left corner */}
+                         <div className="absolute top-0 left-0 z-10">
+                           <Badge variant="outline" className="text-xs font-bold rounded-none rounded-br-md">
                              #{index + 1}
                            </Badge>
                          </div>
 
-                         <div className="flex items-start gap-3">
+                         <div className="flex items-start gap-3 mt-4">
                            {/* Avatar with registration date badge and week interval */}
                            <div className="flex flex-col items-center gap-1 flex-shrink-0 relative">
                              {/* Week interval above avatar */}
@@ -493,21 +493,35 @@ export const VotersModal = ({ isOpen, onClose, participantId, participantName }:
                                </div>
                              </div>
 
-                             {/* Full-width rating circles */}
+                             {/* Rating change circles */}
                              <div className="flex items-center gap-1 mt-2 w-full">
-                               {Array.from({ length: 10 }, (_, i) => (
-                                 <div
-                                   key={i}
-                                   className={`h-3 w-3 rounded-full flex-1 max-w-[20px] ${
-                                     i < voter.latest_rating.rating
-                                       ? getRatingColor(voter.latest_rating.rating)
-                                       : 'bg-gray-200'
-                                   }`}
-                                 />
-                               ))}
-                               <span className="ml-2 text-sm font-medium">
-                                 {voter.latest_rating.rating}/10
-                               </span>
+                               {voter.rating_history && voter.rating_history.length > 0 ? (
+                                 <>
+                                   {voter.rating_history.slice().reverse().slice(0, 10).map((historyItem, i) => {
+                                     const rating = historyItem.new_rating || historyItem.old_rating || 0;
+                                     return (
+                                       <div
+                                         key={i}
+                                         className={`h-3 w-3 rounded-full flex-1 max-w-[20px] ${getRatingColor(rating)}`}
+                                         title={`Rating: ${rating}/10 on ${new Date(historyItem.changed_at).toLocaleDateString()}`}
+                                       />
+                                     );
+                                   })}
+                                   <span className="ml-2 text-sm font-medium">
+                                     {voter.rating_history.length} changes
+                                   </span>
+                                 </>
+                               ) : (
+                                 <>
+                                   <div
+                                     className={`h-3 w-3 rounded-full flex-1 max-w-[20px] ${getRatingColor(voter.latest_rating.rating)}`}
+                                     title={`Rating: ${voter.latest_rating.rating}/10`}
+                                   />
+                                   <span className="ml-2 text-sm font-medium">
+                                     {voter.latest_rating.rating}/10
+                                   </span>
+                                 </>
+                               )}
                              </div>
                            </div>
                          </div>
