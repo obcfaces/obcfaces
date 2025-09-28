@@ -24,6 +24,7 @@ import cityTimezones from 'city-timezones';
 import { AdminPhotoModal } from '@/components/admin-photo-modal';
 import { RejectReasonModal, REJECTION_REASONS } from '@/components/reject-reason-modal';
 import { VotersModal } from '@/components/voters-modal';
+import { NextWeekVotersModal } from '@/components/next-week-voters-modal';
 import { ContestParticipationModal } from '@/components/contest-participation-modal';
 import { ApplicationEditHistory } from '@/components/ApplicationEditHistory';
 import { ExpandableApplicationHistory } from '@/components/ExpandableApplicationHistory';
@@ -176,6 +177,8 @@ const Admin = () => {
   const [applicationToReject, setApplicationToReject] = useState<{ id: string; name: string } | null>(null);
   const [votersModalOpen, setVotersModalOpen] = useState(false);
   const [selectedParticipantForVoters, setSelectedParticipantForVoters] = useState<{ id: string; name: string } | null>(null);
+  const [nextWeekVotersModalOpen, setNextWeekVotersModalOpen] = useState(false);
+  const [selectedParticipantForNextWeekVoters, setSelectedParticipantForNextWeekVoters] = useState<string>('');
   const [countryFilter, setCountryFilter] = useState<string>('all');
   const [genderFilter, setGenderFilter] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -2083,30 +2086,33 @@ const Admin = () => {
                               </div>
                             </div>
                             
-                             {/* Bottom row - Rating, votes, like/dislike counts */}
-                             <div className="flex items-center justify-between mt-auto pt-2">
-                               <div className="text-xs text-muted-foreground flex items-center gap-3">
-                                 <span>
-                                   Rating: 
-                                   <span 
-                                     className="ml-1 cursor-pointer hover:underline text-primary"
-                                     onClick={() => {
-                                       setSelectedParticipantForVoters({
-                                         id: participant.participant_id,
-                                         name: participantProfile?.display_name || `${participantProfile?.first_name || appData.first_name} ${participantProfile?.last_name || appData.last_name}` || 'Unnamed'
-                                       });
-                                       setVotersModalOpen(true);
-                                     }}
-                                   >
-                                     {`${(participant.average_rating || 0).toFixed(1)} (${participant.total_votes || 0})`}
-                                   </span>
-                                 </span>
-                                 <span className="flex items-center gap-2">
-                                   <span className="text-green-600">👍 {participant.like_count || 0}</span>
-                                   <span className="text-red-600">👎 {participant.dislike_count || 0}</span>
-                                 </span>
-                               </div>
-                             </div>
+                              {/* Bottom row - Like/dislike counts only */}
+                              <div className="flex items-center justify-between mt-auto pt-2">
+                                <div className="text-xs text-muted-foreground flex items-center gap-3">
+                                  <button
+                                    className="flex items-center gap-1 text-green-600 hover:underline cursor-pointer"
+                                    onClick={() => {
+                                      const participantName = participantProfile?.display_name || `${participantProfile?.first_name || appData.first_name} ${participantProfile?.last_name || appData.last_name}` || 'Unnamed';
+                                      setSelectedParticipantForNextWeekVoters(participantName);
+                                      setNextWeekVotersModalOpen(true);
+                                    }}
+                                  >
+                                    <span>👍</span>
+                                    <span className="font-medium">{participant.like_count || 0}</span>
+                                  </button>
+                                  <button
+                                    className="flex items-center gap-1 text-red-600 hover:underline cursor-pointer"
+                                    onClick={() => {
+                                      const participantName = participantProfile?.display_name || `${participantProfile?.first_name || appData.first_name} ${participantProfile?.last_name || appData.last_name}` || 'Unnamed';
+                                      setSelectedParticipantForNextWeekVoters(participantName);
+                                      setNextWeekVotersModalOpen(true);
+                                    }}
+                                  >
+                                    <span>👎</span>
+                                    <span className="font-medium">{participant.dislike_count || 0}</span>
+                                  </button>
+                                </div>
+                              </div>
                           </div>
                         </div>
                         
@@ -2159,23 +2165,31 @@ const Admin = () => {
                               <div>{participantProfile?.age || appData.age}л, {participantProfile?.city || appData.city}</div>
                               <div>{participantProfile?.height_cm || appData.height_cm}см, {participantProfile?.weight_kg || appData.weight_kg}кг</div>
                             </div>
-                             <div className="flex items-center justify-between pt-1">
-                               <div className="text-muted-foreground flex items-center gap-2">
-                                 <span 
-                                   className="cursor-pointer hover:underline text-primary"
-                                   onClick={() => {
-                                     setSelectedParticipantForVoters({
-                                       id: participant.participant_id,
-                                       name: participantProfile?.display_name || `${participantProfile?.first_name || appData.first_name} ${participantProfile?.last_name || appData.last_name}` || 'Unnamed'
-                                     });
-                                     setVotersModalOpen(true);
-                                   }}
-                                 >
-                                   {`${(participant.average_rating || 0).toFixed(1)} (${participant.total_votes || 0})`}
-                                 </span>
-                                 <span className="text-green-600">👍{participant.like_count || 0}</span>
-                                 <span className="text-red-600">👎{participant.dislike_count || 0}</span>
-                               </div>
+                              <div className="flex items-center justify-between pt-1">
+                                <div className="text-muted-foreground flex items-center gap-2">
+                                  <button
+                                    className="flex items-center gap-1 text-green-600 hover:underline cursor-pointer"
+                                    onClick={() => {
+                                      const participantName = participantProfile?.display_name || `${participantProfile?.first_name || appData.first_name} ${participantProfile?.last_name || appData.last_name}` || 'Unnamed';
+                                      setSelectedParticipantForNextWeekVoters(participantName);
+                                      setNextWeekVotersModalOpen(true);
+                                    }}
+                                  >
+                                    <span>👍</span>
+                                    <span className="font-medium">{participant.like_count || 0}</span>
+                                  </button>
+                                  <button
+                                    className="flex items-center gap-1 text-red-600 hover:underline cursor-pointer"
+                                    onClick={() => {
+                                      const participantName = participantProfile?.display_name || `${participantProfile?.first_name || appData.first_name} ${participantProfile?.last_name || appData.last_name}` || 'Unnamed';
+                                      setSelectedParticipantForNextWeekVoters(participantName);
+                                      setNextWeekVotersModalOpen(true);
+                                    }}
+                                  >
+                                    <span>👎</span>
+                                    <span className="font-medium">{participant.dislike_count || 0}</span>
+                                  </button>
+                                </div>
                               <Select 
                                 value={participant.admin_status || 'next week on site'} 
                                 onValueChange={async (value) => {
@@ -4503,26 +4517,26 @@ const Admin = () => {
              } else {
                // Regular application rejection
                await reviewApplication(applicationToReject.id, 'rejected', { reasonTypes, notes });
-             }
-             
-             setApplicationToReject(null);
-             setRejectModalOpen(false);
-           }
-         }}
-      />
+              }
+              
+              setApplicationToReject(null);
+              setRejectModalOpen(false);
+            }
+          }}
+       />
 
-      {/* Voters Modal */}
-      <VotersModal
-        isOpen={votersModalOpen}
-        onClose={() => setVotersModalOpen(false)}
-        participantId={selectedParticipantForVoters?.id || ''}
-        participantName={selectedParticipantForVoters?.name || ''}
-      />
+       {/* Voters Modal */}
+       <VotersModal
+         isOpen={votersModalOpen}
+         onClose={() => setVotersModalOpen(false)}
+         participantId={selectedParticipantForVoters?.id || ''}
+         participantName={selectedParticipantForVoters?.name || ''}
+       />
 
-      {/* Contest Participation Modal for editing */}
-      <ContestParticipationModal 
-        isOpen={showParticipationModal}
-        onOpenChange={(open) => {
+       {/* Contest Participation Modal for editing */}
+       <ContestParticipationModal 
+         isOpen={showParticipationModal}
+         onOpenChange={(open) => {
           setShowParticipationModal(open);
           if (!open) {
             setEditingParticipantData(null);
@@ -4601,8 +4615,8 @@ const Admin = () => {
                           }
                         }))}
                         className="mt-1"
-                      />
-                    </div>
+                       />
+                     </div>
                     <div>
                       <Label htmlFor="edit-last-name">Last Name *</Label>
                       <Input
