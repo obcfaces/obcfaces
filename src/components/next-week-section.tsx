@@ -88,9 +88,10 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
   const [history, setHistory] = useState<number[]>([]);
   const [user, setUser] = useState<any>(null);
   const [showLoginModal, setShowLoginModal] = useState(false);
-  const [filteredCandidates, setFilteredCandidates] = useState(candidates);
+  const [filteredCandidates, setFilteredCandidates] = useState<any[]>([]);
   const [remainingCandidates, setRemainingCandidates] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [isDataReady, setIsDataReady] = useState(false);
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
@@ -108,6 +109,7 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
   useEffect(() => {
     const filterCandidates = async () => {
       setIsLoading(true);
+      setIsDataReady(false);
       
       try {
         // Get participants with "next week" or "next week on site" admin_status
@@ -166,6 +168,7 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
       }
       
       setIsLoading(false);
+      setIsDataReady(true);
     };
 
     filterCandidates();
@@ -285,7 +288,7 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
             <div className="h-4 bg-muted rounded w-48 mx-auto"></div>
           </div>
         </div>
-      ) : currentIndex < filteredCandidates.length ? (
+      ) : isDataReady && currentIndex < filteredCandidates.length ? (
         <div className="flex flex-col items-center">
           <div className="w-full px-0 sm:px-6 max-w-full overflow-hidden">
             <ContestantCard
