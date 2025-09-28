@@ -1077,6 +1077,10 @@ const Admin = () => {
       }
 
       console.log('Fetched next week participants:', participants?.length || 0);
+      if (participants && participants.length > 0) {
+        console.log('First participant structure:', participants[0]);
+        console.log('participant_id field:', participants[0]?.participant_id);
+      }
       setNextWeekParticipants(participants || []);
     } catch (error) {
       console.error('Error in fetchNextWeekParticipants:', error);
@@ -2010,22 +2014,16 @@ const Admin = () => {
                                      value={participant.admin_status || 'next week'}
                                      onValueChange={async (value) => {
                                       try {
-                                         console.log('Updating participant:', participant);
-                                         console.log('participant.participant_id:', participant.participant_id);
-                                         console.log('participant.id:', participant.id);
-                                         console.log('participant.user_id:', participant.user_id);
+                                         console.log('Updating participant status for participant_id:', participant.participant_id);
                                          
-                                         const participantId = participant.participant_id || participant.id;
-                                         console.log('Using participantId:', participantId);
-                                         
-                                         if (!participantId) {
-                                           throw new Error('No valid participant ID found');
+                                         if (!participant.participant_id) {
+                                           throw new Error('No participant_id found in participant object');
                                          }
                                          
                                          const { error } = await supabase
                                            .from('weekly_contest_participants')
                                            .update({ admin_status: value } as any)
-                                           .eq('id', participantId);
+                                           .eq('id', participant.participant_id);
                                       
                                       if (error) {
                                         console.error('Error updating participant status:', error);
