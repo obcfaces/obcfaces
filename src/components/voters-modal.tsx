@@ -404,10 +404,10 @@ export const VotersModal = ({ isOpen, onClose, participantId, participantName }:
               <div className="text-muted-foreground">No votes yet for this participant</div>
             </div>
           ) : (
-            <div className="grid gap-4">
+            <div className="space-y-0 md:space-y-4 -mx-4 md:mx-0">
               {voters.map((voter, index) => (
                 <Collapsible key={`${voter.user_id}-${index}`} open={expandedUser === voter.user_id}>
-                  <Card className="hover:shadow-md transition-shadow relative mx-0 md:mx-auto">
+                  <Card className="hover:shadow-md transition-shadow relative rounded-none md:rounded-lg border-x-0 md:border-x border-t-0 first:border-t md:border-t border-b md:border-b">
                      {/* Card number - only on desktop */}
                      <div className="hidden md:block absolute top-0 left-0 bg-primary text-primary-foreground text-xs px-2 py-1 font-semibold">
                        {index + 1}
