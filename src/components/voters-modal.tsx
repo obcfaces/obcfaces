@@ -416,7 +416,7 @@ export const VotersModal = ({ isOpen, onClose, participantId, participantName }:
                        className="w-full text-left"
                        onClick={() => handleUserClick(voter.user_id)}
                      >
-                       <CardContent className="p-4 hover:bg-muted/50 transition-colors relative">
+                       <CardContent className="p-6 hover:bg-muted/50 transition-colors relative">
                          <div className="flex items-start gap-4">
                            {/* Avatar with week interval on top and registration date overlay */}
                            <div className="flex flex-col items-center gap-2 flex-shrink-0 relative">
