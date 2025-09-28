@@ -4965,6 +4965,13 @@ const Admin = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Next Week Voters Modal */}
+      <NextWeekVotersModal
+        isOpen={nextWeekVotersModalOpen}
+        onClose={() => setNextWeekVotersModalOpen(false)}
+        participantName={selectedParticipantForNextWeekVoters}
+      />
     </>
   );
 };
