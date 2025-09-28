@@ -232,7 +232,8 @@ const Admin = () => {
     fetchDailyApplicationStats();
     fetchDailyRegistrationStats();
     fetchNextWeekParticipants(); // Добавляем загрузку next week участников
-    fetchNextWeekDailyStats(); // Добавляем загрузку статистики next week
+    fetchNextWeekDailyStats();
+    
     
     // Set up real-time subscriptions for automatic updates
     const contestAppsChannel = supabase
@@ -283,6 +284,7 @@ const Admin = () => {
           console.log('Ratings changed:', payload);
           // Refresh daily voting stats
           fetchDailyStats();
+          fetchNextWeekDailyStats();
         }
       )
       .subscribe();
@@ -1097,6 +1099,7 @@ const Admin = () => {
       console.error('Error in fetchNextWeekParticipants:', error);
     }
   };
+
 
   const fetchNextWeekDailyStats = async () => {
     try {
