@@ -77,62 +77,54 @@ export function NextWeekVotersModal({ isOpen, onClose, participantName }: NextWe
     });
   };
 
-  const VoterCard = ({ voter }: { voter: Voter }) => (
-    <Card key={voter.user_id} className="overflow-hidden">
+  const VoterCard = ({ voter, index }: { voter: Voter; index: number }) => (
+    <Card className="overflow-hidden relative w-full">
+      {/* Order number in top-left corner */}
+      <div className="absolute top-0 left-0 bg-primary text-primary-foreground text-xs font-bold px-2 py-1 rounded-br-md z-10">
+        #{index + 1}
+      </div>
+      
       <CardContent className="p-0">
-        <div className="flex">
-          {/* Photos section */}
-          <div className="flex gap-px w-[20ch] flex-shrink-0">
-            {voter.photo_1_url && (
-              <div className="w-1/2">
-                <img 
-                  src={voter.photo_1_url} 
-                  alt="Portrait" 
-                  className="w-full h-[120px] object-cover cursor-pointer hover:opacity-90 transition-opacity"
-                  onClick={() => openPhotoModal([voter.photo_1_url, voter.photo_2_url].filter(Boolean), 0, voter.display_name || `${voter.first_name} ${voter.last_name}`)}
-                />
-              </div>
-            )}
-            {voter.photo_2_url && (
-              <div className="w-1/2 relative">
-                <img 
-                  src={voter.photo_2_url} 
-                  alt="Full length" 
-                  className="w-full h-[120px] object-cover cursor-pointer hover:opacity-90 transition-opacity"
-                  onClick={() => openPhotoModal([voter.photo_1_url, voter.photo_2_url].filter(Boolean), 1, voter.display_name || `${voter.first_name} ${voter.last_name}`)}
-                />
-                <div className="absolute top-2 right-2">
-                  <Avatar className="h-6 w-6 flex-shrink-0 border-2 border-white shadow-sm">
-                    <AvatarImage src={voter.avatar_url || voter.photo_1_url || ''} />
-                    <AvatarFallback className="text-xs">
-                      {voter.first_name?.charAt(0) || voter.display_name?.charAt(0) || 'U'}
-                    </AvatarFallback>
-                  </Avatar>
-                </div>
-              </div>
-            )}
+        <div className="flex w-full">
+          {/* Avatar section */}
+          <div className="relative flex-shrink-0">
+            <Avatar className="h-16 w-16 m-3">
+              <AvatarImage src={voter.avatar_url || voter.photo_1_url || ''} />
+              <AvatarFallback className="text-base">
+                {voter.first_name?.charAt(0) || voter.display_name?.charAt(0) || 'U'}
+              </AvatarFallback>
+            </Avatar>
+            
+            {/* Registration date badge at bottom of avatar */}
+            <Badge 
+              variant="outline" 
+              className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 text-xs px-1 py-0 bg-background"
+            >
+              {new Date(voter.created_at).toLocaleDateString('ru-RU', { 
+                day: '2-digit', 
+                month: '2-digit', 
+                year: '2-digit' 
+              })}
+            </Badge>
           </div>
           
           {/* Content section */}
-          <div className="flex-1 p-3 flex flex-col justify-between">
-            <div>
-              <h3 className="font-semibold text-sm truncate">
-                {voter.display_name || `${voter.first_name} ${voter.last_name}` || 'Unnamed User'}
+          <div className="flex-1 p-3 pt-4">
+            <div className="space-y-1">
+              <h3 className="font-semibold text-base leading-tight">
+                {voter.age && `${voter.age}, `}{voter.display_name || `${voter.first_name} ${voter.last_name}` || 'Unnamed User'}
               </h3>
-              <div className="text-xs text-muted-foreground space-y-0.5 mt-1">
-                <div className="flex items-center gap-2">
-                  <span>{voter.age || 'Unknown'} лет</span>
-                  <span>•</span>
-                  <span>{voter.city || 'Unknown'}, {voter.country || 'Unknown'}</span>
-                </div>
-                <div className="flex items-center gap-2 mt-2">
-                  <Badge variant={voter.vote_type === 'like' ? 'default' : 'destructive'} className="text-xs">
-                    {voter.vote_type === 'like' ? '👍 Like' : '👎 Dislike'}
-                  </Badge>
-                  <span className="text-xs text-muted-foreground">
-                    {new Date(voter.created_at).toLocaleDateString()}
-                  </span>
-                </div>
+              
+              {/* City and Country */}
+              <div className="text-sm text-muted-foreground">
+                <span>{voter.city || 'Unknown'}, {voter.country || 'Unknown'}</span>
+              </div>
+              
+              {/* Vote type badge */}
+              <div className="flex items-center gap-2 mt-2">
+                <Badge variant={voter.vote_type === 'like' ? 'default' : 'destructive'} className="text-xs">
+                  {voter.vote_type === 'like' ? '👍 Like' : '👎 Dislike'}
+                </Badge>
               </div>
             </div>
           </div>
@@ -171,8 +163,8 @@ export function NextWeekVotersModal({ isOpen, onClose, participantName }: NextWe
                   </div>
                 ) : (
                   <div className="grid gap-4">
-                    {likeVoters.map(voter => (
-                      <VoterCard key={voter.user_id} voter={voter} />
+                    {likeVoters.map((voter, index) => (
+                      <VoterCard key={voter.user_id} voter={voter} index={index} />
                     ))}
                   </div>
                 )}
@@ -185,8 +177,8 @@ export function NextWeekVotersModal({ isOpen, onClose, participantName }: NextWe
                   </div>
                 ) : (
                   <div className="grid gap-4">
-                    {dislikeVoters.map(voter => (
-                      <VoterCard key={voter.user_id} voter={voter} />
+                    {dislikeVoters.map((voter, index) => (
+                      <VoterCard key={voter.user_id} voter={voter} index={index} />
                     ))}
                   </div>
                 )}
