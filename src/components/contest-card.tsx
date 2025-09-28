@@ -6,6 +6,7 @@ import winnerPaymentImage from "@/assets/winner-payment.jpg";
 import winnerVideo from "@/assets/winner-video.mp4";
 import winnerPaymentImageApril from "@/assets/winner-payment-april.jpg";
 import winnerVideoApril from "@/assets/winner-video-april.mp4";
+import jasminPaymentProof from "@/assets/jasmin-payment-proof.png";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
