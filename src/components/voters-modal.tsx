@@ -407,9 +407,9 @@ export const VotersModal = ({ isOpen, onClose, participantId, participantName }:
             <div className="grid gap-4">
               {voters.map((voter, index) => (
                 <Collapsible key={`${voter.user_id}-${index}`} open={expandedUser === voter.user_id}>
-                  <Card className="hover:shadow-md transition-shadow relative">
-                     {/* Card number - responsive positioning */}
-                     <div className="absolute top-0 right-0 md:left-0 md:right-auto bg-primary text-primary-foreground text-xs px-2 py-1 font-semibold">
+                  <Card className="hover:shadow-md transition-shadow relative mx-0 md:mx-auto">
+                     {/* Card number - only on desktop */}
+                     <div className="hidden md:block absolute top-0 left-0 bg-primary text-primary-foreground text-xs px-2 py-1 font-semibold">
                        {index + 1}
                      </div>
                      <CollapsibleTrigger 
@@ -423,7 +423,7 @@ export const VotersModal = ({ isOpen, onClose, participantId, participantName }:
                              <div className="relative">
                                {/* Week interval badge on top of avatar */}
                                {voter.profile?.is_contest_participant && (
-                                 <Badge variant="secondary" className="absolute -top-2 left-1/2 transform -translate-x-1/2 text-xs z-10">
+                                 <Badge variant="secondary" className="absolute -top-2 left-1/2 transform -translate-x-1/2 text-xs z-10 whitespace-nowrap">
                                    Week 42-43
                                  </Badge>
                                )}
