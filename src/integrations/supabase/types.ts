@@ -1382,6 +1382,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      update_participant_rating_stats: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       user_in_conversation: {
         Args: { conversation_id: string; user_id: string }
         Returns: boolean
