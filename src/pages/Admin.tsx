@@ -363,7 +363,25 @@ const Admin = () => {
           })
         );
 
-        setFilteredWeeklyParticipants(participantsWithRatings);
+        // Sort participants by rating (highest to lowest) like on the main site
+        const sortedParticipants = participantsWithRatings.sort((a, b) => {
+          // Sort by final_rank first (winners at top)
+          if (a.final_rank && !b.final_rank) return -1;
+          if (!a.final_rank && b.final_rank) return 1;
+          if (a.final_rank && b.final_rank) return a.final_rank - b.final_rank;
+          
+          // Then by average_rating (highest first)
+          const ratingA = Number(a.average_rating) || 0;
+          const ratingB = Number(b.average_rating) || 0;
+          if (ratingB !== ratingA) return ratingB - ratingA;
+          
+          // Finally by total_votes (highest first)
+          const votesA = Number(a.total_votes) || 0;
+          const votesB = Number(b.total_votes) || 0;
+          return votesB - votesA;
+        });
+
+        setFilteredWeeklyParticipants(sortedParticipants);
       } else if (weeklyContestFilter === 'reject') {
         // Get rejected applications that should not appear in other sections
         const rejectedApps = contestApplications
@@ -446,8 +464,26 @@ const Admin = () => {
           arr.findIndex(p => p.user_id === participant.user_id) === index
         );
         
-        console.log('Unique participants count:', uniqueParticipants.length);
-        setFilteredWeeklyParticipants(uniqueParticipants);
+        // Sort participants by rating (highest to lowest) like on the main site
+        const sortedParticipants = uniqueParticipants.sort((a, b) => {
+          // Sort by final_rank first (winners at top)
+          if (a.final_rank && !b.final_rank) return -1;
+          if (!a.final_rank && b.final_rank) return 1;
+          if (a.final_rank && b.final_rank) return a.final_rank - b.final_rank;
+          
+          // Then by average_rating (highest first)
+          const ratingA = Number(a.average_rating) || 0;
+          const ratingB = Number(b.average_rating) || 0;
+          if (ratingB !== ratingA) return ratingB - ratingA;
+          
+          // Finally by total_votes (highest first)
+          const votesA = Number(a.total_votes) || 0;
+          const votesB = Number(b.total_votes) || 0;
+          return votesB - votesA;
+        });
+        
+        console.log('Unique participants count:', sortedParticipants.length);
+        setFilteredWeeklyParticipants(sortedParticipants);
       }
     };
 
