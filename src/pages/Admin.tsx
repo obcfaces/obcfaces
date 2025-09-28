@@ -29,6 +29,7 @@ import { NextWeekVotersModal } from '@/components/next-week-voters-modal';
 import { ContestParticipationModal } from '@/components/contest-participation-modal';
 import { ApplicationEditHistory } from '@/components/ApplicationEditHistory';
 import { ExpandableApplicationHistory } from '@/components/ExpandableApplicationHistory';
+import { WeeklyTransitionButton } from '@/components/WeeklyTransitionButton';
 
 // Helper function to check if rejection reason is a duplicate of predefined reasons
 const isReasonDuplicate = (rejectionReason: string, reasonTypes: string[]) => {
@@ -1519,8 +1520,9 @@ const Admin = () => {
 
       <div className="min-h-screen bg-gradient-to-br from-background to-muted/20 py-8 md:px-6">
         <div className="max-w-7xl md:mx-auto px-2 md:px-6">
-          <div className="mb-8">
+          <div className="mb-8 flex justify-between items-center">
             <h1 className="text-3xl font-bold mb-2">Admin Panel</h1>
+            <WeeklyTransitionButton />
           </div>
 
           <Tabs defaultValue="applications" className="space-y-6">
