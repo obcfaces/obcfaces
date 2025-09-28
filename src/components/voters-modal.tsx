@@ -407,36 +407,40 @@ export const VotersModal = ({ isOpen, onClose, participantId, participantName }:
             <div className="grid gap-4">
               {voters.map((voter, index) => (
                 <Collapsible key={`${voter.user_id}-${index}`} open={expandedUser === voter.user_id}>
-                  <Card className="hover:shadow-md transition-shadow">
+                  <Card className="hover:shadow-md transition-shadow relative">
+                     {/* Card number - responsive positioning */}
+                     <div className="absolute top-0 right-0 md:left-0 md:right-auto bg-primary text-primary-foreground text-xs px-2 py-1 font-semibold">
+                       {index + 1}
+                     </div>
                      <CollapsibleTrigger 
                        className="w-full text-left"
                        onClick={() => handleUserClick(voter.user_id)}
                      >
-                       <CardContent className="p-4 hover:bg-muted/50 transition-colors relative">
-                         {/* Contestant badge in top-left corner */}
-                         {voter.profile?.is_contest_participant && (
-                           <Badge variant="secondary" className="absolute top-2 left-2 text-xs">
-                             Contestant
-                           </Badge>
-                         )}
-                         <div className="flex items-start gap-4 mt-4">
-                            {/* Avatar with registration date overlay */}
-                            <div className="flex flex-col items-center gap-2 flex-shrink-0 relative">
-                              <div className="relative">
-                                <Avatar className="h-16 w-16">
-                                  <AvatarImage src={voter.profile?.avatar_url || ''} />
-                                  <AvatarFallback className="text-lg">
-                                    {getDisplayName(voter).charAt(0)}
-                                  </AvatarFallback>
-                                </Avatar>
-                                {/* Registration date badge overlaying bottom of avatar */}
-                                {voter.registration_date && (
-                                  <Badge variant="outline" className="text-xs px-1 py-0.5 absolute bottom-0 left-1/2 transform -translate-x-1/2 bg-background">
-                                    {new Date(voter.registration_date).toLocaleDateString()}
-                                  </Badge>
-                                )}
-                              </div>
-                            </div>
+                       <CardContent className="p-2 hover:bg-muted/50 transition-colors relative">
+                         <div className="flex items-start gap-4">
+                           {/* Avatar with week interval on top and registration date overlay */}
+                           <div className="flex flex-col items-center gap-2 flex-shrink-0 relative">
+                             <div className="relative">
+                               {/* Week interval badge on top of avatar */}
+                               {voter.profile?.is_contest_participant && (
+                                 <Badge variant="secondary" className="absolute -top-2 left-1/2 transform -translate-x-1/2 text-xs z-10">
+                                   Week 42-43
+                                 </Badge>
+                               )}
+                               <Avatar className="h-16 w-16">
+                                 <AvatarImage src={voter.profile?.avatar_url || ''} />
+                                 <AvatarFallback className="text-lg">
+                                   {getDisplayName(voter).charAt(0)}
+                                 </AvatarFallback>
+                               </Avatar>
+                               {/* Registration date badge overlaying bottom of avatar */}
+                               {voter.registration_date && (
+                                 <Badge variant="outline" className="text-xs px-1 py-0.5 absolute bottom-0 left-1/2 transform -translate-x-1/2 bg-background">
+                                   {new Date(voter.registration_date).toLocaleDateString()}
+                                 </Badge>
+                               )}
+                             </div>
+                           </div>
                           
                            {/* User Info */}
                            <div className="flex-1 min-w-0">
