@@ -936,6 +936,7 @@ export type Database = {
       get_next_week_participants_admin: {
         Args: Record<PropertyKey, never>
         Returns: {
+          admin_status: string
           age: number
           average_rating: number
           city: string
