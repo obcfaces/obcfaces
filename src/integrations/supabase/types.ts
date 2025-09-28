@@ -658,6 +658,7 @@ export type Database = {
           participant_status:
             | Database["public"]["Enums"]["participant_status"]
             | null
+          status_history: Json | null
           total_votes: number | null
           user_id: string
         }
@@ -673,6 +674,7 @@ export type Database = {
           participant_status?:
             | Database["public"]["Enums"]["participant_status"]
             | null
+          status_history?: Json | null
           total_votes?: number | null
           user_id: string
         }
@@ -688,6 +690,7 @@ export type Database = {
           participant_status?:
             | Database["public"]["Enums"]["participant_status"]
             | null
+          status_history?: Json | null
           total_votes?: number | null
           user_id?: string
         }
