@@ -2013,7 +2013,7 @@ const Admin = () => {
                                         const { error } = await supabase
                                           .from('weekly_contest_participants')
                                           .update({ admin_status: value } as any)
-                                          .eq('id', participant.id);
+                                          .eq('id', participant.participant_id);
                                       
                                       if (error) {
                                         console.error('Error updating participant status:', error);
