@@ -59,7 +59,7 @@ const getDynamicPastWeekFilters = (participants: any[]) => {
         if (statusInfo?.week_start_date && statusInfo?.week_end_date) {
           const startDate = new Date(statusInfo.week_start_date);
           const endDate = new Date(statusInfo.week_end_date);
-          const interval = `${startDate.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit' })}-${endDate.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: '2-digit' })}`;
+          const interval = `${startDate.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit' })}-${endDate.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit' })}/${endDate.getFullYear().toString().slice(-2)}`;
           allWeeks.add(interval);
         }
       });
@@ -75,10 +75,19 @@ const getDynamicPastWeekFilters = (participants: any[]) => {
   const sortedWeeks = Array.from(allWeeks).sort((a, b) => {
     // Extract start date and compare
     const getStartDate = (interval: string) => {
-      const match = interval.match(/(\d{2}\/\d{2})/);
-      if (match) {
-        const [day, month] = match[1].split('/');
-        return new Date(2025, parseInt(month) - 1, parseInt(day)); // Assuming 2025 year
+      // Try to match full format with year first: dd/mm-dd/mm/yy
+      const fullMatch = interval.match(/(\d{2})\/(\d{2})-\d{2}\/\d{2}\/(\d{2,4})/);
+      if (fullMatch) {
+        const [, day, month, year] = fullMatch;
+        const fullYear = year.length === 2 ? 2000 + parseInt(year) : parseInt(year);
+        return new Date(fullYear, parseInt(month) - 1, parseInt(day));
+      }
+      
+      // Fallback to simple format: dd/mm
+      const simpleMatch = interval.match(/(\d{2})\/(\d{2})/);
+      if (simpleMatch) {
+        const [, day, month] = simpleMatch;
+        return new Date(new Date().getFullYear(), parseInt(month) - 1, parseInt(day));
       }
       return new Date(0);
     };
