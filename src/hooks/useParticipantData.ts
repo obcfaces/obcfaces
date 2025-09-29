@@ -4,30 +4,21 @@ import { supabase } from '@/integrations/supabase/client';
 export interface ParticipantData {
   participant_id: string;
   user_id: string;
-  contest_id: string;
   first_name: string;
   last_name: string;
-  display_name: string;
   age: number;
   country: string;
-  state: string;
+  state?: string;
   city: string;
   height_cm: number;
   weight_kg: number;
-  gender: string;
-  marital_status: string;
-  has_children: boolean;
   photo_1_url: string;
   photo_2_url: string;
-  avatar_url: string;
-  participant_type: string;
   average_rating: number;
   total_votes: number;
   final_rank: number;
-  contest_start_date: string;
-  contest_end_date: string;
-  contest_title: string;
-  contest_status: string;
+  created_at: string;
+  display_name?: string;
 }
 
 export const useParticipantData = (participantName?: string, userId?: string) => {
