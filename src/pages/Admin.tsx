@@ -488,14 +488,19 @@ const Admin = () => {
           
           switch (weeklyContestFilter) {
             case 'this week':
-              // Only show participants explicitly marked as 'this week'
-              const shouldInclude = status === 'this week';
-              console.log(`Should include for 'this week': ${shouldInclude}`);
-              return shouldInclude;
+              // Show participants with 'this week' status OR approved applications not yet in weekly contest
+              const isThisWeek = status === 'this week';
+              const isApprovedApplication = !participant.contest_id && 
+                contestApplications.some(app => app.user_id === participant.user_id && app.status === 'approved');
+              return isThisWeek || isApprovedApplication;
             case 'pre next week':
               return status === 'pre next week';
             case 'next week':
-              return status === 'next week';
+              // Show participants with 'next week' or 'next week on site' status OR applications with 'next week' status
+              const isNextWeek = status === 'next week' || status === 'next week on site';
+              const isNextWeekApplication = !participant.contest_id && 
+                contestApplications.some(app => app.user_id === participant.user_id && app.status === 'next week');
+              return isNextWeek || isNextWeekApplication;
             case 'past week 1':
               return status === 'past week 1';
             case 'past week 2':
