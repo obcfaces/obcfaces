@@ -616,16 +616,20 @@ const Admin = () => {
       return (participant as any).status_week_history.past;
     }
     
-    // Map other admin_status to specific week dates
+    // Map other admin_status to specific week dates (актуальные интервалы)
     switch (adminStatus) {
       case 'this week':
-        return '22/09 - 28/09/2025'; // Current week
+        return '29/09 - 05/10/2025'; // Current week (сейчас активная неделя)
       case 'next week on site':
-        return '29/09 - 05/10/2025'; // Next week on site
+        return '06/10 - 12/10/2025'; // Next week on site
       case 'next week':
-        return '06/10 - 12/10/2025'; // Next week
-      case 'pre next week':
-        return '13/10 - 19/10/2025'; // Pre next week
+        return '13/10 - 19/10/2025'; // Next week
+      case 'past week 1':
+        return '22/09-28/09/25'; // 1 неделя назад
+      case 'past week 2':
+        return '15/09-21/09/25'; // 2 недели назад
+      case 'past week 3':
+        return '08/09-14/09/25'; // 3 недели назад
       default:
         // Fallback to dynamic calculation for any other cases
         const contestDate = participant.contest_start_date ? 
@@ -2589,20 +2593,20 @@ const Admin = () => {
                     >
                       All Past Weeks
                     </Button>
-                    <Button
-                      variant={pastWeekFilter === 'past week 1' ? 'default' : 'outline'}
-                      size="sm"
-                      onClick={() => setPastWeekFilter('past week 1')}
-                    >
-                      1 week ago (15-21 Sep)
-                    </Button>
-                    <Button
-                      variant={pastWeekFilter === 'past week 2' ? 'default' : 'outline'}
-                      size="sm"
-                      onClick={() => setPastWeekFilter('past week 2')}
-                    >
-                      2 weeks ago (8-14 Sep)
-                    </Button>
+                     <Button
+                       variant={pastWeekFilter === 'past week 1' ? 'default' : 'outline'}
+                       size="sm"
+                       onClick={() => setPastWeekFilter('past week 1')}
+                     >
+                       1 week ago (29 Sep - 5 Oct)
+                     </Button>
+                     <Button
+                       variant={pastWeekFilter === 'past week 2' ? 'default' : 'outline'}
+                       size="sm"
+                       onClick={() => setPastWeekFilter('past week 2')}
+                     >
+                       2 weeks ago (22-28 Sep)
+                     </Button>
                     <Button
                       variant={pastWeekFilter === 'past week 3' ? 'default' : 'outline'}
                       size="sm"
@@ -2621,20 +2625,22 @@ const Admin = () => {
                     >
                       All Past
                     </Button>
-                    <Button
-                      variant={pastWeekFilter === 'past week 1' ? 'default' : 'outline'}
-                      size="sm"
-                      onClick={() => setPastWeekFilter('past week 1')}
-                    >
-                      1 week ago
-                    </Button>
-                    <Button
-                      variant={pastWeekFilter === 'past week 2' ? 'default' : 'outline'}
-                      size="sm"
-                      onClick={() => setPastWeekFilter('past week 2')}
-                    >
-                      2 weeks ago
-                    </Button>
+                     <Button
+                       variant={pastWeekFilter === 'past week 1' ? 'default' : 'outline'}
+                       size="sm"
+                       onClick={() => setPastWeekFilter('past week 1')}
+                       className="text-xs"
+                     >
+                       1 week ago
+                     </Button>
+                     <Button
+                       variant={pastWeekFilter === 'past week 2' ? 'default' : 'outline'}
+                       size="sm"
+                       onClick={() => setPastWeekFilter('past week 2')}
+                       className="text-xs"  
+                     >
+                       2 weeks ago
+                     </Button>
                     <Button
                       variant={pastWeekFilter === 'past week 3' ? 'default' : 'outline'}
                       size="sm"
@@ -2673,18 +2679,23 @@ const Admin = () => {
                   if (adminStatus === 'past') {
                     const weekInterval = participant.weekInterval || getParticipantWeekInterval(participant);
                     
-                    // Map filter names to week intervals
-                    switch (pastWeekFilter) {
-                      case 'past week 1':
-                        return weekInterval === '15/09 - 21/09/2025'; // 1 week ago
-                      case 'past week 2':
-                        return weekInterval === '08/09 - 14/09/2025'; // 2 weeks ago
-                      case 'past week 3':
-                        // 3+ weeks ago (any interval that's not week 1 or 2)
-                        return weekInterval !== '15/09 - 21/09/2025' && weekInterval !== '08/09 - 14/09/2025';
-                      default:
-                        return false;
-                    }
+                     // Map filter names to week intervals (правильное сопоставление)
+                     switch (pastWeekFilter) {
+                       case 'past week 1':
+                         // Участники с интервалом 29/09-05/10/25 (1 неделю назад от текущей)
+                         return weekInterval === '29/09-05/10/25' || weekInterval === '29/09 - 05/10/2025';
+                       case 'past week 2':
+                         // Участники с интервалом 22/09-28/09/25 (2 недели назад от текущей)
+                         return weekInterval === '22/09-28/09/25' || weekInterval === '22/09 - 28/09/2025';
+                       case 'past week 3':
+                         // Все остальные интервалы (3+ недель назад)
+                         return weekInterval !== '29/09-05/10/25' && 
+                                weekInterval !== '29/09 - 05/10/2025' &&
+                                weekInterval !== '22/09-28/09/25' && 
+                                weekInterval !== '22/09 - 28/09/2025';
+                       default:
+                         return false;
+                     }
                   }
                   
                   return false; // Only show 'past' status participants in past week sections
