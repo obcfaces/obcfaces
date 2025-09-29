@@ -145,41 +145,25 @@ const getFutureWeekInterval = (weeksAhead: number, countryCode: string = 'PH') =
 
 // Helper function to get dynamic past week filters based on actual data
 const getDynamicPastWeekFilters = (participants: any[]) => {
-  const allWeeks = new Set<string>();
+  // Используем правильные статические интервалы для 2025 года
+  const staticWeeks = [
+    '29/09-05/10/25', '22/09-28/09/25', '15/09-21/09/25', 
+    '08/09-14/09/25', '01/09-07/09/25', '18/08-24/08/25'
+  ];
+  // Используем правильные статические интервалы для 2025 года
+  const staticWeeks = [
+    '29/09-05/10/25', // 1 week ago
+    '22/09-28/09/25', // 2 weeks ago  
+    '15/09-21/09/25', // 3 weeks ago
+    '08/09-14/09/25', // 4 weeks ago
+    '01/09-07/09/25', // 5 weeks ago
+    '18/08-24/08/25'  // 6 weeks ago
+  ];
   
-  console.log('Processing participants for filters:', participants.length);
+  console.log('Using static week filters instead of status_history');
   
-  participants.forEach(participant => {
-    // Collect weeks from status_history (primary source - more reliable)
-    if (participant.status_history) {
-      Object.values(participant.status_history).forEach((statusInfo: any) => {
-        if (statusInfo?.week_start_date && statusInfo?.week_end_date) {
-          const startDate = new Date(statusInfo.week_start_date);
-          const endDate = new Date(statusInfo.week_end_date);
-          
-          // Ensure we're working with valid dates
-          if (!isNaN(startDate.getTime()) && !isNaN(endDate.getTime())) {
-            // Fix year to current year if it's 2025 (wrong year in DB)
-            const currentYear = new Date().getFullYear();
-            if (startDate.getFullYear() === 2025) {
-              startDate.setFullYear(currentYear);
-              endDate.setFullYear(currentYear);
-            }
-            
-            const interval = `${startDate.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit' })}-${endDate.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit' })}/${String(currentYear).slice(-2)}`;
-            
-            console.log('Adding interval from status_history:', interval, {
-              originalStart: statusInfo.week_start_date,
-              originalEnd: statusInfo.week_end_date,
-              correctedStart: startDate,
-              correctedEnd: endDate
-            });
-            
-            allWeeks.add(interval);
-          }
-        }
-      });
-    }
+  // Convert static weeks to sorted format
+  const sortedWeeks = staticWeeks;
     
     // Only collect from weekInterval if it looks like a valid format and we don't have enough data
     if (participant.weekInterval && allWeeks.size < 3) {
