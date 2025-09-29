@@ -2905,7 +2905,7 @@ const Admin = () => {
                           </div>
                       
                           {/* Column 3: Status History (30ch) */}
-                          <div className="w-[30ch] flex-shrink-0 p-2">
+                          <div className="w-[40ch] flex-shrink-0 p-2">
                             <div className="text-xs h-32 overflow-y-auto">
                               <div className="flex flex-wrap gap-1">
                                 {/* Show all statuses including current, sorted by changed_at (newest first) */}
