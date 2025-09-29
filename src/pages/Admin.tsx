@@ -734,9 +734,9 @@ const Admin = () => {
   const getParticipantWeekInterval = (participant: any) => {
     const adminStatus = participant.admin_status || participantFilters[participant.id];
     
-    // For 'past' status, use the interval from status_week_history
-    if (adminStatus === 'past' && (participant as any).status_week_history?.past) {
-      return (participant as any).status_week_history.past;
+    // For any status with status_week_history, use the correct interval from there
+    if ((participant as any).status_week_history?.[adminStatus]) {
+      return (participant as any).status_week_history[adminStatus];
     }
     
     // Map other admin_status to specific week dates (актуальные интервалы)
@@ -760,11 +760,8 @@ const Admin = () => {
       case 'pending':
         return '29/09-05/10/25'; // Pending (текущая неделя)
       default:
-        // Fallback to dynamic calculation for any other cases
-        const contestDate = participant.contest_start_date ? 
-          new Date(participant.contest_start_date) : 
-          new Date(participant.created_at);
-        return formatWeekInterval(contestDate);
+        // Fallback: если нет данных, используем текущую неделю
+        return '29/09-05/10/25';
     }
   };
 
