@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Helmet } from 'react-helmet-async';
@@ -144,7 +144,7 @@ const getFutureWeekInterval = (weeksAhead: number, countryCode: string = 'PH') =
 };
 
 // Helper function to get dynamic past week filters based on actual data
-const getDynamicPastWeekFilters = (participants: any[]) => {
+const getDynamicPastWeekFilters = useMemo(() => {
   // Используем правильные статические интервалы для 2025 года
   const staticWeeks = [
     '29/09-05/10/25', // 1 week ago
@@ -155,7 +155,7 @@ const getDynamicPastWeekFilters = (participants: any[]) => {
     '18/08-24/08/25'  // 6 weeks ago
   ];
   
-  console.log('Using static week filters instead of status_history');
+  console.log('Creating static week filters');
   
   // Return static weeks already sorted
   const sortedWeeks = staticWeeks;
@@ -186,7 +186,7 @@ const getDynamicPastWeekFilters = (participants: any[]) => {
   });
   
   return filters;
-};
+}, []); // Пустой массив зависимостей, так как фильтры статические
 
 
 
@@ -2660,8 +2660,8 @@ const Admin = () => {
                 {/* Past week filter */}
                 <div className="mt-4">
                   {(() => {
-                    // Get dynamic filters based on available data
-                    const dynamicFilters = getDynamicPastWeekFilters(weeklyParticipants);
+                    // Get dynamic filters based on available data - использукм мемоизированный результат
+                    const dynamicFilters = getDynamicPastWeekFilters;
                     
                     return (
                       <>
@@ -2723,8 +2723,8 @@ const Admin = () => {
                   
                   const adminStatus = participant.admin_status || 'this week';
                   
-                  // Get the dynamic filters to find the target week interval
-                  const dynamicFilters = getDynamicPastWeekFilters(weeklyParticipants);
+                  // Get the dynamic filters to find the target week interval - использукм мемоизированный результат
+                  const dynamicFilters = getDynamicPastWeekFilters;
                   const selectedFilter = dynamicFilters.find(f => f.id === pastWeekFilter);
                   
                   if (!selectedFilter?.weekInterval) return false;
