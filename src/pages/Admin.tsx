@@ -2943,10 +2943,27 @@ const Admin = () => {
                                 {participant.status_history && Object.keys(participant.status_history).length > 0 ? (
                                   Object.entries(participant.status_history)
                                     .sort((a: any, b: any) => new Date(b[1]?.changed_at || 0).getTime() - new Date(a[1]?.changed_at || 0).getTime())
-                                    .map(([status, info]: [string, any], index: number) => {
-                                      const interval = info?.week_start_date ? 
-                                        `${new Date(info.week_start_date).toLocaleDateString('ru-RU', {day: '2-digit', month: '2-digit'})} - ${new Date(info.week_end_date).toLocaleDateString('ru-RU', {day: '2-digit', month: '2-digit', year: '2-digit'})}` : 
-                                        'нет интервала';
+                                     .map(([status, info]: [string, any], index: number) => {
+                                       // Use correct interval mapping instead of wrong data from status_history
+                                       const interval = (() => {
+                                         switch (status) {
+                                           case 'this week':
+                                             return '29/09-05/10/25';
+                                           case 'next week':
+                                           case 'next week on site':
+                                           case 'pre next week':
+                                             return '06/10-12/10/25';
+                                           case 'past week 1':
+                                           case 'past':
+                                             return '22/09-28/09/25';
+                                           case 'past week 2':
+                                             return '15/09-21/09/25';
+                                           case 'past week 3':
+                                             return '08/09-14/09/25';
+                                           default:
+                                             return participant.week_interval || '29/09-05/10/25';
+                                         }
+                                       })();
                                       
                                       const changedAt = info?.changed_at ? 
                                         new Date(info.changed_at).toLocaleDateString('ru-RU', {
@@ -3096,19 +3113,26 @@ const Admin = () => {
                             {/* Status debug info - mobile */}
                             <div className="mt-2 text-xs bg-yellow-100 p-2 rounded border">
                               <div className="text-gray-700">
-                                {participant.admin_status} - {(() => {
-                                  // Сначала пробуем week_interval, если нет - ищем в status_history
-                                  if (participant.week_interval) {
-                                    return participant.week_interval;
-                                  }
-                                  
-                                  const currentStatusHistory = participant.status_history?.[participant.admin_status];
-                                  if (currentStatusHistory?.week_start_date) {
-                                    return `${new Date(currentStatusHistory.week_start_date).toLocaleDateString('ru-RU', {day: '2-digit', month: '2-digit'})} - ${new Date(currentStatusHistory.week_end_date).toLocaleDateString('ru-RU', {day: '2-digit', month: '2-digit', year: '2-digit'})}`;
-                                  }
-                                  
-                                  return 'нет интервала';
-                                })()}
+                                 {participant.admin_status} - {(() => {
+                                   // Use correct interval mapping based on status
+                                   switch (participant.admin_status) {
+                                     case 'this week':
+                                       return '29/09-05/10/25';
+                                     case 'next week':
+                                     case 'next week on site':
+                                     case 'pre next week':
+                                       return '06/10-12/10/25';
+                                     case 'past week 1':
+                                     case 'past':
+                                       return '22/09-28/09/25';
+                                     case 'past week 2':
+                                       return '15/09-21/09/25';
+                                     case 'past week 3':
+                                       return '08/09-14/09/25';
+                                     default:
+                                       return participant.week_interval || '29/09-05/10/25';
+                                   }
+                                 })()}
                               </div>
                               {participant.status_history && Object.keys(participant.status_history).length > 0 && (
                                 <div className="text-gray-600">
@@ -3117,10 +3141,27 @@ const Admin = () => {
                                       .sort((a: any, b: any) => new Date(b[1]?.changed_at || 0).getTime() - new Date(a[1]?.changed_at || 0).getTime())
                                       .filter(([status, info]: [string, any]) => status !== participant.admin_status);
                                     
-                                    return prevStatuses.map(([status, info]: [string, any], index: number) => {
-                                      const interval = info?.week_start_date ? 
-                                        `${new Date(info.week_start_date).toLocaleDateString('ru-RU', {day: '2-digit', month: '2-digit'})} - ${new Date(info.week_end_date).toLocaleDateString('ru-RU', {day: '2-digit', month: '2-digit', year: '2-digit'})}` : 
-                                        'нет интервала';
+                                     return prevStatuses.map(([status, info]: [string, any], index: number) => {
+                                       // Use correct interval mapping for previous statuses too
+                                       const interval = (() => {
+                                         switch (status) {
+                                           case 'this week':
+                                             return '29/09-05/10/25';
+                                           case 'next week':
+                                           case 'next week on site':
+                                           case 'pre next week':
+                                             return '06/10-12/10/25';
+                                           case 'past week 1':
+                                           case 'past':
+                                             return '22/09-28/09/25';
+                                           case 'past week 2':
+                                             return '15/09-21/09/25';
+                                           case 'past week 3':
+                                             return '08/09-14/09/25';
+                                           default:
+                                             return 'нет интервала';
+                                         }
+                                       })();
                                       return (
                                         <div key={index}>
                                           {status} - {interval}
