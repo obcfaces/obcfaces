@@ -1048,22 +1048,42 @@ const Admin = () => {
 
   const checkAdminAccess = async () => {
     try {
+      console.log('checkAdminAccess: Starting...');
       const { data: { session } } = await supabase.auth.getSession();
+      console.log('checkAdminAccess: Session retrieved', !!session?.user);
       
       if (!session?.user) {
+        console.log('checkAdminAccess: No user, redirecting to /auth');
         sessionStorage.setItem('redirectPath', '/admin');
         navigate('/auth');
+        setLoading(false);
         return;
       }
 
       setUser(session.user);
+      console.log('checkAdminAccess: User set, checking roles...');
 
-      const { data: roles } = await supabase
+      const { data: roles, error: rolesError } = await supabase
         .from('user_roles')
         .select('role')
         .eq('user_id', session.user.id);
 
+      console.log('checkAdminAccess: Roles fetched', roles, rolesError);
+
+      if (rolesError) {
+        console.error('checkAdminAccess: Error fetching roles', rolesError);
+        toast({
+          title: "Error",
+          description: "Failed to check admin permissions",
+          variant: "destructive"
+        });
+        navigate('/');
+        setLoading(false);
+        return;
+      }
+
       const hasAdminRole = roles?.some(r => r.role === 'admin');
+      console.log('checkAdminAccess: Has admin role?', hasAdminRole);
       
       if (!hasAdminRole) {
         toast({
@@ -1072,38 +1092,30 @@ const Admin = () => {
           variant: "destructive"
         });
         navigate('/');
+        setLoading(false);
         return;
       }
 
       setIsAdmin(true);
+      console.log('checkAdminAccess: Admin access granted, fetching data...');
+      
       fetchProfiles();
       fetchUserRoles();
       fetchContestApplications();
       fetchWeeklyContests();
+      fetchWeeklyParticipants();
       
-      // Auto-assign weekly statuses and then fetch participants
-      const autoAssignAndFetch = async () => {
-        try {
-          console.log('Auto-assigning weekly statuses...');
-          const { error } = await supabase.rpc('auto_assign_weekly_status');
-          if (error) {
-            console.error('Error auto-assigning statuses:', error);
-          } else {
-            console.log('Successfully auto-assigned weekly statuses');
-          }
-        } catch (error) {
-          console.error('Error calling auto_assign_weekly_status:', error);
-        } finally {
-          // Fetch participants after status assignment
-          fetchWeeklyParticipants();
-        }
-      };
-      
-      autoAssignAndFetch();
+      console.log('checkAdminAccess: All fetch functions called');
     } catch (error) {
-      console.error('Error checking admin access:', error);
+      console.error('checkAdminAccess: Unexpected error', error);
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred",
+        variant: "destructive"
+      });
       navigate('/');
     } finally {
+      console.log('checkAdminAccess: Setting loading to false');
       setLoading(false);
     }
   };
