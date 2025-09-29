@@ -356,10 +356,8 @@ const Admin = () => {
 
   console.log('Admin component rendering, statusFilter:', statusFilter);
 
-  // Мемоизированные фильтры для прошлых недель
-  const getDynamicPastWeekFilters = useMemo(() => {
-    return createDynamicPastWeekFilters();
-  }, []);
+  // Temporarily disable memoization to fix infinite recursion
+  const getDynamicPastWeekFilters = createDynamicPastWeekFilters();
 
   useEffect(() => {
     checkAdminAccess();
