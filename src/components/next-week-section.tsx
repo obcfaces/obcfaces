@@ -118,9 +118,13 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
       setIsVotesLoaded(false);
       
       try {
-        // Get participants with "next week" or "next week on site" admin_status
-        const { data: nextWeekParticipants, error } = await supabase
-          .rpc('get_next_week_participants_public');
+        // ВРЕМЕННО ОТКЛЮЧЕНО: Не загружаем участников next week на сайт
+        // const { data: nextWeekParticipants, error } = await supabase
+        //   .rpc('get_next_week_participants_public');
+        
+        // Возвращаем пустой массив
+        const nextWeekParticipants: any[] = [];
+        const error = null;
 
         if (error) {
           console.error('Error fetching next week participants:', error);
