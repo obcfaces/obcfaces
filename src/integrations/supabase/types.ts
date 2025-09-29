@@ -707,6 +707,7 @@ export type Database = {
             | Database["public"]["Enums"]["participant_status"]
             | null
           status_history: Json | null
+          status_week_history: Json | null
           total_votes: number | null
           user_id: string
           week_interval: string | null
@@ -724,6 +725,7 @@ export type Database = {
             | Database["public"]["Enums"]["participant_status"]
             | null
           status_history?: Json | null
+          status_week_history?: Json | null
           total_votes?: number | null
           user_id: string
           week_interval?: string | null
@@ -741,6 +743,7 @@ export type Database = {
             | Database["public"]["Enums"]["participant_status"]
             | null
           status_history?: Json | null
+          status_week_history?: Json | null
           total_votes?: number | null
           user_id?: string
           week_interval?: string | null
@@ -964,6 +967,10 @@ export type Database = {
       get_conversation_unread_count: {
         Args: { conversation_id_param: string; user_id_param: string }
         Returns: number
+      }
+      get_current_week_interval: {
+        Args: Record<PropertyKey, never>
+        Returns: string
       }
       get_daily_application_stats: {
         Args: Record<PropertyKey, never>
