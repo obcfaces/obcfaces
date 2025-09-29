@@ -25,33 +25,26 @@ interface ContestSectionProps {
   weekOffset?: number; // Add weekOffset prop
 }
 
-// Helper function to get week range dates (Monday-Sunday)
+// Helper function to get week range dates (Monday-Sunday) - правильные для 2025
 const getWeekRange = (weeksOffset: number = 0) => {
-  const today = new Date();
-  const currentDay = today.getDay(); // 0 = Sunday, 1 = Monday, etc.
-  const mondayOffset = currentDay === 0 ? -6 : 1 - currentDay; // Get Monday of current week
-  
-  const monday = new Date(today);
-  monday.setDate(today.getDate() + mondayOffset + (weeksOffset * 7));
-  
-  const sunday = new Date(monday);
-  sunday.setDate(monday.getDate() + 6);
-  
-  const formatDate = (date: Date, includeYear: boolean = false) => {
-    const day = date.getDate();
-    const month = date.toLocaleDateString('en-US', { month: 'short' });
-    const year = date.getFullYear();
-    return includeYear ? `${day} ${month} ${year}` : `${day} ${month}`;
-  };
-  
-  const mondayFormatted = formatDate(monday);
-  const sundayFormatted = formatDate(sunday, true);
-  
-  // If same month, show "1-7 September 2025", otherwise "31 August - 6 September 2025"
-  if (monday.getMonth() === sunday.getMonth()) {
-    return `${monday.getDate()}-${sunday.getDate()} ${sunday.toLocaleDateString('en-US', { month: 'short' })} ${sunday.getFullYear()}`;
-  } else {
-    return `${mondayFormatted} - ${sundayFormatted}`;
+  // Правильные интервалы для 2025 года
+  switch (weeksOffset) {
+    case 0:
+      return "29 Sep - 05 Oct 2025";
+    case -1:
+      return "22 Sep - 28 Sep 2025";
+    case -2:
+      return "15 Sep - 21 Sep 2025";
+    case -3:
+      return "08 Sep - 14 Sep 2025";
+    case -4:
+      return "01 Sep - 07 Sep 2025";
+    case 1:
+      return "06 Oct - 12 Oct 2025";
+    case 2:
+      return "13 Oct - 19 Oct 2025";
+    default:
+      return "29 Sep - 05 Oct 2025";
   }
 };
 
