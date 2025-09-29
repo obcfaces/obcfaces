@@ -2907,7 +2907,7 @@ const Admin = () => {
                           {/* Column 3: Status History (30ch) */}
                           <div className="w-[30ch] flex-shrink-0 p-2">
                             <div className="text-xs h-32 overflow-y-auto">
-                              <div className="space-y-1">
+                              <div className="flex flex-wrap gap-1">
                                 {/* Show all statuses including current, sorted by changed_at (newest first) */}
                                 {participant.status_history && Object.keys(participant.status_history).length > 0 ? (
                                   Object.entries(participant.status_history)
@@ -2929,7 +2929,7 @@ const Admin = () => {
                                       const isCurrentStatus = status === participant.admin_status;
                                       
                                       return (
-                                        <div key={index} className={`p-1 rounded text-xs ${
+                                        <div key={index} className={`p-1 rounded text-xs flex-shrink-0 ${
                                           isCurrentStatus ? 'bg-yellow-100 border font-medium text-gray-700' : 'bg-gray-100 text-gray-600'
                                         }`}>
                                           {status} - {interval} {changedAt && `(${changedAt})`}
@@ -2938,7 +2938,7 @@ const Admin = () => {
                                     })
                                 ) : (
                                   // Fallback for when there's no status_history but we have current status
-                                  <div className="bg-yellow-100 p-1 rounded border text-xs font-medium text-gray-700">
+                                  <div className="bg-yellow-100 p-1 rounded border text-xs font-medium text-gray-700 flex-shrink-0">
                                     {participant.admin_status} - {(() => {
                                       if (participant.week_interval) {
                                         return participant.week_interval;
