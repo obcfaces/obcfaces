@@ -34,7 +34,8 @@ serve(async (req) => {
       pastWeeksShifted: 0,
       thisWeekToPast: 0,
       nextWeekOnSiteToThisWeek: 0,
-      nextWeekToNextWeekOnSite: 0
+      nextWeekToNextWeekOnSite: 0,
+      approvedToThisWeek: 0
     }
 
     // 1. Сначала сдвигаем все существующие "past" статусы на одну неделю назад
@@ -187,15 +188,80 @@ serve(async (req) => {
       }
     }
 
-    // 5. Статус "next week" остается без изменений для фильтрации в админке по неделям
+    // 5. Добавляем approved заявки как новых участников "this week"
+    const { data: approvedApplications, error: approvedError } = await supabase
+      .from('contest_applications')
+      .select(`
+        id,
+        user_id,
+        application_data,
+        status
+      `)
+      .eq('status', 'approved')
+      .eq('is_active', true)
+      .is('deleted_at', null)
+
+    if (approvedError) {
+      console.error('Error fetching approved applications:', approvedError)
+      throw approvedError
+    }
+
+    let approvedToThisWeek = 0
+
+    for (const application of approvedApplications || []) {
+      // Проверяем, не существует ли уже этот участник в weekly_contest_participants
+      const { data: existingParticipant } = await supabase
+        .from('weekly_contest_participants')
+        .select('id')
+        .eq('user_id', application.user_id)
+        .eq('is_active', true)
+        .single()
+
+      if (!existingParticipant) {
+        // Получаем текущий активный конкурс
+        const { data: currentContest } = await supabase
+          .from('weekly_contests')
+          .select('id')
+          .eq('status', 'active')
+          .order('week_start_date', { ascending: false })
+          .limit(1)
+          .single()
+
+        if (currentContest) {
+          const { error: insertError } = await supabase
+            .from('weekly_contest_participants')
+            .insert({
+              contest_id: currentContest.id,
+              user_id: application.user_id,
+              application_data: application.application_data,
+              admin_status: 'this week',
+              status_week_history: {
+                'this week': weekInterval
+              },
+              is_active: true
+            })
+
+          if (insertError) {
+            console.error(`Error inserting approved application ${application.id}:`, insertError)
+          } else {
+            approvedToThisWeek++
+            console.log(`Added approved application ${application.id} as "this week" participant`)
+          }
+        }
+      }
+    }
+
+    // 6. Статус "next week" остается без изменений для фильтрации в админке по неделям
     console.log('Skipping "next week" participants - they remain unchanged for admin filtering')
+
+    transitions.approvedToThisWeek = approvedToThisWeek
 
     const summary = {
       success: true,
       weekInterval,
       transitions,
       message: `Weekly transition completed for week ${weekInterval}`,
-      totalTransitions: transitions.pastWeeksShifted + transitions.thisWeekToPast + transitions.nextWeekOnSiteToThisWeek + transitions.nextWeekToNextWeekOnSite
+      totalTransitions: transitions.pastWeeksShifted + transitions.thisWeekToPast + transitions.nextWeekOnSiteToThisWeek + transitions.nextWeekToNextWeekOnSite + transitions.approvedToThisWeek
     }
 
     console.log('Weekly transition summary:', summary)
