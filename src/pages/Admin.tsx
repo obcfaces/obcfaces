@@ -1147,7 +1147,7 @@ const Admin = () => {
     try {
       console.log('Fetching weekly participants from database...');
       
-      // Fetch all weekly contest participants with their contests data
+      // Fetch all weekly contest participants with their contests data and profiles
       const { data: allParticipants, error } = await supabase
         .from('weekly_contest_participants')
          .select(`
@@ -1170,6 +1170,13 @@ const Admin = () => {
              week_end_date,
              title,
              status
+           ),
+           profiles!inner(
+             id,
+             display_name,
+             avatar_url,
+             photo_1_url,
+             photo_2_url
            )
          `)
         // Load all participants including inactive ones for past weeks display
@@ -1186,6 +1193,7 @@ const Admin = () => {
       const participants = await Promise.all((allParticipants || []).map(async (item: any) => {
         const contest = item.weekly_contests;
         const appData = item.application_data || {};
+        const profile = item.profiles || {};
         
         // Fetch real-time rating stats for this user
         let realTimeRatings = { average_rating: 0, total_votes: 0 };
@@ -1218,8 +1226,9 @@ const Admin = () => {
              gender: appData.gender || '',
              marital_status: appData.marital_status || '',
              has_children: appData.has_children || false,
-             photo1_url: appData.photo1_url || '',
-             photo2_url: appData.photo2_url || ''
+             photo1_url: appData.photo1_url || profile.photo_1_url || '',
+             photo2_url: appData.photo2_url || profile.photo_2_url || '',
+             avatar_url: profile.avatar_url || ''
            },
            final_rank: item.final_rank,
            total_votes: realTimeRatings.total_votes,
