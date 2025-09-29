@@ -632,12 +632,8 @@ const Admin = () => {
               const isNextWeekApplication = !participant.contest_id && 
                 contestApplications.some(app => app.user_id === participant.user_id && app.status === 'next week');
               return isNextWeek || isNextWeekApplication;
-            case 'past week 1':
-              return status === 'past week 1';
-            case 'past week 2':
-              return status === 'past week 2';
-            case 'past week 3':
-              return status === 'past week 3';
+            case 'past':
+              return status === 'past' || status === 'past week 1' || status === 'past week 2' || status === 'past week 3';
             case 'pending':
               return status === 'pending';
             case 'approved':
@@ -1832,9 +1828,7 @@ const Admin = () => {
                     <SelectItem value="pre next week">{`Pre Next Week (${getFutureWeekInterval(1).formatted})`}</SelectItem>
                     <SelectItem value="next week">Next Week</SelectItem>
                     <SelectItem value="next week on site">Next Week On Site</SelectItem>
-                    <SelectItem value="past week 1">{`Past Week 1 (${getPastWeekInterval(1).formatted})`}</SelectItem>
-                    <SelectItem value="past week 2">{`Past Week 2 (${getPastWeekInterval(2).formatted})`}</SelectItem>
-                    <SelectItem value="past week 3">{`Past Week 3 (${getPastWeekInterval(3).formatted})`}</SelectItem>
+                    <SelectItem value="past">Past</SelectItem>
                     <SelectItem value="pending">Pending</SelectItem>
                     <SelectItem value="approved">Approved</SelectItem>
                     <SelectItem value="rejected">Rejected</SelectItem>
@@ -2041,9 +2035,7 @@ const Admin = () => {
                                           <SelectItem value="pre next week">{`Pre Next Week (${getFutureWeekInterval(1).formatted})`}</SelectItem>
                                           <SelectItem value="next week">Next Week</SelectItem>
                                           <SelectItem value="next week on site">Next Week On Site</SelectItem>
-                                          <SelectItem value="past week 1">{`Past Week 1 (${getPastWeekInterval(1).formatted})`}</SelectItem>
-                                          <SelectItem value="past week 2">{`Past Week 2 (${getPastWeekInterval(2).formatted})`}</SelectItem>
-                                          <SelectItem value="past week 3">{`Past Week 3 (${getPastWeekInterval(3).formatted})`}</SelectItem>
+                                          <SelectItem value="past">Past</SelectItem>
                                         <SelectItem value="pending">Pending</SelectItem>
                                         <SelectItem value="approved">Approved</SelectItem>
                                         <SelectItem value="rejected">Rejected</SelectItem>
@@ -2211,9 +2203,7 @@ const Admin = () => {
                                                <SelectItem value="pre next week">{`Pre Next Week (${getFutureWeekInterval(1).formatted})`}</SelectItem>
                                                <SelectItem value="next week">Next Week</SelectItem>
                                                <SelectItem value="next week on site">Next Week On Site</SelectItem>
-                                               <SelectItem value="past week 1">{`Past Week 1 (${getPastWeekInterval(1).formatted})`}</SelectItem>
-                                               <SelectItem value="past week 2">{`Past Week 2 (${getPastWeekInterval(2).formatted})`}</SelectItem>
-                                               <SelectItem value="past week 3">{`Past Week 3 (${getPastWeekInterval(3).formatted})`}</SelectItem>
+                                               <SelectItem value="past">Past</SelectItem>
                                              <SelectItem value="pending">Pending</SelectItem>
                                              <SelectItem value="approved">Approved</SelectItem>
                                              <SelectItem value="rejected">Rejected</SelectItem>
@@ -2361,9 +2351,7 @@ const Admin = () => {
                                   <SelectItem value="next week">Next Week</SelectItem>
                                   <SelectItem value="next week on site">Next Week On Site</SelectItem>
                                   <SelectItem value="this week">This Week</SelectItem>
-                                  <SelectItem value="past week 1">Past Week 1</SelectItem>
-                                  <SelectItem value="past week 2">Past Week 2</SelectItem>
-                                  <SelectItem value="past week 3">Past Week 3</SelectItem>
+                                  <SelectItem value="past">Past</SelectItem>
                                 </SelectContent>
                               </Select>
                             </div>
@@ -2654,9 +2642,7 @@ const Admin = () => {
                                         <SelectItem value="pre next week">{`Pre Next Week (${getFutureWeekInterval(1).formatted})`}</SelectItem>
                                         <SelectItem value="next week">Next Week</SelectItem>
                                         <SelectItem value="next week on site">Next Week On Site</SelectItem>
-                                        <SelectItem value="past week 1">{`Past Week 1 (${getPastWeekInterval(1).formatted})`}</SelectItem>
-                                        <SelectItem value="past week 2">{`Past Week 2 (${getPastWeekInterval(2).formatted})`}</SelectItem>
-                                        <SelectItem value="past week 3">{`Past Week 3 (${getPastWeekInterval(3).formatted})`}</SelectItem>
+                                        <SelectItem value="past">Past</SelectItem>
                                       <SelectItem value="pending">Pending</SelectItem>
                                       <SelectItem value="approved">Approved</SelectItem>
                                       <SelectItem value="rejected">Rejected</SelectItem>
@@ -2806,9 +2792,7 @@ const Admin = () => {
                                       <SelectItem value="pre next week">{`Pre Next Week (${getFutureWeekInterval(1).formatted})`}</SelectItem>
                                       <SelectItem value="next week">Next Week</SelectItem>
                                       <SelectItem value="next week on site">Next Week On Site</SelectItem>
-                                      <SelectItem value="past week 1">{`Past Week 1 (${getPastWeekInterval(1).formatted})`}</SelectItem>
-                                      <SelectItem value="past week 2">{`Past Week 2 (${getPastWeekInterval(2).formatted})`}</SelectItem>
-                                      <SelectItem value="past week 3">{`Past Week 3 (${getPastWeekInterval(3).formatted})`}</SelectItem>
+                                      <SelectItem value="past">Past</SelectItem>
                                     <SelectItem value="pending">Pending</SelectItem>
                                     <SelectItem value="approved">Approved</SelectItem>
                                     <SelectItem value="rejected">Rejected</SelectItem>
@@ -3210,9 +3194,7 @@ const Admin = () => {
                                      <SelectItem value="pre next week">{`Pre Next Week (${getFutureWeekInterval(1).formatted})`}</SelectItem>
                                      <SelectItem value="next week">Next Week</SelectItem>
                                      <SelectItem value="next week on site">Next Week On Site</SelectItem>
-                                     <SelectItem value="past week 1">{`Past Week 1 (${getPastWeekInterval(1).formatted})`}</SelectItem>
-                                     <SelectItem value="past week 2">{`Past Week 2 (${getPastWeekInterval(2).formatted})`}</SelectItem>
-                                     <SelectItem value="past week 3">{`Past Week 3 (${getPastWeekInterval(3).formatted})`}</SelectItem>
+                                     <SelectItem value="past">Past</SelectItem>
                                      <SelectItem value="past">Past</SelectItem>
                                      <SelectItem value="pending">Pending</SelectItem>
                                      <SelectItem value="approved">Approved</SelectItem>
@@ -3708,9 +3690,7 @@ const Admin = () => {
                                               <SelectItem value="pre next week">{`Pre Next Week (${getFutureWeekInterval(1).formatted})`}</SelectItem>
                                               <SelectItem value="next week">Next Week</SelectItem>
                                               <SelectItem value="next week on site">Next Week On Site</SelectItem>
-                                             <SelectItem value="past week 1">{`Past Week 1 (${getPastWeekInterval(1).formatted})`}</SelectItem>
-                                             <SelectItem value="past week 2">{`Past Week 2 (${getPastWeekInterval(2).formatted})`}</SelectItem>
-                                             <SelectItem value="past week 3">{`Past Week 3 (${getPastWeekInterval(3).formatted})`}</SelectItem>
+                                             <SelectItem value="past">Past</SelectItem>
                                             <SelectItem value="pending">Pending</SelectItem>
                                             <SelectItem value="approved">Approved</SelectItem>
                                             <SelectItem value="rejected">Rejected</SelectItem>
@@ -3930,9 +3910,7 @@ const Admin = () => {
                                                        <SelectItem value="pre next week">{`Pre Next Week (${getFutureWeekInterval(1).formatted})`}</SelectItem>
                                                        <SelectItem value="next week">Next Week</SelectItem>
                                                        <SelectItem value="next week on site">Next Week On Site</SelectItem>
-                                                      <SelectItem value="past week 1">{`Past Week 1 (${getPastWeekInterval(1).formatted})`}</SelectItem>
-                                                      <SelectItem value="past week 2">{`Past Week 2 (${getPastWeekInterval(2).formatted})`}</SelectItem>
-                                                      <SelectItem value="past week 3">{`Past Week 3 (${getPastWeekInterval(3).formatted})`}</SelectItem>
+                                                      <SelectItem value="past">Past</SelectItem>
                                                      <SelectItem value="pending">Pending</SelectItem>
                                                      <SelectItem value="approved">Approved</SelectItem>
                                                      <SelectItem value="rejected">Rejected</SelectItem>
@@ -4035,9 +4013,7 @@ const Admin = () => {
                          <SelectItem value="this week">This Week</SelectItem>
                           <SelectItem value="pre next week">{`Pre Next Week (${getFutureWeekInterval(1).formatted})`}</SelectItem>
                           <SelectItem value="next week">Next Week</SelectItem>
-                          <SelectItem value="past week 1">{`Past Week 1 (${getPastWeekInterval(1).formatted})`}</SelectItem>
-                          <SelectItem value="past week 2">{`Past Week 2 (${getPastWeekInterval(2).formatted})`}</SelectItem>
-                          <SelectItem value="past week 3">{`Past Week 3 (${getPastWeekInterval(3).formatted})`}</SelectItem>
+                          <SelectItem value="past">Past</SelectItem>
                          <SelectItem value="pending">Pending</SelectItem>
                          <SelectItem value="approved">Approved</SelectItem>
                          <SelectItem value="rejected">Rejected</SelectItem>
@@ -4525,9 +4501,7 @@ const Admin = () => {
                                                      <SelectItem value="pre next week">{`Pre Next Week (${getFutureWeekInterval(1).formatted})`}</SelectItem>
                                                       <SelectItem value="next week">Next Week</SelectItem>
                                                       <SelectItem value="next week on site">Next Week On Site</SelectItem>
-                                                     <SelectItem value="past week 1">{`Past Week 1 (${getPastWeekInterval(1).formatted})`}</SelectItem>
-                                                     <SelectItem value="past week 2">{`Past Week 2 (${getPastWeekInterval(2).formatted})`}</SelectItem>
-                                                     <SelectItem value="past week 3">{`Past Week 3 (${getPastWeekInterval(3).formatted})`}</SelectItem>
+                                                     <SelectItem value="past">Past</SelectItem>
                                                     <SelectItem value="pending">Pending</SelectItem>
                                                     <SelectItem value="approved">Approved</SelectItem>
                                                     <SelectItem value="rejected">Rejected</SelectItem>
