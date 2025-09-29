@@ -2908,42 +2908,43 @@ const Admin = () => {
                           <div className="w-[30ch] flex-shrink-0 p-2">
                             <div className="text-xs h-32 overflow-y-auto">
                               <div className="space-y-1">
-                                {/* Current status */}
-                                <div className="bg-yellow-100 p-2 rounded border">
-                                  <div className="font-medium text-gray-700">
+                                {/* Show all statuses including current, sorted by changed_at (newest first) */}
+                                {participant.status_history && Object.keys(participant.status_history).length > 0 ? (
+                                  Object.entries(participant.status_history)
+                                    .sort((a: any, b: any) => new Date(b[1]?.changed_at || 0).getTime() - new Date(a[1]?.changed_at || 0).getTime())
+                                    .map(([status, info]: [string, any], index: number) => {
+                                      const interval = info?.week_start_date ? 
+                                        `${new Date(info.week_start_date).toLocaleDateString('ru-RU', {day: '2-digit', month: '2-digit'})} - ${new Date(info.week_end_date).toLocaleDateString('ru-RU', {day: '2-digit', month: '2-digit', year: '2-digit'})}` : 
+                                        'нет интервала';
+                                      
+                                      const changedAt = info?.changed_at ? 
+                                        new Date(info.changed_at).toLocaleDateString('ru-RU', {
+                                          day: '2-digit',
+                                          month: 'short',
+                                          hour: '2-digit',
+                                          minute: '2-digit'
+                                        }).replace(',', '') : 
+                                        '';
+                                      
+                                      const isCurrentStatus = status === participant.admin_status;
+                                      
+                                      return (
+                                        <div key={index} className={`p-1 rounded text-xs ${
+                                          isCurrentStatus ? 'bg-yellow-100 border font-medium text-gray-700' : 'bg-gray-100 text-gray-600'
+                                        }`}>
+                                          {status} - {interval} {changedAt && `(${changedAt})`}
+                                        </div>
+                                      );
+                                    })
+                                ) : (
+                                  // Fallback for when there's no status_history but we have current status
+                                  <div className="bg-yellow-100 p-1 rounded border text-xs font-medium text-gray-700">
                                     {participant.admin_status} - {(() => {
-                                      // Сначала пробуем week_interval, если нет - ищем в status_history
                                       if (participant.week_interval) {
                                         return participant.week_interval;
                                       }
-                                      
-                                      const currentStatusHistory = participant.status_history?.[participant.admin_status];
-                                      if (currentStatusHistory?.week_start_date) {
-                                        return `${new Date(currentStatusHistory.week_start_date).toLocaleDateString('ru-RU', {day: '2-digit', month: '2-digit'})} - ${new Date(currentStatusHistory.week_end_date).toLocaleDateString('ru-RU', {day: '2-digit', month: '2-digit', year: '2-digit'})}`;
-                                      }
-                                      
                                       return 'нет интервала';
                                     })()}
-                                  </div>
-                                </div>
-                                
-                                {/* Previous statuses */}
-                                {participant.status_history && Object.keys(participant.status_history).length > 0 && (
-                                  <div className="space-y-1">
-                                    {Object.entries(participant.status_history)
-                                      .sort((a: any, b: any) => new Date(b[1]?.changed_at || 0).getTime() - new Date(a[1]?.changed_at || 0).getTime())
-                                      .filter(([status, info]: [string, any]) => status !== participant.admin_status)
-                                      .map(([status, info]: [string, any], index: number) => {
-                                        const interval = info?.week_start_date ? 
-                                          `${new Date(info.week_start_date).toLocaleDateString('ru-RU', {day: '2-digit', month: '2-digit'})} - ${new Date(info.week_end_date).toLocaleDateString('ru-RU', {day: '2-digit', month: '2-digit', year: '2-digit'})}` : 
-                                          'нет интервала';
-                                        return (
-                                          <div key={index} className="bg-gray-100 p-1 rounded text-xs text-gray-600">
-                                            {status} - {interval}
-                                          </div>
-                                        );
-                                      })
-                                    }
                                   </div>
                                 )}
                               </div>
