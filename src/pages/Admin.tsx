@@ -727,26 +727,43 @@ const Admin = () => {
     // Map admin_status to correct week dates for 2025
     switch (adminStatus) {
       case 'this week':
-        return '29/09-05/10/25';
+        return '06/10-12/10/25'; // Current actual week
       case 'next week':
       case 'next week on site':
       case 'pre next week':
-        return '06/10-12/10/25';
+        return '13/10-19/10/25'; // Next week
       case 'past week 1':
       case 'past':
-        return '22/09-28/09/25';
+        return '29/09-05/10/25'; // 1 week ago
       case 'past week 2':
-        return '15/09-21/09/25';
+        return '22/09-28/09/25'; // 2 weeks ago
       case 'past week 3':
-        return '08/09-14/09/25';
+        return '15/09-21/09/25'; // 3 weeks ago
       case 'past week 4':
-        return '01/09-07/09/25';
+        return '08/09-14/09/25'; // 4 weeks ago
       case 'pending':
-        return '29/09-05/10/25';
+        return '06/10-12/10/25'; // Same as current week
       default:
-        return '29/09-05/10/25';
+        return '06/10-12/10/25'; // Default to current week
     }
   };
+
+  // Helper function to get corresponding past week filter based on interval
+  const getCorrespondingPastWeekFilter = (interval: string) => {
+    const dynamicFilters = getDynamicPastWeekFilters;
+    const matchingFilter = dynamicFilters.find(f => f.weekInterval === interval);
+    return matchingFilter?.id || 'all';
+  };
+
+  // Update pastWeekFilter when pastWeekIntervalFilter changes
+  useEffect(() => {
+    if (pastWeekIntervalFilter !== 'all') {
+      const correspondingFilter = getCorrespondingPastWeekFilter(pastWeekIntervalFilter);
+      if (correspondingFilter !== pastWeekFilter) {
+        setPastWeekFilter(correspondingFilter);
+      }
+    }
+  }, [pastWeekIntervalFilter]);
 
   // Helper function to get participant display info with winner indication
   const getParticipantDisplayInfo = (participant: any) => {
@@ -2867,60 +2884,29 @@ const Admin = () => {
                 
                 // Apply past week filter based on week intervals
                 const filteredByWeek = participantsToShow.filter(participant => {
-                  if (pastWeekFilter === 'all' && pastWeekIntervalFilter === 'all') return true;
-                  
-                  let matchesStatusFilter = true;
-                  let matchesIntervalFilter = true;
-                  
-                  // Проверка по статусному фильтру
-                  if (pastWeekFilter !== 'all') {
-                    const adminStatus = participant.admin_status || 'this week';
-                    
-                    // Get the dynamic filters to find the target week interval - использукм мемоизированный результат
-                    const dynamicFilters = getDynamicPastWeekFilters;
-                    const selectedFilter = dynamicFilters.find(f => f.id === pastWeekFilter);
-                    
-                    if (!selectedFilter?.weekInterval) {
-                      matchesStatusFilter = false;
-                    } else {
-                      const targetWeekInterval = selectedFilter.weekInterval;
-                      
-                      // Check if participant has this specific week interval in their history
-                      const detailedStatusHistory = participant.status_history || {};
-                      let foundInHistory = false;
-                      
-                      // Look for any status (past, this week, etc.) that matches the target week interval
-                      for (const [statusName, statusInfo] of Object.entries(detailedStatusHistory)) {
-                        if (typeof statusInfo === 'object' && statusInfo && 
-                            'week_start_date' in statusInfo && 'week_end_date' in statusInfo) {
-                          const startDate = new Date(statusInfo.week_start_date as string);
-                          const endDate = new Date(statusInfo.week_end_date as string);
-                          const participantInterval = `${startDate.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit' })}-${endDate.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: '2-digit' })}`;
-                          
-                          if (participantInterval === targetWeekInterval) {
-                            foundInHistory = true;
-                            break;
-                          }
-                        }
-                      }
-                      
-                      // Also check weekInterval property
-                      const weekInterval = participant.weekInterval || getParticipantWeekInterval(participant);
-                      if (!foundInHistory && weekInterval !== targetWeekInterval) {
-                        matchesStatusFilter = false;
-                      }
-                    }
-                  }
-                  
-                  // Проверка по интервальному фильтру
+                  // When a specific interval is selected, use stricter filtering to avoid duplicates
                   if (pastWeekIntervalFilter !== 'all') {
                     const participantInterval = participant.weekInterval || getParticipantWeekInterval(participant);
-                    if (participantInterval !== pastWeekIntervalFilter) {
-                      matchesIntervalFilter = false;
-                    }
+                    return participantInterval === pastWeekIntervalFilter;
                   }
                   
-                  return matchesStatusFilter && matchesIntervalFilter;
+                  // When no specific interval is selected, use the status-based filter
+                  if (pastWeekFilter === 'all') return true;
+                  
+                  const adminStatus = participant.admin_status || 'this week';
+                  
+                  // Get the dynamic filters to find the target week interval
+                  const dynamicFilters = getDynamicPastWeekFilters;
+                  const selectedFilter = dynamicFilters.find(f => f.id === pastWeekFilter);
+                  
+                  if (!selectedFilter?.weekInterval) {
+                    return false;
+                  }
+                  
+                  const targetWeekInterval = selectedFilter.weekInterval;
+                  const participantInterval = participant.weekInterval || getParticipantWeekInterval(participant);
+                  
+                  return participantInterval === targetWeekInterval;
                 });
                 
                 if (filteredByWeek.length === 0) {
