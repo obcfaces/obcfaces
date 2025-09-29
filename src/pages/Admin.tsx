@@ -48,34 +48,90 @@ const isReasonDuplicate = (rejectionReason: string, reasonTypes: string[]) => {
          predefinedReasons.every(reason => rejectionReason.includes(reason));
 };
 
+// Helper function to get dynamic past week filters based on actual data
+const getDynamicPastWeekFilters = (participants: any[]) => {
+  const allWeeks = new Set<string>();
+  
+  participants.forEach(participant => {
+    // Collect weeks from status_history
+    if (participant.status_history) {
+      Object.values(participant.status_history).forEach((statusInfo: any) => {
+        if (statusInfo?.week_start_date && statusInfo?.week_end_date) {
+          const startDate = new Date(statusInfo.week_start_date);
+          const endDate = new Date(statusInfo.week_end_date);
+          const interval = `${startDate.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit' })}-${endDate.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: '2-digit' })}`;
+          allWeeks.add(interval);
+        }
+      });
+    }
+    
+    // Collect weeks from weekInterval
+    if (participant.weekInterval) {
+      allWeeks.add(participant.weekInterval);
+    }
+  });
+  
+  // Convert to array and sort by date (newest first)
+  const sortedWeeks = Array.from(allWeeks).sort((a, b) => {
+    // Extract start date and compare
+    const getStartDate = (interval: string) => {
+      const match = interval.match(/(\d{2}\/\d{2})/);
+      if (match) {
+        const [day, month] = match[1].split('/');
+        return new Date(2025, parseInt(month) - 1, parseInt(day)); // Assuming 2025 year
+      }
+      return new Date(0);
+    };
+    
+    return getStartDate(b).getTime() - getStartDate(a).getTime();
+  });
+  
+  // Create filters for each week
+  const filters: Array<{ id: string; label: string; mobileLabel: string; weekInterval?: string }> = [
+    { id: 'all', label: 'All Past Weeks', mobileLabel: 'All Past' }
+  ];
+  
+  let weekCounter = 1;
+  sortedWeeks.forEach(week => {
+    const filterLabel = weekCounter <= 2 
+      ? `${weekCounter} week${weekCounter === 1 ? '' : 's'} ago (${week})`
+      : `${weekCounter} weeks ago (${week})`;
+    
+    const mobileLabel = weekCounter <= 2 
+      ? `${weekCounter} week${weekCounter === 1 ? '' : 's'} ago`
+      : `${weekCounter} weeks ago`;
+    
+    filters.push({
+      id: `past week ${weekCounter}`,
+      label: filterLabel,
+      mobileLabel: mobileLabel,
+      weekInterval: week
+    });
+    
+    weekCounter++;
+  });
+  
+  return filters;
+};
+
 // Helper function to get date intervals for past weeks based on actual week intervals
 const getWeekInterval = (weeksAgo: number) => {
-  // Return specific intervals that correspond to actual past weeks in the system
-  switch (weeksAgo) {
-    case 1:
-      return '15/09-21/09'; // 1 week ago
-    case 2:
-      return '08/09-14/09'; // 2 weeks ago
-    case 3:
-      return '3+ weeks ago'; // 3+ weeks ago (multiple intervals)
-    default:
-      // Fallback to dynamic calculation
-      const today = new Date();
-      const currentMonday = new Date(today);
-      currentMonday.setDate(today.getDate() - (today.getDay() === 0 ? 6 : today.getDay() - 1));
-      
-      const targetMonday = new Date(currentMonday);
-      targetMonday.setDate(currentMonday.getDate() - (weeksAgo * 7));
-      
-      const targetSunday = new Date(targetMonday);
-      targetSunday.setDate(targetMonday.getDate() + 6);
-      
-      const formatDate = (date: Date) => {
-        return date.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit' });
-      };
-      
-      return `${formatDate(targetMonday)}-${formatDate(targetSunday)}`;
-  }
+  // Fallback to dynamic calculation
+  const today = new Date();
+  const currentMonday = new Date(today);
+  currentMonday.setDate(today.getDate() - (today.getDay() === 0 ? 6 : today.getDay() - 1));
+  
+  const targetMonday = new Date(currentMonday);
+  targetMonday.setDate(currentMonday.getDate() - (weeksAgo * 7));
+  
+  const targetSunday = new Date(targetMonday);
+  targetSunday.setDate(targetMonday.getDate() + 6);
+  
+  const formatDate = (date: Date) => {
+    return date.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit' });
+  };
+  
+  return `${formatDate(targetMonday)}-${formatDate(targetSunday)}`;
 };
 
 // Helper function to get date intervals for future weeks
@@ -236,7 +292,7 @@ const Admin = () => {
   const [expandedDesktopItems, setExpandedDesktopItems] = useState<Set<string>>(new Set());
   const [participantFilters, setParticipantFilters] = useState<{ [key: string]: string }>({});
   const [pastWeekParticipants, setPastWeekParticipants] = useState<any[]>([]);
-  const [pastWeekFilter, setPastWeekFilter] = useState<string>('past week 1');
+  const [pastWeekFilter, setPastWeekFilter] = useState<string>('all');
    const [expandedAdminDates, setExpandedAdminDates] = useState<Set<string>>(new Set());
    const [adminDatePopup, setAdminDatePopup] = useState<{ show: boolean; date: string; admin: string; applicationId: string }>({ 
      show: false, date: '', admin: '', applicationId: '' 
@@ -2565,71 +2621,43 @@ const Admin = () => {
                 
                 {/* Past week filter */}
                 <div className="mt-4">
-                  {/* Desktop filters */}
-                  <div className="hidden md:flex gap-2">
-                    <Button
-                      variant={pastWeekFilter === 'all' ? 'default' : 'outline'}
-                      size="sm"
-                      onClick={() => setPastWeekFilter('all')}
-                    >
-                      All Past Weeks
-                    </Button>
-                     <Button
-                       variant={pastWeekFilter === 'past week 1' ? 'default' : 'outline'}
-                       size="sm"
-                       onClick={() => setPastWeekFilter('past week 1')}
-                     >
-                       1 week ago (29 Sep - 5 Oct)
-                     </Button>
-                     <Button
-                       variant={pastWeekFilter === 'past week 2' ? 'default' : 'outline'}
-                       size="sm"
-                       onClick={() => setPastWeekFilter('past week 2')}
-                     >
-                       2 weeks ago (22-28 Sep)
-                     </Button>
-                    <Button
-                      variant={pastWeekFilter === 'past week 3' ? 'default' : 'outline'}
-                      size="sm"
-                      onClick={() => setPastWeekFilter('past week 3')}
-                    >
-                      3+ weeks ago
-                    </Button>
-                  </div>
-                  
-                  {/* Mobile filters */}
-                  <div className="md:hidden grid grid-cols-2 gap-2">
-                    <Button
-                      variant={pastWeekFilter === 'all' ? 'default' : 'outline'}
-                      size="sm"
-                      onClick={() => setPastWeekFilter('all')}
-                    >
-                      All Past
-                    </Button>
-                     <Button
-                       variant={pastWeekFilter === 'past week 1' ? 'default' : 'outline'}
-                       size="sm"
-                       onClick={() => setPastWeekFilter('past week 1')}
-                       className="text-xs"
-                     >
-                       1 week ago
-                     </Button>
-                     <Button
-                       variant={pastWeekFilter === 'past week 2' ? 'default' : 'outline'}
-                       size="sm"
-                       onClick={() => setPastWeekFilter('past week 2')}
-                       className="text-xs"  
-                     >
-                       2 weeks ago
-                     </Button>
-                    <Button
-                      variant={pastWeekFilter === 'past week 3' ? 'default' : 'outline'}
-                      size="sm"
-                      onClick={() => setPastWeekFilter('past week 3')}
-                    >
-                      3+ weeks
-                    </Button>
-                  </div>
+                  {(() => {
+                    // Get dynamic filters based on available data
+                    const dynamicFilters = getDynamicPastWeekFilters(weeklyParticipants);
+                    
+                    return (
+                      <>
+                        {/* Desktop filters */}
+                        <div className="hidden md:flex gap-2 flex-wrap">
+                          {dynamicFilters.map((filter) => (
+                            <Button
+                              key={filter.id}
+                              variant={pastWeekFilter === filter.id ? 'default' : 'outline'}
+                              size="sm"
+                              onClick={() => setPastWeekFilter(filter.id)}
+                            >
+                              {filter.label}
+                            </Button>
+                          ))}
+                        </div>
+                        
+                        {/* Mobile filters */}
+                        <div className="md:hidden grid grid-cols-2 gap-2">
+                          {dynamicFilters.map((filter) => (
+                            <Button
+                              key={filter.id}
+                              variant={pastWeekFilter === filter.id ? 'default' : 'outline'}
+                              size="sm"
+                              onClick={() => setPastWeekFilter(filter.id)}
+                              className="text-xs"
+                            >
+                              {filter.mobileLabel}
+                            </Button>
+                          ))}
+                        </div>
+                      </>
+                    );
+                  })()}
                 </div>
               </div>
               
@@ -2656,125 +2684,35 @@ const Admin = () => {
                   if (pastWeekFilter === 'all') return true;
                   
                   const adminStatus = participant.admin_status || 'this week';
-                  const weekInterval = participant.weekInterval || getParticipantWeekInterval(participant);
                   
-                  // Отладочная информация
-                  console.log(`Participant ${participant.id}:`, {
-                    adminStatus,
-                    weekInterval, 
-                    pastWeekFilter,
-                    status_week_history: participant.status_week_history
-                  });
+                  // Get the dynamic filters to find the target week interval
+                  const dynamicFilters = getDynamicPastWeekFilters(weeklyParticipants);
+                  const selectedFilter = dynamicFilters.find(f => f.id === pastWeekFilter);
                   
-                  // For 'past' or 'this week' status, filter by week interval
-                  if (adminStatus === 'past' || adminStatus === 'this week') {
-                    // Map filter names to week intervals (правильное сопоставление)
-                    switch (pastWeekFilter) {
-                       case 'past week 1':
-                         // Участники должны иметь ОБА статуса:
-                         // 1. статус "past" с интервалом "29/09-05/10/25" 
-                         // 2. статус "this week" с интервалом "22/09-28/09/25"
-                         const statusHistory = participant.status_week_history || {};
-                         const detailedStatusHistory = participant.status_history || {};
-                         
-                         // Debug for Jasmin specifically
-                         const participantName = `${participant.first_name} ${participant.last_name}`;
-                         if (participantName.includes('Jasmin') || participantName.includes('Carriaga')) {
-                           console.log('JASMIN DEBUG - Found Jasmin:', {
-                             name: participantName,
-                             adminStatus: adminStatus,
-                             weekInterval: weekInterval,
-                             statusHistory: statusHistory,
-                             detailedStatusHistory: detailedStatusHistory,
-                             statusHistoryKeys: Object.keys(statusHistory),
-                           });
-                         }
-                         
-                         // Проверяем статус "past" с интервалом "29/09-05/10/25"
-                         const hasPastStatus = statusHistory['past'] && (
-                           statusHistory['past'] === '29/09-05/10/25' || 
-                           statusHistory['past'] === '29/09 - 05/10/2025'
-                         );
-                         
-                         // Проверяем статус "this week" - сначала в status_week_history, потом в status_history
-                         let hasThisWeekStatus = false;
-                         
-                         // Проверка в status_week_history
-                         if (statusHistory['this week']) {
-                           hasThisWeekStatus = statusHistory['this week'] === '22/09-28/09/25' || 
-                                             statusHistory['this week'] === '22/09 - 28/09/2025';
-                         }
-                         
-                         // Если не найдено в status_week_history, проверяем в status_history
-                         if (!hasThisWeekStatus && detailedStatusHistory['this week']) {
-                           const thisWeekInfo = detailedStatusHistory['this week'];
-                           if (thisWeekInfo && thisWeekInfo.week_start_date && thisWeekInfo.week_end_date) {
-                             const startDate = new Date(thisWeekInfo.week_start_date).toLocaleDateString('en-GB');
-                             const endDate = new Date(thisWeekInfo.week_end_date).toLocaleDateString('en-GB');
-                             hasThisWeekStatus = (startDate === '22/09/2025' && endDate === '28/09/2025');
-                           }
-                         }
-                         
-                         if (participantName.includes('Jasmin') || participantName.includes('Carriaga')) {
-                           console.log('JASMIN DEBUG - Status check:', {
-                             hasPastStatus: hasPastStatus,
-                             hasThisWeekStatus: hasThisWeekStatus,
-                             result: hasPastStatus && hasThisWeekStatus
-                           });
-                         }
-                         
-                         return hasPastStatus && hasThisWeekStatus;
-                        case 'past week 2':
-                          // Участники со статусом "past" и интервалом "22.09-28.09.2025" (2 недели назад)
-                          // НО которые НЕ имеют статуса "this week" с тем же интервалом
-                          const detailedStatusHistory2 = participant.status_history || {};
-                          const pastHistoryInfo = detailedStatusHistory2['past'];
-                          const thisWeekHistoryInfo = detailedStatusHistory2['this week'];
-                          
-                          // Debug log для понимания структуры данных
-                          const participantName2 = `${participant.first_name} ${participant.last_name}`;
-                          console.log(`PAST WEEK 2 DEBUG - ${participantName2}:`, {
-                            pastHistoryInfo: pastHistoryInfo,
-                            thisWeekHistoryInfo: thisWeekHistoryInfo,
-                            hasWeekDates: !!(pastHistoryInfo && pastHistoryInfo.week_start_date && pastHistoryInfo.week_end_date)
-                          });
-                          
-                          // Проверяем что есть статус "past" с периодом 22/09-28/09
-                          let hasPastStatus22 = false;
-                          if (pastHistoryInfo && pastHistoryInfo.week_start_date && pastHistoryInfo.week_end_date) {
-                            const startDate = new Date(pastHistoryInfo.week_start_date).toLocaleDateString('en-GB');
-                            const endDate = new Date(pastHistoryInfo.week_end_date).toLocaleDateString('en-GB');
-                            hasPastStatus22 = (startDate === '22/09/2025' && endDate === '28/09/2025');
-                          }
-                          
-                          // Проверяем что НЕТ статуса "this week" с тем же периодом
-                          let hasThisWeekStatus22 = false;
-                          if (thisWeekHistoryInfo && thisWeekHistoryInfo.week_start_date && thisWeekHistoryInfo.week_end_date) {
-                            const startDate = new Date(thisWeekHistoryInfo.week_start_date).toLocaleDateString('en-GB');
-                            const endDate = new Date(thisWeekHistoryInfo.week_end_date).toLocaleDateString('en-GB');
-                            hasThisWeekStatus22 = (startDate === '22/09/2025' && endDate === '28/09/2025');
-                          }
-                          
-                          console.log(`PAST WEEK 2 DATE CHECK - ${participantName2}:`, {
-                            hasPastStatus22: hasPastStatus22,
-                            hasThisWeekStatus22: hasThisWeekStatus22,
-                            result: hasPastStatus22 && !hasThisWeekStatus22
-                          });
-                          
-                          // Возвращаем true только если есть "past" 22/09-28/09 И НЕТ "this week" 22/09-28/09
-                          return hasPastStatus22 && !hasThisWeekStatus22;
-                        case 'past week 3':
-                          // Все остальные интервалы (3+ недель назад)
-                          return weekInterval !== '29/09-05/10/25' && 
-                                 weekInterval !== '29/09 - 05/10/2025' &&
-                                 weekInterval !== '22/09-28/09/25' && 
-                                 weekInterval !== '22/09 - 28/09/2025';
-                       default:
-                         return false;
-                     }
+                  if (!selectedFilter?.weekInterval) return false;
+                  
+                  const targetWeekInterval = selectedFilter.weekInterval;
+                  
+                  // Check if participant has this specific week interval in their history
+                  const detailedStatusHistory = participant.status_history || {};
+                  
+                  // Look for any status (past, this week, etc.) that matches the target week interval
+                  for (const [statusName, statusInfo] of Object.entries(detailedStatusHistory)) {
+                    if (typeof statusInfo === 'object' && statusInfo && 
+                        'week_start_date' in statusInfo && 'week_end_date' in statusInfo) {
+                      const startDate = new Date(statusInfo.week_start_date as string);
+                      const endDate = new Date(statusInfo.week_end_date as string);
+                      const participantInterval = `${startDate.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit' })}-${endDate.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: '2-digit' })}`;
+                      
+                      if (participantInterval === targetWeekInterval) {
+                        return true;
+                      }
+                    }
                   }
                   
-                  return false; // Only show 'past' status participants in past week sections
+                  // Also check weekInterval property
+                  const weekInterval = participant.weekInterval || getParticipantWeekInterval(participant);
+                  return weekInterval === targetWeekInterval;
                 });
                 
                 if (filteredByWeek.length === 0) {
