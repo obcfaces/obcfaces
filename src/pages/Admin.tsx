@@ -3018,7 +3018,19 @@ const Admin = () => {
                             {/* Status debug info - mobile */}
                             <div className="mt-2 text-xs bg-yellow-100 p-2 rounded border">
                               <div className="text-gray-700">
-                                Тек: {participant.admin_status} - {participant.week_interval || 'нет интервала'}
+                                {participant.admin_status} - {(() => {
+                                  // Сначала пробуем week_interval, если нет - ищем в status_history
+                                  if (participant.week_interval) {
+                                    return participant.week_interval;
+                                  }
+                                  
+                                  const currentStatusHistory = participant.status_history?.[participant.admin_status];
+                                  if (currentStatusHistory?.week_start_date) {
+                                    return `${new Date(currentStatusHistory.week_start_date).toLocaleDateString('ru-RU', {day: '2-digit', month: '2-digit'})} - ${new Date(currentStatusHistory.week_end_date).toLocaleDateString('ru-RU', {day: '2-digit', month: '2-digit', year: '2-digit'})}`;
+                                  }
+                                  
+                                  return 'нет интервала';
+                                })()}
                               </div>
                               {participant.status_history && Object.keys(participant.status_history).length > 0 && (
                                 <div className="text-gray-600">
@@ -3032,9 +3044,9 @@ const Admin = () => {
                                       const interval = info?.week_start_date ? 
                                         `${new Date(info.week_start_date).toLocaleDateString('ru-RU', {day: '2-digit', month: '2-digit'})} - ${new Date(info.week_end_date).toLocaleDateString('ru-RU', {day: '2-digit', month: '2-digit', year: '2-digit'})}` : 
                                         'нет интервала';
-                                      return `Пред: ${status} - ${interval}`;
+                                      return `${status} - ${interval}`;
                                     }
-                                    return 'Пред: нет';
+                                    return '';
                                   })()}
                                 </div>
                               )}
