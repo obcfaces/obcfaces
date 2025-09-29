@@ -2789,11 +2789,7 @@ const Admin = () => {
                               {(appData.photo1_url || appData.photo_1_url) && (
                                 <div className="w-full">
                                   <img 
-                                src={(() => {
-                                  const photoUrl = appData.photo1_url || appData.photo_1_url;
-                                  console.log(`Desktop photo1 for ${appData.first_name}: photo1_url=${appData.photo1_url}, photo_1_url=${appData.photo_1_url}, final=${photoUrl}`);
-                                  return photoUrl;
-                                })()}
+                                src={appData.photo1_url || appData.photo_1_url}
                                     alt="Portrait"
                                     className="w-full h-36 object-contain cursor-pointer hover:opacity-90 transition-opacity"
                                     onClick={() => openPhotoModal([appData.photo1_url || appData.photo_1_url, appData.photo2_url || appData.photo_2_url].filter(Boolean), 0, `${appData.first_name} ${appData.last_name}`)}
@@ -2817,11 +2813,7 @@ const Admin = () => {
                           <div className="w-[25ch] flex-shrink-0 p-4">
                             <div className="flex items-center gap-2 mb-1">
                               <Avatar className="h-6 w-6 flex-shrink-0">
-                                <AvatarImage src={(() => {
-                                  const photoUrl = appData.photo1_url || appData.photo_1_url || participantProfile?.avatar_url || '';
-                                  console.log(`Desktop avatar for ${appData.first_name}: photo1_url=${appData.photo1_url}, photo_1_url=${appData.photo_1_url}, final=${photoUrl}`);
-                                  return photoUrl;
-                                })()} />
+                                <AvatarImage src={appData.photo1_url || appData.photo_1_url || participantProfile?.avatar_url || ''} />
                                 <AvatarFallback className="text-xs">
                                   {appData.first_name?.charAt(0) || 'U'}
                                 </AvatarFallback>
@@ -3003,11 +2995,7 @@ const Admin = () => {
                           <div className="w-24 flex-shrink-0">
                             {(appData.photo1_url || appData.photo_1_url) && (
                               <img 
-                                src={(() => {
-                                  const photoUrl = appData.photo1_url || appData.photo_1_url;
-                                  console.log(`Mobile photo1 for ${appData.first_name}: photo1_url=${appData.photo1_url}, photo_1_url=${appData.photo_1_url}, final=${photoUrl}`);
-                                  return photoUrl;
-                                })()}
+                                src={appData.photo1_url || appData.photo_1_url}
                                 alt="Portrait" 
                                 className="w-full h-[149px] object-cover rounded-l-lg cursor-pointer hover:opacity-90 transition-opacity"
                                 onClick={() => openPhotoModal([appData.photo1_url || appData.photo_1_url, appData.photo2_url || appData.photo_2_url].filter(Boolean), 0, `${appData.first_name} ${appData.last_name}`)}
@@ -3019,11 +3007,7 @@ const Admin = () => {
                           <div className="flex-1 p-3">
                             <div className="flex items-center gap-2 mb-1">
                               <Avatar className="h-5 w-5 flex-shrink-0">
-                                <AvatarImage src={(() => {
-                                  const photoUrl = appData.photo1_url || appData.photo_1_url || participantProfile?.avatar_url || '';
-                                  console.log(`Mobile avatar for ${appData.first_name}: photo1_url=${appData.photo1_url}, photo_1_url=${appData.photo_1_url}, final=${photoUrl}`);
-                                  return photoUrl;
-                                })()} />
+                                <AvatarImage src={appData.photo1_url || appData.photo_1_url || participantProfile?.avatar_url || ''} />
                                 <AvatarFallback className="text-xs">
                                   {appData.first_name?.charAt(0) || 'U'}
                                 </AvatarFallback>
