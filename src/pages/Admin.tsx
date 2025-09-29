@@ -742,17 +742,23 @@ const Admin = () => {
     // Map other admin_status to specific week dates (актуальные интервалы)
     switch (adminStatus) {
       case 'this week':
-        return '29/09 - 05/10/2025'; // Current week (сейчас активная неделя)
+        return '29/09-05/10/25'; // Current week (понедельник 29 сентября - воскресенье 5 октября 2025)
       case 'next week on site':
-        return '06/10 - 12/10/2025'; // Next week on site
+        return '06/10-12/10/25'; // Next week on site (понедельник 6 - воскресенье 12 октября 2025)
       case 'next week':
-        return '13/10 - 19/10/2025'; // Next week
+        return '06/10-12/10/25'; // Next week (понедельник 6 - воскресенье 12 октября 2025)
       case 'past week 1':
-        return '22/09-28/09/25'; // 1 неделя назад
+        return '22/09-28/09/25'; // Past week 1 (понедельник 22 - воскресенье 28 сентября 2025)
       case 'past week 2':
-        return '15/09-21/09/25'; // 2 недели назад
+        return '15/09-21/09/25'; // Past week 2 (понедельник 15 - воскресенье 21 сентября 2025)
       case 'past week 3':
-        return '08/09-14/09/25'; // 3 недели назад
+        return '08/09-14/09/25'; // Past week 3 (понедельник 8 - воскресенье 14 сентября 2025)
+      case 'past week 4':
+        return '01/09-07/09/25'; // Past week 4 (понедельник 1 - воскресенье 7 сентября 2025)
+      case 'past':
+        return '22/09-28/09/25'; // Past (понедельник 22 - воскресенье 28 сентября 2025)
+      case 'pending':
+        return '29/09-05/10/25'; // Pending (текущая неделя)
       default:
         // Fallback to dynamic calculation for any other cases
         const contestDate = participant.contest_start_date ? 
