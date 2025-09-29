@@ -571,11 +571,11 @@ const Admin = () => {
             status_week_history: (participant as any).status_week_history
           });
           
-          // Include participants with 'past' status
-          return adminStatus === 'past';
+          // Include participants with 'past' or 'this week' status for interval filtering
+          return adminStatus === 'past' || adminStatus === 'this week';
         });
 
-        // Load rating stats for each past participant
+        // Load rating stats for each participant (past and this week)
         const pastParticipantsWithRatings = await Promise.all(
           pastParticipants.map(async (participant) => {
             try {
@@ -2673,7 +2673,8 @@ const Admin = () => {
                 // For debugging, let's show some past participants even if the filter doesn't match exactly
                 const debugPastParticipants = weeklyParticipants.filter(p => {
                   const status = p.admin_status || 'this week';
-                  return status !== 'this week' && status !== 'next week' && status !== 'pending';
+                  // Включаем участников со статусами 'past' и 'this week' для фильтрации по интервалам
+                  return status === 'past' || status === 'this week';
                 });
                 
                 console.log('Debug past participants found:', debugPastParticipants.length);
@@ -2697,13 +2698,15 @@ const Admin = () => {
                     status_week_history: participant.status_week_history
                   });
                   
-                  // For 'past' status, filter by week interval
-                  if (adminStatus === 'past') {
+                  // For 'past' or 'this week' status, filter by week interval
+                  if (adminStatus === 'past' || adminStatus === 'this week') {
                     // Map filter names to week intervals (правильное сопоставление)
                     switch (pastWeekFilter) {
-                      case 'past week 1':
-                         // Участники с интервалом 29/09-05/10/25 (1 неделю назад от текущей)
-                         return weekInterval === '29/09-05/10/25' || weekInterval === '29/09 - 05/10/2025';
+                       case 'past week 1':
+                         // Участники с интервалом 29/09-05/10/25 (текущий статус past)
+                         // ИЛИ участники со статусом this week с интервалом 22/09-28/09/25
+                         return (weekInterval === '29/09-05/10/25' || weekInterval === '29/09 - 05/10/2025') ||
+                                (adminStatus === 'this week' && (weekInterval === '22/09-28/09/25' || weekInterval === '22/09 - 28/09/2025'));
                        case 'past week 2':
                          // Участники с интервалом 22/09-28/09/25 (2 недели назад от текущей)
                          return weekInterval === '22/09-28/09/25' || weekInterval === '22/09 - 28/09/2025';
