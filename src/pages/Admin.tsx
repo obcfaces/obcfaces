@@ -2707,6 +2707,7 @@ const Admin = () => {
                          // 1. статус "past" с интервалом "29/09-05/10/25" 
                          // 2. статус "this week" с интервалом "22/09-28/09/25"
                          const statusHistory = participant.status_week_history || {};
+                         const detailedStatusHistory = participant.status_history || {};
                          
                          // Debug for Jasmin specifically
                          const participantName = `${participant.first_name} ${participant.last_name}`;
@@ -2716,20 +2717,35 @@ const Admin = () => {
                              adminStatus: adminStatus,
                              weekInterval: weekInterval,
                              statusHistory: statusHistory,
+                             detailedStatusHistory: detailedStatusHistory,
                              statusHistoryKeys: Object.keys(statusHistory),
                            });
                          }
                          
+                         // Проверяем статус "past" с интервалом "29/09-05/10/25"
                          const hasPastStatus = statusHistory['past'] && (
                            statusHistory['past'] === '29/09-05/10/25' || 
-                           statusHistory['past'] === '29/09 - 05/10/2025' ||
-                           statusHistory['past'] === '29/09-05/10/25'
+                           statusHistory['past'] === '29/09 - 05/10/2025'
                          );
-                         const hasThisWeekStatus = statusHistory['this week'] && (
-                           statusHistory['this week'] === '22/09-28/09/25' || 
-                           statusHistory['this week'] === '22/09 - 28/09/2025' ||
-                           statusHistory['this week'] === '22/09-28/09/25'
-                         );
+                         
+                         // Проверяем статус "this week" - сначала в status_week_history, потом в status_history
+                         let hasThisWeekStatus = false;
+                         
+                         // Проверка в status_week_history
+                         if (statusHistory['this week']) {
+                           hasThisWeekStatus = statusHistory['this week'] === '22/09-28/09/25' || 
+                                             statusHistory['this week'] === '22/09 - 28/09/2025';
+                         }
+                         
+                         // Если не найдено в status_week_history, проверяем в status_history
+                         if (!hasThisWeekStatus && detailedStatusHistory['this week']) {
+                           const thisWeekInfo = detailedStatusHistory['this week'];
+                           if (thisWeekInfo && thisWeekInfo.week_start_date && thisWeekInfo.week_end_date) {
+                             const startDate = new Date(thisWeekInfo.week_start_date).toLocaleDateString('en-GB');
+                             const endDate = new Date(thisWeekInfo.week_end_date).toLocaleDateString('en-GB');
+                             hasThisWeekStatus = (startDate === '22/09/2025' && endDate === '28/09/2025');
+                           }
+                         }
                          
                          if (participantName.includes('Jasmin') || participantName.includes('Carriaga')) {
                            console.log('JASMIN DEBUG - Status check:', {
