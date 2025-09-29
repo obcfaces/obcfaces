@@ -2905,9 +2905,8 @@ const Admin = () => {
                           </div>
                       
                           {/* Column 3: Status History (30ch) */}
-                          <div className="w-[30ch] flex-shrink-0 p-4">
+                          <div className="w-[30ch] flex-shrink-0 p-2">
                             <div className="text-xs">
-                              <div className="font-semibold mb-2 text-gray-800">Статусы:</div>
                               <div className="space-y-1">
                                 {/* Current status */}
                                 <div className="bg-yellow-100 p-2 rounded border">
