@@ -186,6 +186,9 @@ interface WeeklyContestParticipant {
     height_cm: number;
     weight_kg: number;
   } | null;
+  status_week_history?: any;
+  status_history?: any;
+  week_interval?: string;
 }
 
 
@@ -1082,25 +1085,28 @@ const Admin = () => {
       // Fetch all weekly contest participants with their contests data
       const { data: allParticipants, error } = await supabase
         .from('weekly_contest_participants')
-        .select(`
-          id,
-          contest_id,
-          user_id,
-          application_data,
-          final_rank,
-          total_votes,
-          average_rating,
-          created_at,
-          is_active,
-          admin_status,
-          weekly_contests!inner(
-            id,
-            week_start_date,
-            week_end_date,
-            title,
-            status
-          )
-        `)
+         .select(`
+           id,
+           contest_id,
+           user_id,
+           application_data,
+           final_rank,
+           total_votes,
+           average_rating,
+           created_at,
+           is_active,
+           admin_status,
+           status_week_history,
+           status_history,
+           week_interval,
+           weekly_contests!inner(
+             id,
+             week_start_date,
+             week_end_date,
+             title,
+             status
+           )
+         `)
         // Load all participants including inactive ones for past weeks display
         .order('created_at', { ascending: false });
 
@@ -1131,33 +1137,36 @@ const Admin = () => {
           console.error('Error fetching real-time ratings for user:', item.user_id, error);
         }
         
-        return {
-          id: item.id,
-          contest_id: item.contest_id,
-          user_id: item.user_id,
-          application_data: {
-            first_name: appData.first_name || '',
-            last_name: appData.last_name || '',
-            age: appData.age || null,
-            country: appData.country || '',
-            state: appData.state || '',
-            city: appData.city || '',
-            height_cm: appData.height_cm || null,
-            weight_kg: appData.weight_kg || null,
-            gender: appData.gender || '',
-            marital_status: appData.marital_status || '',
-            has_children: appData.has_children || false,
-            photo1_url: appData.photo1_url || '',
-            photo2_url: appData.photo2_url || ''
-          },
-          final_rank: item.final_rank,
-          total_votes: realTimeRatings.total_votes,
-          average_rating: realTimeRatings.average_rating,
-          created_at: contest?.week_start_date || item.created_at,
-          contest_start_date: contest?.week_start_date,
-          is_active: item.is_active,
-          admin_status: item.admin_status || 'this week'
-        };
+         return {
+           id: item.id,
+           contest_id: item.contest_id,
+           user_id: item.user_id,
+           application_data: {
+             first_name: appData.first_name || '',
+             last_name: appData.last_name || '',
+             age: appData.age || null,
+             country: appData.country || '',
+             state: appData.state || '',
+             city: appData.city || '',
+             height_cm: appData.height_cm || null,
+             weight_kg: appData.weight_kg || null,
+             gender: appData.gender || '',
+             marital_status: appData.marital_status || '',
+             has_children: appData.has_children || false,
+             photo1_url: appData.photo1_url || '',
+             photo2_url: appData.photo2_url || ''
+           },
+           final_rank: item.final_rank,
+           total_votes: realTimeRatings.total_votes,
+           average_rating: realTimeRatings.average_rating,
+           created_at: contest?.week_start_date || item.created_at,
+           contest_start_date: contest?.week_start_date,
+           is_active: item.is_active,
+           admin_status: item.admin_status || 'this week',
+           status_week_history: item.status_week_history,
+           status_history: item.status_history,
+           week_interval: item.week_interval
+         };
       }));
 
       console.log('Total participants after transformation:', participants.length);
