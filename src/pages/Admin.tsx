@@ -606,20 +606,33 @@ const Admin = () => {
           
           switch (weeklyContestFilter) {
             case 'this week':
-              // STRICT FILTER: Show ONLY participants with 'this week' status
-              // Exclude any participants with 'past' statuses to prevent duplication
+              // Show participants with 'this week' status OR week-specific statuses
               const isThisWeek = status === 'this week';
+              
+              // Check for week-YYYY-MM-DD format statuses
+              // Current week starts from 2025-09-28 (Monday), so we need to check for week-2025-09-28 or week-2025-09-29
+              const isCurrentWeekFormat = status && (
+                status === 'week-2025-09-28' || 
+                status === 'week-2025-09-29' ||
+                status.startsWith('week-2025-09-') && (
+                  status.includes('-28') || status.includes('-29') || 
+                  status.includes('-30') || status.includes('-01') || 
+                  status.includes('-02') || status.includes('-03') || 
+                  status.includes('-04') || status.includes('-05')
+                )
+              );
+              
               const isApprovedApplication = !participant.contest_id && 
                 contestApplications.some(app => app.user_id === participant.user_id && app.status === 'approved');
               
-              // Explicitly exclude past statuses to prevent duplication
+              // Explicitly exclude past statuses
               const isPastStatus = status === 'past' || 
                                   status === 'past week 1' || 
                                   status === 'past week 2' || 
                                   status === 'past week 3' ||
                                   status === 'past week 4';
               
-              return (isThisWeek || isApprovedApplication) && !isPastStatus;
+              return (isThisWeek || isCurrentWeekFormat || isApprovedApplication) && !isPastStatus;
             case 'pre next week':
               return status === 'pre next week';
             case 'next week':
