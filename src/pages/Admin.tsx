@@ -730,37 +730,35 @@ const Admin = () => {
     filterPastWeekParticipants();
   }, [weeklyParticipants, participantFilters, pastWeekFilter]);
 
-  // Helper function to determine week interval for participant based on admin_status and status_week_history
+  // Helper function to determine week interval for participant based on admin_status and status_week_history  
   const getParticipantWeekInterval = (participant: any) => {
     const adminStatus = participant.admin_status || participantFilters[participant.id];
     
-    // For any status with status_week_history, use the correct interval from there
-    if ((participant as any).status_week_history?.[adminStatus]) {
-      return (participant as any).status_week_history[adminStatus];
+    // If participant has week_interval from database, use it first
+    if (participant.week_interval) {
+      return participant.week_interval;
     }
     
-    // Map other admin_status to specific week dates (актуальные интервалы)
+    // Map admin_status to correct week dates for 2025
     switch (adminStatus) {
       case 'this week':
-        return '29/09-05/10/25'; // Current week (понедельник 29 сентября - воскресенье 5 октября 2025)
-      case 'next week on site':
-        return '06/10-12/10/25'; // Next week on site (понедельник 6 - воскресенье 12 октября 2025)
+        return '29/09-05/10/25';
       case 'next week':
-        return '06/10-12/10/25'; // Next week (понедельник 6 - воскресенье 12 октября 2025)
+      case 'next week on site':
+      case 'pre next week':
+        return '06/10-12/10/25';
       case 'past week 1':
-        return '22/09-28/09/25'; // Past week 1 (понедельник 22 - воскресенье 28 сентября 2025)
-      case 'past week 2':
-        return '15/09-21/09/25'; // Past week 2 (понедельник 15 - воскресенье 21 сентября 2025)
-      case 'past week 3':
-        return '08/09-14/09/25'; // Past week 3 (понедельник 8 - воскресенье 14 сентября 2025)
-      case 'past week 4':
-        return '01/09-07/09/25'; // Past week 4 (понедельник 1 - воскресенье 7 сентября 2025)
       case 'past':
-        return '22/09-28/09/25'; // Past (понедельник 22 - воскресенье 28 сентября 2025)
+        return '22/09-28/09/25';
+      case 'past week 2':
+        return '15/09-21/09/25';
+      case 'past week 3':
+        return '08/09-14/09/25';
+      case 'past week 4':
+        return '01/09-07/09/25';
       case 'pending':
-        return '29/09-05/10/25'; // Pending (текущая неделя)
+        return '29/09-05/10/25';
       default:
-        // Fallback: если нет данных, используем текущую неделю
         return '29/09-05/10/25';
     }
   };
