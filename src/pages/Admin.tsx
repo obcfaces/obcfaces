@@ -2724,9 +2724,13 @@ const Admin = () => {
                          }
                          
                          return hasPastStatus && hasThisWeekStatus;
-                       case 'past week 2':
-                         // Участники с интервалом 22/09-28/09/25 (2 недели назад от текущей)
-                         return weekInterval === '22/09-28/09/25' || weekInterval === '22/09 - 28/09/2025';
+                        case 'past week 2':
+                          // Участники со статусом "past" и интервалом "22.09-28.09.2025" (2 недели назад)
+                          const hasPastStatus22 = statusHistory['past'] && (
+                            statusHistory['past'] === '22/09-28/09/25' || 
+                            statusHistory['past'] === '22/09 - 28/09/2025'
+                          );
+                          return hasPastStatus22;
                        case 'past week 3':
                          // Все остальные интервалы (3+ недель назад)
                          return weekInterval !== '29/09-05/10/25' && 
