@@ -445,39 +445,21 @@ const Admin = () => {
           .filter(app => app.status === 'rejected')
           .filter((app, index, arr) => arr.findIndex(a => a.user_id === app.user_id) === index);
 
-        const rejectedParticipantsWithRatings = await Promise.all(
-          rejectedApps.map(async (app) => {
-            const appData = app.application_data || {};
-            
-            try {
-              const { data: ratingStats } = await supabase
-                .rpc('get_public_participant_rating_stats', { target_participant_id: app.user_id });
-              
-              return {
-                id: `rejected-${app.id}`,
-                user_id: app.user_id,
-                application_data: appData,
-                average_rating: ratingStats?.[0]?.average_rating || 0,
-                total_votes: ratingStats?.[0]?.total_votes || 0,
-                final_rank: null,
-                fromApplication: true,
-                status: 'rejected'
-              };
-            } catch (error) {
-              console.error('Error fetching rating stats:', error);
-              return {
-                id: `rejected-${app.id}`,
-                user_id: app.user_id,
-                application_data: appData,
-                average_rating: 0,
-                total_votes: 0,
-                final_rank: null,
-                fromApplication: true,
-                status: 'rejected'
-              };
-            }
-          })
-        );
+        const rejectedParticipantsWithRatings = rejectedApps.map((app) => {
+          const appData = app.application_data || {};
+          
+          // Для отклоненных заявок рейтинги будут 0, так как они не участвуют в конкурсе
+          return {
+            id: `rejected-${app.id}`,
+            user_id: app.user_id,
+            application_data: appData,
+            average_rating: 0,
+            total_votes: 0,
+            final_rank: null,
+            fromApplication: true,
+            status: 'rejected'
+          };
+        });
 
         setFilteredWeeklyParticipants(rejectedParticipantsWithRatings);
       } else {
@@ -575,30 +557,16 @@ const Admin = () => {
           return adminStatus === 'past' || adminStatus === 'this week';
         });
 
-        // Load rating stats for each participant (past and this week)
-        const pastParticipantsWithRatings = await Promise.all(
-          pastParticipants.map(async (participant) => {
-            try {
-              const { data: ratingStats } = await supabase
-                .rpc('get_public_participant_rating_stats', { target_participant_id: participant.user_id });
-              
-              return {
-                ...participant,
-                average_rating: ratingStats?.[0]?.average_rating || 0,
-                total_votes: ratingStats?.[0]?.total_votes || 0,
-                weekInterval: getParticipantWeekInterval(participant)
-              };
-            } catch (error) {
-              console.error('Error fetching rating stats for participant:', error);
-              return {
-                ...participant,
-                average_rating: 0,
-                total_votes: 0,
-                weekInterval: getParticipantWeekInterval(participant)
-              };
-            }
-          })
-        );
+        // Load rating stats for each participant (past and this week) - использовать данные из weekly_contest_participants
+        const pastParticipantsWithRatings = pastParticipants.map((participant) => {
+          // Используем данные, которые уже есть в weekly_contest_participants
+          return {
+            ...participant,
+            average_rating: participant.average_rating || 0,
+            total_votes: participant.total_votes || 0,
+            weekInterval: getParticipantWeekInterval(participant)
+          };
+        });
         
         console.log('Filtered past week participants:', pastParticipantsWithRatings.length);
         console.log('Past participants admin statuses:', pastParticipantsWithRatings.map(p => p.admin_status));
