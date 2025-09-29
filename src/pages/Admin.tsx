@@ -1147,7 +1147,7 @@ const Admin = () => {
     try {
       console.log('Fetching weekly participants from database...');
       
-      // Fetch all weekly contest participants with their contests data and profiles
+      // Fetch all weekly contest participants with their contests data
       const { data: allParticipants, error } = await supabase
         .from('weekly_contest_participants')
          .select(`
@@ -1163,21 +1163,7 @@ const Admin = () => {
            admin_status,
            status_week_history,
            status_history,
-           week_interval,
-           weekly_contests(
-             id,
-             week_start_date,
-             week_end_date,
-             title,
-             status
-           ),
-           profiles(
-             id,
-             display_name,
-             avatar_url,
-             photo_1_url,
-             photo_2_url
-           )
+           week_interval
          `)
         // Load all participants including inactive ones for past weeks display
         .order('created_at', { ascending: false });
@@ -1191,9 +1177,33 @@ const Admin = () => {
       
       // Transform data to match our interface and fetch real-time rating data
       const participants = await Promise.all((allParticipants || []).map(async (item: any) => {
-        const contest = item.weekly_contests;
         const appData = item.application_data || {};
-        const profile = item.profiles || {};
+        
+        // Fetch contest data separately
+        let contest = null;
+        try {
+          const { data: contestData } = await supabase
+            .from('weekly_contests')
+            .select('id, week_start_date, week_end_date, title, status')
+            .eq('id', item.contest_id)
+            .single();
+          contest = contestData;
+        } catch (error) {
+          console.error('Error fetching contest for participant:', item.contest_id, error);
+        }
+        
+        // Fetch profile data separately
+        let profile: any = {};
+        try {
+          const { data: profileData } = await supabase
+            .from('profiles')
+            .select('id, display_name, avatar_url, photo_1_url, photo_2_url')
+            .eq('id', item.user_id)
+            .single();
+          profile = profileData || {};
+        } catch (error) {
+          console.error('Error fetching profile for user:', item.user_id, error);
+        }
         
         // Fetch real-time rating stats for this user
         let realTimeRatings = { average_rating: 0, total_votes: 0 };
