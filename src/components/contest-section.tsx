@@ -94,25 +94,11 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
 
   const loadContestParticipants = async (weekOffset: number = 0) => {
     try {
-      // Use the existing function and filter by participant_status
-      const { data, error } = await supabase
-        .rpc('get_weekly_contest_participants_public', { weeks_offset: weekOffset });
-
-      console.log(`Loading participants for ${title} with week offset ${weekOffset}:`, data);
-      console.log('Weekly contest participants error:', error);
-
-      if (error) {
-        console.error('Database error loading participants:', error);
-        return [];
-      }
-
-      if (data && Array.isArray(data)) {
-        console.log(`Found ${data.length} real participants for ${title} with week offset ${weekOffset}`);
-        return data;
-      } else {
-        console.warn(`No weekly contest participants found for ${title} with week offset:`, weekOffset);
-        return [];
-      }
+      // ВРЕМЕННО ОТКЛЮЧЕНО: Не загружаем участников на сайт
+      console.log(`Loading participants disabled for ${title} with week offset ${weekOffset}`);
+      
+      // Возвращаем пустой массив - участники не отображаются на сайте
+      return [];
     } catch (err) {
       console.error('Error loading weekly contest participants:', err);
       return [];
