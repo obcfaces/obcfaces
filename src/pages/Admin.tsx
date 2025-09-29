@@ -48,23 +48,34 @@ const isReasonDuplicate = (rejectionReason: string, reasonTypes: string[]) => {
          predefinedReasons.every(reason => rejectionReason.includes(reason));
 };
 
-// Helper function to get date intervals for past weeks
+// Helper function to get date intervals for past weeks based on actual week intervals
 const getWeekInterval = (weeksAgo: number) => {
-  const today = new Date();
-  const currentMonday = new Date(today);
-  currentMonday.setDate(today.getDate() - (today.getDay() === 0 ? 6 : today.getDay() - 1));
-  
-  const targetMonday = new Date(currentMonday);
-  targetMonday.setDate(currentMonday.getDate() - (weeksAgo * 7));
-  
-  const targetSunday = new Date(targetMonday);
-  targetSunday.setDate(targetMonday.getDate() + 6);
-  
-  const formatDate = (date: Date) => {
-    return date.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit' });
-  };
-  
-  return `${formatDate(targetMonday)}-${formatDate(targetSunday)}`;
+  // Return specific intervals that correspond to actual past weeks in the system
+  switch (weeksAgo) {
+    case 1:
+      return '15/09-21/09'; // 1 week ago
+    case 2:
+      return '08/09-14/09'; // 2 weeks ago
+    case 3:
+      return '3+ weeks ago'; // 3+ weeks ago (multiple intervals)
+    default:
+      // Fallback to dynamic calculation
+      const today = new Date();
+      const currentMonday = new Date(today);
+      currentMonday.setDate(today.getDate() - (today.getDay() === 0 ? 6 : today.getDay() - 1));
+      
+      const targetMonday = new Date(currentMonday);
+      targetMonday.setDate(currentMonday.getDate() - (weeksAgo * 7));
+      
+      const targetSunday = new Date(targetMonday);
+      targetSunday.setDate(targetMonday.getDate() + 6);
+      
+      const formatDate = (date: Date) => {
+        return date.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit' });
+      };
+      
+      return `${formatDate(targetMonday)}-${formatDate(targetSunday)}`;
+  }
 };
 
 // Helper function to get date intervals for future weeks
@@ -542,14 +553,14 @@ const Admin = () => {
         console.log('Filtering past week participants - showing all past weeks');
         console.log('All weekly participants:', weeklyParticipants.length);
         
-        // Show all participants from all past weeks (any status that starts with "past week")
+        // Filter participants with 'past' admin_status and group by week intervals from status_week_history
         const pastParticipants = weeklyParticipants.filter(participant => {
           const adminStatus = participant.admin_status || participantFilters[participant.id];
           
-          console.log(`Participant ${participant.id}: status = ${adminStatus}`);
+          console.log(`Participant ${participant.id}: status = ${adminStatus}, week_history =`, (participant as any).status_week_history);
           
-          // Include all past week participants
-          return adminStatus && adminStatus.startsWith('past week');
+          // Include participants with 'past' status
+          return adminStatus === 'past';
         });
 
         // Load rating stats for each past participant
@@ -591,20 +602,25 @@ const Admin = () => {
     filterPastWeekParticipants();
   }, [weeklyParticipants, participantFilters, pastWeekFilter]);
 
-  // Helper function to determine week interval for participant based on admin_status
+  // Helper function to determine week interval for participant based on admin_status and status_week_history
   const getParticipantWeekInterval = (participant: any) => {
     const adminStatus = participant.admin_status || participantFilters[participant.id];
     
-    // Map admin_status to specific week dates based on your contest data
+    // For 'past' status, use the interval from status_week_history
+    if (adminStatus === 'past' && (participant as any).status_week_history?.past) {
+      return (participant as any).status_week_history.past;
+    }
+    
+    // Map other admin_status to specific week dates
     switch (adminStatus) {
-      case 'past week 1':
-        return '15/09 - 21/09/2025'; // Contest id: aa89cda5-e0f7-4421-bdf2-372f406959e7
-      case 'past week 2':
-        return '08/09 - 14/09/2025'; // Contest id: 292653f9-3e93-486e-a531-bd324afaf40e  
-      case 'past week 3':
-        return '18/08 - 24/08/2025'; // Contest id: fc81b526-c732-43f2-9cc2-c46c696e5343
       case 'this week':
         return '22/09 - 28/09/2025'; // Current week
+      case 'next week on site':
+        return '29/09 - 05/10/2025'; // Next week on site
+      case 'next week':
+        return '06/10 - 12/10/2025'; // Next week
+      case 'pre next week':
+        return '13/10 - 19/10/2025'; // Pre next week
       default:
         // Fallback to dynamic calculation for any other cases
         const contestDate = participant.contest_start_date ? 
@@ -2642,17 +2658,31 @@ const Admin = () => {
                 // Use actual past participants if available, otherwise use debug participants for display
                 const participantsToShow = pastWeekParticipants.length > 0 ? pastWeekParticipants : debugPastParticipants;
                 
-                // Apply past week filter
+                // Apply past week filter based on week intervals
                 const filteredByWeek = participantsToShow.filter(participant => {
                   if (pastWeekFilter === 'all') return true;
                   
                   const adminStatus = participant.admin_status || 'this week';
                   
-                  if (pastWeekFilter === 'past week 3') {
-                    return adminStatus.startsWith('past week') && adminStatus !== 'past week 1' && adminStatus !== 'past week 2';
+                  // For 'past' status, filter by week interval
+                  if (adminStatus === 'past') {
+                    const weekInterval = participant.weekInterval || getParticipantWeekInterval(participant);
+                    
+                    // Map filter names to week intervals
+                    switch (pastWeekFilter) {
+                      case 'past week 1':
+                        return weekInterval === '15/09 - 21/09/2025'; // 1 week ago
+                      case 'past week 2':
+                        return weekInterval === '08/09 - 14/09/2025'; // 2 weeks ago
+                      case 'past week 3':
+                        // 3+ weeks ago (any interval that's not week 1 or 2)
+                        return weekInterval !== '15/09 - 21/09/2025' && weekInterval !== '08/09 - 14/09/2025';
+                      default:
+                        return false;
+                    }
                   }
                   
-                  return adminStatus === pastWeekFilter;
+                  return false; // Only show 'past' status participants in past week sections
                 });
                 
                 if (filteredByWeek.length === 0) {
