@@ -2726,12 +2726,31 @@ const Admin = () => {
                          return hasPastStatus && hasThisWeekStatus;
                         case 'past week 2':
                           // Участники со статусом "past" и интервалом "22.09-28.09.2025" (2 недели назад)
-                          const statusHistory2 = participant.status_week_history || {};
-                          const hasPastStatus22 = statusHistory2['past'] && (
-                            statusHistory2['past'] === '22/09-28/09/25' || 
-                            statusHistory2['past'] === '22/09 - 28/09/2025'
-                          );
-                          return hasPastStatus22;
+                          // Проверяем в status_history, а не в status_week_history
+                          const detailedStatusHistory2 = participant.status_history || {};
+                          const pastHistoryInfo = detailedStatusHistory2['past'];
+                          
+                          // Debug log для понимания структуры данных
+                          const participantName2 = `${participant.first_name} ${participant.last_name}`;
+                          console.log(`PAST WEEK 2 DEBUG - ${participantName2}:`, {
+                            pastHistoryInfo: pastHistoryInfo,
+                            hasWeekDates: !!(pastHistoryInfo && pastHistoryInfo.week_start_date && pastHistoryInfo.week_end_date)
+                          });
+                          
+                          if (pastHistoryInfo && pastHistoryInfo.week_start_date && pastHistoryInfo.week_end_date) {
+                            const startDate = new Date(pastHistoryInfo.week_start_date).toLocaleDateString('en-GB');
+                            const endDate = new Date(pastHistoryInfo.week_end_date).toLocaleDateString('en-GB');
+                            
+                            console.log(`PAST WEEK 2 DATE CHECK - ${participantName2}:`, {
+                              startDate: startDate,
+                              endDate: endDate,
+                              match: (startDate === '22/09/2025' && endDate === '28/09/2025')
+                            });
+                            
+                            return (startDate === '22/09/2025' && endDate === '28/09/2025');
+                          }
+                          
+                          return false;
                         case 'past week 3':
                           // Все остальные интервалы (3+ недель назад)
                           return weekInterval !== '29/09-05/10/25' && 
