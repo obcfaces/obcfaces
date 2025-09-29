@@ -159,9 +159,7 @@ const getAvailableWeekIntervals = () => {
     
     intervals.push({
       value: weekInterval.formatted,
-      label: i === 0 ? `Current Week (${weekInterval.formatted})` : 
-             i === 1 ? `Next Week (${weekInterval.formatted})` :
-             `Week +${i} (${weekInterval.formatted})`
+      label: weekInterval.formatted
     });
   }
   
@@ -173,8 +171,7 @@ const getAvailableWeekIntervals = () => {
     
     intervals.unshift({
       value: weekInterval.formatted,
-      label: i === 1 ? `Last Week (${weekInterval.formatted})` : 
-             `Week -${i} (${weekInterval.formatted})`
+      label: weekInterval.formatted
     });
   }
   
