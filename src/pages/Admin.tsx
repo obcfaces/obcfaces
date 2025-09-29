@@ -1164,14 +1164,14 @@ const Admin = () => {
            status_week_history,
            status_history,
            week_interval,
-           weekly_contests!inner(
+           weekly_contests(
              id,
              week_start_date,
              week_end_date,
              title,
              status
            ),
-           profiles!inner(
+           profiles(
              id,
              display_name,
              avatar_url,
@@ -1228,7 +1228,7 @@ const Admin = () => {
              has_children: appData.has_children || false,
              photo1_url: appData.photo1_url || profile.photo_1_url || '',
              photo2_url: appData.photo2_url || profile.photo_2_url || '',
-             avatar_url: profile.avatar_url || ''
+             avatar_url: profile.avatar_url || appData.avatar_url || ''
            },
            final_rank: item.final_rank,
            total_votes: realTimeRatings.total_votes,
