@@ -3035,18 +3035,21 @@ const Admin = () => {
                               {participant.status_history && Object.keys(participant.status_history).length > 0 && (
                                 <div className="text-gray-600">
                                   {(() => {
-                                    const prevStatus = Object.entries(participant.status_history)
+                                    const prevStatuses = Object.entries(participant.status_history)
                                       .sort((a: any, b: any) => new Date(b[1]?.changed_at || 0).getTime() - new Date(a[1]?.changed_at || 0).getTime())
-                                      .find(([status, info]: [string, any]) => status !== participant.admin_status);
+                                      .filter(([status, info]: [string, any]) => status !== participant.admin_status)
+                                      .slice(0, 2);
                                     
-                                    if (prevStatus) {
-                                      const [status, info] = prevStatus as [string, any];
+                                    return prevStatuses.map(([status, info]: [string, any], index: number) => {
                                       const interval = info?.week_start_date ? 
                                         `${new Date(info.week_start_date).toLocaleDateString('ru-RU', {day: '2-digit', month: '2-digit'})} - ${new Date(info.week_end_date).toLocaleDateString('ru-RU', {day: '2-digit', month: '2-digit', year: '2-digit'})}` : 
                                         'нет интервала';
-                                      return `${status} - ${interval}`;
-                                    }
-                                    return '';
+                                      return (
+                                        <div key={index}>
+                                          {status} - {interval}
+                                        </div>
+                                      );
+                                    });
                                   })()}
                                 </div>
                               )}
