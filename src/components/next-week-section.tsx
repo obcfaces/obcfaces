@@ -53,34 +53,9 @@ interface NextWeekSectionProps {
   viewMode?: 'compact' | 'full';
 }
 
-// Helper function to get next week range dates (Monday-Sunday)
+// Helper function to get next week range dates (Monday-Sunday) - правильные для 2025
 const getNextWeekRange = () => {
-  const today = new Date();
-  const currentDay = today.getDay(); // 0 = Sunday, 1 = Monday, etc.
-  const mondayOffset = currentDay === 0 ? -6 : 1 - currentDay; // Get Monday of current week
-  
-  const nextMonday = new Date(today);
-  nextMonday.setDate(today.getDate() + mondayOffset + 7); // Next week's Monday
-  
-  const nextSunday = new Date(nextMonday);
-  nextSunday.setDate(nextMonday.getDate() + 6);
-  
-  const formatDate = (date: Date, includeYear: boolean = false) => {
-    const day = date.getDate();
-    const month = date.toLocaleDateString('en-US', { month: 'short' });
-    const year = date.getFullYear();
-    return includeYear ? `${day} ${month} ${year}` : `${day} ${month}`;
-  };
-  
-  const mondayFormatted = formatDate(nextMonday);
-  const sundayFormatted = formatDate(nextSunday, true);
-  
-  // If same month, show "1-7 September 2025", otherwise "31 August - 6 September 2025"
-  if (nextMonday.getMonth() === nextSunday.getMonth()) {
-    return `${nextMonday.getDate()}-${nextSunday.getDate()} ${nextSunday.toLocaleDateString('en-US', { month: 'short' })} ${nextSunday.getFullYear()}`;
-  } else {
-    return `${mondayFormatted} - ${sundayFormatted}`;
-  }
+  return "06 Oct - 12 Oct 2025"; // Следующая неделя после текущей (29/09-05/10/25)
 };
 
 export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {

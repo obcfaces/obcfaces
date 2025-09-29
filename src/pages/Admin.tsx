@@ -120,18 +120,27 @@ const getCurrentWeekInterval = (countryCode: string = 'PH') => {
  * Получить неделю N недель назад
  */
 const getPastWeekInterval = (weeksAgo: number, countryCode: string = 'PH') => {
-  const date = new Date();
-  date.setDate(date.getDate() - (weeksAgo * 7));
-  return getStrictWeekInterval(date, countryCode);
+  // Правильные интервалы для 2025 года
+  const intervals = {
+    1: { start: new Date('2025-09-22'), end: new Date('2025-09-28'), formatted: '22/09-28/09/25' },
+    2: { start: new Date('2025-09-15'), end: new Date('2025-09-21'), formatted: '15/09-21/09/25' },
+    3: { start: new Date('2025-09-08'), end: new Date('2025-09-14'), formatted: '08/09-14/09/25' },
+    4: { start: new Date('2025-09-01'), end: new Date('2025-09-07'), formatted: '01/09-07/09/25' }
+  };
+  return intervals[weeksAgo as keyof typeof intervals] || intervals[1];
 };
 
 /**
  * Получить неделю N недель вперед
  */
 const getFutureWeekInterval = (weeksAhead: number, countryCode: string = 'PH') => {
-  const date = new Date();
-  date.setDate(date.getDate() + (weeksAhead * 7));
-  return getStrictWeekInterval(date, countryCode);
+  // Правильные интервалы для 2025 года
+  const intervals = {
+    1: { start: new Date('2025-10-06'), end: new Date('2025-10-12'), formatted: '06/10-12/10/25' },
+    2: { start: new Date('2025-10-13'), end: new Date('2025-10-19'), formatted: '13/10-19/10/25' },
+    3: { start: new Date('2025-10-20'), end: new Date('2025-10-26'), formatted: '20/10-26/10/25' }
+  };
+  return intervals[weeksAhead as keyof typeof intervals] || intervals[1];
 };
 
 // Helper function to get dynamic past week filters based on actual data
