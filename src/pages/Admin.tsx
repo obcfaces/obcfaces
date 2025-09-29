@@ -606,34 +606,46 @@ const Admin = () => {
           
           switch (weeklyContestFilter) {
             case 'this week':
-              // Show participants with 'this week' status OR approved applications not yet in weekly contest
-              // Also include participants with specific week statuses that match current week interval
+              // STRICT FILTER: Show ONLY participants with 'this week' status
+              // Exclude any participants with 'past' statuses to prevent duplication
               const isThisWeek = status === 'this week';
               const isApprovedApplication = !participant.contest_id && 
                 contestApplications.some(app => app.user_id === participant.user_id && app.status === 'approved');
               
-              // Check if participant has week-specific status that matches current interval
-              const currentWeekInterval = '29/09-05/10/25'; // Current week
-              const participantInterval = participant.week_interval || getParticipantWeekInterval(participant);
-              const isMatchingWeekInterval = participantInterval === currentWeekInterval;
+              // Explicitly exclude past statuses to prevent duplication
+              const isPastStatus = status === 'past' || 
+                                  status === 'past week 1' || 
+                                  status === 'past week 2' || 
+                                  status === 'past week 3' ||
+                                  status === 'past week 4';
               
-              // Also check for old "week-YYYY-MM-DD" format statuses - week-2025-09-23 should be current week
-              const isWeekStatusFormat = status && status.startsWith('week-2025-09-') && (
-                status.includes('29') || status.includes('30') || status.includes('01') || 
-                status.includes('02') || status.includes('03') || status.includes('04') || status.includes('05')
-              );
-              
-              return isThisWeek || isApprovedApplication || isMatchingWeekInterval || isWeekStatusFormat;
+              return (isThisWeek || isApprovedApplication) && !isPastStatus;
             case 'pre next week':
               return status === 'pre next week';
             case 'next week':
               // Show participants with 'next week' or 'next week on site' status OR applications with 'next week' status
+              // Exclude past and current week statuses
               const isNextWeek = status === 'next week' || status === 'next week on site';
               const isNextWeekApplication = !participant.contest_id && 
                 contestApplications.some(app => app.user_id === participant.user_id && app.status === 'next week');
-              return isNextWeek || isNextWeekApplication;
+              const isNotPastOrCurrent = status !== 'this week' && 
+                                        status !== 'past' && 
+                                        status !== 'past week 1' && 
+                                        status !== 'past week 2' && 
+                                        status !== 'past week 3';
+              return (isNextWeek || isNextWeekApplication) && isNotPastOrCurrent;
             case 'past':
-              return status === 'past' || status === 'past week 1' || status === 'past week 2' || status === 'past week 3';
+              // STRICT FILTER: Show ONLY participants with past statuses
+              // Exclude current and future week statuses
+              const isPast = status === 'past' || 
+                            status === 'past week 1' || 
+                            status === 'past week 2' || 
+                            status === 'past week 3';
+              const isNotCurrentOrFuture = status !== 'this week' && 
+                                          status !== 'next week' && 
+                                          status !== 'next week on site' && 
+                                          status !== 'pre next week';
+              return isPast && isNotCurrentOrFuture;
             case 'pending':
               return status === 'pending';
             case 'approved':
