@@ -104,7 +104,7 @@ serve(async (req) => {
       }
     }
 
-    // 3. Переводим "next week" → "next week on site"
+    // 3. Обновляем интервал для "next week" (статус остается тот же)
     const { data: nextWeekParticipants, error: nextWeekError } = await supabase
       .from('weekly_contest_participants')
       .select('id, status_week_history')
@@ -119,13 +119,13 @@ serve(async (req) => {
     for (const participant of nextWeekParticipants || []) {
       const updatedHistory = {
         ...participant.status_week_history,
-        'next week on site': weekInterval
+        'next week': weekInterval
       }
 
       const { error: updateError } = await supabase
         .from('weekly_contest_participants')
         .update({
-          admin_status: 'next week on site',
+          admin_status: 'next week',
           status_week_history: updatedHistory
         })
         .eq('id', participant.id)
@@ -134,7 +134,7 @@ serve(async (req) => {
         console.error(`Error updating participant ${participant.id}:`, updateError)
       } else {
         transitions.nextWeekToNextWeekOnSite++
-        console.log(`Moved participant ${participant.id} from "next week" to "next week on site"`)
+        console.log(`Updated participant ${participant.id} "next week" interval to ${weekInterval}`)
       }
     }
 
