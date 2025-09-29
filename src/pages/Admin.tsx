@@ -2906,7 +2906,7 @@ const Admin = () => {
                       
                           {/* Column 3: Status History (30ch) */}
                           <div className="w-[30ch] flex-shrink-0 p-2">
-                            <div className="text-xs">
+                            <div className="text-xs h-32 overflow-y-auto">
                               <div className="space-y-1">
                                 {/* Current status */}
                                 <div className="bg-yellow-100 p-2 rounded border">
