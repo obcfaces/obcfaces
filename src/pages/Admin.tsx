@@ -144,7 +144,7 @@ const getFutureWeekInterval = (weeksAhead: number, countryCode: string = 'PH') =
 };
 
 // Helper function to get dynamic past week filters based on actual data
-const getDynamicPastWeekFilters = useMemo(() => {
+const createDynamicPastWeekFilters = () => {
   // Используем правильные статические интервалы для 2025 года
   const staticWeeks = [
     '29/09-05/10/25', // 1 week ago
@@ -155,7 +155,7 @@ const getDynamicPastWeekFilters = useMemo(() => {
     '18/08-24/08/25'  // 6 weeks ago
   ];
   
-  console.log('Creating static week filters');
+  // Не нужен console.log здесь - будет логировать один раз при создании
   
   // Return static weeks already sorted
   const sortedWeeks = staticWeeks;
@@ -186,7 +186,7 @@ const getDynamicPastWeekFilters = useMemo(() => {
   });
   
   return filters;
-}, []); // Пустой массив зависимостей, так как фильтры статические
+};
 
 
 
@@ -355,6 +355,11 @@ const Admin = () => {
   const { toast } = useToast();
 
   console.log('Admin component rendering, statusFilter:', statusFilter);
+
+  // Мемоизированные фильтры для прошлых недель
+  const getDynamicPastWeekFilters = useMemo(() => {
+    return createDynamicPastWeekFilters();
+  }, []);
 
   useEffect(() => {
     checkAdminAccess();
