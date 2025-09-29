@@ -462,6 +462,8 @@ const Admin = () => {
               const shouldInclude = status === 'this week';
               console.log(`Should include for 'this week': ${shouldInclude}`);
               return shouldInclude;
+            case 'pre next week':
+              return status === 'pre next week';
             case 'next week':
               return status === 'next week';
             case 'past week 1':
@@ -1529,25 +1531,23 @@ const Admin = () => {
           <Tabs defaultValue="applications" className="space-y-6">
             {/* Mobile layout: Single row with all tabs */}
             <div className="md:hidden">
-              <TabsList className="grid grid-cols-5 w-full">
-                <TabsTrigger value="applications" className="flex items-center gap-1 text-xs">
-                  <FileText className="w-3 h-3" />
+              <TabsList className="grid grid-cols-6 w-full">
+                <TabsTrigger value="applications" className="text-xs">
                   Card
                 </TabsTrigger>
-                <TabsTrigger value="weekly" className="flex items-center gap-1 text-xs">
-                  <Calendar className="w-3 h-3" />
-                  This
+                <TabsTrigger value="prenextweek" className="text-xs">
+                  Pre
                 </TabsTrigger>
-                <TabsTrigger value="nextweek" className="flex items-center gap-1 text-xs">
-                  <Calendar className="w-3 h-3" />
+                <TabsTrigger value="nextweek" className="text-xs">
                   Next
                 </TabsTrigger>
-                <TabsTrigger value="pastweek" className="flex items-center gap-1 text-xs">
-                  <Trophy className="w-3 h-3" />
+                <TabsTrigger value="weekly" className="text-xs">
+                  This
+                </TabsTrigger>
+                <TabsTrigger value="pastweek" className="text-xs">
                   Past
                 </TabsTrigger>
-                <TabsTrigger value="registrations" className="flex items-center gap-1 text-xs">
-                  <UserCog className="w-3 h-3" />
+                <TabsTrigger value="registrations" className="text-xs">
                   Reg
                 </TabsTrigger>
               </TabsList>
@@ -1555,28 +1555,25 @@ const Admin = () => {
 
             {/* Desktop layout - single row */}
             <TabsList className="hidden md:flex">
-              <TabsTrigger value="weekly" className="flex items-center gap-2">
-                <Calendar className="w-4 h-4" />
-                Weekly Contests
-              </TabsTrigger>
-              <TabsTrigger value="nextweek" className="flex items-center gap-2">
-                <Calendar className="w-4 h-4" />
-                Next Week
-              </TabsTrigger>
-              <TabsTrigger value="pastweek" className="flex items-center gap-2">
-                <Trophy className="w-4 h-4" />
-                Past Week
-              </TabsTrigger>
-              <TabsTrigger value="applications" className="flex items-center gap-2">
-                <FileText className="w-4 h-4" />
+              <TabsTrigger value="applications">
                 Contest Applications
               </TabsTrigger>
-              <TabsTrigger value="registrations" className="flex items-center gap-2">
-                <UserCog className="w-4 h-4" />
+              <TabsTrigger value="prenextweek">
+                Pre Next Week
+              </TabsTrigger>
+              <TabsTrigger value="nextweek">
+                Next Week
+              </TabsTrigger>
+              <TabsTrigger value="weekly">
+                Weekly Contests
+              </TabsTrigger>
+              <TabsTrigger value="pastweek">
+                Past Week
+              </TabsTrigger>
+              <TabsTrigger value="registrations">
                 Регистрации
               </TabsTrigger>
-              <TabsTrigger value="winnercontent" className="flex items-center gap-2">
-                <Trophy className="w-4 h-4" />
+              <TabsTrigger value="winnercontent">
                 Контент победителей
               </TabsTrigger>
             </TabsList>
@@ -1993,6 +1990,154 @@ const Admin = () => {
                                 >
                                   {`${(participant.average_rating || 0).toFixed(1)} (${participant.total_votes || 0})`}
                                 </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                });
+              })()}
+            </TabsContent>
+
+            <TabsContent value="prenextweek" className="space-y-4">
+              <div className="mb-6">
+                <div>
+                  <h2 className="text-xl font-semibold">Pre Next Week Participants</h2>
+                  <p className="text-muted-foreground">Participants scheduled for pre next week status</p>
+                </div>
+              </div>
+              
+              {(() => {
+                // Фильтруем участников со статусом "pre next week"
+                const preNextWeekParticipants = weeklyParticipants.filter(participant => {
+                  const status = participant.admin_status || 'this week';
+                  return status === 'pre next week';
+                });
+                
+                if (preNextWeekParticipants.length === 0) {
+                  return (
+                    <div className="text-center py-8 text-muted-foreground">
+                      No participants found with "pre next week" status
+                    </div>
+                  );
+                }
+                
+                return preNextWeekParticipants.map((participant) => {
+                  const participantProfile = profiles.find(p => p.id === participant.user_id);
+                  const appData = participant.application_data || {};
+                  
+                  return (
+                    <Card key={participant.id} className="overflow-hidden relative h-[149px]">
+                      <CardContent className="p-0">
+                        {/* Desktop layout */}
+                        <div className="hidden md:flex">
+                          {/* Photos section - 2 columns */}
+                          <div className="flex gap-px w-[25ch] flex-shrink-0">
+                            {(participantProfile?.photo_1_url || appData.photo1_url) && (
+                              <div className="w-1/2">
+                                <img 
+                                  src={participantProfile?.photo_1_url || appData.photo1_url} 
+                                  alt="Portrait" 
+                                  className="w-full h-[149px] object-contain cursor-pointer hover:opacity-90 transition-opacity"
+                                  onClick={() => openPhotoModal([
+                                    participantProfile?.photo_1_url || appData.photo1_url, 
+                                    participantProfile?.photo_2_url || appData.photo2_url
+                                  ].filter(Boolean), 0, `${participantProfile?.first_name || appData.first_name} ${participantProfile?.last_name || appData.last_name}`)}
+                                />
+                              </div>
+                            )}
+                            {(participantProfile?.photo_2_url || appData.photo2_url) && (
+                              <div className="w-1/2 relative">
+                                <img 
+                                  src={participantProfile?.photo_2_url || appData.photo2_url} 
+                                  alt="Full length" 
+                                  className="w-full h-[149px] object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                                  onClick={() => openPhotoModal([
+                                    participantProfile?.photo_1_url || appData.photo1_url, 
+                                    participantProfile?.photo_2_url || appData.photo2_url
+                                  ].filter(Boolean), 1, `${participantProfile?.first_name || appData.first_name} ${participantProfile?.last_name || appData.last_name}`)}
+                                />
+                              </div>
+                            )}
+                          </div>
+                          
+                          {/* Information section */}
+                          <div className="flex-1 pl-4 pr-4 py-3 flex flex-col">
+                            <div className="flex items-center justify-between mb-2">
+                              <div className="flex items-center gap-2">
+                                <span className="font-semibold">
+                                  {participantProfile?.first_name || appData.first_name} {participantProfile?.last_name || appData.last_name}
+                                </span>
+                                <span className="text-sm text-muted-foreground">
+                                  ({participantProfile?.age || new Date().getFullYear() - appData.birth_year})
+                                </span>
+                              </div>
+                              
+                              {/* Status selector */}
+                              <Select 
+                                value={participant.admin_status || 'pre next week'}
+                                onValueChange={async (newStatus) => {
+                                  setParticipantFilters(prev => ({
+                                    ...prev,
+                                    [participant.id]: newStatus
+                                  }));
+
+                                  try {
+                                    const { error } = await supabase
+                                      .from('weekly_contest_participants')
+                                      .update({ admin_status: newStatus } as any)
+                                      .eq('id', participant.id);
+                                    
+                                    if (error) {
+                                      console.error('Error updating participant status:', error);
+                                      toast({
+                                        title: "Error",
+                                        description: "Failed to update participant status",
+                                        variant: "destructive",
+                                      });
+                                    } else {
+                                      toast({
+                                        title: "Status Updated",
+                                        description: `Participant status changed to ${newStatus}`,
+                                      });
+                                      fetchWeeklyParticipants();
+                                    }
+                                  } catch (error) {
+                                    console.error('Error updating participant status:', error);
+                                  }
+                                }}
+                              >
+                                <SelectTrigger className="w-40 h-8 text-xs">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="pre next week">Pre Next Week</SelectItem>
+                                  <SelectItem value="next week">Next Week</SelectItem>
+                                  <SelectItem value="next week on site">Next Week On Site</SelectItem>
+                                  <SelectItem value="this week">This Week</SelectItem>
+                                  <SelectItem value="past week 1">Past Week 1</SelectItem>
+                                  <SelectItem value="past week 2">Past Week 2</SelectItem>
+                                  <SelectItem value="past week 3">Past Week 3</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            
+                            <div className="text-sm text-muted-foreground mb-2">
+                              {participantProfile?.city || appData.city}, {participantProfile?.country || appData.country}
+                            </div>
+                            
+                            <div className="text-sm text-muted-foreground">
+                              {participantProfile?.height_cm || appData.height_cm}cm, {participantProfile?.weight_kg || appData.weight_kg}kg
+                            </div>
+                            
+                            <div className="flex-1"></div>
+                            
+                            <div className="flex items-center justify-between">
+                              <div className="text-sm">
+                                <span className="text-muted-foreground">Rating:</span> {participant.average_rating || 0}
+                                <span className="text-muted-foreground ml-2">Votes:</span> {participant.total_votes || 0}
                               </div>
                             </div>
                           </div>
