@@ -2910,30 +2910,42 @@ const Admin = () => {
                               <div className="flex flex-wrap gap-1">
                                 {/* Show all statuses including current, sorted by changed_at (newest first) */}
                                 {participant.status_history && Object.keys(participant.status_history).length > 0 ? (
-                                  Object.entries(participant.status_history)
-                                    .sort((a: any, b: any) => new Date(b[1]?.changed_at || 0).getTime() - new Date(a[1]?.changed_at || 0).getTime())
-                                     .map(([status, info]: [string, any], index: number) => {
-                                       // Use correct interval mapping instead of wrong data from status_history
-                                       const interval = (() => {
-                                         switch (status) {
-                                           case 'this week':
-                                             return '29/09-05/10/25';
-                                           case 'next week':
-                                           case 'next week on site':
-                                           case 'pre next week':
-                                             return '06/10-12/10/25';
-                                           case 'past week 1':
-                                           case 'past':
-                                             return '22/09-28/09/25';
-                                           case 'past week 2':
-                                             return '15/09-21/09/25';
-                                           case 'past week 3':
-                                             return '08/09-14/09/25';
-                                           default:
-                                             return participant.week_interval || '29/09-05/10/25';
-                                         }
-                                       })();
-                                      
+                                  (() => {
+                                    // Sort all status entries by changed_at (newest first)
+                                    const sortedEntries = Object.entries(participant.status_history)
+                                      .sort((a: any, b: any) => new Date(b[1]?.changed_at || 0).getTime() - new Date(a[1]?.changed_at || 0).getTime());
+                                    
+                                    // Group statuses by name to find previous occurrences
+                                    const statusOccurrences = new Map<string, any[]>();
+                                    sortedEntries.forEach(([status, info]) => {
+                                      if (!statusOccurrences.has(status)) {
+                                        statusOccurrences.set(status, []);
+                                      }
+                                      statusOccurrences.get(status)!.push(info);
+                                    });
+                                    
+                                    return sortedEntries.map(([status, info]: [string, any], index: number) => {
+                                      // Use correct interval mapping instead of wrong data from status_history
+                                      const interval = (() => {
+                                        switch (status) {
+                                          case 'this week':
+                                            return '29/09-05/10/25';
+                                          case 'next week':
+                                          case 'next week on site':
+                                          case 'pre next week':
+                                            return '06/10-12/10/25';
+                                          case 'past week 1':
+                                          case 'past':
+                                            return '22/09-28/09/25';
+                                          case 'past week 2':
+                                            return '15/09-21/09/25';
+                                          case 'past week 3':
+                                            return '08/09-14/09/25';
+                                          default:
+                                            return participant.week_interval || '29/09-05/10/25';
+                                        }
+                                      })();
+                                     
                                       const changedAt = info?.changed_at ? 
                                         new Date(info.changed_at).toLocaleDateString('ru-RU', {
                                           day: '2-digit',
@@ -2943,16 +2955,30 @@ const Admin = () => {
                                         }).replace(',', '') : 
                                         '';
                                       
+                                      // Find previous occurrence of the same status
+                                      const occurrences = statusOccurrences.get(status) || [];
+                                      const currentOccurrenceIndex = occurrences.findIndex(occ => 
+                                        occ.changed_at === info.changed_at
+                                      );
+                                      const previousOccurrence = occurrences[currentOccurrenceIndex + 1];
+                                      
+                                      const previousDate = previousOccurrence?.changed_at ? 
+                                        new Date(previousOccurrence.changed_at).toLocaleDateString('ru-RU', {
+                                          day: '2-digit',
+                                          month: 'short'
+                                        }) : '';
+                                      
                                       const isCurrentStatus = status === participant.admin_status;
                                       
                                       return (
                                         <div key={index} className={`p-1 rounded text-xs flex-shrink-0 ${
                                           isCurrentStatus ? 'bg-yellow-100 border font-medium text-gray-700' : 'bg-gray-100 text-gray-600'
                                         }`}>
-                                          {status} - {interval} {changedAt && `(${changedAt})`}
+                                          {status} - {interval} {changedAt && `(${changedAt})`}{previousDate && ` (предыд: ${previousDate})`}
                                         </div>
                                       );
-                                    })
+                                     });
+                                   })()
                                 ) : (
                                   // Fallback for when there's no status_history but we have current status
                                   <div className="bg-yellow-100 p-1 rounded border text-xs font-medium text-gray-700 flex-shrink-0">
