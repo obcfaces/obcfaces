@@ -2703,10 +2703,21 @@ const Admin = () => {
                     // Map filter names to week intervals (правильное сопоставление)
                     switch (pastWeekFilter) {
                        case 'past week 1':
-                         // Участники с интервалом 29/09-05/10/25 (текущий статус past)
-                         // ИЛИ участники со статусом this week с интервалом 22/09-28/09/25
-                         return (weekInterval === '29/09-05/10/25' || weekInterval === '29/09 - 05/10/2025') ||
-                                (adminStatus === 'this week' && (weekInterval === '22/09-28/09/25' || weekInterval === '22/09 - 28/09/2025'));
+                         // Участники должны иметь ОБА статуса:
+                         // 1. статус "past" с интервалом "29/09-05/10/25" 
+                         // 2. статус "this week" с интервалом "22/09-28/09/25"
+                         const statusHistory = participant.status_week_history || {};
+                         const hasPastStatus = statusHistory['past'] && (
+                           statusHistory['past'] === '29/09-05/10/25' || 
+                           statusHistory['past'] === '29/09 - 05/10/2025' ||
+                           statusHistory['past'] === '29/09-05/10/25'
+                         );
+                         const hasThisWeekStatus = statusHistory['this week'] && (
+                           statusHistory['this week'] === '22/09-28/09/25' || 
+                           statusHistory['this week'] === '22/09 - 28/09/2025' ||
+                           statusHistory['this week'] === '22/09-28/09/25'
+                         );
+                         return hasPastStatus && hasThisWeekStatus;
                        case 'past week 2':
                          // Участники с интервалом 22/09-28/09/25 (2 недели назад от текущей)
                          return weekInterval === '22/09-28/09/25' || weekInterval === '22/09 - 28/09/2025';
