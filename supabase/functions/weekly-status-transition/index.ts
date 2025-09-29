@@ -104,39 +104,8 @@ serve(async (req) => {
       }
     }
 
-    // 3. Обновляем интервал для "next week" (статус остается тот же)
-    const { data: nextWeekParticipants, error: nextWeekError } = await supabase
-      .from('weekly_contest_participants')
-      .select('id, status_week_history')
-      .eq('admin_status', 'next week')
-      .eq('is_active', true)
-
-    if (nextWeekError) {
-      console.error('Error fetching next week participants:', nextWeekError)
-      throw nextWeekError
-    }
-
-    for (const participant of nextWeekParticipants || []) {
-      const updatedHistory = {
-        ...participant.status_week_history,
-        'next week': weekInterval
-      }
-
-      const { error: updateError } = await supabase
-        .from('weekly_contest_participants')
-        .update({
-          admin_status: 'next week',
-          status_week_history: updatedHistory
-        })
-        .eq('id', participant.id)
-
-      if (updateError) {
-        console.error(`Error updating participant ${participant.id}:`, updateError)
-      } else {
-        transitions.nextWeekToNextWeekOnSite++
-        console.log(`Updated participant ${participant.id} "next week" interval to ${weekInterval}`)
-      }
-    }
+    // 3. Статус "next week" остается без изменений для фильтрации в админке по неделям
+    console.log('Skipping "next week" participants - they remain unchanged for admin filtering')
 
     const summary = {
       success: true,
