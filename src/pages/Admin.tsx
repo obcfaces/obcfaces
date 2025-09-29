@@ -2956,17 +2956,28 @@ const Admin = () => {
                                         '';
                                       
                                       // Find previous occurrence of the same status
-                                      const occurrences = statusOccurrences.get(status) || [];
-                                      const currentOccurrenceIndex = occurrences.findIndex(occ => 
-                                        occ.changed_at === info.changed_at
-                                      );
-                                      const previousOccurrence = occurrences[currentOccurrenceIndex + 1];
-                                      
-                                      const previousDate = previousOccurrence?.changed_at ? 
-                                        new Date(previousOccurrence.changed_at).toLocaleDateString('ru-RU', {
-                                          day: '2-digit',
-                                          month: 'short'
-                                        }) : '';
+                                       const occurrences = statusOccurrences.get(status) || [];
+                                       const currentOccurrenceIndex = occurrences.findIndex(occ => 
+                                         occ.changed_at === info.changed_at
+                                       );
+                                       const previousOccurrence = occurrences[currentOccurrenceIndex + 1];
+                                       
+                                       // If no previous occurrence in status_history but this is current status,
+                                       // use the participant creation date as previous occurrence
+                                       let previousDate = '';
+                                       if (previousOccurrence?.changed_at) {
+                                         previousDate = new Date(previousOccurrence.changed_at).toLocaleDateString('ru-RU', {
+                                           day: '2-digit',
+                                           month: 'short'
+                                         });
+                                       } else if (status === participant.admin_status && currentOccurrenceIndex === 0) {
+                                         // This is the current status and first occurrence in history
+                                         // Use participant creation date as the original date when status was first set
+                                         previousDate = new Date(participant.created_at).toLocaleDateString('ru-RU', {
+                                           day: '2-digit',
+                                           month: 'short'
+                                         });
+                                       }
                                       
                                       const isCurrentStatus = status === participant.admin_status;
                                       
