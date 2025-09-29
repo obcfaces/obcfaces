@@ -3037,8 +3037,7 @@ const Admin = () => {
                                   {(() => {
                                     const prevStatuses = Object.entries(participant.status_history)
                                       .sort((a: any, b: any) => new Date(b[1]?.changed_at || 0).getTime() - new Date(a[1]?.changed_at || 0).getTime())
-                                      .filter(([status, info]: [string, any]) => status !== participant.admin_status)
-                                      .slice(0, 2);
+                                      .filter(([status, info]: [string, any]) => status !== participant.admin_status);
                                     
                                     return prevStatuses.map(([status, info]: [string, any], index: number) => {
                                       const interval = info?.week_start_date ? 
