@@ -2726,31 +2726,43 @@ const Admin = () => {
                          return hasPastStatus && hasThisWeekStatus;
                         case 'past week 2':
                           // Участники со статусом "past" и интервалом "22.09-28.09.2025" (2 недели назад)
-                          // Проверяем в status_history, а не в status_week_history
+                          // НО которые НЕ имеют статуса "this week" с тем же интервалом
                           const detailedStatusHistory2 = participant.status_history || {};
                           const pastHistoryInfo = detailedStatusHistory2['past'];
+                          const thisWeekHistoryInfo = detailedStatusHistory2['this week'];
                           
                           // Debug log для понимания структуры данных
                           const participantName2 = `${participant.first_name} ${participant.last_name}`;
                           console.log(`PAST WEEK 2 DEBUG - ${participantName2}:`, {
                             pastHistoryInfo: pastHistoryInfo,
+                            thisWeekHistoryInfo: thisWeekHistoryInfo,
                             hasWeekDates: !!(pastHistoryInfo && pastHistoryInfo.week_start_date && pastHistoryInfo.week_end_date)
                           });
                           
+                          // Проверяем что есть статус "past" с периодом 22/09-28/09
+                          let hasPastStatus22 = false;
                           if (pastHistoryInfo && pastHistoryInfo.week_start_date && pastHistoryInfo.week_end_date) {
                             const startDate = new Date(pastHistoryInfo.week_start_date).toLocaleDateString('en-GB');
                             const endDate = new Date(pastHistoryInfo.week_end_date).toLocaleDateString('en-GB');
-                            
-                            console.log(`PAST WEEK 2 DATE CHECK - ${participantName2}:`, {
-                              startDate: startDate,
-                              endDate: endDate,
-                              match: (startDate === '22/09/2025' && endDate === '28/09/2025')
-                            });
-                            
-                            return (startDate === '22/09/2025' && endDate === '28/09/2025');
+                            hasPastStatus22 = (startDate === '22/09/2025' && endDate === '28/09/2025');
                           }
                           
-                          return false;
+                          // Проверяем что НЕТ статуса "this week" с тем же периодом
+                          let hasThisWeekStatus22 = false;
+                          if (thisWeekHistoryInfo && thisWeekHistoryInfo.week_start_date && thisWeekHistoryInfo.week_end_date) {
+                            const startDate = new Date(thisWeekHistoryInfo.week_start_date).toLocaleDateString('en-GB');
+                            const endDate = new Date(thisWeekHistoryInfo.week_end_date).toLocaleDateString('en-GB');
+                            hasThisWeekStatus22 = (startDate === '22/09/2025' && endDate === '28/09/2025');
+                          }
+                          
+                          console.log(`PAST WEEK 2 DATE CHECK - ${participantName2}:`, {
+                            hasPastStatus22: hasPastStatus22,
+                            hasThisWeekStatus22: hasThisWeekStatus22,
+                            result: hasPastStatus22 && !hasThisWeekStatus22
+                          });
+                          
+                          // Возвращаем true только если есть "past" 22/09-28/09 И НЕТ "this week" 22/09-28/09
+                          return hasPastStatus22 && !hasThisWeekStatus22;
                         case 'past week 3':
                           // Все остальные интервалы (3+ недель назад)
                           return weekInterval !== '29/09-05/10/25' && 
