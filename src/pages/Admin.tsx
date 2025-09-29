@@ -144,6 +144,43 @@ const getFutureWeekInterval = (weeksAhead: number, countryCode: string = 'PH') =
   return intervals[weeksAhead as keyof typeof intervals] || intervals[1];
 };
 
+/**
+ * Получить список доступных интервалов недель начиная с текущей недели
+ */
+const getAvailableWeekIntervals = () => {
+  const intervals = [];
+  const currentDate = new Date();
+  
+  // Добавляем текущую неделю и следующие недели
+  for (let i = 0; i < 12; i++) {
+    const weekDate = new Date(currentDate);
+    weekDate.setDate(currentDate.getDate() + (i * 7));
+    const weekInterval = getStrictWeekInterval(weekDate, 'PH');
+    
+    intervals.push({
+      value: weekInterval.formatted,
+      label: i === 0 ? `Current Week (${weekInterval.formatted})` : 
+             i === 1 ? `Next Week (${weekInterval.formatted})` :
+             `Week +${i} (${weekInterval.formatted})`
+    });
+  }
+  
+  // Добавляем прошлые недели
+  for (let i = 1; i <= 8; i++) {
+    const weekDate = new Date(currentDate);
+    weekDate.setDate(currentDate.getDate() - (i * 7));
+    const weekInterval = getStrictWeekInterval(weekDate, 'PH');
+    
+    intervals.unshift({
+      value: weekInterval.formatted,
+      label: i === 1 ? `Last Week (${weekInterval.formatted})` : 
+             `Week -${i} (${weekInterval.formatted})`
+    });
+  }
+  
+  return intervals;
+};
+
 // Helper function to get dynamic past week filters based on actual data
 const createDynamicPastWeekFilters = () => {
   // Используем правильные статические интервалы для 2025 года
@@ -332,6 +369,7 @@ const Admin = () => {
   const [participantFilters, setParticipantFilters] = useState<{ [key: string]: string }>({});
   const [pastWeekParticipants, setPastWeekParticipants] = useState<any[]>([]);
   const [pastWeekFilter, setPastWeekFilter] = useState<string>('all');
+  const [pastWeekIntervalFilter, setPastWeekIntervalFilter] = useState<string>('all'); // Новый фильтр для интервалов недель
    const [expandedAdminDates, setExpandedAdminDates] = useState<Set<string>>(new Set());
    const [adminDatePopup, setAdminDatePopup] = useState<{ show: boolean; date: string; admin: string; applicationId: string }>({ 
      show: false, date: '', admin: '', applicationId: '' 
@@ -2752,7 +2790,8 @@ const Admin = () => {
                 </div>
                 
                 {/* Past week filter */}
-                <div className="mt-4">
+                <div className="mt-4 space-y-4">
+                  {/* Фильтр по статусу/неделям */}
                   {(() => {
                     // Get dynamic filters based on available data - использукм мемоизированный результат
                     const dynamicFilters = getDynamicPastWeekFilters;
@@ -2790,6 +2829,24 @@ const Admin = () => {
                       </>
                     );
                   })()}
+                  
+                  {/* Фильтр по интервалам недель */}
+                  <div className="border-t pt-4">
+                    <Label className="text-sm font-medium mb-2 block">Фильтр по интервалам недель:</Label>
+                    <Select value={pastWeekIntervalFilter} onValueChange={setPastWeekIntervalFilter}>
+                      <SelectTrigger className="w-full max-w-md">
+                        <SelectValue placeholder="Выберите интервал недели" />
+                      </SelectTrigger>
+                      <SelectContent className="z-[9999] bg-popover border shadow-lg">
+                        <SelectItem value="all">Все интервалы</SelectItem>
+                        {getAvailableWeekIntervals().map((interval) => (
+                          <SelectItem key={interval.value} value={interval.value}>
+                            {interval.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
               </div>
               
@@ -2813,38 +2870,60 @@ const Admin = () => {
                 
                 // Apply past week filter based on week intervals
                 const filteredByWeek = participantsToShow.filter(participant => {
-                  if (pastWeekFilter === 'all') return true;
+                  if (pastWeekFilter === 'all' && pastWeekIntervalFilter === 'all') return true;
                   
-                  const adminStatus = participant.admin_status || 'this week';
+                  let matchesStatusFilter = true;
+                  let matchesIntervalFilter = true;
                   
-                  // Get the dynamic filters to find the target week interval - использукм мемоизированный результат
-                  const dynamicFilters = getDynamicPastWeekFilters;
-                  const selectedFilter = dynamicFilters.find(f => f.id === pastWeekFilter);
-                  
-                  if (!selectedFilter?.weekInterval) return false;
-                  
-                  const targetWeekInterval = selectedFilter.weekInterval;
-                  
-                  // Check if participant has this specific week interval in their history
-                  const detailedStatusHistory = participant.status_history || {};
-                  
-                  // Look for any status (past, this week, etc.) that matches the target week interval
-                  for (const [statusName, statusInfo] of Object.entries(detailedStatusHistory)) {
-                    if (typeof statusInfo === 'object' && statusInfo && 
-                        'week_start_date' in statusInfo && 'week_end_date' in statusInfo) {
-                      const startDate = new Date(statusInfo.week_start_date as string);
-                      const endDate = new Date(statusInfo.week_end_date as string);
-                      const participantInterval = `${startDate.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit' })}-${endDate.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: '2-digit' })}`;
+                  // Проверка по статусному фильтру
+                  if (pastWeekFilter !== 'all') {
+                    const adminStatus = participant.admin_status || 'this week';
+                    
+                    // Get the dynamic filters to find the target week interval - использукм мемоизированный результат
+                    const dynamicFilters = getDynamicPastWeekFilters;
+                    const selectedFilter = dynamicFilters.find(f => f.id === pastWeekFilter);
+                    
+                    if (!selectedFilter?.weekInterval) {
+                      matchesStatusFilter = false;
+                    } else {
+                      const targetWeekInterval = selectedFilter.weekInterval;
                       
-                      if (participantInterval === targetWeekInterval) {
-                        return true;
+                      // Check if participant has this specific week interval in their history
+                      const detailedStatusHistory = participant.status_history || {};
+                      let foundInHistory = false;
+                      
+                      // Look for any status (past, this week, etc.) that matches the target week interval
+                      for (const [statusName, statusInfo] of Object.entries(detailedStatusHistory)) {
+                        if (typeof statusInfo === 'object' && statusInfo && 
+                            'week_start_date' in statusInfo && 'week_end_date' in statusInfo) {
+                          const startDate = new Date(statusInfo.week_start_date as string);
+                          const endDate = new Date(statusInfo.week_end_date as string);
+                          const participantInterval = `${startDate.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit' })}-${endDate.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: '2-digit' })}`;
+                          
+                          if (participantInterval === targetWeekInterval) {
+                            foundInHistory = true;
+                            break;
+                          }
+                        }
+                      }
+                      
+                      // Also check weekInterval property
+                      const weekInterval = participant.weekInterval || getParticipantWeekInterval(participant);
+                      if (!foundInHistory && weekInterval !== targetWeekInterval) {
+                        matchesStatusFilter = false;
                       }
                     }
                   }
                   
-                  // Also check weekInterval property
-                  const weekInterval = participant.weekInterval || getParticipantWeekInterval(participant);
-                  return weekInterval === targetWeekInterval;
+                  // Проверка по интервальному фильтру
+                  if (pastWeekIntervalFilter !== 'all') {
+                    const participantInterval = participant.weekInterval || getParticipantWeekInterval(participant);
+                    if (participantInterval !== pastWeekIntervalFilter) {
+                      matchesIntervalFilter = false;
+                    }
+                  }
+                  
+                  return matchesStatusFilter && matchesIntervalFilter;
                 });
                 
                 if (filteredByWeek.length === 0) {
@@ -3077,22 +3156,116 @@ const Admin = () => {
                             </div>
                           </div>
 
-                          {/* Column 4: Voting stats and actions (20ch) */}
-                          <div className="w-[20ch] flex-shrink-0 p-4 flex flex-col justify-between">
-                            {/* Week interval display */}
-                            <div className="text-xs text-muted-foreground mb-2">
-                              <div className="font-semibold mb-1">Contest Week:</div>
-                              <div className="bg-muted p-2 rounded text-center text-xs font-medium">
-                                {participant.weekInterval}
-                              </div>
-                              {participant.final_rank && (
-                                <div className="mt-2 p-2 bg-primary/10 rounded text-center text-xs">
-                                  <div className="font-semibold text-primary">
-                                    {participant.final_rank === 1 ? '🏆 Winner' : `🏅 Rank #${participant.final_rank}`}
-                                  </div>
-                                </div>
-                              )}
-                            </div>
+                           {/* Column 4: Voting stats and actions (20ch) */}
+                           <div className="w-[20ch] flex-shrink-0 p-4 flex flex-col justify-between">
+                             {/* Status and Week interval controls */}
+                             <div className="text-xs text-muted-foreground mb-2 space-y-2">
+                               {/* Status selector */}
+                               <div>
+                                 <div className="font-semibold mb-1">Status:</div>
+                                 <Select 
+                                   value={participant.admin_status || 'past'}
+                                   onValueChange={async (newStatus) => {
+                                     try {
+                                       const { error } = await supabase
+                                         .from('weekly_contest_participants')
+                                         .update({ admin_status: newStatus } as any)
+                                         .eq('id', participant.id);
+                                       
+                                       if (error) {
+                                         console.error('Error updating participant status:', error);
+                                         toast({
+                                           title: "Error",
+                                           description: "Failed to update participant status",
+                                           variant: "destructive",
+                                         });
+                                       } else {
+                                         toast({
+                                           title: "Status Updated",
+                                           description: `Participant status changed to ${newStatus}`,
+                                         });
+                                         fetchWeeklyParticipants();
+                                       }
+                                     } catch (error) {
+                                       console.error('Error updating participant status:', error);
+                                     }
+                                   }}
+                                 >
+                                   <SelectTrigger className="w-full h-6 text-xs">
+                                     <SelectValue />
+                                   </SelectTrigger>
+                                   <SelectContent className="z-[9999] bg-popover border shadow-lg">
+                                     <SelectItem value="this week">This Week</SelectItem>
+                                     <SelectItem value="pre next week">{`Pre Next Week (${getFutureWeekInterval(1).formatted})`}</SelectItem>
+                                     <SelectItem value="next week">Next Week</SelectItem>
+                                     <SelectItem value="next week on site">Next Week On Site</SelectItem>
+                                     <SelectItem value="past week 1">{`Past Week 1 (${getPastWeekInterval(1).formatted})`}</SelectItem>
+                                     <SelectItem value="past week 2">{`Past Week 2 (${getPastWeekInterval(2).formatted})`}</SelectItem>
+                                     <SelectItem value="past week 3">{`Past Week 3 (${getPastWeekInterval(3).formatted})`}</SelectItem>
+                                     <SelectItem value="past">Past</SelectItem>
+                                     <SelectItem value="pending">Pending</SelectItem>
+                                     <SelectItem value="approved">Approved</SelectItem>
+                                     <SelectItem value="rejected">Rejected</SelectItem>
+                                   </SelectContent>
+                                 </Select>
+                               </div>
+                               
+                               {/* Week interval selector */}
+                               <div>
+                                 <div className="font-semibold mb-1">Week Interval:</div>
+                                 <Select 
+                                   value={participant.week_interval || participant.weekInterval || ''}
+                                   onValueChange={async (newInterval) => {
+                                     try {
+                                       const { error } = await supabase
+                                         .from('weekly_contest_participants')
+                                         .update({ week_interval: newInterval } as any)
+                                         .eq('id', participant.id);
+                                       
+                                       if (error) {
+                                         console.error('Error updating participant week interval:', error);
+                                         toast({
+                                           title: "Error",
+                                           description: "Failed to update week interval",
+                                           variant: "destructive",
+                                         });
+                                       } else {
+                                         toast({
+                                           title: "Week Interval Updated",
+                                           description: `Week interval changed to ${newInterval}`,
+                                         });
+                                         fetchWeeklyParticipants();
+                                       }
+                                     } catch (error) {
+                                       console.error('Error updating participant week interval:', error);
+                                     }
+                                   }}
+                                 >
+                                   <SelectTrigger className="w-full h-6 text-xs">
+                                     <SelectValue placeholder="Select week" />
+                                   </SelectTrigger>
+                                   <SelectContent className="z-[9999] bg-popover border shadow-lg">
+                                     {getAvailableWeekIntervals().map((interval) => (
+                                       <SelectItem key={interval.value} value={interval.value}>
+                                         {interval.label}
+                                       </SelectItem>
+                                     ))}
+                                   </SelectContent>
+                                 </Select>
+                               </div>
+                               
+                               {/* Current week interval display */}
+                               <div className="bg-muted p-2 rounded text-center text-xs font-medium">
+                                 {participant.weekInterval}
+                               </div>
+                               {participant.final_rank && (
+                                 <div className="mt-2 p-2 bg-primary/10 rounded text-center text-xs">
+                                   <div className="font-semibold text-primary">
+                                     {participant.final_rank === 1 ? '🏆 Winner' : `🏅 Rank #${participant.final_rank}`}
+                                   </div>
+                                 </div>
+                               )}
+                             </div>
                             
                             {/* Voting stats */}
                             <div 
