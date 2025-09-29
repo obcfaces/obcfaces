@@ -52,24 +52,52 @@ const isReasonDuplicate = (rejectionReason: string, reasonTypes: string[]) => {
 const getDynamicPastWeekFilters = (participants: any[]) => {
   const allWeeks = new Set<string>();
   
+  console.log('Processing participants for filters:', participants.length);
+  
   participants.forEach(participant => {
-    // Collect weeks from status_history
+    // Collect weeks from status_history (primary source - more reliable)
     if (participant.status_history) {
       Object.values(participant.status_history).forEach((statusInfo: any) => {
         if (statusInfo?.week_start_date && statusInfo?.week_end_date) {
           const startDate = new Date(statusInfo.week_start_date);
           const endDate = new Date(statusInfo.week_end_date);
-          const interval = `${startDate.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit' })}-${endDate.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit' })}/${endDate.getFullYear().toString().slice(-2)}`;
-          allWeeks.add(interval);
+          
+          // Ensure we're working with valid dates
+          if (!isNaN(startDate.getTime()) && !isNaN(endDate.getTime())) {
+            // Fix year to current year if it's 2025 (wrong year in DB)
+            const currentYear = new Date().getFullYear();
+            if (startDate.getFullYear() === 2025) {
+              startDate.setFullYear(currentYear);
+              endDate.setFullYear(currentYear);
+            }
+            
+            const interval = `${startDate.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit' })}-${endDate.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit' })}/${String(currentYear).slice(-2)}`;
+            
+            console.log('Adding interval from status_history:', interval, {
+              originalStart: statusInfo.week_start_date,
+              originalEnd: statusInfo.week_end_date,
+              correctedStart: startDate,
+              correctedEnd: endDate
+            });
+            
+            allWeeks.add(interval);
+          }
         }
       });
     }
     
-    // Collect weeks from weekInterval
-    if (participant.weekInterval) {
-      allWeeks.add(participant.weekInterval);
+    // Only collect from weekInterval if it looks like a valid format and we don't have enough data
+    if (participant.weekInterval && allWeeks.size < 3) {
+      // Only add weekInterval if it matches expected format (dd/mm-dd/mm/yy or similar)
+      const validFormatRegex = /^\d{2}\/\d{2}-\d{2}\/\d{2}(\/\d{2})?$/;
+      if (validFormatRegex.test(participant.weekInterval)) {
+        console.log('Adding interval from weekInterval:', participant.weekInterval);
+        allWeeks.add(participant.weekInterval);
+      }
     }
   });
+  
+  console.log('All collected weeks:', Array.from(allWeeks));
   
   // Convert to array and sort by date (newest first)
   const sortedWeeks = Array.from(allWeeks).sort((a, b) => {
@@ -79,7 +107,13 @@ const getDynamicPastWeekFilters = (participants: any[]) => {
       const fullMatch = interval.match(/(\d{2})\/(\d{2})-\d{2}\/\d{2}\/(\d{2,4})/);
       if (fullMatch) {
         const [, day, month, year] = fullMatch;
-        const fullYear = year.length === 2 ? 2000 + parseInt(year) : parseInt(year);
+        let fullYear = year.length === 2 ? 2000 + parseInt(year) : parseInt(year);
+        
+        // If year is 2025, correct it to current year (2024)
+        if (fullYear === 2025) {
+          fullYear = new Date().getFullYear();
+        }
+        
         return new Date(fullYear, parseInt(month) - 1, parseInt(day));
       }
       
