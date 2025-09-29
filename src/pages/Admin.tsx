@@ -3017,23 +3017,25 @@ const Admin = () => {
                             
                             {/* Status debug info - mobile */}
                             <div className="mt-2 text-xs bg-yellow-100 p-2 rounded border">
-                              <div className="font-semibold text-gray-800">Статусы:</div>
-                              <div className="text-gray-700">Текущий: {participant.admin_status} - {participant.week_interval}</div>
+                              <div className="text-gray-700">
+                                Тек: {participant.admin_status} - {participant.week_interval || 'нет интервала'}
+                              </div>
                               {participant.status_history && Object.keys(participant.status_history).length > 0 && (
-                                <div className="text-gray-600 mt-1">
-                                  Предыдущие:
-                                  {Object.entries(participant.status_history)
-                                    .sort((a: any, b: any) => new Date(b[1]?.changed_at || 0).getTime() - new Date(a[1]?.changed_at || 0).getTime())
-                                    .slice(0, 3)
-                                    .map(([status, info]: [string, any]) => (
-                                      <div key={status} className="ml-2">
-                                        {status} - {info?.week_start_date ? 
-                                          `${new Date(info.week_start_date).toLocaleDateString('ru-RU', {day: '2-digit', month: '2-digit'})} - ${new Date(info.week_end_date).toLocaleDateString('ru-RU', {day: '2-digit', month: '2-digit', year: 'numeric'})}` : 
-                                          'без даты'
-                                        }
-                                      </div>
-                                    ))
-                                  }
+                                <div className="text-gray-600">
+                                  {(() => {
+                                    const prevStatus = Object.entries(participant.status_history)
+                                      .sort((a: any, b: any) => new Date(b[1]?.changed_at || 0).getTime() - new Date(a[1]?.changed_at || 0).getTime())
+                                      .find(([status, info]: [string, any]) => status !== participant.admin_status);
+                                    
+                                    if (prevStatus) {
+                                      const [status, info] = prevStatus as [string, any];
+                                      const interval = info?.week_start_date ? 
+                                        `${new Date(info.week_start_date).toLocaleDateString('ru-RU', {day: '2-digit', month: '2-digit'})} - ${new Date(info.week_end_date).toLocaleDateString('ru-RU', {day: '2-digit', month: '2-digit', year: '2-digit'})}` : 
+                                        'нет интервала';
+                                      return `Пред: ${status} - ${interval}`;
+                                    }
+                                    return 'Пред: нет';
+                                  })()}
                                 </div>
                               )}
                             </div>
