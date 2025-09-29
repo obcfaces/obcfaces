@@ -147,11 +147,6 @@ const getFutureWeekInterval = (weeksAhead: number, countryCode: string = 'PH') =
 const getDynamicPastWeekFilters = (participants: any[]) => {
   // Используем правильные статические интервалы для 2025 года
   const staticWeeks = [
-    '29/09-05/10/25', '22/09-28/09/25', '15/09-21/09/25', 
-    '08/09-14/09/25', '01/09-07/09/25', '18/08-24/08/25'
-  ];
-  // Используем правильные статические интервалы для 2025 года
-  const staticWeeks = [
     '29/09-05/10/25', // 1 week ago
     '22/09-28/09/25', // 2 weeks ago  
     '15/09-21/09/25', // 3 weeks ago
@@ -162,51 +157,8 @@ const getDynamicPastWeekFilters = (participants: any[]) => {
   
   console.log('Using static week filters instead of status_history');
   
-  // Convert static weeks to sorted format
+  // Return static weeks already sorted
   const sortedWeeks = staticWeeks;
-    
-    // Only collect from weekInterval if it looks like a valid format and we don't have enough data
-    if (participant.weekInterval && allWeeks.size < 3) {
-      // Only add weekInterval if it matches expected format (dd/mm-dd/mm/yy or similar)
-      const validFormatRegex = /^\d{2}\/\d{2}-\d{2}\/\d{2}(\/\d{2})?$/;
-      if (validFormatRegex.test(participant.weekInterval)) {
-        console.log('Adding interval from weekInterval:', participant.weekInterval);
-        allWeeks.add(participant.weekInterval);
-      }
-    }
-  });
-  
-  console.log('All collected weeks:', Array.from(allWeeks));
-  
-  // Convert to array and sort by date (newest first)
-  const sortedWeeks = Array.from(allWeeks).sort((a, b) => {
-    // Extract start date and compare
-    const getStartDate = (interval: string) => {
-      // Try to match full format with year first: dd/mm-dd/mm/yy
-      const fullMatch = interval.match(/(\d{2})\/(\d{2})-\d{2}\/\d{2}\/(\d{2,4})/);
-      if (fullMatch) {
-        const [, day, month, year] = fullMatch;
-        let fullYear = year.length === 2 ? 2000 + parseInt(year) : parseInt(year);
-        
-        // If year is 2025, correct it to current year (2024)
-        if (fullYear === 2025) {
-          fullYear = new Date().getFullYear();
-        }
-        
-        return new Date(fullYear, parseInt(month) - 1, parseInt(day));
-      }
-      
-      // Fallback to simple format: dd/mm
-      const simpleMatch = interval.match(/(\d{2})\/(\d{2})/);
-      if (simpleMatch) {
-        const [, day, month] = simpleMatch;
-        return new Date(new Date().getFullYear(), parseInt(month) - 1, parseInt(day));
-      }
-      return new Date(0);
-    };
-    
-    return getStartDate(b).getTime() - getStartDate(a).getTime();
-  });
   
   // Create filters for each week
   const filters: Array<{ id: string; label: string; mobileLabel: string; weekInterval?: string }> = [
