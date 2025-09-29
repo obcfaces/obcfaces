@@ -555,14 +555,18 @@ const Admin = () => {
   useEffect(() => {
   const filterPastWeekParticipants = async () => {
       try {
-        console.log('Filtering past week participants - showing all past weeks');
+        console.log('=== FILTERING PAST WEEK PARTICIPANTS ===');
         console.log('All weekly participants:', weeklyParticipants.length);
         
         // Filter participants with 'past' admin_status and group by week intervals from status_week_history
         const pastParticipants = weeklyParticipants.filter(participant => {
           const adminStatus = participant.admin_status || participantFilters[participant.id];
           
-          console.log(`Participant ${participant.id}: status = ${adminStatus}, week_history =`, (participant as any).status_week_history);
+          console.log(`Participant ${participant.id}:`, {
+            name: `${participant.application_data?.first_name || ''} ${participant.application_data?.last_name || ''}`.trim(),
+            adminStatus,
+            status_week_history: (participant as any).status_week_history
+          });
           
           // Include participants with 'past' status
           return adminStatus === 'past';
@@ -2674,14 +2678,21 @@ const Admin = () => {
                   if (pastWeekFilter === 'all') return true;
                   
                   const adminStatus = participant.admin_status || 'this week';
+                  const weekInterval = participant.weekInterval || getParticipantWeekInterval(participant);
+                  
+                  // Отладочная информация
+                  console.log(`Participant ${participant.id}:`, {
+                    adminStatus,
+                    weekInterval, 
+                    pastWeekFilter,
+                    status_week_history: participant.status_week_history
+                  });
                   
                   // For 'past' status, filter by week interval
                   if (adminStatus === 'past') {
-                    const weekInterval = participant.weekInterval || getParticipantWeekInterval(participant);
-                    
-                     // Map filter names to week intervals (правильное сопоставление)
-                     switch (pastWeekFilter) {
-                       case 'past week 1':
+                    // Map filter names to week intervals (правильное сопоставление)
+                    switch (pastWeekFilter) {
+                      case 'past week 1':
                          // Участники с интервалом 29/09-05/10/25 (1 неделю назад от текущей)
                          return weekInterval === '29/09-05/10/25' || weekInterval === '29/09 - 05/10/2025';
                        case 'past week 2':
@@ -2703,12 +2714,15 @@ const Admin = () => {
                 
                 if (filteredByWeek.length === 0) {
                   return (
-                    <div className="text-center py-8 text-muted-foreground">
-                      <p className="text-lg">Нет участников для выбранного периода</p>
-                      <p className="text-xs mt-2 text-muted-foreground/70">
-                        Фильтр: {pastWeekFilter}, всего участников: {participantsToShow.length}
-                      </p>
-                    </div>
+                     <div className="text-center py-8 text-muted-foreground">
+                       <p className="text-lg">Нет участников для выбранного периода</p>
+                       <p className="text-xs mt-2 text-muted-foreground/70">
+                         Фильтр: {pastWeekFilter}, всего участников: {participantsToShow.length}
+                       </p>
+                       <p className="text-xs mt-1 text-muted-foreground/70">
+                         Участники со статусом 'past': {participantsToShow.filter(p => (p.admin_status || participantFilters[p.id]) === 'past').length}
+                       </p>
+                     </div>
                   );
                 }
 
