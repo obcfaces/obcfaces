@@ -607,10 +607,23 @@ const Admin = () => {
           switch (weeklyContestFilter) {
             case 'this week':
               // Show participants with 'this week' status OR approved applications not yet in weekly contest
+              // Also include participants with specific week statuses that match current week interval
               const isThisWeek = status === 'this week';
               const isApprovedApplication = !participant.contest_id && 
                 contestApplications.some(app => app.user_id === participant.user_id && app.status === 'approved');
-              return isThisWeek || isApprovedApplication;
+              
+              // Check if participant has week-specific status that matches current interval
+              const currentWeekInterval = '29/09-05/10/25'; // Current week
+              const participantInterval = participant.week_interval || getParticipantWeekInterval(participant);
+              const isMatchingWeekInterval = participantInterval === currentWeekInterval;
+              
+              // Also check for old "week-YYYY-MM-DD" format statuses - week-2025-09-23 should be current week
+              const isWeekStatusFormat = status && status.startsWith('week-2025-09-') && (
+                status.includes('29') || status.includes('30') || status.includes('01') || 
+                status.includes('02') || status.includes('03') || status.includes('04') || status.includes('05')
+              );
+              
+              return isThisWeek || isApprovedApplication || isMatchingWeekInterval || isWeekStatusFormat;
             case 'pre next week':
               return status === 'pre next week';
             case 'next week':
@@ -724,27 +737,42 @@ const Admin = () => {
       return participant.week_interval;
     }
     
+    // Handle old "week-YYYY-MM-DD" format statuses - convert to proper intervals
+    if (adminStatus && adminStatus.startsWith('week-2025-09-')) {
+      // Extract date from status like "week-2025-09-23"
+      const dateMatch = adminStatus.match(/week-2025-09-(\d+)/);
+      if (dateMatch) {
+        const day = parseInt(dateMatch[1]);
+        // Map specific week ranges for September 2025
+        if (day >= 29 || day <= 5) return '29/09-05/10/25'; // Current week spans Sept 29 - Oct 5
+        if (day >= 22 && day <= 28) return '22/09-28/09/25'; // Last week
+        if (day >= 15 && day <= 21) return '15/09-21/09/25'; // 2 weeks ago
+        if (day >= 8 && day <= 14) return '08/09-14/09/25';  // 3 weeks ago
+        if (day >= 1 && day <= 7) return '01/09-07/09/25';   // 4 weeks ago
+      }
+    }
+    
     // Map admin_status to correct week dates for 2025
     switch (adminStatus) {
       case 'this week':
-        return '06/10-12/10/25'; // Current actual week
+        return '29/09-05/10/25'; // Current actual week  
       case 'next week':
       case 'next week on site':
       case 'pre next week':
-        return '13/10-19/10/25'; // Next week
+        return '06/10-12/10/25'; // Next week
       case 'past week 1':
       case 'past':
-        return '29/09-05/10/25'; // 1 week ago
+        return '22/09-28/09/25'; // 1 week ago
       case 'past week 2':
-        return '22/09-28/09/25'; // 2 weeks ago
+        return '15/09-21/09/25'; // 2 weeks ago
       case 'past week 3':
-        return '15/09-21/09/25'; // 3 weeks ago
+        return '08/09-14/09/25'; // 3 weeks ago
       case 'past week 4':
-        return '08/09-14/09/25'; // 4 weeks ago
+        return '01/09-07/09/25'; // 4 weeks ago
       case 'pending':
-        return '06/10-12/10/25'; // Same as current week
+        return '29/09-05/10/25'; // Same as current week for pending apps
       default:
-        return '06/10-12/10/25'; // Default to current week
+        return '29/09-05/10/25'; // Default to current week
     }
   };
 
@@ -2886,7 +2914,7 @@ const Admin = () => {
                 const filteredByWeek = participantsToShow.filter(participant => {
                   // When a specific interval is selected, use stricter filtering to avoid duplicates
                   if (pastWeekIntervalFilter !== 'all') {
-                    const participantInterval = participant.weekInterval || getParticipantWeekInterval(participant);
+                    const participantInterval = participant.week_interval || getParticipantWeekInterval(participant);
                     return participantInterval === pastWeekIntervalFilter;
                   }
                   
@@ -2904,7 +2932,7 @@ const Admin = () => {
                   }
                   
                   const targetWeekInterval = selectedFilter.weekInterval;
-                  const participantInterval = participant.weekInterval || getParticipantWeekInterval(participant);
+                  const participantInterval = participant.week_interval || getParticipantWeekInterval(participant);
                   
                   return participantInterval === targetWeekInterval;
                 });
@@ -3197,7 +3225,7 @@ const Admin = () => {
                                <div>
                                  <div className="font-semibold mb-1">Week Interval:</div>
                                  <Select 
-                                   value={participant.week_interval || participant.weekInterval || ''}
+                                   value={participant.week_interval || ''}
                                    onValueChange={async (newInterval) => {
                                      try {
                                        const { error } = await supabase
@@ -3239,7 +3267,7 @@ const Admin = () => {
                                
                                {/* Current week interval display */}
                                <div className="bg-muted p-2 rounded text-center text-xs font-medium">
-                                 {participant.weekInterval}
+                                  {participant.week_interval || getParticipantWeekInterval(participant)}
                                </div>
                                {participant.final_rank && (
                                  <div className="mt-2 p-2 bg-primary/10 rounded text-center text-xs">
@@ -3321,7 +3349,7 @@ const Admin = () => {
                             <div className="text-xs text-muted-foreground mb-2">
                               <span className="font-semibold">Week: </span>
                               <span className="bg-muted px-2 py-1 rounded text-xs">
-                                {participant.weekInterval}
+                                {participant.week_interval || getParticipantWeekInterval(participant)}
                               </span>
                               {participant.final_rank && (
                                 <span className="ml-2 bg-primary/10 px-2 py-1 rounded text-xs text-primary font-semibold">
