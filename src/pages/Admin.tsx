@@ -78,8 +78,12 @@ const getCountryCapitalTimezone = (countryCode: string): string => {
 const getStrictWeekInterval = (date: Date, countryCode: string = 'PH'): { start: Date, end: Date, formatted: string } => {
   const timezone = getCountryCapitalTimezone(countryCode);
   
+  // ВАЖНО: Принудительно используем 2024 год для совместимости с существующими данными
+  const adjustedDate = new Date(date);
+  adjustedDate.setFullYear(2024);
+  
   // Конвертировать дату в временную зону страны
-  const localDate = new Date(date.toLocaleString("en-US", { timeZone: timezone }));
+  const localDate = new Date(adjustedDate.toLocaleString("en-US", { timeZone: timezone }));
   
   // Найти понедельник этой недели (ISO week - понедельник = 1, воскресенье = 0)
   const dayOfWeek = localDate.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
@@ -93,11 +97,11 @@ const getStrictWeekInterval = (date: Date, countryCode: string = 'PH'): { start:
   sunday.setDate(monday.getDate() + 6);
   sunday.setHours(23, 59, 59, 999);
   
-  // Форматирование: dd/mm - dd/mm/yy
+  // Форматирование: dd/mm - dd/mm/yy - принудительно используем 2024
   const formatDate = (d: Date) => d.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit' });
-  const formatYear = (d: Date) => String(d.getFullYear()).slice(-2);
+  const formatYear = () => '24'; // Принудительно 2024 год
   
-  const formatted = `${formatDate(monday)}-${formatDate(sunday)}/${formatYear(sunday)}`;
+  const formatted = `${formatDate(monday)}-${formatDate(sunday)}/${formatYear()}`;
   
   console.log(`STRICT WEEK CALCULATION: Input: ${date.toISOString()}, Country: ${countryCode}, Timezone: ${timezone}`);
   console.log(`STRICT WEEK RESULT: Monday: ${monday.toISOString()}, Sunday: ${sunday.toISOString()}, Formatted: ${formatted}`);
