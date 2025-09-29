@@ -2707,6 +2707,19 @@ const Admin = () => {
                          // 1. статус "past" с интервалом "29/09-05/10/25" 
                          // 2. статус "this week" с интервалом "22/09-28/09/25"
                          const statusHistory = participant.status_week_history || {};
+                         
+                         // Debug for Jasmin specifically
+                         const participantName = `${participant.first_name} ${participant.last_name}`;
+                         if (participantName.includes('Jasmin') || participantName.includes('Carriaga')) {
+                           console.log('JASMIN DEBUG - Found Jasmin:', {
+                             name: participantName,
+                             adminStatus: adminStatus,
+                             weekInterval: weekInterval,
+                             statusHistory: statusHistory,
+                             statusHistoryKeys: Object.keys(statusHistory),
+                           });
+                         }
+                         
                          const hasPastStatus = statusHistory['past'] && (
                            statusHistory['past'] === '29/09-05/10/25' || 
                            statusHistory['past'] === '29/09 - 05/10/2025' ||
@@ -2717,6 +2730,15 @@ const Admin = () => {
                            statusHistory['this week'] === '22/09 - 28/09/2025' ||
                            statusHistory['this week'] === '22/09-28/09/25'
                          );
+                         
+                         if (participantName.includes('Jasmin') || participantName.includes('Carriaga')) {
+                           console.log('JASMIN DEBUG - Status check:', {
+                             hasPastStatus: hasPastStatus,
+                             hasThisWeekStatus: hasThisWeekStatus,
+                             result: hasPastStatus && hasThisWeekStatus
+                           });
+                         }
+                         
                          return hasPastStatus && hasThisWeekStatus;
                        case 'past week 2':
                          // Участники с интервалом 22/09-28/09/25 (2 недели назад от текущей)
