@@ -70,7 +70,41 @@ serve(async (req) => {
       }
     }
 
-    // 2. Переводим "next week on site" → "this week"
+    // 2. Переводим "pre next week" → "next week"
+    const { data: preNextWeekParticipants, error: preNextWeekError } = await supabase
+      .from('weekly_contest_participants')
+      .select('id, status_week_history')
+      .eq('admin_status', 'pre next week')
+      .eq('is_active', true)
+
+    if (preNextWeekError) {
+      console.error('Error fetching pre next week participants:', preNextWeekError)
+      throw preNextWeekError
+    }
+
+    for (const participant of preNextWeekParticipants || []) {
+      const updatedHistory = {
+        ...participant.status_week_history,
+        'next week': weekInterval
+      }
+
+      const { error: updateError } = await supabase
+        .from('weekly_contest_participants')
+        .update({
+          admin_status: 'next week',
+          status_week_history: updatedHistory
+        })
+        .eq('id', participant.id)
+
+      if (updateError) {
+        console.error(`Error updating participant ${participant.id}:`, updateError)
+      } else {
+        transitions.nextWeekToNextWeekOnSite++
+        console.log(`Moved participant ${participant.id} from "pre next week" to "next week"`)
+      }
+    }
+
+    // 3. Переводим "next week on site" → "this week"
     const { data: nextWeekOnSiteParticipants, error: nextWeekOnSiteError } = await supabase
       .from('weekly_contest_participants')
       .select('id, status_week_history')
@@ -104,7 +138,7 @@ serve(async (req) => {
       }
     }
 
-    // 3. Статус "next week" остается без изменений для фильтрации в админке по неделям
+    // 4. Статус "next week" остается без изменений для фильтрации в админке по неделям
     console.log('Skipping "next week" participants - they remain unchanged for admin filtering')
 
     const summary = {
