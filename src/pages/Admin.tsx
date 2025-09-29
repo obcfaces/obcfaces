@@ -397,15 +397,22 @@ const Admin = () => {
   const getDynamicPastWeekFilters = createDynamicPastWeekFilters();
 
   useEffect(() => {
-    checkAdminAccess();
-    fetchUserRoles();
-    fetchDailyStats();
-    fetchDailyApplicationStats();
-    fetchDailyRegistrationStats();
-    fetchNextWeekParticipants(); // Добавляем загрузку next week участников
-    fetchNextWeekDailyStats();
-    fetchNextWeekApplicationsCount();
-    fetchCardSectionStats();
+    console.log('useEffect: Admin component useEffect started');
+    
+    try {
+      checkAdminAccess();
+      fetchUserRoles();
+      fetchDailyStats();
+      fetchDailyApplicationStats();
+      fetchDailyRegistrationStats();
+      fetchNextWeekParticipants(); // Добавляем загрузку next week участников
+      fetchNextWeekDailyStats();
+      fetchNextWeekApplicationsCount();
+      fetchCardSectionStats();
+    } catch (error) {
+      console.error('useEffect: Error in Admin useEffect:', error);
+      setLoading(false);
+    }
     
     
     // Set up real-time subscriptions for automatic updates
