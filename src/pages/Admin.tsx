@@ -1131,13 +1131,16 @@ const Admin = () => {
       setIsAdmin(true);
       console.log('checkAdminAccess: Admin access granted, fetching data...');
       
-      fetchProfiles();
-      fetchUserRoles();
-      fetchContestApplications();
-      fetchWeeklyContests();
-      fetchWeeklyParticipants();
+      // Use await to ensure data is loaded before proceeding
+      await Promise.all([
+        fetchProfiles(),
+        fetchUserRoles(),
+        fetchContestApplications(),
+        fetchWeeklyContests(),
+        fetchWeeklyParticipants()
+      ]);
       
-      console.log('checkAdminAccess: All fetch functions called');
+      console.log('checkAdminAccess: All fetch functions completed');
     } catch (error) {
       console.error('checkAdminAccess: Unexpected error', error);
       toast({
