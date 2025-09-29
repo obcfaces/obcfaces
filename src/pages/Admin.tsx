@@ -1956,18 +1956,18 @@ const Admin = () => {
                                <SelectTrigger className="w-28 h-6 text-xs">
                                  <SelectValue />
                                </SelectTrigger>
-                                     <SelectContent className="z-50 bg-background border shadow-md">
-                                        <SelectItem value="this week">This Week</SelectItem>
-                                         <SelectItem value="pre next week">{`Pre Next Week (${getFutureWeekInterval(1).formatted})`}</SelectItem>
-                                         <SelectItem value="next week">Next Week</SelectItem>
-                                         <SelectItem value="next week on site">Next Week On Site</SelectItem>
-                                         <SelectItem value="past week 1">{`Past Week 1 (${getPastWeekInterval(1).formatted})`}</SelectItem>
-                                         <SelectItem value="past week 2">{`Past Week 2 (${getPastWeekInterval(2).formatted})`}</SelectItem>
-                                         <SelectItem value="past week 3">{`Past Week 3 (${getPastWeekInterval(3).formatted})`}</SelectItem>
-                                       <SelectItem value="pending">Pending</SelectItem>
-                                       <SelectItem value="approved">Approved</SelectItem>
-                                       <SelectItem value="rejected">Rejected</SelectItem>
-                                    </SelectContent>
+                                      <SelectContent className="z-[9999] bg-popover border shadow-lg">
+                                         <SelectItem value="this week">This Week</SelectItem>
+                                          <SelectItem value="pre next week">{`Pre Next Week (${getFutureWeekInterval(1).formatted})`}</SelectItem>
+                                          <SelectItem value="next week">Next Week</SelectItem>
+                                          <SelectItem value="next week on site">Next Week On Site</SelectItem>
+                                          <SelectItem value="past week 1">{`Past Week 1 (${getPastWeekInterval(1).formatted})`}</SelectItem>
+                                          <SelectItem value="past week 2">{`Past Week 2 (${getPastWeekInterval(2).formatted})`}</SelectItem>
+                                          <SelectItem value="past week 3">{`Past Week 3 (${getPastWeekInterval(3).formatted})`}</SelectItem>
+                                        <SelectItem value="pending">Pending</SelectItem>
+                                        <SelectItem value="approved">Approved</SelectItem>
+                                        <SelectItem value="rejected">Rejected</SelectItem>
+                                     </SelectContent>
                              </Select>
                             
                             {/* Status change date with reviewer login - desktop */}
@@ -2126,18 +2126,18 @@ const Admin = () => {
                                    <SelectTrigger className="w-24 h-7 text-xs">
                                      <SelectValue />
                                    </SelectTrigger>
-                                          <SelectContent className="z-50 bg-background border shadow-md">
-                                             <SelectItem value="this week">This Week</SelectItem>
-                                              <SelectItem value="pre next week">{`Pre Next Week (${getFutureWeekInterval(1).formatted})`}</SelectItem>
-                                              <SelectItem value="next week">Next Week</SelectItem>
-                                              <SelectItem value="next week on site">Next Week On Site</SelectItem>
-                                              <SelectItem value="past week 1">{`Past Week 1 (${getPastWeekInterval(1).formatted})`}</SelectItem>
-                                              <SelectItem value="past week 2">{`Past Week 2 (${getPastWeekInterval(2).formatted})`}</SelectItem>
-                                              <SelectItem value="past week 3">{`Past Week 3 (${getPastWeekInterval(3).formatted})`}</SelectItem>
-                                            <SelectItem value="pending">Pending</SelectItem>
-                                            <SelectItem value="approved">Approved</SelectItem>
-                                            <SelectItem value="rejected">Rejected</SelectItem>
-                                       </SelectContent>
+                                           <SelectContent className="z-[9999] bg-popover border shadow-lg">
+                                              <SelectItem value="this week">This Week</SelectItem>
+                                               <SelectItem value="pre next week">{`Pre Next Week (${getFutureWeekInterval(1).formatted})`}</SelectItem>
+                                               <SelectItem value="next week">Next Week</SelectItem>
+                                               <SelectItem value="next week on site">Next Week On Site</SelectItem>
+                                               <SelectItem value="past week 1">{`Past Week 1 (${getPastWeekInterval(1).formatted})`}</SelectItem>
+                                               <SelectItem value="past week 2">{`Past Week 2 (${getPastWeekInterval(2).formatted})`}</SelectItem>
+                                               <SelectItem value="past week 3">{`Past Week 3 (${getPastWeekInterval(3).formatted})`}</SelectItem>
+                                             <SelectItem value="pending">Pending</SelectItem>
+                                             <SelectItem value="approved">Approved</SelectItem>
+                                             <SelectItem value="rejected">Rejected</SelectItem>
+                                          </SelectContent>
                                  </Select>
                                 
                                 {/* Rating with votes */}
@@ -2569,18 +2569,18 @@ const Admin = () => {
                                   <SelectTrigger className="w-24 h-7 text-xs">
                                     <SelectValue />
                                   </SelectTrigger>
-                                   <SelectContent className="z-50 bg-background border shadow-md">
-                                      <SelectItem value="this week">This Week</SelectItem>
-                                       <SelectItem value="pre next week">{`Pre Next Week (${getFutureWeekInterval(1).formatted})`}</SelectItem>
-                                       <SelectItem value="next week">Next Week</SelectItem>
-                                       <SelectItem value="next week on site">Next Week On Site</SelectItem>
-                                       <SelectItem value="past week 1">{`Past Week 1 (${getPastWeekInterval(1).formatted})`}</SelectItem>
-                                       <SelectItem value="past week 2">{`Past Week 2 (${getPastWeekInterval(2).formatted})`}</SelectItem>
-                                       <SelectItem value="past week 3">{`Past Week 3 (${getPastWeekInterval(3).formatted})`}</SelectItem>
-                                     <SelectItem value="pending">Pending</SelectItem>
-                                     <SelectItem value="approved">Approved</SelectItem>
-                                     <SelectItem value="rejected">Rejected</SelectItem>
-                                  </SelectContent>
+                                   <SelectContent className="z-[9999] bg-popover border shadow-lg">
+                                       <SelectItem value="this week">This Week</SelectItem>
+                                        <SelectItem value="pre next week">{`Pre Next Week (${getFutureWeekInterval(1).formatted})`}</SelectItem>
+                                        <SelectItem value="next week">Next Week</SelectItem>
+                                        <SelectItem value="next week on site">Next Week On Site</SelectItem>
+                                        <SelectItem value="past week 1">{`Past Week 1 (${getPastWeekInterval(1).formatted})`}</SelectItem>
+                                        <SelectItem value="past week 2">{`Past Week 2 (${getPastWeekInterval(2).formatted})`}</SelectItem>
+                                        <SelectItem value="past week 3">{`Past Week 3 (${getPastWeekInterval(3).formatted})`}</SelectItem>
+                                      <SelectItem value="pending">Pending</SelectItem>
+                                      <SelectItem value="approved">Approved</SelectItem>
+                                      <SelectItem value="rejected">Rejected</SelectItem>
+                                   </SelectContent>
                                 </Select>
                               </div>
                             </div>
@@ -2721,18 +2721,18 @@ const Admin = () => {
                                 <SelectTrigger className="w-16 h-6 text-xs">
                                   <SelectValue />
                                 </SelectTrigger>
-                                 <SelectContent className="z-50 bg-background border shadow-md">
-                                    <SelectItem value="this week">This Week</SelectItem>
-                                     <SelectItem value="pre next week">{`Pre Next Week (${getFutureWeekInterval(1).formatted})`}</SelectItem>
-                                     <SelectItem value="next week">Next Week</SelectItem>
-                                     <SelectItem value="next week on site">Next Week On Site</SelectItem>
-                                     <SelectItem value="past week 1">{`Past Week 1 (${getPastWeekInterval(1).formatted})`}</SelectItem>
-                                     <SelectItem value="past week 2">{`Past Week 2 (${getPastWeekInterval(2).formatted})`}</SelectItem>
-                                     <SelectItem value="past week 3">{`Past Week 3 (${getPastWeekInterval(3).formatted})`}</SelectItem>
-                                   <SelectItem value="pending">Pending</SelectItem>
-                                   <SelectItem value="approved">Approved</SelectItem>
-                                   <SelectItem value="rejected">Rejected</SelectItem>
-                                </SelectContent>
+                                  <SelectContent className="z-[9999] bg-popover border shadow-lg">
+                                     <SelectItem value="this week">This Week</SelectItem>
+                                      <SelectItem value="pre next week">{`Pre Next Week (${getFutureWeekInterval(1).formatted})`}</SelectItem>
+                                      <SelectItem value="next week">Next Week</SelectItem>
+                                      <SelectItem value="next week on site">Next Week On Site</SelectItem>
+                                      <SelectItem value="past week 1">{`Past Week 1 (${getPastWeekInterval(1).formatted})`}</SelectItem>
+                                      <SelectItem value="past week 2">{`Past Week 2 (${getPastWeekInterval(2).formatted})`}</SelectItem>
+                                      <SelectItem value="past week 3">{`Past Week 3 (${getPastWeekInterval(3).formatted})`}</SelectItem>
+                                    <SelectItem value="pending">Pending</SelectItem>
+                                    <SelectItem value="approved">Approved</SelectItem>
+                                    <SelectItem value="rejected">Rejected</SelectItem>
+                                 </SelectContent>
                               </Select>
                             </div>
                           </div>
@@ -3846,18 +3846,18 @@ const Admin = () => {
                       >
                         <SelectValue placeholder="Filter by status" />
                       </SelectTrigger>
-                      <SelectContent className="z-[100] bg-background border shadow-lg min-w-[160px]">
-                        <SelectItem value="all">All Statuses</SelectItem>
-                        <SelectItem value="this week">This Week</SelectItem>
-                         <SelectItem value="pre next week">{`Pre Next Week (${getFutureWeekInterval(1).formatted})`}</SelectItem>
-                         <SelectItem value="next week">Next Week</SelectItem>
-                         <SelectItem value="past week 1">{`Past Week 1 (${getPastWeekInterval(1).formatted})`}</SelectItem>
-                         <SelectItem value="past week 2">{`Past Week 2 (${getPastWeekInterval(2).formatted})`}</SelectItem>
-                         <SelectItem value="past week 3">{`Past Week 3 (${getPastWeekInterval(3).formatted})`}</SelectItem>
-                        <SelectItem value="pending">Pending</SelectItem>
-                        <SelectItem value="approved">Approved</SelectItem>
-                        <SelectItem value="rejected">Rejected</SelectItem>
-                      </SelectContent>
+                       <SelectContent className="z-[9999] bg-popover border shadow-lg min-w-[160px]">
+                         <SelectItem value="all">All Statuses</SelectItem>
+                         <SelectItem value="this week">This Week</SelectItem>
+                          <SelectItem value="pre next week">{`Pre Next Week (${getFutureWeekInterval(1).formatted})`}</SelectItem>
+                          <SelectItem value="next week">Next Week</SelectItem>
+                          <SelectItem value="past week 1">{`Past Week 1 (${getPastWeekInterval(1).formatted})`}</SelectItem>
+                          <SelectItem value="past week 2">{`Past Week 2 (${getPastWeekInterval(2).formatted})`}</SelectItem>
+                          <SelectItem value="past week 3">{`Past Week 3 (${getPastWeekInterval(3).formatted})`}</SelectItem>
+                         <SelectItem value="pending">Pending</SelectItem>
+                         <SelectItem value="approved">Approved</SelectItem>
+                         <SelectItem value="rejected">Rejected</SelectItem>
+                       </SelectContent>
                     </Select>
                     {statusFilter !== 'all' && (
                       <p className="text-xs text-muted-foreground">
@@ -5053,10 +5053,10 @@ const Admin = () => {
                               <SelectTrigger className="w-20 h-6 text-xs">
                                 <SelectValue />
                               </SelectTrigger>
-                              <SelectContent className="bg-background border shadow-md z-50">
-                                <SelectItem value="usual">Usual</SelectItem>
-                                <SelectItem value="admin">Admin</SelectItem>
-                              </SelectContent>
+                               <SelectContent className="z-[9999] bg-popover border shadow-lg">
+                                 <SelectItem value="usual">Usual</SelectItem>
+                                 <SelectItem value="admin">Admin</SelectItem>
+                               </SelectContent>
                             </Select>
                             
                             {profile.email_confirmed_at ? (
