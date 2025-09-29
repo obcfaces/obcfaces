@@ -31,6 +31,7 @@ import { ApplicationEditHistory } from '@/components/ApplicationEditHistory';
 import { ExpandableApplicationHistory } from '@/components/ExpandableApplicationHistory';
 import { WeeklyTransitionButton } from '@/components/WeeklyTransitionButton';
 import { WinnerContentManager } from '@/components/admin/WinnerContentManager';
+import { ParticipantStatusHistory } from '@/components/admin/ParticipantStatusHistory';
 
 // Helper function to check if rejection reason is a duplicate of predefined reasons
 const isReasonDuplicate = (rejectionReason: string, reasonTypes: string[]) => {
@@ -327,6 +328,7 @@ const Admin = () => {
   const [applicationToDelete, setApplicationToDelete] = useState<{ id: string; name: string } | null>(null);
   const [expandedMobileItems, setExpandedMobileItems] = useState<Set<string>>(new Set());
   const [expandedDesktopItems, setExpandedDesktopItems] = useState<Set<string>>(new Set());
+  const [expandedStatusHistory, setExpandedStatusHistory] = useState<Set<string>>(new Set());
   const [participantFilters, setParticipantFilters] = useState<{ [key: string]: string }>({});
   const [pastWeekParticipants, setPastWeekParticipants] = useState<any[]>([]);
   const [pastWeekFilter, setPastWeekFilter] = useState<string>('all');
@@ -1867,6 +1869,23 @@ const Admin = () => {
                                >
                                  {participant.total_votes || 0} • ★ {(participant.average_rating || 0).toFixed(1)}
                                </div>
+                               
+                               {/* Status History */}
+                               <div className="mt-2">
+                                 <ParticipantStatusHistory
+                                   statusHistory={participant.status_history}
+                                   isExpanded={expandedStatusHistory.has(participant.id)}
+                                   onToggle={() => {
+                                     const newExpanded = new Set(expandedStatusHistory);
+                                     if (expandedStatusHistory.has(participant.id)) {
+                                       newExpanded.delete(participant.id);
+                                     } else {
+                                       newExpanded.add(participant.id);
+                                     }
+                                     setExpandedStatusHistory(newExpanded);
+                                   }}
+                                 />
+                               </div>
                             </div>
                             
                             <div className="flex-1"></div>
@@ -2273,9 +2292,26 @@ const Admin = () => {
                               {participantProfile?.city || appData.city}, {participantProfile?.country || appData.country}
                             </div>
                             
-                            <div className="text-sm text-muted-foreground">
-                              {participantProfile?.height_cm || appData.height_cm}cm, {participantProfile?.weight_kg || appData.weight_kg}kg
-                            </div>
+                              <div className="text-sm text-muted-foreground">
+                                {participantProfile?.height_cm || appData.height_cm}cm, {participantProfile?.weight_kg || appData.weight_kg}kg
+                              </div>
+                              
+                              {/* Status History */}
+                              <div className="mt-2">
+                                <ParticipantStatusHistory
+                                  statusHistory={participant.status_history}
+                                  isExpanded={expandedStatusHistory.has(participant.id)}
+                                  onToggle={() => {
+                                    const newExpanded = new Set(expandedStatusHistory);
+                                    if (expandedStatusHistory.has(participant.id)) {
+                                      newExpanded.delete(participant.id);
+                                    } else {
+                                      newExpanded.add(participant.id);
+                                    }
+                                    setExpandedStatusHistory(newExpanded);
+                                  }}
+                                />
+                              </div>
                             
                             <div className="flex-1"></div>
                             
@@ -2433,13 +2469,49 @@ const Admin = () => {
                                        <span>•</span>
                                        <span>{participant.weight_kg || 'Unknown'}кг</span>
                                      </div>
-                                     {/* Интервал недели */}
-                                     <div className="flex items-center gap-2">
-                                       <Badge variant="outline" className="text-xs px-1 py-0">
-                                         Week: {participant.week_interval}
-                                       </Badge>
-                                     </div>
-                                   </div>
+                                      {/* Интервал недели */}
+                                      <div className="flex items-center gap-2">
+                                        <Badge variant="outline" className="text-xs px-1 py-0">
+                                          Week: {participant.week_interval}
+                                        </Badge>
+                                      </div>
+                                      
+                                      {/* Status History */}
+                                      <div className="mt-1">
+                                        <ParticipantStatusHistory
+                                          statusHistory={participant.status_history}
+                                          isExpanded={expandedStatusHistory.has(participant.participant_id || participant.id)}
+                                          onToggle={() => {
+                                            const id = participant.participant_id || participant.id;
+                                            const newExpanded = new Set(expandedStatusHistory);
+                                            if (expandedStatusHistory.has(id)) {
+                                              newExpanded.delete(id);
+                                            } else {
+                                              newExpanded.add(id);
+                                            }
+                                            setExpandedStatusHistory(newExpanded);
+                                          }}
+                                        />
+                                      </div>
+                                  </div>
+                                  
+                                  {/* Status History */}
+                                  <div className="mt-2">
+                                    <ParticipantStatusHistory
+                                      statusHistory={participant.status_history}
+                                      isExpanded={expandedStatusHistory.has(participant.participant_id || participant.id)}
+                                      onToggle={() => {
+                                        const id = participant.participant_id || participant.id;
+                                        const newExpanded = new Set(expandedStatusHistory);
+                                        if (expandedStatusHistory.has(id)) {
+                                          newExpanded.delete(id);
+                                        } else {
+                                          newExpanded.add(id);
+                                        }
+                                        setExpandedStatusHistory(newExpanded);
+                                      }}
+                                    />
+                                  </div>
                                 </div>
                               </div>
                               
