@@ -35,72 +35,76 @@ export const useCardData = (participantName: string, userId?: string, profileId?
       setLoading(true);
       
       try {
-        // Use user_id based approach if available, fallback to name-based
+        // Use secure RPC function that doesn't expose user IDs
         if (profileId) {
-          // Use new user_id based system
-          const baseContentId = `contestant-user-${profileId}`;
-          const photoContentPattern = `contestant-user-${profileId}-%`;
-          
-          // Load likes using new format
-          const { data: likesData } = await supabase
-            .from('likes')
-            .select('user_id')
-            .eq('content_type', 'contest')
-            .or(`content_id.eq.${baseContentId},content_id.like.${photoContentPattern}`);
+          // Use new secure function for user_id based system
+          const { data: stats, error } = await supabase
+            .rpc('get_participant_content_stats', { 
+              profile_id_param: profileId,
+              requesting_user_id: userId || null
+            });
 
-          const totalLikes = likesData?.length || 0;
-          const isUserLiked = userId ? likesData?.some(like => like.user_id === userId) || false : false;
+          if (error) throw error;
 
-          // Load comments using new format
-          const { data: commentsData } = await supabase
-            .from('photo_comments')
-            .select('user_id')
-            .eq('content_type', 'contest')
-            .or(`content_id.eq.${baseContentId},content_id.like.${photoContentPattern}`);
-
-          const totalComments = commentsData?.length || 0;
-          const hasUserCommented = userId ? commentsData?.some(comment => comment.user_id === userId) || false : false;
-
+          const statsData = stats?.[0];
           setData({
-            likes: totalLikes,
-            comments: totalComments,
-            isLiked: isUserLiked,
-            hasCommented: hasUserCommented
+            likes: Number(statsData?.total_likes) || 0,
+            comments: Number(statsData?.total_comments) || 0,
+            isLiked: statsData?.user_has_liked || false,
+            hasCommented: statsData?.user_has_commented || false
           });
         } else {
           // Fallback to name-based system for older data
+          // Use like_counts table for aggregate data instead of querying likes directly
           const normalizedName = participantName.trim();
           
-          const { data: allLikes } = await supabase
-            .from("likes")
-            .select("content_id, user_id")
+          // Get aggregate like count from like_counts table
+          const baseContentId = `contestant-card-${normalizedName}`;
+          const { data: likeCountData } = await supabase
+            .from("like_counts")
+            .select("like_count")
             .eq("content_type", "contest")
-            .or(`content_id.ilike.%${normalizedName}%`);
+            .eq("content_id", baseContentId)
+            .maybeSingle();
 
-          const participantLikes = allLikes?.filter(like => 
-            like.content_id.includes(normalizedName) &&
-            (like.content_id.includes('contestant-card-') || like.content_id.includes('contestant-photo-'))
-          ) || [];
+          // Check if current user has liked (only query their own data)
+          let isUserLiked = false;
+          if (userId) {
+            const { data: userLike } = await supabase
+              .from("likes")
+              .select("id")
+              .eq("user_id", userId)
+              .eq("content_type", "contest")
+              .ilike("content_id", `%${normalizedName}%`)
+              .maybeSingle();
+            
+            isUserLiked = !!userLike;
+          }
 
-          const totalLikes = participantLikes.length;
-          const isUserLiked = userId ? participantLikes.some(like => like.user_id === userId) : false;
-
-          const { data: allComments } = await supabase
+          // For comments, count from photo_comments table
+          const { count: commentsCount } = await supabase
             .from("photo_comments")
-            .select("content_id, user_id")
+            .select("*", { count: 'exact', head: true })
             .eq("content_type", "contest")
-            .or(`content_id.ilike.%${normalizedName}%`);
+            .ilike("content_id", `%${normalizedName}%`);
 
-          const participantComments = allComments?.filter(comment => 
-            comment.content_id.includes(normalizedName)
-          ) || [];
-
-          const totalComments = participantComments.length;
-          const hasUserCommented = userId ? participantComments.some(comment => comment.user_id === userId) : false;
+          // Check if current user has commented
+          let hasUserCommented = false;
+          if (userId) {
+            const { data: userComment } = await supabase
+              .from("photo_comments")
+              .select("id")
+              .eq("user_id", userId)
+              .eq("content_type", "contest")
+              .ilike("content_id", `%${normalizedName}%`)
+              .maybeSingle();
+            
+            hasUserCommented = !!userComment;
+          }
 
           setData({
-            likes: totalLikes,
-            comments: totalComments,
+            likes: likeCountData?.like_count || 0,
+            comments: commentsCount || 0,
             isLiked: isUserLiked,
             hasCommented: hasUserCommented
           });
@@ -122,45 +126,26 @@ export const useCardData = (participantName: string, userId?: string, profileId?
   }, [participantName, userId, profileId]);
 
   return { data, loading, refresh: () => {
-    if (participantName) {
-      const loadCardData = async () => {
+    if (participantName && profileId) {
+      const refreshData = async () => {
         setLoading(true);
         
         try {
-          const normalizedName = participantName.trim();
-          
-          const { data: allLikes } = await supabase
-            .from("likes")
-            .select("content_id, user_id")
-            .eq("content_type", "contest")
-            .or(`content_id.ilike.%${normalizedName}%`);
+          // Use secure RPC function for refresh
+          const { data: stats, error } = await supabase
+            .rpc('get_participant_content_stats', { 
+              profile_id_param: profileId,
+              requesting_user_id: userId || null
+            });
 
-          const participantLikes = allLikes?.filter(like => 
-            like.content_id.includes(normalizedName) &&
-            (like.content_id.includes('contestant-card-') || like.content_id.includes('contestant-photo-'))
-          ) || [];
+          if (error) throw error;
 
-          const totalLikes = participantLikes.length;
-          const isUserLiked = userId ? participantLikes.some(like => like.user_id === userId) : false;
-
-          const { data: allComments } = await supabase
-            .from("photo_comments")
-            .select("content_id, user_id")
-            .eq("content_type", "contest")
-            .or(`content_id.ilike.%${normalizedName}%`);
-
-          const participantComments = allComments?.filter(comment => 
-            comment.content_id.includes(normalizedName)
-          ) || [];
-
-          const totalComments = participantComments.length;
-          const hasUserCommented = userId ? participantComments.some(comment => comment.user_id === userId) : false;
-
+          const statsData = stats?.[0];
           setData({
-            likes: totalLikes,
-            comments: totalComments,
-            isLiked: isUserLiked,
-            hasCommented: hasUserCommented
+            likes: Number(statsData?.total_likes) || 0,
+            comments: Number(statsData?.total_comments) || 0,
+            isLiked: statsData?.user_has_liked || false,
+            hasCommented: statsData?.user_has_commented || false
           });
         } catch (error) {
           console.error('Error refreshing card data:', error);
@@ -169,7 +154,7 @@ export const useCardData = (participantName: string, userId?: string, profileId?
         }
       };
 
-      loadCardData();
+      refreshData();
     }
   }};
 };
