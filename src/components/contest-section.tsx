@@ -89,23 +89,11 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
   const loadAdminParticipants = async () => {
     try {
       console.log('Loading admin participants with query...');
+      
+      // First get participants with this week status
       const { data: participants, error } = await supabase
         .from('weekly_contest_participants')
-        .select(`
-          *,
-          profiles!inner(
-            first_name,
-            last_name,
-            age,
-            city,
-            country,
-            photo_1_url,
-            photo_2_url,
-            height_cm,
-            weight_kg,
-            email
-          )
-        `)
+        .select('*')
         .or('admin_status.eq.this week,participant_status.eq.this week')
         .eq('is_active', true)
         .limit(10);
@@ -115,8 +103,37 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
         return [];
       }
 
-      console.log('Admin participants query result:', participants?.length, participants);
-      return participants || [];
+      console.log('Raw participants data:', participants?.length, participants);
+
+      if (!participants || participants.length === 0) {
+        return [];
+      }
+
+      // Get user IDs and fetch their profiles separately
+      const userIds = participants.map(p => p.user_id);
+      const { data: profiles, error: profilesError } = await supabase
+        .from('profiles')
+        .select('*')
+        .in('id', userIds);
+
+      if (profilesError) {
+        console.error('Error loading profiles:', profilesError);
+        return [];
+      }
+
+      console.log('Profiles data:', profiles?.length, profiles);
+
+      // Combine participants with their profiles
+      const combined = participants.map(participant => {
+        const profile = profiles?.find(p => p.id === participant.user_id);
+        return {
+          ...participant,
+          profiles: profile
+        };
+      });
+
+      console.log('Combined participants data:', combined?.length, combined);
+      return combined || [];
     } catch (error) {
       console.error('Error loading admin participants:', error);
       return [];
