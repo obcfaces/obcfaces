@@ -527,8 +527,7 @@ const Admin = () => {
 
         // Get weekly participants with "pending" status
         const pendingParticipants = weeklyParticipants.filter(participant => {
-          const status = participant.participant_status || participantFilters[participant.id];
-          return status === 'pending';
+          return participant.admin_status === 'pending';
         });
 
         // Combine both approved applications and pending participants
@@ -621,9 +620,8 @@ const Admin = () => {
           
           switch (weeklyContestFilter) {
             case 'this week':
-              // Show participants with participant_status = 'this week' OR admin_status = 'this week'
+              // Show participants with admin_status = 'this week' 
               const isThisWeekStatus = status === 'this week';
-              const hasThisWeekParticipantStatus = participant.participant_status === 'this week';
               
               // Check for week-YYYY-MM-DD format statuses  
               const isCurrentWeekFormat = status && (
@@ -638,25 +636,26 @@ const Admin = () => {
               );
               
               const isApprovedApplication = !participant.contest_id && 
-                contestApplications.some(app => app.user_id === participant.user_id && app.status === 'approved');
+                // Убираем проверку application.status - используем только admin_status
               
               // Explicitly exclude past statuses 
               const isPastStatus = status === 'past';
               
-              console.log(`Participant ${participant.id}: admin_status=${status}, participant_status=${participant.participant_status}, showing=${(isThisWeekStatus || hasThisWeekParticipantStatus || isCurrentWeekFormat || isApprovedApplication) && !isPastStatus}`);
+              console.log(`Participant ${participant.id}: admin_status=${status}, showing=${isThisWeekStatus && !isPastStatus}`);
               
-              return (isThisWeekStatus || hasThisWeekParticipantStatus || isCurrentWeekFormat || isApprovedApplication) && !isPastStatus;
+              return (isThisWeekStatus) && !isPastStatus;
             case 'pre next week':
               return status === 'pre next week';
             case 'next week':
               // Show participants with 'next week' or 'next week on site' status OR applications with 'next week' status
               // Exclude past and current week statuses
               const isNextWeek = status === 'next week' || status === 'next week on site';
-              const isNextWeekApplication = !participant.contest_id && 
-                contestApplications.some(app => app.user_id === participant.user_id && app.status === 'next week');
+              const isNextWeek = status === 'next week' || status === 'next week on site';
+              // Убираем проверку application.status - используем только admin_status
+              const hasNextWeekApplication = false; // Не используем больше
               const isNotPastOrCurrent = status !== 'this week' && 
                                         status !== 'past';
-              return (isNextWeek || isNextWeekApplication) && isNotPastOrCurrent;
+              return (isNextWeek || hasNextWeekApplication) && isNotPastOrCurrent;
             case 'past':
               // Show participants with 'past' admin_status - they are grouped by week intervals from status_week_history
               const isPast = status === 'past';
@@ -1952,11 +1951,11 @@ const Admin = () => {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="this week">This Week</SelectItem>
-                    <SelectItem value="pre next week">Pre Next Week</SelectItem>
                     <SelectItem value="next week">Next Week</SelectItem>
                     <SelectItem value="next week on site">Next Week On Site</SelectItem>
                     <SelectItem value="past">Past</SelectItem>
                     <SelectItem value="pending">Pending</SelectItem>
+                    <SelectItem value="under review">Under Review</SelectItem>
                     <SelectItem value="approved">Approved</SelectItem>
                     <SelectItem value="rejected">Rejected</SelectItem>
                   </SelectContent>
