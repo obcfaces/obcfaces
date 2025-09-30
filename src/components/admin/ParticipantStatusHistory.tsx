@@ -168,13 +168,11 @@ export const ParticipantStatusHistory: React.FC<ParticipantStatusHistoryProps> =
   }
 
   return (
-    <Collapsible open={isExpanded} onOpenChange={onToggle}>
-      <CollapsibleTrigger className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground">
-        <span>History ({entries.length})</span>
-        {isExpanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
-      </CollapsibleTrigger>
-      
-      <CollapsibleContent className="space-y-1 mt-2">
+    <div className="text-xs">
+      <div className="mb-1 text-muted-foreground">
+        History ({entries.length}):
+      </div>
+      <div className="flex flex-wrap gap-1">
         {sortedEntries.map((entry, index) => {
           const weekInterval = formatWeekInterval(entry);
           const isHighlighted = entry.status === 'past' && weekInterval === '22/09-28/09/25';
@@ -182,40 +180,30 @@ export const ParticipantStatusHistory: React.FC<ParticipantStatusHistoryProps> =
           return (
             <div 
               key={index} 
-              className={`text-xs p-2 rounded border ${
+              className={`inline-flex items-center gap-1 px-2 py-1 rounded border text-xs ${
                 isHighlighted 
                   ? 'bg-yellow-50 border-yellow-200' 
                   : 'bg-muted/30 border-muted'
               }`}
             >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Badge 
-                    variant={getStatusBadgeVariant(entry.status)} 
-                    className="text-xs"
-                  >
-                    {entry.status}
-                  </Badge>
-                  {weekInterval && (
-                    <span className="text-muted-foreground">
-                      {weekInterval}
-                    </span>
-                  )}
-                </div>
+              <Badge 
+                variant={getStatusBadgeVariant(entry.status)} 
+                className="text-xs"
+              >
+                {entry.status}
+              </Badge>
+              {weekInterval && (
                 <span className="text-muted-foreground">
-                  ({formatDateTime(entry.changed_at)})
+                  {weekInterval}
                 </span>
-              </div>
-              
-              {isHighlighted && (
-                <div className="mt-1 text-muted-foreground">
-                  <span>(предыд: 23 сент.)</span>
-                </div>
               )}
+              <span className="text-muted-foreground">
+                ({formatDateTime(entry.changed_at)})
+              </span>
             </div>
           );
         })}
-      </CollapsibleContent>
-    </Collapsible>
+      </div>
+    </div>
   );
 };
