@@ -838,16 +838,46 @@ export function ContestantCard({
 
   return (
     <>
-      
-      <Card className={`${isExample ? 'border-yellow-400 border-2 bg-yellow-50/50' : isWinner ? 'border-contest-blue border-2' : 'bg-card border-contest-border'} relative overflow-hidden ${isWinner ? 'flex flex-col' : 'h-36 sm:h-40 md:h-44'}`}>
-        {isWinner && (
-          <div className="absolute top-0 left-0 w-[193px] sm:w-[225px] md:w-[257px] bg-blue-100 text-blue-700 pl-2 pr-2 py-1 text-xs font-semibold flex items-center justify-start z-20">
-            <span>🏆 WINNER   + 5000 PHP</span>
-          </div>
-        )}
-        
-        {/* Rating badge in top right corner - show for everyone except unauthenticated users in THIS WEEK */}
-        {isVoted && !isEditing && !showThanks && !isExample && (propUser || !isThisWeek) && !hideCardActions && (
+      {/* For non-winners, use the self-contained CompactCardLayout */}
+      {!isWinner ? (
+        <CompactCardLayout
+          name={name}
+          age={age}
+          weight={weight}
+          height={height}
+          country={country}
+          city={city}
+          profileId={profileId}
+          faceImage={faceImage}
+          fullBodyImage={fullBodyImage}
+          additionalPhotos={additionalPhotos}
+          isVoted={isVoted}
+          isEditing={isEditing}
+          showThanks={showThanks}
+          isExample={isExample}
+          isThisWeek={isThisWeek}
+          isWinner={isWinner}
+          rank={rank}
+          userRating={userRating}
+          localAverageRating={localAverageRating}
+          hideCardActions={hideCardActions}
+          cardData={cardData}
+          isLiked={isLiked}
+          hasCommented={hasCommented}
+          isDisliked={isDisliked}
+          dislikesCount={dislikesCount}
+          showDislike={showDislike}
+          propUser={propUser}
+          openModal={openModal}
+          handleLike={handleLike}
+          handleComment={markAsCommented}
+          handleDislike={handleDislike}
+          openShareModal={openShareModal}
+          handleRate={handleRate}
+          setShowLoginModal={setShowLoginModal}
+          setUserRating={setUserRating}
+          setIsEditing={setIsEditing}
+        />
           <div className="absolute top-0 right-0 z-10 flex flex-col items-end">
              <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
                <PopoverTrigger asChild>
@@ -966,50 +996,117 @@ export function ContestantCard({
               setUserRating={setUserRating}
               setIsEditing={setIsEditing}
             />
-          )}
-        </div>
-        
-        {/* Divider line between rows */}
-        {isWinner && <div className="border-t border-gray-400 w-full"></div>}
-        
-        {/* Second row for winner cards only - show ONLY if winner content exists in database */}
-        {isWinner && winnerContent && (weekOffset === 1 || weekOffset >= 2) && (
-          <>
-            <div className="flex h-36 sm:h-40 md:h-44 relative gap-px">
-               {/* Payment photo - use winner content from database only */}
-               <div className="relative">
-                 <img 
-                   src={resolveAsset(winnerContent.payment_proof_url)} 
-                   alt="Payment receipt"
-                   className="w-24 sm:w-28 md:w-32 h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
-                   onClick={() => openModal(isWinner ? additionalPhotos.length + 2 : 2)}
-                 />
-               </div>
-              
-               {/* Video - use winner content from database only */}
-               <div className="relative">
-                 <video 
-                   src={resolveAsset(winnerContent.testimonial_video_url)}
-                   className="w-24 sm:w-28 md:w-32 h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
-                   controls={false}
-                   muted
-                   onClick={() => openModal(isWinner ? additionalPhotos.length + 3 : 3)}
-                 />
-               </div>
-              
-               {/* Testimonial text - use winner content from database only */}
-               <div className="flex-1 p-3 flex flex-col items-center justify-start max-h-32 overflow-y-auto scroll-smooth">
-                 <p className="text-sm text-gray-700 italic text-center mb-3">
-                   {winnerContent.testimonial_text}
-                 </p>
-                 <p className="text-xs text-gray-600 font-bold italic self-end uppercase">{name}</p>
-               </div>
+      ) : (
+        /* Winner cards with special layout */
+        <Card className={`${isExample ? 'border-yellow-400 border-2 bg-yellow-50/50' : 'border-contest-blue border-2'} relative overflow-hidden flex flex-col`}>
+          {isWinner && (
+            <div className="absolute top-0 left-0 w-[193px] sm:w-[225px] md:w-[257px] bg-blue-100 text-blue-700 pl-2 pr-2 py-1 text-xs font-semibold flex items-center justify-start z-20">
+              <span>🏆 WINNER   + 5000 PHP</span>
             </div>
-            
-            {/* Winner cards end after second row - no extra content area */}
-          </>
-        )}
-      </Card>
+          )}
+          
+          {/* Rating badge in top right corner for winners */}
+          {isVoted && !isEditing && !showThanks && !isExample && (propUser || !isThisWeek) && !hideCardActions && (
+            <div className="absolute top-0 right-0 z-10">
+              <Popover>
+                <PopoverTrigger asChild>
+                  <div className="bg-contest-blue text-white px-2 py-1.5 rounded-bl-lg text-sm sm:text-base font-bold cursor-pointer hover:bg-contest-blue/90 transition-colors">
+                    {localAverageRating > 0 ? localAverageRating.toFixed(1) : '0.0'}
+                  </div>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-2">
+                  <div className="text-xs text-gray-600">
+                    {localTotalVotes} vote{localTotalVotes !== 1 ? 's' : ''}
+                  </div>
+                </PopoverContent>
+              </Popover>
+            </div>
+          )}
+          
+          {/* First row - main photos */}
+          <div className="flex h-36 sm:h-40 md:h-44 relative gap-px">
+            <CompactCardLayout
+              name={name}
+              age={age}
+              weight={weight}
+              height={height}
+              country={country}
+              city={city}
+              profileId={profileId}
+              faceImage={faceImage}
+              fullBodyImage={fullBodyImage}
+              additionalPhotos={additionalPhotos}
+              isVoted={isVoted}
+              isEditing={isEditing}
+              showThanks={showThanks}
+              isExample={isExample}
+              isThisWeek={isThisWeek}
+              isWinner={isWinner}
+              rank={rank}
+              userRating={userRating}
+              localAverageRating={localAverageRating}
+              hideCardActions={hideCardActions}
+              cardData={cardData}
+              isLiked={isLiked}
+              hasCommented={hasCommented}
+              isDisliked={isDisliked}
+              dislikesCount={dislikesCount}
+              showDislike={showDislike}
+              propUser={propUser}
+              openModal={openModal}
+              handleLike={handleLike}
+              handleComment={markAsCommented}
+              handleDislike={handleDislike}
+              openShareModal={openShareModal}
+              handleRate={handleRate}
+              setShowLoginModal={setShowLoginModal}
+              setUserRating={setUserRating}
+              setIsEditing={setIsEditing}
+            />
+          </div>
+          
+          {/* Divider line between rows */}
+          <div className="border-t border-gray-400 w-full"></div>
+          
+          {/* Second row for winner cards only - show ONLY if winner content exists in database */}
+          {winnerContent && (weekOffset === 1 || weekOffset >= 2) && (
+            <>
+              <div className="flex h-36 sm:h-40 md:h-44 relative gap-px">
+                 {/* Payment photo - use winner content from database only */}
+                 <div className="relative">
+                   <img 
+                     src={resolveAsset(winnerContent.payment_proof_url)} 
+                     alt="Payment receipt"
+                     className="w-24 sm:w-28 md:w-32 h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                     onClick={() => openModal(isWinner ? additionalPhotos.length + 2 : 2)}
+                   />
+                 </div>
+                
+                 {/* Video - use winner content from database only */}
+                 <div className="relative">
+                   <video 
+                     src={resolveAsset(winnerContent.testimonial_video_url)}
+                     className="w-24 sm:w-28 md:w-32 h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                     controls={false}
+                     muted
+                     onClick={() => openModal(isWinner ? additionalPhotos.length + 3 : 3)}
+                   />
+                 </div>
+                
+                 {/* Testimonial text - use winner content from database only */}
+                 <div className="flex-1 p-3 flex flex-col items-center justify-start max-h-32 overflow-y-auto scroll-smooth">
+                   <p className="text-sm text-gray-700 italic text-center mb-3">
+                     {winnerContent.testimonial_text}
+                   </p>
+                   <p className="text-xs text-gray-600 font-bold italic self-end uppercase">{name}</p>
+                 </div>
+              </div>
+              
+              {/* Winner cards end after second row - no extra content area */}
+            </>
+          )}
+        </Card>
+      )}
 
       <PhotoModal
         isOpen={isModalOpen}
