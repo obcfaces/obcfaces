@@ -76,7 +76,7 @@ export function ContestSection({
         statusFilter = 'past';
       }
 
-      // Get participants directly from weekly_contest_participants with proper admin_status filtering
+      // Get participants with their photos from profiles and contest_applications tables
       let query = supabase
         .from('weekly_contest_participants')
         .select(`
@@ -87,7 +87,8 @@ export function ContestSection({
           average_rating,
           total_votes,
           final_rank,
-          is_active
+          is_active,
+          profiles!inner(photo_1_url, photo_2_url)
         `)
         .eq('is_active', true);
       
@@ -117,8 +118,8 @@ export function ContestSection({
           new Date().getFullYear() - parseInt(p.application_data.birth_year) : null,
         city: p.application_data?.city || '',
         country: p.application_data?.country === 'PH' ? 'Philippines' : p.application_data?.country || '',
-        photo1_url: p.application_data?.photo1_url || '',
-        photo2_url: p.application_data?.photo2_url || '',
+        photo1_url: p.profiles?.photo_1_url || p.application_data?.photo1_url || '',
+        photo2_url: p.profiles?.photo_2_url || p.application_data?.photo2_url || '',
         height_cm: p.application_data?.height_cm || null,
         weight_kg: p.application_data?.weight_kg || null,
         final_rank: p.final_rank,
