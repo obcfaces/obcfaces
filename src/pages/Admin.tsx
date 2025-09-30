@@ -3628,7 +3628,7 @@ const Admin = () => {
                                   Сохранить
                                 </Button>
                                
-                                {participant.final_rank && (
+                               {participant.final_rank && (
                                   <div className="mt-2 p-2 bg-primary/10 rounded text-center text-xs">
                                     <div className="font-semibold text-primary">
                                       {participant.final_rank === 1 ? '🏆 Winner' : `🏅 Rank #${participant.final_rank}`}
@@ -3636,6 +3636,17 @@ const Admin = () => {
                                   </div>
                                 )}
                               </div>
+                            
+                            {/* Winner Content Manager - только для победительниц */}
+                            {participant.final_rank === 1 && (
+                              <div className="col-span-full p-4 border-t">
+                                <WinnerContentManager
+                                  participantId={participant.id}
+                                  userId={participant.user_id}
+                                  participantName={`${appData.first_name} ${appData.last_name}`}
+                                />
+                              </div>
+                            )}
                             
                             {/* Voting stats */}
                             <div 
