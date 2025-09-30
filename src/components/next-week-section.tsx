@@ -68,6 +68,7 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [isVotesLoaded, setIsVotesLoaded] = useState(false);
   const [userInitialized, setUserInitialized] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
@@ -83,6 +84,31 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
     return () => subscription.unsubscribe();
   }, []);
 
+  // Check if user is admin
+  useEffect(() => {
+    const checkAdminStatus = async () => {
+      if (!user) {
+        setIsAdmin(false);
+        return;
+      }
+
+      try {
+        const { data: userRoles } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', user.id);
+
+        const hasAdminRole = userRoles?.some(role => role.role === 'admin');
+        setIsAdmin(hasAdminRole || false);
+      } catch (error) {
+        console.error('Error checking admin status:', error);
+        setIsAdmin(false);
+      }
+    };
+
+    checkAdminStatus();
+  }, [user]);
+
   // Filter candidates based on user's previous votes and next week participants
   useEffect(() => {
     const filterCandidates = async () => {
@@ -93,13 +119,33 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
       setIsVotesLoaded(false);
       
       try {
-        // ВРЕМЕННО ОТКЛЮЧЕНО: Не загружаем участников next week на сайт
-        // const { data: nextWeekParticipants, error } = await supabase
-        //   .rpc('get_next_week_participants_public');
-        
-        // Возвращаем пустой массив
-        const nextWeekParticipants: any[] = [];
-        const error = null;
+        let nextWeekParticipants: any[] = [];
+        let error = null;
+
+        // Для админов загружаем участников со статусом next week и next week on site
+        if (isAdmin) {
+          const { data, error: fetchError } = await supabase
+            .from('weekly_contest_participants')
+            .select(`
+              *,
+              profiles:user_id (
+                first_name,
+                last_name,
+                age,
+                country,
+                city,
+                photo_1_url,
+                photo_2_url,
+                height_cm,
+                weight_kg
+              )
+            `)
+            .in('participant_status', ['next week', 'next week on site'])
+            .eq('is_active', true);
+
+          nextWeekParticipants = data || [];
+          error = fetchError;
+        }
 
         if (error) {
           console.error('Error fetching next week participants:', error);
@@ -118,18 +164,20 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
 
         // Convert database participants to candidate format
         const candidatesFromDB = actualNextWeekCandidates.map(participant => ({
-          id: participant.participant_id,
-          name: `${participant.first_name} ${participant.last_name}`,
-          age: participant.age,
-          country: participant.country,
-          city: participant.city,
-          location: `${participant.city}, ${participant.country}`,
-          facePhoto: participant.photo_1_url,
-          fullPhoto: participant.photo_2_url,
-          faceImage: participant.photo_1_url,
-          fullBodyImage: participant.photo_2_url,
-          height: participant.height_cm,
-          weight: participant.weight_kg
+          id: participant.id,
+          participant_id: participant.id,
+          name: `${participant.profiles?.first_name || ''} ${participant.profiles?.last_name || ''}`.trim(),
+          age: participant.profiles?.age,
+          country: participant.profiles?.country,
+          city: participant.profiles?.city,
+          location: `${participant.profiles?.city || ''}, ${participant.profiles?.country || ''}`,
+          facePhoto: participant.profiles?.photo_1_url,
+          fullPhoto: participant.profiles?.photo_2_url,
+          faceImage: participant.profiles?.photo_1_url,
+          fullBodyImage: participant.profiles?.photo_2_url,
+          height: participant.profiles?.height_cm,
+          weight: participant.profiles?.weight_kg,
+          status: participant.participant_status
         }));
 
         console.log('Candidates from DB:', candidatesFromDB);
@@ -180,7 +228,7 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
     };
 
     filterCandidates();
-  }, [user, userInitialized]);
+  }, [user, userInitialized, isAdmin]);
 
   const handleLike = async () => {
     if (!user) {
