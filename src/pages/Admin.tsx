@@ -2163,29 +2163,41 @@ const Admin = () => {
                                     [participant.id]: value
                                   }));
 
-                                  // Update the database with the new admin_status
-                                  const updateParticipantStatus = async () => {
-                                    try {
-                                      const { error } = await supabase
-                                        .from('weekly_contest_participants')
-                                         .update({ admin_status: value } as any)
-                                        .eq('id', participant.id);
-                                      
-                                      if (error) {
-                                        console.error('Error updating participant status:', error);
-                                        toast({
-                                          title: "Error",
-                                          description: "Failed to update participant status",
-                                          variant: "destructive"
-                                        });
-                                      } else {
-                                        // Refresh the participants data
-                                        fetchWeeklyParticipants();
-                                      }
-                                    } catch (error) {
-                                      console.error('Error updating participant status:', error);
-                                    }
-                                  };
+                                   // Update the database with the new admin_status
+                                   const updateParticipantStatus = async () => {
+                                     try {
+                                       const { error } = await supabase
+                                         .from('weekly_contest_participants')
+                                          .update({ admin_status: value } as any)
+                                         .eq('id', participant.id);
+                                       
+                                       if (error) {
+                                         console.error('Error updating participant status:', error);
+                                         toast({
+                                           title: "Error",
+                                           description: "Failed to update participant status",
+                                           variant: "destructive"
+                                         });
+                                         // Revert the local state on error
+                                         setParticipantFilters(prev => {
+                                           const updated = { ...prev };
+                                           delete updated[participant.id];
+                                           return updated;
+                                         });
+                                       } else {
+                                         // Successfully updated - keep the local state, don't refetch
+                                         console.log(`Successfully updated participant ${participant.id} status to ${value}`);
+                                       }
+                                     } catch (error) {
+                                       console.error('Error updating participant status:', error);
+                                       // Revert the local state on error
+                                       setParticipantFilters(prev => {
+                                         const updated = { ...prev };
+                                         delete updated[participant.id];
+                                         return updated;
+                                       });
+                                     }
+                                   };
 
                                   updateParticipantStatus();
                                }}
@@ -2331,29 +2343,41 @@ const Admin = () => {
                                         [participant.id]: value
                                       }));
 
-                                      // Update the database with the new admin_status
-                                      const updateParticipantStatus = async () => {
-                                        try {
-                                          const { error } = await supabase
-                                            .from('weekly_contest_participants')
-                                            .update({ admin_status: value } as any)
-                                            .eq('id', participant.id);
-                                          
-                                          if (error) {
-                                            console.error('Error updating participant status:', error);
-                                            toast({
-                                              title: "Error",
-                                              description: "Failed to update participant status",
-                                              variant: "destructive"
-                                            });
-                                          } else {
-                                            // Refresh the participants data
-                                            fetchWeeklyParticipants();
-                                          }
-                                        } catch (error) {
-                                          console.error('Error updating participant status:', error);
-                                        }
-                                      };
+                                       // Update the database with the new admin_status
+                                       const updateParticipantStatus = async () => {
+                                         try {
+                                           const { error } = await supabase
+                                             .from('weekly_contest_participants')
+                                             .update({ admin_status: value } as any)
+                                             .eq('id', participant.id);
+                                           
+                                           if (error) {
+                                             console.error('Error updating participant status:', error);
+                                             toast({
+                                               title: "Error",
+                                               description: "Failed to update participant status",
+                                               variant: "destructive"
+                                             });
+                                             // Revert the local state on error
+                                             setParticipantFilters(prev => {
+                                               const updated = { ...prev };
+                                               delete updated[participant.id];
+                                               return updated;
+                                             });
+                                           } else {
+                                             // Successfully updated - keep the local state, don't refetch
+                                             console.log(`Successfully updated participant ${participant.id} status to ${value}`);
+                                           }
+                                         } catch (error) {
+                                           console.error('Error updating participant status:', error);
+                                           // Revert the local state on error
+                                           setParticipantFilters(prev => {
+                                             const updated = { ...prev };
+                                             delete updated[participant.id];
+                                             return updated;
+                                           });
+                                         }
+                                       };
 
                                       updateParticipantStatus();
                                    }}
@@ -2532,12 +2556,13 @@ const Admin = () => {
                                         description: "Failed to update participant status",
                                         variant: "destructive",
                                       });
-                                    } else {
-                                      toast({
-                                        title: "Status Updated",
-                                        description: `Participant status changed to ${newStatus}`,
-                                      });
-                                      fetchWeeklyParticipants();
+                                     } else {
+                                       // Successfully updated - keep the local state, don't refetch
+                                       console.log(`Successfully updated participant ${participant.id} status to ${newStatus}`);
+                                       toast({
+                                         title: "Status Updated",
+                                         description: `Participant status changed to ${newStatus}`,
+                                       });
                                     }
                                   } catch (error) {
                                     console.error('Error updating participant status:', error);
