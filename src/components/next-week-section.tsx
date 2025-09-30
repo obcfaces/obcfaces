@@ -128,20 +128,7 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
         // Загружаем участников со статусом next week и next week on site для всех пользователей
         const { data, error: fetchError } = await supabase
           .from('weekly_contest_participants')
-          .select(`
-            *,
-            profiles:user_id (
-              first_name,
-              last_name,
-              age,
-              country,
-              city,
-              photo_1_url,
-              photo_2_url,
-              height_cm,
-              weight_kg
-            )
-          `)
+          .select('*')
           .in('admin_status', ['next week', 'next week on site'])
           .eq('is_active', true);
 
@@ -164,23 +151,26 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
         // All returned participants have next week status already
         const actualNextWeekCandidates = nextWeekParticipants || [];
 
-        // Convert database participants to candidate format
-        const candidatesFromDB = actualNextWeekCandidates.map(participant => ({
-          id: participant.id,
-          participant_id: participant.id,
-          name: `${participant.profiles?.first_name || ''} ${participant.profiles?.last_name || ''}`.trim(),
-          age: participant.profiles?.age,
-          country: participant.profiles?.country,
-          city: participant.profiles?.city,
-          location: `${participant.profiles?.city || ''}, ${participant.profiles?.country || ''}`,
-          facePhoto: participant.profiles?.photo_1_url,
-          fullPhoto: participant.profiles?.photo_2_url,
-          faceImage: participant.profiles?.photo_1_url,
-          fullBodyImage: participant.profiles?.photo_2_url,
-          height: participant.profiles?.height_cm,
-          weight: participant.profiles?.weight_kg,
-          status: participant.admin_status
-        }));
+        // Convert database participants to candidate format using application_data
+        const candidatesFromDB = actualNextWeekCandidates.map(participant => {
+          const appData = participant.application_data || {};
+          return {
+            id: participant.id,
+            participant_id: participant.id,
+            name: `${appData.first_name || ''} ${appData.last_name || ''}`.trim(),
+            age: appData.birth_year ? new Date().getFullYear() - parseInt(appData.birth_year) : null,
+            country: appData.country === 'PH' ? 'Philippines' : appData.country,
+            city: appData.city,
+            location: `${appData.city || ''}, ${appData.country === 'PH' ? 'Philippines' : appData.country || ''}`,
+            facePhoto: appData.photo1_url,
+            fullPhoto: appData.photo2_url,
+            faceImage: appData.photo1_url,
+            fullBodyImage: appData.photo2_url,
+            height: appData.height_cm,
+            weight: appData.weight_kg,
+            status: participant.admin_status
+          };
+        });
 
         console.log('Candidates from DB:', candidatesFromDB);
 
