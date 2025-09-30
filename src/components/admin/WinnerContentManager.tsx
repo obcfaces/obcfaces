@@ -1,11 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { Upload, Save, Trash, Eye, Crown } from 'lucide-react';
+import { Upload, Save, Trash, Eye, Crown, Image as ImageIcon, Video } from 'lucide-react';
 
 interface WinnerContentManagerProps {
   participantId?: string;
@@ -36,6 +36,10 @@ export function WinnerContentManager({
   });
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [uploadingVideo, setUploadingVideo] = useState(false);
+  const photoInputRef = useRef<HTMLInputElement>(null);
+  const videoInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (participantId || userId) {
@@ -165,6 +169,134 @@ export function WinnerContentManager({
     }
   };
 
+  const handlePhotoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: "Ошибка",
+        description: "Пожалуйста, выберите изображение",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Validate file size (max 10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      toast({
+        title: "Ошибка",
+        description: "Размер файла не должен превышать 10MB",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setUploadingPhoto(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${participantId || userId}-photo-${Date.now()}.${fileExt}`;
+      const filePath = `${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('winner-content')
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('winner-content')
+        .getPublicUrl(filePath);
+
+      setContent(prev => ({ ...prev, payment_proof_url: publicUrl }));
+
+      toast({
+        title: "Успех",
+        description: "Фото успешно загружено"
+      });
+    } catch (error) {
+      console.error('Error uploading photo:', error);
+      toast({
+        title: "Ошибка",
+        description: "Не удалось загрузить фото",
+        variant: "destructive"
+      });
+    } finally {
+      setUploadingPhoto(false);
+      if (photoInputRef.current) {
+        photoInputRef.current.value = '';
+      }
+    }
+  };
+
+  const handleVideoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('video/')) {
+      toast({
+        title: "Ошибка",
+        description: "Пожалуйста, выберите видео",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Validate file size (max 50MB)
+    if (file.size > 50 * 1024 * 1024) {
+      toast({
+        title: "Ошибка",
+        description: "Размер файла не должен превышать 50MB",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setUploadingVideo(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${participantId || userId}-video-${Date.now()}.${fileExt}`;
+      const filePath = `${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('winner-content')
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('winner-content')
+        .getPublicUrl(filePath);
+
+      setContent(prev => ({ ...prev, testimonial_video_url: publicUrl }));
+
+      toast({
+        title: "Успех",
+        description: "Видео успешно загружено"
+      });
+    } catch (error) {
+      console.error('Error uploading video:', error);
+      toast({
+        title: "Ошибка",
+        description: "Не удалось загрузить видео",
+        variant: "destructive"
+      });
+    } finally {
+      setUploadingVideo(false);
+      if (videoInputRef.current) {
+        videoInputRef.current.value = '';
+      }
+    }
+  };
+
   if (loading) {
     return <div className="p-4">Загрузка...</div>;
   }
@@ -179,24 +311,70 @@ export function WinnerContentManager({
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
+        {/* Photo Upload */}
         <div>
-          <label className="text-sm font-medium">URL скриншота оплаты</label>
-          <Input
-            type="url"
-            placeholder="https://example.com/payment-proof.jpg"
-            value={content.payment_proof_url || ''}
-            onChange={(e) => setContent(prev => ({ ...prev, payment_proof_url: e.target.value }))}
-          />
+          <label className="text-sm font-medium mb-2 block">Фото оплаты</label>
+          <div className="flex gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => photoInputRef.current?.click()}
+              disabled={uploadingPhoto}
+              className="flex-1"
+            >
+              <ImageIcon className="h-4 w-4 mr-2" />
+              {uploadingPhoto ? 'Загрузка...' : 'Загрузить фото'}
+            </Button>
+            <input
+              ref={photoInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handlePhotoUpload}
+              className="hidden"
+            />
+          </div>
+          {content.payment_proof_url && (
+            <Input
+              type="url"
+              placeholder="https://example.com/payment-proof.jpg"
+              value={content.payment_proof_url || ''}
+              onChange={(e) => setContent(prev => ({ ...prev, payment_proof_url: e.target.value }))}
+              className="mt-2"
+            />
+          )}
         </div>
 
+        {/* Video Upload */}
         <div>
-          <label className="text-sm font-medium">URL видео-отзыва</label>
-          <Input
-            type="url"
-            placeholder="https://example.com/testimonial-video.mp4"
-            value={content.testimonial_video_url || ''}
-            onChange={(e) => setContent(prev => ({ ...prev, testimonial_video_url: e.target.value }))}
-          />
+          <label className="text-sm font-medium mb-2 block">Видео-отзыв</label>
+          <div className="flex gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => videoInputRef.current?.click()}
+              disabled={uploadingVideo}
+              className="flex-1"
+            >
+              <Video className="h-4 w-4 mr-2" />
+              {uploadingVideo ? 'Загрузка...' : 'Загрузить видео'}
+            </Button>
+            <input
+              ref={videoInputRef}
+              type="file"
+              accept="video/*"
+              onChange={handleVideoUpload}
+              className="hidden"
+            />
+          </div>
+          {content.testimonial_video_url && (
+            <Input
+              type="url"
+              placeholder="https://example.com/testimonial-video.mp4"
+              value={content.testimonial_video_url || ''}
+              onChange={(e) => setContent(prev => ({ ...prev, testimonial_video_url: e.target.value }))}
+              className="mt-2"
+            />
+          )}
         </div>
 
         <div>
