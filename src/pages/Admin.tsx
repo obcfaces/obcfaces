@@ -3662,10 +3662,28 @@ const Admin = () => {
                                 </Button>
                                
                                {participant.final_rank && (
-                                  <div className="mt-2 p-2 bg-primary/10 rounded text-center text-xs">
+                                  <div className="mt-2 p-2 bg-primary/10 rounded text-center text-xs space-y-2">
                                     <div className="font-semibold text-primary">
                                       {participant.final_rank === 1 ? '🏆 Winner' : `🏅 Rank #${participant.final_rank}`}
                                     </div>
+                                    {participant.final_rank === 1 && (
+                                      <Button
+                                        size="sm"
+                                        variant="outline"
+                                        className="w-full h-7 text-xs gap-1"
+                                        onClick={() => {
+                                          setSelectedWinner({
+                                            participantId: participant.id,
+                                            userId: participant.user_id,
+                                            name: `${appData.first_name} ${appData.last_name}`
+                                          });
+                                          setShowWinnerContentModal(true);
+                                        }}
+                                      >
+                                        <Trophy className="h-3 w-3" />
+                                        Контент
+                                      </Button>
+                                    )}
                                   </div>
                                 )}
                               </div>
