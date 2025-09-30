@@ -408,6 +408,8 @@ const Admin = () => {
   const [showRoleConfirmModal, setShowRoleConfirmModal] = useState(false);
   const [roleChangeUser, setRoleChangeUser] = useState<{ id: string; name: string; newRole: string } | null>(null);
   const [assigningRoles, setAssigningRoles] = useState<Set<string>>(new Set());
+  const [showWinnerContentModal, setShowWinnerContentModal] = useState(false);
+  const [selectedWinner, setSelectedWinner] = useState<{ participantId: string; userId: string; name: string } | null>(null);
   const [nextWeekFilter, setNextWeekFilter] = useState<string>('all'); // Новый фильтр для next week
   const [nextWeekParticipants, setNextWeekParticipants] = useState<any[]>([]);
   const [dailyStats, setDailyStats] = useState<Array<{ day_name: string; vote_count: number; like_count: number }>>([]);
@@ -3198,6 +3200,37 @@ const Admin = () => {
                         ))}
                       </SelectContent>
                     </Select>
+                  </div>
+                  
+                  {/* Winner Content Manager Button */}
+                  <div className="border-t pt-4">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        // Find winner from current filtered participants
+                        const winner = pastWeekParticipants.find(p => p.final_rank === 1);
+                        if (winner) {
+                          const appData = winner.application_data || {};
+                          setSelectedWinner({
+                            participantId: winner.id,
+                            userId: winner.user_id,
+                            name: `${appData.first_name} ${appData.last_name}`
+                          });
+                          setShowWinnerContentModal(true);
+                        } else {
+                          toast({
+                            title: "Победительница не найдена",
+                            description: "В текущем фильтре нет победительницы",
+                            variant: "destructive"
+                          });
+                        }
+                      }}
+                      className="gap-2"
+                    >
+                      <Trophy className="h-4 w-4" />
+                      Управление контентом победительницы
+                    </Button>
                   </div>
                 </div>
               </div>
@@ -6351,6 +6384,22 @@ const Admin = () => {
         onClose={() => setNextWeekVotersModalOpen(false)}
         participantName={selectedParticipantForNextWeekVoters}
       />
+
+      {/* Winner Content Manager Modal */}
+      <Dialog open={showWinnerContentModal} onOpenChange={setShowWinnerContentModal}>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Управление контентом победительницы</DialogTitle>
+          </DialogHeader>
+          {selectedWinner && (
+            <WinnerContentManager
+              participantId={selectedWinner.participantId}
+              userId={selectedWinner.userId}
+              participantName={selectedWinner.name}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
 
       {/* Status History Modal */}
       {selectedStatusHistory && (
