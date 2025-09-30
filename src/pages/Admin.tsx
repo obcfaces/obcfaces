@@ -1158,6 +1158,24 @@ const Admin = () => {
     }
   };
 
+  // Function to get status background color
+  const getStatusBackgroundColor = (status: string) => {
+    switch (status) {
+      case 'pre next week':
+        return 'bg-[hsl(var(--status-pre-next-week))]';
+      case 'next week':
+        return 'bg-[hsl(var(--status-next-week))]';
+      case 'next week on site':
+        return 'bg-[hsl(var(--status-next-week-on-site))]';
+      case 'this week':
+        return 'bg-[hsl(var(--status-this-week))]';
+      case 'past':
+        return 'bg-[hsl(var(--status-past))]';
+      default:
+        return '';
+    }
+  };
+
   const fetchProfiles = async () => {
     const { data: profilesData, error: profilesError } = await supabase
       .from('profiles')
@@ -2080,8 +2098,8 @@ const Admin = () => {
                                   updateParticipantStatus();
                                }}
                              >
-                               <SelectTrigger className="w-28 h-6 text-xs">
-                                 <SelectValue />
+                                    <SelectTrigger className={`w-28 h-6 text-xs ${getStatusBackgroundColor(participant.admin_status || participantFilters[participant.id] || (participant.final_rank ? 'this week' : 'approve'))}`}>
+                                      <SelectValue />
                                </SelectTrigger>
                                       <SelectContent className="z-[9999] bg-popover border shadow-lg">
                                          <SelectItem value="this week">This Week</SelectItem>
@@ -2202,9 +2220,9 @@ const Admin = () => {
                               
                               {/* Status filter positioned at bottom */}
                               <div className="absolute bottom-12 right-13 flex items-center gap-2">
-                                 <Select 
-                                   value={participant.admin_status || participantFilters[participant.id] || (participant.final_rank ? 'this week' : 'approve')} 
-                                   onValueChange={(value) => {
+                                  <Select 
+                                    value={participant.admin_status || participantFilters[participant.id] || (participant.final_rank ? 'this week' : 'approve')} 
+                                    onValueChange={(value) => {
                                      if (value === 'reject') {
                                        // Open reject modal for this participant
                                        setApplicationToReject({
@@ -2362,9 +2380,9 @@ const Admin = () => {
                               </div>
                               
                               {/* Status selector */}
-                              <Select 
-                                value={participant.admin_status || 'pre next week'}
-                                onValueChange={async (newStatus) => {
+                               <Select 
+                                 value={participant.admin_status || 'pre next week'}
+                                 onValueChange={async (newStatus) => {
                                   setParticipantFilters(prev => ({
                                     ...prev,
                                     [participant.id]: newStatus
@@ -2637,9 +2655,9 @@ const Admin = () => {
                               
                               {/* Status controls */}
                                <div className="flex items-center gap-2 ml-2 flex-shrink-0">
-                                   <Select 
-                                     value={participant.admin_status || 'next week'}
-                                     onValueChange={async (value) => {
+                                    <Select 
+                                      value={participant.admin_status || 'next week'}
+                                      onValueChange={async (value) => {
                                       try {
                                           console.log('=== Status Update Debug ===');
                                           console.log('Full participant object:', JSON.stringify(participant, null, 2));
@@ -2686,8 +2704,8 @@ const Admin = () => {
                                      }
                                   }}
                                 >
-                                  <SelectTrigger className="w-24 h-7 text-xs">
-                                    <SelectValue />
+                                   <SelectTrigger className={`w-24 h-7 text-xs ${getStatusBackgroundColor(participant.admin_status || 'next week')}`}>
+                                     <SelectValue />
                                   </SelectTrigger>
                                    <SelectContent className="z-[9999] bg-popover border shadow-lg">
                                        <SelectItem value="this week">This Week</SelectItem>
@@ -2807,9 +2825,9 @@ const Admin = () => {
                                     <span className="font-medium">{participant.dislike_count || 0}</span>
                                   </button>
                                 </div>
-                              <Select 
-                                value={participant.admin_status || 'next week on site'} 
-                                onValueChange={async (value) => {
+                                <Select 
+                                 value={participant.admin_status || 'next week on site'} 
+                                 onValueChange={async (value) => {
                                   try {
                                     const { error } = await supabase
                                       .from('weekly_contest_participants')
@@ -2836,8 +2854,8 @@ const Admin = () => {
                                   }
                                 }}
                               >
-                                <SelectTrigger className="w-16 h-6 text-xs">
-                                  <SelectValue />
+                                 <SelectTrigger className={`w-16 h-6 text-xs ${getStatusBackgroundColor(participant.admin_status || 'next week on site')}`}>
+                                   <SelectValue />
                                 </SelectTrigger>
                                   <SelectContent className="z-[9999] bg-popover border shadow-lg">
                                      <SelectItem value="this week">This Week</SelectItem>
@@ -3258,9 +3276,9 @@ const Admin = () => {
                                {/* Status selector */}
                                <div>
                                  <div className="font-semibold mb-1">Status:</div>
-                                 <Select 
-                                   value={participant.admin_status || 'past'}
-                                   onValueChange={async (newStatus) => {
+                                  <Select 
+                                    value={participant.admin_status || 'past'}
+                                    onValueChange={async (newStatus) => {
                                      try {
                                        const { error } = await supabase
                                          .from('weekly_contest_participants')
@@ -3286,8 +3304,8 @@ const Admin = () => {
                                      }
                                    }}
                                  >
-                                   <SelectTrigger className="w-full h-6 text-xs">
-                                     <SelectValue />
+                                    <SelectTrigger className={`w-full h-6 text-xs ${getStatusBackgroundColor(participant.admin_status || 'past')}`}>
+                                      <SelectValue />
                                    </SelectTrigger>
                                    <SelectContent className="z-[9999] bg-popover border shadow-lg">
                                      <SelectItem value="this week">This Week</SelectItem>
