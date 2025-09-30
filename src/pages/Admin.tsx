@@ -1878,7 +1878,7 @@ const Admin = () => {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="this week">This Week</SelectItem>
-                    <SelectItem value="pre next week">{`Pre Next Week (${getFutureWeekInterval(1).formatted})`}</SelectItem>
+                    <SelectItem value="pre next week">Pre Next Week</SelectItem>
                     <SelectItem value="next week">Next Week</SelectItem>
                     <SelectItem value="next week on site">Next Week On Site</SelectItem>
                     <SelectItem value="past">Past</SelectItem>
@@ -2085,7 +2085,7 @@ const Admin = () => {
                                </SelectTrigger>
                                       <SelectContent className="z-[9999] bg-popover border shadow-lg">
                                          <SelectItem value="this week">This Week</SelectItem>
-                                          <SelectItem value="pre next week">{`Pre Next Week (${getFutureWeekInterval(1).formatted})`}</SelectItem>
+                                           <SelectItem value="pre next week">Pre Next Week</SelectItem>
                                           <SelectItem value="next week">Next Week</SelectItem>
                                           <SelectItem value="next week on site">Next Week On Site</SelectItem>
                                           <SelectItem value="past">Past</SelectItem>
@@ -2253,7 +2253,7 @@ const Admin = () => {
                                    </SelectTrigger>
                                            <SelectContent className="z-[9999] bg-popover border shadow-lg">
                                               <SelectItem value="this week">This Week</SelectItem>
-                                               <SelectItem value="pre next week">{`Pre Next Week (${getFutureWeekInterval(1).formatted})`}</SelectItem>
+                                                <SelectItem value="pre next week">Pre Next Week</SelectItem>
                                                <SelectItem value="next week">Next Week</SelectItem>
                                                <SelectItem value="next week on site">Next Week On Site</SelectItem>
                                                <SelectItem value="past">Past</SelectItem>
@@ -2399,7 +2399,6 @@ const Admin = () => {
                                   <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent>
-                                  <SelectItem value="pre next week">{`Pre Next Week (${getFutureWeekInterval(1).formatted})`}</SelectItem>
                                   <SelectItem value="pre next week">Pre Next Week</SelectItem>
                                   <SelectItem value="next week">Next Week</SelectItem>
                                   <SelectItem value="next week on site">Next Week On Site</SelectItem>
@@ -2692,7 +2691,7 @@ const Admin = () => {
                                   </SelectTrigger>
                                    <SelectContent className="z-[9999] bg-popover border shadow-lg">
                                        <SelectItem value="this week">This Week</SelectItem>
-                                        <SelectItem value="pre next week">{`Pre Next Week (${getFutureWeekInterval(1).formatted})`}</SelectItem>
+                                         <SelectItem value="pre next week">Pre Next Week</SelectItem>
                                         <SelectItem value="next week">Next Week</SelectItem>
                                         <SelectItem value="next week on site">Next Week On Site</SelectItem>
                                         <SelectItem value="past">Past</SelectItem>
@@ -2842,7 +2841,7 @@ const Admin = () => {
                                 </SelectTrigger>
                                   <SelectContent className="z-[9999] bg-popover border shadow-lg">
                                      <SelectItem value="this week">This Week</SelectItem>
-                                      <SelectItem value="pre next week">{`Pre Next Week (${getFutureWeekInterval(1).formatted})`}</SelectItem>
+                                       <SelectItem value="pre next week">Pre Next Week</SelectItem>
                                       <SelectItem value="next week">Next Week</SelectItem>
                                       <SelectItem value="next week on site">Next Week On Site</SelectItem>
                                       <SelectItem value="past">Past</SelectItem>
@@ -3292,11 +3291,10 @@ const Admin = () => {
                                    </SelectTrigger>
                                    <SelectContent className="z-[9999] bg-popover border shadow-lg">
                                      <SelectItem value="this week">This Week</SelectItem>
-                                     <SelectItem value="pre next week">{`Pre Next Week (${getFutureWeekInterval(1).formatted})`}</SelectItem>
+                                      <SelectItem value="pre next week">Pre Next Week</SelectItem>
                                      <SelectItem value="next week">Next Week</SelectItem>
                                      <SelectItem value="next week on site">Next Week On Site</SelectItem>
-                                     <SelectItem value="past">Past</SelectItem>
-                                     <SelectItem value="past">Past</SelectItem>
+                                      <SelectItem value="past">Past</SelectItem>
                                      <SelectItem value="pending">Pending</SelectItem>
                                      <SelectItem value="approved">Approved</SelectItem>
                                      <SelectItem value="rejected">Rejected</SelectItem>
@@ -3788,7 +3786,7 @@ const Admin = () => {
                                         </SelectTrigger>
                                           <SelectContent>
                                              <SelectItem value="this week">This Week</SelectItem>
-                                              <SelectItem value="pre next week">{`Pre Next Week (${getFutureWeekInterval(1).formatted})`}</SelectItem>
+                                               <SelectItem value="pre next week">Pre Next Week</SelectItem>
                                               <SelectItem value="next week">Next Week</SelectItem>
                                               <SelectItem value="next week on site">Next Week On Site</SelectItem>
                                              <SelectItem value="past">Past</SelectItem>
@@ -4008,7 +4006,7 @@ const Admin = () => {
                                                 </SelectTrigger>
                                                    <SelectContent>
                                                       <SelectItem value="this week">This Week</SelectItem>
-                                                       <SelectItem value="pre next week">{`Pre Next Week (${getFutureWeekInterval(1).formatted})`}</SelectItem>
+                                                        <SelectItem value="pre next week">Pre Next Week</SelectItem>
                                                        <SelectItem value="next week">Next Week</SelectItem>
                                                        <SelectItem value="next week on site">Next Week On Site</SelectItem>
                                                       <SelectItem value="past">Past</SelectItem>
@@ -4112,7 +4110,7 @@ const Admin = () => {
                        <SelectContent className="z-[9999] bg-popover border shadow-lg min-w-[160px]">
                          <SelectItem value="all">All Statuses</SelectItem>
                          <SelectItem value="this week">This Week</SelectItem>
-                          <SelectItem value="pre next week">{`Pre Next Week (${getFutureWeekInterval(1).formatted})`}</SelectItem>
+                           <SelectItem value="pre next week">Pre Next Week</SelectItem>
                           <SelectItem value="next week">Next Week</SelectItem>
                           <SelectItem value="past">Past</SelectItem>
                          <SelectItem value="pending">Pending</SelectItem>
@@ -4599,7 +4597,7 @@ const Admin = () => {
                                                </SelectTrigger>
                                                   <SelectContent>
                                                      <SelectItem value="this week">This Week</SelectItem>
-                                                     <SelectItem value="pre next week">{`Pre Next Week (${getFutureWeekInterval(1).formatted})`}</SelectItem>
+                                                     <SelectItem value="pre next week">Pre Next Week</SelectItem>
                                                       <SelectItem value="next week">Next Week</SelectItem>
                                                       <SelectItem value="next week on site">Next Week On Site</SelectItem>
                                                      <SelectItem value="past">Past</SelectItem>
