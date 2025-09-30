@@ -758,10 +758,28 @@ const Admin = () => {
           };
         });
         
-        console.log('Filtered past week participants:', pastParticipantsWithRatings.length);
-        console.log('Past participants admin statuses:', pastParticipantsWithRatings.map(p => p.admin_status));
+        // Sort past participants by rating (highest to lowest)
+        const sortedPastParticipants = pastParticipantsWithRatings.sort((a, b) => {
+          // Sort by final_rank first (winners at top)
+          if (a.final_rank && !b.final_rank) return -1;
+          if (!a.final_rank && b.final_rank) return 1;
+          if (a.final_rank && b.final_rank) return a.final_rank - b.final_rank;
+          
+          // Then by average_rating (highest first)
+          const ratingA = Number(a.average_rating) || 0;
+          const ratingB = Number(b.average_rating) || 0;
+          if (ratingB !== ratingA) return ratingB - ratingA;
+          
+          // Finally by total_votes (highest first)
+          const votesA = Number(a.total_votes) || 0;
+          const votesB = Number(b.total_votes) || 0;
+          return votesB - votesA;
+        });
         
-        setPastWeekParticipants(pastParticipantsWithRatings);
+        console.log('Filtered past week participants:', sortedPastParticipants.length);
+        console.log('Past participants admin statuses:', sortedPastParticipants.map(p => p.admin_status));
+        
+        setPastWeekParticipants(sortedPastParticipants);
         
       } catch (error) {
         console.error('Error in filterPastWeekParticipants:', error);
