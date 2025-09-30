@@ -122,18 +122,24 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
 
   // Get user session once for the entire section and listen for changes
   useEffect(() => {
+    console.log('ContestSection useEffect triggered for:', title);
     const getCurrentUser = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       const currentUser = session?.user ?? null;
+      console.log('ContestSection: Current user:', currentUser?.id);
       setUser(currentUser);
       
       // Check admin status and load admin participants if user is admin
       if (currentUser && title === "THIS WEEK") {
+        console.log('Checking admin status for user:', currentUser.id);
         const adminStatus = await checkAdminStatus(currentUser.id);
+        console.log('Admin status result:', adminStatus);
         setIsAdmin(adminStatus);
         
         if (adminStatus) {
+          console.log('Loading admin participants for THIS WEEK section');
           const adminData = await loadAdminParticipants();
+          console.log('Loaded admin participants:', adminData.length);
           setAdminParticipants(adminData);
         }
       }
@@ -171,7 +177,9 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
 
   // Load participants based on title
   useEffect(() => {
+    console.log('ContestSection loadParticipants useEffect triggered for:', title);
     const loadParticipants = async () => {
+      console.log('Starting loadParticipants for:', title);
       setIsLoading(true);
       let weekOffset = 0;
       if (title === "THIS WEEK") weekOffset = 0;  // Current week - participants with "this week" status
