@@ -88,6 +88,7 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
   // Load admin participants for THIS WEEK section
   const loadAdminParticipants = async () => {
     try {
+      console.log('Loading admin participants with query...');
       const { data: participants, error } = await supabase
         .from('weekly_contest_participants')
         .select(`
@@ -105,14 +106,16 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
             email
           )
         `)
-        .eq('admin_status', 'this week')
-        .eq('is_active', true);
+        .or('admin_status.eq.this week,participant_status.eq.this week')
+        .eq('is_active', true)
+        .limit(10);
 
       if (error) {
         console.error('Error loading admin participants:', error);
         return [];
       }
 
+      console.log('Admin participants query result:', participants?.length, participants);
       return participants || [];
     } catch (error) {
       console.error('Error loading admin participants:', error);
