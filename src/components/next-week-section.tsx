@@ -122,37 +122,32 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
         let nextWeekParticipants: any[] = [];
         let error = null;
 
-        console.log('Is admin:', isAdmin);
+        console.log('Loading next week participants...');
         console.log('User ID:', user?.id);
 
-        // Для админов загружаем участников со статусом next week и next week on site
-        if (isAdmin) {
-          console.log('Loading next week participants for admin...');
-          const { data, error: fetchError } = await supabase
-            .from('weekly_contest_participants')
-            .select(`
-              *,
-              profiles:user_id (
-                first_name,
-                last_name,
-                age,
-                country,
-                city,
-                photo_1_url,
-                photo_2_url,
-                height_cm,
-                weight_kg
-              )
-            `)
-            .in('admin_status', ['next week', 'next week on site'])
-            .eq('is_active', true);
+        // Загружаем участников со статусом next week и next week on site для всех пользователей
+        const { data, error: fetchError } = await supabase
+          .from('weekly_contest_participants')
+          .select(`
+            *,
+            profiles:user_id (
+              first_name,
+              last_name,
+              age,
+              country,
+              city,
+              photo_1_url,
+              photo_2_url,
+              height_cm,
+              weight_kg
+            )
+          `)
+          .in('admin_status', ['next week', 'next week on site'])
+          .eq('is_active', true);
 
-          console.log('Query result:', { data, fetchError });
-          nextWeekParticipants = data || [];
-          error = fetchError;
-        } else {
-          console.log('Not admin, skipping query');
-        }
+        console.log('Query result:', { data, fetchError });
+        nextWeekParticipants = data || [];
+        error = fetchError;
 
         if (error) {
           console.error('Error fetching next week participants:', error);
@@ -235,7 +230,7 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
     };
 
     filterCandidates();
-  }, [user, userInitialized, isAdmin]);
+  }, [user, userInitialized]);
 
   const handleLike = async () => {
     if (!user) {
