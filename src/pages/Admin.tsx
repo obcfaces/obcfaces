@@ -3327,11 +3327,11 @@ const Admin = () => {
                             </div>
                           </div>
                       
-                          {/* Column 3: Status History (30ch) */}
+                          {/* Column 3: Status History (40ch) - горизонтальное отображение для past */}
                           <div className="w-[40ch] flex-shrink-0 p-2">
                             <div className="text-xs h-32 overflow-y-auto">
-                              <div className="flex flex-wrap gap-1">
-                                {/* Show all statuses including current, sorted by changed_at (newest first) */}
+                              <div className="flex flex-wrap gap-2">
+                                {/* Show all statuses horizontally, sorted by changed_at (newest first) */}
                                 {participant.status_history && Object.keys(participant.status_history).length > 0 ? (
                                   (() => {
                                     // Sort all status entries by changed_at (newest first)
@@ -3396,19 +3396,18 @@ const Admin = () => {
                                        
                                        const isCurrentStatus = status === participant.admin_status;
                                        
-                                       return (
-                                         <div key={index} className={`p-2 rounded-md text-xs border mb-1 ${
-                                           isCurrentStatus ? 'bg-blue-50 border-blue-200 text-blue-800 font-medium' : 
-                                           'bg-gray-50 border-gray-200 text-gray-600'
-                                         }`}>
-                                           <div className="font-medium">{status.toUpperCase()}</div>
-                                           <div className="text-xs opacity-80">
-                                             📅 {changedAt}<br/>
-                                             📊 {weekInterval}<br/>
-                                             {adminInfo && <span>{adminInfo}<br/></span>}
-                                             {changeReason && <span className="text-xs opacity-60">{changeReason}</span>}
-                                           </div>
-                                         </div>
+                                        return (
+                                          <div key={index} className={`inline-flex flex-col p-2 rounded-lg text-xs border mr-2 mb-2 ${
+                                            isCurrentStatus ? 'bg-blue-50 border-blue-200 text-blue-800 font-medium' : 
+                                            'bg-gray-50 border-gray-200 text-gray-600'
+                                          }`} style={{minWidth: '120px'}}>
+                                            <div className="font-bold text-center mb-1">{status.toUpperCase()}</div>
+                                            <div className="text-xs text-center space-y-1">
+                                              <div>📅 {changedAt}</div>
+                                              <div>📊 {weekInterval}</div>
+                                              {adminInfo && <div>{adminInfo}</div>}
+                                            </div>
+                                          </div>
                                       );
                                      });
                                    })()
