@@ -60,11 +60,9 @@ export function WinnerContentManager({
         query = query.eq('user_id', userId);
       }
       
-      const { data, error } = await query.single();
+      const { data, error } = await query.maybeSingle();
       
-      if (error && error.code !== 'PGRST116') {
-        throw error;
-      }
+      if (error) throw error;
       
       if (data) {
         setContent(data);
@@ -183,11 +181,11 @@ export function WinnerContentManager({
       return;
     }
 
-    // Validate file size (max 10MB)
+    // Validate file size (max 10MB for images)
     if (file.size > 10 * 1024 * 1024) {
       toast({
         title: "Ошибка",
-        description: "Размер файла не должен превышать 10MB",
+        description: "Размер изображения не должен превышать 10MB",
         variant: "destructive"
       });
       return;
@@ -196,14 +194,14 @@ export function WinnerContentManager({
     setUploadingPhoto(true);
     try {
       const fileExt = file.name.split('.').pop();
-      const fileName = `${participantId || userId}-photo-${Date.now()}.${fileExt}`;
+      const fileName = `${userId || participantId}-photo-${Date.now()}.${fileExt}`;
       const filePath = `${fileName}`;
 
       const { error: uploadError } = await supabase.storage
         .from('winner-content')
         .upload(filePath, file, {
           cacheControl: '3600',
-          upsert: false
+          upsert: true
         });
 
       if (uploadError) throw uploadError;
@@ -247,11 +245,11 @@ export function WinnerContentManager({
       return;
     }
 
-    // Validate file size (max 50MB)
+    // Validate file size (max 50MB for videos)
     if (file.size > 50 * 1024 * 1024) {
       toast({
         title: "Ошибка",
-        description: "Размер файла не должен превышать 50MB",
+        description: "Размер видео не должен превышать 50MB",
         variant: "destructive"
       });
       return;
@@ -260,14 +258,14 @@ export function WinnerContentManager({
     setUploadingVideo(true);
     try {
       const fileExt = file.name.split('.').pop();
-      const fileName = `${participantId || userId}-video-${Date.now()}.${fileExt}`;
+      const fileName = `${userId || participantId}-video-${Date.now()}.${fileExt}`;
       const filePath = `${fileName}`;
 
       const { error: uploadError } = await supabase.storage
         .from('winner-content')
         .upload(filePath, file, {
           cacheControl: '3600',
-          upsert: false
+          upsert: true
         });
 
       if (uploadError) throw uploadError;
@@ -306,25 +304,22 @@ export function WinnerContentManager({
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Crown className="h-5 w-5 text-yellow-600" />
-          Контент победителя
+          Контент победительницы
           {participantName && <span className="text-sm font-normal">({participantName})</span>}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Photo Upload */}
         <div>
-          <label className="text-sm font-medium mb-2 block">Фото оплаты</label>
+          <label className="text-sm font-medium mb-2 block">Фото для победительницы</label>
           <div className="flex gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => photoInputRef.current?.click()}
-              disabled={uploadingPhoto}
+            <Input
+              type="url"
+              placeholder="или введите URL изображения"
+              value={content.payment_proof_url || ''}
+              onChange={(e) => setContent(prev => ({ ...prev, payment_proof_url: e.target.value }))}
               className="flex-1"
-            >
-              <ImageIcon className="h-4 w-4 mr-2" />
-              {uploadingPhoto ? 'Загрузка...' : 'Загрузить фото'}
-            </Button>
+            />
             <input
               ref={photoInputRef}
               type="file"
@@ -332,32 +327,37 @@ export function WinnerContentManager({
               onChange={handlePhotoUpload}
               className="hidden"
             />
+            <Button
+              type="button"
+              onClick={() => photoInputRef.current?.click()}
+              disabled={uploadingPhoto}
+              variant="outline"
+              size="sm"
+            >
+              <ImageIcon className="h-4 w-4 mr-2" />
+              {uploadingPhoto ? 'Загрузка...' : 'Загрузить'}
+            </Button>
           </div>
           {content.payment_proof_url && (
-            <Input
-              type="url"
-              placeholder="https://example.com/payment-proof.jpg"
-              value={content.payment_proof_url || ''}
-              onChange={(e) => setContent(prev => ({ ...prev, payment_proof_url: e.target.value }))}
-              className="mt-2"
+            <img 
+              src={content.payment_proof_url} 
+              alt="Preview" 
+              className="mt-2 w-32 h-32 object-cover rounded"
             />
           )}
         </div>
 
         {/* Video Upload */}
         <div>
-          <label className="text-sm font-medium mb-2 block">Видео-отзыв</label>
+          <label className="text-sm font-medium mb-2 block">Видео для победительницы</label>
           <div className="flex gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => videoInputRef.current?.click()}
-              disabled={uploadingVideo}
+            <Input
+              type="url"
+              placeholder="или введите URL видео"
+              value={content.testimonial_video_url || ''}
+              onChange={(e) => setContent(prev => ({ ...prev, testimonial_video_url: e.target.value }))}
               className="flex-1"
-            >
-              <Video className="h-4 w-4 mr-2" />
-              {uploadingVideo ? 'Загрузка...' : 'Загрузить видео'}
-            </Button>
+            />
             <input
               ref={videoInputRef}
               type="file"
@@ -365,22 +365,31 @@ export function WinnerContentManager({
               onChange={handleVideoUpload}
               className="hidden"
             />
+            <Button
+              type="button"
+              onClick={() => videoInputRef.current?.click()}
+              disabled={uploadingVideo}
+              variant="outline"
+              size="sm"
+            >
+              <Video className="h-4 w-4 mr-2" />
+              {uploadingVideo ? 'Загрузка...' : 'Загрузить'}
+            </Button>
           </div>
           {content.testimonial_video_url && (
-            <Input
-              type="url"
-              placeholder="https://example.com/testimonial-video.mp4"
-              value={content.testimonial_video_url || ''}
-              onChange={(e) => setContent(prev => ({ ...prev, testimonial_video_url: e.target.value }))}
-              className="mt-2"
+            <video 
+              src={content.testimonial_video_url} 
+              className="mt-2 w-32 h-32 object-cover rounded"
+              controls
             />
           )}
         </div>
 
+        {/* Text */}
         <div>
-          <label className="text-sm font-medium">Текст отзыва</label>
+          <label className="text-sm font-medium mb-2 block">Текст отзыва победительницы</label>
           <Textarea
-            placeholder="Введите текст отзыва победителя..."
+            placeholder="Введите текст отзыва победительницы..."
             value={content.testimonial_text || ''}
             onChange={(e) => setContent(prev => ({ ...prev, testimonial_text: e.target.value }))}
             rows={4}
