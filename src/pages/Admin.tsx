@@ -3090,16 +3090,36 @@ const Admin = () => {
                       <>
                         {/* Desktop filters */}
                         <div className="hidden md:flex gap-2 flex-wrap">
-                          {dynamicFilters.map((filter) => (
-                            <Button
-                              key={filter.id}
-                              variant={pastWeekFilter === filter.id ? 'default' : 'outline'}
-                              size="sm"
-                              onClick={() => setPastWeekFilter(filter.id)}
-                            >
-                              {filter.label}
-                            </Button>
-                          ))}
+                          {dynamicFilters.map((filter) => {
+                            // Extract the week label and date range
+                            const match = filter.label.match(/^(.+?)\s*\((.+?)\)$/);
+                            const weekLabel = match ? match[1] : filter.label;
+                            const dateRange = match ? match[2] : null;
+                            
+                            return (
+                              <div key={filter.id} className="flex items-center gap-1">
+                                <Button
+                                  variant={pastWeekFilter === filter.id ? 'default' : 'outline'}
+                                  size="sm"
+                                  onClick={() => setPastWeekFilter(filter.id)}
+                                >
+                                  {weekLabel}
+                                </Button>
+                                {dateRange && (
+                                  <TooltipProvider>
+                                    <Tooltip>
+                                      <TooltipTrigger asChild>
+                                        <Info className="h-4 w-4 text-muted-foreground cursor-help" />
+                                      </TooltipTrigger>
+                                      <TooltipContent>
+                                        <p>{dateRange}</p>
+                                      </TooltipContent>
+                                    </Tooltip>
+                                  </TooltipProvider>
+                                )}
+                              </div>
+                            );
+                          })}
                           <Button
                             variant={showAllCards ? 'default' : 'outline'}
                             size="sm"
@@ -3115,17 +3135,37 @@ const Admin = () => {
                         
                         {/* Mobile filters */}
                          <div className="md:hidden grid grid-cols-2 gap-2">
-                          {dynamicFilters.map((filter) => (
-                            <Button
-                              key={filter.id}
-                              variant={pastWeekFilter === filter.id ? 'default' : 'outline'}
-                              size="sm"
-                              onClick={() => setPastWeekFilter(filter.id)}
-                              className="text-xs"
-                            >
-                              {filter.mobileLabel}
-                            </Button>
-                          ))}
+                          {dynamicFilters.map((filter) => {
+                            // Extract the week label and date range for mobile
+                            const match = filter.mobileLabel.match(/^(.+?)\s*\((.+?)\)$/);
+                            const weekLabel = match ? match[1] : filter.mobileLabel;
+                            const dateRange = filter.weekInterval || (match ? match[2] : null);
+                            
+                            return (
+                              <div key={filter.id} className="flex items-center gap-1">
+                                <Button
+                                  variant={pastWeekFilter === filter.id ? 'default' : 'outline'}
+                                  size="sm"
+                                  onClick={() => setPastWeekFilter(filter.id)}
+                                  className="text-xs flex-1"
+                                >
+                                  {weekLabel}
+                                </Button>
+                                {dateRange && (
+                                  <TooltipProvider>
+                                    <Tooltip>
+                                      <TooltipTrigger asChild>
+                                        <Info className="h-4 w-4 text-muted-foreground cursor-help flex-shrink-0" />
+                                      </TooltipTrigger>
+                                      <TooltipContent>
+                                        <p>{dateRange}</p>
+                                      </TooltipContent>
+                                    </Tooltip>
+                                  </TooltipProvider>
+                                )}
+                              </div>
+                            );
+                          })}
                           <Button
                             variant={showAllCards ? 'default' : 'outline'}
                             size="sm"
