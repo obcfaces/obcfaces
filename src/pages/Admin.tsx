@@ -3543,49 +3543,48 @@ const Admin = () => {
                                   </Select>
                                 </div>
                                 
-                                {/* Save button */}
-                                {pendingPastChanges[participant.id] && (
-                                  <Button
-                                    size="sm"
-                                    className="w-full h-7 text-xs"
-                                    onClick={async () => {
-                                      try {
-                                        const changes = pendingPastChanges[participant.id];
-                                        const { error } = await supabase
-                                          .from('weekly_contest_participants')
-                                          .update({ 
-                                            admin_status: changes.admin_status ?? participant.admin_status,
-                                            week_interval: changes.week_interval ?? participant.week_interval
-                                          } as any)
-                                          .eq('id', participant.id);
-                                        
-                                        if (error) {
-                                          console.error('Error updating participant:', error);
-                                          toast({
-                                            title: "Error",
-                                            description: "Failed to update participant",
-                                            variant: "destructive",
-                                          });
-                                        } else {
-                                          toast({
-                                            title: "Saved",
-                                            description: "Status and interval updated successfully",
-                                          });
-                                          setPendingPastChanges(prev => {
-                                            const updated = { ...prev };
-                                            delete updated[participant.id];
-                                            return updated;
-                                          });
-                                          fetchWeeklyParticipants();
-                                        }
-                                      } catch (error) {
+                                {/* Save button - always visible */}
+                                <Button
+                                  size="sm"
+                                  className="w-full h-7 text-xs"
+                                  disabled={!pendingPastChanges[participant.id]}
+                                  onClick={async () => {
+                                    try {
+                                      const changes = pendingPastChanges[participant.id];
+                                      const { error } = await supabase
+                                        .from('weekly_contest_participants')
+                                        .update({ 
+                                          admin_status: changes.admin_status ?? participant.admin_status,
+                                          week_interval: changes.week_interval ?? participant.week_interval
+                                        } as any)
+                                        .eq('id', participant.id);
+                                      
+                                      if (error) {
                                         console.error('Error updating participant:', error);
+                                        toast({
+                                          title: "Error",
+                                          description: "Failed to update participant",
+                                          variant: "destructive",
+                                        });
+                                      } else {
+                                        toast({
+                                          title: "Saved",
+                                          description: "Status and interval updated successfully",
+                                        });
+                                        setPendingPastChanges(prev => {
+                                          const updated = { ...prev };
+                                          delete updated[participant.id];
+                                          return updated;
+                                        });
+                                        fetchWeeklyParticipants();
                                       }
-                                    }}
-                                  >
-                                    Сохранить
-                                  </Button>
-                                )}
+                                    } catch (error) {
+                                      console.error('Error updating participant:', error);
+                                    }
+                                  }}
+                                >
+                                  Сохранить
+                                </Button>
                                
                                 {/* Current week interval display */}
                                 <div className="bg-muted p-2 rounded text-center text-xs font-medium">
