@@ -635,12 +635,8 @@ const Admin = () => {
               const isApprovedApplication = !participant.contest_id && 
                 contestApplications.some(app => app.user_id === participant.user_id && app.status === 'approved');
               
-              // Explicitly exclude past statuses (but allow past week 3 if they have this week participant_status)
-              const isPastStatus = status === 'past' || 
-                                  status === 'past week 1' || 
-                                  status === 'past week 2' || 
-                                  (status === 'past week 3' && participant.participant_status !== 'this week') ||
-                                  status === 'past week 4';
+              // Explicitly exclude past statuses 
+              const isPastStatus = status === 'past';
               
               console.log(`Participant ${participant.id}: admin_status=${status}, participant_status=${participant.participant_status}, showing=${(isThisWeekStatus || hasThisWeekParticipantStatus || isCurrentWeekFormat || isApprovedApplication) && !isPastStatus}`);
               
@@ -654,18 +650,11 @@ const Admin = () => {
               const isNextWeekApplication = !participant.contest_id && 
                 contestApplications.some(app => app.user_id === participant.user_id && app.status === 'next week');
               const isNotPastOrCurrent = status !== 'this week' && 
-                                        status !== 'past' && 
-                                        status !== 'past week 1' && 
-                                        status !== 'past week 2' && 
-                                        status !== 'past week 3';
+                                        status !== 'past';
               return (isNextWeek || isNextWeekApplication) && isNotPastOrCurrent;
             case 'past':
-              // STRICT FILTER: Show ONLY participants with past statuses
-              // Exclude current and future week statuses
-              const isPast = status === 'past' || 
-                            status === 'past week 1' || 
-                            status === 'past week 2' || 
-                            status === 'past week 3';
+              // Show participants with 'past' admin_status - they are grouped by week intervals from status_week_history
+              const isPast = status === 'past';
               const isNotCurrentOrFuture = status !== 'this week' && 
                                           status !== 'next week' && 
                                           status !== 'next week on site' && 
@@ -793,15 +782,9 @@ const Admin = () => {
       case 'next week on site':
       case 'pre next week':
         return '06/10-12/10/25'; // Next week
-      case 'past week 1':
       case 'past':
-        return '22/09-28/09/25'; // 1 week ago
-      case 'past week 2':
-        return '15/09-21/09/25'; // 2 weeks ago
-      case 'past week 3':
-        return '08/09-14/09/25'; // 3 weeks ago
-      case 'past week 4':
-        return '01/09-07/09/25'; // 4 weeks ago
+        // For 'past' status, use status_week_history to determine week interval
+        return '22/09-28/09/25'; // Default to 1 week ago if no specific interval
       case 'pending':
         return '29/09-05/10/25'; // Same as current week for pending apps
       default:
@@ -3278,13 +3261,8 @@ const Admin = () => {
                                           case 'next week on site':
                                           case 'pre next week':
                                             return '06/10-12/10/25';
-                                          case 'past week 1':
                                           case 'past':
                                             return '22/09-28/09/25';
-                                          case 'past week 2':
-                                            return '15/09-21/09/25';
-                                          case 'past week 3':
-                                            return '08/09-14/09/25';
                                           default:
                                             return participant.week_interval || '29/09-05/10/25';
                                         }
@@ -3563,13 +3541,8 @@ const Admin = () => {
                                      case 'next week on site':
                                      case 'pre next week':
                                        return '06/10-12/10/25';
-                                     case 'past week 1':
-                                     case 'past':
-                                       return '22/09-28/09/25';
-                                     case 'past week 2':
-                                       return '15/09-21/09/25';
-                                     case 'past week 3':
-                                       return '08/09-14/09/25';
+                                      case 'past':
+                                        return '22/09-28/09/25';
                                      default:
                                        return participant.week_interval || '29/09-05/10/25';
                                    }
@@ -3592,13 +3565,8 @@ const Admin = () => {
                                            case 'next week on site':
                                            case 'pre next week':
                                              return '06/10-12/10/25';
-                                           case 'past week 1':
-                                           case 'past':
-                                             return '22/09-28/09/25';
-                                           case 'past week 2':
-                                             return '15/09-21/09/25';
-                                           case 'past week 3':
-                                             return '08/09-14/09/25';
+                                            case 'past':
+                                              return '22/09-28/09/25';
                                            default:
                                              return 'нет интервала';
                                          }
