@@ -3349,22 +3349,9 @@ const Admin = () => {
                                        } // Закрываем проверку на null
                                      });
                                     
-                                    return sortedEntries.map(([status, info]: [string, any], index: number) => {
-                                      // Use correct interval mapping instead of wrong data from status_history
-                                      const interval = (() => {
-                                        switch (status) {
-                                          case 'this week':
-                                            return '29/09-05/10/25';
-                                          case 'next week':
-                                          case 'next week on site':
-                                          case 'pre next week':
-                                            return '06/10-12/10/25';
-                                          case 'past':
-                                            return '22/09-28/09/25';
-                                          default:
-                                            return participant.week_interval || '29/09-05/10/25';
-                                        }
-                                      })();
+                                     return sortedEntries.map(([status, info]: [string, any], index: number) => {
+                                       // Skip null or empty entries
+                                       if (!info || !status) return null;
                                      
                                        // Формат даты и времени когда статус был поставлен
                                        const changedAt = info?.changed_at ? 
@@ -3377,14 +3364,14 @@ const Admin = () => {
                                          }).replace(',', '') : 
                                          '';
 
-                                       // Получить правильный интервал недели (понедельник-воскресенье)
-                                       const weekInterval = (() => {
-                                         if (info?.changed_at) {
-                                           const statusDate = new Date(info.changed_at);
-                                           return getStrictWeekInterval(statusDate, 'PH').formatted;
-                                         }
-                                         return interval; // Fallback на старый метод
-                                       })();
+                                        // Получить правильный интервал недели (понедельник-воскресенье)
+                                        const weekInterval = (() => {
+                                          if (info?.changed_at) {
+                                            const statusDate = new Date(info.changed_at);
+                                            return getStrictWeekInterval(statusDate, 'PH').formatted;
+                                          }
+                                          return participant.week_interval || '29/09-05/10/25'; // Fallback на участника
+                                        })();
 
                                        // Информация об админе который поставил статус
                                        const changedBy = info?.changed_by || info?.reviewed_by || '';
