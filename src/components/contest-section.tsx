@@ -140,6 +140,62 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
     }
   };
 
+  // Load admin participants for 1 WEEK AGO section (participants with admin_status = 'past' and specific week interval)
+  const loadPastWeekAdminParticipants = async () => {
+    try {
+      console.log('Loading past week admin participants...');
+      
+      // Get participants with admin_status = 'past' and week interval '29/09-05/10/25'
+      const { data: participants, error } = await supabase
+        .from('weekly_contest_participants')
+        .select('*')
+        .eq('admin_status', 'past')
+        .eq('is_active', true)
+        .like('week_interval', '%29/09-05/10/25%')
+        .limit(10);
+
+      if (error) {
+        console.error('Error loading past week admin participants:', error);
+        return [];
+      }
+
+      console.log('Raw past week participants data:', participants?.length, participants);
+
+      if (!participants || participants.length === 0) {
+        return [];
+      }
+
+      // Get user IDs and fetch their profiles separately
+      const userIds = participants.map(p => p.user_id);
+      const { data: profiles, error: profilesError } = await supabase
+        .from('profiles')
+        .select('*')
+        .in('id', userIds);
+
+      if (profilesError) {
+        console.error('Error loading profiles for past week:', profilesError);
+        return [];
+      }
+
+      console.log('Past week profiles data:', profiles?.length, profiles);
+
+      // Combine participants with their profiles
+      const combined = participants.map(participant => {
+        const profile = profiles?.find(p => p.id === participant.user_id);
+        return {
+          ...participant,
+          profiles: profile
+        };
+      });
+
+      console.log('Combined past week participants data:', combined?.length, combined);
+      return combined || [];
+    } catch (error) {
+      console.error('Error loading past week admin participants:', error);
+      return [];
+    }
+  };
+
   // Get user session once for the entire section and listen for changes
   useEffect(() => {
     console.log('ContestSection useEffect triggered for:', title);
@@ -150,17 +206,24 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
       setUser(currentUser);
       
       // Check admin status and load admin participants if user is admin
-      if (currentUser && title === "THIS WEEK") {
+      if (currentUser) {
         console.log('Checking admin status for user:', currentUser.id);
         const adminStatus = await checkAdminStatus(currentUser.id);
         console.log('Admin status result:', adminStatus);
         setIsAdmin(adminStatus);
         
         if (adminStatus) {
-          console.log('Loading admin participants for THIS WEEK section');
-          const adminData = await loadAdminParticipants();
-          console.log('Loaded admin participants:', adminData.length);
-          setAdminParticipants(adminData);
+          if (title === "THIS WEEK") {
+            console.log('Loading admin participants for THIS WEEK section');
+            const adminData = await loadAdminParticipants();
+            console.log('Loaded admin participants:', adminData.length);
+            setAdminParticipants(adminData);
+          } else if (title === "1 WEEK AGO") {
+            console.log('Loading past week admin participants for 1 WEEK AGO section');
+            const pastWeekData = await loadPastWeekAdminParticipants();
+            console.log('Loaded past week participants:', pastWeekData.length);
+            setAdminParticipants(pastWeekData);
+          }
         }
       }
     };
@@ -180,7 +243,7 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
     });
     
     return () => subscription.unsubscribe();
-  }, []);
+  }, [title]);
 
 
   // Load participants based on title
@@ -233,7 +296,7 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
         supabase.removeChannel(channel);
       };
     }
-  }, [title, user, isAdmin, adminParticipants.length]);
+   }, [title, user, isAdmin, adminParticipants.length]);
 
   const handleRate = async (contestantId: number, rating: number) => {
     setVotes(prev => ({ ...prev, [contestantId]: rating }));
@@ -365,6 +428,44 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
       } else {
         // No participants to show
         console.log('No participants found for THIS WEEK');
+        return [];
+      }
+    }
+
+    // For "1 WEEK AGO" section, show admin participants with "past" status for specific week interval
+    if (title === "1 WEEK AGO") {
+      console.log('Processing 1 WEEK AGO section');
+      
+      // If user is admin and has admin participants, show only those
+      if (isAdmin && adminParticipants.length > 0) {
+        console.log('Admin with past week participants:', adminParticipants.length);
+        const pastWeekCards = adminParticipants.map((participant, index) => ({
+          rank: index + 1,
+          name: `${participant.profiles?.first_name || ''} ${participant.profiles?.last_name || ''}`.trim(),
+          profileId: participant.id,
+          country: participant.profiles?.country || 'Unknown',
+          city: participant.profiles?.city || 'Unknown',
+          age: participant.profiles?.age || 0,
+          weight: participant.profiles?.weight_kg || 0,
+          height: participant.profiles?.height_cm || 0,
+          rating: participant.average_rating || 0,
+          averageRating: participant.average_rating || 0,
+          totalVotes: participant.total_votes || 0,
+          faceImage: participant.profiles?.photo_1_url || testContestantFace,
+          fullBodyImage: participant.profiles?.photo_2_url || testContestantFull,
+          additionalPhotos: [],
+          isVoted: true, // Past week participants are considered as voted
+          isWinner: showWinner && index === 0, // First participant is winner if showWinner is true
+          prize: showWinner && index === 0 ? "+ 5000 PHP" : undefined,
+          isRealContestant: true,
+          isAdminCard: true // Special flag for admin cards
+        }));
+        
+        console.log('Returning past week cards:', pastWeekCards.length);
+        return pastWeekCards;
+      } else {
+        // No participants to show for non-admin users
+        console.log('No participants found for 1 WEEK AGO (non-admin)');
         return [];
       }
     }
