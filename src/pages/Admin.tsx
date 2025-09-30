@@ -712,7 +712,7 @@ const Admin = () => {
         console.log('Total weeklyParticipants before filtering:', weeklyParticipants.length);
         
         const filteredByStatus = weeklyParticipants.filter(participant => {
-          const status = participant.admin_status || participantFilters[participant.id];
+          const status = participant.admin_status || 'this week';
           console.log(`Participant ${participant.id}: admin_status = ${participant.admin_status}, status = ${status}`);
           
           switch (weeklyContestFilter) {
@@ -810,7 +810,7 @@ const Admin = () => {
         
         // Filter participants with 'past' admin_status and group by week intervals from status_week_history
         const pastParticipants = weeklyParticipants.filter(participant => {
-          const adminStatus = participant.admin_status || participantFilters[participant.id];
+          const adminStatus = participant.admin_status || 'this week';
           
           console.log(`Participant ${participant.id}:`, {
             name: `${participant.application_data?.first_name || ''} ${participant.application_data?.last_name || ''}`.trim(),
@@ -818,8 +818,8 @@ const Admin = () => {
             status_week_history: (participant as any).status_week_history
           });
           
-          // Include participants with 'past' or 'this week' status for interval filtering
-          return adminStatus === 'past' || adminStatus === 'this week';
+          // Include only participants with 'past' status - don't include 'this week'
+          return adminStatus === 'past';
         });
 
         // Load rating stats for each participant (past and this week) - использовать данные из weekly_contest_participants
@@ -867,7 +867,7 @@ const Admin = () => {
 
   // Helper function to determine week interval for participant based on admin_status and status_week_history  
   const getParticipantWeekInterval = (participant: any) => {
-    const adminStatus = participant.admin_status || participantFilters[participant.id];
+    const adminStatus = participant.admin_status || 'this week';
     
     // If participant has week_interval from database, use it first
     if (participant.week_interval) {
@@ -2240,9 +2240,9 @@ const Admin = () => {
                               <Edit className="w-4 h-4" />
                             </Button>
                             
-                            <div className="flex items-center gap-1">
+                             <div className="flex items-center gap-1">
                              <Select 
-                                value={participant.admin_status || participantFilters[participant.id] || (participant.final_rank ? 'this week' : 'approve')}
+                                value={participant.admin_status || 'this week'}
                                onValueChange={(value) => {
                                  if (value === 'reject') {
                                    // Open reject modal for this participant
@@ -2254,13 +2254,7 @@ const Admin = () => {
                                    return;
                                  }
                                  
-                                  // Update the filter state
-                                  setParticipantFilters(prev => ({
-                                    ...prev,
-                                    [participant.id]: value
-                                  }));
-
-                                   // Update the database with the new admin_status
+                                   // Update the database with the new admin_status directly
                                     const updateStatus = async () => {
                                       const result = await updateParticipantStatusWithHistory(
                                         participant.id,
@@ -2274,12 +2268,7 @@ const Admin = () => {
                                           description: "Failed to update participant status",
                                           variant: "destructive"
                                         });
-                                        // Revert the local state on error
-                                        setParticipantFilters(prev => {
-                                          const updated = { ...prev };
-                                          delete updated[participant.id];
-                                          return updated;
-                                        });
+                                        // Error occurred, data will be refreshed from DB
                                       } else {
                                         // Successfully updated - refresh data from server
                                         fetchWeeklyParticipants();
@@ -2289,7 +2278,7 @@ const Admin = () => {
                                    updateStatus();
                                }}
                              >
-                                     <SelectTrigger className={`w-28 h-6 text-xs ${getStatusBackgroundColor(participant.admin_status || participantFilters[participant.id] || (participant.final_rank ? 'this week' : 'approve'))}`}>
+                                     <SelectTrigger className={`w-28 h-6 text-xs ${getStatusBackgroundColor(participant.admin_status || 'this week')}`}>
                                        <SelectValue />
                                 </SelectTrigger>
                                        <SelectContent className="z-[9999] bg-popover border shadow-lg">
@@ -2430,7 +2419,7 @@ const Admin = () => {
                               {/* Status filter positioned at bottom */}
                               <div className="absolute bottom-12 right-0 flex items-center gap-1">
                                   <Select 
-                                    value={participant.admin_status || participantFilters[participant.id] || (participant.final_rank ? 'this week' : 'approve')}
+                                    value={participant.admin_status || 'this week'}
                                     onValueChange={(value) => {
                                      if (value === 'reject') {
                                        // Open reject modal for this participant
@@ -2442,13 +2431,7 @@ const Admin = () => {
                                        return;
                                      }
                                      
-                                      // Update the filter state
-                                      setParticipantFilters(prev => ({
-                                        ...prev,
-                                        [participant.id]: value
-                                      }));
-
-                                       // Update the database with the new admin_status
+                                       // Update the database with the new admin_status directly
                                         const updateStatus = async () => {
                                           const result = await updateParticipantStatusWithHistory(
                                             participant.id,
@@ -2462,12 +2445,7 @@ const Admin = () => {
                                               description: "Failed to update participant status",
                                               variant: "destructive"
                                             });
-                                            // Revert the local state on error
-                                            setParticipantFilters(prev => {
-                                              const updated = { ...prev };
-                                              delete updated[participant.id];
-                                              return updated;
-                                            });
+                                            // Error occurred, data will be refreshed from DB
                                           } else {
                                             // Successfully updated - refresh data from server
                                             fetchWeeklyParticipants();
@@ -2650,12 +2628,7 @@ const Admin = () => {
                               <div className="flex items-center gap-1">
                                <Select 
                                  value={participant.admin_status || 'pre next week'}
-                                 onValueChange={async (newStatus) => {
-                                  setParticipantFilters(prev => ({
-                                    ...prev,
-                                    [participant.id]: newStatus
-                                  }));
-
+                                  onValueChange={async (newStatus) => {
                                    const result = await updateParticipantStatusWithHistory(
                                       participant.id,
                                       newStatus,
@@ -3252,7 +3225,7 @@ const Admin = () => {
                     // For "К" filter (showAllCards is false but we want all statuses), don't filter by status
                     // For other filters, only show participants with 'past' status
                     if (!showAllCards) {
-                      const adminStatus = participant.admin_status || participantFilters[participant.id] || 'this week';
+                      const adminStatus = participant.admin_status || 'this week';
                       return hasCorrectInterval && adminStatus === 'past';
                     }
                     
@@ -3262,7 +3235,7 @@ const Admin = () => {
                   // When no specific interval is selected, use the status-based filter
                   if (pastWeekFilter === 'all') {
                     // For 'all' filter, only show participants with 'past' status
-                    const adminStatus = participant.admin_status || participantFilters[participant.id] || 'this week';
+                    const adminStatus = participant.admin_status || 'this week';
                     return adminStatus === 'past';
                   }
                   
