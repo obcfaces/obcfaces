@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { CardLayoutVariants } from "@/components/admin/CardLayoutVariants";
 
 import { ContestHeader } from "@/components/contest-header";
 import { ContestSection } from "@/components/contest-section";
@@ -369,6 +370,9 @@ const Index = () => {
           </div>
         </div>
       )}
+
+      {/* Admin Layout Variants Preview */}
+      <CardLayoutVariants />
     </div>
   );
 };
