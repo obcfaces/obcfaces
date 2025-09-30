@@ -613,11 +613,11 @@ const Admin = () => {
           
           switch (weeklyContestFilter) {
             case 'this week':
-              // Show participants with 'this week' status OR week-specific statuses
-              const isThisWeek = status === 'this week';
+              // Show participants with participant_status = 'this week' OR admin_status = 'this week'
+              const isThisWeekStatus = status === 'this week';
+              const hasThisWeekParticipantStatus = participant.participant_status === 'this week';
               
-              // Check for week-YYYY-MM-DD format statuses
-              // Current week starts from 2025-09-28 (Monday), so we need to check for week-2025-09-28 or week-2025-09-29
+              // Check for week-YYYY-MM-DD format statuses  
               const isCurrentWeekFormat = status && (
                 status === 'week-2025-09-28' || 
                 status === 'week-2025-09-29' ||
@@ -632,14 +632,16 @@ const Admin = () => {
               const isApprovedApplication = !participant.contest_id && 
                 contestApplications.some(app => app.user_id === participant.user_id && app.status === 'approved');
               
-              // Explicitly exclude past statuses
+              // Explicitly exclude past statuses (but allow past week 3 if they have this week participant_status)
               const isPastStatus = status === 'past' || 
                                   status === 'past week 1' || 
                                   status === 'past week 2' || 
-                                  status === 'past week 3' ||
+                                  (status === 'past week 3' && participant.participant_status !== 'this week') ||
                                   status === 'past week 4';
               
-              return (isThisWeek || isCurrentWeekFormat || isApprovedApplication) && !isPastStatus;
+              console.log(`Participant ${participant.id}: admin_status=${status}, participant_status=${participant.participant_status}, showing=${(isThisWeekStatus || hasThisWeekParticipantStatus || isCurrentWeekFormat || isApprovedApplication) && !isPastStatus}`);
+              
+              return (isThisWeekStatus || hasThisWeekParticipantStatus || isCurrentWeekFormat || isApprovedApplication) && !isPastStatus;
             case 'pre next week':
               return status === 'pre next week';
             case 'next week':
