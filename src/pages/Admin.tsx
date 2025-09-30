@@ -3082,11 +3082,24 @@ const Admin = () => {
                   // When a specific interval is selected, use stricter filtering to avoid duplicates
                   if (pastWeekIntervalFilter !== 'all') {
                     const participantInterval = participant.week_interval || getParticipantWeekInterval(participant);
-                    return participantInterval === pastWeekIntervalFilter;
+                    const hasCorrectInterval = participantInterval === pastWeekIntervalFilter;
+                    
+                    // For "К" filter (showAllCards is false but we want all statuses), don't filter by status
+                    // For other filters, only show participants with 'past' status
+                    if (!showAllCards) {
+                      const adminStatus = participant.admin_status || participantFilters[participant.id] || 'this week';
+                      return hasCorrectInterval && adminStatus === 'past';
+                    }
+                    
+                    return hasCorrectInterval;
                   }
                   
                   // When no specific interval is selected, use the status-based filter
-                  if (pastWeekFilter === 'all') return true;
+                  if (pastWeekFilter === 'all') {
+                    // For 'all' filter, only show participants with 'past' status
+                    const adminStatus = participant.admin_status || participantFilters[participant.id] || 'this week';
+                    return adminStatus === 'past';
+                  }
                   
                   const adminStatus = participant.admin_status || 'this week';
                   
@@ -3100,8 +3113,10 @@ const Admin = () => {
                   
                   const targetWeekInterval = selectedFilter.weekInterval;
                   const participantInterval = participant.week_interval || getParticipantWeekInterval(participant);
+                  const hasCorrectInterval = participantInterval === targetWeekInterval;
                   
-                  return participantInterval === targetWeekInterval;
+                  // For week-specific filters, only show participants with 'past' status
+                  return hasCorrectInterval && adminStatus === 'past';
                 });
                 
                 if (filteredByWeek.length === 0) {
