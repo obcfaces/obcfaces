@@ -3333,23 +3333,27 @@ const Admin = () => {
                           <div className="w-[40ch] flex-shrink-0 p-2">
                             <div className="text-xs h-32 overflow-y-auto">
                               <div className="flex flex-wrap gap-2">
-                                {/* Show all statuses horizontally, sorted by changed_at (newest first) */}
-                                {participant.status_history && Object.keys(participant.status_history).length > 0 ? (
-                                  (() => {
-                                    // Sort all status entries by changed_at (newest first)
-                                    const sortedEntries = Object.entries(participant.status_history)
-                                      .sort((a: any, b: any) => new Date(b[1]?.changed_at || 0).getTime() - new Date(a[1]?.changed_at || 0).getTime());
-                                    
-                                    // Group statuses by name to find previous occurrences
-                                    const statusOccurrences = new Map<string, any[]>();
-                                     sortedEntries.forEach(([status, info]) => {
-                                       if (info && status) { // Добавляем проверку на null
-                                         if (!statusOccurrences.has(status)) {
-                                           statusOccurrences.set(status, []);
-                                         }
-                                         statusOccurrences.get(status)!.push(info);
-                                       } // Закрываем проверку на null
-                                     });
+                                 {/* Show all statuses horizontally, sorted by changed_at (newest first) */}
+                                 {participant.status_history && Object.keys(participant.status_history).length > 0 ? (
+                                   (() => {
+                                     // Valid admin_status values only
+                                     const validAdminStatuses = ['this week', 'pre next week', 'next week', 'next week on site', 'past', 'pending', 'approved', 'rejected'];
+                                     
+                                     // Sort all status entries by changed_at (newest first) and filter only valid admin statuses
+                                     const sortedEntries = Object.entries(participant.status_history)
+                                       .filter(([status, info]) => validAdminStatuses.includes(status) && info && status) // Only valid admin statuses
+                                       .sort((a: any, b: any) => new Date(b[1]?.changed_at || 0).getTime() - new Date(a[1]?.changed_at || 0).getTime());
+                                     
+                                     // Group statuses by name to find previous occurrences
+                                     const statusOccurrences = new Map<string, any[]>();
+                                      sortedEntries.forEach(([status, info]) => {
+                                        if (info && status) { // Добавляем проверку на null
+                                          if (!statusOccurrences.has(status)) {
+                                            statusOccurrences.set(status, []);
+                                          }
+                                          statusOccurrences.get(status)!.push(info);
+                                        } // Закрываем проверку на null
+                                      });
                                     
                                      return sortedEntries.map(([status, info]: [string, any], index: number) => {
                                        // Skip null or empty entries
@@ -3638,11 +3642,14 @@ const Admin = () => {
                               </div>
                               {participant.status_history && Object.keys(participant.status_history).length > 0 && (
                                 <div className="text-gray-600">
-                                  {(() => {
-                                     const prevStatuses = Object.entries(participant.status_history)
-                                       .filter(([status, info]: [string, any]) => info && status) // Проверяем на null
-                                       .sort((a: any, b: any) => new Date(b[1]?.changed_at || 0).getTime() - new Date(a[1]?.changed_at || 0).getTime())
-                                       .filter(([status, info]: [string, any]) => status !== participant.admin_status);
+                                   {(() => {
+                                      // Valid admin_status values only 
+                                      const validAdminStatuses = ['this week', 'pre next week', 'next week', 'next week on site', 'past', 'pending', 'approved', 'rejected'];
+                                      
+                                      const prevStatuses = Object.entries(participant.status_history)
+                                        .filter(([status, info]: [string, any]) => validAdminStatuses.includes(status) && info && status) // Only valid admin statuses
+                                        .sort((a: any, b: any) => new Date(b[1]?.changed_at || 0).getTime() - new Date(a[1]?.changed_at || 0).getTime())
+                                        .filter(([status, info]: [string, any]) => status !== participant.admin_status);
                                     
                                      return prevStatuses.map(([status, info]: [string, any], index: number) => {
                                        // Use correct interval mapping for previous statuses too
