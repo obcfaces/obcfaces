@@ -446,7 +446,19 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
       // If user is admin and has admin participants, show only those
       if (isAdmin && adminParticipants.length > 0) {
         console.log('Admin with admin participants:', adminParticipants.length);
-        const adminCards = adminParticipants.map((participant, index) => ({
+        
+        // Sort by average_rating (highest first), then by total_votes
+        const sortedParticipants = [...adminParticipants].sort((a, b) => {
+          const ratingA = Number(a.average_rating) || 0;
+          const ratingB = Number(b.average_rating) || 0;
+          if (ratingB !== ratingA) return ratingB - ratingA;
+          
+          const votesA = Number(a.total_votes) || 0;
+          const votesB = Number(b.total_votes) || 0;
+          return votesB - votesA;
+        });
+        
+        const adminCards = sortedParticipants.map((participant, index) => ({
           rank: index + 1,
           name: `${participant.profiles?.first_name || ''} ${participant.profiles?.last_name || ''}`.trim(),
           profileId: participant.id,
@@ -561,7 +573,19 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
       // If user is admin and has admin participants, show only those
       if (isAdmin && adminParticipants.length > 0) {
         console.log('Admin with past week participants:', adminParticipants.length);
-        const pastWeekCards = adminParticipants.map((participant, index) => ({
+        
+        // Sort by average_rating (highest first), then by total_votes
+        const sortedParticipants = [...adminParticipants].sort((a, b) => {
+          const ratingA = Number(a.average_rating) || 0;
+          const ratingB = Number(b.average_rating) || 0;
+          if (ratingB !== ratingA) return ratingB - ratingA;
+          
+          const votesA = Number(a.total_votes) || 0;
+          const votesB = Number(b.total_votes) || 0;
+          return votesB - votesA;
+        });
+        
+        const pastWeekCards = sortedParticipants.map((participant, index) => ({
           rank: index + 1,
           name: `${participant.profiles?.first_name || ''} ${participant.profiles?.last_name || ''}`.trim(),
           profileId: participant.id,
@@ -599,7 +623,19 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
       // If user is admin and has admin participants, show only those
       if (isAdmin && adminParticipants.length > 0) {
         console.log('Admin with 2 weeks ago participants:', adminParticipants.length);
-        const twoWeeksAgoCards = adminParticipants.map((participant, index) => ({
+        
+        // Sort by average_rating (highest first), then by total_votes
+        const sortedParticipants = [...adminParticipants].sort((a, b) => {
+          const ratingA = Number(a.average_rating) || 0;
+          const ratingB = Number(b.average_rating) || 0;
+          if (ratingB !== ratingA) return ratingB - ratingA;
+          
+          const votesA = Number(a.total_votes) || 0;
+          const votesB = Number(b.total_votes) || 0;
+          return votesB - votesA;
+        });
+        
+        const twoWeeksAgoCards = sortedParticipants.map((participant, index) => ({
           rank: index + 1,
           name: `${participant.profiles?.first_name || ''} ${participant.profiles?.last_name || ''}`.trim(),
           profileId: participant.id,
@@ -637,7 +673,19 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
       // If user is admin and has admin participants, show only those
       if (isAdmin && adminParticipants.length > 0) {
         console.log('Admin with 3 weeks ago participants:', adminParticipants.length);
-        const threeWeeksAgoCards = adminParticipants.map((participant, index) => ({
+        
+        // Sort by average_rating (highest first), then by total_votes
+        const sortedParticipants = [...adminParticipants].sort((a, b) => {
+          const ratingA = Number(a.average_rating) || 0;
+          const ratingB = Number(b.average_rating) || 0;
+          if (ratingB !== ratingA) return ratingB - ratingA;
+          
+          const votesA = Number(a.total_votes) || 0;
+          const votesB = Number(b.total_votes) || 0;
+          return votesB - votesA;
+        });
+        
+        const threeWeeksAgoCards = sortedParticipants.map((participant, index) => ({
           rank: index + 1,
           name: `${participant.profiles?.first_name || ''} ${participant.profiles?.last_name || ''}`.trim(),
           profileId: participant.id,
