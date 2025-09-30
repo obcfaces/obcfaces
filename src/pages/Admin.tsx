@@ -374,6 +374,7 @@ const Admin = () => {
   const [itemsPerPage] = useState(20);
   const [applicationCurrentPage, setApplicationCurrentPage] = useState(1);
   const [participantCurrentPage, setParticipantCurrentPage] = useState(1);
+  const [pastCurrentPage, setPastCurrentPage] = useState(1);
   const [pastWeekIntervalFilter, setPastWeekIntervalFilter] = useState<string>('all'); // Новый фильтр для интервалов недель
    const [expandedAdminDates, setExpandedAdminDates] = useState<Set<string>>(new Set());
    const [adminDatePopup, setAdminDatePopup] = useState<{ show: boolean; date: string; admin: string; applicationId: string }>({ 
@@ -3014,7 +3015,10 @@ const Admin = () => {
                           <Button
                             variant={showAllCards ? 'default' : 'outline'}
                             size="sm"
-                            onClick={() => setShowAllCards(!showAllCards)}
+                            onClick={() => {
+                              setShowAllCards(!showAllCards);
+                              setPastCurrentPage(1); // Reset pagination when toggling К button
+                            }}
                             className="ml-2"
                           >
                             К
@@ -3037,7 +3041,10 @@ const Admin = () => {
                           <Button
                             variant={showAllCards ? 'default' : 'outline'}
                             size="sm"
-                            onClick={() => setShowAllCards(!showAllCards)}
+                            onClick={() => {
+                              setShowAllCards(!showAllCards);
+                              setPastCurrentPage(1); // Reset pagination when toggling К button
+                            }}
                             className="text-xs col-span-2"
                           >
                             К - Все карточки
@@ -3173,7 +3180,16 @@ const Admin = () => {
                   );
                 }
 
-                return filteredByWeek.map((participant) => {
+                // Apply pagination for Past section when showAllCards is active
+                const totalPastParticipants = filteredByWeek.length;
+                const totalPastPages = Math.ceil(totalPastParticipants / itemsPerPage);
+                const pastStartIndex = (pastCurrentPage - 1) * itemsPerPage;
+                const pastEndIndex = pastStartIndex + itemsPerPage;
+                const paginatedPastParticipants = showAllCards ? filteredByWeek.slice(pastStartIndex, pastEndIndex) : filteredByWeek;
+
+                return (
+                  <>
+                    {paginatedPastParticipants.map((participant) => {
                   const participantProfile = profiles.find(p => p.id === participant.user_id);
                   const appData = participant.application_data || {};
                   
@@ -3663,7 +3679,102 @@ const Admin = () => {
                       </CardContent>
                     </Card>
                   );
-                });
+                })};
+                
+                {/* Pagination for Past section when К button is active */}
+                {showAllCards && totalPastPages > 1 && (
+                  <div className="flex justify-center items-center space-x-2 mt-6">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setPastCurrentPage(prev => Math.max(prev - 1, 1))}
+                      disabled={pastCurrentPage === 1}
+                    >
+                      Предыдущая
+                    </Button>
+                    
+                    <div className="flex space-x-1">
+                      {Array.from({ length: Math.min(totalPastPages, 10) }, (_, i) => {
+                        // Show first 5 pages, current page vicinity, and last 5 pages
+                        const page = i + 1;
+                        if (totalPastPages <= 10) {
+                          return (
+                            <Button
+                              key={page}
+                              variant={page === pastCurrentPage ? "default" : "outline"}
+                              size="sm"
+                              onClick={() => setPastCurrentPage(page)}
+                              className="w-8 h-8 p-0"
+                            >
+                              {page}
+                            </Button>
+                          );
+                        }
+                        return null;
+                      })}
+                      
+                      {totalPastPages > 10 && (
+                        <>
+                          {[1, 2, 3].map(page => (
+                            <Button
+                              key={page}
+                              variant={page === pastCurrentPage ? "default" : "outline"}
+                              size="sm"
+                              onClick={() => setPastCurrentPage(page)}
+                              className="w-8 h-8 p-0"
+                            >
+                              {page}
+                            </Button>
+                          ))}
+                          
+                          {pastCurrentPage > 4 && <span className="text-muted-foreground px-2">...</span>}
+                          
+                          {pastCurrentPage > 3 && pastCurrentPage < totalPastPages - 2 && (
+                            <Button
+                              variant="default"
+                              size="sm"
+                              className="w-8 h-8 p-0"
+                            >
+                              {pastCurrentPage}
+                            </Button>
+                          )}
+                          
+                          {pastCurrentPage < totalPastPages - 3 && <span className="text-muted-foreground px-2">...</span>}
+                          
+                          {[totalPastPages - 2, totalPastPages - 1, totalPastPages].map(page => (
+                            <Button
+                              key={page}
+                              variant={page === pastCurrentPage ? "default" : "outline"}
+                              size="sm"
+                              onClick={() => setPastCurrentPage(page)}
+                              className="w-8 h-8 p-0"
+                            >
+                              {page}
+                            </Button>
+                          ))}
+                        </>
+                      )}
+                    </div>
+                    
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setPastCurrentPage(prev => Math.min(prev + 1, totalPastPages))}
+                      disabled={pastCurrentPage === totalPastPages}
+                    >
+                      Следующая
+                    </Button>
+                  </div>
+                )}
+                
+                {/* Show pagination info when К button is active */}
+                {showAllCards && totalPastParticipants > itemsPerPage && (
+                  <div className="text-center text-sm text-muted-foreground mt-2">
+                    Показано {pastStartIndex + 1}-{Math.min(pastEndIndex, totalPastParticipants)} из {totalPastParticipants} участников
+                  </div>
+                )}
+                </>
+              );
               })()}
             </TabsContent>
 
