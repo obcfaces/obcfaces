@@ -522,13 +522,9 @@ const Admin = () => {
       
       if (weeklyContestFilter === 'approve') {
         // Get approved applications
-        const approvedApps = contestApplications
-          .filter(app => {
-            // Проверяем либо старый статус заявки, либо статус участника
-            const participant = weeklyParticipants.find(p => p.user_id === app.user_id);
-            return app.status === 'approved' || (participant && participant.admin_status === 'approved');
-          })
-          .filter((app, index, arr) => arr.findIndex(a => a.user_id === app.user_id) === index);
+        const approvedApps = weeklyParticipants
+          .filter(participant => participant.admin_status === 'approved')
+          .filter((participant, index, arr) => arr.findIndex(a => a.user_id === participant.user_id) === index);
 
         // Get weekly participants with "pending" status
         const pendingParticipants = weeklyParticipants.filter(participant => {
@@ -595,13 +591,9 @@ const Admin = () => {
         setFilteredWeeklyParticipants(sortedParticipants);
       } else if (weeklyContestFilter === 'reject') {
         // Get rejected applications that should not appear in other sections
-        const rejectedApps = contestApplications
-          .filter(app => {
-            // Проверяем либо старый статус заявки, либо статус участника
-            const participant = weeklyParticipants.find(p => p.user_id === app.user_id);
-            return app.status === 'rejected' || (participant && participant.admin_status === 'rejected');
-          })
-          .filter((app, index, arr) => arr.findIndex(a => a.user_id === app.user_id) === index);
+        const rejectedApps = weeklyParticipants
+          .filter(participant => participant.admin_status === 'rejected')
+          .filter((participant, index, arr) => arr.findIndex(a => a.user_id === participant.user_id) === index);
 
         const rejectedParticipantsWithRatings = rejectedApps.map((app) => {
           const appData = app.application_data || {};
@@ -3838,13 +3830,10 @@ const Admin = () => {
                       ))}
                     </div>
                     <div className="text-xs pt-1 border-t border-border/50">
-                      {/* Подсчет по объединенному admin_status */}
-                      {weeklyParticipants.filter(p => p.admin_status === 'pending').length + 
-                       contestApplications.filter(app => !weeklyParticipants.find(p => p.user_id === app.user_id) && app.status === 'pending').length} pending, {' '}
-                      {weeklyParticipants.filter(p => p.admin_status === 'approved').length + 
-                       contestApplications.filter(app => !weeklyParticipants.find(p => p.user_id === app.user_id) && app.status === 'approved').length} approved, {' '}
-                      {weeklyParticipants.filter(p => p.admin_status === 'rejected').length + 
-                       contestApplications.filter(app => !weeklyParticipants.find(p => p.user_id === app.user_id) && app.status === 'rejected').length} rejected
+                      {/* Подсчет только по admin_status */}
+                      {weeklyParticipants.filter(p => p.admin_status === 'pending').length} pending, {' '}
+                      {weeklyParticipants.filter(p => p.admin_status === 'approved').length} approved, {' '}
+                      {weeklyParticipants.filter(p => p.admin_status === 'rejected').length} rejected
                     </div>
                   </div>
                 </div>
