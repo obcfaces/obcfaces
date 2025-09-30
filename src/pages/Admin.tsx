@@ -425,7 +425,8 @@ const Admin = () => {
     }
     
     
-    // Set up real-time subscriptions for automatic updates
+    // ОТКЛЮЧЕНО: realtime subscriptions для предотвращения автоматических обновлений статусов
+    /*
     const contestAppsChannel = supabase
       .channel('contest-applications-changes')
       .on(
@@ -505,6 +506,7 @@ const Admin = () => {
       supabase.removeChannel(ratingsChannel);
       supabase.removeChannel(weeklyParticipantsChannel);
     };
+    */
   }, []);
 
   // Recalculate application stats when contestApplications change
