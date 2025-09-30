@@ -60,12 +60,83 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
   const [contestants, setContestants] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [adminParticipants, setAdminParticipants] = useState<any[]>([]);
+
+  // Check admin status
+  const checkAdminStatus = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', userId)
+        .eq('role', 'admin')
+        .single();
+      
+      if (error && error.code !== 'PGRST116') {
+        console.error('Error checking admin status:', error);
+        return false;
+      }
+      
+      return !!data;
+    } catch (error) {
+      console.error('Error checking admin status:', error);
+      return false;
+    }
+  };
+
+  // Load admin participants for THIS WEEK section
+  const loadAdminParticipants = async () => {
+    try {
+      const { data: participants, error } = await supabase
+        .from('weekly_contest_participants')
+        .select(`
+          *,
+          profiles!inner(
+            first_name,
+            last_name,
+            age,
+            city,
+            country,
+            photo_1_url,
+            photo_2_url,
+            height_cm,
+            weight_kg,
+            email
+          )
+        `)
+        .eq('admin_status', 'this week')
+        .eq('is_active', true);
+
+      if (error) {
+        console.error('Error loading admin participants:', error);
+        return [];
+      }
+
+      return participants || [];
+    } catch (error) {
+      console.error('Error loading admin participants:', error);
+      return [];
+    }
+  };
 
   // Get user session once for the entire section and listen for changes
   useEffect(() => {
     const getCurrentUser = async () => {
       const { data: { session } } = await supabase.auth.getSession();
-      setUser(session?.user ?? null);
+      const currentUser = session?.user ?? null;
+      setUser(currentUser);
+      
+      // Check admin status and load admin participants if user is admin
+      if (currentUser && title === "THIS WEEK") {
+        const adminStatus = await checkAdminStatus(currentUser.id);
+        setIsAdmin(adminStatus);
+        
+        if (adminStatus) {
+          const adminData = await loadAdminParticipants();
+          setAdminParticipants(adminData);
+        }
+      }
     };
     
     getCurrentUser();
@@ -112,6 +183,12 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
       if (["THIS WEEK", "NEXT WEEK", "1 WEEK AGO", "2 WEEKS AGO", "3 WEEKS AGO"].includes(title)) {
         const participants = await loadContestParticipants(weekOffset);
         setRealContestants(participants);
+        
+        // For THIS WEEK section, also load admin participants if user is admin
+        if (title === "THIS WEEK" && user && isAdmin) {
+          const adminData = await loadAdminParticipants();
+          setAdminParticipants(adminData);
+        }
         
         // Load contestants immediately after getting real data
         const contestantsData = await getContestantsSync(participants);
@@ -160,7 +237,7 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
         supabase.removeChannel(channel);
       };
     }
-  }, [title]);
+  }, [title, user, isAdmin]);
 
   const handleRate = async (contestantId: number, rating: number) => {
     setVotes(prev => ({ ...prev, [contestantId]: rating }));
@@ -280,9 +357,37 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
         
         return [testCard, ...realContestantsWithRanks];
       } else {
-        // Only show example card if no real contestants
-        console.log('Returning only test card for THIS WEEK');
-        return [testCard];
+        // Show admin participants for admins, otherwise only example card
+        if (isAdmin && adminParticipants.length > 0) {
+          console.log('Showing admin participants for THIS WEEK');
+          const adminCards = adminParticipants.map((participant, index) => ({
+            rank: index + 1,
+            name: `${participant.profiles?.first_name || ''} ${participant.profiles?.last_name || ''}`.trim(),
+            profileId: participant.id,
+            country: participant.profiles?.country || 'Unknown',
+            city: participant.profiles?.city || 'Unknown',
+            age: participant.profiles?.age || 0,
+            weight: participant.profiles?.weight_kg || 0,
+            height: participant.profiles?.height_cm || 0,
+            rating: participant.average_rating || 0,
+            averageRating: participant.average_rating || 0,
+            totalVotes: participant.total_votes || 0,
+            faceImage: participant.profiles?.photo_1_url || testContestantFace,
+            fullBodyImage: participant.profiles?.photo_2_url || testContestantFull,
+            additionalPhotos: [],
+            isVoted: false,
+            isWinner: false,
+            prize: undefined,
+            isRealContestant: true,
+            isAdminCard: true // Special flag for admin cards
+          }));
+          
+          return [testCard, ...adminCards];
+        } else {
+          // Only show example card if no real contestants and not admin
+          console.log('Returning only test card for THIS WEEK');
+          return [testCard];
+        }
       }
     }
     
