@@ -76,7 +76,7 @@ export function ContestSection({
         statusFilter = 'past';
       }
 
-      // Get participants with their photos from profiles and contest_applications tables
+      // Get participants without JOIN first
       let query = supabase
         .from('weekly_contest_participants')
         .select(`
@@ -87,8 +87,7 @@ export function ContestSection({
           average_rating,
           total_votes,
           final_rank,
-          is_active,
-          profiles!inner(photo_1_url, photo_2_url)
+          is_active
         `)
         .eq('is_active', true);
       
@@ -108,30 +107,38 @@ export function ContestSection({
         return [];
       }
 
-      // Transform the data to match expected format
-      const filteredParticipants = (participants || []).map((p: any) => ({
-        id: p.id,
-        user_id: p.user_id,
-        first_name: p.application_data?.first_name || '',
-        last_name: p.application_data?.last_name || '',
-        age: p.application_data?.birth_year ? 
-          new Date().getFullYear() - parseInt(p.application_data.birth_year) : null,
-        city: p.application_data?.city || '',
-        country: p.application_data?.country === 'PH' ? 'Philippines' : p.application_data?.country || '',
-        photo1_url: p.profiles?.photo_1_url || p.application_data?.photo1_url || '',
-        photo2_url: p.profiles?.photo_2_url || p.application_data?.photo2_url || '',
-        height_cm: p.application_data?.height_cm || null,
-        weight_kg: p.application_data?.weight_kg || null,
-        final_rank: p.final_rank,
-        average_rating: p.average_rating || 0,
-        total_votes: p.total_votes || 0,
-        contest_status: 'active',
-        week_start_date: '2025-09-29',
-        week_end_date: '2025-10-05'
+      // Get photos from profiles table separately for each participant
+      const participantsWithPhotos = await Promise.all((participants || []).map(async (p: any) => {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('photo_1_url, photo_2_url')
+          .eq('id', p.user_id)
+          .single();
+
+        return {
+          id: p.id,
+          user_id: p.user_id,
+          first_name: p.application_data?.first_name || '',
+          last_name: p.application_data?.last_name || '',
+          age: p.application_data?.birth_year ? 
+            new Date().getFullYear() - parseInt(p.application_data.birth_year) : null,
+          city: p.application_data?.city || '',
+          country: p.application_data?.country === 'PH' ? 'Philippines' : p.application_data?.country || '',
+          photo1_url: profile?.photo_1_url || p.application_data?.photo1_url || '',
+          photo2_url: profile?.photo_2_url || p.application_data?.photo2_url || '',
+          height_cm: p.application_data?.height_cm || null,
+          weight_kg: p.application_data?.weight_kg || null,
+          final_rank: p.final_rank,
+          average_rating: p.average_rating || 0,
+          total_votes: p.total_votes || 0,
+          contest_status: 'active',
+          week_start_date: '2025-09-29',
+          week_end_date: '2025-10-05'
+        };
       }));
 
-      console.log(`Loaded ${filteredParticipants?.length || 0} participants for ${sectionTitle} with status ${statusFilter}`);
-      return filteredParticipants || [];
+      console.log(`Loaded ${participantsWithPhotos?.length || 0} participants for ${sectionTitle} with status ${statusFilter}`);
+      return participantsWithPhotos || [];
     } catch (err) {
       console.error('Error loading weekly contest participants:', err);
       return [];
