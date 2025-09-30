@@ -88,8 +88,6 @@ export function ContestantCard({
   // Debug log to check weekOffset value and prevent excessive re-renders
   console.log(`ContestantCard ${name}: weekOffset = ${weekOffset}, isWinner = ${isWinner}, userId = ${propUser?.id || 'none'}`);
   
-  // REMOVED RENDER COUNTER - it was causing infinite re-renders by calling setState during render!
-  
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalStartIndex, setModalStartIndex] = useState(0);
   const [isEditing, setIsEditing] = useState(false);
@@ -120,17 +118,6 @@ export function ContestantCard({
     setLocalTotalVotes(totalVotes);
   }, [averageRating, totalVotes]);
   
-  
-  // TEMPORARILY DISABLED ALL EFFECTS AND PROP SYNC TO STOP RECURSION
-  // Sync local state with props only once on mount to prevent recursion
-  // useEffect(() => {
-  //   setLocalAverageRating(averageRating);
-  //   setLocalTotalVotes(totalVotes);
-  // }, []); // Empty dependency array - only run once on mount
-
-  // Local state should only be updated through user interactions, not props changes
-  // This prevents infinite recursion from prop updates
-
   // Check if user is admin
   useEffect(() => {
     const checkAdminStatus = async () => {
@@ -178,12 +165,11 @@ export function ContestantCard({
 
     loadUserRating();
   }, [propUser?.id, profileId]);
+  
   // Initialize isVoted state without complex initialization
   const [isVoted, setIsVoted] = useState(propIsVoted || false);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const { isShareModalOpen, shareData, openShareModal, closeShareModal } = useShare();
-
-  // Remove problematic useEffect that was causing infinite recursion
 
   const loadUserExistingRating = async (userId: string) => {
     if (!profileId) return;
@@ -223,8 +209,6 @@ export function ContestantCard({
       setIsVoted(false);
     }
   }, [propUser?.id, profileId, name]);
-
-  // Login modal removed auto-close
 
   // Load user voting status and setup dislikes - only run when we have a stable user
   useEffect(() => {
@@ -448,8 +432,6 @@ export function ContestantCard({
     }
   };
 
-
-
   // Helper function to resolve asset names to actual imports
   const resolveAsset = (assetName: string) => {
     switch (assetName) {
@@ -501,305 +483,55 @@ export function ContestantCard({
                         {localAverageRating > 0 ? localAverageRating.toFixed(1) : '0.0'}
                       </div>
                     </PopoverTrigger>
-                    <PopoverContent className="w-auto p-3">
-                      <div className="text-sm">
-                        {userRating > 0 ? 
-                          `Your rating: ${userRating}` : 
-                          `No rating`
-                        }{isThisWeek && ` — `}<button 
-                          className={`text-contest-blue hover:underline ${!isThisWeek ? 'hidden' : ''}`}
-                          onClick={async () => {
-                            // Immediately delete rating from database and reset local state
-                            if (propUser && profileId) {
-                              try {
-                                await supabase
-                                  .from('contestant_ratings')
-                                  .delete()
-                                  .eq('user_id', propUser.id)
-                                  .eq('contestant_user_id', profileId);
-                                
-                                // Reset local state to unrated
-                                setUserRating(0);
-                                setIsVoted(false);
-                                setPreviousUserRating(0);
-                                setIsEditing(true);
-                                setIsPopoverOpen(false);
-                                
-                                // Update local stats
-                                const newTotalVotes = Math.max(0, localTotalVotes - 1);
-                                const newSum = Math.max(0, (localAverageRating * localTotalVotes) - userRating);
-                                const newAverageRating = newTotalVotes > 0 ? newSum / newTotalVotes : 0;
-                                setLocalAverageRating(newAverageRating);
-                                setLocalTotalVotes(newTotalVotes);
-                                
-                                // Remove from localStorage
-                                localStorage.removeItem(`rating-${name}-${propUser.id}`);
-                                
-                                toast({ description: "Rating removed" });
-                              } catch (error) {
-                                console.error('Error removing rating:', error);
-                                toast({ description: "Error removing rating" });
-                              }
-                            }
-                          }}
-                        >
-                          change
-                        </button>
+                    <PopoverContent className="w-auto p-2" side="left">
+                      <div className="text-xs text-gray-600">
+                        {localTotalVotes} vote{localTotalVotes !== 1 ? 's' : ''}
                       </div>
                     </PopoverContent>
                   </Popover>
                 </div>
               )}
-          
-          
-          {/* Header with content or voting overlay */}
-          <div className="relative px-6 py-3 border-b border-contest-border h-[80px]">
-            {/* Show different content based on user auth status and contest type */}
-            {isThisWeek && !propUser && !isExample && !hideCardActions ? (
-              /* Unauthorized users in THIS WEEK section only see voting (but not for test cards) */
-              <div className="absolute inset-0 bg-gray-300 flex items-center justify-center h-full">
-                {(viewMode as string) === 'compact' ? (
-                  <div className="flex flex-col items-center gap-2">
-                    <div className="scale-[1.2] sm:scale-[1.4]">
-                      <StarRating 
-                        rating={userRating}
-                        isVoted={false}
-                        onRate={handleRate}
-                        readonly={false}
-                        hideText={true}
-                        variant="white"
-                      />
-                    </div>
-                    <span className="text-xs text-gray-600 text-center leading-tight">Rate from 1 (lowest)<br />to 5 (highest)</span>
-                  </div>
-                ) : (
-                  <div className="flex flex-col items-center justify-center gap-1.5">
-                    <span className="text-base font-medium text-gray-600 text-center">Rate from 1 (lowest) 5 (highest)</span>
-                    <div className="scale-[1.6] sm:scale-[1.8]">
-                      <StarRating 
-                        rating={userRating}
-                        isVoted={false}
-                        onRate={handleRate}
-                        readonly={false}
-                        hideText={true}
-                        variant="white"
-                      />
-                    </div>
-                  </div>
-                )}
-              </div>
-            ) : (
-              /* Authorized users or non-THIS WEEK sections see full content */
-              !isEditing && !showThanks && !isExample && (
-                <div className="flex items-center justify-between h-full">
-                  <div>
-                    <h3 className="text-xl font-semibold text-contest-text">
-                      {profileId ? (
-                        <Link to={`/u/${profileId}`} className="hover:text-primary underline-offset-2 hover:underline">
-                          {name}
-                        </Link>
-                      ) : name}
-                    </h3>
-                    <div className="text-sm text-muted-foreground">
-                      {age} yo · {weight} kg · {height} cm
-                    </div>
-                    <div className="text-contest-blue text-sm">{getCountryDisplayName(country)} · {city}</div>
-                  </div>
-                  {/* Remove rating display from header since it's now in corner */}
-                </div>
-              )
-            )}
             
-            {/* Thank you message - shown for 1 second after voting */}
-            {showThanks && (
-              <div className="absolute inset-0 bg-gray-300 flex items-center justify-center gap-3 h-full">
-                <span className="text-lg font-medium text-gray-800">Thank you! Rated {userRating.toFixed(0)}</span>
-              </div>
-            )}
-            
-            {/* Re-voting overlay - shown when editing existing vote */}
-            {isVoted && isEditing && !showThanks && !hideCardActions && (
-            <div className="absolute inset-0 bg-gray-300 flex items-center justify-center h-full">
-              {(viewMode as string) === 'compact' ? (
-                <div className="flex flex-col items-center gap-2">
-                  <div className="scale-[1.2] sm:scale-[1.4]">
-                    <StarRating 
-                      rating={0}
-                      isVoted={false}
-                      variant="white"
-                      hideText={true}
-                      onRate={(rating) => {
-                        console.log('Edit mode StarRating onRate called with rating:', rating);
-                        console.log('User state:', propUser);
-                        if (!propUser) {
-                          setShowLoginModal(true);
-                          return;
-                        }
-                        setUserRating(rating);
-                        localStorage.setItem(`rating-${name}-${propUser.id}`, rating.toString());
-                        setIsEditing(false);
-                        handleRate(rating);
-                      }}
-                    />
-                  </div>
-                  <span className="text-xs text-gray-600 text-center leading-tight">Rate from 1 (lowest)<br />to 5 (highest)</span>
-                </div>
-              ) : (
-                <div className="flex flex-col items-center justify-center gap-1.5">
-                  <span className="text-base font-medium text-gray-600 text-center">Rate from 1 (lowest) 5 (highest)</span>
-                  <div className="scale-[1.6] sm:scale-[1.8]">
-                    <StarRating 
-                      rating={0}
-                      isVoted={false}
-                      variant="white"
-                      hideText={true}
-                      onRate={(rating) => {
-                        console.log('Edit mode StarRating onRate called with rating:', rating);
-                        console.log('User state:', propUser);
-                        if (!propUser) {
-                          setShowLoginModal(true);
-                          return;
-                        }
-                        setUserRating(rating);
-                        localStorage.setItem(`rating-${name}-${propUser.id}`, rating.toString());
-                        setIsEditing(false);
-                        handleRate(rating);
-                      }}
-                    />
-                  </div>
-                </div>
-              )}
-            </div>
-            )}
-            
-            {/* Empty space after voting */}
-            {isVoted && !isEditing && !showThanks && (
-              <div className="h-full">
-              </div>
-            )}
-          </div>
-          
-           {/* Photos section */}
-           <div className="relative">
-              {/* Example text area with photo requirements */}
-              {isExample && (
-                <div className="bg-yellow-200 text-black px-4 py-3">
-                  <div className="text-sm font-semibold mb-3">How your photos should look:</div>
-                  <div className="grid grid-cols-2 gap-6 text-xs">
-                    <div className="space-y-1">
-                      <div>• Look like an ID photo</div>
-                      <div>• No makeup</div>
-                      <div>• No filters</div>
-                      <div>• No glasses allowed</div>
-                    </div>
-                    <div className="space-y-1">
-                      <div>• Whole body from head to toe</div>
-                      <div>• Wear tight/fitted clothes. No dresses, skirts, heels</div>
-                      <div>• No bags or backpacks</div>
-                    </div>
-                  </div>
-                </div>
-              )}
-             
-             <div className="grid grid-cols-2 gap-px">
-               {/* Winner Badge - overlaid on photos like in profile */}
-               {isWinner && (
-                 <div className="absolute top-0 left-0 right-0 z-20 bg-blue-100 text-blue-700 px-2 py-1 text-xs font-semibold flex justify-start items-center">
-                   <span>🏆 WINNER   + 5000 PHP</span>
-                 </div>
-               )}
-               
-                <div className="relative">
-                  <img 
-                    src={faceImage} 
-                    alt={`${name} face`}
-                    className="w-full aspect-[4/5] object-cover cursor-pointer hover:opacity-90 transition-opacity"
-                    onClick={() => openModal(0)}
-                  />
-                  {/* Example Badge in corner of first photo */}
-                  {isExample && (
-                    <div className="absolute top-1 left-1 bg-yellow-500 text-white px-1.5 py-0.5 text-xs font-bold rounded">
-                      Example
-                    </div>
-                  )}
-                </div>
-              <div className="relative">
-                <img 
-                  src={fullBodyImage} 
-                  alt={`${name} full body`}
-                  className="w-full aspect-[4/5] object-cover cursor-pointer hover:opacity-90 transition-opacity"
-                  onClick={() => openModal(1)}
-                />
-                {additionalPhotos.length > 0 && (
-                  <div 
-                    className="absolute bottom-0.5 right-0.5 bg-black/40 text-white/80 text-xs px-1 py-0.5 rounded cursor-pointer hover:bg-black/60 transition-colors"
-                    onClick={() => openModal(2)}
-                  >
-                    +{additionalPhotos.length}
-                  </div>
-                )}
-              </div>
-            </div>
-           </div>
-           {!isExample && !hideCardActions && (
-             <div className="border-t border-contest-border px-4 py-2 flex items-center justify-evenly gap-4">
-                <button
-                 type="button"
-                 className={cn(
-                   "inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors",
-                   (isLiked[0] || isLiked[1]) && "text-contest-blue"
-                 )}
-                 onClick={() => handleLike(0)}
-                 aria-label="Like"
-               >
-                  <ThumbsUp className={cn("w-4 h-4", (isLiked[0] || isLiked[1]) ? "text-blue-500" : "text-gray-500")} strokeWidth={1} />
-                  <span className={cn("hidden sm:inline", (isLiked[0] || isLiked[1]) ? "text-blue-500" : "text-gray-500")}>Like</span>
-                    <span className={cn((isLiked[0] || isLiked[1]) ? "text-blue-500" : "text-gray-500")}>{cardData.likes}</span>
-               </button>
-               {showDislike && (
-                 <button
-                   type="button"
-                   className={cn(
-                     "inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors",
-                     isDisliked && "text-red-500"
-                   )}
-                   onClick={handleDislike}
-                   aria-label="Dislike"
-                 >
-                   <ThumbsDown className="w-4 h-4" />
-                   <span className="hidden sm:inline">Dislike</span>
-                   <span>{dislikesCount}</span>
-                 </button>
-               )}
-               <button
-                 type="button"
-                 className={cn(
-                   "inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors",
-                   hasCommented && "text-contest-blue"
-                 )}
-                 onClick={handleComment}
-                 aria-label="Comments"
-               >
-                 <MessageCircle className={cn("w-4 h-4", hasCommented ? "text-contest-blue" : "text-gray-500")} strokeWidth={1} />
-                 <span className="hidden sm:inline">Comment</span>
-                  <span>{cardData.comments}</span>
-               </button>
-               <button
-                 type="button"
-                 className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
-                 onClick={() => openShareModal({
-                   title: `${name} - Beauty Contest`,
-                   url: profileId ? `https://obcface.com/u/${profileId}` : `https://obcface.com`,
-                   description: `Check out ${name}, ${age} from ${city}, ${country} in this beauty contest!`
-                 })}
-                 aria-label="Share"
-               >
-                  <Share2 className="w-4 h-4" strokeWidth={1} />
-                  <span className="hidden sm:inline">Share</span>
-               </button>
-            </div>
-           )}
-         </Card>
+            <FullCardLayout
+              name={name}
+              age={age}
+              weight={weight}
+              height={height}
+              country={country}
+              city={city}
+              profileId={profileId}
+              faceImage={faceImage}
+              fullBodyImage={fullBodyImage}
+              additionalPhotos={additionalPhotos}
+              isVoted={isVoted}
+              isEditing={isEditing}
+              showThanks={showThanks}
+              isExample={isExample}
+              isThisWeek={isThisWeek}
+              isWinner={isWinner}
+              rank={rank}
+              userRating={userRating}
+              localAverageRating={localAverageRating}
+              isPopoverOpen={isPopoverOpen}
+              setIsPopoverOpen={setIsPopoverOpen}
+              cardData={cardData}
+              isLiked={isLiked}
+              hasCommented={hasCommented}
+              isDisliked={isDisliked}
+              dislikesCount={dislikesCount}
+              showDislike={showDislike}
+              propUser={propUser}
+              openModal={openModal}
+              handleLike={handleLike}
+              handleComment={markAsCommented}
+              handleDislike={handleDislike}
+              openShareModal={openShareModal}
+              handleRate={handleRate}
+              setShowLoginModal={setShowLoginModal}
+              setUserRating={setUserRating}
+              setIsEditing={setIsEditing}
+            />
+          </Card>
 
         <PhotoModal
           isOpen={isModalOpen}
@@ -838,275 +570,44 @@ export function ContestantCard({
 
   return (
     <>
-      {/* For non-winners, use the self-contained CompactCardLayout */}
-      {!isWinner ? (
-        <CompactCardLayout
-          name={name}
-          age={age}
-          weight={weight}
-          height={height}
-          country={country}
-          city={city}
-          profileId={profileId}
-          faceImage={faceImage}
-          fullBodyImage={fullBodyImage}
-          additionalPhotos={additionalPhotos}
-          isVoted={isVoted}
-          isEditing={isEditing}
-          showThanks={showThanks}
-          isExample={isExample}
-          isThisWeek={isThisWeek}
-          isWinner={isWinner}
-          rank={rank}
-          userRating={userRating}
-          localAverageRating={localAverageRating}
-          hideCardActions={hideCardActions}
-          cardData={cardData}
-          isLiked={isLiked}
-          hasCommented={hasCommented}
-          isDisliked={isDisliked}
-          dislikesCount={dislikesCount}
-          showDislike={showDislike}
-          propUser={propUser}
-          openModal={openModal}
-          handleLike={handleLike}
-          handleComment={markAsCommented}
-          handleDislike={handleDislike}
-          openShareModal={openShareModal}
-          handleRate={handleRate}
-          setShowLoginModal={setShowLoginModal}
-          setUserRating={setUserRating}
-          setIsEditing={setIsEditing}
-        />
-          <div className="absolute top-0 right-0 z-10 flex flex-col items-end">
-             <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
-               <PopoverTrigger asChild>
-                  <div className="bg-contest-blue text-white px-1.5 py-1 rounded-bl-lg text-sm sm:text-base font-bold shadow-sm cursor-pointer hover:bg-contest-blue/90 transition-colors relative">
-                     {isWinner && (
-                       <Crown className="w-4 h-4 text-yellow-400 absolute -top-5 left-1/2 transform -translate-x-1/2" />
-                     )}
-                      {(() => {
-                        // Для всех пользователей (включая админов) показываем средний рейтинг
-                        return localAverageRating > 0 ? localAverageRating.toFixed(1) : '0.0';
-                      })()}
-                  </div>
-               </PopoverTrigger>
-                <PopoverContent className="w-auto p-3">
-                  <div className="text-sm">
-                    {userRating > 0 ? 
-                      `Your rating: ${userRating}` : 
-                      `No rating`
-                    }{isThisWeek && ` — `}<button 
-                      className={`text-contest-blue hover:underline ${!isThisWeek ? 'hidden' : ''}`}
-                      onClick={() => {
-                        setIsEditing(true);
-                        setIsPopoverOpen(false);
-                      }}
-                    >
-                      change
-                    </button>
-                  </div>
-                </PopoverContent>
-             </Popover>
-          </div>
-        )}
-        
-        {/* First row: Main two photos with additional photos indicator */}
-        <div className={`${isWinner && viewMode !== 'compact' ? 'w-full' : 'flex h-full'} relative gap-px`}>
-          {/* Winner cards have different layout only in full mode */}
-          {isWinner && viewMode !== 'compact' ? (
-            <div className="flex flex-col">
-              <FullCardLayout
-                name={name}
-                age={age}
-                weight={weight}
-                height={height}
-                country={country}
-                city={city}
-                profileId={profileId}
-                faceImage={faceImage}
-                fullBodyImage={fullBodyImage}
-                additionalPhotos={additionalPhotos}
-                isVoted={isVoted}
-                isEditing={isEditing}
-                showThanks={showThanks}
-                isExample={isExample}
-                isThisWeek={isThisWeek}
-                isWinner={isWinner}
-                rank={rank}
-                userRating={userRating}
-                localAverageRating={localAverageRating}
-                isPopoverOpen={isPopoverOpen}
-                setIsPopoverOpen={setIsPopoverOpen}
-                cardData={cardData}
-                isLiked={isLiked}
-                hasCommented={hasCommented}
-                isDisliked={isDisliked}
-                dislikesCount={dislikesCount}
-                showDislike={showDislike}
-                propUser={propUser}
-                openModal={openModal}
-                handleLike={handleLike}
-                handleComment={markAsCommented}
-                handleDislike={handleDislike}
-                openShareModal={openShareModal}
-                handleRate={handleRate}
-                setShowLoginModal={setShowLoginModal}
-                setUserRating={setUserRating}
-                setIsEditing={setIsEditing}
-              />
-            </div>
-          ) : (
-            /* Regular cards layout (including winners in compact mode) */
-            <CompactCardLayout
-              name={name}
-              age={age}
-              weight={weight}
-              height={height}
-              country={country}
-              city={city}
-              profileId={profileId}
-              faceImage={faceImage}
-              fullBodyImage={fullBodyImage}
-              additionalPhotos={additionalPhotos}
-              isVoted={isVoted}
-              isEditing={isEditing}
-              showThanks={showThanks}
-              isExample={isExample}
-              isThisWeek={isThisWeek}
-              isWinner={isWinner}
-              rank={rank}
-              userRating={userRating}
-              localAverageRating={localAverageRating}
-              hideCardActions={hideCardActions}
-              cardData={cardData}
-              isLiked={isLiked}
-              hasCommented={hasCommented}
-              isDisliked={isDisliked}
-              dislikesCount={dislikesCount}
-              showDislike={showDislike}
-              propUser={propUser}
-              openModal={openModal}
-              handleLike={handleLike}
-              handleComment={markAsCommented}
-              handleDislike={handleDislike}
-              openShareModal={openShareModal}
-              handleRate={handleRate}
-              setShowLoginModal={setShowLoginModal}
-              setUserRating={setUserRating}
-              setIsEditing={setIsEditing}
-            />
-      ) : (
-        /* Winner cards with special layout */
-        <Card className={`${isExample ? 'border-yellow-400 border-2 bg-yellow-50/50' : 'border-contest-blue border-2'} relative overflow-hidden flex flex-col`}>
-          {isWinner && (
-            <div className="absolute top-0 left-0 w-[193px] sm:w-[225px] md:w-[257px] bg-blue-100 text-blue-700 pl-2 pr-2 py-1 text-xs font-semibold flex items-center justify-start z-20">
-              <span>🏆 WINNER   + 5000 PHP</span>
-            </div>
-          )}
-          
-          {/* Rating badge in top right corner for winners */}
-          {isVoted && !isEditing && !showThanks && !isExample && (propUser || !isThisWeek) && !hideCardActions && (
-            <div className="absolute top-0 right-0 z-10">
-              <Popover>
-                <PopoverTrigger asChild>
-                  <div className="bg-contest-blue text-white px-2 py-1.5 rounded-bl-lg text-sm sm:text-base font-bold cursor-pointer hover:bg-contest-blue/90 transition-colors">
-                    {localAverageRating > 0 ? localAverageRating.toFixed(1) : '0.0'}
-                  </div>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-2">
-                  <div className="text-xs text-gray-600">
-                    {localTotalVotes} vote{localTotalVotes !== 1 ? 's' : ''}
-                  </div>
-                </PopoverContent>
-              </Popover>
-            </div>
-          )}
-          
-          {/* First row - main photos */}
-          <div className="flex h-36 sm:h-40 md:h-44 relative gap-px">
-            <CompactCardLayout
-              name={name}
-              age={age}
-              weight={weight}
-              height={height}
-              country={country}
-              city={city}
-              profileId={profileId}
-              faceImage={faceImage}
-              fullBodyImage={fullBodyImage}
-              additionalPhotos={additionalPhotos}
-              isVoted={isVoted}
-              isEditing={isEditing}
-              showThanks={showThanks}
-              isExample={isExample}
-              isThisWeek={isThisWeek}
-              isWinner={isWinner}
-              rank={rank}
-              userRating={userRating}
-              localAverageRating={localAverageRating}
-              hideCardActions={hideCardActions}
-              cardData={cardData}
-              isLiked={isLiked}
-              hasCommented={hasCommented}
-              isDisliked={isDisliked}
-              dislikesCount={dislikesCount}
-              showDislike={showDislike}
-              propUser={propUser}
-              openModal={openModal}
-              handleLike={handleLike}
-              handleComment={markAsCommented}
-              handleDislike={handleDislike}
-              openShareModal={openShareModal}
-              handleRate={handleRate}
-              setShowLoginModal={setShowLoginModal}
-              setUserRating={setUserRating}
-              setIsEditing={setIsEditing}
-            />
-          </div>
-          
-          {/* Divider line between rows */}
-          <div className="border-t border-gray-400 w-full"></div>
-          
-          {/* Second row for winner cards only - show ONLY if winner content exists in database */}
-          {winnerContent && (weekOffset === 1 || weekOffset >= 2) && (
-            <>
-              <div className="flex h-36 sm:h-40 md:h-44 relative gap-px">
-                 {/* Payment photo - use winner content from database only */}
-                 <div className="relative">
-                   <img 
-                     src={resolveAsset(winnerContent.payment_proof_url)} 
-                     alt="Payment receipt"
-                     className="w-24 sm:w-28 md:w-32 h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
-                     onClick={() => openModal(isWinner ? additionalPhotos.length + 2 : 2)}
-                   />
-                 </div>
-                
-                 {/* Video - use winner content from database only */}
-                 <div className="relative">
-                   <video 
-                     src={resolveAsset(winnerContent.testimonial_video_url)}
-                     className="w-24 sm:w-28 md:w-32 h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
-                     controls={false}
-                     muted
-                     onClick={() => openModal(isWinner ? additionalPhotos.length + 3 : 3)}
-                   />
-                 </div>
-                
-                 {/* Testimonial text - use winner content from database only */}
-                 <div className="flex-1 p-3 flex flex-col items-center justify-start max-h-32 overflow-y-auto scroll-smooth">
-                   <p className="text-sm text-gray-700 italic text-center mb-3">
-                     {winnerContent.testimonial_text}
-                   </p>
-                   <p className="text-xs text-gray-600 font-bold italic self-end uppercase">{name}</p>
-                 </div>
-              </div>
-              
-              {/* Winner cards end after second row - no extra content area */}
-            </>
-          )}
-        </Card>
-      )}
+      <CompactCardLayout
+        name={name}
+        age={age}
+        weight={weight}
+        height={height}
+        country={country}
+        city={city}
+        profileId={profileId}
+        faceImage={faceImage}
+        fullBodyImage={fullBodyImage}
+        additionalPhotos={additionalPhotos}
+        isVoted={isVoted}
+        isEditing={isEditing}
+        showThanks={showThanks}
+        isExample={isExample}
+        isThisWeek={isThisWeek}
+        isWinner={isWinner}
+        rank={rank}
+        userRating={userRating}
+        localAverageRating={localAverageRating}
+        hideCardActions={hideCardActions}
+        cardData={cardData}
+        isLiked={isLiked}
+        hasCommented={hasCommented}
+        isDisliked={isDisliked}
+        dislikesCount={dislikesCount}
+        showDislike={showDislike}
+        propUser={propUser}
+        openModal={openModal}
+        handleLike={handleLike}
+        handleComment={markAsCommented}
+        handleDislike={handleDislike}
+        openShareModal={openShareModal}
+        handleRate={handleRate}
+        setShowLoginModal={setShowLoginModal}
+        setUserRating={setUserRating}
+        setIsEditing={setIsEditing}
+      />
 
       <PhotoModal
         isOpen={isModalOpen}
