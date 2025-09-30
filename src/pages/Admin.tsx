@@ -349,7 +349,7 @@ const Admin = () => {
   const [genderFilter, setGenderFilter] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [weeklyContestFilter, setWeeklyContestFilter] = useState<string>('this week');
-  const [participantStatusFilter, setParticipantStatusFilter] = useState<string>('all');
+  const [participantStatusFilter, setParticipantStatusFilter] = useState<string>('all'); // Не используется, удалить
   const [filteredWeeklyParticipants, setFilteredWeeklyParticipants] = useState<any[]>([]);
   const [selectedUserApplications, setSelectedUserApplications] = useState<string | null>(null);
   const [editingApplicationId, setEditingApplicationId] = useState<string | null>(null);
@@ -523,7 +523,11 @@ const Admin = () => {
       if (weeklyContestFilter === 'approve') {
         // Get approved applications
         const approvedApps = contestApplications
-          .filter(app => app.status === 'approved')
+          .filter(app => {
+            // Проверяем либо старый статус заявки, либо статус участника
+            const participant = weeklyParticipants.find(p => p.user_id === app.user_id);
+            return app.status === 'approved' || (participant && participant.admin_status === 'approved');
+          })
           .filter((app, index, arr) => arr.findIndex(a => a.user_id === app.user_id) === index);
 
         // Get weekly participants with "pending" status
@@ -592,7 +596,11 @@ const Admin = () => {
       } else if (weeklyContestFilter === 'reject') {
         // Get rejected applications that should not appear in other sections
         const rejectedApps = contestApplications
-          .filter(app => app.status === 'rejected')
+          .filter(app => {
+            // Проверяем либо старый статус заявки, либо статус участника
+            const participant = weeklyParticipants.find(p => p.user_id === app.user_id);
+            return app.status === 'rejected' || (participant && participant.admin_status === 'rejected');
+          })
           .filter((app, index, arr) => arr.findIndex(a => a.user_id === app.user_id) === index);
 
         const rejectedParticipantsWithRatings = rejectedApps.map((app) => {
@@ -3830,9 +3838,13 @@ const Admin = () => {
                       ))}
                     </div>
                     <div className="text-xs pt-1 border-t border-border/50">
-                      {contestApplications.filter(app => app.status === 'pending').length} pending, {' '}
-                      {contestApplications.filter(app => app.status === 'approved').length} approved, {' '}
-                      {contestApplications.filter(app => app.status === 'rejected').length} rejected
+                      {/* Подсчет по объединенному admin_status */}
+                      {weeklyParticipants.filter(p => p.admin_status === 'pending').length + 
+                       contestApplications.filter(app => !weeklyParticipants.find(p => p.user_id === app.user_id) && app.status === 'pending').length} pending, {' '}
+                      {weeklyParticipants.filter(p => p.admin_status === 'approved').length + 
+                       contestApplications.filter(app => !weeklyParticipants.find(p => p.user_id === app.user_id) && app.status === 'approved').length} approved, {' '}
+                      {weeklyParticipants.filter(p => p.admin_status === 'rejected').length + 
+                       contestApplications.filter(app => !weeklyParticipants.find(p => p.user_id === app.user_id) && app.status === 'rejected').length} rejected
                     </div>
                   </div>
                 </div>
@@ -4413,13 +4425,15 @@ const Admin = () => {
                         participant.user_id === application.user_id
                       );
                       
-                      // Exclude applications with status="next week" from Card section (unless filtering by "next week")
-                      if (application.status === 'next week' && statusFilter !== 'next week') {
+                      // Exclude applications with admin_status="next week" from Card section (unless filtering by "next week")
+                      if (weeklyParticipant && weeklyParticipant.admin_status === 'next week' && statusFilter !== 'next week') {
                         return false;
                       }
                       
-                      // Exclude applications already in weekly contest (unless they have "pending" status or we're filtering by "next week")
-                      if (weeklyParticipant && weeklyParticipant.admin_status !== 'pending' && statusFilter !== 'next week') {
+                      // Exclude applications already in weekly contest with active status (unless they have "pending" status or we're filtering by "next week")
+                      if (weeklyParticipant && 
+                          !['pending', 'under review'].includes(weeklyParticipant.admin_status) && 
+                          statusFilter !== 'next week') {
                         return false;
                       }
                       
