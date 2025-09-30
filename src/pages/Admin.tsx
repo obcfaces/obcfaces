@@ -2227,9 +2227,10 @@ const Admin = () => {
                                            return updated;
                                          });
                                        } else {
-                                         // Successfully updated - keep the local state, don't refetch
-                                         console.log(`Successfully updated participant ${participant.id} status to ${value}`);
-                                       }
+                                          // Successfully updated - refresh data from server
+                                          console.log(`Successfully updated participant ${participant.id} status to ${value} with interval ${weekInterval}`);
+                                          fetchWeeklyParticipants();
+                                        }
                                      } catch (error) {
                                        console.error('Error updating participant status:', error);
                                        // Revert the local state on error
@@ -2411,9 +2412,10 @@ const Admin = () => {
                                                return updated;
                                              });
                                            } else {
-                                             // Successfully updated - keep the local state, don't refetch
-                                             console.log(`Successfully updated participant ${participant.id} status to ${value}`);
-                                           }
+                                              // Successfully updated - refresh data from server
+                                              console.log(`Successfully updated participant ${participant.id} status to ${value} with interval ${weekInterval}`);
+                                              fetchWeeklyParticipants();
+                                            }
                                          } catch (error) {
                                            console.error('Error updating participant status:', error);
                                            // Revert the local state on error
