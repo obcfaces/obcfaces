@@ -1276,17 +1276,15 @@ const Admin = () => {
     }
   };
 
-  // Create debounced version of status update
+  // DEPRECATED: Use updateParticipantStatusWithHistory instead
+  // Keeping for reference but should not be used
   const debounceStatusUpdate = useCallback(
-    debounce(async (participantId: string, newStatus: string) => {
+    debounce(async (participantId: string, newStatus: string, participantName: string = 'Unknown') => {
       try {
-        const { error } = await supabase
-          .from('weekly_contest_participants')
-          .update({ admin_status: newStatus } as any)
-          .eq('id', participantId);
-          
-        if (error) {
-          console.error('Error updating participant status:', error);
+        // Use centralized function instead
+        const result = await updateParticipantStatusWithHistory(participantId, newStatus, participantName);
+        
+        if (!result.success) {
           toast({
             title: "Error",
             description: "Failed to update participant status",
@@ -1294,31 +1292,25 @@ const Admin = () => {
           });
         } else {
           toast({
-            title: "Status Updated",
-            description: `Participant status changed to ${newStatus}`,
+            title: "Success",
+            description: `Participant status updated to ${newStatus}`,
           });
-          // Batch refresh to avoid multiple API calls
-          setTimeout(() => {
-            fetchWeeklyParticipants();
-          }, 500);
+          fetchWeeklyParticipants();
         }
       } catch (error) {
-        console.error('Error updating participant status:', error);
+        console.error('Error in debounced status update:', error);
       }
     }, 300),
     []
   );
 
-  // Optimized debounced status update function
-  const optimizedStatusUpdate = useCallback(async (participantId: string, newStatus: string, participantData?: any) => {
+  // DEPRECATED: Use updateParticipantStatusWithHistory instead
+  const optimizedStatusUpdate = useCallback(async (participantId: string, newStatus: string, participantName: string = 'Unknown') => {
     try {
-      const { error } = await supabase
-        .from('weekly_contest_participants')
-        .update({ admin_status: newStatus } as any)
-        .eq('id', participantId);
-        
-      if (error) {
-        console.error('Error updating participant status:', error);
+      // Use centralized function instead
+      const result = await updateParticipantStatusWithHistory(participantId, newStatus, participantName);
+      
+      if (!result.success) {
         toast({
           title: "Error",
           description: "Failed to update participant status",
@@ -1326,16 +1318,13 @@ const Admin = () => {
         });
       } else {
         toast({
-          title: "Status Updated",
-          description: `Participant status changed to ${newStatus}`,
+          title: "Success",
+          description: `Participant status updated to ${newStatus}`,
         });
-        // Batch refresh to avoid multiple API calls
-        setTimeout(() => {
-          fetchWeeklyParticipants();
-        }, 500);
+        fetchWeeklyParticipants();
       }
     } catch (error) {
-      console.error('Error updating participant status:', error);
+      console.error('Error in optimized status update:', error);
     }
   }, []);
 
@@ -1752,22 +1741,26 @@ const Admin = () => {
       return;
     }
 
-    // If user is in weekly contest participants, update admin_status
+    // If user is in weekly contest participants, update admin_status with history
     const weeklyParticipant = weeklyParticipants.find(p => p.user_id === application?.user_id);
     if (weeklyParticipant) {
       try {
-        const { error: updateError } = await supabase
-          .from('weekly_contest_participants')
-          .update({ admin_status: newStatus === 'approved' ? 'this week' : newStatus })
-          .eq('user_id', application.user_id);
+        const participantName = `${application?.application_data?.first_name || ''} ${application?.application_data?.last_name || ''}`.trim();
+        const targetStatus = newStatus === 'approved' ? 'this week' : newStatus;
+        
+        const result = await updateParticipantStatusWithHistory(
+          weeklyParticipant.id,
+          targetStatus,
+          participantName
+        );
 
-        if (updateError) {
-          console.error('Error updating weekly participant admin_status:', updateError);
-        } else {
-          console.log('Successfully updated weekly participant admin_status to:', newStatus === 'approved' ? 'this week' : newStatus);
+        if (result.success) {
+          console.log('Successfully updated weekly participant admin_status to:', targetStatus);
           // Immediately refresh the data
           fetchWeeklyParticipants();
           fetchContestApplications();
+        } else {
+          console.error('Error updating weekly participant admin_status:', result.error);
         }
       } catch (error) {
         console.error('Error updating weekly participant:', error);
@@ -1837,14 +1830,18 @@ const Admin = () => {
               console.error('Error adding participant to weekly contest:', participantError);
             }
           } else {
-            // Update existing participant's admin_status
-            const { error: updateError } = await supabase
-              .from('weekly_contest_participants')
-              .update({ admin_status: newStatus === 'approved' ? 'this week' : 'next week on site' })
-              .eq('id', existingParticipant.id);
+            // Update existing participant's admin_status with history
+            const participantName = `${application?.application_data?.first_name || ''} ${application?.application_data?.last_name || ''}`.trim();
+            const targetStatus = newStatus === 'approved' ? 'this week' : 'next week on site';
+            
+            const result = await updateParticipantStatusWithHistory(
+              existingParticipant.id,
+              targetStatus,
+              participantName
+            );
 
-            if (updateError) {
-              console.error('Error updating participant admin_status:', updateError);
+            if (!result.success) {
+              console.error('Error updating participant admin_status:', result.error);
             }
           }
         }
