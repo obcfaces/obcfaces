@@ -147,6 +147,21 @@ const getFutureWeekInterval = (weeksAhead: number, countryCode: string = 'PH') =
 };
 
 /**
+ * Получить week_interval для admin_status
+ */
+const getWeekIntervalForStatus = (adminStatus: string): string => {
+  const statusMapping: { [key: string]: string } = {
+    'this week': '29/09-05/10/25',           // Current week
+    'next week': '06/10-12/10/25',           // Next week
+    'next week on site': '06/10-12/10/25',   // Next week
+    'pre next week': '06/10-12/10/25',       // Next week
+    'past': '22/09-28/09/25',                // Past week (1 week ago)
+  };
+  
+  return statusMapping[adminStatus] || '29/09-05/10/25'; // Default to current week
+};
+
+/**
  * Получить список доступных интервалов недель начиная с текущей недели
  */
 const getAvailableWeekIntervals = () => {
@@ -2164,12 +2179,16 @@ const Admin = () => {
                                   }));
 
                                    // Update the database with the new admin_status
-                                   const updateParticipantStatus = async () => {
-                                     try {
-                                       const { error } = await supabase
-                                         .from('weekly_contest_participants')
-                                          .update({ admin_status: value } as any)
-                                         .eq('id', participant.id);
+                                    const updateParticipantStatus = async () => {
+                                      try {
+                                        const weekInterval = getWeekIntervalForStatus(value);
+                                        const { error } = await supabase
+                                          .from('weekly_contest_participants')
+                                           .update({ 
+                                             admin_status: value,
+                                             week_interval: weekInterval
+                                           } as any)
+                                          .eq('id', participant.id);
                                        
                                        if (error) {
                                          console.error('Error updating participant status:', error);
@@ -2344,12 +2363,16 @@ const Admin = () => {
                                       }));
 
                                        // Update the database with the new admin_status
-                                       const updateParticipantStatus = async () => {
-                                         try {
-                                           const { error } = await supabase
-                                             .from('weekly_contest_participants')
-                                             .update({ admin_status: value } as any)
-                                             .eq('id', participant.id);
+                                        const updateParticipantStatus = async () => {
+                                          try {
+                                            const weekInterval = getWeekIntervalForStatus(value);
+                                            const { error } = await supabase
+                                              .from('weekly_contest_participants')
+                                              .update({ 
+                                                admin_status: value,
+                                                week_interval: weekInterval
+                                              } as any)
+                                              .eq('id', participant.id);
                                            
                                            if (error) {
                                              console.error('Error updating participant status:', error);
@@ -2543,11 +2566,15 @@ const Admin = () => {
                                     [participant.id]: newStatus
                                   }));
 
-                                  try {
-                                    const { error } = await supabase
-                                      .from('weekly_contest_participants')
-                                      .update({ admin_status: newStatus } as any)
-                                      .eq('id', participant.id);
+                                   try {
+                                     const weekInterval = getWeekIntervalForStatus(newStatus);
+                                     const { error } = await supabase
+                                       .from('weekly_contest_participants')
+                                       .update({ 
+                                         admin_status: newStatus,
+                                         week_interval: weekInterval
+                                       } as any)
+                                       .eq('id', participant.id);
                                     
                                     if (error) {
                                       console.error('Error updating participant status:', error);
@@ -2827,11 +2854,15 @@ const Admin = () => {
                                             throw new Error('No participant ID found in participant object');
                                           }
                                           
-                                          console.log('About to update with ID:', participant.participant_id);
-                                          const { error } = await supabase
-                                            .from('weekly_contest_participants')
-                                            .update({ admin_status: value } as any)
-                                            .eq('id', participant.participant_id);
+                                           console.log('About to update with ID:', participant.participant_id);
+                                           const weekInterval = getWeekIntervalForStatus(value);
+                                           const { error } = await supabase
+                                             .from('weekly_contest_participants')
+                                             .update({ 
+                                               admin_status: value,
+                                               week_interval: weekInterval
+                                             } as any)
+                                             .eq('id', participant.participant_id);
                                       
                                        if (error) {
                                          console.error('=== Supabase Error Details ===');
