@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import { debounce } from '@/utils/performance';
 import { Helmet } from 'react-helmet-async';
 import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -1176,6 +1177,39 @@ const Admin = () => {
         return '';
     }
   };
+
+  // Create debounced version of status update
+  const debounceStatusUpdate = useCallback(
+    debounce(async (participantId: string, newStatus: string) => {
+      try {
+        const { error } = await supabase
+          .from('weekly_contest_participants')
+          .update({ admin_status: newStatus } as any)
+          .eq('id', participantId);
+          
+        if (error) {
+          console.error('Error updating participant status:', error);
+          toast({
+            title: "Error",
+            description: "Failed to update participant status",
+            variant: "destructive",
+          });
+        } else {
+          toast({
+            title: "Status Updated",
+            description: `Participant status changed to ${newStatus}`,
+          });
+          // Batch refresh to avoid multiple API calls
+          setTimeout(() => {
+            fetchWeeklyParticipants();
+          }, 500);
+        }
+      } catch (error) {
+        console.error('Error updating participant status:', error);
+      }
+    }, 300),
+    []
+  );
 
   // Optimized debounced status update function
   const optimizedStatusUpdate = useCallback(async (participantId: string, newStatus: string, participantData?: any) => {
