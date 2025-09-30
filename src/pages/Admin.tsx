@@ -388,6 +388,7 @@ const Admin = () => {
   const [selectedDay, setSelectedDay] = useState<{ day: number; type: 'new' | 'approved' } | null>(null);
   const [nextWeekApplicationsCount, setNextWeekApplicationsCount] = useState<{ total: number; next_week: number }>({ total: 0, next_week: 0 });
   const [cardSectionStats, setCardSectionStats] = useState<{ newApplications: number; movedToNextWeek: number; new_applications_count: number; moved_to_next_week_count: number }>({ newApplications: 0, movedToNextWeek: 0, new_applications_count: 0, moved_to_next_week_count: 0 });
+  const [showAllCards, setShowAllCards] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -2885,10 +2886,18 @@ const Admin = () => {
                               {filter.label}
                             </Button>
                           ))}
+                          <Button
+                            variant={showAllCards ? 'default' : 'outline'}
+                            size="sm"
+                            onClick={() => setShowAllCards(!showAllCards)}
+                            className="ml-2"
+                          >
+                            К
+                          </Button>
                         </div>
                         
                         {/* Mobile filters */}
-                        <div className="md:hidden grid grid-cols-2 gap-2">
+                         <div className="md:hidden grid grid-cols-2 gap-2">
                           {dynamicFilters.map((filter) => (
                             <Button
                               key={filter.id}
@@ -2900,6 +2909,14 @@ const Admin = () => {
                               {filter.mobileLabel}
                             </Button>
                           ))}
+                          <Button
+                            variant={showAllCards ? 'default' : 'outline'}
+                            size="sm"
+                            onClick={() => setShowAllCards(!showAllCards)}
+                            className="text-xs col-span-2"
+                          >
+                            К - Все карточки
+                          </Button>
                         </div>
                       </>
                     );
@@ -2930,21 +2947,50 @@ const Admin = () => {
                 console.log('All admin statuses available:', 
                   [...new Set(weeklyParticipants.map(p => p.admin_status))]);
                 
-                // For debugging, let's show some past participants even if the filter doesn't match exactly
-                const debugPastParticipants = weeklyParticipants.filter(p => {
-                  const status = p.admin_status || 'this week';
-                  // Включаем участников со статусами 'past' и 'this week' для фильтрации по интервалам
-                  return status === 'past' || status === 'this week';
-                });
-                
-                console.log('Debug past participants found:', debugPastParticipants.length);
-                console.log('Past week participants from state:', pastWeekParticipants.length);
-                
-                // Use actual past participants if available, otherwise use debug participants for display
-                const participantsToShow = pastWeekParticipants.length > 0 ? pastWeekParticipants : debugPastParticipants;
+                // If "К" button is active, show ALL participants from the entire site
+                if (showAllCards) {
+                  const allParticipants = [...weeklyParticipants];
+                  
+                  // Also include all contest applications as participants
+                  const applicationParticipants = contestApplications.map(app => {
+                    const profile = profiles.find(p => p.id === app.user_id);
+                    return {
+                      id: `app-${app.id}`,
+                      user_id: app.user_id,
+                      application_data: app.application_data,
+                      admin_status: app.status,
+                      participant_status: app.status,
+                      status_history: {},
+                      status_week_history: {},
+                      week_interval: getParticipantWeekInterval({ admin_status: app.status }),
+                      created_at: app.submitted_at,
+                      contest_id: null,
+                      final_rank: null,
+                      total_votes: 0,
+                      average_rating: 0,
+                      is_active: app.deleted_at === null
+                    };
+                  });
+                  
+                  const participantsToShow = [...allParticipants, ...applicationParticipants];
+                  console.log('Showing ALL cards:', participantsToShow.length);
+                } else {
+                  // For debugging, let's show some past participants even if the filter doesn't match exactly
+                  const debugPastParticipants = weeklyParticipants.filter(p => {
+                    const status = p.admin_status || 'this week';
+                    // Включаем участников со статусами 'past' и 'this week' для фильтрации по интервалам
+                    return status === 'past' || status === 'this week';
+                  });
+                  
+                  console.log('Debug past participants found:', debugPastParticipants.length);
+                  console.log('Past week participants from state:', pastWeekParticipants.length);
+                  
+                  // Use actual past participants if available, otherwise use debug participants for display
+                  var participantsToShow = pastWeekParticipants.length > 0 ? pastWeekParticipants : debugPastParticipants;
+                }
                 
                 // Apply past week filter based on week intervals
-                const filteredByWeek = participantsToShow.filter(participant => {
+                const filteredByWeek = showAllCards ? participantsToShow : participantsToShow.filter(participant => {
                   // When a specific interval is selected, use stricter filtering to avoid duplicates
                   if (pastWeekIntervalFilter !== 'all') {
                     const participantInterval = participant.week_interval || getParticipantWeekInterval(participant);
