@@ -147,18 +147,22 @@ const getFutureWeekInterval = (weeksAhead: number, countryCode: string = 'PH') =
 };
 
 /**
- * Получить week_interval для admin_status
+ * Получить week_interval для admin_status (динамически на основе текущей даты)
  */
 const getWeekIntervalForStatus = (adminStatus: string): string => {
+  const currentWeek = getCurrentWeekInterval('PH');
+  const nextWeek = getFutureWeekInterval(1, 'PH');
+  const pastWeek = getPastWeekInterval(1, 'PH');
+  
   const statusMapping: { [key: string]: string } = {
-    'this week': '29/09-05/10/25',           // Current week
-    'next week': '06/10-12/10/25',           // Next week
-    'next week on site': '06/10-12/10/25',   // Next week
-    'pre next week': '06/10-12/10/25',       // Next week
-    'past': '22/09-28/09/25',                // Past week (1 week ago)
+    'this week': currentWeek.formatted,
+    'next week': nextWeek.formatted,
+    'next week on site': nextWeek.formatted,
+    'pre next week': nextWeek.formatted,
+    'past': pastWeek.formatted,
   };
   
-  return statusMapping[adminStatus] || '29/09-05/10/25'; // Default to current week
+  return statusMapping[adminStatus] || currentWeek.formatted;
 };
 
 /**
