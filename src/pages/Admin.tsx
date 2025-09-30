@@ -368,6 +368,12 @@ const Admin = () => {
   const [participantFilters, setParticipantFilters] = useState<{ [key: string]: string }>({});
   const [pastWeekParticipants, setPastWeekParticipants] = useState<any[]>([]);
   const [pastWeekFilter, setPastWeekFilter] = useState<string>('all');
+  
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(20);
+  const [applicationCurrentPage, setApplicationCurrentPage] = useState(1);
+  const [participantCurrentPage, setParticipantCurrentPage] = useState(1);
   const [pastWeekIntervalFilter, setPastWeekIntervalFilter] = useState<string>('all'); // Новый фильтр для интервалов недель
    const [expandedAdminDates, setExpandedAdminDates] = useState<Set<string>>(new Set());
    const [adminDatePopup, setAdminDatePopup] = useState<{ show: boolean; date: string; admin: string; applicationId: string }>({ 
@@ -1938,7 +1944,10 @@ const Admin = () => {
                   </div>
                 </div>
                 
-                <Select value={weeklyContestFilter} onValueChange={setWeeklyContestFilter}>
+                <Select value={weeklyContestFilter} onValueChange={(value) => {
+                  setWeeklyContestFilter(value);
+                  setParticipantCurrentPage(1); // Reset pagination when filter changes
+                }}>
                   <SelectTrigger className="w-48">
                     <SelectValue />
                   </SelectTrigger>
@@ -1970,7 +1979,16 @@ const Admin = () => {
                   );
                 }
 
-                return filteredWeeklyParticipants.map((participant) => {
+                // Calculate pagination for weekly participants
+                const totalParticipants = filteredWeeklyParticipants.length;
+                const totalParticipantPages = Math.ceil(totalParticipants / itemsPerPage);
+                const participantStartIndex = (participantCurrentPage - 1) * itemsPerPage;
+                const participantEndIndex = participantStartIndex + itemsPerPage;
+                const paginatedParticipants = filteredWeeklyParticipants.slice(participantStartIndex, participantEndIndex);
+
+                return (
+                  <>
+                    {paginatedParticipants.map((participant) => {
                   const participantProfile = profiles.find(p => p.id === participant.user_id);
                   const appData = participant.application_data || {};
                   
@@ -2349,7 +2367,46 @@ const Admin = () => {
                       </CardContent>
                     </Card>
                   );
-                });
+                })}
+                
+                {/* Pagination for participants */}
+                {totalParticipantPages > 1 && (
+                  <div className="flex justify-center items-center space-x-2 mt-6">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setParticipantCurrentPage(prev => Math.max(prev - 1, 1))}
+                      disabled={participantCurrentPage === 1}
+                    >
+                      Предыдущая
+                    </Button>
+                    
+                    <div className="flex space-x-1">
+                      {Array.from({ length: totalParticipantPages }, (_, i) => i + 1).map((page) => (
+                        <Button
+                          key={page}
+                          variant={page === participantCurrentPage ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => setParticipantCurrentPage(page)}
+                          className="w-8 h-8 p-0"
+                        >
+                          {page}
+                        </Button>
+                      ))}
+                    </div>
+                    
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setParticipantCurrentPage(prev => Math.min(prev + 1, totalParticipantPages))}
+                      disabled={participantCurrentPage === totalParticipantPages}
+                    >
+                      Следующая
+                    </Button>
+                  </div>
+                )}
+                </>
+              );
               })()}
             </TabsContent>
 
@@ -4160,9 +4217,12 @@ const Admin = () => {
               <div className="mb-6 px-0 md:px-6">
                 <div className="flex gap-4 items-center justify-start">
                   <div className="flex flex-col gap-2">
-                     <Select 
+                      <Select 
                       value={statusFilter} 
-                      onValueChange={setStatusFilter}
+                      onValueChange={(value) => {
+                        setStatusFilter(value);
+                        setApplicationCurrentPage(1); // Reset pagination when filter changes
+                      }}
                     >
                        <SelectTrigger 
                         className={`w-20 md:w-32 ${
@@ -4286,7 +4346,16 @@ const Admin = () => {
                      );
                    };
 
-                   return uniqueApplications.map((application) => {
+                    // Calculate pagination for applications
+                    const totalApplications = uniqueApplications.length;
+                    const totalApplicationPages = Math.ceil(totalApplications / itemsPerPage);
+                    const applicationStartIndex = (applicationCurrentPage - 1) * itemsPerPage;
+                    const applicationEndIndex = applicationStartIndex + itemsPerPage;
+                    const paginatedApplications = uniqueApplications.slice(applicationStartIndex, applicationEndIndex);
+
+                    return (
+                      <>
+                        {paginatedApplications.map((application) => {
                     const appData = typeof application.application_data === 'string' 
                       ? JSON.parse(application.application_data) 
                       : application.application_data;
@@ -5268,8 +5337,47 @@ const Admin = () => {
                         
                        </div>
                      );
-                   });
-                 })()}
+                    })}
+                        
+                        {/* Pagination for applications */}
+                        {totalApplicationPages > 1 && (
+                          <div className="flex justify-center items-center space-x-2 mt-6">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setApplicationCurrentPage(prev => Math.max(prev - 1, 1))}
+                              disabled={applicationCurrentPage === 1}
+                            >
+                              Предыдущая
+                            </Button>
+                            
+                            <div className="flex space-x-1">
+                              {Array.from({ length: totalApplicationPages }, (_, i) => i + 1).map((page) => (
+                                <Button
+                                  key={page}
+                                  variant={page === applicationCurrentPage ? "default" : "outline"}
+                                  size="sm"
+                                  onClick={() => setApplicationCurrentPage(page)}
+                                  className="w-8 h-8 p-0"
+                                >
+                                  {page}
+                                </Button>
+                              ))}
+                            </div>
+                            
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setApplicationCurrentPage(prev => Math.min(prev + 1, totalApplicationPages))}
+                              disabled={applicationCurrentPage === totalApplicationPages}
+                            >
+                              Следующая
+                            </Button>
+                          </div>
+                        )}
+                      </>
+                    );
+                  })()}
                </div>
               </TabsContent>
 
