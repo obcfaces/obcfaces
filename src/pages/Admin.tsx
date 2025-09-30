@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Helmet } from 'react-helmet-async';
@@ -100,8 +100,9 @@ const getStrictWeekInterval = (date: Date, countryCode: string = 'PH'): { start:
   
   const formatted = `${formatDate(monday)}-${formatDate(sunday)}/${formatYear(sunday)}`;
   
-  console.log(`STRICT WEEK CALCULATION: Input: ${date.toISOString()}, Country: ${countryCode}, Timezone: ${timezone}`);
-  console.log(`STRICT WEEK RESULT: Monday: ${monday.toISOString()}, Sunday: ${sunday.toISOString()}, Formatted: ${formatted}`);
+  // Remove console logs for performance
+  // console.log(`STRICT WEEK CALCULATION: Input: ${date.toISOString()}, Country: ${countryCode}, Timezone: ${timezone}`);
+  // console.log(`STRICT WEEK RESULT: Monday: ${monday.toISOString()}, Sunday: ${sunday.toISOString()}, Formatted: ${formatted}`);
   
   return {
     start: monday,
@@ -1175,6 +1176,36 @@ const Admin = () => {
         return '';
     }
   };
+
+  // Optimized debounced status update function
+  const optimizedStatusUpdate = useCallback(async (participantId: string, newStatus: string, participantData?: any) => {
+    try {
+      const { error } = await supabase
+        .from('weekly_contest_participants')
+        .update({ admin_status: newStatus } as any)
+        .eq('id', participantId);
+        
+      if (error) {
+        console.error('Error updating participant status:', error);
+        toast({
+          title: "Error",
+          description: "Failed to update participant status",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Status Updated",
+          description: `Participant status changed to ${newStatus}`,
+        });
+        // Batch refresh to avoid multiple API calls
+        setTimeout(() => {
+          fetchWeeklyParticipants();
+        }, 500);
+      }
+    } catch (error) {
+      console.error('Error updating participant status:', error);
+    }
+  }, []);
 
   const fetchProfiles = async () => {
     const { data: profilesData, error: profilesError } = await supabase
@@ -3043,12 +3074,12 @@ const Admin = () => {
                   return (
                      <div className="text-center py-8 text-muted-foreground">
                        <p className="text-lg">Нет участников для выбранного периода</p>
-                       <p className="text-xs mt-2 text-muted-foreground/70">
-                         Фильтр: {pastWeekFilter}, всего участников: {participantsToShow.length}
-                       </p>
-                       <p className="text-xs mt-1 text-muted-foreground/70">
-                         Участники со статусом 'past': {participantsToShow.filter(p => (p.admin_status || participantFilters[p.id]) === 'past').length}
-                       </p>
+                        <p className="text-xs mt-2 text-muted-foreground/70">
+                          Фильтр: {pastWeekFilter}, всего участников: {filteredByWeek.length}
+                        </p>
+                        <p className="text-xs mt-1 text-muted-foreground/70">
+                          Участники со статусом 'past': {filteredByWeek.filter(p => (p.admin_status || participantFilters[p.id]) === 'past').length}
+                        </p>
                      </div>
                   );
                 }
