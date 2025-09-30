@@ -2947,6 +2947,9 @@ const Admin = () => {
                 console.log('All admin statuses available:', 
                   [...new Set(weeklyParticipants.map(p => p.admin_status))]);
                 
+                // Declare participantsToShow outside conditional blocks
+                let participantsToShow = [];
+                
                 // If "К" button is active, show ALL participants from the entire site
                 if (showAllCards) {
                   const allParticipants = [...weeklyParticipants];
@@ -2972,7 +2975,7 @@ const Admin = () => {
                     };
                   });
                   
-                  const participantsToShow = [...allParticipants, ...applicationParticipants];
+                  participantsToShow = [...allParticipants, ...applicationParticipants];
                   console.log('Showing ALL cards:', participantsToShow.length);
                 } else {
                   // For debugging, let's show some past participants even if the filter doesn't match exactly
@@ -2986,7 +2989,7 @@ const Admin = () => {
                   console.log('Past week participants from state:', pastWeekParticipants.length);
                   
                   // Use actual past participants if available, otherwise use debug participants for display
-                  var participantsToShow = pastWeekParticipants.length > 0 ? pastWeekParticipants : debugPastParticipants;
+                  participantsToShow = pastWeekParticipants.length > 0 ? pastWeekParticipants : debugPastParticipants;
                 }
                 
                 // Apply past week filter based on week intervals
