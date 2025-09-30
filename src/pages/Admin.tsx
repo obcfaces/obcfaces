@@ -523,8 +523,7 @@ const Admin = () => {
       if (weeklyContestFilter === 'approve') {
         // Get approved applications
         const approvedApps = weeklyParticipants
-          .filter(participant => participant.admin_status === 'approved')
-          .filter((participant, index, arr) => arr.findIndex(a => a.user_id === participant.user_id) === index);
+          .filter(participant => participant.admin_status === 'approved');
 
         // Get weekly participants with "pending" status
         const pendingParticipants = weeklyParticipants.filter(participant => {
@@ -592,8 +591,7 @@ const Admin = () => {
       } else if (weeklyContestFilter === 'reject') {
         // Get rejected applications that should not appear in other sections
         const rejectedApps = weeklyParticipants
-          .filter(participant => participant.admin_status === 'rejected')
-          .filter((participant, index, arr) => arr.findIndex(a => a.user_id === participant.user_id) === index);
+          .filter(participant => participant.admin_status === 'rejected');
 
         const rejectedParticipantsWithRatings = rejectedApps.map((app) => {
           const appData = app.application_data || {};
@@ -4403,8 +4401,9 @@ const Admin = () => {
                             return false;
                           }
                         } else {
-                          // Handle regular status filtering
-                          if (application.status !== statusFilter) return false;
+                          // Проверяем ТОЛЬКО admin_status
+                          const participant = weeklyParticipants.find(p => p.user_id === application.user_id);
+                          if (!participant || participant.admin_status !== statusFilter) return false;
                         }
                       }
                       
@@ -4623,10 +4622,10 @@ const Admin = () => {
                                    {!showDeletedApplications && (
                                       <Select 
                                         value={(() => {
-                                          // If user is in weekly contest participants, show admin_status as the status
-                                          const weeklyParticipant = weeklyParticipants.find(p => p.user_id === application.user_id);
-                                          return weeklyParticipant ? weeklyParticipant.admin_status : application.status;
-                                        })()} 
+                                           // Используем только admin_status
+                                           const weeklyParticipant = weeklyParticipants.find(p => p.user_id === application.user_id);
+                                           return weeklyParticipant ? weeklyParticipant.admin_status : 'pending';
+                                         })()} 
                                         onValueChange={(newStatus) => {
                                           if (newStatus === 'delete') {
                                             const appData = typeof application.application_data === 'string' 
@@ -4653,12 +4652,15 @@ const Admin = () => {
                                           reviewApplication(application.id, newStatus);
                                         }}
                                      >
-                                       <SelectTrigger 
-                                          className={`w-[60%] h-7 text-xs ${
-                                            application.status === 'approved' ? 'bg-green-100 border-green-500 text-green-700' :
-                                            application.status === 'rejected' ? 'bg-red-100 border-red-500 text-red-700' :
-                                            ''
-                                          }`}
+                                        <SelectTrigger 
+                                           className={`w-[60%] h-7 text-xs ${
+                                             (() => {
+                                               const participant = weeklyParticipants.find(p => p.user_id === application.user_id);
+                                               const status = participant ? participant.admin_status : 'pending';
+                                               return status === 'approved' ? 'bg-green-100 border-green-500 text-green-700' :
+                                                      status === 'rejected' ? 'bg-red-100 border-red-500 text-red-700' : '';
+                                             })()
+                                           }`}
                                        >
                                          <SelectValue />
                                        </SelectTrigger>
@@ -4932,7 +4934,10 @@ const Admin = () => {
                         </Card>
         
          {/* Rejection reason under the card */}
-        {application.status === 'rejected' && ((application as any).rejection_reason_types || application.rejection_reason) && (
+        {(() => {
+          const participant = weeklyParticipants.find(p => p.user_id === application.user_id);
+          return participant && participant.admin_status === 'rejected';
+        })() && ((application as any).rejection_reason_types || application.rejection_reason) && (
           <div className="p-2 bg-destructive/10 border border-destructive/20 rounded-b-lg -mt-1">
              <div className="space-y-1 text-xs leading-tight">
                {(application as any).rejection_reason_types && (application as any).rejection_reason_types.length > 0 && (
