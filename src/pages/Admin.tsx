@@ -426,6 +426,78 @@ const Admin = () => {
 
   console.log('Admin component rendering, statusFilter:', statusFilter);
 
+  // Centralized function to update participant status with history
+  const updateParticipantStatusWithHistory = async (
+    participantId: string,
+    newStatus: string,
+    participantName: string
+  ): Promise<{ success: boolean; error?: any }> => {
+    try {
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        return { success: false, error: 'No authenticated user' };
+      }
+
+      // Get week interval for the status
+      const weekInterval = getWeekIntervalForStatus(newStatus);
+      
+      // Get current participant data to update status_history
+      const { data: currentParticipant, error: fetchError } = await supabase
+        .from('weekly_contest_participants')
+        .select('status_history')
+        .eq('id', participantId)
+        .single();
+
+      if (fetchError) {
+        console.error('Error fetching current participant:', fetchError);
+        return { success: false, error: fetchError };
+      }
+
+      // Parse existing status_history or create new one
+      let statusHistory: any = {};
+      try {
+        statusHistory = typeof currentParticipant.status_history === 'string' 
+          ? JSON.parse(currentParticipant.status_history) 
+          : (currentParticipant.status_history || {});
+      } catch (e) {
+        console.error('Error parsing status_history:', e);
+        statusHistory = {};
+      }
+
+      // Add new status to history
+      statusHistory[newStatus] = {
+        changed_at: new Date().toISOString(),
+        changed_by: user.id,
+        changed_by_email: user.email,
+        week_interval: weekInterval,
+        timestamp: new Date().toISOString()
+      };
+
+      // Update participant with new status and history
+      const { error: updateError } = await supabase
+        .from('weekly_contest_participants')
+        .update({ 
+          admin_status: newStatus,
+          week_interval: weekInterval,
+          status_history: statusHistory
+        })
+        .eq('id', participantId);
+
+      if (updateError) {
+        console.error('Error updating participant status:', updateError);
+        return { success: false, error: updateError };
+      }
+
+      console.log(`✅ Successfully updated ${participantName} (${participantId}) to ${newStatus} with interval ${weekInterval}`);
+      return { success: true };
+
+    } catch (error) {
+      console.error('Unexpected error in updateParticipantStatusWithHistory:', error);
+      return { success: false, error };
+    }
+  };
+
   // Temporarily disable memoization to fix infinite recursion
   const getDynamicPastWeekFilters = createDynamicPastWeekFilters();
 
@@ -2189,47 +2261,32 @@ const Admin = () => {
                                   }));
 
                                    // Update the database with the new admin_status
-                                    const updateParticipantStatus = async () => {
-                                      try {
-                                        const weekInterval = getWeekIntervalForStatus(value);
-                                        const { error } = await supabase
-                                          .from('weekly_contest_participants')
-                                           .update({ 
-                                             admin_status: value,
-                                             week_interval: weekInterval
-                                           } as any)
-                                          .eq('id', participant.id);
-                                       
-                                       if (error) {
-                                         console.error('Error updating participant status:', error);
-                                         toast({
-                                           title: "Error",
-                                           description: "Failed to update participant status",
-                                           variant: "destructive"
-                                         });
-                                         // Revert the local state on error
-                                         setParticipantFilters(prev => {
-                                           const updated = { ...prev };
-                                           delete updated[participant.id];
-                                           return updated;
-                                         });
-                                       } else {
-                                          // Successfully updated - refresh data from server
-                                          console.log(`Successfully updated participant ${participant.id} status to ${value} with interval ${weekInterval}`);
-                                          fetchWeeklyParticipants();
-                                        }
-                                     } catch (error) {
-                                       console.error('Error updating participant status:', error);
-                                       // Revert the local state on error
-                                       setParticipantFilters(prev => {
-                                         const updated = { ...prev };
-                                         delete updated[participant.id];
-                                         return updated;
-                                       });
-                                     }
-                                   };
+                                    const updateStatus = async () => {
+                                      const result = await updateParticipantStatusWithHistory(
+                                        participant.id,
+                                        value,
+                                        `${participantProfile?.first_name || appData.first_name} ${participantProfile?.last_name || appData.last_name}`
+                                      );
 
-                                  updateParticipantStatus();
+                                      if (!result.success) {
+                                        toast({
+                                          title: "Error",
+                                          description: "Failed to update participant status",
+                                          variant: "destructive"
+                                        });
+                                        // Revert the local state on error
+                                        setParticipantFilters(prev => {
+                                          const updated = { ...prev };
+                                          delete updated[participant.id];
+                                          return updated;
+                                        });
+                                      } else {
+                                        // Successfully updated - refresh data from server
+                                        fetchWeeklyParticipants();
+                                      }
+                                    };
+
+                                   updateStatus();
                                }}
                              >
                                      <SelectTrigger className={`w-28 h-6 text-xs ${getStatusBackgroundColor(participant.admin_status || participantFilters[participant.id] || (participant.final_rank ? 'this week' : 'approve'))}`}>
@@ -2392,47 +2449,32 @@ const Admin = () => {
                                       }));
 
                                        // Update the database with the new admin_status
-                                        const updateParticipantStatus = async () => {
-                                          try {
-                                            const weekInterval = getWeekIntervalForStatus(value);
-                                            const { error } = await supabase
-                                              .from('weekly_contest_participants')
-                                              .update({ 
-                                                admin_status: value,
-                                                week_interval: weekInterval
-                                              } as any)
-                                              .eq('id', participant.id);
-                                           
-                                           if (error) {
-                                             console.error('Error updating participant status:', error);
-                                             toast({
-                                               title: "Error",
-                                               description: "Failed to update participant status",
-                                               variant: "destructive"
-                                             });
-                                             // Revert the local state on error
-                                             setParticipantFilters(prev => {
-                                               const updated = { ...prev };
-                                               delete updated[participant.id];
-                                               return updated;
-                                             });
-                                           } else {
-                                              // Successfully updated - refresh data from server
-                                              console.log(`Successfully updated participant ${participant.id} status to ${value} with interval ${weekInterval}`);
-                                              fetchWeeklyParticipants();
-                                            }
-                                         } catch (error) {
-                                           console.error('Error updating participant status:', error);
-                                           // Revert the local state on error
-                                           setParticipantFilters(prev => {
-                                             const updated = { ...prev };
-                                             delete updated[participant.id];
-                                             return updated;
-                                           });
-                                         }
-                                       };
+                                        const updateStatus = async () => {
+                                          const result = await updateParticipantStatusWithHistory(
+                                            participant.id,
+                                            value,
+                                            `${participantProfile?.first_name || appData.first_name} ${participantProfile?.last_name || appData.last_name}`
+                                          );
 
-                                      updateParticipantStatus();
+                                          if (!result.success) {
+                                            toast({
+                                              title: "Error",
+                                              description: "Failed to update participant status",
+                                              variant: "destructive"
+                                            });
+                                            // Revert the local state on error
+                                            setParticipantFilters(prev => {
+                                              const updated = { ...prev };
+                                              delete updated[participant.id];
+                                              return updated;
+                                            });
+                                          } else {
+                                            // Successfully updated - refresh data from server
+                                            fetchWeeklyParticipants();
+                                          }
+                                        };
+
+                                      updateStatus();
                                    }}
                                  >
                                    <SelectTrigger className="w-24 h-7 text-xs">
@@ -2614,34 +2656,25 @@ const Admin = () => {
                                     [participant.id]: newStatus
                                   }));
 
-                                   try {
-                                     const weekInterval = getWeekIntervalForStatus(newStatus);
-                                     const { error } = await supabase
-                                       .from('weekly_contest_participants')
-                                       .update({ 
-                                         admin_status: newStatus,
-                                         week_interval: weekInterval
-                                       } as any)
-                                       .eq('id', participant.id);
-                                    
-                                    if (error) {
-                                      console.error('Error updating participant status:', error);
+                                   const result = await updateParticipantStatusWithHistory(
+                                      participant.id,
+                                      newStatus,
+                                      `${participantProfile?.first_name || appData.first_name} ${participantProfile?.last_name || appData.last_name}`
+                                    );
+
+                                    if (!result.success) {
                                       toast({
                                         title: "Error",
                                         description: "Failed to update participant status",
                                         variant: "destructive",
                                       });
-                                     } else {
-                                       // Successfully updated - keep the local state, don't refetch
-                                       console.log(`Successfully updated participant ${participant.id} status to ${newStatus}`);
-                                       toast({
-                                         title: "Status Updated",
-                                         description: `Participant status changed to ${newStatus}`,
-                                       });
+                                    } else {
+                                      toast({
+                                        title: "Status Updated",
+                                        description: `Participant status changed to ${newStatus}`,
+                                      });
+                                      fetchWeeklyParticipants();
                                     }
-                                  } catch (error) {
-                                    console.error('Error updating participant status:', error);
-                                  }
                                 }}
                               >
                                 <SelectTrigger className="w-40 h-8 text-xs">
@@ -2854,55 +2887,48 @@ const Admin = () => {
                                     <Select 
                                       value={participant.admin_status || 'next week'}
                                       onValueChange={async (value) => {
-                                      try {
-                                          console.log('=== Status Update Debug ===');
-                                          console.log('Full participant object:', JSON.stringify(participant, null, 2));
-                                          console.log('participant.participant_id:', participant.participant_id);
-                                          console.log('typeof participant.participant_id:', typeof participant.participant_id);
-                                          console.log('participant keys:', Object.keys(participant));
-                                          console.log('New status value:', value);
-                                          
+                                        try {
                                           if (!participant.participant_id) {
                                             console.error('participant.participant_id is falsy:', participant.participant_id);
-                                            throw new Error('No participant ID found in participant object');
+                                            toast({
+                                              title: "Error",
+                                              description: "No participant ID found",
+                                              variant: "destructive",
+                                            });
+                                            return;
                                           }
+
+                                          const participantName = participant.display_name || 
+                                            `${participant.first_name || 'Unknown'} ${participant.last_name || ''}`;
                                           
-                                           console.log('About to update with ID:', participant.participant_id);
-                                           const weekInterval = getWeekIntervalForStatus(value);
-                                           const { error } = await supabase
-                                             .from('weekly_contest_participants')
-                                             .update({ 
-                                               admin_status: value,
-                                               week_interval: weekInterval
-                                             } as any)
-                                             .eq('id', participant.participant_id);
-                                      
-                                       if (error) {
-                                         console.error('=== Supabase Error Details ===');
-                                         console.error('Full error object:', error);
-                                         console.error('Error code:', error.code);
-                                         console.error('Error message:', error.message);
-                                          console.error('Error details:', error.details);
-                                          console.error('participant.participant_id used in query:', participant.participant_id);
-                                         toast({
-                                           title: "Error",
-                                           description: "Failed to update participant status",
-                                           variant: "destructive",
-                                         });
-                                       } else {
-                                          // Refresh the data
-                                          await fetchNextWeekParticipants();
-                                         toast({
-                                           title: "Success",
-                                           description: "Participant status updated successfully",
-                                         });
-                                       }
-                                     } catch (error) {
-                                       console.error('=== Catch Block Error ===');
-                                       console.error('Error updating participant status:', error);
-                                       console.error('participant object when error occurred:', participant);
-                                     }
-                                  }}
+                                          const result = await updateParticipantStatusWithHistory(
+                                            participant.participant_id,
+                                            value,
+                                            participantName
+                                          );
+
+                                          if (!result.success) {
+                                            toast({
+                                              title: "Error",
+                                              description: "Failed to update participant status",
+                                              variant: "destructive",
+                                            });
+                                          } else {
+                                            await fetchNextWeekParticipants();
+                                            toast({
+                                              title: "Success",
+                                              description: "Participant status updated successfully",
+                                            });
+                                          }
+                                        } catch (error) {
+                                          console.error('Error updating participant status:', error);
+                                          toast({
+                                            title: "Error",
+                                            description: "An unexpected error occurred",
+                                            variant: "destructive",
+                                          });
+                                        }
+                                      }}
                                 >
                                    <SelectTrigger className={`w-24 h-7 text-xs ${getStatusBackgroundColor(participant.admin_status || 'next week')}`}>
                                      <SelectValue />
@@ -3028,35 +3054,29 @@ const Admin = () => {
                                 <Select 
                                  value={participant.admin_status || 'next week on site'} 
                                  onValueChange={async (value) => {
-                                   try {
-                                     const weekInterval = getWeekIntervalForStatus(value);
-                                     const { error } = await supabase
-                                       .from('weekly_contest_participants')
-                                       .update({ 
-                                         admin_status: value,
-                                         week_interval: weekInterval
-                                       } as any)
-                                       .eq('id', participant.id);
+                                    const participantName = participantProfile?.display_name || 
+                                      `${participantProfile?.first_name || appData.first_name} ${participantProfile?.last_name || appData.last_name}`;
                                     
-                                    if (error) {
-                                      console.error('Error updating participant status:', error);
+                                    const result = await updateParticipantStatusWithHistory(
+                                      participant.id,
+                                      value,
+                                      participantName
+                                    );
+
+                                    if (!result.success) {
                                       toast({
                                         title: "Error",
                                         description: "Failed to update participant status",
                                         variant: "destructive",
                                       });
                                     } else {
-                                      // Refresh the data
                                       await fetchWeeklyParticipants();
                                       toast({
                                         title: "Success",
                                         description: "Participant status updated successfully",
                                       });
                                     }
-                                  } catch (error) {
-                                    console.error('Error updating participant status:', error);
-                                  }
-                                }}
+                                  }}
                               >
                                  <SelectTrigger className={`w-16 h-6 text-xs ${getStatusBackgroundColor(participant.admin_status || 'next week on site')}`}>
                                    <SelectValue />
