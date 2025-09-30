@@ -122,8 +122,12 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
         let nextWeekParticipants: any[] = [];
         let error = null;
 
+        console.log('Is admin:', isAdmin);
+        console.log('User ID:', user?.id);
+
         // Для админов загружаем участников со статусом next week и next week on site
         if (isAdmin) {
+          console.log('Loading next week participants for admin...');
           const { data, error: fetchError } = await supabase
             .from('weekly_contest_participants')
             .select(`
@@ -140,11 +144,14 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
                 weight_kg
               )
             `)
-            .in('participant_status', ['next week', 'next week on site'])
+            .in('admin_status', ['next week', 'next week on site'])
             .eq('is_active', true);
 
+          console.log('Query result:', { data, fetchError });
           nextWeekParticipants = data || [];
           error = fetchError;
+        } else {
+          console.log('Not admin, skipping query');
         }
 
         if (error) {
@@ -177,7 +184,7 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
           fullBodyImage: participant.profiles?.photo_2_url,
           height: participant.profiles?.height_cm,
           weight: participant.profiles?.weight_kg,
-          status: participant.participant_status
+          status: participant.admin_status
         }));
 
         console.log('Candidates from DB:', candidatesFromDB);
