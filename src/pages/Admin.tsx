@@ -3015,11 +3015,15 @@ const Admin = () => {
                                 <Select 
                                  value={participant.admin_status || 'next week on site'} 
                                  onValueChange={async (value) => {
-                                  try {
-                                    const { error } = await supabase
-                                      .from('weekly_contest_participants')
-                                      .update({ admin_status: value } as any)
-                                      .eq('id', participant.id);
+                                   try {
+                                     const weekInterval = getWeekIntervalForStatus(value);
+                                     const { error } = await supabase
+                                       .from('weekly_contest_participants')
+                                       .update({ 
+                                         admin_status: value,
+                                         week_interval: weekInterval
+                                       } as any)
+                                       .eq('id', participant.id);
                                     
                                     if (error) {
                                       console.error('Error updating participant status:', error);
@@ -3485,11 +3489,15 @@ const Admin = () => {
                                   <Select 
                                     value={participant.admin_status || 'past'}
                                     onValueChange={async (newStatus) => {
-                                     try {
-                                       const { error } = await supabase
-                                         .from('weekly_contest_participants')
-                                         .update({ admin_status: newStatus } as any)
-                                         .eq('id', participant.id);
+                                      try {
+                                        const weekInterval = getWeekIntervalForStatus(newStatus);
+                                        const { error } = await supabase
+                                          .from('weekly_contest_participants')
+                                          .update({ 
+                                            admin_status: newStatus,
+                                            week_interval: weekInterval
+                                          } as any)
+                                          .eq('id', participant.id);
                                        
                                        if (error) {
                                          console.error('Error updating participant status:', error);
