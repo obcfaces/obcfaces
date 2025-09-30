@@ -102,8 +102,7 @@ const Index = () => {
             />
           </div>
           
-          {/* ВРЕМЕННО ОТКЛЮЧЕНО: Не отображаем карточки на сайте */}
-          {/* 
+          
           <NextWeekSection viewMode={viewMode} />
           
           <section className="max-w-6xl mx-auto pt-2 mb-1 sm:mb-3 mt-2 bg-background rounded-lg shadow-sm shadow-foreground/10">
@@ -147,16 +146,6 @@ const Index = () => {
             viewMode={viewMode}
             weekOffset={3}
           />
-          */}
-          
-          <div className="max-w-6xl mx-auto px-6 py-8 text-center">
-            <h2 className="text-2xl font-bold text-muted-foreground mb-4">
-              Contest sections temporarily disabled
-            </h2>
-            <p className="text-muted-foreground">
-              Contest cards are not currently displayed on the site
-            </p>
-          </div>
 
         </>
       )}
