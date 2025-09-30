@@ -18,7 +18,7 @@ import { useToast } from '@/hooks/use-toast';
 import { MiniStars } from '@/components/mini-stars';
 import { 
   Calendar, FileText, UserCog, Eye, Edit, Check, X, Trash2, 
-  RotateCcw, Copy, Facebook, Minus, AlertCircle, Trophy, ChevronDown, ChevronUp, Shield
+  RotateCcw, Copy, Facebook, Minus, AlertCircle, Trophy, ChevronDown, ChevronUp, Shield, Info
 } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
@@ -33,6 +33,7 @@ import { ExpandableApplicationHistory } from '@/components/ExpandableApplication
 import { WeeklyTransitionButton } from '@/components/WeeklyTransitionButton';
 import { WinnerContentManager } from '@/components/admin/WinnerContentManager';
 import { ParticipantStatusHistory } from '@/components/admin/ParticipantStatusHistory';
+import { ParticipantStatusHistoryModal } from '@/components/admin/ParticipantStatusHistoryModal';
 
 // Helper function to check if rejection reason is a duplicate of predefined reasons
 const isReasonDuplicate = (rejectionReason: string, reasonTypes: string[]) => {
@@ -418,6 +419,8 @@ const Admin = () => {
   const [cardSectionStats, setCardSectionStats] = useState<{ newApplications: number; movedToNextWeek: number; new_applications_count: number; moved_to_next_week_count: number }>({ newApplications: 0, movedToNextWeek: 0, new_applications_count: 0, moved_to_next_week_count: 0 });
   const [showAllCards, setShowAllCards] = useState(false);
   const [pendingPastChanges, setPendingPastChanges] = useState<{ [participantId: string]: { admin_status?: string; week_interval?: string } }>({});
+  const [statusHistoryModalOpen, setStatusHistoryModalOpen] = useState(false);
+  const [selectedStatusHistory, setSelectedStatusHistory] = useState<{ participantId: string; participantName: string; statusHistory: any } | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -2142,31 +2145,14 @@ const Admin = () => {
                                    setVotersModalOpen(true);
                                  }}
                                >
-                                 {participant.total_votes || 0} • ★ {(participant.average_rating || 0).toFixed(1)}
-                               </div>
-                               
-                               {/* Status History */}
-                               <div className="mt-2">
-                                 <ParticipantStatusHistory
-                                   statusHistory={participant.status_history}
-                                   isExpanded={expandedStatusHistory.has(participant.id)}
-                                   onToggle={() => {
-                                     const newExpanded = new Set(expandedStatusHistory);
-                                     if (expandedStatusHistory.has(participant.id)) {
-                                       newExpanded.delete(participant.id);
-                                     } else {
-                                       newExpanded.add(participant.id);
-                                     }
-                                     setExpandedStatusHistory(newExpanded);
-                                   }}
-                                 />
-                               </div>
-                            </div>
+                                {participant.total_votes || 0} • ★ {(participant.average_rating || 0).toFixed(1)}
+                                </div>
+                             </div>
                             
                             <div className="flex-1"></div>
                           </div>
 
-                          {/* Right side actions */}
+                            {/* Right side actions */}
                           <div className="w-[20ch] flex-shrink-0 p-4 flex flex-col gap-2">
                             {/* Edit button */}
                             <Button
@@ -2182,6 +2168,7 @@ const Admin = () => {
                               <Edit className="w-4 h-4" />
                             </Button>
                             
+                            <div className="flex items-center gap-1">
                              <Select 
                                 value={participant.admin_status || participantFilters[participant.id] || (participant.final_rank ? 'this week' : 'approve')}
                                onValueChange={(value) => {
@@ -2245,20 +2232,38 @@ const Admin = () => {
                                   updateParticipantStatus();
                                }}
                              >
-                                    <SelectTrigger className={`w-28 h-6 text-xs ${getStatusBackgroundColor(participant.admin_status || participantFilters[participant.id] || (participant.final_rank ? 'this week' : 'approve'))}`}>
-                                      <SelectValue />
-                               </SelectTrigger>
-                                      <SelectContent className="z-[9999] bg-popover border shadow-lg">
-                                         <SelectItem value="this week">This Week</SelectItem>
-                                           <SelectItem value="pre next week">Pre Next Week</SelectItem>
-                                          <SelectItem value="next week">Next Week</SelectItem>
-                                          <SelectItem value="next week on site">Next Week On Site</SelectItem>
-                                          <SelectItem value="past">Past</SelectItem>
-                                        <SelectItem value="pending">Pending</SelectItem>
-                                        <SelectItem value="approved">Approved</SelectItem>
-                                        <SelectItem value="rejected">Rejected</SelectItem>
-                                     </SelectContent>
-                             </Select>
+                                     <SelectTrigger className={`w-28 h-6 text-xs ${getStatusBackgroundColor(participant.admin_status || participantFilters[participant.id] || (participant.final_rank ? 'this week' : 'approve'))}`}>
+                                       <SelectValue />
+                                </SelectTrigger>
+                                       <SelectContent className="z-[9999] bg-popover border shadow-lg">
+                                          <SelectItem value="this week">This Week</SelectItem>
+                                            <SelectItem value="pre next week">Pre Next Week</SelectItem>
+                                           <SelectItem value="next week">Next Week</SelectItem>
+                                           <SelectItem value="next week on site">Next Week On Site</SelectItem>
+                                           <SelectItem value="past">Past</SelectItem>
+                                         <SelectItem value="pending">Pending</SelectItem>
+                                         <SelectItem value="approved">Approved</SelectItem>
+                                         <SelectItem value="rejected">Rejected</SelectItem>
+                                      </SelectContent>
+                              </Select>
+                              
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="p-0 h-6 w-6 hover:bg-accent"
+                                onClick={() => {
+                                  setSelectedStatusHistory({
+                                    participantId: participant.id,
+                                    participantName: `${participantProfile?.first_name || appData.first_name} ${participantProfile?.last_name || appData.last_name}`,
+                                    statusHistory: participant.status_history
+                                  });
+                                  setStatusHistoryModalOpen(true);
+                                }}
+                                title="View Status History"
+                              >
+                                <Info className="w-4 h-4" />
+                              </Button>
+                            </div>
                             
                             {/* Status change date with reviewer login - desktop */}
                             <div 
@@ -2366,9 +2371,9 @@ const Admin = () => {
                               <div className="flex-1"></div>
                               
                               {/* Status filter positioned at bottom */}
-                              <div className="absolute bottom-12 right-13 flex items-center gap-2">
+                              <div className="absolute bottom-12 right-0 flex items-center gap-1">
                                   <Select 
-                                    value={participant.admin_status || participantFilters[participant.id] || (participant.final_rank ? 'this week' : 'approve')} 
+                                    value={participant.admin_status || participantFilters[participant.id] || (participant.final_rank ? 'this week' : 'approve')}
                                     onValueChange={(value) => {
                                      if (value === 'reject') {
                                        // Open reject modal for this participant
@@ -2442,10 +2447,27 @@ const Admin = () => {
                                              <SelectItem value="pending">Pending</SelectItem>
                                              <SelectItem value="approved">Approved</SelectItem>
                                              <SelectItem value="rejected">Rejected</SelectItem>
-                                          </SelectContent>
-                                 </Select>
-                                
-                                {/* Rating with votes */}
+                                           </SelectContent>
+                                  </Select>
+                                  
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="p-0 h-7 w-7 hover:bg-accent"
+                                    onClick={() => {
+                                      setSelectedStatusHistory({
+                                        participantId: participant.id,
+                                        participantName: `${participantProfile?.first_name || appData.first_name} ${participantProfile?.last_name || appData.last_name}`,
+                                        statusHistory: participant.status_history
+                                      });
+                                      setStatusHistoryModalOpen(true);
+                                    }}
+                                    title="View Status History"
+                                  >
+                                    <Info className="w-4 h-4" />
+                                  </Button>
+                                 
+                                 {/* Rating with votes */}
                                 <div 
                                   className="text-xs text-muted-foreground -mt-[5px] cursor-pointer hover:text-foreground"
                                   onClick={() => {
@@ -2583,6 +2605,7 @@ const Admin = () => {
                               </div>
                               
                               {/* Status selector */}
+                              <div className="flex items-center gap-1">
                                <Select 
                                  value={participant.admin_status || 'pre next week'}
                                  onValueChange={async (newStatus) => {
@@ -2624,14 +2647,32 @@ const Admin = () => {
                                 <SelectTrigger className="w-40 h-8 text-xs">
                                   <SelectValue />
                                 </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="pre next week">Pre Next Week</SelectItem>
-                                  <SelectItem value="next week">Next Week</SelectItem>
-                                  <SelectItem value="next week on site">Next Week On Site</SelectItem>
-                                  <SelectItem value="this week">This Week</SelectItem>
-                                  <SelectItem value="past">Past</SelectItem>
-                                </SelectContent>
-                              </Select>
+                                 <SelectContent>
+                                   <SelectItem value="pre next week">Pre Next Week</SelectItem>
+                                   <SelectItem value="next week">Next Week</SelectItem>
+                                   <SelectItem value="next week on site">Next Week On Site</SelectItem>
+                                   <SelectItem value="this week">This Week</SelectItem>
+                                   <SelectItem value="past">Past</SelectItem>
+                                 </SelectContent>
+                               </Select>
+                               
+                               <Button
+                                 variant="ghost"
+                                 size="sm"
+                                 className="p-0 h-8 w-8 hover:bg-accent"
+                                 onClick={() => {
+                                   setSelectedStatusHistory({
+                                     participantId: participant.id,
+                                     participantName: `${participantProfile?.first_name || appData.first_name} ${participantProfile?.last_name || appData.last_name}`,
+                                     statusHistory: participant.status_history
+                                   });
+                                   setStatusHistoryModalOpen(true);
+                                 }}
+                                 title="View Status History"
+                               >
+                                 <Info className="w-4 h-4" />
+                               </Button>
+                              </div>
                             </div>
                             
                             <div className="text-sm text-muted-foreground mb-2">
@@ -2640,23 +2681,6 @@ const Admin = () => {
                             
                               <div className="text-sm text-muted-foreground">
                                 {participantProfile?.height_cm || appData.height_cm}cm, {participantProfile?.weight_kg || appData.weight_kg}kg
-                              </div>
-                              
-                              {/* Status History */}
-                              <div className="mt-2">
-                                <ParticipantStatusHistory
-                                  statusHistory={participant.status_history}
-                                  isExpanded={expandedStatusHistory.has(participant.id)}
-                                  onToggle={() => {
-                                    const newExpanded = new Set(expandedStatusHistory);
-                                    if (expandedStatusHistory.has(participant.id)) {
-                                      newExpanded.delete(participant.id);
-                                    } else {
-                                      newExpanded.add(participant.id);
-                                    }
-                                    setExpandedStatusHistory(newExpanded);
-                                  }}
-                                />
                               </div>
                             
                             <div className="flex-1"></div>
@@ -2821,42 +2845,6 @@ const Admin = () => {
                                           Week: {participant.week_interval}
                                         </Badge>
                                       </div>
-                                      
-                                      {/* Status History */}
-                                      <div className="mt-1">
-                                        <ParticipantStatusHistory
-                                          statusHistory={participant.status_history}
-                                          isExpanded={expandedStatusHistory.has(participant.participant_id || participant.id)}
-                                          onToggle={() => {
-                                            const id = participant.participant_id || participant.id;
-                                            const newExpanded = new Set(expandedStatusHistory);
-                                            if (expandedStatusHistory.has(id)) {
-                                              newExpanded.delete(id);
-                                            } else {
-                                              newExpanded.add(id);
-                                            }
-                                            setExpandedStatusHistory(newExpanded);
-                                          }}
-                                        />
-                                      </div>
-                                  </div>
-                                  
-                                  {/* Status History */}
-                                  <div className="mt-2">
-                                    <ParticipantStatusHistory
-                                      statusHistory={participant.status_history}
-                                      isExpanded={expandedStatusHistory.has(participant.participant_id || participant.id)}
-                                      onToggle={() => {
-                                        const id = participant.participant_id || participant.id;
-                                        const newExpanded = new Set(expandedStatusHistory);
-                                        if (expandedStatusHistory.has(id)) {
-                                          newExpanded.delete(id);
-                                        } else {
-                                          newExpanded.add(id);
-                                        }
-                                        setExpandedStatusHistory(newExpanded);
-                                      }}
-                                    />
                                   </div>
                                 </div>
                               </div>
@@ -6322,6 +6310,19 @@ const Admin = () => {
         onClose={() => setNextWeekVotersModalOpen(false)}
         participantName={selectedParticipantForNextWeekVoters}
       />
+
+      {/* Status History Modal */}
+      {selectedStatusHistory && (
+        <ParticipantStatusHistoryModal
+          isOpen={statusHistoryModalOpen}
+          onClose={() => {
+            setStatusHistoryModalOpen(false);
+            setSelectedStatusHistory(null);
+          }}
+          participantName={selectedStatusHistory.participantName}
+          statusHistory={selectedStatusHistory.statusHistory}
+        />
+      )}
     </>
   );
 };
