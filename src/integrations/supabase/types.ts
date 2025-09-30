@@ -905,6 +905,17 @@ export type Database = {
           new_applications_count: number
         }[]
       }
+      get_content_like_stats: {
+        Args: {
+          content_id_param: string
+          content_type_param: string
+          requesting_user_id?: string
+        }
+        Returns: {
+          total_likes: number
+          user_has_liked: boolean
+        }[]
+      }
       get_contest_applications_admin: {
         Args: { include_deleted?: boolean }
         Returns: {
@@ -1156,6 +1167,15 @@ export type Database = {
       get_participant_comments_count: {
         Args: { participant_id_param: string }
         Returns: number
+      }
+      get_participant_content_stats: {
+        Args: { profile_id_param: string; requesting_user_id?: string }
+        Returns: {
+          total_comments: number
+          total_likes: number
+          user_has_commented: boolean
+          user_has_liked: boolean
+        }[]
       }
       get_participant_likes_count: {
         Args: { participant_id_param: string }
