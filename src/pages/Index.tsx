@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { CardLayoutVariants } from "@/components/admin/CardLayoutVariants";
 
 import { ContestHeader } from "@/components/contest-header";
 import { ContestSection } from "@/components/contest-section";
@@ -103,63 +102,61 @@ const Index = () => {
             />
           </div>
           
-          {/* Show contest sections only for admins */}
-          {isAdmin ? (
-            <>
-              <NextWeekSection viewMode={viewMode} />
-              
-              <section className="max-w-6xl mx-auto pt-2 mb-1 sm:mb-3 mt-2 bg-background rounded-lg shadow-sm shadow-foreground/10">
-              <ContestSection
-                title="THIS WEEK"
-                subtitle={getWeekRange(0)}
-                description="Choose the winner"
-                isActive={true}
-                noWrapTitle
-                viewMode={viewMode}
-                weekOffset={0}
-              />
-              </section>
+          {/* ВРЕМЕННО ОТКЛЮЧЕНО: Не отображаем карточки на сайте */}
+          {/* 
+          <NextWeekSection viewMode={viewMode} />
+          
+          <section className="max-w-6xl mx-auto pt-2 mb-1 sm:mb-3 mt-2 bg-background rounded-lg shadow-sm shadow-foreground/10">
+          <ContestSection
+            title="THIS WEEK"
+            subtitle={getWeekRange(0)}
+            description="Choose the winner"
+            isActive={true}
+            noWrapTitle
+            viewMode={viewMode}
+            weekOffset={0}
+          />
+          </section>
 
-              <ContestSection
-                title="1 WEEK AGO"
-                titleSuffix="(Closed)"
-                subtitle={getWeekRange(-1)}
-                centerSubtitle
-                showWinner={true}
-                viewMode={viewMode}
-                weekOffset={1}
-              />
+          <ContestSection
+            title="1 WEEK AGO"
+            titleSuffix="(Closed)"
+            subtitle={getWeekRange(-1)}
+            centerSubtitle
+            showWinner={true}
+            viewMode={viewMode}
+            weekOffset={1}
+          />
 
-              <ContestSection
-                title="2 WEEKS AGO"
-                titleSuffix="(Closed)"
-                subtitle={getWeekRange(-2)}
-                centerSubtitle
-                showWinner={true}
-                viewMode={viewMode}
-                weekOffset={2}
-              />
+          <ContestSection
+            title="2 WEEKS AGO"
+            titleSuffix="(Closed)"
+            subtitle={getWeekRange(-2)}
+            centerSubtitle
+            showWinner={true}
+            viewMode={viewMode}
+            weekOffset={2}
+          />
 
-              <ContestSection
-                title="3 WEEKS AGO"
-                titleSuffix="(Closed)"
-                subtitle={getWeekRange(-3)}
-                centerSubtitle
-                showWinner={true}
-                viewMode={viewMode}
-                weekOffset={3}
-              />
-            </>
-          ) : (
-            <div className="max-w-6xl mx-auto px-6 py-8 text-center">
-              <h2 className="text-2xl font-bold text-muted-foreground mb-4">
-                Contest sections temporarily disabled
-              </h2>
-              <p className="text-muted-foreground">
-                Contest cards are not currently displayed on the site
-              </p>
-            </div>
-          )}
+          <ContestSection
+            title="3 WEEKS AGO"
+            titleSuffix="(Closed)"
+            subtitle={getWeekRange(-3)}
+            centerSubtitle
+            showWinner={true}
+            viewMode={viewMode}
+            weekOffset={3}
+          />
+          */}
+          
+          <div className="max-w-6xl mx-auto px-6 py-8 text-center">
+            <h2 className="text-2xl font-bold text-muted-foreground mb-4">
+              Contest sections temporarily disabled
+            </h2>
+            <p className="text-muted-foreground">
+              Contest cards are not currently displayed on the site
+            </p>
+          </div>
 
         </>
       )}
@@ -370,9 +367,6 @@ const Index = () => {
           </div>
         </div>
       )}
-
-      {/* Admin Layout Variants Preview */}
-      <CardLayoutVariants />
     </div>
   );
 };
