@@ -40,14 +40,16 @@ export const ParticipantStatusHistory: React.FC<ParticipantStatusHistoryProps> =
     
     // If it's an object, convert to array
     if (typeof history === 'object' && !Array.isArray(history)) {
-      return Object.entries(history).map(([status, data]: [string, any]) => ({
-        status,
-        changed_at: data.changed_at || data.timestamp || new Date().toISOString(),
-        contest_title: data.contest_title,
-        week_start_date: data.week_start_date,
-        week_end_date: data.week_end_date,
-        week_interval: data.week_interval
-      }));
+      return Object.entries(history)
+        .filter(([status, data]: [string, any]) => data !== null && data !== undefined) // Фильтруем null значения
+        .map(([status, data]: [string, any]) => ({
+          status,
+          changed_at: data.changed_at || data.timestamp || new Date().toISOString(),
+          contest_title: data.contest_title,
+          week_start_date: data.week_start_date,
+          week_end_date: data.week_end_date,
+          week_interval: data.week_interval
+        }));
     }
     
     // If it's already an array, return as is
