@@ -635,10 +635,7 @@ const Admin = () => {
                 )
               );
               
-              const isApprovedApplication = !participant.contest_id && 
-                // Убираем проверку application.status - используем только admin_status
-              
-              // Explicitly exclude past statuses 
+              // Убираем старую логику и используем только admin_status
               const isPastStatus = status === 'past';
               
               console.log(`Participant ${participant.id}: admin_status=${status}, showing=${isThisWeekStatus && !isPastStatus}`);
@@ -649,7 +646,6 @@ const Admin = () => {
             case 'next week':
               // Show participants with 'next week' or 'next week on site' status OR applications with 'next week' status
               // Exclude past and current week statuses
-              const isNextWeek = status === 'next week' || status === 'next week on site';
               const isNextWeek = status === 'next week' || status === 'next week on site';
               // Убираем проверку application.status - используем только admin_status
               const hasNextWeekApplication = false; // Не используем больше
