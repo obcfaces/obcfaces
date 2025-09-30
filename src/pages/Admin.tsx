@@ -413,6 +413,7 @@ const Admin = () => {
   const [nextWeekApplicationsCount, setNextWeekApplicationsCount] = useState<{ total: number; next_week: number }>({ total: 0, next_week: 0 });
   const [cardSectionStats, setCardSectionStats] = useState<{ newApplications: number; movedToNextWeek: number; new_applications_count: number; moved_to_next_week_count: number }>({ newApplications: 0, movedToNextWeek: 0, new_applications_count: 0, moved_to_next_week_count: 0 });
   const [showAllCards, setShowAllCards] = useState(false);
+  const [pendingPastChanges, setPendingPastChanges] = useState<{ [participantId: string]: { admin_status?: string; week_interval?: string } }>({});
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -3482,114 +3483,122 @@ const Admin = () => {
                            {/* Column 4: Voting stats and actions (20ch) */}
                            <div className="w-[20ch] flex-shrink-0 p-4 flex flex-col justify-between">
                              {/* Status and Week interval controls */}
-                             <div className="text-xs text-muted-foreground mb-2 space-y-2">
-                               {/* Status selector */}
-                               <div>
-                                 <div className="font-semibold mb-1">Status:</div>
+                              <div className="text-xs text-muted-foreground mb-2 space-y-2">
+                                {/* Status selector */}
+                                <div>
+                                  <div className="font-semibold mb-1">Status:</div>
+                                   <Select 
+                                     value={pendingPastChanges[participant.id]?.admin_status ?? participant.admin_status ?? 'past'}
+                                     onValueChange={(newStatus) => {
+                                       setPendingPastChanges(prev => ({
+                                         ...prev,
+                                         [participant.id]: {
+                                           ...prev[participant.id],
+                                           admin_status: newStatus
+                                         }
+                                       }));
+                                     }}
+                                  >
+                                     <SelectTrigger className={`w-full h-6 text-xs ${getStatusBackgroundColor(pendingPastChanges[participant.id]?.admin_status ?? participant.admin_status ?? 'past')}`}>
+                                       <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent className="z-[9999] bg-popover border shadow-lg">
+                                      <SelectItem value="this week">This Week</SelectItem>
+                                       <SelectItem value="pre next week">Pre Next Week</SelectItem>
+                                      <SelectItem value="next week">Next Week</SelectItem>
+                                      <SelectItem value="next week on site">Next Week On Site</SelectItem>
+                                       <SelectItem value="past">Past</SelectItem>
+                                      <SelectItem value="pending">Pending</SelectItem>
+                                      <SelectItem value="approved">Approved</SelectItem>
+                                      <SelectItem value="rejected">Rejected</SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                </div>
+                                
+                                {/* Week interval selector */}
+                                <div>
+                                  <div className="font-semibold mb-1">Week Interval:</div>
                                   <Select 
-                                    value={participant.admin_status || 'past'}
-                                    onValueChange={async (newStatus) => {
+                                    value={pendingPastChanges[participant.id]?.week_interval ?? participant.week_interval ?? ''}
+                                    onValueChange={(newInterval) => {
+                                      setPendingPastChanges(prev => ({
+                                        ...prev,
+                                        [participant.id]: {
+                                          ...prev[participant.id],
+                                          week_interval: newInterval
+                                        }
+                                      }));
+                                    }}
+                                  >
+                                    <SelectTrigger className="w-full h-6 text-xs">
+                                      <SelectValue placeholder="Select week" />
+                                    </SelectTrigger>
+                                    <SelectContent className="z-[9999] bg-popover border shadow-lg">
+                                      {getAvailableWeekIntervals().map((interval) => (
+                                        <SelectItem key={interval.value} value={interval.value}>
+                                          {interval.label}
+                                        </SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+                                </div>
+                                
+                                {/* Save button */}
+                                {pendingPastChanges[participant.id] && (
+                                  <Button
+                                    size="sm"
+                                    className="w-full h-7 text-xs"
+                                    onClick={async () => {
                                       try {
-                                        const weekInterval = getWeekIntervalForStatus(newStatus);
+                                        const changes = pendingPastChanges[participant.id];
                                         const { error } = await supabase
                                           .from('weekly_contest_participants')
                                           .update({ 
-                                            admin_status: newStatus,
-                                            week_interval: weekInterval
+                                            admin_status: changes.admin_status ?? participant.admin_status,
+                                            week_interval: changes.week_interval ?? participant.week_interval
                                           } as any)
                                           .eq('id', participant.id);
-                                       
-                                       if (error) {
-                                         console.error('Error updating participant status:', error);
-                                         toast({
-                                           title: "Error",
-                                           description: "Failed to update participant status",
-                                           variant: "destructive",
-                                         });
-                                       } else {
-                                         toast({
-                                           title: "Status Updated",
-                                           description: `Participant status changed to ${newStatus}`,
-                                         });
-                                         fetchWeeklyParticipants();
-                                       }
-                                     } catch (error) {
-                                       console.error('Error updating participant status:', error);
-                                     }
-                                   }}
-                                 >
-                                    <SelectTrigger className={`w-full h-6 text-xs ${getStatusBackgroundColor(participant.admin_status || 'past')}`}>
-                                      <SelectValue />
-                                   </SelectTrigger>
-                                   <SelectContent className="z-[9999] bg-popover border shadow-lg">
-                                     <SelectItem value="this week">This Week</SelectItem>
-                                      <SelectItem value="pre next week">Pre Next Week</SelectItem>
-                                     <SelectItem value="next week">Next Week</SelectItem>
-                                     <SelectItem value="next week on site">Next Week On Site</SelectItem>
-                                      <SelectItem value="past">Past</SelectItem>
-                                     <SelectItem value="pending">Pending</SelectItem>
-                                     <SelectItem value="approved">Approved</SelectItem>
-                                     <SelectItem value="rejected">Rejected</SelectItem>
-                                   </SelectContent>
-                                 </Select>
-                               </div>
+                                        
+                                        if (error) {
+                                          console.error('Error updating participant:', error);
+                                          toast({
+                                            title: "Error",
+                                            description: "Failed to update participant",
+                                            variant: "destructive",
+                                          });
+                                        } else {
+                                          toast({
+                                            title: "Saved",
+                                            description: "Status and interval updated successfully",
+                                          });
+                                          setPendingPastChanges(prev => {
+                                            const updated = { ...prev };
+                                            delete updated[participant.id];
+                                            return updated;
+                                          });
+                                          fetchWeeklyParticipants();
+                                        }
+                                      } catch (error) {
+                                        console.error('Error updating participant:', error);
+                                      }
+                                    }}
+                                  >
+                                    Сохранить
+                                  </Button>
+                                )}
                                
-                               {/* Week interval selector */}
-                               <div>
-                                 <div className="font-semibold mb-1">Week Interval:</div>
-                                 <Select 
-                                   value={participant.week_interval || ''}
-                                   onValueChange={async (newInterval) => {
-                                     try {
-                                       const { error } = await supabase
-                                         .from('weekly_contest_participants')
-                                         .update({ week_interval: newInterval } as any)
-                                         .eq('id', participant.id);
-                                       
-                                       if (error) {
-                                         console.error('Error updating participant week interval:', error);
-                                         toast({
-                                           title: "Error",
-                                           description: "Failed to update week interval",
-                                           variant: "destructive",
-                                         });
-                                       } else {
-                                         toast({
-                                           title: "Week Interval Updated",
-                                           description: `Week interval changed to ${newInterval}`,
-                                         });
-                                         fetchWeeklyParticipants();
-                                       }
-                                     } catch (error) {
-                                       console.error('Error updating participant week interval:', error);
-                                     }
-                                   }}
-                                 >
-                                   <SelectTrigger className="w-full h-6 text-xs">
-                                     <SelectValue placeholder="Select week" />
-                                   </SelectTrigger>
-                                   <SelectContent className="z-[9999] bg-popover border shadow-lg">
-                                     {getAvailableWeekIntervals().map((interval) => (
-                                       <SelectItem key={interval.value} value={interval.value}>
-                                         {interval.label}
-                                       </SelectItem>
-                                     ))}
-                                   </SelectContent>
-                                 </Select>
-                               </div>
-                               
-                               {/* Current week interval display */}
-                               <div className="bg-muted p-2 rounded text-center text-xs font-medium">
-                                  {participant.week_interval || getParticipantWeekInterval(participant)}
-                               </div>
-                               {participant.final_rank && (
-                                 <div className="mt-2 p-2 bg-primary/10 rounded text-center text-xs">
-                                   <div className="font-semibold text-primary">
-                                     {participant.final_rank === 1 ? '🏆 Winner' : `🏅 Rank #${participant.final_rank}`}
-                                   </div>
-                                 </div>
-                               )}
-                             </div>
+                                {/* Current week interval display */}
+                                <div className="bg-muted p-2 rounded text-center text-xs font-medium">
+                                   {participant.week_interval || getParticipantWeekInterval(participant)}
+                                </div>
+                                {participant.final_rank && (
+                                  <div className="mt-2 p-2 bg-primary/10 rounded text-center text-xs">
+                                    <div className="font-semibold text-primary">
+                                      {participant.final_rank === 1 ? '🏆 Winner' : `🏅 Rank #${participant.final_rank}`}
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
                             
                             {/* Voting stats */}
                             <div 
