@@ -3317,12 +3317,14 @@ const Admin = () => {
                                     
                                     // Group statuses by name to find previous occurrences
                                     const statusOccurrences = new Map<string, any[]>();
-                                    sortedEntries.forEach(([status, info]) => {
-                                      if (!statusOccurrences.has(status)) {
-                                        statusOccurrences.set(status, []);
-                                      }
-                                      statusOccurrences.get(status)!.push(info);
-                                    });
+                                     sortedEntries.forEach(([status, info]) => {
+                                       if (info && status) { // Добавляем проверку на null
+                                         if (!statusOccurrences.has(status)) {
+                                           statusOccurrences.set(status, []);
+                                         }
+                                         statusOccurrences.get(status)!.push(info);
+                                       } // Закрываем проверку на null
+                                     });
                                     
                                     return sortedEntries.map(([status, info]: [string, any], index: number) => {
                                       // Use correct interval mapping instead of wrong data from status_history
@@ -3350,17 +3352,17 @@ const Admin = () => {
                                         }).replace(',', '') : 
                                         '';
                                       
-                                      // Find previous occurrence of the same status
-                                       const occurrences = statusOccurrences.get(status) || [];
-                                       const currentOccurrenceIndex = occurrences.findIndex(occ => 
-                                         occ.changed_at === info.changed_at
-                                       );
+                                       // Find previous occurrence of the same status
+                                        const occurrences = statusOccurrences.get(status) || [];
+                                        const currentOccurrenceIndex = occurrences.findIndex(occ => 
+                                          occ && occ.changed_at === info.changed_at
+                                        );
                                        const previousOccurrence = occurrences[currentOccurrenceIndex + 1];
                                        
                                        // If no previous occurrence in status_history but this is current status,
                                        // use the participant creation date as previous occurrence
                                        let previousDate = '';
-                                       if (previousOccurrence?.changed_at) {
+                                       if (previousOccurrence && previousOccurrence.changed_at) {
                                          previousDate = new Date(previousOccurrence.changed_at).toLocaleDateString('ru-RU', {
                                            day: '2-digit',
                                            month: 'short'
@@ -3624,9 +3626,10 @@ const Admin = () => {
                               {participant.status_history && Object.keys(participant.status_history).length > 0 && (
                                 <div className="text-gray-600">
                                   {(() => {
-                                    const prevStatuses = Object.entries(participant.status_history)
-                                      .sort((a: any, b: any) => new Date(b[1]?.changed_at || 0).getTime() - new Date(a[1]?.changed_at || 0).getTime())
-                                      .filter(([status, info]: [string, any]) => status !== participant.admin_status);
+                                     const prevStatuses = Object.entries(participant.status_history)
+                                       .filter(([status, info]: [string, any]) => info && status) // Проверяем на null
+                                       .sort((a: any, b: any) => new Date(b[1]?.changed_at || 0).getTime() - new Date(a[1]?.changed_at || 0).getTime())
+                                       .filter(([status, info]: [string, any]) => status !== participant.admin_status);
                                     
                                      return prevStatuses.map(([status, info]: [string, any], index: number) => {
                                        // Use correct interval mapping for previous statuses too
