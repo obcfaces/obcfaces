@@ -2032,11 +2032,41 @@ const Admin = () => {
 
                           {/* Main info section */}
                           <div className="w-[50ch] flex-shrink-0 flex-1 min-w-0 p-4">
-                            <div className="flex items-center gap-2 mb-1">
-                              <span className="text-xs font-semibold whitespace-nowrap">
-                                {new Date().getFullYear() - (appData.birth_year || new Date().getFullYear() - (participantProfile?.age || 25))} {participantProfile?.first_name || appData.first_name} {participantProfile?.last_name || appData.last_name}
-                              </span>
-                            </div>
+                             <div className="flex items-center gap-2 mb-1">
+                               <span className="text-xs font-semibold whitespace-nowrap">
+                                 {new Date().getFullYear() - (appData.birth_year || new Date().getFullYear() - (participantProfile?.age || 25))} {participantProfile?.first_name || appData.first_name} {participantProfile?.last_name || appData.last_name}
+                               </span>
+                               {/* Статус участника с деталями */}
+                               {(() => {
+                                 const currentStatus = participant.admin_status || 'pending';
+                                 const statusInfo = participant.status_history && 
+                                   Object.entries(participant.status_history).find(([status]) => status === currentStatus);
+                                 
+                                 const statusDate = statusInfo && statusInfo[1] && (statusInfo[1] as any)?.changed_at ? 
+                                   new Date((statusInfo[1] as any).changed_at).toLocaleDateString('ru-RU', {
+                                     day: '2-digit', 
+                                     month: 'short'
+                                   }) : '';
+                                   
+                                 const weekInterval = statusInfo && statusInfo[1] && (statusInfo[1] as any)?.changed_at ? 
+                                   getStrictWeekInterval(new Date((statusInfo[1] as any).changed_at), 'PH').formatted : '';
+                                 
+                                 return (
+                                   <div className={`px-2 py-1 rounded text-xs font-medium ${
+                                     currentStatus === 'approved' ? 'bg-green-100 text-green-700' :
+                                     currentStatus === 'rejected' ? 'bg-red-100 text-red-700' :
+                                     currentStatus === 'this week' ? 'bg-blue-100 text-blue-700' :
+                                     currentStatus === 'next week' ? 'bg-purple-100 text-purple-700' :
+                                     currentStatus === 'past' ? 'bg-gray-100 text-gray-700' :
+                                     'bg-yellow-100 text-yellow-700'
+                                   }`}>
+                                     {currentStatus.toUpperCase()}
+                                     {statusDate && <div className="text-xs opacity-80">📅 {statusDate}</div>}
+                                     {weekInterval && <div className="text-xs opacity-80">📊 {weekInterval}</div>}
+                                   </div>
+                                 );
+                               })()}
+                             </div>
                             
                             <div 
                               className="text-xs text-muted-foreground mb-1"
@@ -3336,47 +3366,49 @@ const Admin = () => {
                                         }
                                       })();
                                      
-                                      const changedAt = info?.changed_at ? 
-                                        new Date(info.changed_at).toLocaleDateString('ru-RU', {
-                                          day: '2-digit',
-                                          month: 'short',
-                                          hour: '2-digit',
-                                          minute: '2-digit'
-                                        }).replace(',', '') : 
-                                        '';
-                                      
-                                       // Find previous occurrence of the same status
-                                        const occurrences = statusOccurrences.get(status) || [];
-                                        const currentOccurrenceIndex = occurrences.findIndex(occ => 
-                                          occ && occ.changed_at === info.changed_at
-                                        );
-                                       const previousOccurrence = occurrences[currentOccurrenceIndex + 1];
+                                       // Формат даты и времени когда статус был поставлен
+                                       const changedAt = info?.changed_at ? 
+                                         new Date(info.changed_at).toLocaleDateString('ru-RU', {
+                                           day: '2-digit',
+                                           month: 'short',
+                                           year: '2-digit',
+                                           hour: '2-digit',
+                                           minute: '2-digit'
+                                         }).replace(',', '') : 
+                                         '';
+
+                                       // Получить правильный интервал недели (понедельник-воскресенье)
+                                       const weekInterval = (() => {
+                                         if (info?.changed_at) {
+                                           const statusDate = new Date(info.changed_at);
+                                           return getStrictWeekInterval(statusDate, 'PH').formatted;
+                                         }
+                                         return interval; // Fallback на старый метод
+                                       })();
+
+                                       // Информация об админе который поставил статус
+                                       const changedBy = info?.changed_by || info?.reviewed_by || '';
+                                       const adminInfo = changedBy ? `👤${changedBy.slice(0, 8)}` : '';
+
+                                       // Краткая причина изменения
+                                       const changeReason = info?.change_reason ? 
+                                         ` (${info.change_reason.slice(0, 20)}${info.change_reason.length > 20 ? '...' : ''})` : '';
                                        
-                                       // If no previous occurrence in status_history but this is current status,
-                                       // use the participant creation date as previous occurrence
-                                       let previousDate = '';
-                                       if (previousOccurrence && previousOccurrence.changed_at) {
-                                         previousDate = new Date(previousOccurrence.changed_at).toLocaleDateString('ru-RU', {
-                                           day: '2-digit',
-                                           month: 'short'
-                                         });
-                                       } else if (status === participant.admin_status && currentOccurrenceIndex === 0) {
-                                         // This is the current status and first occurrence in history
-                                         // Use participant creation date as the original date when status was first set
-                                         previousDate = new Date(participant.created_at).toLocaleDateString('ru-RU', {
-                                           day: '2-digit',
-                                           month: 'short'
-                                         });
-                                       }
-                                      
-                                      const isCurrentStatus = status === participant.admin_status;
-                                      
-                                      return (
-                                        <div key={index} className={`p-1 rounded text-xs flex-shrink-0 ${
-                                          isCurrentStatus ? 'bg-yellow-100 border font-medium text-gray-700' : 'bg-gray-100 text-gray-600'
-                                        }`}>
-                                          {status} - {interval} {changedAt && `(${changedAt})`}{previousDate && ` (предыд: ${previousDate})`}
-                                        </div>
+                                       const isCurrentStatus = status === participant.admin_status;
+                                       
+                                       return (
+                                         <div key={index} className={`p-2 rounded-md text-xs border mb-1 ${
+                                           isCurrentStatus ? 'bg-blue-50 border-blue-200 text-blue-800 font-medium' : 
+                                           'bg-gray-50 border-gray-200 text-gray-600'
+                                         }`}>
+                                           <div className="font-medium">{status.toUpperCase()}</div>
+                                           <div className="text-xs opacity-80">
+                                             📅 {changedAt}<br/>
+                                             📊 {weekInterval}<br/>
+                                             {adminInfo && <span>{adminInfo}<br/></span>}
+                                             {changeReason && <span className="text-xs opacity-60">{changeReason}</span>}
+                                           </div>
+                                         </div>
                                       );
                                      });
                                    })()
