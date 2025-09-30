@@ -61,6 +61,13 @@ All colors MUST be HSL.
     --star-active: 45 100% 51%;
     --star-inactive: 0 0% 80%;
 
+    /* Status highlight colors (light shades) */
+    --status-pre-next-week: 210 100% 90%;
+    --status-next-week: 45 100% 85%;
+    --status-next-week-on-site: 25 100% 85%;
+    --status-this-week: 120 60% 85%;
+    --status-past: 0 70% 90%;
+
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
