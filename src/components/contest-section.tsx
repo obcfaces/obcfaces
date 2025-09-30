@@ -85,13 +85,87 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
     return () => subscription.unsubscribe();
   }, []);
 
-  const loadContestParticipants = async (weekOffset: number = 0) => {
+  const loadContestParticipants = async (sectionTitle: string) => {
     try {
-      // ВРЕМЕННО ОТКЛЮЧЕНО: Не загружаем участников на сайт
-      console.log(`Loading participants disabled for ${title} with week offset ${weekOffset}`);
+      console.log(`Loading participants for ${sectionTitle}`);
       
-      // Возвращаем пустой массив - участники не отображаются на сайте
-      return [];
+      // Determine status filter based on section title
+      let statusFilter = '';
+      let weekOffset = 0;
+      
+      if (sectionTitle === "NEXT WEEK") {
+        // Show participants with "next week" or "next week on site" status
+        statusFilter = 'next';
+        weekOffset = 0; // Use current week data but filter by status
+      } else if (sectionTitle === "THIS WEEK") {
+        // Show participants with "this week" status
+        statusFilter = 'this';
+        weekOffset = 0;
+      } else if (sectionTitle === "1 WEEK AGO") {
+        // Show participants with "past" status from previous weeks
+        statusFilter = 'past';
+        weekOffset = 0;
+      } else if (sectionTitle === "2 WEEKS AGO") {
+        statusFilter = 'past';
+        weekOffset = 0;
+      } else if (sectionTitle === "3 WEEKS AGO") {
+        statusFilter = 'past';
+        weekOffset = 0;
+      }
+
+      // Get participants directly from weekly_contest_participants with proper admin_status filtering
+      let query = supabase
+        .from('weekly_contest_participants')
+        .select(`
+          id,
+          user_id,
+          admin_status,
+          application_data,
+          average_rating,
+          total_votes,
+          final_rank,
+          is_active
+        `)
+        .eq('is_active', true);
+      
+      // Filter by admin_status based on section
+      if (statusFilter === 'next') {
+        query = query.in('admin_status', ['next week', 'next week on site']);
+      } else if (statusFilter === 'this') {
+        query = query.eq('admin_status', 'this week');
+      } else if (statusFilter === 'past') {
+        query = query.or('admin_status.eq.past,admin_status.like.*past week*');
+      }
+
+      const { data: participants, error } = await query;
+
+      if (error) {
+        console.error('Error loading weekly contest participants:', error);
+        return [];
+      }
+
+      // Transform the data to match expected format
+      const filteredParticipants = (participants || []).map((p: any) => ({
+        id: p.id,
+        user_id: p.user_id,
+        first_name: p.application_data?.first_name || '',
+        last_name: p.application_data?.last_name || '',
+        age: p.application_data?.birth_year ? 
+          new Date().getFullYear() - parseInt(p.application_data.birth_year) : null,
+        city: p.application_data?.city || '',
+        country: p.application_data?.country === 'PH' ? 'Philippines' : p.application_data?.country || '',
+        photo1_url: p.application_data?.photo1_url || '',
+        photo2_url: p.application_data?.photo2_url || '',
+        height_cm: p.application_data?.height_cm || null,
+        weight_kg: p.application_data?.weight_kg || null,
+        final_rank: p.final_rank,
+        contest_status: 'active',
+        week_start_date: '2025-09-29',
+        week_end_date: '2025-10-05'
+      }));
+
+      console.log(`Loaded ${filteredParticipants?.length || 0} participants for ${sectionTitle} with status ${statusFilter}`);
+      return filteredParticipants || [];
     } catch (err) {
       console.error('Error loading weekly contest participants:', err);
       return [];
@@ -102,15 +176,9 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
   useEffect(() => {
     const loadParticipants = async () => {
       setIsLoading(true);
-      let weekOffset = 0;
-      if (title === "THIS WEEK") weekOffset = 0;  // Current week - participants with "this week" status
-      else if (title === "NEXT WEEK") weekOffset = 1;  // Next week - participants with "next" status
-      else if (title === "1 WEEK AGO") weekOffset = -1;  // 15/09 - 21/09/2025 range  
-      else if (title === "2 WEEKS AGO") weekOffset = -2;  // 08/09 - 14/09/2025 range
-      else if (title === "3 WEEKS AGO") weekOffset = -3;
       
       if (["THIS WEEK", "NEXT WEEK", "1 WEEK AGO", "2 WEEKS AGO", "3 WEEKS AGO"].includes(title)) {
-        const participants = await loadContestParticipants(weekOffset);
+        const participants = await loadContestParticipants(title);
         setRealContestants(participants);
         
         // Load contestants immediately after getting real data
