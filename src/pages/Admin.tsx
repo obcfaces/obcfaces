@@ -3586,10 +3586,6 @@ const Admin = () => {
                                   Сохранить
                                 </Button>
                                
-                                {/* Current week interval display */}
-                                <div className="bg-muted p-2 rounded text-center text-xs font-medium">
-                                   {participant.week_interval || getParticipantWeekInterval(participant)}
-                                </div>
                                 {participant.final_rank && (
                                   <div className="mt-2 p-2 bg-primary/10 rounded text-center text-xs">
                                     <div className="font-semibold text-primary">
