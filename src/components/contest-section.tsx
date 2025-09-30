@@ -289,32 +289,40 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
       participantsData: participantsData.slice(0, 2) // Log first 2 for debugging
     });
 
-    // For "THIS WEEK" section, always create and show example card
+    // For "THIS WEEK" section, show only admin participants if user is admin
     if (title === "THIS WEEK") {
-      console.log('Creating test card for THIS WEEK');
-      const testCard = {
-        rank: 0, // Use 0 to distinguish from real ranks
-        name: "Example Card", 
-        profileId: "00000000-0000-0000-0000-000000000000", // Use null UUID for example
-        country: "Philippines",
-        city: "Manila",
-        age: 25,
-        weight: 55,
-        height: 165,
-        rating: 4.8,
-        averageRating: 4.8,
-        totalVotes: 124,
-        faceImage: testContestantFace,
-        fullBodyImage: testContestantFull,
-        additionalPhotos: [],
-        isVoted: true,
-        isWinner: false,
-        prize: undefined,
-        isRealContestant: false,
-        isExample: true // Special flag for example card
-      };
-
-      // If there are real contestants, process them too
+      console.log('Processing THIS WEEK section');
+      
+      // If user is admin and has admin participants, show only those
+      if (isAdmin && adminParticipants.length > 0) {
+        console.log('Admin with admin participants:', adminParticipants.length);
+        const adminCards = adminParticipants.map((participant, index) => ({
+          rank: index + 1,
+          name: `${participant.profiles?.first_name || ''} ${participant.profiles?.last_name || ''}`.trim(),
+          profileId: participant.id,
+          country: participant.profiles?.country || 'Unknown',
+          city: participant.profiles?.city || 'Unknown',
+          age: participant.profiles?.age || 0,
+          weight: participant.profiles?.weight_kg || 0,
+          height: participant.profiles?.height_cm || 0,
+          rating: participant.average_rating || 0,
+          averageRating: participant.average_rating || 0,
+          totalVotes: participant.total_votes || 0,
+          faceImage: participant.profiles?.photo_1_url || testContestantFace,
+          fullBodyImage: participant.profiles?.photo_2_url || testContestantFull,
+          additionalPhotos: [],
+          isVoted: false,
+          isWinner: false,
+          prize: undefined,
+          isRealContestant: true,
+          isAdminCard: true // Special flag for admin cards
+        }));
+        
+        console.log('Returning admin cards:', adminCards.length);
+        return adminCards;
+      } 
+      
+      // If there are real contestants, process them
       if (actualParticipants && actualParticipants.length > 0) {
         console.log(`Using real contestants for ${title}:`, actualParticipants.length);
         const contestantsWithRatings = await Promise.all(
@@ -377,7 +385,7 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
           return (b.totalVotes || 0) - (a.totalVotes || 0);
         });
 
-        // Add test card at the beginning, then real contestants
+        // Assign ranks based on rating order
         const realContestantsWithRanks = sortedContestants.map((contestant, index) => {
           const newRank = contestant.rating > 0 ? index + 1 : 0;
           return {
@@ -388,40 +396,11 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
           };
         });
         
-        return [testCard, ...realContestantsWithRanks];
-        } else {
-          // Show admin participants for admins, otherwise only example card
-          console.log('No real contestants - checking admin status:', { isAdmin, adminParticipantsLength: adminParticipants.length });
-          if (isAdmin && adminParticipants.length > 0) {
-          console.log('Showing admin participants for THIS WEEK');
-          const adminCards = adminParticipants.map((participant, index) => ({
-            rank: index + 1,
-            name: `${participant.profiles?.first_name || ''} ${participant.profiles?.last_name || ''}`.trim(),
-            profileId: participant.id,
-            country: participant.profiles?.country || 'Unknown',
-            city: participant.profiles?.city || 'Unknown',
-            age: participant.profiles?.age || 0,
-            weight: participant.profiles?.weight_kg || 0,
-            height: participant.profiles?.height_cm || 0,
-            rating: participant.average_rating || 0,
-            averageRating: participant.average_rating || 0,
-            totalVotes: participant.total_votes || 0,
-            faceImage: participant.profiles?.photo_1_url || testContestantFace,
-            fullBodyImage: participant.profiles?.photo_2_url || testContestantFull,
-            additionalPhotos: [],
-            isVoted: false,
-            isWinner: false,
-            prize: undefined,
-            isRealContestant: true,
-            isAdminCard: true // Special flag for admin cards
-          }));
-          
-          return [testCard, ...adminCards];
-        } else {
-          // Only show example card if no real contestants and not admin
-          console.log('Returning only test card for THIS WEEK');
-          return [testCard];
-        }
+        return realContestantsWithRanks;
+      } else {
+        // No participants to show
+        console.log('No participants found for THIS WEEK');
+        return [];
       }
     }
     
@@ -556,7 +535,7 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
         <div className="px-0 sm:px-6">
           {/* Regular contestants only */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-1 sm:gap-3 max-w-full overflow-hidden">
-            {contestants.filter(c => !c.isExample).map((contestant, index) => (
+            {contestants.map((contestant, index) => (
               <ContestantCard
                 key={`${contestant.profileId || contestant.name}-${index}`}
                 {...contestant}
