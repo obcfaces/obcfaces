@@ -182,18 +182,6 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
     return () => subscription.unsubscribe();
   }, []);
 
-  const loadContestParticipants = async (weekOffset: number = 0) => {
-    try {
-      // ВРЕМЕННО ОТКЛЮЧЕНО: Не загружаем участников на сайт
-      console.log(`Loading participants disabled for ${title} with week offset ${weekOffset}`);
-      
-      // Возвращаем пустой массив - участники не отображаются на сайте
-      return [];
-    } catch (err) {
-      console.error('Error loading weekly contest participants:', err);
-      return [];
-    }
-  };
 
   // Load participants based on title
   useEffect(() => {
@@ -201,34 +189,11 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
     const loadParticipants = async () => {
       console.log('Starting loadParticipants for:', title);
       setIsLoading(true);
-      let weekOffset = 0;
-      if (title === "THIS WEEK") weekOffset = 0;  // Current week - participants with "this week" status
-      else if (title === "NEXT WEEK") weekOffset = 1;  // Next week - participants with "next" status
-      else if (title === "1 WEEK AGO") weekOffset = -1;  // 15/09 - 21/09/2025 range  
-      else if (title === "2 WEEKS AGO") weekOffset = -2;  // 08/09 - 14/09/2025 range
-      else if (title === "3 WEEKS AGO") weekOffset = -3;
       
-      if (["THIS WEEK", "NEXT WEEK", "1 WEEK AGO", "2 WEEKS AGO", "3 WEEKS AGO"].includes(title)) {
-        const participants = await loadContestParticipants(weekOffset);
-        setRealContestants(participants);
-        
-        // For THIS WEEK section, also load admin participants if user is admin
-        if (title === "THIS WEEK" && user && isAdmin) {
-          console.log('Loading admin participants for THIS WEEK section');
-          const adminData = await loadAdminParticipants();
-          console.log('Loaded admin participants:', adminData.length);
-          setAdminParticipants(adminData);
-        }
-        
-        
-        // Load contestants immediately after getting real data and admin data
-        const contestantsData = await getContestantsSync(participants);
-        setContestants(contestantsData || []);
-      } else {
-        // For other weeks, load fallback data immediately
-        const contestantsData = await getContestantsSync([]);
-        setContestants(contestantsData || []);
-      }
+      // For THIS WEEK section, admin participants are already loaded in the first useEffect
+      // Just load contestants based on existing data
+      const contestantsData = await getContestantsSync([]);
+      setContestants(contestantsData || []);
       setIsLoading(false);
     };
 
