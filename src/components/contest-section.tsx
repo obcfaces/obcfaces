@@ -252,6 +252,62 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
     }
   };
 
+  // Load admin participants for 3 WEEKS AGO section (participants with admin_status = 'past' and specific week interval)
+  const loadThreeWeeksAgoAdminParticipants = async () => {
+    try {
+      console.log('Loading 3 weeks ago admin participants...');
+      
+      // Get participants with admin_status = 'past' and week interval '15/09-21/09/25'
+      const { data: participants, error } = await supabase
+        .from('weekly_contest_participants')
+        .select('*')
+        .eq('admin_status', 'past')
+        .eq('is_active', true)
+        .like('week_interval', '%15/09-21/09/25%')
+        .limit(10);
+
+      if (error) {
+        console.error('Error loading 3 weeks ago admin participants:', error);
+        return [];
+      }
+
+      console.log('Raw 3 weeks ago participants data:', participants?.length, participants);
+
+      if (!participants || participants.length === 0) {
+        return [];
+      }
+
+      // Get user IDs and fetch their profiles separately
+      const userIds = participants.map(p => p.user_id);
+      const { data: profiles, error: profilesError } = await supabase
+        .from('profiles')
+        .select('*')
+        .in('id', userIds);
+
+      if (profilesError) {
+        console.error('Error loading profiles for 3 weeks ago:', profilesError);
+        return [];
+      }
+
+      console.log('3 weeks ago profiles data:', profiles?.length, profiles);
+
+      // Combine participants with their profiles
+      const combined = participants.map(participant => {
+        const profile = profiles?.find(p => p.id === participant.user_id);
+        return {
+          ...participant,
+          profiles: profile
+        };
+      });
+
+      console.log('Combined 3 weeks ago participants data:', combined?.length, combined);
+      return combined || [];
+    } catch (error) {
+      console.error('Error loading 3 weeks ago admin participants:', error);
+      return [];
+    }
+  };
+
   // Get user session once for the entire section and listen for changes
   useEffect(() => {
     console.log('ContestSection useEffect triggered for:', title);
@@ -284,6 +340,11 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
             const twoWeeksAgoData = await loadTwoWeeksAgoAdminParticipants();
             console.log('Loaded 2 weeks ago participants:', twoWeeksAgoData.length);
             setAdminParticipants(twoWeeksAgoData);
+          } else if (title === "3 WEEKS AGO") {
+            console.log('Loading 3 weeks ago admin participants for 3 WEEKS AGO section');
+            const threeWeeksAgoData = await loadThreeWeeksAgoAdminParticipants();
+            console.log('Loaded 3 weeks ago participants:', threeWeeksAgoData.length);
+            setAdminParticipants(threeWeeksAgoData);
           }
         }
       }
@@ -565,6 +626,44 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
       } else {
         // No participants to show for non-admin users
         console.log('No participants found for 2 WEEKS AGO (non-admin)');
+        return [];
+      }
+    }
+
+    // For "3 WEEKS AGO" section, show admin participants with "past" status for specific week interval
+    if (title === "3 WEEKS AGO") {
+      console.log('Processing 3 WEEKS AGO section');
+      
+      // If user is admin and has admin participants, show only those
+      if (isAdmin && adminParticipants.length > 0) {
+        console.log('Admin with 3 weeks ago participants:', adminParticipants.length);
+        const threeWeeksAgoCards = adminParticipants.map((participant, index) => ({
+          rank: index + 1,
+          name: `${participant.profiles?.first_name || ''} ${participant.profiles?.last_name || ''}`.trim(),
+          profileId: participant.id,
+          country: participant.profiles?.country || 'Unknown',
+          city: participant.profiles?.city || 'Unknown',
+          age: participant.profiles?.age || 0,
+          weight: participant.profiles?.weight_kg || 0,
+          height: participant.profiles?.height_cm || 0,
+          rating: participant.average_rating || 0,
+          averageRating: participant.average_rating || 0,
+          totalVotes: participant.total_votes || 0,
+          faceImage: participant.profiles?.photo_1_url || testContestantFace,
+          fullBodyImage: participant.profiles?.photo_2_url || testContestantFull,
+          additionalPhotos: [],
+          isVoted: true, // 3 weeks ago participants are considered as voted
+          isWinner: showWinner && participant.final_rank === 1, // Show winner based on final_rank
+          prize: showWinner && participant.final_rank === 1 ? "+ 5000 PHP" : undefined,
+          isRealContestant: true,
+          isAdminCard: true // Special flag for admin cards
+        }));
+        
+        console.log('Returning 3 weeks ago cards:', threeWeeksAgoCards.length);
+        return threeWeeksAgoCards;
+      } else {
+        // No participants to show for non-admin users
+        console.log('No participants found for 3 WEEKS AGO (non-admin)');
         return [];
       }
     }
