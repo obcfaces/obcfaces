@@ -186,11 +186,14 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
         
         // For THIS WEEK section, also load admin participants if user is admin
         if (title === "THIS WEEK" && user && isAdmin) {
+          console.log('Loading admin participants for THIS WEEK section');
           const adminData = await loadAdminParticipants();
+          console.log('Loaded admin participants:', adminData.length);
           setAdminParticipants(adminData);
         }
         
-        // Load contestants immediately after getting real data
+        
+        // Load contestants immediately after getting real data and admin data
         const contestantsData = await getContestantsSync(participants);
         setContestants(contestantsData || []);
       } else {
@@ -237,7 +240,7 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
         supabase.removeChannel(channel);
       };
     }
-  }, [title, user, isAdmin]);
+  }, [title, user, isAdmin, adminParticipants.length]);
 
   const handleRate = async (contestantId: number, rating: number) => {
     setVotes(prev => ({ ...prev, [contestantId]: rating }));
@@ -253,6 +256,8 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
       participantsDataLength: participantsData.length, 
       realContestantsLength: realContestants.length,
       actualParticipantsLength: actualParticipants.length,
+      isAdmin,
+      adminParticipantsLength: adminParticipants.length,
       participantsData: participantsData.slice(0, 2) // Log first 2 for debugging
     });
 
@@ -356,9 +361,10 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
         });
         
         return [testCard, ...realContestantsWithRanks];
-      } else {
-        // Show admin participants for admins, otherwise only example card
-        if (isAdmin && adminParticipants.length > 0) {
+        } else {
+          // Show admin participants for admins, otherwise only example card
+          console.log('No real contestants - checking admin status:', { isAdmin, adminParticipantsLength: adminParticipants.length });
+          if (isAdmin && adminParticipants.length > 0) {
           console.log('Showing admin participants for THIS WEEK');
           const adminCards = adminParticipants.map((participant, index) => ({
             rank: index + 1,
