@@ -1800,7 +1800,7 @@ const Admin = () => {
           <Tabs defaultValue="applications" className="space-y-6">
             {/* Mobile layout: Single row with all tabs */}
             <div className="md:hidden">
-              <TabsList className="grid grid-cols-6 w-full">
+              <TabsList className="grid grid-cols-7 w-full">
                 <TabsTrigger value="applications" className="text-xs">
                   Card
                 </TabsTrigger>
@@ -1819,31 +1819,34 @@ const Admin = () => {
                 <TabsTrigger value="registrations" className="text-xs">
                   Reg
                 </TabsTrigger>
+                <TabsTrigger value="winnercontent" className="text-xs">
+                  Win
+                </TabsTrigger>
               </TabsList>
             </div>
 
             {/* Desktop layout - single row */}
             <TabsList className="hidden md:flex">
               <TabsTrigger value="applications">
-                Contest Applications
+                Card
               </TabsTrigger>
               <TabsTrigger value="prenextweek">
-                Pre Next Week
+                Pre
               </TabsTrigger>
               <TabsTrigger value="nextweek">
-                Next Week
+                Next
               </TabsTrigger>
               <TabsTrigger value="weekly">
-                Weekly Contests
+                This
               </TabsTrigger>
               <TabsTrigger value="pastweek">
-                Past Week
+                Past
               </TabsTrigger>
               <TabsTrigger value="registrations">
-                Регистрации
+                Reg
               </TabsTrigger>
               <TabsTrigger value="winnercontent">
-                Контент победителей
+                Win
               </TabsTrigger>
             </TabsList>
 
