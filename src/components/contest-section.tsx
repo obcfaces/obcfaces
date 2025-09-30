@@ -2,12 +2,6 @@ import { useState, useEffect } from "react";
 import { ContestantCard } from "@/components/contest-card";
 import { supabase } from "@/integrations/supabase/client";
 
-import contestant1Face from "@/assets/contestant-1-face.jpg";
-import contestant1Full from "@/assets/contestant-1-full.jpg";
-import contestant2Face from "@/assets/contestant-2-face.jpg";
-import contestant2Full from "@/assets/contestant-2-full.jpg";
-import contestant3Face from "@/assets/contestant-3-face.jpg";
-import contestant3Full from "@/assets/contestant-3-full.jpg";
 import testContestantFace from "/lovable-uploads/0db6ac53-7148-4ae3-9622-f3af6675c364.png";
 import testContestantFull from "/lovable-uploads/eecb29a9-eb9b-47c0-acad-9666f450ccc7.png";
 
@@ -21,42 +15,25 @@ interface ContestSectionProps {
   titleSuffix?: string;
   noWrapTitle?: boolean;
   viewMode?: 'compact' | 'full';
-  filters?: React.ReactNode; // Add filters prop
-  weekOffset?: number; // Add weekOffset prop
+  filters?: React.ReactNode;
+  weekOffset?: number;
 }
 
-// Helper function to get week range dates (Monday-Sunday) - правильные для 2025
-const getWeekRange = (weeksOffset: number = 0) => {
-  // Правильные интервалы для 2025 года
-  switch (weeksOffset) {
-    case 0:
-      return "29 Sep - 05 Oct 2025";
-    case -1:
-      return "22 Sep - 28 Sep 2025";
-    case -2:
-      return "15 Sep - 21 Sep 2025";
-    case -3:
-      return "08 Sep - 14 Sep 2025";
-    case -4:
-      return "01 Sep - 07 Sep 2025";
-    case 1:
-      return "06 Oct - 12 Oct 2025";
-    case 2:
-      return "13 Oct - 19 Oct 2025";
-    default:
-      return "29 Sep - 05 Oct 2025";
-  }
-};
-
-export function ContestSection({ title, subtitle, description, isActive, showWinner, centerSubtitle, titleSuffix, noWrapTitle, viewMode: controlledViewMode, filters, weekOffset = 0 }: ContestSectionProps) {
+export function ContestSection({ 
+  title, 
+  subtitle, 
+  description, 
+  isActive, 
+  showWinner, 
+  centerSubtitle, 
+  titleSuffix, 
+  noWrapTitle, 
+  viewMode: controlledViewMode, 
+  filters, 
+  weekOffset = 0 
+}: ContestSectionProps) {
   const [localViewMode] = useState<'compact' | 'full'>('compact');
   const viewMode = controlledViewMode ?? localViewMode;
-  const [ratings, setRatings] = useState<Record<number, number>>({
-    1: 4.8, 2: 4.5, 3: 4.2, 4: 3.9, 5: 3.5, 6: 3.1, 7: 3.7, 8: 3.4, 9: 3.2, 10: 3.0
-  });
-
-  const [votes, setVotes] = useState<Record<number, number>>({});
-  const [realContestants, setRealContestants] = useState<any[]>([]);
   const [contestants, setContestants] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
@@ -70,11 +47,10 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
     
     getCurrentUser();
     
-    // Listen for auth state changes (login/logout) but avoid setting same user object
+    // Listen for auth state changes (login/logout)
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       const newUser = session?.user ?? null;
       setUser(prevUser => {
-        // Only update if user actually changed to prevent unnecessary re-renders
         if (prevUser?.id !== newUser?.id) {
           return newUser;
         }
@@ -91,26 +67,13 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
       
       // Determine status filter based on section title
       let statusFilter = '';
-      let weekOffset = 0;
       
       if (sectionTitle === "NEXT WEEK") {
-        // Show participants with "next week" or "next week on site" status
         statusFilter = 'next';
-        weekOffset = 0; // Use current week data but filter by status
       } else if (sectionTitle === "THIS WEEK") {
-        // Show participants with "this week" status
         statusFilter = 'this';
-        weekOffset = 0;
-      } else if (sectionTitle === "1 WEEK AGO") {
-        // Show participants with "past" status from previous weeks
+      } else if (sectionTitle.includes("AGO")) {
         statusFilter = 'past';
-        weekOffset = 0;
-      } else if (sectionTitle === "2 WEEKS AGO") {
-        statusFilter = 'past';
-        weekOffset = 0;
-      } else if (sectionTitle === "3 WEEKS AGO") {
-        statusFilter = 'past';
-        weekOffset = 0;
       }
 
       // Get participants directly from weekly_contest_participants with proper admin_status filtering
@@ -159,6 +122,8 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
         height_cm: p.application_data?.height_cm || null,
         weight_kg: p.application_data?.weight_kg || null,
         final_rank: p.final_rank,
+        average_rating: p.average_rating || 0,
+        total_votes: p.total_votes || 0,
         contest_status: 'active',
         week_start_date: '2025-09-29',
         week_end_date: '2025-10-05'
@@ -179,16 +144,36 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
       
       if (["THIS WEEK", "NEXT WEEK", "1 WEEK AGO", "2 WEEKS AGO", "3 WEEKS AGO"].includes(title)) {
         const participants = await loadContestParticipants(title);
-        setRealContestants(participants);
         
-        // Load contestants immediately after getting real data
-        const contestantsData = await getContestantsSync(participants);
-        setContestants(contestantsData || []);
-      } else {
-        // For other weeks, load fallback data immediately
-        const contestantsData = await getContestantsSync([]);
-        setContestants(contestantsData || []);
+        // Transform participants to contestant format
+        const transformedContestants = participants.map((participant: any, index: number) => ({
+          rank: index + 1,
+          name: `${participant.first_name || ''} ${participant.last_name || ''}`.trim(),
+          profileId: participant.user_id || participant.id,
+          country: participant.country || 'Philippines',
+          city: participant.city || '',
+          age: participant.age || 25,
+          weight: participant.weight_kg || 55,
+          height: participant.height_cm || 160,
+          faceImage: participant.photo1_url || testContestantFace,
+          fullBodyImage: participant.photo2_url || testContestantFull,
+          additionalPhotos: [],
+          isVoted: false,
+          rating: 0,
+          isThisWeek: title === "THIS WEEK",
+          isNextWeek: title === "NEXT WEEK",
+          isPastWeek: title.includes("AGO"),
+          isWinner: participant.final_rank === 1,
+          averageRating: participant.average_rating || 0,
+          totalVotes: participant.total_votes || 0,
+          isExample: false,
+          prize: participant.final_rank === 1 && showWinner ? "+ 5000 PHP" : undefined,
+          isRealContestant: true
+        }));
+
+        setContestants(transformedContestants);
       }
+      
       setIsLoading(false);
     };
 
@@ -210,301 +195,97 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
             loadParticipants();
           }
         )
-        .on(
-          'postgres_changes',
-          {
-            event: '*',
-            schema: 'public',
-            table: 'contest_applications'
-          },
-          (payload) => {
-            console.log('Contest applications changed:', payload);
-            loadParticipants();
-          }
-        )
         .subscribe();
 
       return () => {
         supabase.removeChannel(channel);
       };
     }
-  }, [title]);
+  }, [title, showWinner]);
 
   const handleRate = async (contestantId: number, rating: number) => {
-    setVotes(prev => ({ ...prev, [contestantId]: rating }));
-    // Let real-time subscription handle the refresh automatically
+    // Handle rating logic here if needed
+    console.log(`Rating contestant ${contestantId} with ${rating} stars`);
   };
-
-  // Define contestants based on week type (synchronous version)
-  const getContestantsSync = async (participantsData: any[] = realContestants) => {
-    // Use the actual participants data passed to the function
-    const actualParticipants = participantsData.length > 0 ? participantsData : realContestants;
-    
-    console.log(`getContestantsSync called for ${title}:`, { 
-      participantsDataLength: participantsData.length, 
-      realContestantsLength: realContestants.length,
-      actualParticipantsLength: actualParticipants.length,
-      participantsData: participantsData.slice(0, 2) // Log first 2 for debugging
-    });
-
-    // For "THIS WEEK" section, always create and show example card
-    if (title === "THIS WEEK") {
-      console.log('Creating test card for THIS WEEK');
-      const testCard = {
-        rank: 0, // Use 0 to distinguish from real ranks
-        name: "Example Card", 
-        profileId: "00000000-0000-0000-0000-000000000000", // Use null UUID for example
-        country: "Philippines",
-        city: "Manila",
-        age: 25,
-        weight: 55,
-        height: 165,
-        rating: 4.8,
-        averageRating: 4.8,
-        totalVotes: 124,
-        faceImage: testContestantFace,
-        fullBodyImage: testContestantFull,
-        additionalPhotos: [],
-        isVoted: true,
-        isWinner: false,
-        prize: undefined,
-        isRealContestant: false,
-        isExample: true // Special flag for example card
-      };
-
-      // If there are real contestants, process them too
-      if (actualParticipants && actualParticipants.length > 0) {
-        console.log(`Using real contestants for ${title}:`, actualParticipants.length);
-        const contestantsWithRatings = await Promise.all(
-          actualParticipants.map(async (contestant) => {
-            // Validate contestant data structure
-            if (!contestant || typeof contestant !== 'object') {
-              console.warn('Invalid contestant data:', contestant);
-              return null;
-            }
-              
-              // Get rating stats using secure function
-              const { data: ratingStats } = await supabase
-                .rpc('get_public_participant_rating_stats', { target_participant_id: contestant.participant_id });
-              
-              let averageRating = 0;
-              let totalVotes = 0;
-              
-              if (ratingStats && ratingStats.length > 0) {
-                averageRating = ratingStats[0].average_rating;
-                totalVotes = ratingStats[0].total_votes;
-             }
-            
-            const contestantData = {
-              rank: contestant.final_rank || 0,
-              name: `${contestant.first_name || 'Unknown'} ${contestant.last_name || ''}`.trim(),
-              profileId: contestant.participant_id, // Use participant_id for rating queries
-              country: contestant.country || 'Unknown',
-              city: contestant.city || 'Unknown',
-              age: contestant.age || 0,
-              weight: contestant.weight_kg || 0,
-              height: contestant.height_cm || 0,
-              rating: averageRating,
-              averageRating: averageRating, // Use secure rating from function
-              totalVotes: totalVotes, // Use secure vote count from function
-              faceImage: contestant.photo_1_url || contestant1Face,
-              fullBodyImage: contestant.photo_2_url || contestant1Full,
-              additionalPhotos: [],
-              isVoted: showWinner ? true : averageRating > 0,
-              isWinner: false, // Will be set after sorting
-              prize: undefined, // Will be set after sorting
-              isRealContestant: true // Mark as real contestant to disable fake likes/comments
-            };
-            
-            console.log(`Real contestant data for ${contestantData.name}:`, {
-              profileId: contestantData.profileId,
-              user_id: contestant.user_id,
-              hasProfileId: !!contestantData.profileId
-            });
-            
-            return contestantData;
-          })
-        );
-        
-        // Sort by average rating (highest first) and assign ranks based on rating
-        const sortedContestants = contestantsWithRatings.filter(Boolean).sort((a, b) => {
-          if (b.rating !== a.rating) {
-            return b.rating - a.rating;
-          }
-          // If ratings are equal, sort by total votes (higher votes first)
-          return (b.totalVotes || 0) - (a.totalVotes || 0);
-        });
-
-        // Add test card at the beginning, then real contestants
-        const realContestantsWithRanks = sortedContestants.map((contestant, index) => {
-          const newRank = contestant.rating > 0 ? index + 1 : 0;
-          return {
-            ...contestant,
-            rank: newRank,
-            isWinner: showWinner && newRank === 1,
-            prize: showWinner && newRank === 1 ? "+ 5000 PHP" : undefined
-          };
-        });
-        
-        return [testCard, ...realContestantsWithRanks];
-      } else {
-        // Only show example card if no real contestants
-        console.log('Returning only test card for THIS WEEK');
-        return [testCard];
-      }
-    }
-    
-    // Use real contestants from weekly contests if available for other weeks and NEXT WEEK
-    if (["NEXT WEEK", "1 WEEK AGO", "2 WEEKS AGO", "3 WEEKS AGO"].includes(title) && actualParticipants.length > 0) {
-      console.log(`Using real contestants for ${title}:`, actualParticipants.length);
-      const contestantsWithRatings = await Promise.all(
-        actualParticipants.map(async (contestant) => {
-          // Validate contestant data structure
-          if (!contestant || typeof contestant !== 'object') {
-            console.warn('Invalid contestant data:', contestant);
-            return null;
-          }
-          
-          // Get rating stats using secure function
-          const { data: ratingStats } = await supabase
-            .rpc('get_public_participant_rating_stats', { target_participant_id: contestant.participant_id });
-          
-          let averageRating = 0;
-          let totalVotes = 0;
-          
-          if (ratingStats && ratingStats.length > 0) {
-            averageRating = ratingStats[0].average_rating;
-            totalVotes = ratingStats[0].total_votes;
-          }
-          
-          const contestantData = {
-            rank: contestant.final_rank || 0,
-            name: `${contestant.first_name || 'Unknown'} ${contestant.last_name || ''}`.trim(),
-            profileId: contestant.participant_id, // Use participant_id for rating queries
-            country: contestant.country || 'Unknown',
-            city: contestant.city || 'Unknown',
-            age: contestant.age || 0,
-            weight: contestant.weight_kg || 0,
-            height: contestant.height_cm || 0,
-            rating: averageRating,
-            averageRating: averageRating, // Use secure rating from function
-            totalVotes: totalVotes, // Use secure vote count from function
-            faceImage: contestant.photo_1_url || contestant1Face,
-            fullBodyImage: contestant.photo_2_url || contestant1Full,
-            additionalPhotos: [],
-            isVoted: showWinner ? true : averageRating > 0,
-            isWinner: false, // Will be set after sorting
-            prize: undefined, // Will be set after sorting
-            isRealContestant: true // Mark as real contestant to disable fake likes/comments
-          };
-          
-          console.log(`Real contestant data for ${contestantData.name}:`, {
-            profileId: contestantData.profileId,
-            user_id: contestant.user_id,
-            hasProfileId: !!contestantData.profileId
-          });
-          
-          return contestantData;
-        })
-      );
-      
-      // Sort by average rating (highest first) and assign ranks based on rating
-      const sortedContestants = contestantsWithRatings.filter(Boolean).sort((a, b) => {
-        if (b.rating !== a.rating) {
-          return b.rating - a.rating;
-        }
-        // If ratings are equal, sort by total votes (higher votes first)
-        return (b.totalVotes || 0) - (a.totalVotes || 0);
-      });
-
-      // Assign ranks based on rating order (1 for highest rating) for other weeks
-      return sortedContestants.map((contestant, index) => {
-        const newRank = contestant.rating > 0 ? index + 1 : 0;
-        return {
-          ...contestant,
-          rank: newRank,
-          isWinner: showWinner && newRank === 1,
-          prize: showWinner && newRank === 1 ? "+ 5000 PHP" : undefined
-        };
-      });
-    }
-    
-    // Return empty array if no real contestants found for other weeks
-    console.log(`No real contestants found for ${title}, returning empty array`);
-    return [];
-  };
-
-  // Keep this for backward compatibility but it's now mainly unused
-  const getContestants = () => getContestantsSync();
 
   return (
-    <section className={`max-w-6xl mx-auto mb-2 rounded-lg shadow-lg shadow-foreground/15 ${title === "THIS WEEK" ? "bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800" : "bg-background"} pt-6 pb-0`}>
-      <div className="mb-6 px-6">
-        <div className="mb-4">
-          <div className="flex items-center gap-3 mb-1">
-            <div className={`inline-flex flex-col w-fit ${centerSubtitle ? "items-center" : "items-center"}`}>
-              <h2 className={`text-3xl font-bold ${title === "THIS WEEK" ? "text-green-800 dark:text-green-200" : "text-contest-text"} ${noWrapTitle ? "whitespace-nowrap" : ""}`}>{title}</h2>
-              <p className={`text-sm ${title === "THIS WEEK" ? "text-green-600 dark:text-green-400" : "text-muted-foreground/70"} italic -mt-1`}>{subtitle}</p>
+    <section className="max-w-6xl mx-auto pt-2 mb-1 sm:mb-3 mt-2 bg-background rounded-lg shadow-sm shadow-foreground/10">
+      <div className="p-6">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex-1">
+            <div className={`flex items-center gap-3 mb-2 ${noWrapTitle ? '' : 'flex-wrap'}`}>
+              <h2 className="text-2xl md:text-3xl font-bold text-foreground">
+                {title}
+              </h2>
+              {titleSuffix && (
+                <span className="text-lg md:text-xl font-medium text-muted-foreground">
+                  {titleSuffix}
+                </span>
+              )}
             </div>
-            {titleSuffix && (
-              <span className="text-2xl font-normal text-muted-foreground">{titleSuffix}</span>
-            )}
-            {isActive && description && (
-              <span className={`text-base font-normal ${title === "THIS WEEK" ? "text-green-700 dark:text-green-300" : "text-contest-text"} leading-tight`}>
+            <p className={`text-sm md:text-base text-muted-foreground mb-1 ${centerSubtitle ? 'text-center' : ''}`}>
+              {subtitle}
+            </p>
+            {description && (
+              <p className="text-xs md:text-sm text-muted-foreground/80">
                 {description}
-              </span>
+              </p>
             )}
           </div>
-          {!isActive && description && (
-            <p className="text-muted-foreground">{description}</p>
-          )}
         </div>
-      </div>
 
-      {filters && isActive && (
-        <div className="mb-6 px-6">
-          {filters}
-        </div>
-      )}
+        {filters && (
+          <div className="mb-6">
+            {filters}
+          </div>
+        )}
 
-      {isLoading ? (
-        <div className="px-0 sm:px-6 grid grid-cols-1 lg:grid-cols-2 gap-1 sm:gap-3 max-w-full overflow-hidden">
-          {/* Loading skeleton */}
-          {[1, 2].map((i) => (
-            <div key={i} className="bg-card border-contest-border relative overflow-hidden flex h-36 sm:h-40 md:h-44 animate-pulse">
-              <div className="w-32 sm:w-36 md:w-40 bg-gray-300"></div>
-              <div className="flex-1 p-3 sm:p-4 space-y-2">
-                <div className="h-4 bg-gray-300 rounded w-3/4"></div>
-                <div className="h-3 bg-gray-300 rounded w-1/2"></div>
-                <div className="h-3 bg-gray-300 rounded w-2/3"></div>
-              </div>
-            </div>
-          ))}
-        </div>
-      ) : (
-        <div className="px-0 sm:px-6">
-          {/* Regular contestants only */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-1 sm:gap-3 max-w-full overflow-hidden">
-            {contestants.filter(c => !c.isExample).map((contestant, index) => (
+        {isLoading ? (
+          <div className="flex justify-center items-center py-8">
+            <div className="text-lg text-muted-foreground">Loading contestants...</div>
+          </div>
+        ) : contestants.length === 0 ? (
+          <div className="flex justify-center items-center py-8">
+            <div className="text-lg text-muted-foreground">No contestants found for this period</div>
+          </div>
+        ) : (
+          <div className={`grid gap-6 ${
+            viewMode === 'compact' 
+              ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' 
+              : 'grid-cols-1 md:grid-cols-2'
+          }`}>
+            {contestants.map((contestant) => (
               <ContestantCard
-                key={`${contestant.profileId || contestant.name}-${index}`}
-                {...contestant}
+                key={`${contestant.profileId}-${contestant.rank}`}
+                rank={contestant.rank}
+                name={contestant.name}
+                profileId={contestant.profileId}
+                country={contestant.country}
+                city={contestant.city}
+                age={contestant.age}
+                weight={contestant.weight}
+                height={contestant.height}
+                faceImage={contestant.faceImage}
+                fullBodyImage={contestant.fullBodyImage}
+                additionalPhotos={contestant.additionalPhotos}
+                isVoted={contestant.isVoted}
+                rating={contestant.rating}
+                isWinner={contestant.isWinner}
+                isExample={contestant.isExample}
+                prize={contestant.prize}
+                hideCardActions={!isActive}
                 viewMode={viewMode}
+                isThisWeek={contestant.isThisWeek}
+                averageRating={contestant.averageRating}
+                totalVotes={contestant.totalVotes}
                 onRate={(rating) => handleRate(contestant.rank, rating)}
-                isThisWeek={title === "THIS WEEK"}
                 user={user}
-                weekOffset={weekOffset}
+                isRealContestant={contestant.isRealContestant}
               />
-             ))}
-           </div>
-           
-           {/* Add spacing after cards for THIS WEEK section */}
-           {title === "THIS WEEK" && (
-             <div className="mt-1 sm:mt-3"></div>
-           )}
-        </div>
-      )}
-
+            ))}
+          </div>
+        )}
+      </div>
     </section>
   );
 }
