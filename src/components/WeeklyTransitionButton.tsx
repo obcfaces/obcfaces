@@ -67,35 +67,15 @@ export const WeeklyTransitionButton = () => {
       // Transition statuses
       const transitions = [];
 
-      // Move 'past week 2' to 'past'
-      const { data: pastWeek2, error: error1 } = await supabase
-        .from('weekly_contest_participants')
-        .update({ admin_status: 'past' })
-        .eq('admin_status', 'past week 2')
-        .select('id');
-
-      if (error1) console.error('Error updating past week 2:', error1);
-      else transitions.push(`Moved ${pastWeek2?.length || 0} from 'past week 2' to 'past'`);
-
-      // Move 'past week 1' to 'past week 2'
-      const { data: pastWeek1, error: error2 } = await supabase
-        .from('weekly_contest_participants')
-        .update({ admin_status: 'past week 2' })
-        .eq('admin_status', 'past week 1')
-        .select('id');
-
-      if (error2) console.error('Error updating past week 1:', error2);
-      else transitions.push(`Moved ${pastWeek1?.length || 0} from 'past week 1' to 'past week 2'`);
-
-      // Move 'this week' to 'past week 1'
+      // Move 'this week' to 'past' (simplified - only one past status)
       const { data: thisWeek, error: error3 } = await supabase
         .from('weekly_contest_participants')
-        .update({ admin_status: 'past week 1' })
+        .update({ admin_status: 'past' })
         .eq('admin_status', 'this week')
         .select('id');
 
       if (error3) console.error('Error updating this week:', error3);
-      else transitions.push(`Moved ${thisWeek?.length || 0} from 'this week' to 'past week 1'`);
+      else transitions.push(`Moved ${thisWeek?.length || 0} from 'this week' to 'past'`);
 
       // Move 'next week on site' to 'this week'
       const { data: nextWeekOnSite, error: error4 } = await supabase
