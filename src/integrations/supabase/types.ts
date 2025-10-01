@@ -1244,7 +1244,6 @@ export type Database = {
         Args: { contestant_user_id: string }
         Returns: {
           avatar_url: string
-          country: string
           display_name: string
           id: string
           is_contest_participant: boolean
