@@ -177,16 +177,17 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
           const photo1 = appData.photo1_url || profileData.photo_1_url || contestant1Face;
           const photo2 = appData.photo2_url || profileData.photo_2_url || contestant1Full;
           
-          console.log('Next week participant:', {
+          console.log('Next week participant FULL DATA:', {
             id: participant.id,
             name: `${appData.first_name} ${appData.last_name}`,
+            full_appData: appData,
+            full_profileData: profileData,
             photo1_from_app: appData.photo1_url,
             photo2_from_app: appData.photo2_url,
             photo1_from_profile: profileData?.photo_1_url,
             photo2_from_profile: profileData?.photo_2_url,
             photo1_final: photo1,
-            photo2_final: photo2,
-            profileData: profileData
+            photo2_final: photo2
           });
           
           return {
