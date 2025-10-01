@@ -3366,34 +3366,31 @@ const Admin = () => {
                 }
                 
                 // Apply past week filter based on week intervals and admin_status
-                const filteredByWeek = showAllCards ? participantsToShow : participantsToShow.filter(participant => {
+                const filteredByWeek = participantsToShow.filter(participant => {
                   // Фильтр по admin_status
                   const adminStatus = participant.admin_status || 'this week';
                   const statusMatch = pastStatusFilter === 'all' || adminStatus === pastStatusFilter;
                   
+                  // When showAllCards is active, show all participants without filtering
+                  if (showAllCards) {
+                    return true;
+                  }
+                  
                   if (!statusMatch) return false;
                   
-                  // When a specific interval is selected, use stricter filtering to avoid duplicates
+                  // When a specific interval is selected from dropdown, use it
                   if (pastWeekIntervalFilter !== 'all') {
                     const participantInterval = participant.week_interval || getParticipantWeekInterval(participant);
                     const hasCorrectInterval = participantInterval === pastWeekIntervalFilter;
-                    
-                    // For "К" filter (showAllCards is false but we want all statuses), don't filter by status
-                    // For other filters, only show participants with 'past' status
-                    if (!showAllCards) {
-                      return hasCorrectInterval && statusMatch;
-                    }
-                    
-                    return hasCorrectInterval;
+                    return hasCorrectInterval && statusMatch;
                   }
                   
-                  // When no specific interval is selected, use the status-based filter
+                  // When 'All Past Weeks' is selected, show all past participants
                   if (pastWeekFilter === 'all') {
-                    // For 'all' filter, apply admin_status filter
                     return statusMatch;
                   }
                   
-                  // Get the dynamic filters to find the target week interval
+                  // For week-specific filters (1 week ago, 2 weeks ago, etc.)
                   const dynamicFilters = getDynamicPastWeekFilters;
                   const selectedFilter = dynamicFilters.find(f => f.id === pastWeekFilter);
                   
@@ -3401,12 +3398,12 @@ const Admin = () => {
                     return false;
                   }
                   
+                  // Match participant's week_interval with the selected filter's weekInterval
                   const targetWeekInterval = selectedFilter.weekInterval;
                   const participantInterval = participant.week_interval || getParticipantWeekInterval(participant);
-                  const hasCorrectInterval = participantInterval === targetWeekInterval;
                   
-                  // For week-specific filters, apply both interval and status filters
-                  return hasCorrectInterval && statusMatch;
+                  // Return true if intervals match AND status is 'past'
+                  return participantInterval === targetWeekInterval && adminStatus === 'past';
                 });
                 
                 if (filteredByWeek.length === 0) {
