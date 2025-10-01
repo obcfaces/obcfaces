@@ -99,28 +99,69 @@ serve(async (req) => {
       }
     }
 
-    // 3. Transition participant statuses
+    // 3. Transition participant statuses with audit logging
     const transitions = []
+    const currentTime = new Date().toISOString()
 
     // Move 'this week' to 'past' (simplified - only one past status)
-    const { data: thisWeek, error: error3 } = await supabase
+    const { data: thisWeekToUpdate, error: fetchThisWeekError } = await supabase
       .from('weekly_contest_participants')
-      .update({ admin_status: 'past' })
+      .select('id, status_history')
       .eq('admin_status', 'this week')
-      .select('id')
 
-    if (error3) console.error('Error updating this week:', error3)
-    else transitions.push(`Moved ${thisWeek?.length || 0} participants from 'this week' to 'past'`)
+    if (!fetchThisWeekError && thisWeekToUpdate) {
+      for (const participant of thisWeekToUpdate) {
+        const currentHistory = (participant.status_history as Record<string, any>) || {}
+        const updatedHistory = {
+          ...currentHistory,
+          past: {
+            changed_at: currentTime,
+            changed_by: 'SYSTEM',
+            changed_via: 'EDGE_FUNCTION_weekly-transition',
+            previous_status: 'this week'
+          }
+        }
+
+        await supabase
+          .from('weekly_contest_participants')
+          .update({ 
+            admin_status: 'past',
+            status_history: updatedHistory
+          })
+          .eq('id', participant.id)
+      }
+      transitions.push(`Moved ${thisWeekToUpdate.length} participants from 'this week' to 'past'`)
+    }
 
     // Move 'next week on site' to 'this week'
-    const { data: nextWeekOnSite, error: error4 } = await supabase
+    const { data: nextWeekToUpdate, error: fetchNextWeekError } = await supabase
       .from('weekly_contest_participants')
-      .update({ admin_status: 'this week' })
+      .select('id, status_history')
       .eq('admin_status', 'next week on site')
-      .select('id')
 
-    if (error4) console.error('Error updating next week on site:', error4)
-    else transitions.push(`Moved ${nextWeekOnSite?.length || 0} participants from 'next week on site' to 'this week'`)
+    if (!fetchNextWeekError && nextWeekToUpdate) {
+      for (const participant of nextWeekToUpdate) {
+        const currentHistory = (participant.status_history as Record<string, any>) || {}
+        const updatedHistory = {
+          ...currentHistory,
+          'this week': {
+            changed_at: currentTime,
+            changed_by: 'SYSTEM',
+            changed_via: 'EDGE_FUNCTION_weekly-transition',
+            previous_status: 'next week on site'
+          }
+        }
+
+        await supabase
+          .from('weekly_contest_participants')
+          .update({ 
+            admin_status: 'this week',
+            status_history: updatedHistory
+          })
+          .eq('id', participant.id)
+      }
+      transitions.push(`Moved ${nextWeekToUpdate.length} participants from 'next week on site' to 'this week'`)
+    }
 
     // 4. Create new contest for current week if it doesn't exist
     const { data: existingContest } = await supabase

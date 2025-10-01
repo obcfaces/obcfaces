@@ -64,28 +64,73 @@ export const WeeklyTransitionButton = () => {
         }
       }
 
-      // Transition statuses
+      // Get current user for audit
+      const { data: { user } } = await supabase.auth.getUser();
+      const currentUserId = user?.id;
+      const currentTime = new Date().toISOString();
+
+      // Transition statuses with audit logging
       const transitions = [];
 
       // Move 'this week' to 'past' (simplified - only one past status)
-      const { data: thisWeek, error: error3 } = await supabase
+      const { data: thisWeekToUpdate, error: fetchThisWeekError } = await supabase
         .from('weekly_contest_participants')
-        .update({ admin_status: 'past' })
-        .eq('admin_status', 'this week')
-        .select('id');
+        .select('id, status_history')
+        .eq('admin_status', 'this week');
 
-      if (error3) console.error('Error updating this week:', error3);
-      else transitions.push(`Moved ${thisWeek?.length || 0} from 'this week' to 'past'`);
+      if (!fetchThisWeekError && thisWeekToUpdate) {
+        for (const participant of thisWeekToUpdate) {
+          const currentHistory = (participant.status_history as Record<string, any>) || {};
+          const updatedHistory = {
+            ...currentHistory,
+            past: {
+              changed_at: currentTime,
+              changed_by: currentUserId,
+              changed_via: 'UI_BUTTON',
+              previous_status: 'this week'
+            }
+          };
+
+          await supabase
+            .from('weekly_contest_participants')
+            .update({ 
+              admin_status: 'past',
+              status_history: updatedHistory
+            })
+            .eq('id', participant.id);
+        }
+        transitions.push(`Moved ${thisWeekToUpdate.length} from 'this week' to 'past' (by user ${currentUserId})`);
+      }
 
       // Move 'next week on site' to 'this week'
-      const { data: nextWeekOnSite, error: error4 } = await supabase
+      const { data: nextWeekToUpdate, error: fetchNextWeekError } = await supabase
         .from('weekly_contest_participants')
-        .update({ admin_status: 'this week' })
-        .eq('admin_status', 'next week on site')
-        .select('id');
+        .select('id, status_history')
+        .eq('admin_status', 'next week on site');
 
-      if (error4) console.error('Error updating next week on site:', error4);
-      else transitions.push(`Moved ${nextWeekOnSite?.length || 0} from 'next week on site' to 'this week'`);
+      if (!fetchNextWeekError && nextWeekToUpdate) {
+        for (const participant of nextWeekToUpdate) {
+          const currentHistory = (participant.status_history as Record<string, any>) || {};
+          const updatedHistory = {
+            ...currentHistory,
+            'this week': {
+              changed_at: currentTime,
+              changed_by: currentUserId,
+              changed_via: 'UI_BUTTON',
+              previous_status: 'next week on site'
+            }
+          };
+
+          await supabase
+            .from('weekly_contest_participants')
+            .update({ 
+              admin_status: 'this week',
+              status_history: updatedHistory
+            })
+            .eq('id', participant.id);
+        }
+        transitions.push(`Moved ${nextWeekToUpdate.length} from 'next week on site' to 'this week' (by user ${currentUserId})`);
+      }
 
       console.log('Transitions completed:', transitions);
       
