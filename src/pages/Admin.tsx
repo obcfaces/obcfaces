@@ -369,9 +369,7 @@ const Admin = () => {
   const [selectedParticipantForNextWeekVoters, setSelectedParticipantForNextWeekVoters] = useState<string>('');
   const [countryFilter, setCountryFilter] = useState<string>('all');
   const [genderFilter, setGenderFilter] = useState<string>('all');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
-  const [weeklyContestFilter, setWeeklyContestFilter] = useState<string>('this week');
-  const [participantStatusFilter, setParticipantStatusFilter] = useState<string>('all'); // Не используется, удалить
+  const [adminStatusFilter, setAdminStatusFilter] = useState<string>('all');
   const [filteredWeeklyParticipants, setFilteredWeeklyParticipants] = useState<any[]>([]);
   const [selectedUserApplications, setSelectedUserApplications] = useState<string | null>(null);
   const [editingApplicationId, setEditingApplicationId] = useState<string | null>(null);
@@ -428,7 +426,7 @@ const Admin = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  console.log('Admin component rendering, statusFilter:', statusFilter);
+  console.log('Admin component rendering, adminStatusFilter:', adminStatusFilter);
 
   // Centralized function to update participant status with history
   const updateParticipantStatusWithHistory = async (
@@ -616,191 +614,41 @@ const Admin = () => {
     }
   }, [contestApplications]);
 
-  // Handle Weekly Contest participants filtering with async rating fetching
+  // Handle Weekly Contest participants filtering - simplified to use only admin_status
   useEffect(() => {
     const filterWeeklyParticipants = async () => {
-      console.log('filterWeeklyParticipants called with weeklyContestFilter:', weeklyContestFilter);
+      console.log('Filtering by admin_status:', adminStatusFilter);
       
-      if (weeklyContestFilter === 'approve') {
-        // Get approved applications
-        const approvedApps = weeklyParticipants
-          .filter(participant => participant.admin_status === 'approved');
+      // Filter by admin_status directly
+      const filteredByStatus = adminStatusFilter === 'all' 
+        ? weeklyParticipants
+        : weeklyParticipants.filter(p => p.admin_status === adminStatusFilter);
 
-        // Get weekly participants with "pending" status
-        const pendingParticipants = weeklyParticipants.filter(participant => {
-          return participant.admin_status === 'pending';
-        });
-
-        // Combine both approved applications and pending participants
-        const allParticipants = [...approvedApps, ...pendingParticipants];
-
-        const participantsWithRatings = await Promise.all(
-          allParticipants.map(async (item) => {
-            // Handle both application and participant data structures
-            const isFromApplication = 'application_data' in item && item.application_data;
-            const appData = isFromApplication ? item.application_data : item.application_data || {};
-            const userId = item.user_id;
-            
-            try {
-              const { data: ratingStats } = await supabase
-                .rpc('get_user_rating_stats', { target_user_id: userId });
-              
-              return {
-                id: isFromApplication ? `app-${item.id}` : item.id,
-                user_id: userId,
-                application_data: appData,
-                average_rating: ratingStats?.[0]?.average_rating || 0,
-                total_votes: ratingStats?.[0]?.total_votes || 0,
-                final_rank: null,
-                fromApplication: isFromApplication
-              };
-            } catch (error) {
-              console.error('Error fetching rating stats:', error);
-              return {
-                id: isFromApplication ? `app-${item.id}` : item.id,
-                user_id: userId,
-                application_data: appData,
-                average_rating: 0,
-                total_votes: 0,
-                final_rank: null,
-                fromApplication: isFromApplication
-              };
-            }
-          })
-        );
-
-        // Sort participants by rating (highest to lowest) like on the main site
-        const sortedParticipants = participantsWithRatings.sort((a, b) => {
-          // Sort by final_rank first (winners at top)
-          if (a.final_rank && !b.final_rank) return -1;
-          if (!a.final_rank && b.final_rank) return 1;
-          if (a.final_rank && b.final_rank) return a.final_rank - b.final_rank;
-          
-          // Then by average_rating (highest first)
-          const ratingA = Number(a.average_rating) || 0;
-          const ratingB = Number(b.average_rating) || 0;
-          if (ratingB !== ratingA) return ratingB - ratingA;
-          
-          // Finally by total_votes (highest first)
-          const votesA = Number(a.total_votes) || 0;
-          const votesB = Number(b.total_votes) || 0;
-          return votesB - votesA;
-        });
-
-        setFilteredWeeklyParticipants(sortedParticipants);
-      } else if (weeklyContestFilter === 'reject') {
-        // Get rejected applications that should not appear in other sections
-        const rejectedApps = weeklyParticipants
-          .filter(participant => participant.admin_status === 'rejected');
-
-        const rejectedParticipantsWithRatings = rejectedApps.map((app) => {
-          const appData = app.application_data || {};
-          
-          // Для отклоненных заявок рейтинги будут 0, так как они не участвуют в конкурсе
-          return {
-            id: `rejected-${app.id}`,
-            user_id: app.user_id,
-            application_data: appData,
-            average_rating: 0,
-            total_votes: 0,
-            final_rank: null,
-            fromApplication: true,
-            status: 'rejected'
-          };
-        });
-
-        setFilteredWeeklyParticipants(rejectedParticipantsWithRatings);
-      } else {
-        // Filter participants based on admin_status - strictly filter for 'this week' block
-        console.log('Filtering participants for weeklyContestFilter:', weeklyContestFilter);
-        console.log('Total weeklyParticipants before filtering:', weeklyParticipants.length);
+      // Remove duplicates based on user_id
+      const uniqueParticipants = filteredByStatus.filter((participant, index, arr) => 
+        arr.findIndex(p => p.user_id === participant.user_id) === index
+      );
+      
+      // Sort participants by rating
+      const sortedParticipants = uniqueParticipants.sort((a, b) => {
+        if (a.final_rank && !b.final_rank) return -1;
+        if (!a.final_rank && b.final_rank) return 1;
+        if (a.final_rank && b.final_rank) return a.final_rank - b.final_rank;
         
-        const filteredByStatus = weeklyParticipants.filter(participant => {
-          const status = participant.admin_status || 'this week';
-          console.log(`Participant ${participant.id}: admin_status = ${participant.admin_status}, status = ${status}`);
-          
-          switch (weeklyContestFilter) {
-            case 'this week':
-              // Show participants with admin_status = 'this week' 
-              const isThisWeekStatus = status === 'this week';
-              
-              // Check for week-YYYY-MM-DD format statuses  
-              const isCurrentWeekFormat = status && (
-                status === 'week-2025-09-28' || 
-                status === 'week-2025-09-29' ||
-                status.startsWith('week-2025-09-') && (
-                  status.includes('-28') || status.includes('-29') || 
-                  status.includes('-30') || status.includes('-01') || 
-                  status.includes('-02') || status.includes('-03') || 
-                  status.includes('-04') || status.includes('-05')
-                )
-              );
-              
-              // Убираем старую логику и используем только admin_status
-              const isPastStatus = status === 'past';
-              
-              console.log(`Participant ${participant.id}: admin_status=${status}, showing=${isThisWeekStatus && !isPastStatus}`);
-              
-              return (isThisWeekStatus) && !isPastStatus;
-            case 'next week':
-              // Show participants with 'next week' or 'next week on site' status OR applications with 'next week' status
-              // Exclude past and current week statuses
-              const isNextWeek = status === 'next week' || status === 'next week on site';
-              // Убираем проверку application.status - используем только admin_status
-              const hasNextWeekApplication = false; // Не используем больше
-              const isNotPastOrCurrent = status !== 'this week' && 
-                                        status !== 'past';
-              return (isNextWeek || hasNextWeekApplication) && isNotPastOrCurrent;
-            case 'past':
-              // Show participants with 'past' admin_status - they are grouped by week intervals from status_week_history
-              const isPast = status === 'past';
-              const isNotCurrentOrFuture = status !== 'this week' && 
-                                          status !== 'next week' && 
-                                          status !== 'next week on site';
-              return isPast && isNotCurrentOrFuture;
-            case 'pending':
-              return status === 'pending';
-            case 'approved':
-              return status === 'approved';
-            case 'rejected':
-              return status === 'rejected';
-            default:
-              return true;
-          }
-        });
-
-        console.log('Filtered participants count:', filteredByStatus.length);
-
-        // Remove duplicates based on user_id
-        const uniqueParticipants = filteredByStatus.filter((participant, index, arr) => 
-          arr.findIndex(p => p.user_id === participant.user_id) === index
-        );
+        const ratingA = Number(a.average_rating) || 0;
+        const ratingB = Number(b.average_rating) || 0;
+        if (ratingB !== ratingA) return ratingB - ratingA;
         
-        // Sort participants by rating (highest to lowest) like on the main site
-        const sortedParticipants = uniqueParticipants.sort((a, b) => {
-          // Sort by final_rank first (winners at top)
-          if (a.final_rank && !b.final_rank) return -1;
-          if (!a.final_rank && b.final_rank) return 1;
-          if (a.final_rank && b.final_rank) return a.final_rank - b.final_rank;
-          
-          // Then by average_rating (highest first)
-          const ratingA = Number(a.average_rating) || 0;
-          const ratingB = Number(b.average_rating) || 0;
-          if (ratingB !== ratingA) return ratingB - ratingA;
-          
-          // Finally by total_votes (highest first)
-          const votesA = Number(a.total_votes) || 0;
-          const votesB = Number(b.total_votes) || 0;
-          return votesB - votesA;
-        });
-        
-        console.log('Unique participants count:', sortedParticipants.length);
-        setFilteredWeeklyParticipants(sortedParticipants);
-      }
+        const votesA = Number(a.total_votes) || 0;
+        const votesB = Number(b.total_votes) || 0;
+        return votesB - votesA;
+      });
+
+      setFilteredWeeklyParticipants(sortedParticipants);
     };
 
     filterWeeklyParticipants();
-  }, [weeklyContestFilter, contestApplications, weeklyParticipants, participantFilters]);
+  }, [adminStatusFilter, weeklyParticipants]);
 
   // Handle Past Week participants filtering  
   useEffect(() => {
@@ -1557,7 +1405,7 @@ const Admin = () => {
         }, {}));
 
       setWeeklyParticipants(participants);
-      console.log('Set weeklyParticipants, current weeklyContestFilter:', weeklyContestFilter);
+      console.log('Set weeklyParticipants, current adminStatusFilter:', adminStatusFilter);
     } catch (error) {
       console.error('Error in fetchWeeklyParticipants:', error);
     }
@@ -2042,9 +1890,9 @@ const Admin = () => {
                   </div>
                 </div>
                 
-                <Select value={weeklyContestFilter} onValueChange={(value) => {
-                  setWeeklyContestFilter(value);
-                  setParticipantCurrentPage(1); // Reset pagination when filter changes
+                <Select value={adminStatusFilter} onValueChange={(value) => {
+                  setAdminStatusFilter(value);
+                  setParticipantCurrentPage(1);
                 }}>
                   <SelectTrigger className="w-48">
                     <SelectValue />
@@ -2063,9 +1911,9 @@ const Admin = () => {
                   return (
                     <div className="text-center py-8 text-muted-foreground">
                       <p className="text-lg">
-                        {weeklyContestFilter === 'approve' 
-                          ? 'No approved applications found' 
-                          : weeklyContestFilter === 'reject'
+                        {adminStatusFilter === 'pending' 
+                          ? 'No pending applications found' 
+                          : adminStatusFilter === 'rejected'
                           ? 'No rejected applications found'
                           : 'No weekly contest participants found'}
                       </p>
@@ -4353,10 +4201,10 @@ const Admin = () => {
                 <div className="flex gap-4 items-center justify-start">
                   <div className="flex flex-col gap-2">
                       <Select 
-                      value={statusFilter} 
+                      value={adminStatusFilter} 
                       onValueChange={(value) => {
-                        setStatusFilter(value);
-                        setApplicationCurrentPage(1); // Reset pagination when filter changes
+                        setAdminStatusFilter(value);
+                        setApplicationCurrentPage(1);
                       }}
                     >
                        <SelectTrigger className="w-20 md:w-32">
@@ -4370,9 +4218,9 @@ const Admin = () => {
                           <SelectItem value="past">Past</SelectItem>
                        </SelectContent>
                     </Select>
-                    {statusFilter !== 'all' && (
+                    {adminStatusFilter !== 'all' && (
                       <p className="text-xs text-muted-foreground">
-                        Filter: {statusFilter}
+                        Filter: {adminStatusFilter}
                       </p>
                     )}
                   </div>
@@ -4396,45 +4244,27 @@ const Admin = () => {
 
               <div className="space-y-4 px-0 md:px-6">
                 {(() => {
-                  console.log('Filtering applications, statusFilter:', statusFilter);
+                  console.log('Filtering applications, adminStatusFilter:', adminStatusFilter);
                   const filteredApplications = (showDeletedApplications ? deletedApplications : contestApplications)
                     .filter((application) => {
-                      const appData = application.application_data || {};
-                      if (countryFilter !== 'all' && appData.country !== countryFilter) return false;
-                      if (genderFilter !== 'all' && appData.gender !== genderFilter) return false;
+                      // Filter by country first
+                      const applicationCountry = application.application_data?.country;
+                      if (countryFilter !== 'all' && applicationCountry !== countryFilter) return false;
                       
-                      // Handle status filtering
-                      if (statusFilter !== 'all') {
-                        if (statusFilter === 'next week') {
-                          // Show applications for users with admin_status === 'next week' or 'next week on site'
-                          const weeklyParticipant = weeklyParticipants.find(participant => 
-                            participant.user_id === application.user_id
-                          );
-                          if (!weeklyParticipant || (weeklyParticipant.admin_status !== 'next week' && weeklyParticipant.admin_status !== 'next week on site')) {
-                            return false;
-                          }
-                        } else {
-                          // Проверяем ТОЛЬКО admin_status
-                          const participant = weeklyParticipants.find(p => p.user_id === application.user_id);
-                          if (!participant || participant.admin_status !== statusFilter) return false;
-                        }
+                      // Handle admin_status filtering - использовать напрямую admin_status
+                      if (adminStatusFilter !== 'all') {
+                        const participant = weeklyParticipants.find(p => p.user_id === application.user_id);
+                        if (!participant || participant.admin_status !== adminStatusFilter) return false;
                       }
                       
-                      // Don't show applications in the cards section if the user is already in "this week" or "next"
-                      // UNLESS the user is specifically filtering by "next week"
-                      const weeklyParticipant = weeklyParticipants.find(participant => 
-                        participant.user_id === application.user_id
-                      );
-                      
-                      // Exclude applications with admin_status="next week" from Card section (unless filtering by "next week")
-                      if (weeklyParticipant && weeklyParticipant.admin_status === 'next week' && statusFilter !== 'next week') {
+                      // Exclude "next week" from main card section unless specifically filtering
+                      const weeklyParticipant = weeklyParticipants.find(p => p.user_id === application.user_id);
+                      if (weeklyParticipant?.admin_status === 'next week' && adminStatusFilter !== 'next week') {
                         return false;
                       }
                       
-                      // Exclude applications already in weekly contest with this week status (unless filtering)
-                      if (weeklyParticipant && 
-                          weeklyParticipant.admin_status === 'this week' && 
-                          statusFilter !== 'this week') {
+                      // Exclude "this week" from main card section unless specifically filtering
+                      if (weeklyParticipant?.admin_status === 'this week' && adminStatusFilter !== 'this week') {
                         return false;
                       }
                       
