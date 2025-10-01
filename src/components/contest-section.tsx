@@ -95,8 +95,7 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
         .from('weekly_contest_participants')
         .select('*')
         .eq('admin_status', 'this week')
-        .eq('is_active', true)
-        .limit(10);
+        .eq('is_active', true);
 
       if (error) {
         console.error('Error loading THIS WEEK participants:', error);
@@ -140,8 +139,7 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
         .select('*')
         .eq('admin_status', 'past')
         .eq('is_active', true)
-        .like('week_interval', '%29/09-05/10/25%')
-        .limit(10);
+        .like('week_interval', '%29/09-05/10/25%');
 
       if (error) {
         console.error('Error loading 1 WEEK AGO participants:', error);
@@ -185,8 +183,7 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
         .select('*')
         .eq('admin_status', 'past')
         .eq('is_active', true)
-        .like('week_interval', '%22/09-28/09/25%')
-        .limit(10);
+        .like('week_interval', '%22/09-28/09/25%');
 
       if (error) {
         console.error('Error loading 2 weeks ago admin participants:', error);
@@ -241,8 +238,7 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
         .select('*')
         .eq('admin_status', 'past')
         .eq('is_active', true)
-        .like('week_interval', '%15/09-21/09/25%')
-        .limit(10);
+        .like('week_interval', '%15/09-21/09/25%');
 
       if (error) {
         console.error('Error loading 3 weeks ago admin participants:', error);
