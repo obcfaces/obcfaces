@@ -88,23 +88,32 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
   // Load participants for THIS WEEK section - FOR ALL USERS
   const loadThisWeekParticipants = async () => {
     try {
-      console.log('Loading THIS WEEK participants for all users...');
+      console.log('🔄 Loading THIS WEEK participants for all users...');
       
-      // Get participants with admin_status = 'this week' for current week
+      // Get participants with admin_status = 'this week' for current week - NO LIMIT!
       const { data: participants, error } = await supabase
         .from('weekly_contest_participants')
         .select('*')
         .eq('admin_status', 'this week')
-        .eq('is_active', true);
+        .eq('is_active', true)
+        .order('created_at', { ascending: false });
 
       if (error) {
-        console.error('Error loading THIS WEEK participants:', error);
+        console.error('❌ Error loading THIS WEEK participants:', error);
         return [];
       }
 
-      console.log('Raw THIS WEEK participants data:', participants?.length);
+      console.log(`✅ Raw THIS WEEK participants data: ${participants?.length} participants loaded`);
+      console.log('📋 Participants list:', participants?.map(p => {
+        const appData = (p.application_data as any) || {};
+        return {
+          name: `${appData.first_name || ''} ${appData.last_name || ''}`.trim(),
+          id: p.id
+        };
+      }));
 
       if (!participants || participants.length === 0) {
+        console.warn('⚠️ No THIS WEEK participants found');
         return [];
       }
 
