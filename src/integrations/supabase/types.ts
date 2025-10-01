@@ -272,7 +272,21 @@ export type Database = {
             foreignKeyName: "follows_followee_id_fkey"
             columns: ["followee_id"]
             isOneToOne: false
+            referencedRelation: "contest_participants_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "follows_followee_id_fkey"
+            columns: ["followee_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "follows_follower_id_fkey"
+            columns: ["follower_id"]
+            isOneToOne: false
+            referencedRelation: "contest_participants_public"
             referencedColumns: ["id"]
           },
           {
@@ -648,6 +662,36 @@ export type Database = {
         }
         Relationships: []
       }
+      security_audit_log: {
+        Row: {
+          accessed_at: string
+          action: string
+          id: string
+          ip_address: unknown | null
+          row_id: string | null
+          table_name: string
+          user_id: string | null
+        }
+        Insert: {
+          accessed_at?: string
+          action: string
+          id?: string
+          ip_address?: unknown | null
+          row_id?: string | null
+          table_name: string
+          user_id?: string | null
+        }
+        Update: {
+          accessed_at?: string
+          action?: string
+          id?: string
+          ip_address?: unknown | null
+          row_id?: string | null
+          table_name?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       shares: {
         Row: {
           content_id: string
@@ -826,6 +870,30 @@ export type Database = {
       }
     }
     Views: {
+      contest_participants_public: {
+        Row: {
+          avatar_url: string | null
+          display_name: string | null
+          id: string | null
+          is_approved: boolean | null
+          is_contest_participant: boolean | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          display_name?: string | null
+          id?: string | null
+          is_approved?: boolean | null
+          is_contest_participant?: boolean | null
+        }
+        Update: {
+          avatar_url?: string | null
+          display_name?: string | null
+          id?: string | null
+          is_approved?: boolean | null
+          is_contest_participant?: boolean | null
+        }
+        Relationships: []
+      }
       participant_stats: {
         Row: {
           avg_rating: number | null
@@ -1431,6 +1499,28 @@ export type Database = {
           photo_2_url: string
           total_votes: number
           user_id: string
+          weight_kg: number
+        }[]
+      }
+      get_weekly_contest_participants_safe: {
+        Args: { weeks_offset?: number }
+        Returns: {
+          age: number
+          average_rating: number
+          city: string
+          contest_status: string
+          country: string
+          final_rank: number
+          first_name: string
+          height_cm: number
+          id: string
+          last_name: string
+          photo1_url: string
+          photo2_url: string
+          total_votes: number
+          user_id: string
+          week_end_date: string
+          week_start_date: string
           weight_kg: number
         }[]
       }
