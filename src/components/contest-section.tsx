@@ -117,12 +117,11 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
         return [];
       }
 
-      // Fetch profiles separately
+      // Fetch profiles using secure RPC function (works for ALL users - authenticated and unauthenticated)
       const userIds = participants.map(p => p.user_id);
-      const { data: profiles } = await supabase
-        .from('profiles')
-        .select('id, photo_1_url, photo_2_url')
-        .in('id', userIds);
+      const { data: profilesData } = await (supabase.rpc as any)('get_public_contest_participant_photos', { participant_user_ids: userIds });
+      
+      const profiles = (profilesData || []) as Array<{ id: string; photo_1_url: string | null; photo_2_url: string | null; avatar_url: string | null }>;
 
       // Attach profiles to participants
       const participantsWithProfiles = participants.map(participant => ({
@@ -161,12 +160,11 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
         return [];
       }
 
-      // Fetch profiles separately
+      // Fetch profiles using secure RPC function (works for ALL users - authenticated and unauthenticated)
       const userIds = participants.map(p => p.user_id);
-      const { data: profiles } = await supabase
-        .from('profiles')
-        .select('id, photo_1_url, photo_2_url')
-        .in('id', userIds);
+      const { data: profilesData } = await (supabase.rpc as any)('get_public_contest_participant_photos', { participant_user_ids: userIds });
+      
+      const profiles = (profilesData || []) as Array<{ id: string; photo_1_url: string | null; photo_2_url: string | null; avatar_url: string | null }>;
 
       // Attach profiles to participants
       const participantsWithProfiles = participants.map(participant => ({
@@ -205,12 +203,11 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
         return [];
       }
 
-      // Get user IDs and fetch their profiles separately
+      // Get user IDs and fetch their profiles using secure RPC function
       const userIds = participants.map(p => p.user_id);
-      const { data: profiles, error: profilesError } = await supabase
-        .from('profiles')
-        .select('*')
-        .in('id', userIds);
+      const { data: profilesData, error: profilesError } = await (supabase.rpc as any)('get_public_contest_participant_photos', { participant_user_ids: userIds });
+      
+      const profiles = (profilesData || []) as Array<{ id: string; photo_1_url: string | null; photo_2_url: string | null; avatar_url: string | null }>;
 
       if (profilesError) {
         console.error('Error loading profiles for 2 weeks ago:', profilesError);
@@ -260,12 +257,11 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
         return [];
       }
 
-      // Get user IDs and fetch their profiles separately
+      // Get user IDs and fetch their profiles using secure RPC function
       const userIds = participants.map(p => p.user_id);
-      const { data: profiles, error: profilesError } = await supabase
-        .from('profiles')
-        .select('*')
-        .in('id', userIds);
+      const { data: profilesData, error: profilesError } = await (supabase.rpc as any)('get_public_contest_participant_photos', { participant_user_ids: userIds });
+      
+      const profiles = (profilesData || []) as Array<{ id: string; photo_1_url: string | null; photo_2_url: string | null; avatar_url: string | null }>;
 
       if (profilesError) {
         console.error('Error loading profiles for 3 weeks ago:', profilesError);
