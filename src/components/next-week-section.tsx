@@ -125,18 +125,29 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
         console.log('Loading next week participants...');
         console.log('User ID:', user?.id);
 
-        // Загружаем участников со статусом next week и next week on site с данными профиля
-        const { data, error: fetchError } = await supabase
+        // Загружаем участников со статусом next week и next week on site
+        const { data: participants, error: fetchError } = await supabase
           .from('weekly_contest_participants')
-          .select(`
-            *,
-            profiles:user_id (
-              photo_1_url,
-              photo_2_url
-            )
-          `)
+          .select('*')
           .in('admin_status', ['next week', 'next week on site'])
           .eq('is_active', true);
+
+        let data = participants;
+
+        // Fetch profiles separately to ensure we get the data
+        if (participants && participants.length > 0) {
+          const userIds = participants.map(p => p.user_id);
+          const { data: profiles } = await supabase
+            .from('profiles')
+            .select('id, photo_1_url, photo_2_url')
+            .in('id', userIds);
+
+          // Attach profiles to participants
+          data = participants.map(participant => ({
+            ...participant,
+            profiles: profiles?.find(p => p.id === participant.user_id) || null
+          }));
+        }
 
         console.log('Query result:', { data, fetchError });
         nextWeekParticipants = data || [];
@@ -171,10 +182,11 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
             name: `${appData.first_name} ${appData.last_name}`,
             photo1_from_app: appData.photo1_url,
             photo2_from_app: appData.photo2_url,
-            photo1_from_profile: profileData.photo_1_url,
-            photo2_from_profile: profileData.photo_2_url,
+            photo1_from_profile: profileData?.photo_1_url,
+            photo2_from_profile: profileData?.photo_2_url,
             photo1_final: photo1,
-            photo2_final: photo2
+            photo2_final: photo2,
+            profileData: profileData
           });
           
           return {
