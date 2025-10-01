@@ -51,7 +51,7 @@ export const useParticipantData = (participantName?: string, userId?: string) =>
           .from('user_roles')
           .select('role')
           .eq('user_id', user.id)
-          .single();
+          .maybeSingle();
         setIsAdmin(roles?.role === 'admin');
       }
     };
@@ -135,7 +135,7 @@ export const useParticipantData = (participantName?: string, userId?: string) =>
     return () => {
       subscription.unsubscribe();
     };
-  }, [participantName, userId]);
+  }, [participantName, userId, isAdmin]);
 
   const getParticipantByName = (name: string): ParticipantData | null => {
     const normalizedName = name.trim().toLowerCase();
