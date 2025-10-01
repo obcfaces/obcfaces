@@ -1077,9 +1077,9 @@ const Admin = () => {
       setUser(session.user);
       console.log('checkAdminAccess: User set, checking roles...');
 
-      // Add timeout to prevent hanging
+      // Add timeout to prevent hanging (10 seconds)
       const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Timeout')), 5000)
+        setTimeout(() => reject(new Error('Timeout')), 10000)
       );
 
       let roles;
