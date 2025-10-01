@@ -875,21 +875,18 @@ export type Database = {
           avatar_url: string | null
           display_name: string | null
           id: string | null
-          is_approved: boolean | null
           is_contest_participant: boolean | null
         }
         Insert: {
           avatar_url?: string | null
           display_name?: string | null
           id?: string | null
-          is_approved?: boolean | null
           is_contest_participant?: boolean | null
         }
         Update: {
           avatar_url?: string | null
           display_name?: string | null
           id?: string | null
-          is_approved?: boolean | null
           is_contest_participant?: boolean | null
         }
         Relationships: []
