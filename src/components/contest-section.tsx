@@ -466,7 +466,8 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
               faceImage: appData.photo1_url || profileData.photo_1_url || contestant1Face,
               fullBodyImage: appData.photo2_url || profileData.photo_2_url || contestant1Full,
               additionalPhotos: [],
-              isVoted: showWinner ? true : averageRating > 0,
+              // For THIS WEEK: always start with isVoted=false, let the card component check user's actual vote
+              isVoted: showWinner ? true : false,
               isWinner: false, // Will be set after sorting
               prize: undefined, // Will be set after sorting
               isRealContestant: true
