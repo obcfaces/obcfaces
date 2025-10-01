@@ -3148,11 +3148,24 @@ const Admin = () => {
                     // Get dynamic filters based on available data - использукм мемоизированный результат
                     const dynamicFilters = getDynamicPastWeekFilters;
                     
+                    // Calculate participant counts for each filter
+                    const filterCounts = dynamicFilters.map(filter => {
+                      if (filter.id === 'all') {
+                        const count = weeklyParticipants.filter(p => p.admin_status === 'past').length;
+                        return { ...filter, count };
+                      }
+                      
+                      const count = weeklyParticipants.filter(p => 
+                        p.admin_status === 'past' && p.week_interval === filter.weekInterval
+                      ).length;
+                      return { ...filter, count };
+                    });
+                    
                     return (
                       <>
                         {/* Desktop filters */}
                         <div className="hidden md:flex gap-2 flex-wrap">
-                          {dynamicFilters.map((filter) => {
+                          {filterCounts.map((filter) => {
                             // Extract the week label and date range
                             const match = filter.label.match(/^(.+?)\s*\((.+?)\)$/);
                             const weekLabel = match ? match[1] : filter.label;
@@ -3164,8 +3177,12 @@ const Admin = () => {
                                   variant={pastWeekFilter === filter.id ? 'default' : 'outline'}
                                   size="sm"
                                   onClick={() => setPastWeekFilter(filter.id)}
+                                  className="gap-2"
                                 >
                                   {weekLabel}
+                                  <Badge variant="secondary" className="ml-1 px-1.5 py-0.5 text-xs">
+                                    {filter.count}
+                                  </Badge>
                                 </Button>
                                 {dateRange && (
                                   <TooltipProvider>
@@ -3197,7 +3214,7 @@ const Admin = () => {
                         
                         {/* Mobile filters */}
                          <div className="md:hidden grid grid-cols-2 gap-2">
-                          {dynamicFilters.map((filter) => {
+                          {filterCounts.map((filter) => {
                             // Extract the week label and date range for mobile
                             const match = filter.mobileLabel.match(/^(.+?)\s*\((.+?)\)$/);
                             const weekLabel = match ? match[1] : filter.mobileLabel;
@@ -3209,9 +3226,12 @@ const Admin = () => {
                                   variant={pastWeekFilter === filter.id ? 'default' : 'outline'}
                                   size="sm"
                                   onClick={() => setPastWeekFilter(filter.id)}
-                                  className="text-xs flex-1"
+                                  className="text-xs flex-1 gap-1"
                                 >
                                   {weekLabel}
+                                  <Badge variant="secondary" className="ml-1 px-1 py-0 text-xs">
+                                    {filter.count}
+                                  </Badge>
                                 </Button>
                                 {dateRange && (
                                   <TooltipProvider>
