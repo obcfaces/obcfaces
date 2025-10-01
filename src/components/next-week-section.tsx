@@ -125,10 +125,16 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
         console.log('Loading next week participants...');
         console.log('User ID:', user?.id);
 
-        // Загружаем участников со статусом next week и next week on site для всех пользователей
+        // Загружаем участников со статусом next week и next week on site с данными профиля
         const { data, error: fetchError } = await supabase
           .from('weekly_contest_participants')
-          .select('*')
+          .select(`
+            *,
+            profiles:user_id (
+              photo_1_url,
+              photo_2_url
+            )
+          `)
           .in('admin_status', ['next week', 'next week on site'])
           .eq('is_active', true);
 
@@ -154,11 +160,21 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
         // Convert database participants to candidate format using application_data
         const candidatesFromDB = actualNextWeekCandidates.map(participant => {
           const appData = participant.application_data || {};
+          const profileData = participant.profiles || {};
+          
+          // Use photos from application_data, fallback to profile photos
+          const photo1 = appData.photo1_url || profileData.photo_1_url;
+          const photo2 = appData.photo2_url || profileData.photo_2_url;
+          
           console.log('Next week participant:', {
             id: participant.id,
             name: `${appData.first_name} ${appData.last_name}`,
-            photo1: appData.photo1_url,
-            photo2: appData.photo2_url
+            photo1_from_app: appData.photo1_url,
+            photo2_from_app: appData.photo2_url,
+            photo1_from_profile: profileData.photo_1_url,
+            photo2_from_profile: profileData.photo_2_url,
+            photo1_final: photo1,
+            photo2_final: photo2
           });
           
           return {
@@ -169,10 +185,10 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
             country: appData.country === 'PH' ? 'Philippines' : appData.country,
             city: appData.city,
             location: `${appData.city || ''}, ${appData.country === 'PH' ? 'Philippines' : appData.country || ''}`,
-            facePhoto: appData.photo1_url,
-            fullPhoto: appData.photo2_url,
-            faceImage: appData.photo1_url,
-            fullBodyImage: appData.photo2_url,
+            facePhoto: photo1,
+            fullPhoto: photo2,
+            faceImage: photo1,
+            fullBodyImage: photo2,
             height: appData.height_cm,
             weight: appData.weight_kg,
             status: participant.admin_status
