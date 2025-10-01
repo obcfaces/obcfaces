@@ -451,6 +451,17 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
               totalVotes = ratingStats[0].total_votes;
             }
             
+            // Log data for debugging
+            console.log('Contestant data for THIS WEEK:', {
+              name: `${appData.first_name || 'Unknown'} ${appData.last_name || ''}`.trim(),
+              photo1_url: appData.photo1_url,
+              photo2_url: appData.photo2_url,
+              profile_photo_1_url: profileData.photo_1_url,
+              profile_photo_2_url: profileData.photo_2_url,
+              appData: appData,
+              profileData: profileData
+            });
+            
             const contestantData = {
               rank: contestant.final_rank || 0,
               name: `${appData.first_name || 'Unknown'} ${appData.last_name || ''}`.trim(),
@@ -463,8 +474,8 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
               rating: averageRating,
               averageRating: averageRating,
               totalVotes: totalVotes,
-              faceImage: appData.photo1_url || profileData.photo_1_url || contestant1Face,
-              fullBodyImage: appData.photo2_url || profileData.photo_2_url || contestant1Full,
+              faceImage: appData.photo1_url || profileData.photo_1_url || testContestantFace,
+              fullBodyImage: appData.photo2_url || profileData.photo_2_url || testContestantFull,
               additionalPhotos: [],
               // For THIS WEEK: always start with isVoted=false, let the card component check user's actual vote
               isVoted: showWinner ? true : false,
