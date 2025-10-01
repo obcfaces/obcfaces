@@ -162,9 +162,9 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
           const appData = participant.application_data || {};
           const profileData = participant.profiles || {};
           
-          // Use photos from application_data, fallback to profile photos
-          const photo1 = appData.photo1_url || profileData.photo_1_url;
-          const photo2 = appData.photo2_url || profileData.photo_2_url;
+          // Use photos from application_data, fallback to profile photos (same as THIS WEEK section)
+          const photo1 = appData.photo1_url || profileData.photo_1_url || contestant1Face;
+          const photo2 = appData.photo2_url || profileData.photo_2_url || contestant1Full;
           
           console.log('Next week participant:', {
             id: participant.id,
@@ -180,18 +180,18 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
           return {
             id: participant.id,
             participant_id: participant.id,
+            profileId: participant.id,
             name: `${appData.first_name || ''} ${appData.last_name || ''}`.trim(),
             age: appData.birth_year ? new Date().getFullYear() - parseInt(appData.birth_year) : null,
             country: appData.country === 'PH' ? 'Philippines' : appData.country,
             city: appData.city,
             location: `${appData.city || ''}, ${appData.country === 'PH' ? 'Philippines' : appData.country || ''}`,
-            facePhoto: photo1,
-            fullPhoto: photo2,
             faceImage: photo1,
             fullBodyImage: photo2,
             height: appData.height_cm,
             weight: appData.weight_kg,
-            status: participant.admin_status
+            status: participant.admin_status,
+            isRealContestant: true
           };
         });
 
