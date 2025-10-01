@@ -1423,12 +1423,17 @@ const Admin = () => {
         throw error;
       }
 
-      // Filter for both 'next week' and 'next week on site' statuses
+      // Filter for both 'next week' and 'next week on site' statuses, включая неактивных
       const nextWeekData = (participants || []).filter((p: any) => 
-        p.admin_status === 'next week' || p.admin_status === 'next week on site'
+        (p.admin_status === 'next week' || p.admin_status === 'next week on site')
       );
       
-      console.log('Fetched next week participants:', nextWeekData?.length || 0);
+      console.log('Fetched next week participants (with both statuses):', nextWeekData?.length || 0);
+      console.log('Next week participants data:', nextWeekData.map((p: any) => ({ 
+        name: `${p.first_name} ${p.last_name}`, 
+        admin_status: p.admin_status,
+        is_active: p.is_active 
+      })));
       setNextWeekParticipants(nextWeekData);
     } catch (error) {
       console.error('Error in fetchNextWeekParticipants:', error);
