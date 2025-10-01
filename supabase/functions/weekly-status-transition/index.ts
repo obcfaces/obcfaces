@@ -34,6 +34,7 @@ serve(async (req) => {
       thisWeekToPast: 0,
       nextWeekOnSiteToThisWeek: 0,
       nextWeekToNextWeekOnSite: 0,
+      preNextWeekToNextWeek: 0,
       approvedToThisWeek: 0
     }
 
@@ -140,19 +141,19 @@ serve(async (req) => {
       }
     }
 
-    // 3. Переводим "next week" → "next week on site" с новым интервалом
-    const { data: nextWeekParticipants, error: nextWeekError } = await supabase
+    // 3. Переводим "pre next week" → "next week" с новым интервалом
+    const { data: preNextWeekParticipants, error: preNextWeekError } = await supabase
       .from('weekly_contest_participants')
       .select('id, status_history')
-      .eq('admin_status', 'next week')
+      .eq('admin_status', 'pre next week')
       .eq('is_active', true)
 
-    if (nextWeekError) {
-      console.error('Error fetching next week participants:', nextWeekError)
-      throw nextWeekError
+    if (preNextWeekError) {
+      console.error('Error fetching pre next week participants:', preNextWeekError)
+      throw preNextWeekError
     }
 
-    for (const participant of nextWeekParticipants || []) {
+    for (const participant of preNextWeekParticipants || []) {
       // Parse existing status_history
       let statusHistory: any = {}
       try {
@@ -165,7 +166,7 @@ serve(async (req) => {
       }
 
       // Add automatic transition to history
-      statusHistory['next week on site'] = {
+      statusHistory['next week'] = {
         changed_at: new Date().toISOString(),
         changed_by: null,
         change_reason: 'Automatic weekly transition (weekly-status-transition function)',
@@ -176,7 +177,7 @@ serve(async (req) => {
       const { error: updateError } = await supabase
         .from('weekly_contest_participants')
         .update({
-          admin_status: 'next week on site',
+          admin_status: 'next week',
           week_interval: weekInterval,
           status_history: statusHistory
         })
@@ -185,8 +186,8 @@ serve(async (req) => {
       if (updateError) {
         console.error(`Error updating participant ${participant.id}:`, updateError)
       } else {
-        transitions.nextWeekToNextWeekOnSite++
-        console.log(`Moved participant ${participant.id} from "next week" to "next week on site" with interval ${weekInterval}`)
+        transitions.preNextWeekToNextWeek++
+        console.log(`Moved participant ${participant.id} from "pre next week" to "next week" with interval ${weekInterval}`)
       }
     }
 
@@ -270,7 +271,7 @@ serve(async (req) => {
       weekInterval,
       transitions,
       message: `Weekly transition completed for week ${weekInterval}`,
-      totalTransitions: transitions.thisWeekToPast + transitions.nextWeekOnSiteToThisWeek + transitions.nextWeekToNextWeekOnSite + transitions.approvedToThisWeek
+      totalTransitions: transitions.thisWeekToPast + transitions.nextWeekOnSiteToThisWeek + transitions.preNextWeekToNextWeek + transitions.approvedToThisWeek
     }
 
     console.log('Weekly transition summary:', summary)
