@@ -1433,71 +1433,21 @@ const Admin = () => {
     try {
       console.log('Fetching next week participants...');
       
-      // Получаем всех участников со статусами 'next week' и 'next week on site' независимо от недели
-      const { data: participants, error } = await supabase
-        .from('weekly_contest_participants')
-        .select(`
-          *,
-          profiles:user_id (
-            id,
-            first_name,
-            last_name,
-            display_name,
-            photo_1_url,
-            photo_2_url,
-            avatar_url,
-            age,
-            city,
-            country,
-            height_cm,
-            weight_kg
-          )
-        `)
-        .in('admin_status', ['next week', 'next week on site'])
-        .order('created_at', { ascending: false });
+      // Get participants using RPC function for proper join
+      const { data: participants, error } = await supabase.rpc('get_weekly_contest_participants_admin', { weeks_offset: 0 });
       
       if (error) {
         console.error('Error fetching next week participants:', error);
         throw error;
       }
 
-      // Форматируем данные для отображения
-      const nextWeekData = (participants || []).map((p: any) => {
-        const profile = p.profiles;
-        const appData = p.application_data || {};
-        
-        return {
-          participant_id: p.id,
-          user_id: p.user_id,
-          admin_status: p.admin_status,
-          week_interval: p.week_interval,
-          is_active: p.is_active,
-          status_assigned_date: p.created_at,
-          first_name: profile?.first_name || appData.first_name,
-          last_name: profile?.last_name || appData.last_name,
-          display_name: profile?.display_name,
-          photo_1_url: profile?.photo_1_url || appData.photo1_url,
-          photo_2_url: profile?.photo_2_url || appData.photo2_url,
-          avatar_url: profile?.avatar_url,
-          age: profile?.age || (appData.birth_year ? new Date().getFullYear() - parseInt(appData.birth_year) : 0),
-          city: profile?.city || appData.city,
-          country: profile?.country || appData.country,
-          height_cm: profile?.height_cm || appData.height_cm,
-          weight_kg: profile?.weight_kg || appData.weight_kg,
-          application_data: appData,
-          average_rating: p.average_rating || 0,
-          total_votes: p.total_votes || 0
-        };
-      });
+      // Filter for next week statuses
+      const nextWeekData = (participants || []).filter((p: any) => 
+        p.admin_status === 'next week' || p.admin_status === 'next week on site'
+      );
       
-      console.log('Fetched next week participants (with both statuses):', nextWeekData?.length || 0);
-      console.log('Next week participants data:', nextWeekData.map((p: any) => ({ 
-        name: `${p.first_name} ${p.last_name}`, 
-        admin_status: p.admin_status,
-        is_active: p.is_active,
-        week_interval: p.week_interval
-      })));
       
+      console.log('Fetched next week participants:', nextWeekData?.length || 0);
       setNextWeekParticipants(nextWeekData);
     } catch (error) {
       console.error('Error in fetchNextWeekParticipants:', error);
