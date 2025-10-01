@@ -121,7 +121,17 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
       const userIds = participants.map(p => p.user_id);
       const { data: profilesData } = await (supabase.rpc as any)('get_public_contest_participant_photos', { participant_user_ids: userIds });
       
-      const profiles = (profilesData || []) as Array<{ id: string; photo_1_url: string | null; photo_2_url: string | null; avatar_url: string | null }>;
+      const profiles = (profilesData || []) as Array<{ 
+        id: string; 
+        photo_1_url: string | null; 
+        photo_2_url: string | null; 
+        avatar_url: string | null;
+        age: number | null;
+        city: string | null;
+        country: string | null;
+        height_cm: number | null;
+        weight_kg: number | null;
+      }>;
 
       // Attach profiles to participants
       const participantsWithProfiles = participants.map(participant => ({
@@ -164,7 +174,17 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
       const userIds = participants.map(p => p.user_id);
       const { data: profilesData } = await (supabase.rpc as any)('get_public_contest_participant_photos', { participant_user_ids: userIds });
       
-      const profiles = (profilesData || []) as Array<{ id: string; photo_1_url: string | null; photo_2_url: string | null; avatar_url: string | null }>;
+      const profiles = (profilesData || []) as Array<{ 
+        id: string; 
+        photo_1_url: string | null; 
+        photo_2_url: string | null; 
+        avatar_url: string | null;
+        age: number | null;
+        city: string | null;
+        country: string | null;
+        height_cm: number | null;
+        weight_kg: number | null;
+      }>;
 
       // Attach profiles to participants
       const participantsWithProfiles = participants.map(participant => ({
@@ -207,7 +227,17 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
       const userIds = participants.map(p => p.user_id);
       const { data: profilesData, error: profilesError } = await (supabase.rpc as any)('get_public_contest_participant_photos', { participant_user_ids: userIds });
       
-      const profiles = (profilesData || []) as Array<{ id: string; photo_1_url: string | null; photo_2_url: string | null; avatar_url: string | null }>;
+      const profiles = (profilesData || []) as Array<{ 
+        id: string; 
+        photo_1_url: string | null; 
+        photo_2_url: string | null; 
+        avatar_url: string | null;
+        age: number | null;
+        city: string | null;
+        country: string | null;
+        height_cm: number | null;
+        weight_kg: number | null;
+      }>;
 
       if (profilesError) {
         console.error('Error loading profiles for 2 weeks ago:', profilesError);
@@ -261,7 +291,17 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
       const userIds = participants.map(p => p.user_id);
       const { data: profilesData, error: profilesError } = await (supabase.rpc as any)('get_public_contest_participant_photos', { participant_user_ids: userIds });
       
-      const profiles = (profilesData || []) as Array<{ id: string; photo_1_url: string | null; photo_2_url: string | null; avatar_url: string | null }>;
+      const profiles = (profilesData || []) as Array<{ 
+        id: string; 
+        photo_1_url: string | null; 
+        photo_2_url: string | null; 
+        avatar_url: string | null;
+        age: number | null;
+        city: string | null;
+        country: string | null;
+        height_cm: number | null;
+        weight_kg: number | null;
+      }>;
 
       if (profilesError) {
         console.error('Error loading profiles for 3 weeks ago:', profilesError);
@@ -468,11 +508,11 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
               name: `${appData.first_name || 'Unknown'} ${appData.last_name || ''}`.trim(),
               profileId: contestant.id, // Use participant id for rating queries
               userId: contestant.user_id, // Add user_id for contestant_user_id in ratings
-              country: appData.country === 'PH' ? 'Philippines' : (appData.country || 'Unknown'),
-              city: appData.city || 'Unknown',
-              age: appData.birth_year ? new Date().getFullYear() - parseInt(appData.birth_year) : 0,
-              weight: appData.weight_kg || 0,
-              height: appData.height_cm || 0,
+              country: profileData.country || (appData.country === 'PH' ? 'Philippines' : (appData.country || 'Unknown')),
+              city: profileData.city || appData.city || 'Unknown',
+              age: profileData.age || (appData.birth_year ? new Date().getFullYear() - parseInt(appData.birth_year) : 0),
+              weight: profileData.weight_kg || appData.weight_kg || 0,
+              height: profileData.height_cm || appData.height_cm || 0,
               rating: averageRating,
               averageRating: averageRating,
               totalVotes: totalVotes,
@@ -552,11 +592,11 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
               name: `${appData.first_name || 'Unknown'} ${appData.last_name || ''}`.trim(),
               profileId: contestant.id,
               userId: contestant.user_id, // Add user_id for contestant_user_id in ratings
-              country: appData.country === 'PH' ? 'Philippines' : (appData.country || 'Unknown'),
-              city: appData.city || 'Unknown',
-              age: appData.birth_year ? new Date().getFullYear() - parseInt(appData.birth_year) : 0,
-              weight: appData.weight_kg || 0,
-              height: appData.height_cm || 0,
+              country: profileData.country || (appData.country === 'PH' ? 'Philippines' : (appData.country || 'Unknown')),
+              city: profileData.city || appData.city || 'Unknown',
+              age: profileData.age || (appData.birth_year ? new Date().getFullYear() - parseInt(appData.birth_year) : 0),
+              weight: profileData.weight_kg || appData.weight_kg || 0,
+              height: profileData.height_cm || appData.height_cm || 0,
               rating: averageRating,
               averageRating: averageRating,
               totalVotes: totalVotes,
@@ -620,11 +660,11 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
               name: `${appData.first_name || 'Unknown'} ${appData.last_name || ''}`.trim(),
               profileId: contestant.id,
               userId: contestant.user_id, // Add user_id for contestant_user_id in ratings
-              country: appData.country === 'PH' ? 'Philippines' : (appData.country || 'Unknown'),
-              city: appData.city || 'Unknown',
-              age: appData.birth_year ? new Date().getFullYear() - parseInt(appData.birth_year) : 0,
-              weight: appData.weight_kg || 0,
-              height: appData.height_cm || 0,
+              country: profileData.country || (appData.country === 'PH' ? 'Philippines' : (appData.country || 'Unknown')),
+              city: profileData.city || appData.city || 'Unknown',
+              age: profileData.age || (appData.birth_year ? new Date().getFullYear() - parseInt(appData.birth_year) : 0),
+              weight: profileData.weight_kg || appData.weight_kg || 0,
+              height: profileData.height_cm || appData.height_cm || 0,
               rating: averageRating,
               averageRating: averageRating,
               totalVotes: totalVotes,
