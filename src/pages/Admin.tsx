@@ -3189,6 +3189,44 @@ const Admin = () => {
 
             <TabsContent value="pastweek" className="space-y-4">
               <div className="mb-6">
+                {/* Stats display - mobile and desktop */}
+                <div className="mb-4 p-3 bg-muted rounded-lg">
+                  <div className="text-sm text-muted-foreground">
+                    {/* Mobile stats - larger and bold with / separator */}
+                    <div className="md:hidden text-base font-bold mb-2">
+                      votes: {weeklyParticipants.filter(p => p.admin_status === 'past').reduce((sum, p) => sum + (p.total_votes || 0), 0)} / likes: {(() => {
+                        // Calculate total likes for past participants
+                        const pastParticipants = weeklyParticipants.filter(p => p.admin_status === 'past');
+                        return pastParticipants.reduce((sum, p) => {
+                          // If participant has status_history with like counts, sum them
+                          const statusHistory = p.status_history || {};
+                          let likeCount = 0;
+                          Object.values(statusHistory).forEach((entry: any) => {
+                            if (entry?.like_count) likeCount += entry.like_count;
+                          });
+                          return sum + likeCount;
+                        }, 0);
+                      })()}
+                    </div>
+                    
+                    {/* Desktop stats - original style */}
+                    <div className="hidden md:block text-xs">
+                      votes: {weeklyParticipants.filter(p => p.admin_status === 'past').reduce((sum, p) => sum + (p.total_votes || 0), 0)}, 
+                      likes: {(() => {
+                        const pastParticipants = weeklyParticipants.filter(p => p.admin_status === 'past');
+                        return pastParticipants.reduce((sum, p) => {
+                          const statusHistory = p.status_history || {};
+                          let likeCount = 0;
+                          Object.values(statusHistory).forEach((entry: any) => {
+                            if (entry?.like_count) likeCount += entry.like_count;
+                          });
+                          return sum + likeCount;
+                        }, 0);
+                      })()}
+                    </div>
+                  </div>
+                </div>
+                
                 {/* Фильтр по admin_status */}
                 <div className="mb-4">
                   <Label className="text-sm font-medium mb-2 block">Admin Status Filter:</Label>
