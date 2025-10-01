@@ -134,13 +134,13 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
     try {
       console.log('Loading 1 WEEK AGO participants for all users...');
       
-      // Get participants with admin_status = 'past' and week interval matching 1 WEEK AGO
+      // Get participants with admin_status = 'past' and week interval matching 1 WEEK AGO (29/09-05/10/25)
       const { data: participants, error } = await supabase
         .from('weekly_contest_participants')
         .select('*')
         .eq('admin_status', 'past')
         .eq('is_active', true)
-        .like('week_interval', '%22/09-28/09/25%')
+        .like('week_interval', '%29/09-05/10/25%')
         .limit(10);
 
       if (error) {
