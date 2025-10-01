@@ -3359,23 +3359,29 @@ const Admin = () => {
                           {/* Column 1: Photos (25ch) */}
                           <div className="w-[25ch] flex-shrink-0 p-0">
                             <div className="flex gap-px">
-                              {(appData.photo1_url || appData.photo_1_url) && (
+                              {(participantProfile?.photo_1_url || appData.photo1_url || appData.photo_1_url) && (
                                 <div className="w-full">
                                   <img 
-                                src={appData.photo1_url || appData.photo_1_url}
+                                src={participantProfile?.photo_1_url || appData.photo1_url || appData.photo_1_url}
                                     alt="Portrait"
                                     className="w-full h-36 object-contain cursor-pointer hover:opacity-90 transition-opacity"
-                                    onClick={() => openPhotoModal([appData.photo1_url || appData.photo_1_url, appData.photo2_url || appData.photo_2_url].filter(Boolean), 0, `${appData.first_name} ${appData.last_name}`)}
+                                    onClick={() => openPhotoModal([
+                                      participantProfile?.photo_1_url || appData.photo1_url || appData.photo_1_url,
+                                      participantProfile?.photo_2_url || appData.photo2_url || appData.photo_2_url
+                                    ].filter(Boolean), 0, `${appData.first_name} ${appData.last_name}`)}
                                   />
                                 </div>
                               )}
-                              {(appData.photo2_url || appData.photo_2_url) && (
+                              {(participantProfile?.photo_2_url || appData.photo2_url || appData.photo_2_url) && (
                                 <div className="w-full">
                                   <img 
-                                    src={appData.photo2_url || appData.photo_2_url} 
+                                    src={participantProfile?.photo_2_url || appData.photo2_url || appData.photo_2_url} 
                                     alt="Full length"
                                     className="w-full h-36 object-cover cursor-pointer hover:opacity-90 transition-opacity"
-                                    onClick={() => openPhotoModal([appData.photo1_url || appData.photo_1_url, appData.photo2_url || appData.photo_2_url].filter(Boolean), 1, `${appData.first_name} ${appData.last_name}`)}
+                                    onClick={() => openPhotoModal([
+                                      participantProfile?.photo_1_url || appData.photo1_url || appData.photo_1_url,
+                                      participantProfile?.photo_2_url || appData.photo2_url || appData.photo_2_url
+                                    ].filter(Boolean), 1, `${appData.first_name} ${appData.last_name}`)}
                                   />
                                 </div>
                               )}
@@ -3386,7 +3392,7 @@ const Admin = () => {
                           <div className="w-[25ch] flex-shrink-0 p-4">
                             <div className="flex items-center gap-2 mb-1">
                               <Avatar className="h-6 w-6 flex-shrink-0">
-                                <AvatarImage src={appData.photo1_url || appData.photo_1_url || participantProfile?.avatar_url || ''} />
+                                <AvatarImage src={participantProfile?.photo_1_url || appData.photo1_url || appData.photo_1_url || participantProfile?.avatar_url || ''} />
                                 <AvatarFallback className="text-xs">
                                   {appData.first_name?.charAt(0) || 'U'}
                                 </AvatarFallback>
@@ -3747,12 +3753,15 @@ const Admin = () => {
                         <div className="md:hidden flex">
                           {/* Photos section */}
                           <div className="w-24 flex-shrink-0">
-                            {(appData.photo1_url || appData.photo_1_url) && (
+                            {(participantProfile?.photo_1_url || appData.photo1_url || appData.photo_1_url) && (
                               <img 
-                                src={appData.photo1_url || appData.photo_1_url}
+                                src={participantProfile?.photo_1_url || appData.photo1_url || appData.photo_1_url}
                                 alt="Portrait" 
                                 className="w-full h-[149px] object-cover rounded-l-lg cursor-pointer hover:opacity-90 transition-opacity"
-                                onClick={() => openPhotoModal([appData.photo1_url || appData.photo_1_url, appData.photo2_url || appData.photo_2_url].filter(Boolean), 0, `${appData.first_name} ${appData.last_name}`)}
+                                onClick={() => openPhotoModal([
+                                  participantProfile?.photo_1_url || appData.photo1_url || appData.photo_1_url,
+                                  participantProfile?.photo_2_url || appData.photo2_url || appData.photo_2_url
+                                ].filter(Boolean), 0, `${appData.first_name} ${appData.last_name}`)}
                               />
                             )}
                           </div>
@@ -3761,7 +3770,7 @@ const Admin = () => {
                           <div className="flex-1 p-3">
                             <div className="flex items-center gap-2 mb-1">
                               <Avatar className="h-5 w-5 flex-shrink-0">
-                                <AvatarImage src={appData.photo1_url || appData.photo_1_url || participantProfile?.avatar_url || ''} />
+                                <AvatarImage src={participantProfile?.photo_1_url || appData.photo1_url || appData.photo_1_url || participantProfile?.avatar_url || ''} />
                                 <AvatarFallback className="text-xs">
                                   {appData.first_name?.charAt(0) || 'U'}
                                 </AvatarFallback>
@@ -4074,23 +4083,29 @@ const Admin = () => {
                               {/* Column 1: Photos (25ch) */}
                               <div className="w-[25ch] flex-shrink-0 p-0">
                                 <div className="flex gap-px">
-                                  {(appData.photo1_url || appData.photo_1_url) && (
+                                  {(participantProfile?.photo_1_url || appData.photo1_url || appData.photo_1_url) && (
                                     <div className="w-full">
                                       <img 
-                                        src={appData.photo1_url || appData.photo_1_url}
+                                        src={participantProfile?.photo_1_url || appData.photo1_url || appData.photo_1_url}
                                         alt="Portrait"
                                         className="w-full h-36 object-contain cursor-pointer hover:opacity-90 transition-opacity"
-                                        onClick={() => openPhotoModal([appData.photo1_url || appData.photo_1_url, appData.photo2_url || appData.photo_2_url].filter(Boolean), 0, `${appData.first_name} ${appData.last_name}`)}
+                                        onClick={() => openPhotoModal([
+                                          participantProfile?.photo_1_url || appData.photo1_url || appData.photo_1_url,
+                                          participantProfile?.photo_2_url || appData.photo2_url || appData.photo_2_url
+                                        ].filter(Boolean), 0, `${appData.first_name} ${appData.last_name}`)}
                                       />
                                     </div>
                                   )}
-                                  {(appData.photo2_url || appData.photo_2_url) && (
+                                  {(participantProfile?.photo_2_url || appData.photo2_url || appData.photo_2_url) && (
                                     <div className="w-full">
                                       <img 
-                                        src={appData.photo2_url || appData.photo_2_url} 
+                                        src={participantProfile?.photo_2_url || appData.photo2_url || appData.photo_2_url} 
                                         alt="Full length"
                                         className="w-full h-36 object-cover cursor-pointer hover:opacity-90 transition-opacity"
-                                        onClick={() => openPhotoModal([appData.photo1_url || appData.photo_1_url, appData.photo2_url || appData.photo_2_url].filter(Boolean), 1, `${appData.first_name} ${appData.last_name}`)}
+                                        onClick={() => openPhotoModal([
+                                          participantProfile?.photo_1_url || appData.photo1_url || appData.photo_1_url,
+                                          participantProfile?.photo_2_url || appData.photo2_url || appData.photo_2_url
+                                        ].filter(Boolean), 1, `${appData.first_name} ${appData.last_name}`)}
                                       />
                                     </div>
                                   )}
@@ -4101,7 +4116,7 @@ const Admin = () => {
                               <div className="w-[25ch] flex-shrink-0 p-4">
                                 <div className="flex items-center gap-2 mb-1">
                                   <Avatar className="h-6 w-6 flex-shrink-0">
-                                    <AvatarImage src={appData.photo1_url || appData.photo_1_url || participantProfile?.avatar_url || ''} />
+                                    <AvatarImage src={participantProfile?.photo_1_url || appData.photo1_url || appData.photo_1_url || participantProfile?.avatar_url || ''} />
                                     <AvatarFallback className="text-xs">
                                       {appData.first_name?.charAt(0) || 'U'}
                                     </AvatarFallback>
@@ -4196,23 +4211,29 @@ const Admin = () => {
                               <div className="flex w-full">
                                 {/* Photos section */}
                                 <div className="flex gap-px w-[50vw] flex-shrink-0">
-                                  {(appData.photo1_url || appData.photo_1_url) && (
+                                  {(participantProfile?.photo_1_url || appData.photo1_url || appData.photo_1_url) && (
                                     <div className="w-1/2">
                                       <img 
-                                        src={appData.photo1_url || appData.photo_1_url} 
+                                        src={participantProfile?.photo_1_url || appData.photo1_url || appData.photo_1_url} 
                                         alt="Portrait" 
                                         className="w-full h-36 object-contain cursor-pointer hover:opacity-90 transition-opacity"
-                                        onClick={() => openPhotoModal([appData.photo1_url || appData.photo_1_url, appData.photo2_url || appData.photo_2_url].filter(Boolean), 0, `${appData.first_name} ${appData.last_name}`)}
+                                        onClick={() => openPhotoModal([
+                                          participantProfile?.photo_1_url || appData.photo1_url || appData.photo_1_url,
+                                          participantProfile?.photo_2_url || appData.photo2_url || appData.photo_2_url
+                                        ].filter(Boolean), 0, `${appData.first_name} ${appData.last_name}`)}
                                       />
                                     </div>
                                   )}
-                                  {(appData.photo2_url || appData.photo_2_url) && (
+                                  {(participantProfile?.photo_2_url || appData.photo2_url || appData.photo_2_url) && (
                                     <div className="w-1/2">
                                       <img 
-                                        src={appData.photo2_url || appData.photo_2_url} 
+                                        src={participantProfile?.photo_2_url || appData.photo2_url || appData.photo_2_url} 
                                         alt="Full length" 
                                         className="w-full h-36 object-cover cursor-pointer hover:opacity-90 transition-opacity"
-                                        onClick={() => openPhotoModal([appData.photo1_url || appData.photo_1_url, appData.photo2_url || appData.photo_2_url].filter(Boolean), 1, `${appData.first_name} ${appData.last_name}`)}
+                                        onClick={() => openPhotoModal([
+                                          participantProfile?.photo_1_url || appData.photo1_url || appData.photo_1_url,
+                                          participantProfile?.photo_2_url || appData.photo2_url || appData.photo_2_url
+                                        ].filter(Boolean), 1, `${appData.first_name} ${appData.last_name}`)}
                                       />
                                     </div>
                                   )}
