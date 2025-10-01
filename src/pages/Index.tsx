@@ -86,7 +86,16 @@ const Index = () => {
       />
       
       {/* Content area that changes based on active section */}
-      {activeSection === "Contest" && (
+      {activeSection === "Contest" && !isAdmin && (
+        <div className="max-w-4xl mx-auto px-6 py-12 text-center">
+          <h2 className="text-3xl font-bold mb-4">Contest Section</h2>
+          <p className="text-muted-foreground mb-6">
+            The contest section is currently available to administrators only.
+          </p>
+        </div>
+      )}
+      
+      {activeSection === "Contest" && isAdmin && (
         <>
           <div className="max-w-6xl mx-auto px-6 pt-6 pb-6 rounded-lg shadow-lg shadow-foreground/15">
             <ContestFilters
