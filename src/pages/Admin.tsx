@@ -1841,7 +1841,7 @@ const Admin = () => {
           <Tabs defaultValue="applications" className="space-y-6">
             {/* Mobile layout: Single row with all tabs */}
             <div className="md:hidden">
-              <TabsList className="grid grid-cols-7 w-full">
+              <TabsList className="grid grid-cols-8 w-full">
                 <TabsTrigger value="applications" className="text-xs">
                   New
                 </TabsTrigger>
@@ -1853,6 +1853,9 @@ const Admin = () => {
                 </TabsTrigger>
                 <TabsTrigger value="weekly" className="text-xs">
                   This
+                </TabsTrigger>
+                <TabsTrigger value="pastweek" className="text-xs">
+                  Past
                 </TabsTrigger>
                 <TabsTrigger value="all" className="text-xs">
                   All
@@ -1879,6 +1882,9 @@ const Admin = () => {
               </TabsTrigger>
               <TabsTrigger value="weekly">
                 This
+              </TabsTrigger>
+              <TabsTrigger value="pastweek">
+                Past
               </TabsTrigger>
               <TabsTrigger value="all">
                 All
