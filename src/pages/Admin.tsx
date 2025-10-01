@@ -3351,18 +3351,18 @@ const Admin = () => {
                   participantsToShow = [...allParticipants, ...applicationParticipants];
                   console.log('Showing ALL cards:', participantsToShow.length);
                 } else {
-                  // For debugging, let's show some past participants even if the filter doesn't match exactly
-                  const debugPastParticipants = weeklyParticipants.filter(p => {
+                  // Use all weekly participants with 'past' status for filtering
+                  // This ensures we get all past participants from database with their week_interval
+                  participantsToShow = weeklyParticipants.filter(p => {
                     const status = p.admin_status || 'this week';
-                    // Включаем участников со статусами 'past' и 'this week' для фильтрации по интервалам
-                    return status === 'past' || status === 'this week';
+                    return status === 'past';
                   });
                   
-                  console.log('Debug past participants found:', debugPastParticipants.length);
-                  console.log('Past week participants from state:', pastWeekParticipants.length);
-                  
-                  // Use actual past participants if available, otherwise use debug participants for display
-                  participantsToShow = pastWeekParticipants.length > 0 ? pastWeekParticipants : debugPastParticipants;
+                  console.log('Past participants to show:', participantsToShow.length);
+                  console.log('Past participants with intervals:', participantsToShow.map(p => ({ 
+                    name: `${p.application_data?.first_name} ${p.application_data?.last_name}`,
+                    interval: p.week_interval 
+                  })));
                 }
                 
                 // Apply past week filter based on week intervals and admin_status
