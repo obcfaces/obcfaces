@@ -162,9 +162,9 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
           const appData = participant.application_data || {};
           const profileData = participant.profiles || {};
           
-          // Use photos from application_data, fallback to profile photos (same as THIS WEEK section)
-          const photo1 = appData.photo1_url || profileData.photo_1_url || contestant1Face;
-          const photo2 = appData.photo2_url || profileData.photo_2_url || contestant1Full;
+          // Use photos from application_data, fallback to profile photos (NO test images)
+          const photo1 = appData.photo1_url || profileData.photo_1_url;
+          const photo2 = appData.photo2_url || profileData.photo_2_url;
           
           console.log('Next week participant:', {
             id: participant.id,
@@ -195,11 +195,13 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
           };
         });
 
-        console.log('Candidates from DB:', candidatesFromDB);
+        // Filter out candidates without photos
+        const candidatesWithPhotos = candidatesFromDB.filter(c => c.faceImage && c.fullBodyImage);
+        console.log('Candidates with photos:', candidatesWithPhotos);
 
         if (!user) {
           // Show only first candidate for non-authenticated users
-          const firstCandidate = candidatesFromDB.length > 0 ? [candidatesFromDB[0]] : [];
+          const firstCandidate = candidatesWithPhotos.length > 0 ? [candidatesWithPhotos[0]] : [];
           console.log('Showing first candidate for non-auth user:', firstCandidate);
           setFilteredCandidates(firstCandidate);
           setRemainingCandidates(firstCandidate.length);
@@ -215,13 +217,13 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
           const votedNames = votes?.map(vote => vote.candidate_name) || [];
           console.log('User voted names:', votedNames);
 
-          // Filter out voted candidates
-          const unvotedCandidatesFromDB = candidatesFromDB.filter(candidate => 
+          // Filter out voted candidates and candidates without photos
+          const unvotedCandidatesWithPhotos = candidatesWithPhotos.filter(candidate => 
             !votedNames.includes(candidate.name)
           );
           
-          // Show only real candidates, no fallback to test candidates
-          const finalCandidates = unvotedCandidatesFromDB;
+          // Show only real candidates with photos
+          const finalCandidates = unvotedCandidatesWithPhotos;
           
           console.log('Final candidates for auth user:', finalCandidates);
           setFilteredCandidates(finalCandidates);
