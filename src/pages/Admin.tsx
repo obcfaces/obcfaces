@@ -1077,10 +1077,36 @@ const Admin = () => {
       setUser(session.user);
       console.log('checkAdminAccess: User set, checking roles...');
 
-      const { data: roles, error: rolesError } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', session.user.id);
+      // Add timeout to prevent hanging
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Timeout')), 5000)
+      );
+
+      let roles;
+      let rolesError;
+      
+      try {
+        const result = await Promise.race([
+          supabase
+            .from('user_roles')
+            .select('role')
+            .eq('user_id', session.user.id)
+            .limit(1),
+          timeoutPromise
+        ]);
+        roles = (result as any).data;
+        rolesError = (result as any).error;
+      } catch (error) {
+        console.error('checkAdminAccess: Timeout or error fetching roles', error);
+        toast({
+          title: "Error",
+          description: "Failed to check admin permissions (timeout)",
+          variant: "destructive"
+        });
+        navigate('/');
+        setLoading(false);
+        return;
+      }
 
       console.log('checkAdminAccess: Roles fetched', roles, rolesError);
 
