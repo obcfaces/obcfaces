@@ -1380,7 +1380,75 @@ const Admin = () => {
         }
       });
 
-      console.log('Total participants loaded:', allParticipants.length);
+      // IMPORTANT: Also fetch ALL participants with 'past' status to ensure we get everyone
+      const { data: pastParticipantsData, error: pastError } = await supabase
+        .from('weekly_contest_participants')
+        .select(`
+          id,
+          contest_id,
+          user_id,
+          admin_status,
+          week_interval,
+          status_week_history,
+          status_history,
+          final_rank,
+          total_votes,
+          average_rating,
+          is_active,
+          created_at,
+          application_data
+        `)
+        .eq('admin_status', 'past');
+
+      if (pastError) {
+        console.error('Error loading past participants:', pastError);
+      } else if (pastParticipantsData) {
+        console.log(`Loaded ${pastParticipantsData.length} participants with 'past' status`);
+        
+        // Transform past participants to match RPC format
+        const transformedPastParticipants = pastParticipantsData.map((item: any) => {
+          const appData = item.application_data || {};
+          return {
+            participant_id: item.id,
+            contest_id: item.contest_id,
+            user_id: item.user_id,
+            first_name: appData.first_name || '',
+            last_name: appData.last_name || '',
+            age: appData.age || null,
+            country: appData.country || '',
+            state: appData.state || '',
+            city: appData.city || '',
+            height_cm: appData.height_cm || null,
+            weight_kg: appData.weight_kg || null,
+            gender: appData.gender || '',
+            marital_status: appData.marital_status || '',
+            has_children: appData.has_children || false,
+            photo_1_url: appData.photo1_url || appData.photo_1_url || '',
+            photo_2_url: appData.photo2_url || appData.photo_2_url || '',
+            avatar_url: appData.avatar_url || '',
+            final_rank: item.final_rank,
+            total_votes: item.total_votes || 0,
+            average_rating: item.average_rating || '0',
+            status_assigned_date: item.created_at,
+            contest_start_date: item.created_at,
+            is_active: item.is_active,
+            admin_status: item.admin_status,
+            status_week_history: item.status_week_history || {},
+            status_history: item.status_history || {},
+            week_interval: item.week_interval
+          };
+        });
+        
+        // Merge with existing participants, avoiding duplicates
+        const existingIds = new Set(allParticipants.map(p => p.participant_id));
+        transformedPastParticipants.forEach(p => {
+          if (!existingIds.has(p.participant_id)) {
+            allParticipants.push(p);
+          }
+        });
+      }
+
+      console.log('Total participants loaded (including past):', allParticipants.length);
 
       // Transform RPC result to match our interface
       const participants = allParticipants.map((item: any) => ({
