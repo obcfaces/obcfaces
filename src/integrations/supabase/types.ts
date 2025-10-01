@@ -1420,6 +1420,7 @@ export type Database = {
       get_weekly_contest_participants_admin: {
         Args: { weeks_offset?: number }
         Returns: {
+          admin_status: string
           age: number
           application_data: Json
           application_status: string
@@ -1447,8 +1448,10 @@ export type Database = {
           photo_1_url: string
           photo_2_url: string
           state: string
+          status_assigned_date: string
           total_votes: number
           user_id: string
+          week_interval: string
           weight_kg: number
         }[]
       }
