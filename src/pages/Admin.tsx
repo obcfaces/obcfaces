@@ -368,6 +368,7 @@ const Admin = () => {
   const [countryFilter, setCountryFilter] = useState<string>('all');
   const [genderFilter, setGenderFilter] = useState<string>('all');
   const [adminStatusFilter, setAdminStatusFilter] = useState<string>('all');
+  const [allSectionStatusFilter, setAllSectionStatusFilter] = useState<string>('all');
   const [filteredWeeklyParticipants, setFilteredWeeklyParticipants] = useState<any[]>([]);
   const [selectedUserApplications, setSelectedUserApplications] = useState<string | null>(null);
   const [editingApplicationId, setEditingApplicationId] = useState<string | null>(null);
@@ -1811,7 +1812,7 @@ const Admin = () => {
           <Tabs defaultValue="applications" className="space-y-6">
             {/* Mobile layout: Single row with all tabs */}
             <div className="md:hidden">
-              <TabsList className="grid grid-cols-6 w-full">
+              <TabsList className="grid grid-cols-7 w-full">
                 <TabsTrigger value="applications" className="text-xs">
                   Card
                 </TabsTrigger>
@@ -1824,6 +1825,9 @@ const Admin = () => {
                 <TabsTrigger value="pastweek" className="text-xs">
                   Past
                 </TabsTrigger>
+                <TabsTrigger value="all" className="text-xs">
+                  All
+                </TabsTrigger>
                 <TabsTrigger value="registrations" className="text-xs">
                   Reg
                 </TabsTrigger>
@@ -1832,7 +1836,7 @@ const Admin = () => {
                 </TabsTrigger>
               </TabsList>
             </div>
-
+            
             {/* Desktop layout - single row */}
             <TabsList className="hidden md:flex">
               <TabsTrigger value="applications">
@@ -1846,6 +1850,9 @@ const Admin = () => {
               </TabsTrigger>
               <TabsTrigger value="pastweek">
                 Past
+              </TabsTrigger>
+              <TabsTrigger value="all">
+                All
               </TabsTrigger>
               <TabsTrigger value="registrations">
                 Reg
@@ -3662,6 +3669,298 @@ const Admin = () => {
                 )}
                 </>
               );
+              })()}
+            </TabsContent>
+
+            <TabsContent value="all" className="space-y-4">
+              <div className="mb-6">
+                <h2 className="text-xl font-semibold mb-4">All Participants</h2>
+                
+                {/* Status Filter */}
+                <div className="mb-4">
+                  <Label className="text-sm font-medium mb-2 block">Фильтр по статусу:</Label>
+                  <Select value={allSectionStatusFilter} onValueChange={setAllSectionStatusFilter}>
+                    <SelectTrigger className="w-full max-w-md">
+                      <SelectValue placeholder="Выберите статус" />
+                    </SelectTrigger>
+                    <SelectContent className="z-[9999] bg-popover border shadow-lg">
+                      <SelectItem value="all">Все статусы</SelectItem>
+                      <SelectItem value="pending">Pending</SelectItem>
+                      <SelectItem value="under_review">Under Review</SelectItem>
+                      <SelectItem value="approved">Approved</SelectItem>
+                      <SelectItem value="rejected">Rejected</SelectItem>
+                      <SelectItem value="this week">This Week</SelectItem>
+                      <SelectItem value="next week">Next Week</SelectItem>
+                      <SelectItem value="next week on site">Next Week On Site</SelectItem>
+                      <SelectItem value="past">Past</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              
+              {(() => {
+                // Combine all participants from weeklyParticipants and contestApplications
+                const allParticipants = [...weeklyParticipants];
+                
+                // Add contest applications as participants
+                const applicationParticipants = contestApplications.map(app => {
+                  const profile = profiles.find(p => p.id === app.user_id);
+                  return {
+                    id: `app-${app.id}`,
+                    user_id: app.user_id,
+                    application_data: app.application_data,
+                    admin_status: app.admin_status,
+                    participant_status: app.admin_status,
+                    status_history: {},
+                    status_week_history: {},
+                    week_interval: getParticipantWeekInterval({ admin_status: app.admin_status }),
+                    created_at: app.submitted_at,
+                    contest_id: null,
+                    final_rank: null,
+                    total_votes: 0,
+                    average_rating: 0,
+                    is_active: app.deleted_at === null
+                  };
+                });
+                
+                const combinedParticipants = [...allParticipants, ...applicationParticipants];
+                
+                // Apply status filter
+                const filteredParticipants = allSectionStatusFilter === 'all' 
+                  ? combinedParticipants 
+                  : combinedParticipants.filter(p => p.admin_status === allSectionStatusFilter);
+                
+                if (filteredParticipants.length === 0) {
+                  return (
+                    <div className="text-center py-8 text-muted-foreground">
+                      <p className="text-lg">Нет участников с выбранным статусом</p>
+                    </div>
+                  );
+                }
+
+                return (
+                  <>
+                    {filteredParticipants.map((participant) => {
+                      const participantProfile = profiles.find(p => p.id === participant.user_id);
+                      const appData = participant.application_data || {};
+                      
+                      return (
+                        <Card key={participant.id} className="overflow-hidden relative mx-0 rounded-lg h-[149px]">
+                          <CardContent className="p-0">
+                            {/* Desktop layout */}
+                            <div className="hidden md:flex md:overflow-visible">
+                              {/* Column 1: Photos (25ch) */}
+                              <div className="w-[25ch] flex-shrink-0 p-0">
+                                <div className="flex gap-px">
+                                  {(appData.photo1_url || appData.photo_1_url) && (
+                                    <div className="w-full">
+                                      <img 
+                                        src={appData.photo1_url || appData.photo_1_url}
+                                        alt="Portrait"
+                                        className="w-full h-36 object-contain cursor-pointer hover:opacity-90 transition-opacity"
+                                        onClick={() => openPhotoModal([appData.photo1_url || appData.photo_1_url, appData.photo2_url || appData.photo_2_url].filter(Boolean), 0, `${appData.first_name} ${appData.last_name}`)}
+                                      />
+                                    </div>
+                                  )}
+                                  {(appData.photo2_url || appData.photo_2_url) && (
+                                    <div className="w-full">
+                                      <img 
+                                        src={appData.photo2_url || appData.photo_2_url} 
+                                        alt="Full length"
+                                        className="w-full h-36 object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                                        onClick={() => openPhotoModal([appData.photo1_url || appData.photo_1_url, appData.photo2_url || appData.photo_2_url].filter(Boolean), 1, `${appData.first_name} ${appData.last_name}`)}
+                                      />
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+
+                              {/* Column 2: Information (25ch) */}
+                              <div className="w-[25ch] flex-shrink-0 p-4">
+                                <div className="flex items-center gap-2 mb-1">
+                                  <Avatar className="h-6 w-6 flex-shrink-0">
+                                    <AvatarImage src={appData.photo1_url || appData.photo_1_url || participantProfile?.avatar_url || ''} />
+                                    <AvatarFallback className="text-xs">
+                                      {appData.first_name?.charAt(0) || 'U'}
+                                    </AvatarFallback>
+                                  </Avatar>
+                                  <span className="text-sm font-semibold whitespace-nowrap flex items-center gap-1">
+                                    {participant.final_rank === 1 && <span className="text-yellow-500">🏆</span>}
+                                    {participant.final_rank > 1 && <span className="text-slate-500">🥈</span>}
+                                    {appData.first_name} {appData.last_name} {appData.birth_year ? new Date().getFullYear() - parseInt(appData.birth_year) : ''}
+                                  </span>
+                                </div>
+                                
+                                <div className="text-xs text-muted-foreground mb-1">
+                                  {appData.city} {appData.state} {appData.country}
+                                </div>
+
+                                <div className="text-xs text-muted-foreground mb-1">
+                                  {participantProfile?.email && (
+                                    <div className="flex items-center gap-1">
+                                      <span 
+                                        className="cursor-pointer" 
+                                        title={participantProfile.email}
+                                      >
+                                        {participantProfile.email.substring(0, 15)}...
+                                      </span>
+                                      <Copy 
+                                        className="h-3 w-3 cursor-pointer hover:text-foreground" 
+                                        onClick={() => navigator.clipboard.writeText(participantProfile.email || '')}
+                                      />
+                                    </div>
+                                  )}
+                                </div>
+
+                                <div className="flex items-center gap-2 mt-2">
+                                  <Select 
+                                    value={participant.admin_status || 'pending'}
+                                    onValueChange={(value) => {
+                                      const updateStatus = async () => {
+                                        const result = await updateParticipantStatusWithHistory(
+                                          participant.id,
+                                          value as ParticipantStatus,
+                                          `${appData.first_name} ${appData.last_name}`
+                                        );
+
+                                        if (!result.success) {
+                                          toast({
+                                            title: "Error",
+                                            description: "Failed to update participant status",
+                                            variant: "destructive"
+                                          });
+                                        } else {
+                                          fetchWeeklyParticipants();
+                                          fetchContestApplications();
+                                        }
+                                      };
+
+                                      updateStatus();
+                                    }}
+                                  >
+                                    <SelectTrigger className={`w-28 h-6 text-xs ${getStatusBackgroundColor(participant.admin_status || 'pending')}`}>
+                                      <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent className="z-[9999] bg-popover border shadow-lg">
+                                      <SelectItem value="pending">Pending</SelectItem>
+                                      <SelectItem value="under_review">Under Review</SelectItem>
+                                      <SelectItem value="approved">Approved</SelectItem>
+                                      <SelectItem value="rejected">Rejected</SelectItem>
+                                      <SelectItem value="this week">This Week</SelectItem>
+                                      <SelectItem value="next week">Next Week</SelectItem>
+                                      <SelectItem value="next week on site">Next Week On Site</SelectItem>
+                                      <SelectItem value="past">Past</SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                  
+                                  <div 
+                                    className="text-xs text-muted-foreground cursor-pointer hover:text-foreground"
+                                    onClick={() => {
+                                      setSelectedParticipantForVoters({
+                                        id: participant.id,
+                                        name: `${appData.first_name} ${appData.last_name}`
+                                      });
+                                      setVotersModalOpen(true);
+                                    }}
+                                  >
+                                    {`${(participant.average_rating || 0).toFixed(1)} (${participant.total_votes || 0})`}
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Mobile layout */}
+                            <div className="md:hidden">
+                              <div className="flex w-full">
+                                {/* Photos section */}
+                                <div className="flex gap-px w-[50vw] flex-shrink-0">
+                                  {(appData.photo1_url || appData.photo_1_url) && (
+                                    <div className="w-1/2">
+                                      <img 
+                                        src={appData.photo1_url || appData.photo_1_url} 
+                                        alt="Portrait" 
+                                        className="w-full h-36 object-contain cursor-pointer hover:opacity-90 transition-opacity"
+                                        onClick={() => openPhotoModal([appData.photo1_url || appData.photo_1_url, appData.photo2_url || appData.photo_2_url].filter(Boolean), 0, `${appData.first_name} ${appData.last_name}`)}
+                                      />
+                                    </div>
+                                  )}
+                                  {(appData.photo2_url || appData.photo_2_url) && (
+                                    <div className="w-1/2">
+                                      <img 
+                                        src={appData.photo2_url || appData.photo_2_url} 
+                                        alt="Full length" 
+                                        className="w-full h-36 object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                                        onClick={() => openPhotoModal([appData.photo1_url || appData.photo_1_url, appData.photo2_url || appData.photo_2_url].filter(Boolean), 1, `${appData.first_name} ${appData.last_name}`)}
+                                      />
+                                    </div>
+                                  )}
+                                </div>
+                                
+                                {/* Information section */}
+                                <div className="w-[50vw] flex-shrink-0 pl-2 flex flex-col h-48 relative">
+                                  <div className="flex items-center gap-2 mb-1 mt-1">
+                                    <span className="text-xs font-semibold whitespace-nowrap">
+                                      {appData.first_name} {appData.last_name}
+                                    </span>
+                                  </div>
+                                  
+                                  <div className="text-xs text-muted-foreground mb-1">
+                                    {appData.city} {appData.country}
+                                  </div>
+                                  
+                                  <div className="flex-1"></div>
+                                  
+                                  {/* Status filter */}
+                                  <div className="absolute bottom-12 right-0 flex items-center gap-1">
+                                    <Select 
+                                      value={participant.admin_status || 'pending'}
+                                      onValueChange={(value) => {
+                                        const updateStatus = async () => {
+                                          const result = await updateParticipantStatusWithHistory(
+                                            participant.id,
+                                            value as ParticipantStatus,
+                                            `${appData.first_name} ${appData.last_name}`
+                                          );
+
+                                          if (!result.success) {
+                                            toast({
+                                              title: "Error",
+                                              description: "Failed to update participant status",
+                                              variant: "destructive"
+                                            });
+                                          } else {
+                                            fetchWeeklyParticipants();
+                                            fetchContestApplications();
+                                          }
+                                        };
+
+                                        updateStatus();
+                                      }}
+                                    >
+                                      <SelectTrigger className="w-24 h-7 text-xs">
+                                        <SelectValue />
+                                      </SelectTrigger>
+                                      <SelectContent className="z-[9999] bg-popover border shadow-lg">
+                                        <SelectItem value="pending">Pending</SelectItem>
+                                        <SelectItem value="under_review">Under Review</SelectItem>
+                                        <SelectItem value="approved">Approved</SelectItem>
+                                        <SelectItem value="rejected">Rejected</SelectItem>
+                                        <SelectItem value="this week">This Week</SelectItem>
+                                        <SelectItem value="next week">Next Week</SelectItem>
+                                        <SelectItem value="next week on site">Next Week On Site</SelectItem>
+                                        <SelectItem value="past">Past</SelectItem>
+                                      </SelectContent>
+                                    </Select>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      );
+                    })}
+                  </>
+                );
               })()}
             </TabsContent>
 
