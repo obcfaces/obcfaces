@@ -516,21 +516,40 @@ const Admin = () => {
   useEffect(() => {
     console.log('useEffect: Admin component useEffect started');
     
-    try {
-      checkAdminAccess();
-      fetchUserRoles();
-      fetchDailyStats();
-      fetchDailyApplicationStats();
-      fetchDailyRegistrationStats();
-      fetchNextWeekParticipants(); // Добавляем загрузку next week участников
-      fetchPreNextWeekParticipants(); // Добавляем загрузку pre next week участников
-      fetchNextWeekDailyStats();
-      fetchNextWeekApplicationsCount();
-      fetchCardSectionStats();
-    } catch (error) {
-      console.error('useEffect: Error in Admin useEffect:', error);
-      setLoading(false);
-    }
+    const initAdmin = async () => {
+      try {
+        await checkAdminAccess();
+        // After admin access is confirmed, load additional stats
+        const results = await Promise.allSettled([
+          fetchDailyStats(),
+          fetchDailyApplicationStats(),
+          fetchDailyRegistrationStats(),
+          fetchNextWeekParticipants(),
+          fetchPreNextWeekParticipants(),
+          fetchNextWeekDailyStats(),
+          fetchNextWeekApplicationsCount(),
+          fetchCardSectionStats()
+        ]);
+        
+        // Log any failures
+        results.forEach((result, index) => {
+          if (result.status === 'rejected') {
+            const functionNames = [
+              'fetchDailyStats', 'fetchDailyApplicationStats', 'fetchDailyRegistrationStats',
+              'fetchNextWeekParticipants', 'fetchPreNextWeekParticipants', 
+              'fetchNextWeekDailyStats', 'fetchNextWeekApplicationsCount', 'fetchCardSectionStats'
+            ];
+            console.error(`initAdmin: ${functionNames[index]} failed:`, result.reason);
+          }
+        });
+        
+        console.log('initAdmin: Additional data loading completed');
+      } catch (error) {
+        console.error('useEffect: Error in Admin initialization:', error);
+      }
+    };
+    
+    initAdmin();
     
     
     // ОТКЛЮЧЕНО: realtime subscriptions для предотвращения автоматических обновлений статусов
@@ -1092,10 +1111,10 @@ const Admin = () => {
       }
 
       setIsAdmin(true);
-      console.log('checkAdminAccess: Admin access granted, fetching data...');
+      console.log('checkAdminAccess: Admin access granted, loading base data...');
       
-      // Use await to ensure data is loaded before proceeding
-      await Promise.all([
+      // Load essential data first (using allSettled to handle individual failures)
+      const results = await Promise.allSettled([
         fetchProfiles(),
         fetchUserRoles(),
         fetchContestApplications(),
@@ -1103,7 +1122,16 @@ const Admin = () => {
         fetchWeeklyParticipants()
       ]);
       
-      console.log('checkAdminAccess: All fetch functions completed');
+      // Log any failures
+      results.forEach((result, index) => {
+        if (result.status === 'rejected') {
+          const functionNames = ['fetchProfiles', 'fetchUserRoles', 'fetchContestApplications', 'fetchWeeklyContests', 'fetchWeeklyParticipants'];
+          console.error(`checkAdminAccess: ${functionNames[index]} failed:`, result.reason);
+        }
+      });
+      
+      console.log('checkAdminAccess: Base data loading completed');
+      
     } catch (error) {
       console.error('checkAdminAccess: Unexpected error', error);
       toast({
