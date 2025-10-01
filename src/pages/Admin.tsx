@@ -1423,7 +1423,7 @@ const Admin = () => {
         throw error;
       }
 
-      // Filter for both 'next week' and 'next week on site' statuses, включая неактивных
+      // Filter for both 'next week' and 'next week on site' statuses - теперь используем поле admin_status из функции
       const nextWeekData = (participants || []).filter((p: any) => 
         (p.admin_status === 'next week' || p.admin_status === 'next week on site')
       );
@@ -1432,8 +1432,10 @@ const Admin = () => {
       console.log('Next week participants data:', nextWeekData.map((p: any) => ({ 
         name: `${p.first_name} ${p.last_name}`, 
         admin_status: p.admin_status,
-        is_active: p.is_active 
+        is_active: p.is_active,
+        week_interval: p.week_interval
       })));
+      
       setNextWeekParticipants(nextWeekData);
     } catch (error) {
       console.error('Error in fetchNextWeekParticipants:', error);
