@@ -1423,7 +1423,6 @@ export type Database = {
           admin_status: string
           age: number
           application_data: Json
-          application_status: string
           avatar_url: string
           average_rating: number
           city: string
@@ -1433,6 +1432,7 @@ export type Database = {
           contest_status: string
           contest_title: string
           country: string
+          created_at: string
           display_name: string
           final_rank: number
           first_name: string
@@ -1448,10 +1448,8 @@ export type Database = {
           photo_1_url: string
           photo_2_url: string
           state: string
-          status_assigned_date: string
           total_votes: number
           user_id: string
-          week_interval: string
           weight_kg: number
         }[]
       }
@@ -1483,6 +1481,7 @@ export type Database = {
           city: string
           country: string
           created_at: string
+          display_name: string
           final_rank: number
           first_name: string
           height_cm: number
@@ -1490,6 +1489,7 @@ export type Database = {
           participant_id: string
           photo_1_url: string
           photo_2_url: string
+          state: string
           total_votes: number
           user_id: string
           weight_kg: number
