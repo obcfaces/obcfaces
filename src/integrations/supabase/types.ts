@@ -1607,8 +1607,6 @@ export type Database = {
       app_role: "admin" | "moderator" | "user"
       participant_admin_status:
         | "pending"
-        | "under_review"
-        | "approved"
         | "rejected"
         | "this week"
         | "next week"
@@ -1755,8 +1753,6 @@ export const Constants = {
       app_role: ["admin", "moderator", "user"],
       participant_admin_status: [
         "pending",
-        "under_review",
-        "approved",
         "rejected",
         "this week",
         "next week",
