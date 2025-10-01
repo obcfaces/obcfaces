@@ -1251,6 +1251,20 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
+      get_public_contest_participant_photos: {
+        Args: { participant_user_ids: string[] }
+        Returns: {
+          age: number
+          avatar_url: string
+          city: string
+          country: string
+          height_cm: number
+          id: string
+          photo_1_url: string
+          photo_2_url: string
+          weight_kg: number
+        }[]
+      }
       get_public_participant_rating_stats: {
         Args: { target_participant_id: string }
         Returns: {
