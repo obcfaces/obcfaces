@@ -210,11 +210,10 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
         console.log('Candidates from DB:', candidatesFromDB);
 
         if (!user) {
-          // Show only first candidate for non-authenticated users
-          const firstCandidate = candidatesFromDB.length > 0 ? [candidatesFromDB[0]] : [];
-          console.log('Showing first candidate for non-auth user:', firstCandidate);
-          setFilteredCandidates(firstCandidate);
-          setRemainingCandidates(firstCandidate.length);
+          // Show all candidates for non-authenticated users
+          console.log('Showing all candidates for non-auth user:', candidatesFromDB);
+          setFilteredCandidates(candidatesFromDB);
+          setRemainingCandidates(candidatesFromDB.length);
           setCurrentIndex(0);
           setIsVotesLoaded(true);
         } else {
