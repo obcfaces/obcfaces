@@ -90,11 +90,11 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
     try {
       console.log('Loading THIS WEEK participants for all users...');
       
-      // Get participants with admin_status = 'this week' OR 'approved' for current week
+      // Get participants with admin_status = 'this week' for current week
       const { data: participants, error } = await supabase
         .from('weekly_contest_participants')
         .select('*')
-        .in('admin_status', ['this week', 'approved'])
+        .eq('admin_status', 'this week')
         .eq('is_active', true)
         .limit(10);
 
