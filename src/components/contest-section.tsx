@@ -109,7 +109,20 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
         return [];
       }
 
-      return participants || [];
+      // Fetch profiles separately
+      const userIds = participants.map(p => p.user_id);
+      const { data: profiles } = await supabase
+        .from('profiles')
+        .select('id, photo_1_url, photo_2_url')
+        .in('id', userIds);
+
+      // Attach profiles to participants
+      const participantsWithProfiles = participants.map(participant => ({
+        ...participant,
+        profiles: profiles?.find(p => p.id === participant.user_id) || null
+      }));
+
+      return participantsWithProfiles || [];
     } catch (error) {
       console.error('Error loading THIS WEEK participants:', error);
       return [];
@@ -141,7 +154,20 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
         return [];
       }
 
-      return participants || [];
+      // Fetch profiles separately
+      const userIds = participants.map(p => p.user_id);
+      const { data: profiles } = await supabase
+        .from('profiles')
+        .select('id, photo_1_url, photo_2_url')
+        .in('id', userIds);
+
+      // Attach profiles to participants
+      const participantsWithProfiles = participants.map(participant => ({
+        ...participant,
+        profiles: profiles?.find(p => p.id === participant.user_id) || null
+      }));
+
+      return participantsWithProfiles || [];
     } catch (error) {
       console.error('Error loading 1 WEEK AGO participants:', error);
       return [];
@@ -419,6 +445,7 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
             
             // Extract data from application_data
             const appData = contestant.application_data || {};
+            const profileData = contestant.profiles || {};
             
             // Get rating stats using secure function
             const { data: ratingStats } = await supabase
@@ -444,8 +471,8 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
               rating: averageRating,
               averageRating: averageRating,
               totalVotes: totalVotes,
-              faceImage: appData.photo1_url || contestant1Face,
-              fullBodyImage: appData.photo2_url || contestant1Full,
+              faceImage: appData.photo1_url || profileData.photo_1_url || contestant1Face,
+              fullBodyImage: appData.photo2_url || profileData.photo_2_url || contestant1Full,
               additionalPhotos: [],
               isVoted: showWinner ? true : averageRating > 0,
               isWinner: false, // Will be set after sorting
@@ -501,6 +528,7 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
             }
             
             const appData = contestant.application_data || {};
+            const profileData = contestant.profiles || {};
             
             const { data: ratingStats } = await supabase
               .rpc('get_public_participant_rating_stats', { target_participant_id: contestant.id });
@@ -525,8 +553,8 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
               rating: averageRating,
               averageRating: averageRating,
               totalVotes: totalVotes,
-              faceImage: appData.photo1_url || contestant1Face,
-              fullBodyImage: appData.photo2_url || contestant1Full,
+              faceImage: appData.photo1_url || profileData.photo_1_url || contestant1Face,
+              fullBodyImage: appData.photo2_url || profileData.photo_2_url || contestant1Full,
               additionalPhotos: [],
               isVoted: true, // Past week participants are considered as voted
               isWinner: showWinner && contestant.final_rank === 1,
@@ -567,6 +595,7 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
             }
             
             const appData = contestant.application_data || {};
+            const profileData = contestant.profiles || {};
             
             const { data: ratingStats } = await supabase
               .rpc('get_public_participant_rating_stats', { target_participant_id: contestant.id });
@@ -591,8 +620,8 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
               rating: averageRating,
               averageRating: averageRating,
               totalVotes: totalVotes,
-              faceImage: appData.photo1_url || contestant1Face,
-              fullBodyImage: appData.photo2_url || contestant1Full,
+              faceImage: appData.photo1_url || profileData.photo_1_url || contestant1Face,
+              fullBodyImage: appData.photo2_url || profileData.photo_2_url || contestant1Full,
               additionalPhotos: [],
               isVoted: true,
               isWinner: showWinner && contestant.final_rank === 1,
