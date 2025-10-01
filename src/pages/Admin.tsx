@@ -298,12 +298,7 @@ interface ContestApplication {
   deleted_at?: string;
   is_active: boolean;
   notes?: string;
-  // Legacy fields (no longer in DB, kept for backwards compatibility)
-  status?: string;
-  approved_at?: string;
-  rejected_at?: string;
-  rejection_reason?: string;
-  rejection_reason_type?: string;
+  admin_status?: 'pending' | 'under_review' | 'approved' | 'rejected' | 'this week' | 'next week' | 'next week on site' | 'past';
 }
 
 interface WeeklyContest {
@@ -1025,7 +1020,7 @@ const Admin = () => {
       return Array.from(userApplications.values())
         .map(userApps => userApps[0]) // Get first application
         .filter(app => {
-          if (app.status !== 'approved' || !app.reviewed_at) return false;
+          if (app.admin_status !== 'approved' || !app.reviewed_at) return false;
           const approvedDate = new Date(app.reviewed_at);
           return approvedDate >= dayStart && approvedDate < dayEnd;
         });
@@ -1238,10 +1233,7 @@ const Admin = () => {
   const fetchContestApplications = async () => {
     console.log('Fetching contest applications...');
     const { data, error } = await supabase
-      .from('contest_applications')
-      .select('*')
-      .is('deleted_at', null)
-      .order('submitted_at', { ascending: false });
+      .rpc('get_contest_applications_admin', { include_deleted: false });
 
     if (error) {
       console.error('Error fetching contest applications:', error);
@@ -1259,10 +1251,7 @@ const Admin = () => {
 
   const fetchDeletedApplications = async () => {
     const { data, error } = await supabase
-      .from('contest_applications')
-      .select('*')
-      .not('deleted_at', 'is', null)
-      .order('deleted_at', { ascending: false });
+      .rpc('get_contest_applications_admin', { include_deleted: true });
 
     if (error) {
       console.error('Error fetching deleted applications:', error);
@@ -1548,38 +1537,35 @@ const Admin = () => {
       const { data: { user } } = await supabase.auth.getUser();
       const currentTime = new Date().toISOString();
       
-      console.log('Updating application:', applicationId, 'to status:', newStatus);
+      console.log('Reviewing application:', applicationId, 'with status:', newStatus);
       console.log('Application data:', application);
       
+      // Update only metadata in contest_applications
       const updateData: any = {
-        status: newStatus,
         reviewed_at: currentTime,
         reviewed_by: user?.id,
-        ...(newStatus === 'approved' && { approved_at: currentTime }),
         ...(newStatus === 'rejected' && { 
-          rejected_at: currentTime,
-          rejection_reason_types: rejectionData?.reasonTypes || null,
           notes: rejectionData?.notes || null
         })
       };
-      
-      const { data, error } = await supabase
+
+      // Update contest_applications
+      const { error: appError } = await supabase
         .from('contest_applications')
         .update(updateData)
-        .eq('id', applicationId)
-        .select();
+        .eq('id', applicationId);
 
-      if (error) {
-        console.error('Database error:', error);
+      if (appError) {
+        console.error('Database error:', appError);
         toast({
           title: "Error",
-          description: `Failed to update application status: ${error.message}`,
+          description: `Failed to update application: ${appError.message}`,
           variant: "destructive"
         });
         return;
       }
 
-      console.log('Update successful:', data);
+      console.log('Application metadata updated successfully');
     } catch (err) {
       console.error('Unexpected error:', err);
       toast({
@@ -1595,16 +1581,15 @@ const Admin = () => {
     if (weeklyParticipant) {
       try {
         const participantName = `${application?.application_data?.first_name || ''} ${application?.application_data?.last_name || ''}`.trim();
-        const targetStatus = newStatus === 'approved' ? 'this week' : newStatus;
         
         const result = await updateParticipantStatusWithHistory(
           weeklyParticipant.id,
-          targetStatus,
+          newStatus,
           participantName
         );
 
         if (result.success) {
-          console.log('Successfully updated weekly participant admin_status to:', targetStatus);
+          console.log('Successfully updated weekly participant admin_status to:', newStatus);
           // Immediately refresh the data
           fetchWeeklyParticipants();
           fetchContestApplications();
@@ -1616,8 +1601,8 @@ const Admin = () => {
       }
     }
 
-    // If status is approved or next week, automatically add to weekly contest
-    if ((newStatus === 'approved' || newStatus === 'next week') && application) {
+    // If status is approved/this week/next week, automatically add to weekly contest if not already there
+    if ((newStatus === 'approved' || newStatus === 'this week' || newStatus === 'next week') && application) {
       try {
         const appData = typeof application.application_data === 'string' 
           ? JSON.parse(application.application_data) 
@@ -1672,7 +1657,7 @@ const Admin = () => {
                 contest_id: contestId,
                 user_id: application.user_id,
                 application_data: application.application_data,
-                admin_status: newStatus === 'approved' ? 'this week' : 'next week on site'
+                admin_status: newStatus
               });
 
             if (participantError) {
@@ -1681,11 +1666,10 @@ const Admin = () => {
           } else {
             // Update existing participant's admin_status with history
             const participantName = `${application?.application_data?.first_name || ''} ${application?.application_data?.last_name || ''}`.trim();
-            const targetStatus = newStatus === 'approved' ? 'this week' : 'next week on site';
             
             const result = await updateParticipantStatusWithHistory(
               existingParticipant.id,
-              targetStatus,
+              newStatus,
               participantName
             );
 
@@ -2936,11 +2920,11 @@ const Admin = () => {
                       id: `app-${app.id}`,
                       user_id: app.user_id,
                       application_data: app.application_data,
-                      admin_status: app.status,
-                      participant_status: app.status,
+                      admin_status: app.admin_status,
+                      participant_status: app.admin_status,
                       status_history: {},
                       status_week_history: {},
-                      week_interval: getParticipantWeekInterval({ admin_status: app.status }),
+                      week_interval: getParticipantWeekInterval({ admin_status: app.admin_status }),
                       created_at: app.submitted_at,
                       contest_id: null,
                       final_rank: null,
@@ -3890,7 +3874,7 @@ const Admin = () => {
                                     <div className="w-[20ch] flex-shrink-0 p-4 pl-0 flex flex-col gap-2 -mt-[20px]">
                                      {/* Status dropdown at the top - desktop */}
                                      <Select 
-                                       value={application.status} 
+                                       value={application.admin_status} 
                                          onValueChange={(newStatus) => {
                                            console.log('Status change requested:', newStatus, 'for application:', application.id);
                                            if (newStatus === 'delete') {
@@ -3915,8 +3899,8 @@ const Admin = () => {
                                      >
                                         <SelectTrigger 
                                            className={`w-24 ${
-                                             application.status === 'approved' ? 'bg-green-100 border-green-500 text-green-700' :
-                                             application.status === 'rejected' ? 'bg-red-100 border-red-500 text-red-700' :
+                                             application.admin_status === 'approved' ? 'bg-green-100 border-green-500 text-green-700' :
+                                             application.admin_status === 'rejected' ? 'bg-red-100 border-red-500 text-red-700' :
                                              ''
                                            }`}
                                         >
@@ -4108,7 +4092,7 @@ const Admin = () => {
                                                {/* Status filter positioned at bottom */}
                                                <div className="absolute bottom-12 right-13 flex items-center gap-2">
                                               <Select 
-                                                value={application.status}
+                                                value={application.admin_status}
                                                  onValueChange={(newStatus) => {
                                                    if (newStatus === 'delete') {
                                                      setApplicationToDelete({ 
@@ -4131,8 +4115,8 @@ const Admin = () => {
                                               >
                                                  <SelectTrigger 
                                                     className={`w-24 h-7 text-xs ${
-                                                      application.status === 'approved' ? 'bg-green-100 border-green-500 text-green-700' :
-                                                      application.status === 'rejected' ? 'bg-red-100 border-red-500 text-red-700' :
+                                                      application.admin_status === 'approved' ? 'bg-green-100 border-green-500 text-green-700' :
+                                                      application.admin_status === 'rejected' ? 'bg-red-100 border-red-500 text-red-700' :
                                                       ''
                                                     }`}
                                                  >
@@ -4684,7 +4668,7 @@ const Admin = () => {
                                                {!showDeletedApplications && (
                                                  <div className="absolute bottom-12 right-13 flex items-center gap-2">
                                              <Select 
-                                               value={application.status}
+                                               value={application.admin_status}
                                                 onValueChange={(newStatus) => {
                                                   if (newStatus === 'delete') {
                                                     const appData = typeof application.application_data === 'string' 
@@ -4713,8 +4697,8 @@ const Admin = () => {
                                              >
                                                 <SelectTrigger 
                                                    className={`w-24 h-7 text-xs ${
-                                                     application.status === 'approved' ? 'bg-green-100 border-green-500 text-green-700' :
-                                                     application.status === 'rejected' ? 'bg-red-100 border-red-500 text-red-700' :
+                                                     application.admin_status === 'approved' ? 'bg-green-100 border-green-500 text-green-700' :
+                                                     application.admin_status === 'rejected' ? 'bg-red-100 border-red-500 text-red-700' :
                                                      ''
                                                    }`}
                                                 >
@@ -5004,7 +4988,7 @@ const Admin = () => {
                                             {/* Status dropdown at the top - desktop */}
                                             {!showDeletedApplications && (
                                               <Select 
-                                                value={prevApp.status} 
+                                                value={prevApp.admin_status} 
                                                  onValueChange={(newStatus) => {
                                                    if (newStatus === 'delete') {
                                                      const prevAppData = typeof prevApp.application_data === 'string' 
@@ -5033,8 +5017,8 @@ const Admin = () => {
                                               >
                                                 <SelectTrigger 
                                                    className={`w-[60%] h-7 text-xs ${
-                                                     prevApp.status === 'approved' ? 'bg-green-100 border-green-500 text-green-700' :
-                                                     prevApp.status === 'rejected' ? 'bg-red-100 border-red-500 text-red-700' :
+                                                     prevApp.admin_status === 'approved' ? 'bg-green-100 border-green-500 text-green-700' :
+                                                     prevApp.admin_status === 'rejected' ? 'bg-red-100 border-red-500 text-red-700' :
                                                      ''
                                                    }`}
                                                 >
@@ -5055,10 +5039,10 @@ const Admin = () => {
                                                  setEditHistoryApplicationId(prevApp.id);
                                                  setShowEditHistory(true);
                                                }}
-                                             >
-                                               {(() => {
-                                                 const statusDate = prevApp.reviewed_at || prevApp.approved_at || prevApp.rejected_at || prevApp.submitted_at;
-                                                 if (statusDate) {
+                                              >
+                                                {(() => {
+                                                  const statusDate = prevApp.reviewed_at || prevApp.submitted_at;
+                                                  if (statusDate) {
                                                    const date = new Date(statusDate);
                                                    const time = date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
                                                    const dateStr = date.toLocaleDateString('en-GB', { 
@@ -5194,7 +5178,7 @@ const Admin = () => {
                                                    {!showDeletedApplications && (
                                                      <div className="mb-2 flex items-center gap-2">
                                                       <Select 
-                                                        value={prevApp.status}
+                                                        value={prevApp.admin_status}
                                                          onValueChange={(newStatus) => {
                                                            if (newStatus === 'delete') {
                                                              const prevAppData = typeof prevApp.application_data === 'string' 
@@ -5223,8 +5207,8 @@ const Admin = () => {
                                                       >
                                                          <SelectTrigger 
                                                             className={`w-24 h-7 text-xs ${
-                                                              prevApp.status === 'approved' ? 'bg-green-100 border-green-500 text-green-700' :
-                                                              prevApp.status === 'rejected' ? 'bg-red-100 border-red-500 text-red-700' :
+                                                              prevApp.admin_status === 'approved' ? 'bg-green-100 border-green-500 text-green-700' :
+                                                              prevApp.admin_status === 'rejected' ? 'bg-red-100 border-red-500 text-red-700' :
                                                               ''
                                                             }`}
                                                          >
@@ -5237,11 +5221,11 @@ const Admin = () => {
                                                          </SelectContent>
                                                       </Select>
                                                       
-                                                       {/* Admin login with expandable date */}
-                                                        <div className="text-xs text-muted-foreground -mt-[5px]">
-                                                          {(() => {
-                                                            const statusDate = prevApp.reviewed_at || prevApp.approved_at || prevApp.rejected_at || prevApp.submitted_at;
-                                                            const reviewerEmail = prevApp.reviewed_by && profiles.find(p => p.id === prevApp.reviewed_by)?.email;
+                                                        {/* Admin login with expandable date */}
+                                                         <div className="text-xs text-muted-foreground -mt-[5px]">
+                                                           {(() => {
+                                                             const statusDate = prevApp.reviewed_at || prevApp.submitted_at;
+                                                             const reviewerEmail = prevApp.reviewed_by && profiles.find(p => p.id === prevApp.reviewed_by)?.email;
                                                             const reviewerLogin = reviewerEmail ? reviewerEmail.substring(0, 3) : 'sys';
                                                             
                                                             return (
@@ -5263,61 +5247,55 @@ const Admin = () => {
                                          </div>
                                        </div>
                                        </CardContent>
-                                     
-                                      {/* Rejection reason under the card for previous applications */}
-                                     {prevApp.status === 'rejected' && ((prevApp as any).rejection_reason_types || prevApp.rejection_reason) && (
-                                       <div className="p-2 bg-destructive/10 border border-destructive/20 rounded-b-lg -mt-1">
-                                          <div className="space-y-1 text-xs leading-tight">
-                                            {(prevApp as any).rejection_reason_types && (prevApp as any).rejection_reason_types.length > 0 && (
-                                              <div className="text-destructive/80">
-                                                {/* Always show date and admin info if available */}
-                                                {(prevApp.rejected_at || prevApp.reviewed_at) && (
-                                                   <TooltipProvider>
-                                                     <Tooltip>
-                                                       <TooltipTrigger asChild>
-                                                         <span className="text-black font-medium cursor-help">
-                                                           {new Date(prevApp.rejected_at || prevApp.reviewed_at).toLocaleDateString('en-GB', { 
-                                                             day: 'numeric', 
-                                                             month: 'short' 
-                                                           }).toLowerCase()}{' '}
-                                                           {prevApp.reviewed_by && profiles.find(p => p.id === prevApp.reviewed_by)?.email ? 
-                                                             profiles.find(p => p.id === prevApp.reviewed_by)?.email?.substring(0, 4) + ' ' : 
-                                                             'unkn '}
-                                                         </span>
-                                                       </TooltipTrigger>
-                                                       <TooltipContent>
-                                                         <p>
-                                                           {new Date(prevApp.rejected_at || prevApp.reviewed_at).toLocaleDateString('en-GB', { 
-                                                             day: 'numeric', 
-                                                             month: 'short',
-                                                             year: 'numeric'
-                                                           }).toLowerCase()}{' '}
-                                                           {new Date(prevApp.rejected_at || prevApp.reviewed_at).toLocaleTimeString('en-GB', {
-                                                             hour: '2-digit',
-                                                             minute: '2-digit'
-                                                           })}
-                                                           {prevApp.reviewed_by && profiles.find(p => p.id === prevApp.reviewed_by)?.email && (
-                                                             <><br />Admin: {profiles.find(p => p.id === prevApp.reviewed_by)?.email}</>
-                                                           )}
-                                                         </p>
-                                                       </TooltipContent>
-                                                     </Tooltip>
-                                                   </TooltipProvider>
-                                                )}
-                                                {(prevApp as any).rejection_reason_types
-                                                  .filter((type: string) => type && REJECTION_REASONS[type as keyof typeof REJECTION_REASONS])
-                                                  .map((type: string) => REJECTION_REASONS[type as keyof typeof REJECTION_REASONS])
-                                                  .join(', ')}
-                </div>
-                                            )}
-                                            {prevApp.rejection_reason && prevApp.rejection_reason.trim() && !isReasonDuplicate(prevApp.rejection_reason, (prevApp as any).rejection_reason_types) && (
-                                              <div className="text-destructive/70">
-                                                <span className="font-medium">Additional comments:</span> {prevApp.rejection_reason}
-                                              </div>
-                                             )}
-                                          </div>
-                                        </div>
-                                      )}
+                                      
+                                       {/* Rejection reason under the card for previous applications */}
+                                      {prevApp.admin_status === 'rejected' && prevApp.notes && (
+                                        <div className="p-2 bg-destructive/10 border border-destructive/20 rounded-b-lg -mt-1">
+                                           <div className="space-y-1 text-xs leading-tight">
+                                             <div className="text-destructive/80">
+                                               {/* Always show date and admin info if available */}
+                                               {prevApp.reviewed_at && (
+                                                  <TooltipProvider>
+                                                    <Tooltip>
+                                                      <TooltipTrigger asChild>
+                                                        <span className="text-black font-medium cursor-help">
+                                                          {new Date(prevApp.reviewed_at).toLocaleDateString('en-GB', { 
+                                                            day: 'numeric', 
+                                                            month: 'short' 
+                                                          }).toLowerCase()}{' '}
+                                                          {prevApp.reviewed_by && profiles.find(p => p.id === prevApp.reviewed_by)?.email ? 
+                                                            profiles.find(p => p.id === prevApp.reviewed_by)?.email?.substring(0, 4) + ' ' : 
+                                                            'unkn '}
+                                                        </span>
+                                                      </TooltipTrigger>
+                                                      <TooltipContent>
+                                                        <p>
+                                                          {new Date(prevApp.reviewed_at).toLocaleDateString('en-GB', { 
+                                                            day: 'numeric', 
+                                                            month: 'short',
+                                                            year: 'numeric'
+                                                          }).toLowerCase()}{' '}
+                                                          {new Date(prevApp.reviewed_at).toLocaleTimeString('en-GB', {
+                                                            hour: '2-digit',
+                                                            minute: '2-digit'
+                                                          })}
+                                                          {prevApp.reviewed_by && profiles.find(p => p.id === prevApp.reviewed_by)?.email && (
+                                                            <><br />Admin: {profiles.find(p => p.id === prevApp.reviewed_by)?.email}</>
+                                                          )}
+                                                        </p>
+                                                      </TooltipContent>
+                                                    </Tooltip>
+                                                  </TooltipProvider>
+                                               )}
+                                             </div>
+                                             {prevApp.notes && prevApp.notes.trim() && (
+                                               <div className="text-destructive/70">
+                                                 <span className="font-medium">Rejection notes:</span> {prevApp.notes}
+                                               </div>
+                                              )}
+                                           </div>
+                                         </div>
+                                       )}
                                     </Card>
                                   );
                                 })}
