@@ -302,39 +302,31 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
         console.log('Admin status result:', adminStatus);
         setIsAdmin(adminStatus);
         
-        // Load participants based on section - for admins set both realContestants and adminParticipants
+        // Load participants based on section - now visible to all users
         if (title === "THIS WEEK") {
           console.log('Loading THIS WEEK participants');
           const thisWeekData = await loadThisWeekParticipants();
           console.log('Loaded THIS WEEK participants:', thisWeekData.length);
           setRealContestants(thisWeekData);
-          if (adminStatus) {
-            setAdminParticipants(thisWeekData);
-          }
+          setAdminParticipants(thisWeekData); // Load for all users
         } else if (title === "1 WEEK AGO") {
           console.log('Loading 1 WEEK AGO participants');
           const pastWeekData = await loadPastWeekParticipants();
           console.log('Loaded 1 WEEK AGO participants:', pastWeekData.length);
           setRealContestants(pastWeekData);
-          if (adminStatus) {
-            setAdminParticipants(pastWeekData);
-          }
+          setAdminParticipants(pastWeekData); // Load for all users
         } else if (title === "2 WEEKS AGO") {
           console.log('Loading 2 WEEKS AGO participants');
           const twoWeeksAgoData = await loadTwoWeeksAgoAdminParticipants();
           console.log('Loaded 2 WEEKS AGO participants:', twoWeeksAgoData.length);
           setRealContestants(twoWeeksAgoData);
-          if (adminStatus) {
-            setAdminParticipants(twoWeeksAgoData);
-          }
+          setAdminParticipants(twoWeeksAgoData); // Load for all users
         } else if (title === "3 WEEKS AGO") {
           console.log('Loading 3 WEEKS AGO participants');
           const threeWeeksAgoData = await loadThreeWeeksAgoAdminParticipants();
           console.log('Loaded 3 WEEKS AGO participants:', threeWeeksAgoData.length);
           setRealContestants(threeWeeksAgoData);
-          if (adminStatus) {
-            setAdminParticipants(threeWeeksAgoData);
-          }
+          setAdminParticipants(threeWeeksAgoData); // Load for all users
         }
       }
     };
