@@ -414,6 +414,14 @@ const Admin = () => {
   const [nextWeekParticipants, setNextWeekParticipants] = useState<any[]>([]);
   const [preNextWeekFilter, setPreNextWeekFilter] = useState<string>('all'); // Фильтр для pre next week
   const [preNextWeekParticipants, setPreNextWeekParticipants] = useState<any[]>([]);
+  
+  // Фильтры admin_status для всех вкладок
+  const [preStatusFilter, setPreStatusFilter] = useState<string>('all');
+  const [nextStatusFilter, setNextStatusFilter] = useState<string>('all');
+  const [thisStatusFilter, setThisStatusFilter] = useState<string>('all');
+  const [pastStatusFilter, setPastStatusFilter] = useState<string>('all');
+  const [regStatusFilter, setRegStatusFilter] = useState<string>('all');
+  const [winStatusFilter, setWinStatusFilter] = useState<string>('all');
   const [dailyStats, setDailyStats] = useState<Array<{ day_name: string; vote_count: number; like_count: number }>>([]);
   const [dailyApplicationStats, setDailyApplicationStats] = useState<Array<{ day_name: string; total_applications: number; approved_applications: number; day_of_week: number; sort_order: number }>>([]);
   const [dailyRegistrationStats, setDailyRegistrationStats] = useState<Array<{ day_name: string; registration_count: number; day_of_week: number; sort_order: number }>>([]);
@@ -2462,6 +2470,26 @@ const Admin = () => {
 
             <TabsContent value="prenextweek" className="space-y-4">
               <div className="mb-6">
+                {/* Фильтр по admin_status */}
+                <div className="mb-4">
+                  <Label className="text-sm font-medium mb-2 block">Admin Status Filter:</Label>
+                  <Select value={preStatusFilter} onValueChange={setPreStatusFilter}>
+                    <SelectTrigger className="w-[200px]">
+                      <SelectValue placeholder="Select status" />
+                    </SelectTrigger>
+                    <SelectContent className="z-[9999] bg-popover border shadow-lg">
+                      <SelectItem value="all">All Statuses</SelectItem>
+                      <SelectItem value="pending">Pending</SelectItem>
+                      <SelectItem value="approved">Approved</SelectItem>
+                      <SelectItem value="rejected">Rejected</SelectItem>
+                      <SelectItem value="this week">This Week</SelectItem>
+                      <SelectItem value="next week">Next Week</SelectItem>
+                      <SelectItem value="next week on site">Next Week On Site</SelectItem>
+                      <SelectItem value="past">Past</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                
                 {/* Фильтр по неделям для pre next week */}
                 <div className="mb-4 flex gap-4">
                   <Select value={preNextWeekFilter} onValueChange={setPreNextWeekFilter}>
@@ -2485,10 +2513,11 @@ const Admin = () => {
               </div>
               
               {(() => {
-                // Фильтруем участников по выбранной неделе
+                // Фильтруем участников по admin_status и неделе
                 const filteredParticipants = preNextWeekParticipants.filter(p => {
-                  if (preNextWeekFilter === 'all') return true;
-                  return p.week_interval === preNextWeekFilter;
+                  const statusMatch = preStatusFilter === 'all' || p.admin_status === preStatusFilter;
+                  const weekMatch = preNextWeekFilter === 'all' || p.week_interval === preNextWeekFilter;
+                  return statusMatch && weekMatch;
                 });
                 
                 if (filteredParticipants.length === 0) {
@@ -2755,6 +2784,21 @@ const Admin = () => {
 
             <TabsContent value="nextweek" className="space-y-4">
               <div className="mb-6">
+                {/* Фильтр по admin_status */}
+                <div className="mb-4">
+                  <Label className="text-sm font-medium mb-2 block">Admin Status Filter:</Label>
+                  <Select value={nextStatusFilter} onValueChange={setNextStatusFilter}>
+                    <SelectTrigger className="w-[200px]">
+                      <SelectValue placeholder="Select status" />
+                    </SelectTrigger>
+                    <SelectContent className="z-[9999] bg-popover border shadow-lg">
+                      <SelectItem value="all">All Statuses</SelectItem>
+                      <SelectItem value="next week">Next Week</SelectItem>
+                      <SelectItem value="next week on site">Next Week On Site</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                
                 {/* Фильтр по неделям для next week */}
                 <div className="mb-4 flex gap-4">
                   <Select value={nextWeekFilter} onValueChange={setNextWeekFilter}>
@@ -2800,18 +2844,23 @@ const Admin = () => {
               </div>
               
               {(() => {
-                // Фильтруем участников по выбранной неделе
+                // Фильтруем участников по admin_status и неделе
                 const filteredParticipants = nextWeekParticipants.filter(p => {
-                  if (nextWeekFilter === 'all') return true;
-                  if (nextWeekFilter === 'current') {
+                  const statusMatch = nextStatusFilter === 'all' || p.admin_status === nextStatusFilter;
+                  let weekMatch = true;
+                  if (nextWeekFilter === 'all') {
+                    weekMatch = true;
+                  } else if (nextWeekFilter === 'current') {
                     // Показываем только текущую неделю
                     const currentWeekStart = new Date();
                     const currentDay = currentWeekStart.getDay();
                     const mondayOffset = currentDay === 0 ? -6 : 1 - currentDay;
                     currentWeekStart.setDate(currentWeekStart.getDate() + mondayOffset);
-                    return p.status_assigned_date >= currentWeekStart.toISOString().split('T')[0];
+                    weekMatch = p.status_assigned_date >= currentWeekStart.toISOString().split('T')[0];
+                  } else {
+                    weekMatch = p.week_interval === nextWeekFilter;
                   }
-                  return p.week_interval === nextWeekFilter;
+                  return statusMatch && weekMatch;
                 });
                 
                 if (filteredParticipants.length === 0) {
@@ -3124,6 +3173,22 @@ const Admin = () => {
 
             <TabsContent value="pastweek" className="space-y-4">
               <div className="mb-6">
+                {/* Фильтр по admin_status */}
+                <div className="mb-4">
+                  <Label className="text-sm font-medium mb-2 block">Admin Status Filter:</Label>
+                  <Select value={pastStatusFilter} onValueChange={setPastStatusFilter}>
+                    <SelectTrigger className="w-[200px]">
+                      <SelectValue placeholder="Select status" />
+                    </SelectTrigger>
+                    <SelectContent className="z-[9999] bg-popover border shadow-lg">
+                      <SelectItem value="all">All Statuses</SelectItem>
+                      <SelectItem value="past">Past</SelectItem>
+                      <SelectItem value="this week">This Week</SelectItem>
+                      <SelectItem value="rejected after contest">Rejected After Contest</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                
                 <div>
                   <h2 className="text-xl font-semibold">Past Week Participants</h2>
                   <p className="text-muted-foreground">Участники из прошлых недель с правильными статусами</p>
@@ -3333,8 +3398,14 @@ const Admin = () => {
                   participantsToShow = pastWeekParticipants.length > 0 ? pastWeekParticipants : debugPastParticipants;
                 }
                 
-                // Apply past week filter based on week intervals
+                // Apply past week filter based on week intervals and admin_status
                 const filteredByWeek = showAllCards ? participantsToShow : participantsToShow.filter(participant => {
+                  // Фильтр по admin_status
+                  const adminStatus = participant.admin_status || 'this week';
+                  const statusMatch = pastStatusFilter === 'all' || adminStatus === pastStatusFilter;
+                  
+                  if (!statusMatch) return false;
+                  
                   // When a specific interval is selected, use stricter filtering to avoid duplicates
                   if (pastWeekIntervalFilter !== 'all') {
                     const participantInterval = participant.week_interval || getParticipantWeekInterval(participant);
@@ -3343,8 +3414,7 @@ const Admin = () => {
                     // For "К" filter (showAllCards is false but we want all statuses), don't filter by status
                     // For other filters, only show participants with 'past' status
                     if (!showAllCards) {
-                      const adminStatus = participant.admin_status || 'this week';
-                      return hasCorrectInterval && adminStatus === 'past';
+                      return hasCorrectInterval && statusMatch;
                     }
                     
                     return hasCorrectInterval;
@@ -3352,12 +3422,9 @@ const Admin = () => {
                   
                   // When no specific interval is selected, use the status-based filter
                   if (pastWeekFilter === 'all') {
-                    // For 'all' filter, only show participants with 'past' status
-                    const adminStatus = participant.admin_status || 'this week';
-                    return adminStatus === 'past';
+                    // For 'all' filter, apply admin_status filter
+                    return statusMatch;
                   }
-                  
-                  const adminStatus = participant.admin_status || 'this week';
                   
                   // Get the dynamic filters to find the target week interval
                   const dynamicFilters = getDynamicPastWeekFilters;
@@ -3371,8 +3438,8 @@ const Admin = () => {
                   const participantInterval = participant.week_interval || getParticipantWeekInterval(participant);
                   const hasCorrectInterval = participantInterval === targetWeekInterval;
                   
-                  // For week-specific filters, only show participants with 'past' status
-                  return hasCorrectInterval && adminStatus === 'past';
+                  // For week-specific filters, apply both interval and status filters
+                  return hasCorrectInterval && statusMatch;
                 });
                 
                 if (filteredByWeek.length === 0) {
