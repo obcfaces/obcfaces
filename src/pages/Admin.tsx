@@ -1361,115 +1361,60 @@ const Admin = () => {
     try {
       console.log('Fetching weekly participants from database...');
       
-      // Fetch all weekly contest participants with their contests data
-      const { data: allParticipants, error } = await supabase
-        .from('weekly_contest_participants')
-         .select(`
-           id,
-           contest_id,
-           user_id,
-           application_data,
-           final_rank,
-           total_votes,
-           average_rating,
-           created_at,
-           is_active,
-           admin_status,
-           status_week_history,
-           status_history,
-           week_interval
-         `)
-        // Load all participants including inactive ones for past weeks display
-        .order('created_at', { ascending: false });
+      // Fetch participants for current week and past 3 weeks using optimized RPC function
+      const weekOffsets = [0, -1, -2, -3];
+      const results = await Promise.allSettled(
+        weekOffsets.map(offset => 
+          supabase.rpc('get_weekly_contest_participants_admin', { weeks_offset: offset })
+        )
+      );
 
-      if (error) {
-        console.error('Error fetching participants:', error);
-        return;
-      }
+      // Combine all participants from all weeks
+      const allParticipants: any[] = [];
+      results.forEach((result, index) => {
+        if (result.status === 'fulfilled' && result.value.data) {
+          console.log(`Loaded ${result.value.data.length} participants for week offset ${weekOffsets[index]}`);
+          allParticipants.push(...result.value.data);
+        } else {
+          console.error(`Error loading participants for week offset ${weekOffsets[index]}:`, result);
+        }
+      });
 
-      console.log('Raw participants data:', allParticipants?.length || 0);
-      
-      // Transform data to match our interface and fetch real-time rating data
-      const participants = await Promise.all((allParticipants || []).map(async (item: any) => {
-        const appData = item.application_data || {};
-        
-        // Fetch contest data separately
-        let contest = null;
-        try {
-          const { data: contestData } = await supabase
-            .from('weekly_contests')
-            .select('id, week_start_date, week_end_date, title, status')
-            .eq('id', item.contest_id)
-            .single();
-          contest = contestData;
-        } catch (error) {
-          console.error('Error fetching contest for participant:', item.contest_id, error);
-        }
-        
-        // Fetch profile data separately
-        let profile: any = {};
-        try {
-          const { data: profileData } = await supabase
-            .from('profiles')
-            .select('id, display_name, avatar_url, photo_1_url, photo_2_url')
-            .eq('id', item.user_id)
-            .single();
-          profile = profileData || {};
-        } catch (error) {
-          console.error('Error fetching profile for user:', item.user_id, error);
-        }
-        
-        // Fetch real-time rating stats for this user
-        let realTimeRatings = { average_rating: 0, total_votes: 0 };
-        try {
-          const { data: ratingStats } = await supabase
-            .rpc('get_user_rating_stats', { target_user_id: item.user_id });
-          if (ratingStats?.[0]) {
-            realTimeRatings = {
-              average_rating: ratingStats[0].average_rating || 0,
-              total_votes: ratingStats[0].total_votes || 0
-            };
-          }
-        } catch (error) {
-          console.error('Error fetching real-time ratings for user:', item.user_id, error);
-        }
-        
-         return {
-           id: item.id,
-           contest_id: item.contest_id,
-           user_id: item.user_id,
-           application_data: {
-             first_name: appData.first_name || '',
-             last_name: appData.last_name || '',
-             age: appData.age || null,
-             country: appData.country || '',
-             state: appData.state || '',
-             city: appData.city || '',
-             height_cm: appData.height_cm || null,
-             weight_kg: appData.weight_kg || null,
-             gender: appData.gender || '',
-             marital_status: appData.marital_status || '',
-             has_children: appData.has_children || false,
-             photo1_url: appData.photo1_url || profile.photo_1_url || '',
-             photo2_url: appData.photo2_url || profile.photo_2_url || '',
-             avatar_url: profile.avatar_url || appData.avatar_url || ''
-           },
-           final_rank: item.final_rank,
-           total_votes: realTimeRatings.total_votes,
-           average_rating: realTimeRatings.average_rating,
-           created_at: contest?.week_start_date || item.created_at,
-           contest_start_date: contest?.week_start_date,
-           is_active: item.is_active,
-           admin_status: (item.admin_status === 'under_review' || item.admin_status === 'rejected after contest') 
-             ? 'rejected' 
-             : (item.admin_status || 'this week'),
-           status_week_history: item.status_week_history,
-           status_history: item.status_history,
-           week_interval: item.week_interval
-         };
+      console.log('Total participants loaded:', allParticipants.length);
+
+      // Transform RPC result to match our interface
+      const participants = allParticipants.map((item: any) => ({
+        id: item.participant_id,
+        contest_id: item.contest_id,
+        user_id: item.user_id,
+        application_data: {
+          first_name: item.first_name || '',
+          last_name: item.last_name || '',
+          age: item.age || null,
+          country: item.country || '',
+          state: item.state || '',
+          city: item.city || '',
+          height_cm: item.height_cm || null,
+          weight_kg: item.weight_kg || null,
+          gender: item.gender || '',
+          marital_status: item.marital_status || '',
+          has_children: item.has_children || false,
+          photo1_url: item.photo_1_url || '',
+          photo2_url: item.photo_2_url || '',
+          avatar_url: item.avatar_url || ''
+        },
+        final_rank: item.final_rank,
+        total_votes: item.total_votes || 0,
+        average_rating: parseFloat(item.average_rating || '0'),
+        created_at: item.contest_start_date || item.status_assigned_date,
+        contest_start_date: item.contest_start_date,
+        is_active: item.is_active,
+        admin_status: item.admin_status || 'pending',
+        status_week_history: item.status_week_history || {},
+        status_history: item.status_history || {},
+        week_interval: item.week_interval
       }));
 
-      console.log('Total participants after transformation:', participants.length);
       console.log('Admin statuses distribution:', 
         participants.reduce((acc: any, p: any) => {
           acc[p.admin_status] = (acc[p.admin_status] || 0) + 1;
