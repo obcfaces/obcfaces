@@ -1414,27 +1414,22 @@ const Admin = () => {
   // Новая функция для загрузки участников next week с интервалами
   const fetchNextWeekParticipants = async () => {
     try {
-      console.log('Fetching next week participants with votes...');
+      console.log('Fetching next week participants...');
       
-      const { data: participants, error } = await supabase.rpc('get_next_week_participants_with_votes');
+      const { data: participants, error } = await supabase.rpc('get_weekly_contest_participants_admin', { weeks_offset: 0 });
       
       if (error) {
         console.error('Error fetching next week participants:', error);
         throw error;
       }
 
-      console.log('Fetched next week participants:', participants?.length || 0);
-      if (participants && participants.length > 0) {
-        console.log('First participant structure:', participants[0]);
-        console.log('Like/Dislike counts:', participants.map(p => ({ 
-          id: p.participant_id, 
-          name: p.display_name,
-          likes: p.like_count,
-          dislikes: p.dislike_count,
-          total: p.vote_total
-        })));
-      }
-      setNextWeekParticipants(participants || []);
+      // Filter for both 'next week' and 'next week on site' statuses
+      const nextWeekData = (participants || []).filter((p: any) => 
+        p.admin_status === 'next week' || p.admin_status === 'next week on site'
+      );
+      
+      console.log('Fetched next week participants:', nextWeekData?.length || 0);
+      setNextWeekParticipants(nextWeekData);
     } catch (error) {
       console.error('Error in fetchNextWeekParticipants:', error);
     }
