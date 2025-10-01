@@ -618,9 +618,10 @@ const Admin = () => {
     const filterWeeklyParticipants = async () => {
       console.log('Filtering by admin_status:', adminStatusFilter);
       
-      // Filter by admin_status directly
+      // For weekly section (This Week), show only "this week" status by default
+      // If specific status filter is selected, show that status instead
       const filteredByStatus = adminStatusFilter === 'all' 
-        ? weeklyParticipants
+        ? weeklyParticipants.filter(p => p.admin_status === 'this week')
         : weeklyParticipants.filter(p => p.admin_status === adminStatusFilter);
 
       // Remove duplicates based on user_id
