@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -7,12 +7,15 @@ import {
 } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { supabase } from '@/integrations/supabase/client';
 
 interface StatusHistoryEntry {
   status: string;
   changed_at: string;
   changed_by?: string;
+  changed_by_email?: string;
   week_interval?: string;
+  change_reason?: string;
 }
 
 interface ParticipantStatusHistoryModalProps {
@@ -28,6 +31,9 @@ export const ParticipantStatusHistoryModal: React.FC<ParticipantStatusHistoryMod
   participantName,
   statusHistory,
 }) => {
+  const [enrichedEntries, setEnrichedEntries] = useState<StatusHistoryEntry[]>([]);
+  const [loading, setLoading] = useState(false);
+
   const parseStatusHistory = (history: any): StatusHistoryEntry[] => {
     if (!history) return [];
     
@@ -45,8 +51,10 @@ export const ParticipantStatusHistoryModal: React.FC<ParticipantStatusHistoryMod
         .map(([status, data]: [string, any]) => ({
           status,
           changed_at: data.changed_at || data.timestamp || new Date().toISOString(),
-          changed_by: data.changed_by || 'Unknown',
-          week_interval: data.week_interval || ''
+          changed_by: data.changed_by,
+          changed_by_email: data.changed_by_email,
+          week_interval: data.week_interval || '',
+          change_reason: data.change_reason || data.reason
         }));
     }
     
@@ -56,6 +64,51 @@ export const ParticipantStatusHistoryModal: React.FC<ParticipantStatusHistoryMod
     
     return [];
   };
+
+  // Load admin emails for entries that don't have them
+  useEffect(() => {
+    const loadAdminEmails = async () => {
+      if (!isOpen) return;
+      
+      setLoading(true);
+      const entries = parseStatusHistory(statusHistory);
+      
+      // Find entries that need email lookup
+      const entriesNeedingEmail = entries.filter(e => e.changed_by && !e.changed_by_email);
+      const userIds = [...new Set(entriesNeedingEmail.map(e => e.changed_by))];
+      
+      if (userIds.length > 0) {
+        try {
+          const { data: profiles, error } = await supabase
+            .from('profiles')
+            .select('id, display_name')
+            .in('id', userIds);
+          
+          if (!error && profiles) {
+            const emailMap = new Map(profiles.map(p => [p.id, p.display_name]));
+            
+            const enriched = entries.map(entry => ({
+              ...entry,
+              changed_by_email: entry.changed_by_email || emailMap.get(entry.changed_by || '') || 'System'
+            }));
+            
+            setEnrichedEntries(enriched);
+          } else {
+            setEnrichedEntries(entries);
+          }
+        } catch (error) {
+          console.error('Error loading admin emails:', error);
+          setEnrichedEntries(entries);
+        }
+      } else {
+        setEnrichedEntries(entries);
+      }
+      
+      setLoading(false);
+    };
+    
+    loadAdminEmails();
+  }, [isOpen, statusHistory]);
 
   const formatDateTime = (dateStr: string) => {
     try {
@@ -92,8 +145,27 @@ export const ParticipantStatusHistoryModal: React.FC<ParticipantStatusHistoryMod
     }
   };
 
-  const entries = parseStatusHistory(statusHistory);
-  const sortedEntries = entries.sort((a, b) => 
+  const getChangedByDisplay = (entry: StatusHistoryEntry) => {
+    if (entry.changed_by_email) {
+      return entry.changed_by_email;
+    }
+    
+    if (entry.change_reason) {
+      // If there's a change_reason, it might indicate an automatic change
+      if (entry.change_reason.includes('function') || entry.change_reason.includes('automatic')) {
+        return `Автоматически (${entry.change_reason})`;
+      }
+      return entry.change_reason;
+    }
+    
+    if (entry.changed_by) {
+      return `User ID: ${entry.changed_by.substring(0, 8)}...`;
+    }
+    
+    return 'Unknown';
+  };
+
+  const sortedEntries = enrichedEntries.sort((a, b) => 
     new Date(b.changed_at).getTime() - new Date(a.changed_at).getTime()
   );
 
@@ -104,7 +176,11 @@ export const ParticipantStatusHistoryModal: React.FC<ParticipantStatusHistoryMod
           <DialogTitle>История статусов - {participantName}</DialogTitle>
         </DialogHeader>
         
-        {sortedEntries.length === 0 ? (
+        {loading ? (
+          <div className="text-center py-8 text-muted-foreground">
+            Загрузка...
+          </div>
+        ) : sortedEntries.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">
             История статусов отсутствует
           </div>
@@ -128,8 +204,8 @@ export const ParticipantStatusHistoryModal: React.FC<ParticipantStatusHistoryMod
                   </TableCell>
                   <TableCell>{entry.week_interval || '—'}</TableCell>
                   <TableCell>{formatDateTime(entry.changed_at)}</TableCell>
-                  <TableCell className="text-muted-foreground">
-                    {entry.changed_by || '—'}
+                  <TableCell className="text-muted-foreground text-xs">
+                    {getChangedByDisplay(entry)}
                   </TableCell>
                 </TableRow>
               ))}
