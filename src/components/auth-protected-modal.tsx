@@ -39,26 +39,27 @@ export const AuthProtectedModal = ({ children }: AuthProtectedModalProps) => {
       // User is authenticated, check their application status
       console.log('Checking application status for user:', session.user.id);
       
-      const { data: applications, error } = await supabase
-        .from('contest_applications')
-        .select('status')
+      // Check if user has a participant record with admin_status
+      const { data: participant, error } = await supabase
+        .from('weekly_contest_participants')
+        .select('admin_status')
         .eq('user_id', session.user.id)
         .eq('is_active', true)
-        .is('deleted_at', null)
         .order('created_at', { ascending: false })
-        .limit(1);
+        .limit(1)
+        .maybeSingle();
 
-      console.log('Application check result:', { applications, error });
+      console.log('Participant check result:', { participant, error });
 
       if (error) {
-        console.error('Error checking application status:', error);
+        console.error('Error checking participant status:', error);
         setIsParticipationOpen(true);
         return;
       }
 
-      if (applications && applications.length > 0) {
-        const status = applications[0].status;
-        console.log('Found application with status:', status);
+      if (participant) {
+        const status = participant.admin_status;
+        console.log('Found participant with admin_status:', status);
         
         if (status === 'rejected') {
           // Allow new participation
@@ -66,13 +67,13 @@ export const AuthProtectedModal = ({ children }: AuthProtectedModalProps) => {
           setIsParticipationOpen(true);
         } else {
           // Show status modal
-          console.log('Showing status modal for user with existing application:', status);
+          console.log('Showing status modal for user with existing participant:', status);
           setApplicationStatus(status);
           setIsStatusModalOpen(true);
         }
       } else {
-        // No application exists, allow participation
-        console.log('Opening participation modal for user with no application');
+        // No participant record exists, allow participation
+        console.log('Opening participation modal for user with no participant record');
         setIsParticipationOpen(true);
       }
     } else {
