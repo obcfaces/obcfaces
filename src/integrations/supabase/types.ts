@@ -1240,6 +1240,16 @@ export type Database = {
           total_votes: number
         }[]
       }
+      get_safe_contestant_info: {
+        Args: { contestant_user_id: string }
+        Returns: {
+          avatar_url: string
+          country: string
+          display_name: string
+          id: string
+          is_contest_participant: boolean
+        }[]
+      }
       get_unread_messages_count: {
         Args: { user_id_param: string }
         Returns: number
@@ -1463,6 +1473,10 @@ export type Database = {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
+        Returns: boolean
+      }
+      is_active_contest_participant: {
+        Args: { user_id_param: string }
         Returns: boolean
       }
       is_following: {
