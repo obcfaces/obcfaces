@@ -339,8 +339,8 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
       setIsLoading(true);
       
       // For THIS WEEK section, admin participants are already loaded in the first useEffect
-      // Just load contestants based on existing data
-      const contestantsData = await getContestantsSync([]);
+      // Use realContestants data instead of empty array
+      const contestantsData = await getContestantsSync(realContestants);
       setContestants(contestantsData || []);
       setIsLoading(false);
     };
@@ -381,7 +381,7 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
         supabase.removeChannel(channel);
       };
     }
-   }, [title, user, isAdmin, adminParticipants.length]);
+   }, [title, user, isAdmin, adminParticipants.length, realContestants.length]);
 
   const handleRate = async (contestantId: number, rating: number) => {
     setVotes(prev => ({ ...prev, [contestantId]: rating }));
