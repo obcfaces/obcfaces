@@ -32,9 +32,8 @@ export interface ParticipantData {
   contest_status?: string;
   application_data?: any;
   phone_data?: any;
-  application_status?: string;
   is_active?: boolean;
-  admin_status?: string;
+  admin_status?: 'pending' | 'under_review' | 'approved' | 'rejected' | 'this week' | 'next week' | 'next week on site' | 'past';
 }
 
 export const useParticipantData = (participantName?: string, userId?: string) => {

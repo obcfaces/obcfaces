@@ -724,7 +724,7 @@ export type Database = {
       }
       weekly_contest_participants: {
         Row: {
-          admin_status: string | null
+          admin_status: Database["public"]["Enums"]["participant_admin_status"]
           application_data: Json | null
           average_rating: number | null
           contest_id: string
@@ -739,7 +739,7 @@ export type Database = {
           week_interval: string | null
         }
         Insert: {
-          admin_status?: string | null
+          admin_status?: Database["public"]["Enums"]["participant_admin_status"]
           application_data?: Json | null
           average_rating?: number | null
           contest_id: string
@@ -754,7 +754,7 @@ export type Database = {
           week_interval?: string | null
         }
         Update: {
-          admin_status?: string | null
+          admin_status?: Database["public"]["Enums"]["participant_admin_status"]
           application_data?: Json | null
           average_rating?: number | null
           contest_id?: string
@@ -1585,6 +1585,15 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
+      participant_admin_status:
+        | "pending"
+        | "under_review"
+        | "approved"
+        | "rejected"
+        | "this week"
+        | "next week"
+        | "next week on site"
+        | "past"
       rejection_reason_type:
         | "first_photo_makeup"
         | "first_photo_id_style"
@@ -1723,6 +1732,16 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "moderator", "user"],
+      participant_admin_status: [
+        "pending",
+        "under_review",
+        "approved",
+        "rejected",
+        "this week",
+        "next week",
+        "next week on site",
+        "past",
+      ],
       rejection_reason_type: [
         "first_photo_makeup",
         "first_photo_id_style",
