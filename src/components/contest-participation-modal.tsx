@@ -590,38 +590,23 @@ export const ContestParticipationModal = ({
         throw new Error('You must be logged in to submit an application');
       }
 
-      // In edit mode, check if application is still editable
-      // Allow editing of all application statuses including rejected ones
-      // Users should be able to fix and resubmit rejected applications
-      if (editMode && existingData) {
-        // Only prevent editing if the status is permanently denied (not rejected)
-        if (existingData.status === 'denied') {
-          toast({
-            title: "Cannot Edit",
-            description: "This application can no longer be edited. You can submit a new application instead.",
-            variant: "destructive"
-          });
-          setIsLoading(false);
-          return;
-        }
-      }
-
-      // Check if user already has an approved application (only for new applications)
+      // Check if user already has an active participant record (only for new applications)
       if (!editMode) {
-        console.log('Checking for existing approved applications');
-        const { data: existingApplication, error: checkError } = await supabase
-          .from('contest_applications')
-          .select('id, status')
+        console.log('Checking for existing participant record');
+        const { data: existingParticipant, error: checkError } = await supabase
+          .from('weekly_contest_participants')
+          .select('id, admin_status')
           .eq('user_id', session.user.id)
-          .in('status', ['approved'])
+          .eq('is_active', true)
+          .not('admin_status', 'in', '("rejected")')
           .maybeSingle();
 
-        console.log('Existing application check result', { existingApplication, checkError });
+        console.log('Existing participant check result', { existingParticipant, checkError });
 
-        if (existingApplication) {
+        if (existingParticipant) {
           toast({
-            title: "Application Already Approved",
-            description: "You already have an approved application. You can submit a new one for the next contest period.",
+            title: "Application Already Exists",
+            description: "You already have an active application. You can edit your existing application or wait for review.",
             variant: "destructive"
           });
           setIsLoading(false);

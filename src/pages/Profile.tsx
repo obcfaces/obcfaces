@@ -754,20 +754,27 @@ const Profile = () => {
       // Проверяем, является ли пользователь участником конкурса или имеет заявку
       console.log('is_contest_participant:', profileData.is_contest_participant);
       
-      // Также проверяем наличие заявки на участие (исключаем удалённые)
-      const { data: contestApplication } = await supabase
-        .from('contest_applications')
-        .select('id, status, created_at, application_data, rejection_reason, rejection_reason_types')
+      // Также проверяем наличие участника (с admin_status)
+      const { data: participant } = await supabase
+        .from('weekly_contest_participants')
+        .select('id, admin_status, created_at, application_data')
         .eq('user_id', id)
-        .is('deleted_at', null)  // Исключаем удалённые заявки
+        .eq('is_active', true)
         .order('created_at', { ascending: false })
         .limit(1)
         .maybeSingle();
 
-      console.log('Contest application:', contestApplication);
+      console.log('Contest participant:', participant);
       
-      // Store contest application data
-      setContestApplication(contestApplication);
+      // Store participant data as contest application for compatibility
+      const contestApplication = participant ? {
+        id: participant.id,
+        admin_status: participant.admin_status,
+        created_at: participant.created_at,
+        application_data: participant.application_data
+      } : null;
+      
+      setContestApplication(contestApplication as any);
 
       // Показываем карточку если есть активная заявка на участие (любого статуса)
       const shouldShowParticipation = contestApplication;
@@ -791,7 +798,7 @@ const Profile = () => {
         likes: Math.floor(Math.random() * 200) + 50, // Mock likes
         comments: Math.floor(Math.random() * 40) + 5, // Mock comments
         imageSrc: appData?.photo1_url || appData?.photo_1_url || c1face,
-        participantType: contestApplication.status === 'approved' ? 'candidate' : 'under_review',
+        participantType: 'candidate', // Default type
         candidateData: {
           name: `${appData?.first_name || ''} ${appData?.last_name || ''}`.trim() || 'Участник',
           age: appData?.birth_year ? new Date().getFullYear() - appData.birth_year : 25,
@@ -801,7 +808,7 @@ const Profile = () => {
           city: appData?.city || 'Manila',
           faceImage: appData?.photo1_url || appData?.photo_1_url || c1face,
           fullBodyImage: appData?.photo2_url || appData?.photo_2_url || c1,
-          participantType: contestApplication.status === 'approved' ? 'candidate' : 'under_review'
+          participantType: 'candidate' // Default type
         }
       };
 
@@ -1403,45 +1410,9 @@ const Profile = () => {
                       />
                     </button>
                     </div>
-                   </div>
-                   
-                     {/* Rejection reason notice */}
-                      {isOwner && contestApplication?.status === 'rejected' && (contestApplication?.rejection_reason || contestApplication?.rejection_reason_types) && (
-                        <div className="mb-0 p-4 bg-destructive/10 border border-destructive/20 rounded-lg shadow-sm">{/* Full width, no margins, card-like styling */}
-                         <div className="flex items-center gap-2 mb-2">
-                           <AlertCircle className="h-5 w-5 text-destructive" />
-                           <h3 className="font-semibold text-destructive">Application Rejected</h3>
-                         </div>
-                         <div className="space-y-2">
-                             {contestApplication.rejection_reason_types && contestApplication.rejection_reason_types.length > 0 && (
-                               <p className="text-sm text-destructive/80">
-                                 <span className="font-medium">Rejection reasons:</span> {contestApplication.rejection_reason_types.map((type: string) => REJECTION_REASONS[type as keyof typeof REJECTION_REASONS]).join(', ')}
-                                  {isOwner && (
-                                    <button 
-                                      onClick={() => {
-                                        console.log('Change link clicked! Loading user application data...');
-                                        if (contestApplication) {
-                                          setEditModalData(contestApplication);
-                                          setIsEditModalOpen(true);
-                                        }
-                                      }}
-                                      className="ml-2 text-primary hover:text-primary/80 underline text-sm"
-                                    >
-                                      change
-                                    </button>
-                                  )}
-                               </p>
-                             )}
-                               {contestApplication.rejection_reason && contestApplication.rejection_reason.trim() && !isReasonDuplicate(contestApplication.rejection_reason, contestApplication.rejection_reason_types) && (
-                                 <p className="text-sm text-destructive/80">
-                                   <span className="font-medium">Additional comments:</span> {contestApplication.rejection_reason}
-                                 </p>
-                                )}
-                           </div>
-                       </div>
-                     )}
-                   
-                   {/* Participation items grid */}
+                    </div>
+                    
+                    {/* Participation items grid */}
                   <div className={`grid gap-1 sm:gap-3 ${
                     participationViewMode === 'compact' 
                       ? 'grid-cols-1' 

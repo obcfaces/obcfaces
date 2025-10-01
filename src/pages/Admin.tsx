@@ -289,15 +289,18 @@ interface ContestApplication {
   id: string;
   user_id: string;
   application_data: any;
-  status: string;
   submitted_at: string;
-  approved_at?: string;
-  rejected_at?: string;
   reviewed_at?: string;
-  rejection_reason?: string;
-  rejection_reason_type?: string;
   reviewed_by?: string;
   deleted_at?: string;
+  is_active: boolean;
+  notes?: string;
+  // Legacy fields (no longer in DB, kept for backwards compatibility)
+  status?: string;
+  approved_at?: string;
+  rejected_at?: string;
+  rejection_reason?: string;
+  rejection_reason_type?: string;
 }
 
 interface WeeklyContest {
@@ -5750,21 +5753,19 @@ const Admin = () => {
                      });
                      return;
                    }
-                   
-                   // Update the corresponding application status to rejected
-                   if (participant.user_id) {
-                     const { data: applications } = await supabase
-                       .from('contest_applications')
-                       .select('id')
-                       .eq('user_id', participant.user_id)
-                       .eq('status', 'approved')
-                       .order('created_at', { ascending: false })
-                       .limit(1);
-                     
-                     if (applications && applications.length > 0) {
-                       await reviewApplication(applications[0].id, 'rejected', { reasonTypes, notes });
-                     }
-                   }
+                    
+                    // Update admin_status instead of old status field
+                    if (participant.user_id) {
+                      const { error: statusUpdateError } = await supabase
+                        .from('weekly_contest_participants')
+                        .update({ admin_status: 'rejected' })
+                        .eq('user_id', participant.user_id)
+                        .eq('is_active', true);
+                      
+                      if (statusUpdateError) {
+                        console.error('Error updating admin_status:', statusUpdateError);
+                      }
+                    }
                    
                    // Remove participant filter
                    setParticipantFilters(prev => {
