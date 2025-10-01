@@ -2203,16 +2203,18 @@ const Admin = () => {
                                      <SelectTrigger className={`w-28 h-6 text-xs ${getStatusBackgroundColor(participant.admin_status || 'this week')}`}>
                                        <SelectValue />
                                 </SelectTrigger>
-                                       <SelectContent className="z-[9999] bg-popover border shadow-lg">
-                                          <SelectItem value="pending">Pending</SelectItem>
-                                          <SelectItem value="under_review">Under Review</SelectItem>
-                                          <SelectItem value="approved">Approved</SelectItem>
-                                          <SelectItem value="rejected">Rejected</SelectItem>
-                                          <SelectItem value="this week">This Week</SelectItem>
-                                          <SelectItem value="next week">Next Week</SelectItem>
-                                          <SelectItem value="next week on site">Next Week On Site</SelectItem>
-                                          <SelectItem value="past">Past</SelectItem>
-                                       </SelectContent>
+                                        <SelectContent className="z-[9999] bg-popover border shadow-lg">
+                                           <SelectItem value="pending">Pending</SelectItem>
+                                           <SelectItem value="under_review">Under Review</SelectItem>
+                                           <SelectItem value="approved">Approved</SelectItem>
+                                           <SelectItem value="rejected">Rejected</SelectItem>
+                                           <SelectItem value="pre next week">Pre Next Week</SelectItem>
+                                           <SelectItem value="this week">This Week</SelectItem>
+                                           <SelectItem value="next week">Next Week</SelectItem>
+                                           <SelectItem value="next week on site">Next Week On Site</SelectItem>
+                                           <SelectItem value="past">Past</SelectItem>
+                                           <SelectItem value="rejected after contest">Rejected After Contest</SelectItem>
+                                        </SelectContent>
                               </Select>
                               
                               <Button
@@ -2654,17 +2656,18 @@ const Admin = () => {
                                   <SelectTrigger className={`w-24 h-7 text-xs ${getStatusBackgroundColor(participant.admin_status || 'pre next week')}`}>
                                     <SelectValue />
                                   </SelectTrigger>
-                                  <SelectContent className="z-[9999] bg-popover border shadow-lg">
-                                    <SelectItem value="pending">Pending</SelectItem>
-                                    <SelectItem value="under_review">Under Review</SelectItem>
-                                    <SelectItem value="approved">Approved</SelectItem>
-                                    <SelectItem value="rejected">Rejected</SelectItem>
-                                    <SelectItem value="pre next week">Pre Next Week</SelectItem>
-                                    <SelectItem value="this week">This Week</SelectItem>
-                                    <SelectItem value="next week">Next Week</SelectItem>
-                                    <SelectItem value="next week on site">Next Week On Site</SelectItem>
-                                    <SelectItem value="past">Past</SelectItem>
-                                  </SelectContent>
+                                   <SelectContent className="z-[9999] bg-popover border shadow-lg">
+                                     <SelectItem value="pending">Pending</SelectItem>
+                                     <SelectItem value="under_review">Under Review</SelectItem>
+                                     <SelectItem value="approved">Approved</SelectItem>
+                                     <SelectItem value="rejected">Rejected</SelectItem>
+                                     <SelectItem value="pre next week">Pre Next Week</SelectItem>
+                                     <SelectItem value="this week">This Week</SelectItem>
+                                     <SelectItem value="next week">Next Week</SelectItem>
+                                     <SelectItem value="next week on site">Next Week On Site</SelectItem>
+                                     <SelectItem value="past">Past</SelectItem>
+                                     <SelectItem value="rejected after contest">Rejected After Contest</SelectItem>
+                                   </SelectContent>
                                 </Select>
                                 <Button 
                                   size="sm"
@@ -2759,17 +2762,18 @@ const Admin = () => {
                                   <SelectTrigger className={`w-24 h-7 text-xs ${getStatusBackgroundColor(participant.admin_status || 'pre next week')}`}>
                                     <SelectValue />
                                   </SelectTrigger>
-                                  <SelectContent className="z-[9999] bg-popover border shadow-lg">
-                                    <SelectItem value="pending">Pending</SelectItem>
-                                    <SelectItem value="under_review">Under Review</SelectItem>
-                                    <SelectItem value="approved">Approved</SelectItem>
-                                    <SelectItem value="rejected">Rejected</SelectItem>
-                                    <SelectItem value="pre next week">Pre Next Week</SelectItem>
-                                    <SelectItem value="this week">This Week</SelectItem>
-                                    <SelectItem value="next week">Next Week</SelectItem>
-                                    <SelectItem value="next week on site">Next Week On Site</SelectItem>
-                                    <SelectItem value="past">Past</SelectItem>
-                                  </SelectContent>
+                                   <SelectContent className="z-[9999] bg-popover border shadow-lg">
+                                     <SelectItem value="pending">Pending</SelectItem>
+                                     <SelectItem value="under_review">Under Review</SelectItem>
+                                     <SelectItem value="approved">Approved</SelectItem>
+                                     <SelectItem value="rejected">Rejected</SelectItem>
+                                     <SelectItem value="pre next week">Pre Next Week</SelectItem>
+                                     <SelectItem value="this week">This Week</SelectItem>
+                                     <SelectItem value="next week">Next Week</SelectItem>
+                                     <SelectItem value="next week on site">Next Week On Site</SelectItem>
+                                     <SelectItem value="past">Past</SelectItem>
+                                     <SelectItem value="rejected after contest">Rejected After Contest</SelectItem>
+                                   </SelectContent>
                                 </Select>
                               </div>
                             </div>
@@ -3002,16 +3006,18 @@ const Admin = () => {
                                    <SelectTrigger className={`w-24 h-7 text-xs ${getStatusBackgroundColor(participant.admin_status || 'next week')}`}>
                                      <SelectValue />
                                   </SelectTrigger>
-                                         <SelectContent className="z-[9999] bg-popover border shadow-lg">
-                                            <SelectItem value="pending">Pending</SelectItem>
-                                            <SelectItem value="under_review">Under Review</SelectItem>
-                                            <SelectItem value="approved">Approved</SelectItem>
-                                            <SelectItem value="rejected">Rejected</SelectItem>
-                                            <SelectItem value="this week">This Week</SelectItem>
-                                            <SelectItem value="next week">Next Week</SelectItem>
-                                            <SelectItem value="next week on site">Next Week On Site</SelectItem>
-                                            <SelectItem value="past">Past</SelectItem>
-                                        </SelectContent>
+                                          <SelectContent className="z-[9999] bg-popover border shadow-lg">
+                                             <SelectItem value="pending">Pending</SelectItem>
+                                             <SelectItem value="under_review">Under Review</SelectItem>
+                                             <SelectItem value="approved">Approved</SelectItem>
+                                             <SelectItem value="rejected">Rejected</SelectItem>
+                                             <SelectItem value="pre next week">Pre Next Week</SelectItem>
+                                             <SelectItem value="this week">This Week</SelectItem>
+                                             <SelectItem value="next week">Next Week</SelectItem>
+                                             <SelectItem value="next week on site">Next Week On Site</SelectItem>
+                                             <SelectItem value="past">Past</SelectItem>
+                                             <SelectItem value="rejected after contest">Rejected After Contest</SelectItem>
+                                         </SelectContent>
                                 </Select>
                               </div>
                             </div>
@@ -3150,16 +3156,18 @@ const Admin = () => {
                                  <SelectTrigger className={`w-16 h-6 text-xs ${getStatusBackgroundColor(participant.admin_status || 'next week on site')}`}>
                                    <SelectValue />
                                 </SelectTrigger>
-                                       <SelectContent className="z-[9999] bg-popover border shadow-lg">
-                                          <SelectItem value="pending">Pending</SelectItem>
-                                          <SelectItem value="under_review">Under Review</SelectItem>
-                                          <SelectItem value="approved">Approved</SelectItem>
-                                          <SelectItem value="rejected">Rejected</SelectItem>
-                                          <SelectItem value="this week">This Week</SelectItem>
-                                          <SelectItem value="next week">Next Week</SelectItem>
-                                          <SelectItem value="next week on site">Next Week On Site</SelectItem>
-                                          <SelectItem value="past">Past</SelectItem>
-                                      </SelectContent>
+                                        <SelectContent className="z-[9999] bg-popover border shadow-lg">
+                                           <SelectItem value="pending">Pending</SelectItem>
+                                           <SelectItem value="under_review">Under Review</SelectItem>
+                                           <SelectItem value="approved">Approved</SelectItem>
+                                           <SelectItem value="rejected">Rejected</SelectItem>
+                                           <SelectItem value="pre next week">Pre Next Week</SelectItem>
+                                           <SelectItem value="this week">This Week</SelectItem>
+                                           <SelectItem value="next week">Next Week</SelectItem>
+                                           <SelectItem value="next week on site">Next Week On Site</SelectItem>
+                                           <SelectItem value="past">Past</SelectItem>
+                                           <SelectItem value="rejected after contest">Rejected After Contest</SelectItem>
+                                       </SelectContent>
                               </Select>
                             </div>
                           </div>
@@ -3698,16 +3706,18 @@ const Admin = () => {
                                      <SelectTrigger className={`w-full h-6 text-xs ${getStatusBackgroundColor(pendingPastChanges[participant.id]?.admin_status ?? participant.admin_status ?? 'past')}`}>
                                        <SelectValue />
                                     </SelectTrigger>
-                                       <SelectContent className="z-[9999] bg-popover border shadow-lg">
-                                          <SelectItem value="pending">Pending</SelectItem>
-                                          <SelectItem value="under_review">Under Review</SelectItem>
-                                          <SelectItem value="approved">Approved</SelectItem>
-                                          <SelectItem value="rejected">Rejected</SelectItem>
-                                          <SelectItem value="this week">This Week</SelectItem>
-                                          <SelectItem value="next week">Next Week</SelectItem>
-                                          <SelectItem value="next week on site">Next Week On Site</SelectItem>
-                                          <SelectItem value="past">Past</SelectItem>
-                                       </SelectContent>
+                                        <SelectContent className="z-[9999] bg-popover border shadow-lg">
+                                           <SelectItem value="pending">Pending</SelectItem>
+                                           <SelectItem value="under_review">Under Review</SelectItem>
+                                           <SelectItem value="approved">Approved</SelectItem>
+                                           <SelectItem value="rejected">Rejected</SelectItem>
+                                           <SelectItem value="pre next week">Pre Next Week</SelectItem>
+                                           <SelectItem value="this week">This Week</SelectItem>
+                                           <SelectItem value="next week">Next Week</SelectItem>
+                                           <SelectItem value="next week on site">Next Week On Site</SelectItem>
+                                           <SelectItem value="past">Past</SelectItem>
+                                           <SelectItem value="rejected after contest">Rejected After Contest</SelectItem>
+                                        </SelectContent>
                                   </Select>
                                 </div>
                                 
@@ -4298,16 +4308,18 @@ const Admin = () => {
                                     <SelectTrigger className={`w-28 h-6 text-xs ${getStatusBackgroundColor(participant.admin_status || 'pending')}`}>
                                       <SelectValue />
                                     </SelectTrigger>
-                                    <SelectContent className="z-[9999] bg-popover border shadow-lg">
-                                      <SelectItem value="pending">Pending</SelectItem>
-                                      <SelectItem value="under_review">Under Review</SelectItem>
-                                      <SelectItem value="approved">Approved</SelectItem>
-                                      <SelectItem value="rejected">Rejected</SelectItem>
-                                      <SelectItem value="this week">This Week</SelectItem>
-                                      <SelectItem value="next week">Next Week</SelectItem>
-                                      <SelectItem value="next week on site">Next Week On Site</SelectItem>
-                                      <SelectItem value="past">Past</SelectItem>
-                                    </SelectContent>
+                                     <SelectContent className="z-[9999] bg-popover border shadow-lg">
+                                       <SelectItem value="pending">Pending</SelectItem>
+                                       <SelectItem value="under_review">Under Review</SelectItem>
+                                       <SelectItem value="approved">Approved</SelectItem>
+                                       <SelectItem value="rejected">Rejected</SelectItem>
+                                       <SelectItem value="pre next week">Pre Next Week</SelectItem>
+                                       <SelectItem value="this week">This Week</SelectItem>
+                                       <SelectItem value="next week">Next Week</SelectItem>
+                                       <SelectItem value="next week on site">Next Week On Site</SelectItem>
+                                       <SelectItem value="past">Past</SelectItem>
+                                       <SelectItem value="rejected after contest">Rejected After Contest</SelectItem>
+                                     </SelectContent>
                                   </Select>
                                   
                                   <div 
@@ -4403,16 +4415,18 @@ const Admin = () => {
                                       <SelectTrigger className="w-24 h-7 text-xs">
                                         <SelectValue />
                                       </SelectTrigger>
-                                      <SelectContent className="z-[9999] bg-popover border shadow-lg">
-                                        <SelectItem value="pending">Pending</SelectItem>
-                                        <SelectItem value="under_review">Under Review</SelectItem>
-                                        <SelectItem value="approved">Approved</SelectItem>
-                                        <SelectItem value="rejected">Rejected</SelectItem>
-                                        <SelectItem value="this week">This Week</SelectItem>
-                                        <SelectItem value="next week">Next Week</SelectItem>
-                                        <SelectItem value="next week on site">Next Week On Site</SelectItem>
-                                        <SelectItem value="past">Past</SelectItem>
-                                      </SelectContent>
+                                       <SelectContent className="z-[9999] bg-popover border shadow-lg">
+                                         <SelectItem value="pending">Pending</SelectItem>
+                                         <SelectItem value="under_review">Under Review</SelectItem>
+                                         <SelectItem value="approved">Approved</SelectItem>
+                                         <SelectItem value="rejected">Rejected</SelectItem>
+                                         <SelectItem value="pre next week">Pre Next Week</SelectItem>
+                                         <SelectItem value="this week">This Week</SelectItem>
+                                         <SelectItem value="next week">Next Week</SelectItem>
+                                         <SelectItem value="next week on site">Next Week On Site</SelectItem>
+                                         <SelectItem value="past">Past</SelectItem>
+                                         <SelectItem value="rejected after contest">Rejected After Contest</SelectItem>
+                                       </SelectContent>
                                     </Select>
                                   </div>
                                 </div>
@@ -5281,11 +5295,17 @@ const Admin = () => {
                                        >
                                          <SelectValue />
                                        </SelectTrigger>
-                                         <SelectContent>
-                                           <SelectItem value="pending">Pending</SelectItem>
-                                           <SelectItem value="approved">Approved</SelectItem>
-                                           <SelectItem value="rejected">Rejected</SelectItem>
-                                         </SelectContent>
+                                          <SelectContent className="z-[9999] bg-popover border shadow-lg">
+                                            <SelectItem value="pending">Pending</SelectItem>
+                                            <SelectItem value="under_review">Under Review</SelectItem>
+                                            <SelectItem value="approved">Approved</SelectItem>
+                                            <SelectItem value="rejected">Rejected</SelectItem>
+                                            <SelectItem value="this week">This Week</SelectItem>
+                                            <SelectItem value="next week">Next Week</SelectItem>
+                                            <SelectItem value="next week on site">Next Week On Site</SelectItem>
+                                            <SelectItem value="past">Past</SelectItem>
+                                            <SelectItem value="rejected after contest">Rejected After Contest</SelectItem>
+                                          </SelectContent>
                                      </Select>
                                    )}
                                    
@@ -5786,11 +5806,17 @@ const Admin = () => {
                                                 >
                                                   <SelectValue />
                                                 </SelectTrigger>
-                                                 <SelectContent>
-                                                   <SelectItem value="pending">Pending</SelectItem>
-                                                   <SelectItem value="approved">Approved</SelectItem>
-                                                   <SelectItem value="rejected">Rejected</SelectItem>
-                                                 </SelectContent>
+                                                  <SelectContent className="z-[9999] bg-popover border shadow-lg">
+                                                    <SelectItem value="pending">Pending</SelectItem>
+                                                    <SelectItem value="under_review">Under Review</SelectItem>
+                                                    <SelectItem value="approved">Approved</SelectItem>
+                                                    <SelectItem value="rejected">Rejected</SelectItem>
+                                                    <SelectItem value="this week">This Week</SelectItem>
+                                                    <SelectItem value="next week">Next Week</SelectItem>
+                                                    <SelectItem value="next week on site">Next Week On Site</SelectItem>
+                                                    <SelectItem value="past">Past</SelectItem>
+                                                    <SelectItem value="rejected after contest">Rejected After Contest</SelectItem>
+                                                  </SelectContent>
                                               </Select>
                                             )}
                                             
@@ -5976,11 +6002,17 @@ const Admin = () => {
                                                          >
                                                           <SelectValue />
                                                         </SelectTrigger>
-                                                         <SelectContent>
-                                                           <SelectItem value="pending">Pending</SelectItem>
-                                                           <SelectItem value="approved">Approved</SelectItem>
-                                                           <SelectItem value="rejected">Rejected</SelectItem>
-                                                         </SelectContent>
+                                                          <SelectContent className="z-[9999] bg-popover border shadow-lg">
+                                                            <SelectItem value="pending">Pending</SelectItem>
+                                                            <SelectItem value="under_review">Under Review</SelectItem>
+                                                            <SelectItem value="approved">Approved</SelectItem>
+                                                            <SelectItem value="rejected">Rejected</SelectItem>
+                                                            <SelectItem value="this week">This Week</SelectItem>
+                                                            <SelectItem value="next week">Next Week</SelectItem>
+                                                            <SelectItem value="next week on site">Next Week On Site</SelectItem>
+                                                            <SelectItem value="past">Past</SelectItem>
+                                                            <SelectItem value="rejected after contest">Rejected After Contest</SelectItem>
+                                                          </SelectContent>
                                                       </Select>
                                                       
                                                         {/* Admin login with expandable date */}
