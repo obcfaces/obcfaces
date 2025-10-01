@@ -36,7 +36,7 @@ import { ParticipantStatusHistory } from '@/components/admin/ParticipantStatusHi
 import { ParticipantStatusHistoryModal } from '@/components/admin/ParticipantStatusHistoryModal';
 
 // Unified status type for participants
-type ParticipantStatus = 'pending' | 'approved' | 'rejected' | 'pre next week' | 'this week' | 'next week' | 'next week on site' | 'past';
+type ParticipantStatus = 'pending' | 'rejected' | 'pre next week' | 'this week' | 'next week' | 'next week on site' | 'past';
 
 // Helper function to check if rejection reason is a duplicate of predefined reasons
 const isReasonDuplicate = (rejectionReason: string, reasonTypes: string[]) => {
@@ -1724,8 +1724,8 @@ const Admin = () => {
       }
     }
 
-    // If status is approved/this week/next week, automatically add to weekly contest if not already there
-    if ((newStatus === 'approved' || newStatus === 'this week' || newStatus === 'next week') && application) {
+    // If status is this week/next week, automatically add to weekly contest if not already there
+    if ((newStatus === 'this week' || newStatus === 'next week') && application) {
       try {
         const appData = typeof application.application_data === 'string' 
           ? JSON.parse(application.application_data) 
@@ -1776,12 +1776,12 @@ const Admin = () => {
           if (!existingParticipant) {
             const { error: participantError } = await supabase
               .from('weekly_contest_participants')
-              .insert({
+              .insert([{
                 contest_id: contestId,
                 user_id: application.user_id,
                 application_data: application.application_data,
                 admin_status: newStatus
-              });
+              }]);
 
             if (participantError) {
               console.error('Error adding participant to weekly contest:', participantError);
@@ -1804,14 +1804,6 @@ const Admin = () => {
       } catch (error) {
         console.error('Error handling approved/next status:', error);
       }
-    }
-
-    // Only show toast for approvals, not rejections
-    if (newStatus === 'approved') {
-      toast({
-        title: "Success",
-        description: "Application approved",
-      });
     }
 
     console.log('Refreshing data after status change...');
