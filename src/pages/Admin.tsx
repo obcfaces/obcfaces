@@ -159,7 +159,6 @@ const getWeekIntervalForStatus = (adminStatus: string): string => {
     'this week': currentWeek.formatted,
     'next week': nextWeek.formatted,
     'next week on site': nextWeek.formatted,
-    'pre next week': nextWeek.formatted,
     'past': pastWeek.formatted,
   };
   
@@ -740,8 +739,6 @@ const Admin = () => {
               console.log(`Participant ${participant.id}: admin_status=${status}, showing=${isThisWeekStatus && !isPastStatus}`);
               
               return (isThisWeekStatus) && !isPastStatus;
-            case 'pre next week':
-              return status === 'pre next week';
             case 'next week':
               // Show participants with 'next week' or 'next week on site' status OR applications with 'next week' status
               // Exclude past and current week statuses
@@ -756,8 +753,7 @@ const Admin = () => {
               const isPast = status === 'past';
               const isNotCurrentOrFuture = status !== 'this week' && 
                                           status !== 'next week' && 
-                                          status !== 'next week on site' && 
-                                          status !== 'pre next week';
+                                          status !== 'next week on site';
               return isPast && isNotCurrentOrFuture;
             case 'pending':
               return status === 'pending';
@@ -897,7 +893,6 @@ const Admin = () => {
         return '29/09-05/10/25'; // Current actual week  
       case 'next week':
       case 'next week on site':
-      case 'pre next week':
         return '06/10-12/10/25'; // Next week
       case 'past':
         // For 'past' status, use status_week_history to determine week interval
@@ -1263,8 +1258,6 @@ const Admin = () => {
   // Function to get status background color
   const getStatusBackgroundColor = (status: string) => {
     switch (status) {
-      case 'pre next week':
-        return 'bg-[hsl(var(--status-pre-next-week))]';
       case 'next week':
         return 'bg-[hsl(var(--status-next-week))]';
       case 'next week on site':
@@ -1980,12 +1973,9 @@ const Admin = () => {
           <Tabs defaultValue="applications" className="space-y-6">
             {/* Mobile layout: Single row with all tabs */}
             <div className="md:hidden">
-              <TabsList className="grid grid-cols-7 w-full">
+              <TabsList className="grid grid-cols-6 w-full">
                 <TabsTrigger value="applications" className="text-xs">
                   Card
-                </TabsTrigger>
-                <TabsTrigger value="prenextweek" className="text-xs">
-                  Pre
                 </TabsTrigger>
                 <TabsTrigger value="nextweek" className="text-xs">
                   Next
@@ -2009,9 +1999,6 @@ const Admin = () => {
             <TabsList className="hidden md:flex">
               <TabsTrigger value="applications">
                 Card
-              </TabsTrigger>
-              <TabsTrigger value="prenextweek">
-                Pre
               </TabsTrigger>
               <TabsTrigger value="nextweek">
                 Next
@@ -2064,10 +2051,6 @@ const Admin = () => {
                     <SelectItem value="next week">Next Week</SelectItem>
                     <SelectItem value="next week on site">Next Week On Site</SelectItem>
                     <SelectItem value="past">Past</SelectItem>
-                    <SelectItem value="pending">Pending</SelectItem>
-                    <SelectItem value="under review">Under Review</SelectItem>
-                    <SelectItem value="approved">Approved</SelectItem>
-                    <SelectItem value="rejected">Rejected</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -2282,13 +2265,9 @@ const Admin = () => {
                                 </SelectTrigger>
                                        <SelectContent className="z-[9999] bg-popover border shadow-lg">
                                           <SelectItem value="this week">This Week</SelectItem>
-                                            <SelectItem value="pre next week">Pre Next Week</SelectItem>
                                            <SelectItem value="next week">Next Week</SelectItem>
                                            <SelectItem value="next week on site">Next Week On Site</SelectItem>
                                            <SelectItem value="past">Past</SelectItem>
-                                         <SelectItem value="pending">Pending</SelectItem>
-                                         <SelectItem value="approved">Approved</SelectItem>
-                                         <SelectItem value="rejected">Rejected</SelectItem>
                                       </SelectContent>
                               </Select>
                               
@@ -2457,16 +2436,12 @@ const Admin = () => {
                                    <SelectTrigger className="w-24 h-7 text-xs">
                                      <SelectValue />
                                    </SelectTrigger>
-                                           <SelectContent className="z-[9999] bg-popover border shadow-lg">
-                                              <SelectItem value="this week">This Week</SelectItem>
-                                                <SelectItem value="pre next week">Pre Next Week</SelectItem>
-                                               <SelectItem value="next week">Next Week</SelectItem>
-                                               <SelectItem value="next week on site">Next Week On Site</SelectItem>
-                                               <SelectItem value="past">Past</SelectItem>
-                                             <SelectItem value="pending">Pending</SelectItem>
-                                             <SelectItem value="approved">Approved</SelectItem>
-                                             <SelectItem value="rejected">Rejected</SelectItem>
-                                           </SelectContent>
+                                                <SelectContent className="z-[9999] bg-popover border shadow-lg">
+                                                   <SelectItem value="this week">This Week</SelectItem>
+                                                    <SelectItem value="next week">Next Week</SelectItem>
+                                                    <SelectItem value="next week on site">Next Week On Site</SelectItem>
+                                                    <SelectItem value="past">Past</SelectItem>
+                                               </SelectContent>
                                   </Select>
                                   
                                   <Button
@@ -2546,162 +2521,6 @@ const Admin = () => {
                 )}
                 </>
               );
-              })()}
-            </TabsContent>
-
-            <TabsContent value="prenextweek" className="space-y-4">
-              <div className="mb-6">
-                <div>
-                  <h2 className="text-xl font-semibold">Pre Next Week Participants</h2>
-                  <p className="text-muted-foreground">Participants scheduled for pre next week status</p>
-                </div>
-              </div>
-              
-              {(() => {
-                // Фильтруем участников со статусом "pre next week"
-                const preNextWeekParticipants = weeklyParticipants.filter(participant => {
-                  const status = participant.admin_status || 'this week';
-                  return status === 'pre next week';
-                });
-                
-                if (preNextWeekParticipants.length === 0) {
-                  return (
-                    <div className="text-center py-8 text-muted-foreground">
-                      No participants found with "pre next week" status
-                    </div>
-                  );
-                }
-                
-                return preNextWeekParticipants.map((participant) => {
-                  const participantProfile = profiles.find(p => p.id === participant.user_id);
-                  const appData = participant.application_data || {};
-                  
-                  return (
-                    <Card key={participant.id} className="overflow-hidden relative h-[149px]">
-                      <CardContent className="p-0">
-                        {/* Desktop layout */}
-                        <div className="hidden md:flex">
-                          {/* Photos section - 2 columns */}
-                          <div className="flex gap-px w-[25ch] flex-shrink-0">
-                            {(participantProfile?.photo_1_url || appData.photo1_url) && (
-                              <div className="w-1/2">
-                                <img 
-                                  src={participantProfile?.photo_1_url || appData.photo1_url} 
-                                  alt="Portrait" 
-                                  className="w-full h-[149px] object-contain cursor-pointer hover:opacity-90 transition-opacity"
-                                  onClick={() => openPhotoModal([
-                                    participantProfile?.photo_1_url || appData.photo1_url, 
-                                    participantProfile?.photo_2_url || appData.photo2_url
-                                  ].filter(Boolean), 0, `${participantProfile?.first_name || appData.first_name} ${participantProfile?.last_name || appData.last_name}`)}
-                                />
-                              </div>
-                            )}
-                            {(participantProfile?.photo_2_url || appData.photo2_url) && (
-                              <div className="w-1/2 relative">
-                                <img 
-                                  src={participantProfile?.photo_2_url || appData.photo2_url} 
-                                  alt="Full length" 
-                                  className="w-full h-[149px] object-cover cursor-pointer hover:opacity-90 transition-opacity"
-                                  onClick={() => openPhotoModal([
-                                    participantProfile?.photo_1_url || appData.photo1_url, 
-                                    participantProfile?.photo_2_url || appData.photo2_url
-                                  ].filter(Boolean), 1, `${participantProfile?.first_name || appData.first_name} ${participantProfile?.last_name || appData.last_name}`)}
-                                />
-                              </div>
-                            )}
-                          </div>
-                          
-                          {/* Information section */}
-                          <div className="flex-1 pl-4 pr-4 py-3 flex flex-col">
-                            <div className="flex items-center justify-between mb-2">
-                              <div className="flex items-center gap-2">
-                                <span className="font-semibold">
-                                  {participantProfile?.first_name || appData.first_name} {participantProfile?.last_name || appData.last_name}
-                                </span>
-                                <span className="text-sm text-muted-foreground">
-                                  ({participantProfile?.age || new Date().getFullYear() - appData.birth_year})
-                                </span>
-                              </div>
-                              
-                              {/* Status selector */}
-                              <div className="flex items-center gap-1">
-                               <Select 
-                                 value={participant.admin_status || 'pre next week'}
-                                  onValueChange={async (newStatus) => {
-                                   const result = await updateParticipantStatusWithHistory(
-                                      participant.id,
-                                      newStatus,
-                                      `${participantProfile?.first_name || appData.first_name} ${participantProfile?.last_name || appData.last_name}`
-                                    );
-
-                                    if (!result.success) {
-                                      toast({
-                                        title: "Error",
-                                        description: "Failed to update participant status",
-                                        variant: "destructive",
-                                      });
-                                    } else {
-                                      toast({
-                                        title: "Status Updated",
-                                        description: `Participant status changed to ${newStatus}`,
-                                      });
-                                      fetchWeeklyParticipants();
-                                    }
-                                }}
-                              >
-                                <SelectTrigger className="w-40 h-8 text-xs">
-                                  <SelectValue />
-                                </SelectTrigger>
-                                 <SelectContent>
-                                   <SelectItem value="pre next week">Pre Next Week</SelectItem>
-                                   <SelectItem value="next week">Next Week</SelectItem>
-                                   <SelectItem value="next week on site">Next Week On Site</SelectItem>
-                                   <SelectItem value="this week">This Week</SelectItem>
-                                   <SelectItem value="past">Past</SelectItem>
-                                 </SelectContent>
-                               </Select>
-                               
-                               <Button
-                                 variant="ghost"
-                                 size="sm"
-                                 className="p-0 h-8 w-8 hover:bg-accent"
-                                 onClick={() => {
-                                   setSelectedStatusHistory({
-                                     participantId: participant.id,
-                                     participantName: `${participantProfile?.first_name || appData.first_name} ${participantProfile?.last_name || appData.last_name}`,
-                                     statusHistory: participant.status_history
-                                   });
-                                   setStatusHistoryModalOpen(true);
-                                 }}
-                                 title="View Status History"
-                               >
-                                 <Info className="w-4 h-4" />
-                               </Button>
-                              </div>
-                            </div>
-                            
-                            <div className="text-sm text-muted-foreground mb-2">
-                              {participantProfile?.city || appData.city}, {participantProfile?.country || appData.country}
-                            </div>
-                            
-                              <div className="text-sm text-muted-foreground">
-                                {participantProfile?.height_cm || appData.height_cm}cm, {participantProfile?.weight_kg || appData.weight_kg}kg
-                              </div>
-                            
-                            <div className="flex-1"></div>
-                            
-                            <div className="flex items-center justify-between">
-                              <div className="text-sm">
-                                <span className="text-muted-foreground">Rating:</span> {participant.average_rating || 0}
-                                <span className="text-muted-foreground ml-2">Votes:</span> {participant.total_votes || 0}
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  );
-                });
               })()}
             </TabsContent>
 
@@ -2905,16 +2724,12 @@ const Admin = () => {
                                    <SelectTrigger className={`w-24 h-7 text-xs ${getStatusBackgroundColor(participant.admin_status || 'next week')}`}>
                                      <SelectValue />
                                   </SelectTrigger>
-                                   <SelectContent className="z-[9999] bg-popover border shadow-lg">
-                                       <SelectItem value="this week">This Week</SelectItem>
-                                         <SelectItem value="pre next week">Pre Next Week</SelectItem>
-                                        <SelectItem value="next week">Next Week</SelectItem>
-                                        <SelectItem value="next week on site">Next Week On Site</SelectItem>
-                                        <SelectItem value="past">Past</SelectItem>
-                                      <SelectItem value="pending">Pending</SelectItem>
-                                      <SelectItem value="approved">Approved</SelectItem>
-                                      <SelectItem value="rejected">Rejected</SelectItem>
-                                   </SelectContent>
+                                         <SelectContent className="z-[9999] bg-popover border shadow-lg">
+                                            <SelectItem value="this week">This Week</SelectItem>
+                                             <SelectItem value="next week">Next Week</SelectItem>
+                                             <SelectItem value="next week on site">Next Week On Site</SelectItem>
+                                             <SelectItem value="past">Past</SelectItem>
+                                        </SelectContent>
                                 </Select>
                               </div>
                             </div>
@@ -3053,16 +2868,12 @@ const Admin = () => {
                                  <SelectTrigger className={`w-16 h-6 text-xs ${getStatusBackgroundColor(participant.admin_status || 'next week on site')}`}>
                                    <SelectValue />
                                 </SelectTrigger>
-                                  <SelectContent className="z-[9999] bg-popover border shadow-lg">
-                                     <SelectItem value="this week">This Week</SelectItem>
-                                       <SelectItem value="pre next week">Pre Next Week</SelectItem>
-                                      <SelectItem value="next week">Next Week</SelectItem>
-                                      <SelectItem value="next week on site">Next Week On Site</SelectItem>
-                                      <SelectItem value="past">Past</SelectItem>
-                                    <SelectItem value="pending">Pending</SelectItem>
-                                    <SelectItem value="approved">Approved</SelectItem>
-                                    <SelectItem value="rejected">Rejected</SelectItem>
-                                 </SelectContent>
+                                       <SelectContent className="z-[9999] bg-popover border shadow-lg">
+                                          <SelectItem value="this week">This Week</SelectItem>
+                                           <SelectItem value="next week">Next Week</SelectItem>
+                                           <SelectItem value="next week on site">Next Week On Site</SelectItem>
+                                           <SelectItem value="past">Past</SelectItem>
+                                      </SelectContent>
                               </Select>
                             </div>
                           </div>
@@ -3472,8 +3283,8 @@ const Admin = () => {
                                  {/* Show all statuses horizontally, sorted by changed_at (newest first) */}
                                  {participant.status_history && Object.keys(participant.status_history).length > 0 ? (
                                    (() => {
-                                     // Valid admin_status values only
-                                     const validAdminStatuses = ['this week', 'pre next week', 'next week', 'next week on site', 'past', 'pending', 'approved', 'rejected'];
+                                      // Valid admin_status values only
+                                      const validAdminStatuses = ['this week', 'next week', 'next week on site', 'past'];
                                      
                                      // Sort all status entries by changed_at (newest first) and filter only valid admin statuses
                                      const sortedEntries = Object.entries(participant.status_history)
@@ -3577,16 +3388,12 @@ const Admin = () => {
                                      <SelectTrigger className={`w-full h-6 text-xs ${getStatusBackgroundColor(pendingPastChanges[participant.id]?.admin_status ?? participant.admin_status ?? 'past')}`}>
                                        <SelectValue />
                                     </SelectTrigger>
-                                    <SelectContent className="z-[9999] bg-popover border shadow-lg">
-                                      <SelectItem value="this week">This Week</SelectItem>
-                                       <SelectItem value="pre next week">Pre Next Week</SelectItem>
-                                      <SelectItem value="next week">Next Week</SelectItem>
-                                      <SelectItem value="next week on site">Next Week On Site</SelectItem>
-                                       <SelectItem value="past">Past</SelectItem>
-                                      <SelectItem value="pending">Pending</SelectItem>
-                                      <SelectItem value="approved">Approved</SelectItem>
-                                      <SelectItem value="rejected">Rejected</SelectItem>
-                                    </SelectContent>
+                                       <SelectContent className="z-[9999] bg-popover border shadow-lg">
+                                          <SelectItem value="this week">This Week</SelectItem>
+                                           <SelectItem value="next week">Next Week</SelectItem>
+                                           <SelectItem value="next week on site">Next Week On Site</SelectItem>
+                                           <SelectItem value="past">Past</SelectItem>
+                                      </SelectContent>
                                   </Select>
                                 </div>
                                 
@@ -3831,7 +3638,6 @@ const Admin = () => {
                                        return '29/09-05/10/25';
                                      case 'next week':
                                      case 'next week on site':
-                                     case 'pre next week':
                                        return '06/10-12/10/25';
                                       case 'past':
                                         return '22/09-28/09/25';
@@ -3844,7 +3650,7 @@ const Admin = () => {
                                 <div className="text-gray-600">
                                    {(() => {
                                       // Valid admin_status values only 
-                                      const validAdminStatuses = ['this week', 'pre next week', 'next week', 'next week on site', 'past', 'pending', 'approved', 'rejected'];
+                                      const validAdminStatuses = ['this week', 'next week', 'next week on site', 'past'];
                                       
                                       const prevStatuses = Object.entries(participant.status_history)
                                         .filter(([status, info]: [string, any]) => validAdminStatuses.includes(status) && info && status) // Only valid admin statuses
@@ -3859,7 +3665,6 @@ const Admin = () => {
                                              return '29/09-05/10/25';
                                            case 'next week':
                                            case 'next week on site':
-                                           case 'pre next week':
                                              return '06/10-12/10/25';
                                             case 'past':
                                               return '22/09-28/09/25';
@@ -4244,13 +4049,9 @@ const Admin = () => {
                                         </SelectTrigger>
                                           <SelectContent>
                                              <SelectItem value="this week">This Week</SelectItem>
-                                               <SelectItem value="pre next week">Pre Next Week</SelectItem>
                                               <SelectItem value="next week">Next Week</SelectItem>
                                               <SelectItem value="next week on site">Next Week On Site</SelectItem>
                                              <SelectItem value="past">Past</SelectItem>
-                                            <SelectItem value="pending">Pending</SelectItem>
-                                            <SelectItem value="approved">Approved</SelectItem>
-                                            <SelectItem value="rejected">Rejected</SelectItem>
                                           </SelectContent>
                                      </Select>
                                      
@@ -4464,13 +4265,9 @@ const Admin = () => {
                                                 </SelectTrigger>
                                                    <SelectContent>
                                                       <SelectItem value="this week">This Week</SelectItem>
-                                                        <SelectItem value="pre next week">Pre Next Week</SelectItem>
                                                        <SelectItem value="next week">Next Week</SelectItem>
                                                        <SelectItem value="next week on site">Next Week On Site</SelectItem>
                                                       <SelectItem value="past">Past</SelectItem>
-                                                     <SelectItem value="pending">Pending</SelectItem>
-                                                     <SelectItem value="approved">Approved</SelectItem>
-                                                     <SelectItem value="rejected">Rejected</SelectItem>
                                                    </SelectContent>
                                               </Select>
                                               
@@ -4559,24 +4356,15 @@ const Admin = () => {
                         setApplicationCurrentPage(1); // Reset pagination when filter changes
                       }}
                     >
-                       <SelectTrigger 
-                        className={`w-20 md:w-32 ${
-                          statusFilter === 'approved' ? 'bg-green-100 border-green-500 text-green-700' :
-                          statusFilter === 'rejected' ? 'bg-red-100 border-red-500 text-red-700' :
-                          ''
-                        }`}
-                      >
+                       <SelectTrigger className="w-20 md:w-32">
                         <SelectValue placeholder="Filter by status" />
                       </SelectTrigger>
-                       <SelectContent className="z-[9999] bg-popover border shadow-lg min-w-[160px]">
+                       <SelectContent className="z-[9999] bg-popover border shadow-lg min-w-[200px]">
                          <SelectItem value="all">All Statuses</SelectItem>
                          <SelectItem value="this week">This Week</SelectItem>
-                           <SelectItem value="pre next week">Pre Next Week</SelectItem>
                           <SelectItem value="next week">Next Week</SelectItem>
+                          <SelectItem value="next week on site">Next Week On Site</SelectItem>
                           <SelectItem value="past">Past</SelectItem>
-                         <SelectItem value="pending">Pending</SelectItem>
-                         <SelectItem value="approved">Approved</SelectItem>
-                         <SelectItem value="rejected">Rejected</SelectItem>
                        </SelectContent>
                     </Select>
                     {statusFilter !== 'all' && (
@@ -4640,10 +4428,10 @@ const Admin = () => {
                         return false;
                       }
                       
-                      // Exclude applications already in weekly contest with active status (unless they have "pending" status or we're filtering by "next week")
+                      // Exclude applications already in weekly contest with this week status (unless filtering)
                       if (weeklyParticipant && 
-                          !['pending', 'under review'].includes(weeklyParticipant.admin_status) && 
-                          statusFilter !== 'next week') {
+                          weeklyParticipant.admin_status === 'this week' && 
+                          statusFilter !== 'this week') {
                         return false;
                       }
                       
@@ -5073,14 +4861,10 @@ const Admin = () => {
                                                </SelectTrigger>
                                                   <SelectContent>
                                                      <SelectItem value="this week">This Week</SelectItem>
-                                                     <SelectItem value="pre next week">Pre Next Week</SelectItem>
                                                       <SelectItem value="next week">Next Week</SelectItem>
                                                       <SelectItem value="next week on site">Next Week On Site</SelectItem>
                                                      <SelectItem value="past">Past</SelectItem>
-                                                    <SelectItem value="pending">Pending</SelectItem>
-                                                    <SelectItem value="approved">Approved</SelectItem>
-                                                    <SelectItem value="rejected">Rejected</SelectItem>
-                                                    
+                                                     
                                                   </SelectContent>
                                              </Select>
                                              
