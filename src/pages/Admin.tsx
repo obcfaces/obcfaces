@@ -35,6 +35,9 @@ import { WinnerContentManager } from '@/components/admin/WinnerContentManager';
 import { ParticipantStatusHistory } from '@/components/admin/ParticipantStatusHistory';
 import { ParticipantStatusHistoryModal } from '@/components/admin/ParticipantStatusHistoryModal';
 
+// Unified status type for participants
+type ParticipantStatus = 'pending' | 'under_review' | 'approved' | 'rejected' | 'this week' | 'next week' | 'next week on site' | 'past';
+
 // Helper function to check if rejection reason is a duplicate of predefined reasons
 const isReasonDuplicate = (rejectionReason: string, reasonTypes: string[]) => {
   if (!rejectionReason || !reasonTypes || reasonTypes.length === 0) return false;
@@ -431,7 +434,7 @@ const Admin = () => {
   // Centralized function to update participant status with history
   const updateParticipantStatusWithHistory = async (
     participantId: string,
-    newStatus: string,
+    newStatus: ParticipantStatus,
     participantName: string
   ): Promise<{ success: boolean; error?: any }> => {
     try {
@@ -1125,7 +1128,7 @@ const Admin = () => {
   // DEPRECATED: Use updateParticipantStatusWithHistory instead
   // Keeping for reference but should not be used
   const debounceStatusUpdate = useCallback(
-    debounce(async (participantId: string, newStatus: string, participantName: string = 'Unknown') => {
+    debounce(async (participantId: string, newStatus: ParticipantStatus, participantName: string = 'Unknown') => {
       try {
         // Use centralized function instead
         const result = await updateParticipantStatusWithHistory(participantId, newStatus, participantName);
@@ -1151,7 +1154,7 @@ const Admin = () => {
   );
 
   // DEPRECATED: Use updateParticipantStatusWithHistory instead
-  const optimizedStatusUpdate = useCallback(async (participantId: string, newStatus: string, participantName: string = 'Unknown') => {
+  const optimizedStatusUpdate = useCallback(async (participantId: string, newStatus: ParticipantStatus, participantName: string = 'Unknown') => {
     try {
       // Use centralized function instead
       const result = await updateParticipantStatusWithHistory(participantId, newStatus, participantName);
@@ -1538,7 +1541,7 @@ const Admin = () => {
     }
   };
 
-  const reviewApplication = async (applicationId: string, newStatus: string, rejectionData?: { reasonTypes: string[], notes: string }) => {
+  const reviewApplication = async (applicationId: string, newStatus: ParticipantStatus, rejectionData?: { reasonTypes: string[], notes: string }) => {
     const application = contestApplications.find(app => app.id === applicationId);
     
     try {
@@ -2096,7 +2099,7 @@ const Admin = () => {
                                     const updateStatus = async () => {
                                       const result = await updateParticipantStatusWithHistory(
                                         participant.id,
-                                        value,
+                                        value as ParticipantStatus,
                                         `${participantProfile?.first_name || appData.first_name} ${participantProfile?.last_name || appData.last_name}`
                                       );
 
@@ -2273,7 +2276,7 @@ const Admin = () => {
                                         const updateStatus = async () => {
                                           const result = await updateParticipantStatusWithHistory(
                                             participant.id,
-                                            value,
+                                            value as ParticipantStatus,
                                             `${participantProfile?.first_name || appData.first_name} ${participantProfile?.last_name || appData.last_name}`
                                           );
 
@@ -2554,7 +2557,7 @@ const Admin = () => {
                                           
                                           const result = await updateParticipantStatusWithHistory(
                                             participant.participant_id,
-                                            value,
+                                            value as ParticipantStatus,
                                             participantName
                                           );
 
@@ -2710,7 +2713,7 @@ const Admin = () => {
                                     
                                     const result = await updateParticipantStatusWithHistory(
                                       participant.id,
-                                      value,
+                                      value as ParticipantStatus,
                                       participantName
                                     );
 
@@ -3311,7 +3314,7 @@ const Admin = () => {
                                       if (changes.admin_status && changes.admin_status !== participant.admin_status) {
                                         const result = await updateParticipantStatusWithHistory(
                                           participant.id,
-                                          changes.admin_status,
+                                          changes.admin_status as ParticipantStatus,
                                           participantName
                                         );
                                         
@@ -3907,7 +3910,7 @@ const Admin = () => {
                                              return;
                                            }
                                            console.log('Calling reviewApplication for status:', newStatus);
-                                           reviewApplication(application.id, newStatus);
+                                            reviewApplication(application.id, newStatus as ParticipantStatus);
                                          }}
                                      >
                                         <SelectTrigger 
@@ -4123,7 +4126,7 @@ const Admin = () => {
                                                      setRejectModalOpen(true);
                                                      return;
                                                    }
-                                                   reviewApplication(application.id, newStatus);
+                                                    reviewApplication(application.id, newStatus as ParticipantStatus);
                                                  }}
                                               >
                                                  <SelectTrigger 
@@ -4517,7 +4520,7 @@ const Admin = () => {
                                             setRejectModalOpen(true);
                                             return;
                                           }
-                                          reviewApplication(application.id, newStatus);
+                                          reviewApplication(application.id, newStatus as ParticipantStatus);
                                         }}
                                      >
                                         <SelectTrigger 
@@ -4705,7 +4708,7 @@ const Admin = () => {
                                                     setRejectModalOpen(true);
                                                     return;
                                                   }
-                                                  reviewApplication(application.id, newStatus);
+                                                  reviewApplication(application.id, newStatus as ParticipantStatus);
                                                 }}
                                              >
                                                 <SelectTrigger 
@@ -5025,7 +5028,7 @@ const Admin = () => {
                                                      setRejectModalOpen(true);
                                                      return;
                                                    }
-                                                   reviewApplication(prevApp.id, newStatus);
+                                                    reviewApplication(prevApp.id, newStatus as ParticipantStatus);
                                                  }}
                                               >
                                                 <SelectTrigger 
@@ -5215,7 +5218,7 @@ const Admin = () => {
                                                              setRejectModalOpen(true);
                                                              return;
                                                            }
-                                                           reviewApplication(prevApp.id, newStatus);
+                                                           reviewApplication(prevApp.id, newStatus as ParticipantStatus);
                                                          }}
                                                       >
                                                          <SelectTrigger 
