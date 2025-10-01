@@ -46,6 +46,7 @@ interface ContestantCardProps {
   viewMode?: 'compact' | 'full';
   onRate?: (rating: number) => void;
   profileId?: string;
+  userId?: string; // Add userId for contestant_user_id in ratings
   showDislike?: boolean;
   isRealContestant?: boolean; // New prop for real contestants
   averageRating?: number; // Add average rating prop
@@ -75,6 +76,7 @@ export function ContestantCard({
   viewMode = 'compact',
   onRate,
   profileId,
+  userId, // Get userId prop
   showDislike = false,
   isRealContestant = false,
   averageRating = 0,
@@ -386,6 +388,7 @@ export function ContestantCard({
         user_id: propUser.id,
         contestant_name: name,
         participant_id: profileId, // Use participant_id for the rating
+        contestant_user_id: userId, // Add contestant_user_id for proper rating queries
         rating: rating
       };
       
