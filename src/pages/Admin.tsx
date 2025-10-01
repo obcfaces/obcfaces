@@ -36,7 +36,7 @@ import { ParticipantStatusHistory } from '@/components/admin/ParticipantStatusHi
 import { ParticipantStatusHistoryModal } from '@/components/admin/ParticipantStatusHistoryModal';
 
 // Unified status type for participants
-type ParticipantStatus = 'pending' | 'under_review' | 'approved' | 'rejected' | 'this week' | 'next week' | 'next week on site' | 'past';
+type ParticipantStatus = 'pending' | 'under_review' | 'approved' | 'rejected' | 'pre next week' | 'this week' | 'next week' | 'next week on site' | 'past';
 
 // Helper function to check if rejection reason is a duplicate of predefined reasons
 const isReasonDuplicate = (rejectionReason: string, reasonTypes: string[]) => {
@@ -162,6 +162,7 @@ const getWeekIntervalForStatus = (adminStatus: string): string => {
     'this week': currentWeek.formatted,
     'next week': nextWeek.formatted,
     'next week on site': nextWeek.formatted,
+    'pre next week': nextWeek.formatted,
     'past': pastWeek.formatted,
   };
   
@@ -298,7 +299,7 @@ interface ContestApplication {
   deleted_at?: string;
   is_active: boolean;
   notes?: string;
-  admin_status?: 'pending' | 'under_review' | 'approved' | 'rejected' | 'this week' | 'next week' | 'next week on site' | 'past';
+  admin_status?: 'pending' | 'under_review' | 'approved' | 'rejected' | 'pre next week' | 'this week' | 'next week' | 'next week on site' | 'past';
 }
 
 interface WeeklyContest {
@@ -411,6 +412,8 @@ const Admin = () => {
   const [selectedWinner, setSelectedWinner] = useState<{ participantId: string; userId: string; name: string } | null>(null);
   const [nextWeekFilter, setNextWeekFilter] = useState<string>('all'); // Новый фильтр для next week
   const [nextWeekParticipants, setNextWeekParticipants] = useState<any[]>([]);
+  const [preNextWeekFilter, setPreNextWeekFilter] = useState<string>('all'); // Фильтр для pre next week
+  const [preNextWeekParticipants, setPreNextWeekParticipants] = useState<any[]>([]);
   const [dailyStats, setDailyStats] = useState<Array<{ day_name: string; vote_count: number; like_count: number }>>([]);
   const [dailyApplicationStats, setDailyApplicationStats] = useState<Array<{ day_name: string; total_applications: number; approved_applications: number; day_of_week: number; sort_order: number }>>([]);
   const [dailyRegistrationStats, setDailyRegistrationStats] = useState<Array<{ day_name: string; registration_count: number; day_of_week: number; sort_order: number }>>([]);
@@ -512,6 +515,7 @@ const Admin = () => {
       fetchDailyApplicationStats();
       fetchDailyRegistrationStats();
       fetchNextWeekParticipants(); // Добавляем загрузку next week участников
+      fetchPreNextWeekParticipants(); // Добавляем загрузку pre next week участников
       fetchNextWeekDailyStats();
       fetchNextWeekApplicationsCount();
       fetchCardSectionStats();
@@ -1109,6 +1113,8 @@ const Admin = () => {
   // Function to get status background color
   const getStatusBackgroundColor = (status: string) => {
     switch (status) {
+      case 'pre next week':
+        return 'bg-purple-100 dark:bg-purple-900';
       case 'next week':
         return 'bg-[hsl(var(--status-next-week))]';
       case 'next week on site':
@@ -1431,6 +1437,28 @@ const Admin = () => {
       setNextWeekParticipants(participants || []);
     } catch (error) {
       console.error('Error in fetchNextWeekParticipants:', error);
+    }
+  };
+
+  // Функция для загрузки участников pre next week
+  const fetchPreNextWeekParticipants = async () => {
+    try {
+      console.log('Fetching pre next week participants...');
+      
+      const { data: participants, error } = await supabase.rpc('get_weekly_contest_participants_admin', { weeks_offset: 0 });
+      
+      if (error) {
+        console.error('Error fetching pre next week participants:', error);
+        throw error;
+      }
+
+      // Filter for pre next week status
+      const preNextWeekData = (participants || []).filter((p: any) => p.admin_status === 'pre next week');
+      
+      console.log('Fetched pre next week participants:', preNextWeekData?.length || 0);
+      setPreNextWeekParticipants(preNextWeekData);
+    } catch (error) {
+      console.error('Error in fetchPreNextWeekParticipants:', error);
     }
   };
 
@@ -1815,16 +1843,16 @@ const Admin = () => {
             <div className="md:hidden">
               <TabsList className="grid grid-cols-7 w-full">
                 <TabsTrigger value="applications" className="text-xs">
-                  Card
+                  New
+                </TabsTrigger>
+                <TabsTrigger value="prenextweek" className="text-xs">
+                  Pre
                 </TabsTrigger>
                 <TabsTrigger value="nextweek" className="text-xs">
                   Next
                 </TabsTrigger>
                 <TabsTrigger value="weekly" className="text-xs">
                   This
-                </TabsTrigger>
-                <TabsTrigger value="pastweek" className="text-xs">
-                  Past
                 </TabsTrigger>
                 <TabsTrigger value="all" className="text-xs">
                   All
@@ -1841,16 +1869,16 @@ const Admin = () => {
             {/* Desktop layout - single row */}
             <TabsList className="hidden md:flex">
               <TabsTrigger value="applications">
-                Card
+                New
+              </TabsTrigger>
+              <TabsTrigger value="prenextweek">
+                Pre
               </TabsTrigger>
               <TabsTrigger value="nextweek">
                 Next
               </TabsTrigger>
               <TabsTrigger value="weekly">
                 This
-              </TabsTrigger>
-              <TabsTrigger value="pastweek">
-                Past
               </TabsTrigger>
               <TabsTrigger value="all">
                 All
@@ -2376,6 +2404,299 @@ const Admin = () => {
                 )}
                 </>
               );
+              })()}
+            </TabsContent>
+
+            <TabsContent value="prenextweek" className="space-y-4">
+              <div className="mb-6">
+                {/* Фильтр по неделям для pre next week */}
+                <div className="mb-4 flex gap-4">
+                  <Select value={preNextWeekFilter} onValueChange={setPreNextWeekFilter}>
+                    <SelectTrigger className="w-48">
+                      <SelectValue placeholder="Filter by week" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All weeks</SelectItem>
+                      {/* Динамические недели на основе данных */}
+                      {Array.from(new Set(preNextWeekParticipants.map(p => p.week_interval))).map(interval => (
+                        <SelectItem key={interval} value={interval}>{interval}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <h2 className="text-xl font-semibold">Pre Next Week Participants</h2>
+                  <p className="text-muted-foreground">Participants queued for upcoming weeks</p>
+                </div>
+              </div>
+              
+              {(() => {
+                // Фильтруем участников по выбранной неделе
+                const filteredParticipants = preNextWeekParticipants.filter(p => {
+                  if (preNextWeekFilter === 'all') return true;
+                  return p.week_interval === preNextWeekFilter;
+                });
+                
+                if (filteredParticipants.length === 0) {
+                  return (
+                    <div className="text-center py-8 text-muted-foreground">
+                      No participants found for selected week filter
+                    </div>
+                  );
+                }
+                
+                return filteredParticipants.map((participant) => {
+                  const participantProfile = profiles.find(p => p.id === participant.user_id);
+                  const appData = participant.application_data || {};
+                  
+                  return (
+                    <Card key={participant.participant_id} className="overflow-hidden relative h-[149px]">
+                      <CardContent className="p-0">
+                        {/* Desktop layout */}
+                        <div className="hidden md:flex">
+                          {/* Photos section - 2 columns */}
+                          <div className="flex gap-px w-[25ch] flex-shrink-0">
+                            {(participantProfile?.photo_1_url || appData.photo1_url) && (
+                              <div className="w-1/2">
+                                <img 
+                                  src={participantProfile?.photo_1_url || appData.photo1_url} 
+                                  alt="Portrait" 
+                                  className="w-full h-[149px] object-contain cursor-pointer hover:opacity-90 transition-opacity"
+                                  onClick={() => openPhotoModal([
+                                    participantProfile?.photo_1_url || appData.photo1_url, 
+                                    participantProfile?.photo_2_url || appData.photo2_url
+                                  ].filter(Boolean), 0, `${participantProfile?.first_name || appData.first_name} ${participantProfile?.last_name || appData.last_name}`)}
+                                />
+                              </div>
+                            )}
+                            {(participantProfile?.photo_2_url || appData.photo2_url) && (
+                              <div className="w-1/2 relative">
+                                <img 
+                                  src={participantProfile?.photo_2_url || appData.photo2_url} 
+                                  alt="Full length" 
+                                  className="w-full h-[149px] object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                                  onClick={() => openPhotoModal([
+                                    participantProfile?.photo_1_url || appData.photo1_url, 
+                                    participantProfile?.photo_2_url || appData.photo2_url
+                                  ].filter(Boolean), 1, `${participantProfile?.first_name || appData.first_name} ${participantProfile?.last_name || appData.last_name}`)}
+                                />
+                                <div className="absolute top-2 right-2">
+                                  <Avatar className="h-6 w-6 flex-shrink-0 border-2 border-white shadow-sm">
+                                    <AvatarImage src={participantProfile?.photo_1_url || appData.photo1_url || participantProfile?.avatar_url || ''} />
+                                    <AvatarFallback className="text-xs">
+                                      {(participantProfile?.first_name || appData.first_name)?.charAt(0) || 'U'}
+                                    </AvatarFallback>
+                                  </Avatar>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                          
+                          {/* Content section */}
+                          <div className="flex-1 p-3 flex flex-col justify-between">
+                            <div className="flex items-start justify-between">
+                              <div className="min-w-0 flex-1">
+                                <div className="space-y-1">
+                                  <h3 className="font-semibold text-sm truncate">
+                                    {participantProfile?.display_name || `${participantProfile?.first_name || appData.first_name} ${participantProfile?.last_name || appData.last_name}` || 'Unnamed participant'}
+                                  </h3>
+                                  
+                                  <div className="text-xs text-muted-foreground space-y-0.5">
+                                    <div className="flex items-center gap-2 flex-wrap">
+                                      <span>{participant.age || 'Unknown'} лет</span>
+                                      <span>•</span>
+                                      <span>{participant.city || 'Unknown'}, {participant.country || 'Unknown'}</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                      <span>{participant.height_cm || 'Unknown'}см</span>
+                                      <span>•</span>
+                                      <span>{participant.weight_kg || 'Unknown'}кг</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                      <Badge variant="outline" className="text-xs px-1 py-0">
+                                        Week: {participant.week_interval}
+                                      </Badge>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                              
+                              {/* Status controls */}
+                              <div className="flex items-center gap-2 ml-2 flex-shrink-0">
+                                <Select 
+                                  value={participant.admin_status || 'pre next week'}
+                                  onValueChange={async (value) => {
+                                    try {
+                                      if (!participant.participant_id) {
+                                        toast({
+                                          title: "Error",
+                                          description: "No participant ID found",
+                                          variant: "destructive",
+                                        });
+                                        return;
+                                      }
+
+                                      const participantName = participant.display_name || 
+                                        `${participant.first_name || 'Unknown'} ${participant.last_name || ''}`;
+                                      
+                                      const result = await updateParticipantStatusWithHistory(
+                                        participant.participant_id,
+                                        value as ParticipantStatus,
+                                        participantName
+                                      );
+
+                                      if (!result.success) {
+                                        toast({
+                                          title: "Error",
+                                          description: "Failed to update participant status",
+                                          variant: "destructive",
+                                        });
+                                      } else {
+                                        await fetchPreNextWeekParticipants();
+                                        toast({
+                                          title: "Success",
+                                          description: "Participant status updated successfully",
+                                        });
+                                      }
+                                    } catch (error) {
+                                      console.error('Error updating participant status:', error);
+                                      toast({
+                                        title: "Error",
+                                        description: "An unexpected error occurred",
+                                        variant: "destructive",
+                                      });
+                                    }
+                                  }}
+                                >
+                                  <SelectTrigger className={`w-24 h-7 text-xs ${getStatusBackgroundColor(participant.admin_status || 'pre next week')}`}>
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent className="z-[9999] bg-popover border shadow-lg">
+                                    <SelectItem value="pending">Pending</SelectItem>
+                                    <SelectItem value="under_review">Under Review</SelectItem>
+                                    <SelectItem value="approved">Approved</SelectItem>
+                                    <SelectItem value="rejected">Rejected</SelectItem>
+                                    <SelectItem value="pre next week">Pre Next Week</SelectItem>
+                                    <SelectItem value="this week">This Week</SelectItem>
+                                    <SelectItem value="next week">Next Week</SelectItem>
+                                    <SelectItem value="next week on site">Next Week On Site</SelectItem>
+                                    <SelectItem value="past">Past</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                                <Button 
+                                  size="sm"
+                                  variant="ghost"
+                                  className="h-7 w-7 p-0"
+                                  onClick={() => {
+                                    setSelectedStatusHistory({
+                                      participantId: participant.participant_id,
+                                      participantName: participant.display_name || `${participant.first_name} ${participant.last_name}`,
+                                      statusHistory: participant.status_history
+                                    });
+                                    setStatusHistoryModalOpen(true);
+                                  }}
+                                >
+                                  <Info className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Mobile layout */}
+                        <div className="md:hidden flex flex-col h-full">
+                          <div className="flex-1 p-3 flex gap-3">
+                            <div className="flex flex-col gap-1 w-20 flex-shrink-0">
+                              {(participantProfile?.photo_1_url || appData.photo1_url) && (
+                                <img 
+                                  src={participantProfile?.photo_1_url || appData.photo1_url} 
+                                  alt="Portrait" 
+                                  className="w-full h-16 object-cover rounded cursor-pointer"
+                                  onClick={() => openPhotoModal([
+                                    participantProfile?.photo_1_url || appData.photo1_url, 
+                                    participantProfile?.photo_2_url || appData.photo2_url
+                                  ].filter(Boolean), 0, `${participantProfile?.first_name || appData.first_name} ${participantProfile?.last_name || appData.last_name}`)}
+                                />
+                              )}
+                              {(participantProfile?.photo_2_url || appData.photo2_url) && (
+                                <img 
+                                  src={participantProfile?.photo_2_url || appData.photo2_url} 
+                                  alt="Full length" 
+                                  className="w-full h-16 object-cover rounded cursor-pointer"
+                                  onClick={() => openPhotoModal([
+                                    participantProfile?.photo_1_url || appData.photo1_url, 
+                                    participantProfile?.photo_2_url || appData.photo2_url
+                                  ].filter(Boolean), 1, `${participantProfile?.first_name || appData.first_name} ${participantProfile?.last_name || appData.last_name}`)}
+                                />
+                              )}
+                            </div>
+                            
+                            <div className="flex-1 min-w-0 flex flex-col justify-between">
+                              <div>
+                                <h3 className="font-semibold text-sm truncate mb-1">
+                                  {participantProfile?.display_name || `${participantProfile?.first_name || appData.first_name} ${participantProfile?.last_name || appData.last_name}` || 'Unnamed'}
+                                </h3>
+                                <div className="text-xs text-muted-foreground space-y-0.5">
+                                  <div>{participant.age || 'Unknown'} лет</div>
+                                  <div>{participant.city || 'Unknown'}, {participant.country || 'Unknown'}</div>
+                                  <div>{participant.height_cm || 'Unknown'}см, {participant.weight_kg || 'Unknown'}кг</div>
+                                  <Badge variant="outline" className="text-xs px-1 py-0 mt-1">
+                                    Week: {participant.week_interval}
+                                  </Badge>
+                                </div>
+                              </div>
+                              <div className="flex items-center justify-between pt-1">
+                                <Select 
+                                  value={participant.admin_status || 'pre next week'} 
+                                  onValueChange={async (value) => {
+                                    const participantName = participantProfile?.display_name || 
+                                      `${participantProfile?.first_name || appData.first_name} ${participantProfile?.last_name || appData.last_name}`;
+                                    
+                                    const result = await updateParticipantStatusWithHistory(
+                                      participant.participant_id,
+                                      value as ParticipantStatus,
+                                      participantName
+                                    );
+
+                                    if (!result.success) {
+                                      toast({
+                                        title: "Error",
+                                        description: "Failed to update participant status",
+                                        variant: "destructive",
+                                      });
+                                    } else {
+                                      await fetchPreNextWeekParticipants();
+                                      toast({
+                                        title: "Success",
+                                        description: "Participant status updated successfully",
+                                      });
+                                    }
+                                  }}
+                                >
+                                  <SelectTrigger className={`w-24 h-7 text-xs ${getStatusBackgroundColor(participant.admin_status || 'pre next week')}`}>
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent className="z-[9999] bg-popover border shadow-lg">
+                                    <SelectItem value="pending">Pending</SelectItem>
+                                    <SelectItem value="under_review">Under Review</SelectItem>
+                                    <SelectItem value="approved">Approved</SelectItem>
+                                    <SelectItem value="rejected">Rejected</SelectItem>
+                                    <SelectItem value="pre next week">Pre Next Week</SelectItem>
+                                    <SelectItem value="this week">This Week</SelectItem>
+                                    <SelectItem value="next week">Next Week</SelectItem>
+                                    <SelectItem value="next week on site">Next Week On Site</SelectItem>
+                                    <SelectItem value="past">Past</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                });
               })()}
             </TabsContent>
 

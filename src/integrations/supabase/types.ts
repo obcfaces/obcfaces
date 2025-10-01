@@ -1594,6 +1594,7 @@ export type Database = {
         | "next week"
         | "next week on site"
         | "past"
+        | "pre next week"
       rejection_reason_type:
         | "first_photo_makeup"
         | "first_photo_id_style"
@@ -1741,6 +1742,7 @@ export const Constants = {
         "next week",
         "next week on site",
         "past",
+        "pre next week",
       ],
       rejection_reason_type: [
         "first_photo_makeup",
