@@ -154,6 +154,13 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
         // Convert database participants to candidate format using application_data
         const candidatesFromDB = actualNextWeekCandidates.map(participant => {
           const appData = participant.application_data || {};
+          console.log('Next week participant:', {
+            id: participant.id,
+            name: `${appData.first_name} ${appData.last_name}`,
+            photo1: appData.photo1_url,
+            photo2: appData.photo2_url
+          });
+          
           return {
             id: participant.id,
             participant_id: participant.id,

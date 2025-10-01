@@ -85,113 +85,65 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
     }
   };
 
-  // Load admin participants for THIS WEEK section
-  const loadAdminParticipants = async () => {
+  // Load participants for THIS WEEK section - FOR ALL USERS
+  const loadThisWeekParticipants = async () => {
     try {
-      console.log('Loading admin participants with query...');
+      console.log('Loading THIS WEEK participants for all users...');
       
-      // Get only participants with admin_status = 'this week'
+      // Get participants with admin_status = 'this week' OR 'approved' for current week
       const { data: participants, error } = await supabase
         .from('weekly_contest_participants')
         .select('*')
-        .eq('admin_status', 'this week')
+        .in('admin_status', ['this week', 'approved'])
         .eq('is_active', true)
         .limit(10);
 
       if (error) {
-        console.error('Error loading admin participants:', error);
+        console.error('Error loading THIS WEEK participants:', error);
         return [];
       }
 
-      console.log('Raw participants data:', participants?.length, participants);
+      console.log('Raw THIS WEEK participants data:', participants?.length);
 
       if (!participants || participants.length === 0) {
         return [];
       }
 
-      // Get user IDs and fetch their profiles separately
-      const userIds = participants.map(p => p.user_id);
-      const { data: profiles, error: profilesError } = await supabase
-        .from('profiles')
-        .select('*')
-        .in('id', userIds);
-
-      if (profilesError) {
-        console.error('Error loading profiles:', profilesError);
-        return [];
-      }
-
-      console.log('Profiles data:', profiles?.length, profiles);
-
-      // Combine participants with their profiles
-      const combined = participants.map(participant => {
-        const profile = profiles?.find(p => p.id === participant.user_id);
-        return {
-          ...participant,
-          profiles: profile
-        };
-      });
-
-      console.log('Combined participants data:', combined?.length, combined);
-      return combined || [];
+      return participants || [];
     } catch (error) {
-      console.error('Error loading admin participants:', error);
+      console.error('Error loading THIS WEEK participants:', error);
       return [];
     }
   };
 
-  // Load admin participants for 1 WEEK AGO section (participants with admin_status = 'past' and specific week interval)
-  const loadPastWeekAdminParticipants = async () => {
+  // Load participants for 1 WEEK AGO section - FOR ALL USERS
+  const loadPastWeekParticipants = async () => {
     try {
-      console.log('Loading past week admin participants...');
+      console.log('Loading 1 WEEK AGO participants for all users...');
       
-      // Get participants with admin_status = 'past' and week interval '29/09-05/10/25'
+      // Get participants with admin_status = 'past' and week interval matching 1 WEEK AGO
       const { data: participants, error } = await supabase
         .from('weekly_contest_participants')
         .select('*')
         .eq('admin_status', 'past')
         .eq('is_active', true)
-        .like('week_interval', '%29/09-05/10/25%')
+        .like('week_interval', '%22/09-28/09/25%')
         .limit(10);
 
       if (error) {
-        console.error('Error loading past week admin participants:', error);
+        console.error('Error loading 1 WEEK AGO participants:', error);
         return [];
       }
 
-      console.log('Raw past week participants data:', participants?.length, participants);
+      console.log('Raw 1 WEEK AGO participants data:', participants?.length);
 
       if (!participants || participants.length === 0) {
         return [];
       }
 
-      // Get user IDs and fetch their profiles separately
-      const userIds = participants.map(p => p.user_id);
-      const { data: profiles, error: profilesError } = await supabase
-        .from('profiles')
-        .select('*')
-        .in('id', userIds);
-
-      if (profilesError) {
-        console.error('Error loading profiles for past week:', profilesError);
-        return [];
-      }
-
-      console.log('Past week profiles data:', profiles?.length, profiles);
-
-      // Combine participants with their profiles
-      const combined = participants.map(participant => {
-        const profile = profiles?.find(p => p.id === participant.user_id);
-        return {
-          ...participant,
-          profiles: profile
-        };
-      });
-
-      console.log('Combined past week participants data:', combined?.length, combined);
-      return combined || [];
+      return participants || [];
     } catch (error) {
-      console.error('Error loading past week admin participants:', error);
+      console.error('Error loading 1 WEEK AGO participants:', error);
       return [];
     }
   };
@@ -324,26 +276,37 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
         console.log('Admin status result:', adminStatus);
         setIsAdmin(adminStatus);
         
-        if (adminStatus) {
-          if (title === "THIS WEEK") {
-            console.log('Loading admin participants for THIS WEEK section');
-            const adminData = await loadAdminParticipants();
-            console.log('Loaded admin participants:', adminData.length);
-            setAdminParticipants(adminData);
-          } else if (title === "1 WEEK AGO") {
-            console.log('Loading past week admin participants for 1 WEEK AGO section');
-            const pastWeekData = await loadPastWeekAdminParticipants();
-            console.log('Loaded past week participants:', pastWeekData.length);
+        // Load participants based on section - for admins set both realContestants and adminParticipants
+        if (title === "THIS WEEK") {
+          console.log('Loading THIS WEEK participants');
+          const thisWeekData = await loadThisWeekParticipants();
+          console.log('Loaded THIS WEEK participants:', thisWeekData.length);
+          setRealContestants(thisWeekData);
+          if (adminStatus) {
+            setAdminParticipants(thisWeekData);
+          }
+        } else if (title === "1 WEEK AGO") {
+          console.log('Loading 1 WEEK AGO participants');
+          const pastWeekData = await loadPastWeekParticipants();
+          console.log('Loaded 1 WEEK AGO participants:', pastWeekData.length);
+          setRealContestants(pastWeekData);
+          if (adminStatus) {
             setAdminParticipants(pastWeekData);
-          } else if (title === "2 WEEKS AGO") {
-            console.log('Loading 2 weeks ago admin participants for 2 WEEKS AGO section');
-            const twoWeeksAgoData = await loadTwoWeeksAgoAdminParticipants();
-            console.log('Loaded 2 weeks ago participants:', twoWeeksAgoData.length);
+          }
+        } else if (title === "2 WEEKS AGO") {
+          console.log('Loading 2 WEEKS AGO participants');
+          const twoWeeksAgoData = await loadTwoWeeksAgoAdminParticipants();
+          console.log('Loaded 2 WEEKS AGO participants:', twoWeeksAgoData.length);
+          setRealContestants(twoWeeksAgoData);
+          if (adminStatus) {
             setAdminParticipants(twoWeeksAgoData);
-          } else if (title === "3 WEEKS AGO") {
-            console.log('Loading 3 weeks ago admin participants for 3 WEEKS AGO section');
-            const threeWeeksAgoData = await loadThreeWeeksAgoAdminParticipants();
-            console.log('Loaded 3 weeks ago participants:', threeWeeksAgoData.length);
+          }
+        } else if (title === "3 WEEKS AGO") {
+          console.log('Loading 3 WEEKS AGO participants');
+          const threeWeeksAgoData = await loadThreeWeeksAgoAdminParticipants();
+          console.log('Loaded 3 WEEKS AGO participants:', threeWeeksAgoData.length);
+          setRealContestants(threeWeeksAgoData);
+          if (adminStatus) {
             setAdminParticipants(threeWeeksAgoData);
           }
         }
@@ -443,50 +406,9 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
     if (title === "THIS WEEK") {
       console.log('Processing THIS WEEK section');
       
-      // If user is admin and has admin participants, show only those
-      if (isAdmin && adminParticipants.length > 0) {
-        console.log('Admin with admin participants:', adminParticipants.length);
-        
-        // Sort by average_rating (highest first), then by total_votes
-        const sortedParticipants = [...adminParticipants].sort((a, b) => {
-          const ratingA = Number(a.average_rating) || 0;
-          const ratingB = Number(b.average_rating) || 0;
-          if (ratingB !== ratingA) return ratingB - ratingA;
-          
-          const votesA = Number(a.total_votes) || 0;
-          const votesB = Number(b.total_votes) || 0;
-          return votesB - votesA;
-        });
-        
-        const adminCards = sortedParticipants.map((participant, index) => ({
-          rank: index + 1,
-          name: `${participant.profiles?.first_name || ''} ${participant.profiles?.last_name || ''}`.trim(),
-          profileId: participant.id,
-          country: participant.profiles?.country || 'Unknown',
-          city: participant.profiles?.city || 'Unknown',
-          age: participant.profiles?.age || 0,
-          weight: participant.profiles?.weight_kg || 0,
-          height: participant.profiles?.height_cm || 0,
-          rating: participant.average_rating || 0,
-          averageRating: participant.average_rating || 0,
-          totalVotes: participant.total_votes || 0,
-          faceImage: participant.profiles?.photo_1_url || testContestantFace,
-          fullBodyImage: participant.profiles?.photo_2_url || testContestantFull,
-          additionalPhotos: [],
-          isVoted: false,
-          isWinner: false,
-          prize: undefined,
-          isRealContestant: true,
-          isAdminCard: true // Special flag for admin cards
-        }));
-        
-        console.log('Returning admin cards:', adminCards.length);
-        return adminCards;
-      } 
-      
-      // If there are real contestants, process them
+      // Process participants for all users (admin and non-admin)
       if (actualParticipants && actualParticipants.length > 0) {
-        console.log(`Using real contestants for ${title}:`, actualParticipants.length);
+        console.log('Processing THIS WEEK participants for all users:', actualParticipants.length);
         const contestantsWithRatings = await Promise.all(
           actualParticipants.map(async (contestant) => {
             // Validate contestant data structure
@@ -494,45 +416,42 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
               console.warn('Invalid contestant data:', contestant);
               return null;
             }
-              
-              // Get rating stats using secure function
-              const { data: ratingStats } = await supabase
-                .rpc('get_public_participant_rating_stats', { target_participant_id: contestant.participant_id });
-              
-              let averageRating = 0;
-              let totalVotes = 0;
-              
-              if (ratingStats && ratingStats.length > 0) {
-                averageRating = ratingStats[0].average_rating;
-                totalVotes = ratingStats[0].total_votes;
-             }
+            
+            // Extract data from application_data
+            const appData = contestant.application_data || {};
+            
+            // Get rating stats using secure function
+            const { data: ratingStats } = await supabase
+              .rpc('get_public_participant_rating_stats', { target_participant_id: contestant.id });
+            
+            let averageRating = 0;
+            let totalVotes = 0;
+            
+            if (ratingStats && ratingStats.length > 0) {
+              averageRating = ratingStats[0].average_rating;
+              totalVotes = ratingStats[0].total_votes;
+            }
             
             const contestantData = {
               rank: contestant.final_rank || 0,
-              name: `${contestant.first_name || 'Unknown'} ${contestant.last_name || ''}`.trim(),
-              profileId: contestant.participant_id, // Use participant_id for rating queries
-              country: contestant.country || 'Unknown',
-              city: contestant.city || 'Unknown',
-              age: contestant.age || 0,
-              weight: contestant.weight_kg || 0,
-              height: contestant.height_cm || 0,
+              name: `${appData.first_name || 'Unknown'} ${appData.last_name || ''}`.trim(),
+              profileId: contestant.id, // Use participant id for rating queries
+              country: appData.country === 'PH' ? 'Philippines' : (appData.country || 'Unknown'),
+              city: appData.city || 'Unknown',
+              age: appData.birth_year ? new Date().getFullYear() - parseInt(appData.birth_year) : 0,
+              weight: appData.weight_kg || 0,
+              height: appData.height_cm || 0,
               rating: averageRating,
-              averageRating: averageRating, // Use secure rating from function
-              totalVotes: totalVotes, // Use secure vote count from function
-              faceImage: contestant.photo_1_url || contestant1Face,
-              fullBodyImage: contestant.photo_2_url || contestant1Full,
+              averageRating: averageRating,
+              totalVotes: totalVotes,
+              faceImage: appData.photo1_url || contestant1Face,
+              fullBodyImage: appData.photo2_url || contestant1Full,
               additionalPhotos: [],
               isVoted: showWinner ? true : averageRating > 0,
               isWinner: false, // Will be set after sorting
               prize: undefined, // Will be set after sorting
-              isRealContestant: true // Mark as real contestant to disable fake likes/comments
+              isRealContestant: true
             };
-            
-            console.log(`Real contestant data for ${contestantData.name}:`, {
-              profileId: contestantData.profileId,
-              user_id: contestant.user_id,
-              hasProfileId: !!contestantData.profileId
-            });
             
             return contestantData;
           })
@@ -566,152 +485,134 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
       }
     }
 
-    // For "1 WEEK AGO" section, show admin participants with "past" status for specific week interval
+    // For "1 WEEK AGO" section, show participants for all users
     if (title === "1 WEEK AGO") {
-      console.log('Processing 1 WEEK AGO section');
+      console.log('Processing 1 WEEK AGO section for all users');
       
-      // If user is admin and has admin participants, show only those
-      if (isAdmin && adminParticipants.length > 0) {
-        console.log('Admin with past week participants:', adminParticipants.length);
+      // If there are participants, process them
+      if (actualParticipants && actualParticipants.length > 0) {
+        console.log('Processing 1 WEEK AGO participants:', actualParticipants.length);
         
-        // Sort by average_rating (highest first), then by total_votes
-        const sortedParticipants = [...adminParticipants].sort((a, b) => {
-          const ratingA = Number(a.average_rating) || 0;
-          const ratingB = Number(b.average_rating) || 0;
-          if (ratingB !== ratingA) return ratingB - ratingA;
-          
-          const votesA = Number(a.total_votes) || 0;
-          const votesB = Number(b.total_votes) || 0;
-          return votesB - votesA;
+        const contestantsWithRatings = await Promise.all(
+          actualParticipants.map(async (contestant) => {
+            if (!contestant || typeof contestant !== 'object') {
+              console.warn('Invalid contestant data:', contestant);
+              return null;
+            }
+            
+            const appData = contestant.application_data || {};
+            
+            const { data: ratingStats } = await supabase
+              .rpc('get_public_participant_rating_stats', { target_participant_id: contestant.id });
+            
+            let averageRating = 0;
+            let totalVotes = 0;
+            
+            if (ratingStats && ratingStats.length > 0) {
+              averageRating = ratingStats[0].average_rating;
+              totalVotes = ratingStats[0].total_votes;
+            }
+            
+            return {
+              rank: contestant.final_rank || 0,
+              name: `${appData.first_name || 'Unknown'} ${appData.last_name || ''}`.trim(),
+              profileId: contestant.id,
+              country: appData.country === 'PH' ? 'Philippines' : (appData.country || 'Unknown'),
+              city: appData.city || 'Unknown',
+              age: appData.birth_year ? new Date().getFullYear() - parseInt(appData.birth_year) : 0,
+              weight: appData.weight_kg || 0,
+              height: appData.height_cm || 0,
+              rating: averageRating,
+              averageRating: averageRating,
+              totalVotes: totalVotes,
+              faceImage: appData.photo1_url || contestant1Face,
+              fullBodyImage: appData.photo2_url || contestant1Full,
+              additionalPhotos: [],
+              isVoted: true, // Past week participants are considered as voted
+              isWinner: showWinner && contestant.final_rank === 1,
+              prize: showWinner && contestant.final_rank === 1 ? "+ 5000 PHP" : undefined,
+              isRealContestant: true
+            };
+          })
+        );
+        
+        const sortedContestants = contestantsWithRatings.filter(Boolean).sort((a, b) => {
+          if (b.rating !== a.rating) {
+            return b.rating - a.rating;
+          }
+          return (b.totalVotes || 0) - (a.totalVotes || 0);
         });
         
-        const pastWeekCards = sortedParticipants.map((participant, index) => ({
-          rank: index + 1,
-          name: `${participant.profiles?.first_name || ''} ${participant.profiles?.last_name || ''}`.trim(),
-          profileId: participant.id,
-          country: participant.profiles?.country || 'Unknown',
-          city: participant.profiles?.city || 'Unknown',
-          age: participant.profiles?.age || 0,
-          weight: participant.profiles?.weight_kg || 0,
-          height: participant.profiles?.height_cm || 0,
-          rating: participant.average_rating || 0,
-          averageRating: participant.average_rating || 0,
-          totalVotes: participant.total_votes || 0,
-          faceImage: participant.profiles?.photo_1_url || testContestantFace,
-          fullBodyImage: participant.profiles?.photo_2_url || testContestantFull,
-          additionalPhotos: [],
-          isVoted: true, // Past week participants are considered as voted
-          isWinner: showWinner && index === 0, // First participant is winner if showWinner is true
-          prize: showWinner && index === 0 ? "+ 5000 PHP" : undefined,
-          isRealContestant: true,
-          isAdminCard: true // Special flag for admin cards
-        }));
-        
-        console.log('Returning past week cards:', pastWeekCards.length);
-        return pastWeekCards;
+        console.log('Returning 1 WEEK AGO cards:', sortedContestants.length);
+        return sortedContestants;
       } else {
-        // No participants to show for non-admin users
-        console.log('No participants found for 1 WEEK AGO (non-admin)');
+        console.log('No participants found for 1 WEEK AGO');
         return [];
       }
     }
 
-    // For "2 WEEKS AGO" section, show admin participants with "past" status for specific week interval
-    if (title === "2 WEEKS AGO") {
-      console.log('Processing 2 WEEKS AGO section');
+    // For "2 WEEKS AGO" and "3 WEEKS AGO" sections, show participants for all users
+    if (["2 WEEKS AGO", "3 WEEKS AGO"].includes(title)) {
+      console.log(`Processing ${title} section for all users`);
       
-      // If user is admin and has admin participants, show only those
-      if (isAdmin && adminParticipants.length > 0) {
-        console.log('Admin with 2 weeks ago participants:', adminParticipants.length);
+      // If there are participants, process them
+      if (actualParticipants && actualParticipants.length > 0) {
+        console.log(`Processing ${title} participants:`, actualParticipants.length);
         
-        // Sort by average_rating (highest first), then by total_votes
-        const sortedParticipants = [...adminParticipants].sort((a, b) => {
-          const ratingA = Number(a.average_rating) || 0;
-          const ratingB = Number(b.average_rating) || 0;
-          if (ratingB !== ratingA) return ratingB - ratingA;
-          
-          const votesA = Number(a.total_votes) || 0;
-          const votesB = Number(b.total_votes) || 0;
-          return votesB - votesA;
+        const contestantsWithRatings = await Promise.all(
+          actualParticipants.map(async (contestant) => {
+            if (!contestant || typeof contestant !== 'object') {
+              console.warn('Invalid contestant data:', contestant);
+              return null;
+            }
+            
+            const appData = contestant.application_data || {};
+            
+            const { data: ratingStats } = await supabase
+              .rpc('get_public_participant_rating_stats', { target_participant_id: contestant.id });
+            
+            let averageRating = 0;
+            let totalVotes = 0;
+            
+            if (ratingStats && ratingStats.length > 0) {
+              averageRating = ratingStats[0].average_rating;
+              totalVotes = ratingStats[0].total_votes;
+            }
+            
+            return {
+              rank: contestant.final_rank || 0,
+              name: `${appData.first_name || 'Unknown'} ${appData.last_name || ''}`.trim(),
+              profileId: contestant.id,
+              country: appData.country === 'PH' ? 'Philippines' : (appData.country || 'Unknown'),
+              city: appData.city || 'Unknown',
+              age: appData.birth_year ? new Date().getFullYear() - parseInt(appData.birth_year) : 0,
+              weight: appData.weight_kg || 0,
+              height: appData.height_cm || 0,
+              rating: averageRating,
+              averageRating: averageRating,
+              totalVotes: totalVotes,
+              faceImage: appData.photo1_url || contestant1Face,
+              fullBodyImage: appData.photo2_url || contestant1Full,
+              additionalPhotos: [],
+              isVoted: true,
+              isWinner: showWinner && contestant.final_rank === 1,
+              prize: showWinner && contestant.final_rank === 1 ? "+ 5000 PHP" : undefined,
+              isRealContestant: true
+            };
+          })
+        );
+        
+        const sortedContestants = contestantsWithRatings.filter(Boolean).sort((a, b) => {
+          if (b.rating !== a.rating) {
+            return b.rating - a.rating;
+          }
+          return (b.totalVotes || 0) - (a.totalVotes || 0);
         });
         
-        const twoWeeksAgoCards = sortedParticipants.map((participant, index) => ({
-          rank: index + 1,
-          name: `${participant.profiles?.first_name || ''} ${participant.profiles?.last_name || ''}`.trim(),
-          profileId: participant.id,
-          country: participant.profiles?.country || 'Unknown',
-          city: participant.profiles?.city || 'Unknown',
-          age: participant.profiles?.age || 0,
-          weight: participant.profiles?.weight_kg || 0,
-          height: participant.profiles?.height_cm || 0,
-          rating: participant.average_rating || 0,
-          averageRating: participant.average_rating || 0,
-          totalVotes: participant.total_votes || 0,
-          faceImage: participant.profiles?.photo_1_url || testContestantFace,
-          fullBodyImage: participant.profiles?.photo_2_url || testContestantFull,
-          additionalPhotos: [],
-          isVoted: true, // 2 weeks ago participants are considered as voted
-          isWinner: showWinner && participant.final_rank === 1, // Show winner based on final_rank
-          prize: showWinner && participant.final_rank === 1 ? "+ 5000 PHP" : undefined,
-          isRealContestant: true,
-          isAdminCard: true // Special flag for admin cards
-        }));
-        
-        console.log('Returning 2 weeks ago cards:', twoWeeksAgoCards.length);
-        return twoWeeksAgoCards;
+        console.log(`Returning ${title} cards:`, sortedContestants.length);
+        return sortedContestants;
       } else {
-        // No participants to show for non-admin users
-        console.log('No participants found for 2 WEEKS AGO (non-admin)');
-        return [];
-      }
-    }
-
-    // For "3 WEEKS AGO" section, show admin participants with "past" status for specific week interval
-    if (title === "3 WEEKS AGO") {
-      console.log('Processing 3 WEEKS AGO section');
-      
-      // If user is admin and has admin participants, show only those
-      if (isAdmin && adminParticipants.length > 0) {
-        console.log('Admin with 3 weeks ago participants:', adminParticipants.length);
-        
-        // Sort by average_rating (highest first), then by total_votes
-        const sortedParticipants = [...adminParticipants].sort((a, b) => {
-          const ratingA = Number(a.average_rating) || 0;
-          const ratingB = Number(b.average_rating) || 0;
-          if (ratingB !== ratingA) return ratingB - ratingA;
-          
-          const votesA = Number(a.total_votes) || 0;
-          const votesB = Number(b.total_votes) || 0;
-          return votesB - votesA;
-        });
-        
-        const threeWeeksAgoCards = sortedParticipants.map((participant, index) => ({
-          rank: index + 1,
-          name: `${participant.profiles?.first_name || ''} ${participant.profiles?.last_name || ''}`.trim(),
-          profileId: participant.id,
-          country: participant.profiles?.country || 'Unknown',
-          city: participant.profiles?.city || 'Unknown',
-          age: participant.profiles?.age || 0,
-          weight: participant.profiles?.weight_kg || 0,
-          height: participant.profiles?.height_cm || 0,
-          rating: participant.average_rating || 0,
-          averageRating: participant.average_rating || 0,
-          totalVotes: participant.total_votes || 0,
-          faceImage: participant.profiles?.photo_1_url || testContestantFace,
-          fullBodyImage: participant.profiles?.photo_2_url || testContestantFull,
-          additionalPhotos: [],
-          isVoted: true, // 3 weeks ago participants are considered as voted
-          isWinner: showWinner && participant.final_rank === 1, // Show winner based on final_rank
-          prize: showWinner && participant.final_rank === 1 ? "+ 5000 PHP" : undefined,
-          isRealContestant: true,
-          isAdminCard: true // Special flag for admin cards
-        }));
-        
-        console.log('Returning 3 weeks ago cards:', threeWeeksAgoCards.length);
-        return threeWeeksAgoCards;
-      } else {
-        // No participants to show for non-admin users
-        console.log('No participants found for 3 WEEKS AGO (non-admin)');
+        console.log(`No participants found for ${title}`);
         return [];
       }
     }
