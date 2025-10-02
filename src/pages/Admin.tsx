@@ -36,8 +36,8 @@ import { WinnerContentManager } from '@/components/admin/WinnerContentManager';
 import { ParticipantStatusHistory } from '@/components/admin/ParticipantStatusHistory';
 import { ParticipantStatusHistoryModal } from '@/components/admin/ParticipantStatusHistoryModal';
 
-// Unified status type for participants - all 9 statuses
-type ParticipantStatus = 'pending' | 'under_review' | 'approved' | 'rejected' | 'pre next week' | 'this week' | 'next week' | 'next week on site' | 'past';
+// Unified status type for participants - only real statuses from DB
+type ParticipantStatus = 'pending' | 'rejected' | 'pre next week' | 'this week' | 'next week' | 'next week on site' | 'past';
 
 // Helper function to check if rejection reason is a duplicate of predefined reasons
 const isReasonDuplicate = (rejectionReason: string, reasonTypes: string[]) => {
@@ -1307,11 +1307,11 @@ const Admin = () => {
 
   const fetchContestApplications = async () => {
     console.log('Fetching contest applications...');
-    // Query unified table ONLY for NEW application statuses (not weekly participants)
+    // Query unified table ONLY for NEW application statuses (pending, rejected)
     const { data, error } = await supabase
       .from('weekly_contest_participants')
       .select('*')
-      .in('admin_status', ['pending', 'approved', 'under_review', 'rejected'] as any) // REMOVED: 'this week', 'next week', 'past'
+      .in('admin_status', ['pending', 'rejected'] as any)
       .is('deleted_at', null)
       .order('submitted_at', { ascending: false });
 
@@ -1334,17 +1334,14 @@ const Admin = () => {
     const validUserIds = new Set(contestAppsData?.map(app => app.user_id) || []);
 
     // Filter to only include participants who have a corresponding contest_application
-    // OR have admin_status that indicates they were manually added (approved/rejected)
     const filteredData = (data || []).filter((app: any) => {
-      // Allow approved/rejected even without contest_application (manual additions)
-      const requiresApplication = ['pending', 'under_review'].includes(app.admin_status);
-      return !requiresApplication || validUserIds.has(app.user_id);
+      // Only show if they have a contest_application
+      return validUserIds.has(app.user_id);
     });
 
-    // Map admin_status to "status" field for compatibility
+    // Keep admin_status as-is, no need to map to "status"
     const processedData = filteredData.map((app: any) => ({
       ...app,
-      status: app.admin_status, // Use admin_status as status
       submitted_at: app.submitted_at || app.created_at
     })) as any;
 
@@ -1356,7 +1353,7 @@ const Admin = () => {
     const { data, error } = await supabase
       .from('weekly_contest_participants')
       .select('*')
-      .in('admin_status', ['pending', 'approved', 'under_review', 'rejected', 'this week', 'next week', 'past'] as any)
+      .in('admin_status', ['pending', 'rejected', 'pre next week', 'this week', 'next week', 'next week on site', 'past'] as any)
       .not('deleted_at', 'is', null)
       .order('deleted_at', { ascending: false });
 
@@ -1367,7 +1364,6 @@ const Admin = () => {
 
     return (data || []).map((app: any) => ({
       ...app,
-      status: app.admin_status,
       submitted_at: app.submitted_at || app.created_at
     })) as any;
   };
@@ -2052,12 +2048,11 @@ const Admin = () => {
                   <SelectContent className="z-[9999] bg-popover border shadow-lg">
                     <SelectItem value="all">All</SelectItem>
                     <SelectItem value="pending">Pending</SelectItem>
-                    <SelectItem value="approved">Approved</SelectItem>
                     <SelectItem value="rejected">Rejected</SelectItem>
                     <SelectItem value="pre next week">Pre Next Week</SelectItem>
+                    <SelectItem value="this week">This Week</SelectItem>
                     <SelectItem value="next week">Next Week</SelectItem>
                     <SelectItem value="next week on site">Next Week On Site</SelectItem>
-                    <SelectItem value="this week">This Week</SelectItem>
                     <SelectItem value="past">Past</SelectItem>
                   </SelectContent>
                 </Select>
@@ -2272,8 +2267,8 @@ const Admin = () => {
                                        <SelectValue />
                                 </SelectTrigger>
                                           <SelectContent className="z-[9999] bg-popover border shadow-lg">
-                                             <SelectItem value="pending">Pending</SelectItem>
-                                             <SelectItem value="approved">Approved</SelectItem>
+                                              <SelectItem value="pending">Pending</SelectItem>
+                                              <SelectItem value="rejected">Rejected</SelectItem>
                                              <SelectItem value="rejected">Rejected</SelectItem>
                                              <SelectItem value="pre next week">Pre Next Week</SelectItem>
                                              <SelectItem value="this week">This Week</SelectItem>
@@ -2449,8 +2444,8 @@ const Admin = () => {
                                      <SelectValue />
                                    </SelectTrigger>
                                                 <SelectContent className="z-[9999] bg-popover border shadow-lg">
-                                                   <SelectItem value="pending">Pending</SelectItem>
-                                                   <SelectItem value="approved">Approved</SelectItem>
+                                                    <SelectItem value="pending">Pending</SelectItem>
+                                                    <SelectItem value="rejected">Rejected</SelectItem>
                                                    <SelectItem value="rejected">Rejected</SelectItem>
                                                    <SelectItem value="pre next week">Pre Next Week</SelectItem>
                                                    <SelectItem value="this week">This Week</SelectItem>
@@ -2551,8 +2546,8 @@ const Admin = () => {
                     </SelectTrigger>
                     <SelectContent className="z-[9999] bg-popover border shadow-lg">
                       <SelectItem value="all">All</SelectItem>
-                      <SelectItem value="pending">Pending</SelectItem>
-                      <SelectItem value="approved">Approved</SelectItem>
+                       <SelectItem value="pending">Pending</SelectItem>
+                       <SelectItem value="rejected">Rejected</SelectItem>
                       <SelectItem value="rejected">Rejected</SelectItem>
                       <SelectItem value="pre next week">Pre Next Week</SelectItem>
                       <SelectItem value="next week">Next Week</SelectItem>
@@ -2728,8 +2723,8 @@ const Admin = () => {
                                     <SelectValue />
                                   </SelectTrigger>
                                     <SelectContent className="z-[9999] bg-popover border shadow-lg">
-                                       <SelectItem value="pending">Pending</SelectItem>
-                                       <SelectItem value="approved">Approved</SelectItem>
+                                        <SelectItem value="pending">Pending</SelectItem>
+                                        <SelectItem value="rejected">Rejected</SelectItem>
                                        <SelectItem value="rejected">Rejected</SelectItem>
                                        <SelectItem value="pre next week">Pre Next Week</SelectItem>
                                        <SelectItem value="this week">This Week</SelectItem>
@@ -2832,8 +2827,8 @@ const Admin = () => {
                                     <SelectValue />
                                   </SelectTrigger>
                                      <SelectContent className="z-[9999] bg-popover border shadow-lg">
-                                       <SelectItem value="pending">Pending</SelectItem>
-                                       <SelectItem value="approved">Approved</SelectItem>
+                                        <SelectItem value="pending">Pending</SelectItem>
+                                        <SelectItem value="rejected">Rejected</SelectItem>
                                        <SelectItem value="rejected">Rejected</SelectItem>
                                        <SelectItem value="pre next week">Pre Next Week</SelectItem>
                                        <SelectItem value="this week">This Week</SelectItem>
@@ -2864,8 +2859,8 @@ const Admin = () => {
                     </SelectTrigger>
                     <SelectContent className="z-[9999] bg-popover border shadow-lg">
                       <SelectItem value="all">All</SelectItem>
-                      <SelectItem value="pending">Pending</SelectItem>
-                      <SelectItem value="approved">Approved</SelectItem>
+                       <SelectItem value="pending">Pending</SelectItem>
+                       <SelectItem value="rejected">Rejected</SelectItem>
                       <SelectItem value="rejected">Rejected</SelectItem>
                       <SelectItem value="pre next week">Pre Next Week</SelectItem>
                       <SelectItem value="next week">Next Week</SelectItem>
@@ -3090,8 +3085,8 @@ const Admin = () => {
                                      <SelectValue />
                                   </SelectTrigger>
                                            <SelectContent className="z-[9999] bg-popover border shadow-lg">
-                                               <SelectItem value="pending">Pending</SelectItem>
-                                               <SelectItem value="approved">Approved</SelectItem>
+                                                <SelectItem value="pending">Pending</SelectItem>
+                                                <SelectItem value="rejected">Rejected</SelectItem>
                                                <SelectItem value="rejected">Rejected</SelectItem>
                                                <SelectItem value="pre next week">Pre Next Week</SelectItem>
                                                <SelectItem value="this week">This Week</SelectItem>
@@ -3238,8 +3233,8 @@ const Admin = () => {
                                    <SelectValue />
                                 </SelectTrigger>
                                          <SelectContent className="z-[9999] bg-popover border shadow-lg">
-                                             <SelectItem value="pending">Pending</SelectItem>
-                                             <SelectItem value="approved">Approved</SelectItem>
+                                              <SelectItem value="pending">Pending</SelectItem>
+                                              <SelectItem value="rejected">Rejected</SelectItem>
                                              <SelectItem value="rejected">Rejected</SelectItem>
                                              <SelectItem value="pre next week">Pre Next Week</SelectItem>
                                              <SelectItem value="this week">This Week</SelectItem>
@@ -3307,8 +3302,8 @@ const Admin = () => {
                     </SelectTrigger>
                     <SelectContent className="z-[9999] bg-popover border shadow-lg">
                       <SelectItem value="all">All</SelectItem>
-                      <SelectItem value="pending">Pending</SelectItem>
-                      <SelectItem value="approved">Approved</SelectItem>
+                       <SelectItem value="pending">Pending</SelectItem>
+                       <SelectItem value="rejected">Rejected</SelectItem>
                       <SelectItem value="rejected">Rejected</SelectItem>
                       <SelectItem value="pre next week">Pre Next Week</SelectItem>
                       <SelectItem value="next week">Next Week</SelectItem>
@@ -3846,8 +3841,8 @@ const Admin = () => {
                                        <SelectValue />
                                     </SelectTrigger>
                                          <SelectContent className="z-[9999] bg-popover border shadow-lg">
-                                             <SelectItem value="pending">Pending</SelectItem>
-                                             <SelectItem value="approved">Approved</SelectItem>
+                                              <SelectItem value="pending">Pending</SelectItem>
+                                              <SelectItem value="rejected">Rejected</SelectItem>
                                              <SelectItem value="rejected">Rejected</SelectItem>
                                              <SelectItem value="pre next week">Pre Next Week</SelectItem>
                                              <SelectItem value="this week">This Week</SelectItem>
@@ -4341,8 +4336,8 @@ const Admin = () => {
                     </SelectTrigger>
                     <SelectContent className="z-[9999] bg-popover border shadow-lg">
                       <SelectItem value="all">All</SelectItem>
-                      <SelectItem value="pending">Pending</SelectItem>
-                      <SelectItem value="approved">Approved</SelectItem>
+                       <SelectItem value="pending">Pending</SelectItem>
+                       <SelectItem value="rejected">Rejected</SelectItem>
                       <SelectItem value="rejected">Rejected</SelectItem>
                       <SelectItem value="pre next week">Pre Next Week</SelectItem>
                       <SelectItem value="next week">Next Week</SelectItem>
@@ -4493,8 +4488,8 @@ const Admin = () => {
                                       <SelectValue />
                                     </SelectTrigger>
                                       <SelectContent className="z-[9999] bg-popover border shadow-lg">
-                                         <SelectItem value="pending">Pending</SelectItem>
-                                         <SelectItem value="approved">Approved</SelectItem>
+                                          <SelectItem value="pending">Pending</SelectItem>
+                                          <SelectItem value="rejected">Rejected</SelectItem>
                                          <SelectItem value="rejected">Rejected</SelectItem>
                                          <SelectItem value="pre next week">Pre Next Week</SelectItem>
                                          <SelectItem value="this week">This Week</SelectItem>
@@ -4612,8 +4607,8 @@ const Admin = () => {
                                         <SelectValue />
                                       </SelectTrigger>
                                         <SelectContent className="z-[9999] bg-popover border shadow-lg">
-                                           <SelectItem value="pending">Pending</SelectItem>
-                                           <SelectItem value="approved">Approved</SelectItem>
+                                            <SelectItem value="pending">Pending</SelectItem>
+                                            <SelectItem value="rejected">Rejected</SelectItem>
                                            <SelectItem value="rejected">Rejected</SelectItem>
                                            <SelectItem value="pre next week">Pre Next Week</SelectItem>
                                            <SelectItem value="this week">This Week</SelectItem>
@@ -4877,8 +4872,8 @@ const Admin = () => {
                                           <SelectValue />
                                         </SelectTrigger>
                                           <SelectContent className="z-[9999] bg-popover border shadow-lg">
-                                             <SelectItem value="pending">Pending</SelectItem>
-                                             <SelectItem value="approved">Approved</SelectItem>
+                                              <SelectItem value="pending">Pending</SelectItem>
+                                              <SelectItem value="rejected">Rejected</SelectItem>
                                              <SelectItem value="rejected">Rejected</SelectItem>
                                              <SelectItem value="pre next week">Pre Next Week</SelectItem>
                                              <SelectItem value="this week">This Week</SelectItem>
@@ -5097,8 +5092,8 @@ const Admin = () => {
                                                   <SelectValue />
                                                 </SelectTrigger>
                                                    <SelectContent className="z-[9999] bg-popover border shadow-lg">
-                                                      <SelectItem value="pending">Pending</SelectItem>
-                                                      <SelectItem value="approved">Approved</SelectItem>
+                                                       <SelectItem value="pending">Pending</SelectItem>
+                                                       <SelectItem value="rejected">Rejected</SelectItem>
                                                       <SelectItem value="rejected">Rejected</SelectItem>
                                                       <SelectItem value="pre next week">Pre Next Week</SelectItem>
                                                       <SelectItem value="this week">This Week</SelectItem>
@@ -5199,7 +5194,7 @@ const Admin = () => {
                        <SelectContent className="z-[9999] bg-popover border shadow-lg min-w-[200px]">
                           <SelectItem value="all">All</SelectItem>
                           <SelectItem value="pending">Pending</SelectItem>
-                          <SelectItem value="approved">Approved</SelectItem>
+                          <SelectItem value="rejected">Rejected</SelectItem>
                           <SelectItem value="rejected">Rejected</SelectItem>
                           <SelectItem value="pre next week">Pre Next Week</SelectItem>
                           <SelectItem value="next week">Next Week</SelectItem>
@@ -5498,8 +5493,8 @@ const Admin = () => {
                                          <SelectValue />
                                        </SelectTrigger>
                                            <SelectContent className="z-[9999] bg-popover border shadow-lg">
-                                              <SelectItem value="pending">Pending</SelectItem>
-                                              <SelectItem value="approved">Approved</SelectItem>
+                                               <SelectItem value="pending">Pending</SelectItem>
+                                               <SelectItem value="rejected">Rejected</SelectItem>
                                               <SelectItem value="rejected">Rejected</SelectItem>
                                               <SelectItem value="pre next week">Pre Next Week</SelectItem>
                                               <SelectItem value="next week">Next Week</SelectItem>
@@ -5688,8 +5683,8 @@ const Admin = () => {
                                                  <SelectValue />
                                                </SelectTrigger>
                                                   <SelectContent className="z-[9999] bg-popover border shadow-lg">
-                                                     <SelectItem value="pending">Pending</SelectItem>
-                                                     <SelectItem value="approved">Approved</SelectItem>
+                                                      <SelectItem value="pending">Pending</SelectItem>
+                                                      <SelectItem value="rejected">Rejected</SelectItem>
                                                      <SelectItem value="rejected">Rejected</SelectItem>
                                                      <SelectItem value="pre next week">Pre Next Week</SelectItem>
                                                      <SelectItem value="next week">Next Week</SelectItem>
@@ -6011,8 +6006,8 @@ const Admin = () => {
                                                   <SelectValue />
                                                 </SelectTrigger>
                                                    <SelectContent className="z-[9999] bg-popover border shadow-lg">
-                                                      <SelectItem value="pending">Pending</SelectItem>
-                                                      <SelectItem value="approved">Approved</SelectItem>
+                                                       <SelectItem value="pending">Pending</SelectItem>
+                                                       <SelectItem value="rejected">Rejected</SelectItem>
                                                       <SelectItem value="rejected">Rejected</SelectItem>
                                                       <SelectItem value="pre next week">Pre Next Week</SelectItem>
                                                       <SelectItem value="this week">This Week</SelectItem>
@@ -6206,8 +6201,8 @@ const Admin = () => {
                                                           <SelectValue />
                                                         </SelectTrigger>
                                                            <SelectContent className="z-[9999] bg-popover border shadow-lg">
-                                                              <SelectItem value="pending">Pending</SelectItem>
-                                                              <SelectItem value="approved">Approved</SelectItem>
+                                                               <SelectItem value="pending">Pending</SelectItem>
+                                                               <SelectItem value="rejected">Rejected</SelectItem>
                                                               <SelectItem value="rejected">Rejected</SelectItem>
                                                               <SelectItem value="pre next week">Pre Next Week</SelectItem>
                                                               <SelectItem value="this week">This Week</SelectItem>
