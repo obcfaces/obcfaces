@@ -685,12 +685,26 @@ export const ContestParticipationModal = ({
         
         dbError = error;
       } else {
+        // Get current active weekly contest
+        const { data: activeContest, error: contestError } = await supabase
+          .from('weekly_contests')
+          .select('id')
+          .eq('status', 'active')
+          .order('week_start_date', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        if (contestError || !activeContest) {
+          throw new Error('No active contest found. Please try again later.');
+        }
+
         // Insert new application and get the returned data
-        console.log('Inserting new application to database');
+        console.log('Inserting new application to database with contest_id:', activeContest.id);
         const { data: insertedData, error } = await supabase
           .from('weekly_contest_participants')
           .insert({
             user_id: session.user.id,
+            contest_id: activeContest.id,
             application_data: applicationData,
             admin_status: 'pending' as any,
             submitted_at: new Date().toISOString()
