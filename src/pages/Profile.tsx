@@ -1379,52 +1379,53 @@ const Profile = () => {
                 <p className="text-muted-foreground text-center py-8 px-6">Загрузка участий...</p>
               ) : participationItems.length > 0 ? (
                 <>
-                  {/* Green banner for tracking application status */}
-                  {isOwner && (
-                    <div className="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4 mx-6" role="alert">
-                      <p className="font-medium">Track the status of your application here.</p>
-                    </div>
-                  )}
                   <div className="px-0 sm:px-6">
-                  {/* Edit photos button and view mode toggle buttons */}
+                   {/* Edit photos button and view mode toggle buttons */}
                    <div className="flex justify-end items-center gap-1 mb-4 px-6 sm:px-0 -mt-[15px]">
-                     {/* View mode toggle buttons */}
-                     <div className="flex items-center gap-1">
-                    <button
-                      type="button"
-                      onClick={() => setParticipationViewMode("compact")}
-                      aria-pressed={participationViewMode === "compact"}
-                      aria-label="List view"
-                      className="p-1 rounded-md hover:bg-accent transition-colors"
-                    >
-                      <AlignJustify 
-                        size={28} 
-                        strokeWidth={1}
-                        className={participationViewMode === "compact" ? "text-primary" : "text-muted-foreground"}
-                      />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setParticipationViewMode("full")}
-                      aria-pressed={participationViewMode === "full"}
-                      aria-label="Grid view"
-                      className="p-1 rounded-md hover:bg-accent transition-colors"
-                    >
-                      <Grid2X2 
-                        size={28} 
-                        strokeWidth={1}
-                        className={participationViewMode === "full" ? "text-primary" : "text-muted-foreground"}
-                      />
-                    </button>
-                    </div>
-                    </div>
-                    
-                    {/* Participation items grid */}
-                  <div className={`grid gap-1 sm:gap-3 ${
-                    participationViewMode === 'compact' 
-                      ? 'grid-cols-1' 
-                      : 'grid-cols-1 lg:grid-cols-2'
-                  }`}>
+                      {/* View mode toggle buttons */}
+                      <div className="flex items-center gap-1">
+                     <button
+                       type="button"
+                       onClick={() => setParticipationViewMode("compact")}
+                       aria-pressed={participationViewMode === "compact"}
+                       aria-label="List view"
+                       className="p-1 rounded-md hover:bg-accent transition-colors"
+                     >
+                       <AlignJustify 
+                         size={28} 
+                         strokeWidth={1}
+                         className={participationViewMode === "compact" ? "text-primary" : "text-muted-foreground"}
+                       />
+                     </button>
+                     <button
+                       type="button"
+                       onClick={() => setParticipationViewMode("full")}
+                       aria-pressed={participationViewMode === "full"}
+                       aria-label="Grid view"
+                       className="p-1 rounded-md hover:bg-accent transition-colors"
+                     >
+                       <Grid2X2 
+                         size={28} 
+                         strokeWidth={1}
+                         className={participationViewMode === "full" ? "text-primary" : "text-muted-foreground"}
+                       />
+                     </button>
+                     </div>
+                     </div>
+
+                     {/* Green banner for tracking application status */}
+                     {isOwner && (
+                       <div className="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4 mx-6 sm:mx-0" role="alert">
+                         <p className="font-medium">Track the status of your application here.</p>
+                       </div>
+                     )}
+                     
+                     {/* Participation items grid */}
+                   <div className={`grid gap-1 sm:gap-3 ${
+                     participationViewMode === 'compact' 
+                       ? 'grid-cols-1' 
+                       : 'grid-cols-1 lg:grid-cols-2'
+                   }`}>
                     {participationItems.map((item) => (
                       <LikedItem
                         key={item.likeId}
