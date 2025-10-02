@@ -501,7 +501,12 @@ export function ContestantCard({
                   <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
                    <PopoverTrigger asChild>
                      <div className="bg-contest-blue text-white px-2 py-1.5 rounded-bl-lg text-sm sm:text-base font-bold cursor-pointer hover:bg-contest-blue/90 transition-colors">
-                       {localAverageRating > 0 ? `${localAverageRating.toFixed(1)} (${localTotalVotes})` : '0.0'}
+                       {localAverageRating > 0 ? (
+                         <>
+                           {localAverageRating.toFixed(1)}
+                           <span className="text-xs font-normal ml-0.5">({localTotalVotes})</span>
+                         </>
+                       ) : '0.0'}
                      </div>
                    </PopoverTrigger>
                     <PopoverContent className="w-auto p-3">
