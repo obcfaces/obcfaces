@@ -1,6 +1,8 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 import { 
   Share2, 
   Copy, 
@@ -30,7 +32,16 @@ export const ContestSuccessModal = ({
   description = ""
 }: ContestSuccessModalProps) => {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState<string | null>(null);
+
+  const handleInviteFriends = async () => {
+    onClose();
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session?.user) {
+      navigate(`/u/${session.user.id}?tab=participation`);
+    }
+  };
 
   const copyToClipboard = async () => {
     try {
@@ -209,7 +220,7 @@ export const ContestSuccessModal = ({
           </div>
 
           <div className="text-center">
-            <Button onClick={onClose} className="w-full">
+            <Button onClick={handleInviteFriends} className="w-full">
               🔥 Invite Friends
             </Button>
           </div>

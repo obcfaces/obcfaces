@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import { Country, State } from 'country-state-city';
 import HeightDropdownOneScrollPick from "@/components/ui/height-filter-dropdown";
 import WeightFilterDropdown from "@/components/ui/weight-filter-dropdown";
@@ -33,6 +34,7 @@ export const ContestParticipationModal = ({
   editMode = false, 
   existingData 
 }: ContestParticipationModalProps) => {
+  const navigate = useNavigate();
   const [internalIsOpen, setInternalIsOpen] = useState(false);
   const isOpen = controlledIsOpen !== undefined ? controlledIsOpen : internalIsOpen;
   const setIsOpen = controlledOnOpenChange || setInternalIsOpen;
@@ -785,8 +787,14 @@ export const ContestParticipationModal = ({
       if (!editMode) {
         setSubmissionSuccess(true);
       } else {
-        // In edit mode, just close modal 
+        // In edit mode, close modal and redirect to profile
         setIsOpen(false);
+        
+        // Get current user session to redirect to their profile
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user) {
+          navigate(`/u/${session.user.id}?tab=participation`);
+        }
       }
     } catch (error: any) {
       console.error('Submission error:', error);
