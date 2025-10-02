@@ -1375,17 +1375,17 @@ const Profile = () => {
             </TabsContent>
 
             <TabsContent value="participation" className="mt-8 -mx-6">
-              {/* Green banner for tracking application status */}
-              {isOwner && participationItems.length > 0 && (
-                <div className="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-6 mx-6" role="alert">
-                  <p className="font-medium">Track the status of your application here.</p>
-                </div>
-              )}
-              
               {loadingParticipation ? (
                 <p className="text-muted-foreground text-center py-8 px-6">Загрузка участий...</p>
               ) : participationItems.length > 0 ? (
-                <div className="px-0 sm:px-6">
+                <>
+                  {/* Green banner for tracking application status */}
+                  {isOwner && (
+                    <div className="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4 mx-6" role="alert">
+                      <p className="font-medium">Track the status of your application here.</p>
+                    </div>
+                  )}
+                  <div className="px-0 sm:px-6">
                   {/* Edit photos button and view mode toggle buttons */}
                    <div className="flex justify-end items-center gap-1 mb-4 px-6 sm:px-0 -mt-[15px]">
                      {/* View mode toggle buttons */}
@@ -1464,7 +1464,8 @@ const Profile = () => {
                       />
                     ))}
                    </div>
-                </div>
+                  </div>
+                </>
               ) : (
                 <p className="text-muted-foreground text-center py-8 px-6">Нет участий в конкурсах</p>
               )}
