@@ -85,6 +85,59 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
     }
   };
 
+  // Load participants for NEXT WEEK section - FOR ALL USERS
+  const loadNextWeekParticipants = async () => {
+    try {
+      console.log('Loading NEXT WEEK participants for all users...');
+      
+      // Get participants with admin_status = 'next week' or 'next week on site' for current week
+      const { data: participants, error } = await supabase
+        .from('weekly_contest_participants')
+        .select('*')
+        .in('admin_status', ['next week', 'next week on site'])
+        .eq('is_active', true)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error loading NEXT WEEK participants:', error);
+        return [];
+      }
+
+      console.log('Raw NEXT WEEK participants data:', participants?.length);
+
+      if (!participants || participants.length === 0) {
+        return [];
+      }
+
+      // Fetch profiles using secure RPC function (works for ALL users - authenticated and unauthenticated)
+      const userIds = participants.map(p => p.user_id);
+      const { data: profilesData } = await (supabase.rpc as any)('get_public_contest_participant_photos', { participant_user_ids: userIds });
+      
+      const profiles = (profilesData || []) as Array<{ 
+        id: string; 
+        photo_1_url: string | null; 
+        photo_2_url: string | null; 
+        avatar_url: string | null;
+        age: number | null;
+        city: string | null;
+        country: string | null;
+        height_cm: number | null;
+        weight_kg: number | null;
+      }>;
+
+      // Attach profiles to participants
+      const participantsWithProfiles = participants.map(participant => ({
+        ...participant,
+        profiles: profiles?.find(p => p.id === participant.user_id) || null
+      }));
+
+      return participantsWithProfiles || [];
+    } catch (error) {
+      console.error('Error loading NEXT WEEK participants:', error);
+      return [];
+    }
+  };
+
   // Load participants for THIS WEEK section - FOR ALL USERS
   const loadThisWeekParticipants = async () => {
     try {
@@ -351,6 +404,12 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
         console.log('Loaded THIS WEEK participants:', thisWeekData.length);
         setRealContestants(thisWeekData);
         setAdminParticipants(thisWeekData);
+      } else if (title === "NEXT WEEK") {
+        console.log('Loading NEXT WEEK participants');
+        const nextWeekData = await loadNextWeekParticipants();
+        console.log('Loaded NEXT WEEK participants:', nextWeekData.length);
+        setRealContestants(nextWeekData);
+        setAdminParticipants(nextWeekData);
       } else if (title === "1 WEEK AGO") {
         console.log('Loading 1 WEEK AGO participants');
         const pastWeekData = await loadPastWeekParticipants();
