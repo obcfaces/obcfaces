@@ -736,8 +736,12 @@ export type Database = {
           final_rank: number | null
           id: string
           is_active: boolean
+          notes: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
           status_history: Json | null
           status_week_history: Json | null
+          submitted_at: string | null
           total_votes: number | null
           user_id: string
           week_interval: string | null
@@ -752,8 +756,12 @@ export type Database = {
           final_rank?: number | null
           id?: string
           is_active?: boolean
+          notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           status_history?: Json | null
           status_week_history?: Json | null
+          submitted_at?: string | null
           total_votes?: number | null
           user_id: string
           week_interval?: string | null
@@ -768,8 +776,12 @@ export type Database = {
           final_rank?: number | null
           id?: string
           is_active?: boolean
+          notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           status_history?: Json | null
           status_week_history?: Json | null
+          submitted_at?: string | null
           total_votes?: number | null
           user_id?: string
           week_interval?: string | null
