@@ -2924,7 +2924,17 @@ const Admin = () => {
                   return statusMatch && weekMatch;
                 });
                 
-                if (filteredParticipants.length === 0) {
+                // Дедупликация: оставляем карточку с максимальным количеством лайков для каждого user_id
+                const userIdMap = new Map();
+                filteredParticipants.forEach(p => {
+                  const existingParticipant = userIdMap.get(p.user_id);
+                  if (!existingParticipant || (p.like_count || 0) > (existingParticipant.like_count || 0)) {
+                    userIdMap.set(p.user_id, p);
+                  }
+                });
+                const deduplicatedParticipants = Array.from(userIdMap.values());
+                
+                if (deduplicatedParticipants.length === 0) {
                   return (
                     <div className="text-center py-8 text-muted-foreground">
                       No participants found for selected week filter
@@ -2932,7 +2942,7 @@ const Admin = () => {
                   );
                 }
                 
-                return filteredParticipants.map((participant) => {
+                return deduplicatedParticipants.map((participant) => {
                   const participantProfile = profiles.find(p => p.id === participant.user_id);
                   const appData = participant.application_data || {};
                   
