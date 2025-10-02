@@ -299,7 +299,7 @@ interface ContestApplication {
   deleted_at?: string;
   is_active: boolean;
   notes?: string;
-  admin_status?: 'pending' | 'approved' | 'rejected' | 'pre next week' | 'this week' | 'next week' | 'next week on site' | 'past';
+  admin_status?: 'pending' | 'rejected' | 'pre next week' | 'this week' | 'next week' | 'next week on site' | 'past';
 }
 
 interface WeeklyContest {
@@ -1053,7 +1053,7 @@ const Admin = () => {
       return Array.from(userApplications.values())
         .map(userApps => userApps[0]) // Get first application
         .filter(app => {
-          if (app.admin_status !== 'approved' || !app.reviewed_at) return false;
+          if (!['this week', 'next week', 'past'].includes(app.admin_status) || !app.reviewed_at) return false;
           const approvedDate = new Date(app.reviewed_at);
           return approvedDate >= dayStart && approvedDate < dayEnd;
         });
@@ -1306,7 +1306,7 @@ const Admin = () => {
     const { data, error } = await supabase
       .from('weekly_contest_participants')
       .select('*')
-      .in('admin_status', ['pending', 'approved', 'rejected'] as any)
+      .in('admin_status', ['pending', 'rejected', 'this week', 'next week', 'past'] as any)
       .is('deleted_at', null)
       .order('submitted_at', { ascending: false });
 
@@ -1335,7 +1335,7 @@ const Admin = () => {
     const { data, error } = await supabase
       .from('weekly_contest_participants')
       .select('*')
-      .in('admin_status', ['pending', 'approved', 'rejected'] as any)
+      .in('admin_status', ['pending', 'rejected', 'this week', 'next week', 'past'] as any)
       .not('deleted_at', 'is', null)
       .order('deleted_at', { ascending: false });
 
@@ -4605,7 +4605,7 @@ const Admin = () => {
                     <div className="text-xs pt-1 border-t border-border/50">
                       {/* Подсчет только по admin_status */}
                       {weeklyParticipants.filter(p => p.admin_status === 'pending').length} pending, {' '}
-                      {weeklyParticipants.filter(p => p.admin_status === 'approved').length} approved, {' '}
+                      {weeklyParticipants.filter(p => ['this week', 'next week', 'past'].includes(p.admin_status)).length} approved, {' '}
                       {weeklyParticipants.filter(p => p.admin_status === 'rejected').length} rejected
                     </div>
                   </div>
@@ -4788,7 +4788,7 @@ const Admin = () => {
                                      >
                                         <SelectTrigger 
                                            className={`w-24 ${
-                                             application.admin_status === 'approved' ? 'bg-green-100 border-green-500 text-green-700' :
+                                             ['this week', 'next week', 'past'].includes(application.admin_status) ? 'bg-green-100 border-green-500 text-green-700' :
                                              application.admin_status === 'rejected' ? 'bg-red-100 border-red-500 text-red-700' :
                                              ''
                                            }`}
@@ -5008,7 +5008,7 @@ const Admin = () => {
                                               >
                                                  <SelectTrigger 
                                                     className={`w-24 h-7 text-xs ${
-                                                      application.admin_status === 'approved' ? 'bg-green-100 border-green-500 text-green-700' :
+                                                      ['this week', 'next week', 'past'].includes(application.admin_status) ? 'bg-green-100 border-green-500 text-green-700' :
                                                       application.admin_status === 'rejected' ? 'bg-red-100 border-red-500 text-red-700' :
                                                       ''
                                                     }`}
@@ -5593,7 +5593,7 @@ const Admin = () => {
                                              >
                                                 <SelectTrigger 
                                                    className={`w-24 h-7 text-xs ${
-                                                     application.admin_status === 'approved' ? 'bg-green-100 border-green-500 text-green-700' :
+                                                     ['this week', 'next week', 'past'].includes(application.admin_status) ? 'bg-green-100 border-green-500 text-green-700' :
                                                      application.admin_status === 'rejected' ? 'bg-red-100 border-red-500 text-red-700' :
                                                      ''
                                                    }`}
@@ -5913,7 +5913,7 @@ const Admin = () => {
                                               >
                                                 <SelectTrigger 
                                                    className={`w-[60%] h-7 text-xs ${
-                                                     prevApp.admin_status === 'approved' ? 'bg-green-100 border-green-500 text-green-700' :
+                                                     ['this week', 'next week', 'past'].includes(prevApp.admin_status) ? 'bg-green-100 border-green-500 text-green-700' :
                                                      prevApp.admin_status === 'rejected' ? 'bg-red-100 border-red-500 text-red-700' :
                                                      ''
                                                    }`}
@@ -6108,7 +6108,7 @@ const Admin = () => {
                                                       >
                                                          <SelectTrigger 
                                                             className={`w-24 h-7 text-xs ${
-                                                              prevApp.admin_status === 'approved' ? 'bg-green-100 border-green-500 text-green-700' :
+                                                              ['this week', 'next week', 'past'].includes(prevApp.admin_status) ? 'bg-green-100 border-green-500 text-green-700' :
                                                               prevApp.admin_status === 'rejected' ? 'bg-red-100 border-red-500 text-red-700' :
                                                               ''
                                                             }`}
