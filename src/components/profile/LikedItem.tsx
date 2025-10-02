@@ -349,15 +349,19 @@ const LikedItem = ({
       setLoadingApplication(true);
       try {
         const { data: application, error } = await supabase
-          .from('contest_applications')
-          .select('id, status, created_at, application_data')
+          .from('weekly_contest_participants')
+          .select('id, admin_status, created_at, application_data')
           .eq('user_id', user.id)
+          .in('admin_status', ['pending', 'approved', 'rejected'] as any)
           .order('created_at', { ascending: false })
           .limit(1)
           .maybeSingle();
 
         if (!error && application) {
-          setContestApplication(application);
+          setContestApplication({
+            ...application,
+            status: application.admin_status // Map admin_status to status
+          } as any);
         }
       } catch (error) {
         console.error('Error fetching application status:', error);
@@ -526,9 +530,10 @@ const LikedItem = ({
                   }
 
                   const { data: latestApplication, error } = await supabase
-                    .from('contest_applications')
+                    .from('weekly_contest_participants')
                     .select('*')
                     .eq('user_id', session.user.id)
+                    .in('admin_status', ['pending', 'approved', 'rejected'] as any)
                     .order('created_at', { ascending: false })
                     .limit(1)
                      .maybeSingle();
@@ -790,9 +795,10 @@ const LikedItem = ({
                   }
 
                   const { data: latestApplication, error } = await supabase
-                    .from('contest_applications')
+                    .from('weekly_contest_participants')
                     .select('*')
                     .eq('user_id', session.user.id)
+                    .in('admin_status', ['pending', 'approved', 'rejected'] as any)
                     .order('created_at', { ascending: false })
                     .limit(1)
                     .maybeSingle();

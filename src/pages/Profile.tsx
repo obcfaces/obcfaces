@@ -332,7 +332,7 @@ const Profile = () => {
     setUpdatingRejection(true);
     try {
       const { error } = await supabase
-        .from('contest_applications')
+        .from('weekly_contest_participants')
         .update({
           rejection_reason_types: reasonTypes,
           rejection_reason: notes || null

@@ -28,9 +28,9 @@ export const TestFormDebug = () => {
         throw new Error('User not authenticated');
       }
 
-      // Try to insert into contest_applications table
+      // Try to insert into weekly_contest_participants table (unified)
       const { data, error } = await supabase
-        .from('contest_applications')
+        .from('weekly_contest_participants')
         .insert({
           user_id: session.user.id,
           application_data: {
@@ -39,8 +39,9 @@ export const TestFormDebug = () => {
             email: testData.email,
             test_submission: true
           },
-          status: 'pending'
-        })
+          admin_status: 'pending' as any,
+          submitted_at: new Date().toISOString()
+        } as any)
         .select('id')
         .single();
 
