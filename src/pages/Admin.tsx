@@ -561,7 +561,7 @@ const Admin = () => {
         {
           event: '*',
           schema: 'public',
-          table: 'contest_applications'
+          table: 'weekly_contest_participants'
         },
         (payload) => {
           console.log('Contest applications changed:', payload);
@@ -1302,8 +1302,13 @@ const Admin = () => {
 
   const fetchContestApplications = async () => {
     console.log('Fetching contest applications...');
+    // Query unified table for application statuses
     const { data, error } = await supabase
-      .rpc('get_contest_applications_admin', { include_deleted: false });
+      .from('weekly_contest_participants')
+      .select('*')
+      .in('admin_status', ['pending', 'approved', 'rejected'] as any)
+      .is('deleted_at', null)
+      .order('submitted_at', { ascending: false });
 
     if (error) {
       console.error('Error fetching contest applications:', error);
@@ -1315,13 +1320,12 @@ const Admin = () => {
       return;
     }
 
-    // Replace deprecated statuses with "rejected"
-    const processedData = (data || []).map(app => ({
+    // Map admin_status to "status" field for compatibility
+    const processedData = (data || []).map((app: any) => ({
       ...app,
-      status: app.status === 'under_review' || app.status === 'rejected after contest' 
-        ? 'rejected' 
-        : app.status
-    }));
+      status: app.admin_status, // Use admin_status as status
+      submitted_at: app.submitted_at || app.created_at
+    })) as any;
 
     console.log('Fetched contest applications:', processedData?.length, 'applications');
     setContestApplications(processedData);
@@ -1329,14 +1333,22 @@ const Admin = () => {
 
   const fetchDeletedApplications = async () => {
     const { data, error } = await supabase
-      .rpc('get_contest_applications_admin', { include_deleted: true });
+      .from('weekly_contest_participants')
+      .select('*')
+      .in('admin_status', ['pending', 'approved', 'rejected'] as any)
+      .not('deleted_at', 'is', null)
+      .order('deleted_at', { ascending: false });
 
     if (error) {
       console.error('Error fetching deleted applications:', error);
       return [];
     }
 
-    return data || [];
+    return (data || []).map((app: any) => ({
+      ...app,
+      status: app.admin_status,
+      submitted_at: app.submitted_at || app.created_at
+    })) as any;
   };
 
   const fetchWeeklyContests = async () => {
@@ -1661,9 +1673,9 @@ const Admin = () => {
         })
       };
 
-      // Update contest_applications
+      // Update weekly_contest_participants (unified table)
       const { error: appError } = await supabase
-        .from('contest_applications')
+        .from('weekly_contest_participants')
         .update(updateData)
         .eq('id', applicationId);
 
@@ -1802,8 +1814,8 @@ const Admin = () => {
 
   const deleteApplication = async (applicationId: string) => {
     const { error } = await supabase
-      .from('contest_applications')
-      .update({ deleted_at: new Date().toISOString() })
+      .from('weekly_contest_participants')
+      .update({ deleted_at: new Date().toISOString() } as any)
       .eq('id', applicationId);
 
     if (error) {
@@ -6785,10 +6797,10 @@ const Admin = () => {
                       if (editingApplicationData && editingApplicationId) {
                         try {
                           const { error } = await supabase
-                            .from('contest_applications')
+                            .from('weekly_contest_participants')
                             .update({
                               application_data: editingApplicationData.application_data
-                            })
+                            } as any)
                             .eq('id', editingApplicationId);
 
                           if (error) {

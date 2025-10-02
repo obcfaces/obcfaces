@@ -178,9 +178,10 @@ export const ContestParticipationModal = ({
       if (!session?.user) return null;
 
       const { data: applications, error } = await supabase
-        .from('contest_applications')
+        .from('weekly_contest_participants')
         .select('*')
         .eq('user_id', session.user.id)
+        .in('admin_status', ['pending', 'approved', 'rejected'] as any)
         .order('created_at', { ascending: false })
         .limit(1);
 
@@ -672,13 +673,13 @@ export const ContestParticipationModal = ({
       if (editMode && existingData) {
         // Update existing application
         const { error } = await supabase
-          .from('contest_applications')
+          .from('weekly_contest_participants')
           .update({
             application_data: applicationData,
-            status: 'pending',
+            admin_status: 'pending' as any,
             submitted_at: new Date().toISOString(),
             updated_at: new Date().toISOString()
-          })
+          } as any)
           .eq('id', existingData.id);
         
         dbError = error;
@@ -686,12 +687,13 @@ export const ContestParticipationModal = ({
         // Insert new application and get the returned data
         console.log('Inserting new application to database');
         const { data: insertedData, error } = await supabase
-          .from('contest_applications')
+          .from('weekly_contest_participants')
           .insert({
             user_id: session.user.id,
             application_data: applicationData,
-            status: 'pending'
-          })
+            admin_status: 'pending' as any,
+            submitted_at: new Date().toISOString()
+          } as any)
           .select('id')
           .single();
         
@@ -1282,12 +1284,12 @@ export const ContestParticipationModal = ({
                                return;
                              }
 
-                             // Get the specific application by ID
-                             const { data: application, error: fetchError } = await supabase
-                               .from('contest_applications')
-                               .select('application_data')
-                               .eq('id', currentApplicationId)
-                               .single();
+                              // Get the specific application by ID
+                              const { data: application, error: fetchError } = await supabase
+                                .from('weekly_contest_participants')
+                                .select('application_data')
+                                .eq('id', currentApplicationId)
+                                .single();
 
                              if (fetchError || !application) {
                               toast({
@@ -1314,16 +1316,16 @@ export const ContestParticipationModal = ({
                                facebook_url: contactForm.facebookUrl || ''
                              };
 
-                             // Update the specific application with contact data
-                             // This will trigger the save_application_history() function automatically
-                             const { error: updateError } = await supabase
-                               .from('contest_applications')
-                               .update({
-                                 application_data: updatedApplicationData,
-                                 updated_at: new Date().toISOString(),
-                                 notes: `Contact information updated: ${contactForm.contact ? 'Phone updated' : ''} ${contactForm.facebookUrl ? 'Facebook updated' : ''}`.trim()
-                               })
-                               .eq('id', currentApplicationId);
+                              // Update the specific application with contact data
+                              // This will trigger the save_application_history() function automatically
+                              const { error: updateError } = await supabase
+                                .from('weekly_contest_participants')
+                                .update({
+                                  application_data: updatedApplicationData,
+                                  updated_at: new Date().toISOString(),
+                                  notes: `Contact information updated: ${contactForm.contact ? 'Phone updated' : ''} ${contactForm.facebookUrl ? 'Facebook updated' : ''}`.trim()
+                                } as any)
+                                .eq('id', currentApplicationId);
 
                            if (updateError) {
                              toast({
