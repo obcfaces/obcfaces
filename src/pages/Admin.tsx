@@ -4338,7 +4338,7 @@ const Admin = () => {
 
                               {/* Column 2: Information (25ch) */}
                               <div className="w-[25ch] flex-shrink-0 p-4">
-                                <div className="flex items-center gap-2 mb-1">
+                                 <div className="flex items-center gap-2 mb-1">
                                   <Avatar className="h-6 w-6 flex-shrink-0">
                                     <AvatarImage src={participantProfile?.photo_1_url || appData.photo1_url || appData.photo_1_url || participantProfile?.avatar_url || ''} />
                                     <AvatarFallback className="text-xs">
@@ -4349,6 +4349,11 @@ const Admin = () => {
                                     {participant.final_rank === 1 && <span className="text-yellow-500">🏆</span>}
                                     {participant.final_rank > 1 && <span className="text-slate-500">🥈</span>}
                                     {appData.first_name} {appData.last_name} {appData.birth_year ? new Date().getFullYear() - parseInt(appData.birth_year) : ''}
+                                    {['this week', 'next week', 'next week on site', 'pre next week'].includes(participant.admin_status) && (
+                                      <Badge variant="outline" className="ml-1 text-[10px] px-1 py-0 h-4 bg-green-100 text-green-700 border-green-300">
+                                        on site
+                                      </Badge>
+                                    )}
                                   </span>
                                 </div>
                                 
