@@ -327,6 +327,7 @@ interface WeeklyContestParticipant {
   is_active: boolean;
   admin_status?: string;
   participant_status?: string; // Add participant_status field
+  deleted_at?: string | null; // Add deleted_at field
   profiles?: {
     first_name: string;
     last_name: string;
@@ -4328,8 +4329,8 @@ const Admin = () => {
               </div>
               
               {(() => {
-                // Use weeklyParticipants as the single source of truth (no duplicates)
-                const allParticipants = weeklyParticipants;
+                // SINGLE SOURCE: Use only weeklyParticipants to avoid duplicates
+                const allParticipants = weeklyParticipants.filter(p => !p.deleted_at);
                 
                 // Sort by updated_at (most recent first)
                 const sortedParticipants = [...allParticipants].sort((a, b) => {
@@ -4338,7 +4339,7 @@ const Admin = () => {
                   return dateB - dateA;
                 });
                 
-                // Apply status filter
+                // Apply admin status filter
                 const filteredParticipants = allSectionStatusFilter === 'all' 
                   ? sortedParticipants 
                   : sortedParticipants.filter(p => p.admin_status === allSectionStatusFilter);
