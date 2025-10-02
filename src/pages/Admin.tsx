@@ -5420,6 +5420,9 @@ const Admin = () => {
                                          <SelectValue />
                                        </SelectTrigger>
                                            <SelectContent className="z-[9999] bg-popover border shadow-lg">
+                                              <SelectItem value="pending">New (Pending)</SelectItem>
+                                              <SelectItem value="approved">Reg (Approved)</SelectItem>
+                                              <SelectItem value="rejected">Reg (Rejected)</SelectItem>
                                               <SelectItem value="pre next week">Pre Next Week</SelectItem>
                                               <SelectItem value="this week">This Week</SelectItem>
                                               <SelectItem value="next week">Next Week</SelectItem>
@@ -5606,12 +5609,15 @@ const Admin = () => {
                                                 >
                                                  <SelectValue />
                                                </SelectTrigger>
-                                                  <SelectContent>
+                                                  <SelectContent className="z-[9999] bg-popover border shadow-lg">
+                                                     <SelectItem value="pending">New (Pending)</SelectItem>
+                                                     <SelectItem value="approved">Reg (Approved)</SelectItem>
+                                                     <SelectItem value="rejected">Reg (Rejected)</SelectItem>
+                                                     <SelectItem value="pre next week">Pre Next Week</SelectItem>
                                                      <SelectItem value="this week">This Week</SelectItem>
-                                                      <SelectItem value="next week">Next Week</SelectItem>
-                                                      <SelectItem value="next week on site">Next Week On Site</SelectItem>
+                                                     <SelectItem value="next week">Next Week</SelectItem>
+                                                     <SelectItem value="next week on site">Next Week On Site</SelectItem>
                                                      <SelectItem value="past">Past</SelectItem>
-                                                     
                                                   </SelectContent>
                                              </Select>
                                              
