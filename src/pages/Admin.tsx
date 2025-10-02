@@ -4254,36 +4254,13 @@ const Admin = () => {
               </div>
               
               {(() => {
-                // Combine all participants from weeklyParticipants and contestApplications
-                const allParticipants = [...weeklyParticipants];
-                
-                // Add contest applications as participants
-                const applicationParticipants = contestApplications.map(app => {
-                  const profile = profiles.find(p => p.id === app.user_id);
-                  return {
-                    id: `app-${app.id}`,
-                    user_id: app.user_id,
-                    application_data: app.application_data,
-                    admin_status: app.admin_status,
-                    participant_status: app.admin_status,
-                    status_history: {},
-                    status_week_history: {},
-                    week_interval: getParticipantWeekInterval({ admin_status: app.admin_status }),
-                    created_at: app.submitted_at,
-                    contest_id: null,
-                    final_rank: null,
-                    total_votes: 0,
-                    average_rating: 0,
-                    is_active: app.deleted_at === null
-                  };
-                });
-                
-                const combinedParticipants = [...allParticipants, ...applicationParticipants];
+                // Use weeklyParticipants as the single source of truth (no duplicates)
+                const allParticipants = weeklyParticipants;
                 
                 // Apply status filter
                 const filteredParticipants = allSectionStatusFilter === 'all' 
-                  ? combinedParticipants 
-                  : combinedParticipants.filter(p => p.admin_status === allSectionStatusFilter);
+                  ? allParticipants 
+                  : allParticipants.filter(p => p.admin_status === allSectionStatusFilter);
                 
                 if (filteredParticipants.length === 0) {
                   return (
@@ -4434,6 +4411,19 @@ const Admin = () => {
                                   >
                                     {`${(participant.average_rating || 0).toFixed(1)} (${participant.total_votes || 0})`}
                                   </div>
+                                  
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    className="h-6 w-6 p-0 text-destructive hover:text-destructive hover:bg-destructive/10"
+                                    onClick={async () => {
+                                      if (confirm(`Are you sure you want to delete ${appData.first_name} ${appData.last_name}?`)) {
+                                        await deleteApplication(participant.id);
+                                      }
+                                    }}
+                                  >
+                                    <Trash2 className="h-3.5 w-3.5" />
+                                  </Button>
                                 </div>
                               </div>
                             </div>
