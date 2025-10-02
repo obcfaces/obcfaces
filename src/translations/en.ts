@@ -68,4 +68,19 @@ export default {
   'footer.privacy': 'Privacy Policy',
   'footer.copyright': 'All rights reserved.',
   'footer.madeWith': 'Made with ❤️',
+
+  // Participation Status
+  'participation.trackStatus': 'Track the status of your application here.',
+  'participation.status.pending': 'Pending',
+  'participation.status.approved': 'Approved',
+  'participation.status.rejected': 'Rejected',
+  'participation.status.preNextWeek': 'Pre Next Week',
+  'participation.status.nextWeek': 'Next Week',
+  'participation.status.nextWeekOnSite': 'Next Week On Site',
+  'participation.status.thisWeek': 'This Week',
+  'participation.status.past': 'Past',
+  'participation.statusDate': 'Status date:',
+  'participation.banner.preNextWeek': 'Your card will be displayed on the site in the next week block next week ({nextWeekInterval}). Candidates who get the most likes will be placed as finalists in the next week block ({finalWeekInterval}). You\'re welcome to share your contest profile on social media and invite your friends and family to vote for you. Every vote brings you closer to the next stage!',
+  'participation.banner.nextWeek': 'Your card is displayed on the site in the next week block ({currentWeekInterval}). Candidates who get the most likes will be placed as finalists in the next week block ({nextWeekInterval}). You\'re welcome to share your contest profile on social media and invite your friends and family to vote for you. Every vote brings you closer to the next stage!',
+  'participation.banner.thisWeek': 'Your card is displayed on the site in the this week block ({currentWeekInterval}). The finalist with the highest rating will be the contest winner and receive the main prize of 5000 pesos. You\'re welcome to share your contest profile on social media and invite your friends and family to vote for you. Every vote brings you closer to the next stage!',
 };
