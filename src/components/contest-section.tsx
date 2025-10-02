@@ -151,13 +151,13 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
     try {
       console.log('Loading 1 WEEK AGO participants for all users...');
       
-      // Get participants with admin_status = 'past' and week interval matching 1 WEEK AGO (29/09-05/10/25)
+      // Get participants with admin_status = 'past' and week interval matching 1 WEEK AGO (22/09-28/09/25)
       const { data: participants, error } = await supabase
         .from('weekly_contest_participants')
         .select('*')
         .eq('admin_status', 'past')
         .eq('is_active', true)
-        .like('week_interval', '%29/09-05/10/25%');
+        .like('week_interval', '%22/09-28/09/25%');
 
       if (error) {
         console.error('Error loading 1 WEEK AGO participants:', error);
@@ -204,13 +204,13 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
     try {
       console.log('Loading 2 weeks ago admin participants...');
       
-      // Get participants with admin_status = 'past' and week interval '22/09-28/09/25'
+      // Get participants with admin_status = 'past' and week interval '15/09-21/09/25'
       const { data: participants, error } = await supabase
         .from('weekly_contest_participants')
         .select('*')
         .eq('admin_status', 'past')
         .eq('is_active', true)
-        .like('week_interval', '%22/09-28/09/25%');
+        .like('week_interval', '%15/09-21/09/25%');
 
       if (error) {
         console.error('Error loading 2 weeks ago admin participants:', error);
@@ -268,13 +268,13 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
     try {
       console.log('Loading 3 weeks ago admin participants...');
       
-      // Get participants with admin_status = 'past' and week interval '15/09-21/09/25'
+      // Get participants with admin_status = 'past' and week interval '08/09-14/09/25'
       const { data: participants, error } = await supabase
         .from('weekly_contest_participants')
         .select('*')
         .eq('admin_status', 'past')
         .eq('is_active', true)
-        .like('week_interval', '%15/09-21/09/25%');
+        .like('week_interval', '%08/09-14/09/25%');
 
       if (error) {
         console.error('Error loading 3 weeks ago admin participants:', error);
