@@ -677,8 +677,7 @@ export const ContestParticipationModal = ({
           .update({
             application_data: applicationData,
             admin_status: 'pending' as any,
-            submitted_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
+            submitted_at: new Date().toISOString()
           } as any)
           .eq('id', existingData.id);
         
