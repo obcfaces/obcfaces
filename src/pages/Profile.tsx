@@ -1375,6 +1375,13 @@ const Profile = () => {
             </TabsContent>
 
             <TabsContent value="participation" className="mt-8 -mx-6">
+              {/* Green banner for tracking application status */}
+              {isOwner && participationItems.length > 0 && (
+                <div className="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-6 mx-6" role="alert">
+                  <p className="font-medium">Track the status of your application here.</p>
+                </div>
+              )}
+              
               {loadingParticipation ? (
                 <p className="text-muted-foreground text-center py-8 px-6">Загрузка участий...</p>
               ) : participationItems.length > 0 ? (
