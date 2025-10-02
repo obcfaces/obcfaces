@@ -422,18 +422,6 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
             loadParticipants();
           }
         )
-        .on(
-          'postgres_changes',
-          {
-            event: '*',
-            schema: 'public',
-            table: 'contest_applications'
-          },
-          (payload) => {
-            console.log('Contest applications changed:', payload);
-            loadParticipants();
-          }
-        )
         .subscribe();
 
       return () => {

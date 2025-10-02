@@ -35,8 +35,8 @@ import { WinnerContentManager } from '@/components/admin/WinnerContentManager';
 import { ParticipantStatusHistory } from '@/components/admin/ParticipantStatusHistory';
 import { ParticipantStatusHistoryModal } from '@/components/admin/ParticipantStatusHistoryModal';
 
-// Unified status type for participants - all 8 statuses
-type ParticipantStatus = 'pending' | 'approved' | 'rejected' | 'pre next week' | 'this week' | 'next week' | 'next week on site' | 'past';
+// Unified status type for participants - all 9 statuses
+type ParticipantStatus = 'pending' | 'under_review' | 'approved' | 'rejected' | 'pre next week' | 'this week' | 'next week' | 'next week on site' | 'past';
 
 // Helper function to check if rejection reason is a duplicate of predefined reasons
 const isReasonDuplicate = (rejectionReason: string, reasonTypes: string[]) => {
@@ -1306,7 +1306,7 @@ const Admin = () => {
     const { data, error } = await supabase
       .from('weekly_contest_participants')
       .select('*')
-      .in('admin_status', ['pending', 'rejected', 'this week', 'next week', 'past'] as any)
+      .in('admin_status', ['pending', 'approved', 'under_review', 'rejected', 'this week', 'next week', 'past'] as any)
       .is('deleted_at', null)
       .order('submitted_at', { ascending: false });
 
@@ -1335,7 +1335,7 @@ const Admin = () => {
     const { data, error } = await supabase
       .from('weekly_contest_participants')
       .select('*')
-      .in('admin_status', ['pending', 'rejected', 'this week', 'next week', 'past'] as any)
+      .in('admin_status', ['pending', 'approved', 'under_review', 'rejected', 'this week', 'next week', 'past'] as any)
       .not('deleted_at', 'is', null)
       .order('deleted_at', { ascending: false });
 

@@ -33,7 +33,7 @@ export interface ParticipantData {
   application_data?: any;
   phone_data?: any;
   is_active?: boolean;
-  admin_status?: 'pending' | 'rejected' | 'pre next week' | 'this week' | 'next week' | 'next week on site' | 'past';
+  admin_status?: 'pending' | 'under_review' | 'approved' | 'rejected' | 'pre next week' | 'this week' | 'next week' | 'next week on site' | 'past';
 }
 
 export const useParticipantData = (participantName?: string, userId?: string) => {
