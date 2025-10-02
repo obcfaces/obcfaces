@@ -1413,12 +1413,66 @@ const Profile = () => {
                      </div>
                      </div>
 
-                     {/* Green banner for tracking application status */}
-                     {isOwner && (
-                       <div className="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4 mx-6 sm:mx-0" role="alert">
-                         <p className="font-medium">Track the status of your application here.</p>
-                       </div>
-                     )}
+                     {/* Status banner - changes based on admin_status */}
+                     {isOwner && participationItems[0]?.candidateData && (() => {
+                       const adminStatus = participationItems[0].candidateData.admin_status;
+                       const getWeekMonday = (date: Date) => {
+                         const day = date.getDay();
+                         const diff = date.getDate() - day + (day === 0 ? -6 : 1);
+                         return new Date(date.setDate(diff));
+                       };
+                       
+                       const formatWeekInterval = (startDate: Date) => {
+                         const endDate = new Date(startDate);
+                         endDate.setDate(endDate.getDate() + 6);
+                         return `${startDate.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit' })}-${endDate.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })}`;
+                       };
+                       
+                       const now = new Date();
+                       const currentMonday = getWeekMonday(new Date(now));
+                       const nextMonday = new Date(currentMonday);
+                       nextMonday.setDate(nextMonday.getDate() + 7);
+                       const weekAfterNext = new Date(nextMonday);
+                       weekAfterNext.setDate(weekAfterNext.getDate() + 7);
+                       
+                       const currentWeekInterval = formatWeekInterval(new Date(currentMonday));
+                       const nextWeekInterval = formatWeekInterval(new Date(nextMonday));
+                       const finalWeekInterval = formatWeekInterval(new Date(weekAfterNext));
+                       
+                       // Show banners for specific statuses
+                       if (adminStatus === 'pre next week') {
+                         return (
+                           <div className="bg-blue-50 border-l-4 border-blue-500 text-blue-700 p-4 mb-4 mx-6 sm:mx-0" role="alert">
+                             <p className="text-sm leading-relaxed">
+                               Your card will be displayed on the site in the next week block next week ({nextWeekInterval}). Candidates who get the most likes will be placed as finalists in the next week block ({finalWeekInterval}). You're welcome to share your contest profile on social media and invite your friends and family to vote for you. Every vote brings you closer to the next stage!
+                             </p>
+                           </div>
+                         );
+                       } else if (adminStatus === 'next week' || adminStatus === 'next week on site') {
+                         return (
+                           <div className="bg-purple-50 border-l-4 border-purple-500 text-purple-700 p-4 mb-4 mx-6 sm:mx-0" role="alert">
+                             <p className="text-sm leading-relaxed">
+                               Your card is displayed on the site in the next week block ({currentWeekInterval}). Candidates who get the most likes will be placed as finalists in the next week block ({nextWeekInterval}). You're welcome to share your contest profile on social media and invite your friends and family to vote for you. Every vote brings you closer to the next stage!
+                             </p>
+                           </div>
+                         );
+                       } else if (adminStatus === 'this week') {
+                         return (
+                           <div className="bg-green-50 border-l-4 border-green-500 text-green-700 p-4 mb-4 mx-6 sm:mx-0" role="alert">
+                             <p className="text-sm leading-relaxed">
+                               Your card is displayed on the site in the this week block ({currentWeekInterval}). The finalist with the highest rating will be the contest winner and receive the main prize of 5000 pesos. You're welcome to share your contest profile on social media and invite your friends and family to vote for you. Every vote brings you closer to the next stage!
+                             </p>
+                           </div>
+                         );
+                       } else if (adminStatus === 'pending' || adminStatus === 'approved') {
+                         return (
+                           <div className="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4 mx-6 sm:mx-0" role="alert">
+                             <p className="font-medium">Track the status of your application here.</p>
+                           </div>
+                         );
+                       }
+                       return null;
+                     })()}
                      
                      {/* Participation items grid */}
                    <div className={`grid gap-1 sm:gap-3 ${

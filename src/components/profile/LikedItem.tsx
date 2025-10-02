@@ -622,6 +622,25 @@ const LikedItem = ({
                 </div>
               </div>
               
+              {/* Application Status Info */}
+              {isOwner && contestApplication && (
+                <div className="mb-2 pb-2 border-b border-border">
+                  <div className="text-xs text-muted-foreground">
+                    <span className="font-medium">Status: </span>
+                    <span className="capitalize">{contestApplication.status?.replace(/_/g, ' ')}</span>
+                    {contestApplication.created_at && (
+                      <span className="ml-2">
+                        ({new Date(contestApplication.created_at).toLocaleDateString('en-GB', {
+                          day: '2-digit',
+                          month: '2-digit',
+                          year: 'numeric'
+                        })})
+                      </span>
+                    )}
+                  </div>
+                </div>
+              )}
+              
               <div className="flex items-center justify-end gap-4">
                 <button
                   type="button"
@@ -870,6 +889,27 @@ const LikedItem = ({
             </div>
           </div>
         </div>
+        
+        {/* Application Status Info */}
+        {isOwner && contestApplication && (
+          <div className="px-4 py-3 bg-muted/30 border-t border-contest-border">
+            <div className="flex items-center justify-between">
+              <div className="text-sm">
+                <span className="text-muted-foreground">Status: </span>
+                <span className="font-medium capitalize">{contestApplication.status?.replace(/_/g, ' ')}</span>
+              </div>
+              {contestApplication.created_at && (
+                <div className="text-xs text-muted-foreground">
+                  {new Date(contestApplication.created_at).toLocaleDateString('en-GB', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric'
+                  })}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
         
         {/* Footer with actions */}
         <div className="border-t border-contest-border px-4 py-2 flex items-center justify-evenly gap-4">
