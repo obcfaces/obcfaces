@@ -1325,8 +1325,24 @@ const Admin = () => {
       return;
     }
 
+    // Get all user_ids from contest_applications to verify they came from the application form
+    const { data: contestAppsData } = await supabase
+      .from('contest_applications')
+      .select('user_id')
+      .is('deleted_at', null);
+
+    const validUserIds = new Set(contestAppsData?.map(app => app.user_id) || []);
+
+    // Filter to only include participants who have a corresponding contest_application
+    // OR have admin_status that indicates they were manually added (not pending/under_review)
+    const filteredData = (data || []).filter((app: any) => {
+      // Allow all statuses except pending/under_review if they don't have a contest_application
+      const requiresApplication = ['pending', 'under_review'].includes(app.admin_status);
+      return !requiresApplication || validUserIds.has(app.user_id);
+    });
+
     // Map admin_status to "status" field for compatibility
-    const processedData = (data || []).map((app: any) => ({
+    const processedData = filteredData.map((app: any) => ({
       ...app,
       status: app.admin_status, // Use admin_status as status
       submitted_at: app.submitted_at || app.created_at
