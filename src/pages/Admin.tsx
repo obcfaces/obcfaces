@@ -1513,22 +1513,22 @@ const Admin = () => {
     try {
       console.log('Fetching next week participants...');
       
-      // Get participants using RPC function for proper join
-      const { data: participants, error } = await supabase.rpc('get_weekly_contest_participants_admin', { weeks_offset: 0 });
+      // Get ALL participants with next week or next week on site status directly from table
+      const { data: nextWeekData, error } = await supabase
+        .from('weekly_contest_participants')
+        .select('*')
+        .in('admin_status', ['next week', 'next week on site'])
+        .eq('is_active', true)
+        .is('deleted_at', null)
+        .order('created_at', { ascending: false });
       
       if (error) {
         console.error('Error fetching next week participants:', error);
         throw error;
       }
-
-      // Filter for next week statuses
-      const nextWeekData = (participants || []).filter((p: any) => 
-        p.admin_status === 'next week' || p.admin_status === 'next week on site'
-      );
-      
       
       console.log('Fetched next week participants:', nextWeekData?.length || 0);
-      setNextWeekParticipants(nextWeekData);
+      setNextWeekParticipants(nextWeekData || []);
     } catch (error) {
       console.error('Error in fetchNextWeekParticipants:', error);
     }
@@ -1539,18 +1539,22 @@ const Admin = () => {
     try {
       console.log('Fetching pre next week participants...');
       
-      const { data: participants, error } = await supabase.rpc('get_weekly_contest_participants_admin', { weeks_offset: 0 });
+      // Get ALL participants with pre next week status directly from table
+      const { data: preNextWeekData, error } = await supabase
+        .from('weekly_contest_participants')
+        .select('*')
+        .eq('admin_status', 'pre next week')
+        .eq('is_active', true)
+        .is('deleted_at', null)
+        .order('created_at', { ascending: false });
       
       if (error) {
         console.error('Error fetching pre next week participants:', error);
         throw error;
       }
 
-      // Filter for pre next week status
-      const preNextWeekData = (participants || []).filter((p: any) => p.admin_status === 'pre next week');
-      
       console.log('Fetched pre next week participants:', preNextWeekData?.length || 0);
-      setPreNextWeekParticipants(preNextWeekData);
+      setPreNextWeekParticipants(preNextWeekData || []);
     } catch (error) {
       console.error('Error in fetchPreNextWeekParticipants:', error);
     }
