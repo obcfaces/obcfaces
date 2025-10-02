@@ -4637,30 +4637,6 @@ const Admin = () => {
 
             <TabsContent value="applications" className="space-y-4 -mx-2 md:mx-0">
 
-              {/* Status Filter */}
-              <div className="mb-4 px-0 md:px-6">
-                <Label className="text-sm font-medium mb-2 block">Admin Status Filter:</Label>
-                <Select value={adminStatusFilter} onValueChange={(value) => {
-                  setAdminStatusFilter(value);
-                  setApplicationCurrentPage(1);
-                }}>
-                  <SelectTrigger className="w-full max-w-md">
-                    <SelectValue placeholder="Select status" />
-                  </SelectTrigger>
-                  <SelectContent className="z-[9999] bg-popover border shadow-lg">
-                    <SelectItem value="all">All</SelectItem>
-                    <SelectItem value="pending">Pending</SelectItem>
-                    <SelectItem value="approved">Approved</SelectItem>
-                    <SelectItem value="rejected">Rejected</SelectItem>
-                    <SelectItem value="pre next week">Pre Next Week</SelectItem>
-                    <SelectItem value="next week">Next Week</SelectItem>
-                    <SelectItem value="next week on site">Next Week On Site</SelectItem>
-                    <SelectItem value="this week">This Week</SelectItem>
-                    <SelectItem value="past">Past</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
               {/* Applications Stats Dashboard */}
               <div className="mb-6 px-0 md:px-6">
                 <div className="mb-4 p-3 bg-muted rounded-lg">
