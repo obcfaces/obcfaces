@@ -1307,11 +1307,11 @@ const Admin = () => {
 
   const fetchContestApplications = async () => {
     console.log('Fetching contest applications...');
-    // Query unified table for application statuses
+    // Query unified table ONLY for NEW application statuses (not weekly participants)
     const { data, error } = await supabase
       .from('weekly_contest_participants')
       .select('*')
-      .in('admin_status', ['pending', 'approved', 'under_review', 'rejected', 'this week', 'next week', 'past'] as any)
+      .in('admin_status', ['pending', 'approved', 'under_review', 'rejected'] as any) // REMOVED: 'this week', 'next week', 'past'
       .is('deleted_at', null)
       .order('submitted_at', { ascending: false });
 
@@ -1334,9 +1334,9 @@ const Admin = () => {
     const validUserIds = new Set(contestAppsData?.map(app => app.user_id) || []);
 
     // Filter to only include participants who have a corresponding contest_application
-    // OR have admin_status that indicates they were manually added (not pending/under_review)
+    // OR have admin_status that indicates they were manually added (approved/rejected)
     const filteredData = (data || []).filter((app: any) => {
-      // Allow all statuses except pending/under_review if they don't have a contest_application
+      // Allow approved/rejected even without contest_application (manual additions)
       const requiresApplication = ['pending', 'under_review'].includes(app.admin_status);
       return !requiresApplication || validUserIds.has(app.user_id);
     });
