@@ -31,6 +31,7 @@ interface FullCardLayoutProps {
   
   // Rating display
   localAverageRating: number;
+  localTotalVotes: number;
   isPopoverOpen: boolean;
   setIsPopoverOpen: (open: boolean) => void;
   
@@ -77,6 +78,7 @@ export function FullCardLayout({
   rank,
   userRating,
   localAverageRating,
+  localTotalVotes,
   isPopoverOpen,
   setIsPopoverOpen,
   cardData,
@@ -116,7 +118,7 @@ export function FullCardLayout({
                    )}
                     {(() => {
                       // Для всех пользователей (включая админов) показываем средний рейтинг
-                      return localAverageRating > 0 ? localAverageRating.toFixed(1) : '0.0';
+                      return localAverageRating > 0 ? `${localAverageRating.toFixed(1)} (${localTotalVotes})` : '0.0';
                     })()}
                 </div>
              </PopoverTrigger>
