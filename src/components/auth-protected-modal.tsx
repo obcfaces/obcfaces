@@ -1,9 +1,8 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { ContestParticipationModal } from "@/components/contest-participation-modal";
 import LoginModalContent from "@/components/login-modal-content";
-import { Button } from "@/components/ui/button";
 
 interface AuthProtectedModalProps {
   children?: React.ReactNode;
@@ -13,8 +12,8 @@ export const AuthProtectedModal = ({ children }: AuthProtectedModalProps) => {
   const [session, setSession] = useState<any>(null);
   const [isParticipationOpen, setIsParticipationOpen] = useState(false);
   const [isLoginOpen, setIsLoginOpen] = useState(false);
-  const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
-  const [applicationStatus, setApplicationStatus] = useState<string | null>(null);
+  const [editMode, setEditMode] = useState(false);
+  const [existingParticipant, setExistingParticipant] = useState<any>(null);
 
   useEffect(() => {
     // Subscribe to auth state changes
@@ -39,10 +38,10 @@ export const AuthProtectedModal = ({ children }: AuthProtectedModalProps) => {
       // User is authenticated, check their application status
       console.log('Checking application status for user:', session.user.id);
       
-      // Check if user has a participant record with admin_status
+      // Check if user has a participant record
       const { data: participant, error } = await supabase
         .from('weekly_contest_participants')
-        .select('admin_status')
+        .select('*')
         .eq('user_id', session.user.id)
         .eq('is_active', true)
         .order('created_at', { ascending: false })
@@ -53,6 +52,8 @@ export const AuthProtectedModal = ({ children }: AuthProtectedModalProps) => {
 
       if (error) {
         console.error('Error checking participant status:', error);
+        setEditMode(false);
+        setExistingParticipant(null);
         setIsParticipationOpen(true);
         return;
       }
@@ -64,20 +65,25 @@ export const AuthProtectedModal = ({ children }: AuthProtectedModalProps) => {
         if (status === 'rejected') {
           // Allow new participation
           console.log('Opening participation modal for user with rejected application');
+          setEditMode(false);
+          setExistingParticipant(null);
           setIsParticipationOpen(true);
         } else {
-          // Show status modal
-          console.log('Showing status modal for user with existing participant:', status);
-          setApplicationStatus(status);
-          setIsStatusModalOpen(true);
+          // Open form in edit mode with existing data
+          console.log('Opening participation modal in edit mode for existing participant');
+          setEditMode(true);
+          setExistingParticipant(participant);
+          setIsParticipationOpen(true);
         }
       } else {
-        // No participant record exists, allow participation
+        // No participant record exists, allow new participation
         console.log('Opening participation modal for user with no participant record');
+        setEditMode(false);
+        setExistingParticipant(null);
         setIsParticipationOpen(true);
       }
     } else {
-      // User is not authenticated, open login modal (same as header)
+      // User is not authenticated, open login modal
       console.log('Opening login modal for unauthenticated user');
       setIsLoginOpen(true);
     }
@@ -104,30 +110,9 @@ export const AuthProtectedModal = ({ children }: AuthProtectedModalProps) => {
       <ContestParticipationModal 
         isOpen={isParticipationOpen} 
         onOpenChange={setIsParticipationOpen}
-        editMode={false}
+        editMode={editMode}
+        existingData={existingParticipant}
       />
-
-      {/* Status Information Modal */}
-      <Dialog open={isStatusModalOpen} onOpenChange={setIsStatusModalOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Application Already Exists</DialogTitle>
-          </DialogHeader>
-          <div className="py-4">
-            <p className="text-muted-foreground">
-              You already have an application with status: <span className="font-semibold">{applicationStatus}</span>
-            </p>
-            <p className="text-sm text-muted-foreground mt-2">
-              You can only submit a new application after the previous one is rejected.
-            </p>
-          </div>
-          <div className="flex justify-end">
-            <Button onClick={() => setIsStatusModalOpen(false)}>
-              Got it
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
     </>
   );
 };
