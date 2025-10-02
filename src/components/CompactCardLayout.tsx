@@ -137,7 +137,12 @@ export function CompactCardLayout({
       {!isEditing && !showThanks && !isExample && !isThisWeek && !hideCardActions && (
         <div className="absolute top-0 right-0 z-10">
           <div className="bg-contest-blue text-white px-1 py-0.5 rounded-bl text-sm sm:text-base font-bold">
-            {localAverageRating > 0 ? `${localAverageRating.toFixed(1)} (${localTotalVotes})` : '0.0'}
+            {localAverageRating > 0 ? (
+              <>
+                {localAverageRating.toFixed(1)}
+                <span className="text-xs font-normal ml-0.5">({localTotalVotes})</span>
+              </>
+            ) : '0.0'}
           </div>
         </div>
       )}

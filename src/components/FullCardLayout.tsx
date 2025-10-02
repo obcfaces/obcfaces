@@ -118,7 +118,15 @@ export function FullCardLayout({
                    )}
                     {(() => {
                       // Для всех пользователей (включая админов) показываем средний рейтинг
-                      return localAverageRating > 0 ? `${localAverageRating.toFixed(1)} (${localTotalVotes})` : '0.0';
+                      if (localAverageRating > 0) {
+                        return (
+                          <>
+                            {localAverageRating.toFixed(1)}
+                            <span className="text-xs font-normal ml-0.5">({localTotalVotes})</span>
+                          </>
+                        );
+                      }
+                      return '0.0';
                     })()}
                 </div>
              </PopoverTrigger>
