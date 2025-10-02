@@ -202,7 +202,7 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
   // Load participants for 1 WEEK AGO section - FOR ALL USERS
   const loadPastWeekParticipants = async () => {
     try {
-      console.log('Loading 1 WEEK AGO participants for all users...');
+      console.log('🔄 Loading 1 WEEK AGO participants for PUBLIC...');
       
       // Get participants with admin_status = 'past' and week interval matching 1 WEEK AGO (22/09-28/09/25)
       const { data: participants, error } = await supabase
@@ -210,14 +210,24 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
         .select('*')
         .eq('admin_status', 'past')
         .eq('is_active', true)
-        .like('week_interval', '%22/09-28/09/25%');
+        .is('deleted_at', null)
+        .eq('week_interval', '22/09-28/09/25');
 
       if (error) {
-        console.error('Error loading 1 WEEK AGO participants:', error);
+        console.error('❌ Error loading 1 WEEK AGO participants:', error);
         return [];
       }
 
-      console.log('Raw 1 WEEK AGO participants data:', participants?.length);
+      console.log('✅ Raw 1 WEEK AGO participants found:', participants?.length);
+      if (participants && participants.length > 0) {
+        console.log('📋 1 WEEK AGO participants:', participants.map(p => {
+          const appData = (p.application_data as any) || {};
+          return {
+            name: `${appData.first_name || ''} ${appData.last_name || ''}`.trim(),
+            week_interval: p.week_interval
+          };
+        }));
+      }
 
       if (!participants || participants.length === 0) {
         return [];
@@ -255,7 +265,7 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
   // Load admin participants for 2 WEEKS AGO section (participants with admin_status = 'past' and specific week interval)
   const loadTwoWeeksAgoAdminParticipants = async () => {
     try {
-      console.log('Loading 2 weeks ago admin participants...');
+      console.log('🔄 Loading 2 WEEKS AGO participants for PUBLIC...');
       
       // Get participants with admin_status = 'past' and week interval '15/09-21/09/25'
       const { data: participants, error } = await supabase
@@ -263,14 +273,24 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
         .select('*')
         .eq('admin_status', 'past')
         .eq('is_active', true)
-        .like('week_interval', '%15/09-21/09/25%');
+        .is('deleted_at', null)
+        .eq('week_interval', '15/09-21/09/25');
 
       if (error) {
-        console.error('Error loading 2 weeks ago admin participants:', error);
+        console.error('❌ Error loading 2 WEEKS AGO participants:', error);
         return [];
       }
 
-      console.log('Raw 2 weeks ago participants data:', participants?.length, participants);
+      console.log('✅ Raw 2 WEEKS AGO participants found:', participants?.length);
+      if (participants && participants.length > 0) {
+        console.log('📋 2 WEEKS AGO participants:', participants.map(p => {
+          const appData = (p.application_data as any) || {};
+          return {
+            name: `${appData.first_name || ''} ${appData.last_name || ''}`.trim(),
+            week_interval: p.week_interval
+          };
+        }));
+      }
 
       if (!participants || participants.length === 0) {
         return [];
@@ -319,7 +339,7 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
   // Load admin participants for 3 WEEKS AGO section (participants with admin_status = 'past' and specific week interval)
   const loadThreeWeeksAgoAdminParticipants = async () => {
     try {
-      console.log('Loading 3 weeks ago admin participants...');
+      console.log('🔄 Loading 3 WEEKS AGO participants for PUBLIC...');
       
       // Get participants with admin_status = 'past' and week interval '08/09-14/09/25'
       const { data: participants, error } = await supabase
@@ -327,14 +347,24 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
         .select('*')
         .eq('admin_status', 'past')
         .eq('is_active', true)
-        .like('week_interval', '%08/09-14/09/25%');
+        .is('deleted_at', null)
+        .eq('week_interval', '08/09-14/09/25');
 
       if (error) {
-        console.error('Error loading 3 weeks ago admin participants:', error);
+        console.error('❌ Error loading 3 WEEKS AGO participants:', error);
         return [];
       }
 
-      console.log('Raw 3 weeks ago participants data:', participants?.length, participants);
+      console.log('✅ Raw 3 WEEKS AGO participants found:', participants?.length);
+      if (participants && participants.length > 0) {
+        console.log('📋 3 WEEKS AGO participants:', participants.map(p => {
+          const appData = (p.application_data as any) || {};
+          return {
+            name: `${appData.first_name || ''} ${appData.last_name || ''}`.trim(),
+            week_interval: p.week_interval
+          };
+        }));
+      }
 
       if (!participants || participants.length === 0) {
         return [];
