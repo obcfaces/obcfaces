@@ -133,8 +133,8 @@ export function CompactCardLayout({
         )}
       </div>
       
-      {/* Rating badge in top right corner for past weeks */}
-      {!isEditing && !showThanks && !isExample && !isThisWeek && !hideCardActions && (
+      {/* Rating badge in top right corner - show after voting or in past weeks */}
+      {!isEditing && !showThanks && !isExample && (!isThisWeek || isVoted) && !hideCardActions && (
         <div className="absolute top-0 right-0 z-10">
           <div className="bg-contest-blue text-white px-1 py-0.5 rounded-bl text-sm sm:text-base font-bold">
             {localAverageRating > 0 ? (
