@@ -107,7 +107,7 @@ export function FullCardLayout({
         </div>
       )}
       
-      {/* Rating badge in top right corner - show for everyone in past weeks */}
+      {/* Rating badge in top right corner - show after voting or in past weeks */}
       {!isEditing && !showThanks && !isExample && (!isThisWeek || isVoted) && (
         <div className="absolute top-0 right-0 z-10 flex flex-col items-end">
            <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
