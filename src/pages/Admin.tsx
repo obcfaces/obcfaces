@@ -2015,13 +2015,13 @@ const Admin = () => {
                   <SelectContent className="z-[9999] bg-popover border shadow-lg">
                     <SelectItem value="all">All</SelectItem>
                     <SelectItem value="pending">Pending</SelectItem>
-                    <SelectItem value="pre next week">Pre Next Week</SelectItem>
-                    <SelectItem value="next week">Next Week</SelectItem>
-                    <SelectItem value="this week">This Week</SelectItem>
-                    <SelectItem value="past">Past</SelectItem>
                     <SelectItem value="approved">Approved</SelectItem>
                     <SelectItem value="rejected">Rejected</SelectItem>
+                    <SelectItem value="pre next week">Pre Next Week</SelectItem>
+                    <SelectItem value="next week">Next Week</SelectItem>
                     <SelectItem value="next week on site">Next Week On Site</SelectItem>
+                    <SelectItem value="this week">This Week</SelectItem>
+                    <SelectItem value="past">Past</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -2515,13 +2515,13 @@ const Admin = () => {
                     <SelectContent className="z-[9999] bg-popover border shadow-lg">
                       <SelectItem value="all">All</SelectItem>
                       <SelectItem value="pending">Pending</SelectItem>
-                      <SelectItem value="pre next week">Pre Next Week</SelectItem>
-                      <SelectItem value="next week">Next Week</SelectItem>
-                      <SelectItem value="this week">This Week</SelectItem>
-                      <SelectItem value="past">Past</SelectItem>
                       <SelectItem value="approved">Approved</SelectItem>
                       <SelectItem value="rejected">Rejected</SelectItem>
+                      <SelectItem value="pre next week">Pre Next Week</SelectItem>
+                      <SelectItem value="next week">Next Week</SelectItem>
                       <SelectItem value="next week on site">Next Week On Site</SelectItem>
+                      <SelectItem value="this week">This Week</SelectItem>
+                      <SelectItem value="past">Past</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -2828,13 +2828,13 @@ const Admin = () => {
                     <SelectContent className="z-[9999] bg-popover border shadow-lg">
                       <SelectItem value="all">All</SelectItem>
                       <SelectItem value="pending">Pending</SelectItem>
-                      <SelectItem value="pre next week">Pre Next Week</SelectItem>
-                      <SelectItem value="next week">Next Week</SelectItem>
-                      <SelectItem value="this week">This Week</SelectItem>
-                      <SelectItem value="past">Past</SelectItem>
                       <SelectItem value="approved">Approved</SelectItem>
                       <SelectItem value="rejected">Rejected</SelectItem>
+                      <SelectItem value="pre next week">Pre Next Week</SelectItem>
+                      <SelectItem value="next week">Next Week</SelectItem>
                       <SelectItem value="next week on site">Next Week On Site</SelectItem>
+                      <SelectItem value="this week">This Week</SelectItem>
+                      <SelectItem value="past">Past</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -3261,13 +3261,13 @@ const Admin = () => {
                     <SelectContent className="z-[9999] bg-popover border shadow-lg">
                       <SelectItem value="all">All</SelectItem>
                       <SelectItem value="pending">Pending</SelectItem>
-                      <SelectItem value="pre next week">Pre Next Week</SelectItem>
-                      <SelectItem value="next week">Next Week</SelectItem>
-                      <SelectItem value="this week">This Week</SelectItem>
-                      <SelectItem value="past">Past</SelectItem>
                       <SelectItem value="approved">Approved</SelectItem>
                       <SelectItem value="rejected">Rejected</SelectItem>
+                      <SelectItem value="pre next week">Pre Next Week</SelectItem>
+                      <SelectItem value="next week">Next Week</SelectItem>
                       <SelectItem value="next week on site">Next Week On Site</SelectItem>
+                      <SelectItem value="this week">This Week</SelectItem>
+                      <SelectItem value="past">Past</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -4237,13 +4237,13 @@ const Admin = () => {
                     <SelectContent className="z-[9999] bg-popover border shadow-lg">
                       <SelectItem value="all">All</SelectItem>
                       <SelectItem value="pending">Pending</SelectItem>
-                      <SelectItem value="pre next week">Pre Next Week</SelectItem>
-                      <SelectItem value="next week">Next Week</SelectItem>
-                      <SelectItem value="this week">This Week</SelectItem>
-                      <SelectItem value="past">Past</SelectItem>
                       <SelectItem value="approved">Approved</SelectItem>
                       <SelectItem value="rejected">Rejected</SelectItem>
+                      <SelectItem value="pre next week">Pre Next Week</SelectItem>
+                      <SelectItem value="next week">Next Week</SelectItem>
                       <SelectItem value="next week on site">Next Week On Site</SelectItem>
+                      <SelectItem value="this week">This Week</SelectItem>
+                      <SelectItem value="past">Past</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -4548,13 +4548,13 @@ const Admin = () => {
                   <SelectContent className="z-[9999] bg-popover border shadow-lg">
                     <SelectItem value="all">All</SelectItem>
                     <SelectItem value="pending">Pending</SelectItem>
-                    <SelectItem value="pre next week">Pre Next Week</SelectItem>
-                    <SelectItem value="next week">Next Week</SelectItem>
-                    <SelectItem value="this week">This Week</SelectItem>
-                    <SelectItem value="past">Past</SelectItem>
                     <SelectItem value="approved">Approved</SelectItem>
                     <SelectItem value="rejected">Rejected</SelectItem>
+                    <SelectItem value="pre next week">Pre Next Week</SelectItem>
+                    <SelectItem value="next week">Next Week</SelectItem>
                     <SelectItem value="next week on site">Next Week On Site</SelectItem>
+                    <SelectItem value="this week">This Week</SelectItem>
+                    <SelectItem value="past">Past</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -5121,13 +5121,13 @@ const Admin = () => {
                        <SelectContent className="z-[9999] bg-popover border shadow-lg min-w-[200px]">
                           <SelectItem value="all">All</SelectItem>
                           <SelectItem value="pending">Pending</SelectItem>
-                          <SelectItem value="pre next week">Pre Next Week</SelectItem>
-                          <SelectItem value="next week">Next Week</SelectItem>
-                          <SelectItem value="this week">This Week</SelectItem>
-                          <SelectItem value="past">Past</SelectItem>
                           <SelectItem value="approved">Approved</SelectItem>
                           <SelectItem value="rejected">Rejected</SelectItem>
+                          <SelectItem value="pre next week">Pre Next Week</SelectItem>
+                          <SelectItem value="next week">Next Week</SelectItem>
                           <SelectItem value="next week on site">Next Week On Site</SelectItem>
+                          <SelectItem value="this week">This Week</SelectItem>
+                          <SelectItem value="past">Past</SelectItem>
                        </SelectContent>
                     </Select>
                     {adminStatusFilter !== 'all' && (
@@ -5424,9 +5424,9 @@ const Admin = () => {
                                               <SelectItem value="approved">Approved</SelectItem>
                                               <SelectItem value="rejected">Rejected</SelectItem>
                                               <SelectItem value="pre next week">Pre Next Week</SelectItem>
-                                              <SelectItem value="this week">This Week</SelectItem>
                                               <SelectItem value="next week">Next Week</SelectItem>
                                               <SelectItem value="next week on site">Next Week On Site</SelectItem>
+                                              <SelectItem value="this week">This Week</SelectItem>
                                               <SelectItem value="past">Past</SelectItem>
                                             </SelectContent>
                                      </Select>
@@ -5614,9 +5614,9 @@ const Admin = () => {
                                                      <SelectItem value="approved">Approved</SelectItem>
                                                      <SelectItem value="rejected">Rejected</SelectItem>
                                                      <SelectItem value="pre next week">Pre Next Week</SelectItem>
-                                                     <SelectItem value="this week">This Week</SelectItem>
                                                      <SelectItem value="next week">Next Week</SelectItem>
                                                      <SelectItem value="next week on site">Next Week On Site</SelectItem>
+                                                     <SelectItem value="this week">This Week</SelectItem>
                                                      <SelectItem value="past">Past</SelectItem>
                                                   </SelectContent>
                                              </Select>
