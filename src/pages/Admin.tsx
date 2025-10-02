@@ -4480,9 +4480,6 @@ const Admin = () => {
                                          <SelectItem value="pending">Pending</SelectItem>
                                          <SelectItem value="approved">Approved</SelectItem>
                                          <SelectItem value="rejected">Rejected</SelectItem>
-                                         <SelectItem value="pending">Pending</SelectItem>
-                                         <SelectItem value="approved">Approved</SelectItem>
-                                         <SelectItem value="rejected">Rejected</SelectItem>
                                          <SelectItem value="pre next week">Pre Next Week</SelectItem>
                                          <SelectItem value="this week">This Week</SelectItem>
                                          <SelectItem value="next week">Next Week</SelectItem>
@@ -4599,9 +4596,6 @@ const Admin = () => {
                                         <SelectValue />
                                       </SelectTrigger>
                                         <SelectContent className="z-[9999] bg-popover border shadow-lg">
-                                           <SelectItem value="pending">Pending</SelectItem>
-                                           <SelectItem value="approved">Approved</SelectItem>
-                                           <SelectItem value="rejected">Rejected</SelectItem>
                                            <SelectItem value="pending">Pending</SelectItem>
                                            <SelectItem value="approved">Approved</SelectItem>
                                            <SelectItem value="rejected">Rejected</SelectItem>
