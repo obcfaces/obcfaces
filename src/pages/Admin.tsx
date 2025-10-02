@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -370,6 +371,9 @@ const Admin = () => {
   const [genderFilter, setGenderFilter] = useState<string>('all');
   const [adminStatusFilter, setAdminStatusFilter] = useState<string>('all');
   const [allSectionStatusFilter, setAllSectionStatusFilter] = useState<string>('all');
+  const [deletedParticipantsAll, setDeletedParticipantsAll] = useState<any[]>([]);
+  const [showDeletedAll, setShowDeletedAll] = useState(false);
+  const [deleteConfirmParticipant, setDeleteConfirmParticipant] = useState<{ id: string; name: string } | null>(null);
   const [filteredWeeklyParticipants, setFilteredWeeklyParticipants] = useState<any[]>([]);
   const [selectedUserApplications, setSelectedUserApplications] = useState<string | null>(null);
   const [editingApplicationId, setEditingApplicationId] = useState<string | null>(null);
@@ -1503,6 +1507,18 @@ const Admin = () => {
 
       setWeeklyParticipants(participants);
       console.log('Set weeklyParticipants, current adminStatusFilter:', adminStatusFilter);
+      
+      // Fetch deleted participants for "All" tab
+      const { data: deletedData } = await supabase
+        .from('weekly_contest_participants')
+        .select('*')
+        .not('deleted_at', 'is', null)
+        .order('deleted_at', { ascending: false })
+        .limit(50);
+      
+      if (deletedData) {
+        setDeletedParticipantsAll(deletedData);
+      }
     } catch (error) {
       console.error('Error in fetchWeeklyParticipants:', error);
     }
@@ -4231,6 +4247,64 @@ const Admin = () => {
               <div className="mb-6">
                 <h2 className="text-xl font-semibold mb-4">All Participants</h2>
                 
+                {/* Deleted participants section */}
+                {deletedParticipantsAll.length > 0 && (
+                  <div className="mb-6 p-4 border border-destructive/30 rounded-lg bg-destructive/5">
+                    <div className="flex items-center justify-between mb-3">
+                      <h3 className="text-sm font-semibold text-destructive flex items-center gap-2">
+                        <Trash2 className="h-4 w-4" />
+                        Deleted Participants ({deletedParticipantsAll.length})
+                      </h3>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => setShowDeletedAll(!showDeletedAll)}
+                      >
+                        {showDeletedAll ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                      </Button>
+                    </div>
+                    
+                    {showDeletedAll && (
+                      <div className="space-y-2 max-h-[400px] overflow-y-auto">
+                        {deletedParticipantsAll.map((participant) => {
+                          const appData = participant.application_data || {};
+                          return (
+                            <div key={participant.id} className="flex items-center justify-between p-2 bg-background rounded border">
+                              <div className="flex items-center gap-2">
+                                <Avatar className="h-8 w-8">
+                                  <AvatarImage src={appData.photo1_url || appData.photo_1_url} />
+                                  <AvatarFallback>{appData.first_name?.charAt(0)}</AvatarFallback>
+                                </Avatar>
+                                <span className="text-sm">{appData.first_name} {appData.last_name}</span>
+                              </div>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={async () => {
+                                  // Restore participant
+                                  const { error } = await supabase
+                                    .from('weekly_contest_participants')
+                                    .update({ deleted_at: null })
+                                    .eq('id', participant.id);
+                                  
+                                  if (!error) {
+                                    setDeletedParticipantsAll(prev => prev.filter(p => p.id !== participant.id));
+                                    fetchWeeklyParticipants();
+                                    toast({ title: "Restored", description: "Participant has been restored" });
+                                  }
+                                }}
+                              >
+                                <RotateCcw className="h-3 w-3 mr-1" />
+                                Restore
+                              </Button>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                )}
+                
                 {/* Status Filter - Admin Status Only */}
                 <div className="mb-4">
                   <Label className="text-sm font-medium mb-2 block">Admin Status Filter:</Label>
@@ -4257,10 +4331,17 @@ const Admin = () => {
                 // Use weeklyParticipants as the single source of truth (no duplicates)
                 const allParticipants = weeklyParticipants;
                 
+                // Sort by updated_at (most recent first)
+                const sortedParticipants = [...allParticipants].sort((a, b) => {
+                  const dateA = new Date(a.application_data?.updated_at || a.created_at || 0).getTime();
+                  const dateB = new Date(b.application_data?.updated_at || b.created_at || 0).getTime();
+                  return dateB - dateA;
+                });
+                
                 // Apply status filter
                 const filteredParticipants = allSectionStatusFilter === 'all' 
-                  ? allParticipants 
-                  : allParticipants.filter(p => p.admin_status === allSectionStatusFilter);
+                  ? sortedParticipants 
+                  : sortedParticipants.filter(p => p.admin_status === allSectionStatusFilter);
                 
                 if (filteredParticipants.length === 0) {
                   return (
@@ -4285,7 +4366,7 @@ const Admin = () => {
                               <div className="w-[25ch] flex-shrink-0 p-0">
                                 <div className="flex gap-px">
                                   {(participantProfile?.photo_1_url || appData.photo1_url || appData.photo_1_url) && (
-                                    <div className="w-full">
+                                    <div className="w-full relative">
                                       <img 
                                         src={participantProfile?.photo_1_url || appData.photo1_url || appData.photo_1_url}
                                         alt="Portrait"
@@ -4295,6 +4376,11 @@ const Admin = () => {
                                           participantProfile?.photo_2_url || appData.photo2_url || appData.photo_2_url
                                         ].filter(Boolean), 0, `${appData.first_name} ${appData.last_name}`)}
                                       />
+                                      {['this week', 'next week', 'next week on site', 'pre next week'].includes(participant.admin_status) && (
+                                        <Badge variant="outline" className="absolute top-1 left-1 text-[10px] px-1 py-0 h-4 bg-green-500/90 text-white border-green-600 shadow-sm">
+                                          on site
+                                        </Badge>
+                                      )}
                                     </div>
                                   )}
                                   {(participantProfile?.photo_2_url || appData.photo2_url || appData.photo_2_url) && (
@@ -4326,11 +4412,6 @@ const Admin = () => {
                                     {participant.final_rank === 1 && <span className="text-yellow-500">🏆</span>}
                                     {participant.final_rank > 1 && <span className="text-slate-500">🥈</span>}
                                     {appData.first_name} {appData.last_name} {appData.birth_year ? new Date().getFullYear() - parseInt(appData.birth_year) : ''}
-                                    {['this week', 'next week', 'next week on site', 'pre next week'].includes(participant.admin_status) && (
-                                      <Badge variant="outline" className="ml-1 text-[10px] px-1 py-0 h-4 bg-green-100 text-green-700 border-green-300">
-                                        on site
-                                      </Badge>
-                                    )}
                                   </span>
                                 </div>
                                 
@@ -4416,10 +4497,11 @@ const Admin = () => {
                                     size="sm"
                                     variant="ghost"
                                     className="h-6 w-6 p-0 text-destructive hover:text-destructive hover:bg-destructive/10"
-                                    onClick={async () => {
-                                      if (confirm(`Are you sure you want to delete ${appData.first_name} ${appData.last_name}?`)) {
-                                        await deleteApplication(participant.id);
-                                      }
+                                    onClick={() => {
+                                      setDeleteConfirmParticipant({
+                                        id: participant.id,
+                                        name: `${appData.first_name} ${appData.last_name}`
+                                      });
                                     }}
                                   >
                                     <Trash2 className="h-3.5 w-3.5" />
@@ -6997,6 +7079,56 @@ const Admin = () => {
           statusHistory={selectedStatusHistory.statusHistory}
         />
       )}
+      
+      {/* Delete Confirmation Dialog for All Tab */}
+      <AlertDialog open={!!deleteConfirmParticipant} onOpenChange={(open) => !open && setDeleteConfirmParticipant(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirm Deletion</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete <strong>{deleteConfirmParticipant?.name}</strong>? 
+              This participant will be moved to the deleted section.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={async () => {
+                if (deleteConfirmParticipant) {
+                  const participantToDelete = weeklyParticipants.find(p => p.id === deleteConfirmParticipant.id);
+                  
+                  const { error } = await supabase
+                    .from('weekly_contest_participants')
+                    .update({ deleted_at: new Date().toISOString() })
+                    .eq('id', deleteConfirmParticipant.id);
+                  
+                  if (!error && participantToDelete) {
+                    // Add to deleted list
+                    setDeletedParticipantsAll(prev => [...prev, participantToDelete]);
+                    // Refresh data
+                    fetchWeeklyParticipants();
+                    toast({
+                      title: "Deleted",
+                      description: `${deleteConfirmParticipant.name} has been moved to deleted section`
+                    });
+                  } else if (error) {
+                    toast({
+                      title: "Error",
+                      description: "Failed to delete participant",
+                      variant: "destructive"
+                    });
+                  }
+                  
+                  setDeleteConfirmParticipant(null);
+                }
+              }}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 };
