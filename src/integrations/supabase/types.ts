@@ -274,6 +274,13 @@ export type Database = {
             foreignKeyName: "follows_followee_id_fkey"
             columns: ["followee_id"]
             isOneToOne: false
+            referencedRelation: "contest_participants_safe"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "follows_followee_id_fkey"
+            columns: ["followee_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -282,6 +289,13 @@ export type Database = {
             columns: ["follower_id"]
             isOneToOne: false
             referencedRelation: "contest_participants_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "follows_follower_id_fkey"
+            columns: ["follower_id"]
+            isOneToOne: false
+            referencedRelation: "contest_participants_safe"
             referencedColumns: ["id"]
           },
           {
@@ -986,6 +1000,27 @@ export type Database = {
         Relationships: []
       }
       contest_participants_public: {
+        Row: {
+          avatar_url: string | null
+          display_name: string | null
+          id: string | null
+          is_contest_participant: boolean | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          display_name?: string | null
+          id?: string | null
+          is_contest_participant?: boolean | null
+        }
+        Update: {
+          avatar_url?: string | null
+          display_name?: string | null
+          id?: string | null
+          is_contest_participant?: boolean | null
+        }
+        Relationships: []
+      }
+      contest_participants_safe: {
         Row: {
           avatar_url: string | null
           display_name: string | null
