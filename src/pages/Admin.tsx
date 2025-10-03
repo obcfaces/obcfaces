@@ -1400,8 +1400,10 @@ const Admin = () => {
 
       const profilesWithAuth = (profilesData || []).map(profile => {
         const userAuthData = authData?.find(auth => auth.user_id === profile.id);
-        // Get the most recent IP address for this user
-        const userLoginLog = loginLogs?.find(log => log.user_id === profile.id);
+        // Get the most recent login log with an IP address for this user
+        const userLoginLog = loginLogs
+          ?.filter(log => log.user_id === profile.id && log.ip_address)
+          ?.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())[0];
         
         let ipCountry = null;
         if (userLoginLog?.ip_address) {
