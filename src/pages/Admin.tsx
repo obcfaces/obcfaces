@@ -455,14 +455,19 @@ const Admin = () => {
     }
   ): Promise<{ success: boolean; error?: any }> => {
     try {
+      console.log('🟢 updateParticipantStatusWithHistory called:', { participantId, newStatus, participantName, additionalData });
+      
       // Get current user
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
+        console.error('🟢 ERROR: No authenticated user');
         return { success: false, error: 'No authenticated user' };
       }
+      console.log('🟢 Current user ID:', user.id);
 
       // Get week interval for the status
       const weekInterval = getWeekIntervalForStatus(newStatus);
+      console.log('🟢 Week interval:', weekInterval);
       
       // Get current participant data to update status_history
       const { data: currentParticipant, error: fetchError } = await supabase
@@ -472,9 +477,10 @@ const Admin = () => {
         .single();
 
       if (fetchError) {
-        console.error('Error fetching current participant:', fetchError);
+        console.error('🟢 ERROR fetching current participant:', fetchError);
         return { success: false, error: fetchError };
       }
+      console.log('🟢 Current participant data:', currentParticipant);
 
       // Parse existing status_history or create new one
       let statusHistory: any = {};
@@ -483,7 +489,7 @@ const Admin = () => {
           ? JSON.parse(currentParticipant.status_history) 
           : (currentParticipant.status_history || {});
       } catch (e) {
-        console.error('Error parsing status_history:', e);
+        console.error('🟢 Error parsing status_history:', e);
         statusHistory = {};
       }
 
@@ -495,6 +501,7 @@ const Admin = () => {
         week_interval: weekInterval,
         timestamp: new Date().toISOString()
       };
+      console.log('🟢 Updated status_history:', statusHistory);
 
       // Prepare update data
       const updateData: any = {
@@ -518,6 +525,7 @@ const Admin = () => {
           updateData.reviewed_by = additionalData.reviewed_by;
         }
       }
+      console.log('🟢 Final update data:', updateData);
 
       // Update participant with new status and history
       const { error: updateError } = await supabase
@@ -526,15 +534,15 @@ const Admin = () => {
         .eq('id', participantId);
 
       if (updateError) {
-        console.error('Error updating participant status:', updateError);
+        console.error('🟢 ERROR updating participant status:', updateError);
         return { success: false, error: updateError };
       }
 
-      console.log(`✅ Successfully updated ${participantName} (${participantId}) to ${newStatus} with interval ${weekInterval}`);
+      console.log(`🟢 ✅ Successfully updated ${participantName} (${participantId}) to ${newStatus} with interval ${weekInterval}`);
       return { success: true };
 
     } catch (error) {
-      console.error('Unexpected error in updateParticipantStatusWithHistory:', error);
+      console.error('🟢 EXCEPTION in updateParticipantStatusWithHistory:', error);
       return { success: false, error };
     }
   };
@@ -6635,19 +6643,41 @@ const Admin = () => {
         onClose={() => setRejectModalOpen(false)}
          onConfirm={async (reasonTypes, notes) => {
            if (applicationToReject) {
+             console.log('🔴 REJECT MODAL: Starting rejection process', { 
+               applicationId: applicationToReject.id, 
+               reasonTypes, 
+               notes 
+             });
+             
              // Check if this is a weekly contest participant or regular application
              const isWeeklyParticipant = filteredWeeklyParticipants.some(p => p.id === applicationToReject.id);
+             console.log('🔴 Is weekly participant?', isWeeklyParticipant);
              
              if (isWeeklyParticipant) {
                // For weekly contest participants, remove them from the contest and reject their application
                const participant = filteredWeeklyParticipants.find(p => p.id === applicationToReject.id);
+               console.log('🔴 Found participant:', participant);
+               
                if (participant) {
                  try {
                     // Get current admin for rejection tracking
                     const { data: { user } } = await supabase.auth.getUser();
+                    console.log('🔴 Current user:', user?.id);
                     
                     // Update participant with rejection data using centralized function
                     const participantName = `${participant.application_data?.first_name || ''} ${participant.application_data?.last_name || ''}`.trim();
+                    console.log('🔴 Calling updateParticipantStatusWithHistory with:', {
+                      participantId: participant.id,
+                      status: 'rejected',
+                      participantName,
+                      additionalData: {
+                        rejection_reason_types: reasonTypes,
+                        rejection_reason: notes || null,
+                        reviewed_at: new Date().toISOString(),
+                        reviewed_by: user?.id
+                      }
+                    });
+                    
                     const result = await updateParticipantStatusWithHistory(
                       participant.id,
                       'rejected',
@@ -6660,33 +6690,37 @@ const Admin = () => {
                       }
                     );
                     
-                    if (!result.success) {
-                      console.error('Error rejecting participant:', result.error);
-                      toast({
-                        title: "Error",
-                        description: `Failed to reject participant: ${result.error}`,
-                        variant: "destructive"
-                      });
-                      return;
-                    }
+                    console.log('🔴 updateParticipantStatusWithHistory result:', result);
                    
-                   // Refresh data to show updated status
-                   await fetchWeeklyParticipants();
-                   await fetchContestApplications();
-                   
-                   // Remove participant filter
-                   setParticipantFilters(prev => {
-                     const newFilters = { ...prev };
-                     delete newFilters[participant.id];
-                     return newFilters;
-                   });
-                   
-                   toast({
-                     title: "Success",
-                     description: "Participant rejected successfully",
-                   });
+                   if (!result.success) {
+                     console.error('🔴 ERROR: Failed to update participant:', result.error);
+                     toast({
+                       title: "Error",
+                       description: `Failed to reject participant: ${result.error}`,
+                       variant: "destructive"
+                     });
+                     return;
+                   }
+                  
+                  console.log('🔴 Refreshing data...');
+                  // Refresh data to show updated status
+                  await fetchWeeklyParticipants();
+                  await fetchContestApplications();
+                  console.log('🔴 Data refreshed');
+                  
+                  // Remove participant filter
+                  setParticipantFilters(prev => {
+                    const newFilters = { ...prev };
+                    delete newFilters[participant.id];
+                    return newFilters;
+                  });
+                  
+                  toast({
+                    title: "Success",
+                    description: "Participant rejected successfully",
+                  });
                  } catch (error) {
-                   console.error('Error rejecting participant:', error);
+                   console.error('🔴 EXCEPTION in rejection process:', error);
                    toast({
                      title: "Error",
                      description: "Failed to reject participant",
@@ -6695,6 +6729,7 @@ const Admin = () => {
                  }
                }
              } else {
+               console.log('🔴 Not a weekly participant, calling reviewApplication');
                // Regular application rejection
                await reviewApplication(applicationToReject.id, 'rejected', { reasonTypes, notes });
               }
