@@ -621,7 +621,6 @@ export type Database = {
           country: string | null
           created_at: string
           display_name: string | null
-          email: string | null
           first_name: string | null
           gender: string | null
           has_children: boolean | null
@@ -651,7 +650,6 @@ export type Database = {
           country?: string | null
           created_at?: string
           display_name?: string | null
-          email?: string | null
           first_name?: string | null
           gender?: string | null
           has_children?: boolean | null
@@ -681,7 +679,6 @@ export type Database = {
           country?: string | null
           created_at?: string
           display_name?: string | null
-          email?: string | null
           first_name?: string | null
           gender?: string | null
           has_children?: boolean | null

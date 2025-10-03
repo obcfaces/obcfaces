@@ -1323,8 +1323,8 @@ const Admin = () => {
       return {
         ...profile,
         auth_provider: userAuthData?.auth_provider || 'unknown',
-        // Приоритет: сначала email из profiles, потом из auth
-        email: profile.email || userAuthData?.email || null,
+        // Email is stored in auth.users only, not in profiles table (security)
+        email: userAuthData?.email || null,
         facebook_data: userAuthData?.facebook_data || null,
         last_sign_in_at: userAuthData?.last_sign_in_at || null,
         email_confirmed_at: userAuthData?.email_confirmed_at || null,
@@ -2234,7 +2234,7 @@ const Admin = () => {
                                 {participantProfile?.email && (
                                   <Copy 
                                     className="h-3 w-3 cursor-pointer hover:text-foreground" 
-                                    onClick={() => navigator.clipboard.writeText(participantProfile.email)}
+                                    onClick={() => participantProfile.email && navigator.clipboard.writeText(participantProfile.email)}
                                   />
                                 )}
                               </div>
@@ -2437,7 +2437,7 @@ const Admin = () => {
                                     {participantProfile?.email && (
                                       <Copy 
                                         className="h-3 w-3 cursor-pointer hover:text-foreground" 
-                                        onClick={() => navigator.clipboard.writeText(participantProfile.email)}
+                                        onClick={() => participantProfile.email && navigator.clipboard.writeText(participantProfile.email)}
                                       />
                                     )}
                                   </div>
@@ -3778,16 +3778,23 @@ const Admin = () => {
                             <div className="text-xs text-muted-foreground mb-1">
                               {participantProfile?.email && (
                                 <div className="flex items-center gap-1">
-                                  <span 
-                                    className="cursor-pointer" 
-                                    title={participantProfile.email}
-                                  >
-                                    {participantProfile.email.length > 25 ? `${participantProfile.email.substring(0, 25)}...` : participantProfile.email}
-                                  </span>
-                                  <Copy 
-                                    className="h-3 w-3 cursor-pointer hover:text-foreground" 
-                                    onClick={() => navigator.clipboard.writeText(participantProfile.email)}
-                                  />
+                                  {participantProfile.email && (
+                                    <>
+                                      <span 
+                                        className="cursor-pointer" 
+                                        title={participantProfile.email}
+                                      >
+                                        {participantProfile.email.length > 25 ? `${participantProfile.email.substring(0, 25)}...` : participantProfile.email}
+                                      </span>
+                                      <Copy 
+                                        className="h-3 w-3 cursor-pointer hover:text-foreground" 
+                                        onClick={() => navigator.clipboard.writeText(participantProfile.email)}
+                                      />
+                                    </>
+                                  )}
+                                  {!participantProfile.email && (
+                                    <span className="text-muted-foreground">No email</span>
+                                  )}
                                 </div>
                               )}
                             </div>
@@ -4165,10 +4172,17 @@ const Admin = () => {
                                 <div>{appData.weight_kg}kg • {appData.height_cm}cm • {appData.gender}</div>
                                 <div>{appData.marital_status} • {appData.has_children ? 'Has children' : 'No children'}</div>
                                 {participantProfile?.email && (
-                                  <div className="flex items-center gap-1">
-                                    <span>{participantProfile.email.length > 20 ? `${participantProfile.email.substring(0, 20)}...` : participantProfile.email}</span>
-                                    <Copy className="h-3 w-3 cursor-pointer" onClick={() => navigator.clipboard.writeText(participantProfile.email)} />
-                                  </div>
+                                <div className="flex items-center gap-1">
+                                  {participantProfile.email && (
+                                    <>
+                                      <span>{participantProfile.email.length > 20 ? `${participantProfile.email.substring(0, 20)}...` : participantProfile.email}</span>
+                                      <Copy className="h-3 w-3 cursor-pointer" onClick={() => navigator.clipboard.writeText(participantProfile.email)} />
+                                    </>
+                                  )}
+                                  {!participantProfile.email && (
+                                    <span className="text-muted-foreground">No email</span>
+                                  )}
+                                </div>
                                 )}
                               </div>
                             )}
@@ -4589,16 +4603,23 @@ const Admin = () => {
                                 <div className="text-xs text-muted-foreground mb-1">
                                   {participantProfile?.email && (
                                     <div className="flex items-center gap-1">
-                                      <span 
-                                        className="cursor-pointer" 
-                                        title={participantProfile.email}
-                                      >
-                                        {participantProfile.email.substring(0, 15)}...
-                                      </span>
-                                      <Copy 
-                                        className="h-3 w-3 cursor-pointer hover:text-foreground" 
-                                        onClick={() => navigator.clipboard.writeText(participantProfile.email || '')}
-                                      />
+                                      {participantProfile.email && (
+                                        <>
+                                          <span 
+                                            className="cursor-pointer" 
+                                            title={participantProfile.email}
+                                          >
+                                            {participantProfile.email.substring(0, 15)}...
+                                          </span>
+                                          <Copy 
+                                            className="h-3 w-3 cursor-pointer hover:text-foreground" 
+                                            onClick={() => navigator.clipboard.writeText(participantProfile.email || '')}
+                                          />
+                                        </>
+                                      )}
+                                      {!participantProfile.email && (
+                                        <span className="text-muted-foreground">No email</span>
+                                      )}
                                     </div>
                                   )}
                                 </div>
