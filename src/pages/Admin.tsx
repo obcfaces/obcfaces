@@ -5519,7 +5519,7 @@ const Admin = () => {
                                   <div className="w-[20ch] flex-shrink-0 p-4 pl-0 flex flex-col gap-2">
                                    <Select 
                                      value={participant.admin_status}
-                                     onValueChange={(newStatus) => handleStatusChange(participant.id, newStatus as ParticipantStatus)}
+                                     onValueChange={(newStatus) => reviewApplication(participant.id, newStatus as ParticipantStatus)}
                                    >
                                      <SelectTrigger className={`w-[60%] h-7 text-xs ${
                                        participant.admin_status === 'this week' ? 'bg-green-100 border-green-500 text-green-700' :
@@ -5593,21 +5593,21 @@ const Admin = () => {
                                        
                                          <div 
                                            className="text-xs text-muted-foreground mb-1 cursor-pointer hover:text-foreground transition-colors"
-                                           onClick={() => {
-                                             const newExpanded = new Set(expandedMobileItems);
-                                             if (expandedMobileItems.has(application.id)) {
-                                               newExpanded.delete(application.id);
-                                             } else {
-                                               newExpanded.add(application.id);
-                                             }
-                                             setExpandedMobileItems(newExpanded);
-                                           }}
+                                            onClick={() => {
+                                              const newExpanded = new Set(expandedMobileItems);
+                                              if (expandedMobileItems.has(participant.id)) {
+                                                newExpanded.delete(participant.id);
+                                              } else {
+                                                newExpanded.add(participant.id);
+                                              }
+                                              setExpandedMobileItems(newExpanded);
+                                            }}
                                          >
                                            {appData.city} {appData.country}
                                          </div>
                                         
-                                            {/* Expanded information */}
-                                             {expandedMobileItems.has(application.id) && (
+                                             {/* Expanded information */}
+                                              {expandedMobileItems.has(participant.id) && (
                                                <div className="text-xs text-muted-foreground mb-1 space-y-0 leading-none">
                                                  <div>{appData.weight_kg}kg, {appData.height_cm}cm</div>
                                                  <div>{appData.marital_status}, {appData.has_children ? 'Has kids' : 'No kids'}</div>
@@ -5652,150 +5652,59 @@ const Admin = () => {
                                            
                                               <div className="flex-1"></div>
                                            
-                                               {/* Status filter positioned at bottom */}
-                                                {!showDeletedApplications && (
-                                                  <div className="absolute bottom-12 right-13 flex items-center gap-2">
-                                              {(() => {
-                                                // Get current status from weeklyParticipants for real-time updates
-                                                const currentParticipant = weeklyParticipants.find(p => p.user_id === application.user_id);
-                                                const currentStatus = currentParticipant?.admin_status || application.admin_status;
-                                                
-                                                return (
-                                                  <Select 
-                                                    value={currentStatus}
-                                                     onValueChange={(newStatus) => {
-                                                       if (newStatus === 'delete') {
-                                                         const appData = typeof application.application_data === 'string' 
-                                                           ? JSON.parse(application.application_data) 
-                                                           : application.application_data;
-                                                         setApplicationToDelete({ 
-                                                           id: application.id, 
-                                                           name: `${appData.firstName} ${appData.lastName}` 
-                                                         });
-                                                         setShowDeleteConfirmModal(true);
-                                                         return;
-                                                       }
-                                                        if (newStatus === 'rejected') {
-                                                          console.log('📍 DROPDOWN: User selected rejected status', { applicationId: application.id });
-                                                          const appData = typeof application.application_data === 'string' 
-                                                            ? JSON.parse(application.application_data) 
-                                                            : application.application_data;
-                                                          console.log('📍 DROPDOWN: Application data:', appData);
-                                                          const participantName = `${appData.first_name || ''} ${appData.last_name || ''}`.trim();
-                                                          console.log('📍 DROPDOWN: Setting up reject modal for:', participantName);
-                                                          setApplicationToReject({ 
-                                                            id: application.id, 
-                                                            name: participantName
-                                                          });
-                                                          setRejectModalOpen(true);
-                                                          console.log('📍 DROPDOWN: Reject modal should now be open');
-                                                          return;
-                                                        }
-                                                        if (newStatus !== 'rejected') {
-                                                          reviewApplication(application.id, newStatus as ParticipantStatus);
-                                                        }
-                                                     }}
+                                                {/* Status filter positioned at bottom */}
+                                                   <div className="absolute bottom-12 right-13 flex items-center gap-2">
+                                                   <Select 
+                                                     value={participant.admin_status}
+                                                      onValueChange={(newStatus) => {
+                                                         if (newStatus === 'rejected') {
+                                                           const participantName = `${appData.first_name || ''} ${appData.last_name || ''}`.trim();
+                                                           setApplicationToReject({ 
+                                                             id: participant.id, 
+                                                             name: participantName
+                                                           });
+                                                           setRejectModalOpen(true);
+                                                           return;
+                                                         }
+                                                         reviewApplication(participant.id, newStatus as ParticipantStatus);
+                                                      }}
                                                   >
-                                                     <SelectTrigger 
-                                                        className={`w-24 h-7 text-xs ${
-                                                          ['this week', 'next week', 'past'].includes(currentStatus) ? 'bg-green-100 border-green-500 text-green-700' :
-                                                          currentStatus === 'rejected' ? 'bg-red-100 border-red-500 text-red-700' :
-                                                          ''
-                                                        }`}
-                                                     >
-                                                      <SelectValue />
-                                                    </SelectTrigger>
-                                                       <SelectContent className="z-[9999] bg-popover border shadow-lg">
-                                                           <SelectItem value="pending">Pending</SelectItem>
-                                                           <SelectItem value="rejected">Rejected</SelectItem>
-                                                          <SelectItem value="pre next week">Pre Next Week</SelectItem>
-                                                          <SelectItem value="next week">Next Week</SelectItem>
-                                                          <SelectItem value="next week on site">Next Week On Site</SelectItem>
-                                                          <SelectItem value="this week">This Week</SelectItem>
-                                                          <SelectItem value="past">Past</SelectItem>
-                                                       </SelectContent>
-                                                  </Select>
-                                                );
-                                              })()}
-                                             
-                                              {/* Admin login with expandable date */}
-                                               <div className="text-xs text-muted-foreground -mt-[5px]">
-                                                 {(() => {
-                                                   const statusDate = application.reviewed_at || application.approved_at || application.rejected_at || application.submitted_at;
-                                                   const reviewerEmail = application.reviewed_by && profiles.find(p => p.id === application.reviewed_by)?.email;
-                                                   const reviewerLogin = reviewerEmail ? reviewerEmail.substring(0, 3) : 'sys';
-                                                   
-                                                   const showDatePopup = async () => {
-                                                     try {
-                                                       // Fetch application history
-                                                       const { data: history } = await supabase
-                                                         .from('contest_application_history')
-                                                         .select('*')
-                                                         .eq('application_id', application.id)
-                                                         .order('created_at', { ascending: true });
-
-                                                       // Remove duplicates based on status, created_at, and changed_by
-                                                       const uniqueHistory = (history || []).filter((entry, index, arr) => {
-                                                         return arr.findIndex(e => 
-                                                           e.status === entry.status &&
-                                                           e.created_at === entry.created_at &&
-                                                           e.changed_by === entry.changed_by
-                                                         ) === index;
-                                                       });
-
-                                                       // Add system entry as first only if no history exists
-                                                       const historyWithCurrent = [...uniqueHistory];
-                                                       if (historyWithCurrent.length === 0) {
-                                                         historyWithCurrent.unshift({
-                                                           id: 'system',
-                                                           application_id: application.id,
-                                                           application_data: null,
-                                                           status: 'pending',
-                                                           notes: '',
-                                                           rejection_reason_types: [],
-                                                           created_at: application.submitted_at,
-                                                           changed_by: '',
-                                                           change_reason: 'Application submitted'
-                                                         });
-                                                       }
-
-                                                       setApplicationHistory(historyWithCurrent);
-                                                       setAdminDatePopup({
-                                                         show: true,
-                                                         date: '',
-                                                         admin: '',
-                                                         applicationId: application.id
-                                                       });
-                                                     } catch (error) {
-                                                       console.error('Error fetching application history:', error);
-                                                     }
-                                                   };
-                                                   
-                                                   return (
-                                                     <span 
-                                                       className="text-blue-600 cursor-pointer hover:text-blue-800"
-                                                       onClick={showDatePopup}
-                                                     >
-                                                       {reviewerLogin}
-                                                     </span>
-                                                   );
-                                                 })()}
-                                              </div>
-                                           </div>
-                                         )}
-                                      </div>
+                                                      <SelectTrigger 
+                                                         className={`w-24 h-7 text-xs ${
+                                                           ['this week', 'next week', 'past'].includes(participant.admin_status) ? 'bg-green-100 border-green-500 text-green-700' :
+                                                           participant.admin_status === 'rejected' ? 'bg-red-100 border-red-500 text-red-700' :
+                                                           ''
+                                                         }`}
+                                                      >
+                                                       <SelectValue />
+                                                     </SelectTrigger>
+                                                        <SelectContent className="z-[9999] bg-popover border shadow-lg">
+                                                            <SelectItem value="pending">Pending</SelectItem>
+                                                            <SelectItem value="rejected">Rejected</SelectItem>
+                                                           <SelectItem value="pre next week">Pre Next Week</SelectItem>
+                                                           <SelectItem value="next week">Next Week</SelectItem>
+                                                           <SelectItem value="next week on site">Next Week On Site</SelectItem>
+                                                           <SelectItem value="this week">This Week</SelectItem>
+                                                           <SelectItem value="past">Past</SelectItem>
+                                                        </SelectContent>
+                                                   </Select>
+                                              
+                                               {/* Date info */}
+                                                <div className="text-xs text-muted-foreground -mt-[5px]">
+                                                  {new Date(participant.created_at).toLocaleDateString('en-GB', { 
+                                                    day: 'numeric', 
+                                                    month: 'short'
+                                                  })}
+                                               </div>
+                                            </div>
+                                       </div>
                                 </div>
                               </div>
                             </CardContent>
                         </Card>
         
          {/* Rejection reason under the card */}
-        {(() => {
-          const participant: any = weeklyParticipants.find(p => p.user_id === application.user_id);
-          return participant && participant.admin_status === 'rejected';
-        })() && (() => {
-          const participant: any = weeklyParticipants.find(p => p.user_id === application.user_id);
-          return (participant?.rejection_reason_types || participant?.rejection_reason) ? (
+         {participant.admin_status === 'rejected' && (participant.rejection_reason_types || participant.rejection_reason) && (
             <div className="p-2 bg-destructive/10 border border-destructive/20 rounded-b-lg -mt-1">
                <div className="space-y-1 text-xs leading-tight">
                  {participant.rejection_reason_types && participant.rejection_reason_types.length > 0 && (
@@ -5847,514 +5756,34 @@ const Admin = () => {
                  )}
               </div>
             </div>
-          ) : null;
-        })()}
+           </div>
+         )}
                         
-                         {/* Previous applications for this user */}
-                         {selectedUserApplications === application.user_id && (
-                           <div className="mt-2 space-y-2">
-                             {(showDeletedApplications ? deletedApplications : contestApplications)
-                               .filter(app => app.user_id === application.user_id && app.id !== application.id)
-                               .sort((a, b) => new Date(b.submitted_at).getTime() - new Date(a.submitted_at).getTime())
-                               .map((prevApp) => {
-                                 const prevAppData = typeof prevApp.application_data === 'string' 
-                                   ? JSON.parse(prevApp.application_data) 
-                                   : prevApp.application_data;
-                                 const prevSubmittedDate = new Date(prevApp.submitted_at);
-                                 const prevUserProfile = profiles.find(p => p.id === prevApp.user_id);
-                                 
-                                 return (
-                                   <Card key={prevApp.id} className="overflow-hidden relative mx-0 rounded-lg bg-muted/30 h-[149px]">
-                                     {/* Edit button in bottom left corner */}
-                                     {!showDeletedApplications && (
-                                       <Button
-                                         size="sm"
-                                         variant="outline"
-                                          onClick={() => {
-                                            setEditingParticipantData(prevApp);
-                                            setShowParticipationModal(true);
-                                          }}
-                                         className="absolute bottom-0 left-0 z-20 p-1 m-0 rounded-none rounded-tr-md border-0 border-t border-r bg-background/90 hover:bg-background"
-                                         title="Edit Application"
-                                       >
-                                         <Edit className="w-4 h-4" />
-                                       </Button>
-                                     )}
-                                     
-                                     <CardContent className="p-0">
-                                       {/* Desktop layout */}
-                                       <div className="hidden md:flex md:overflow-visible">
-                                         {/* Column 1: Photos (25ch) */}
-                                         <div className="w-[25ch] flex-shrink-0 p-0">
-                                           <div className="flex gap-px">
-                                             {prevAppData.photo1_url && (
-                                               <div className="w-full">
-                                                 <img 
-                                                   src={prevAppData.photo1_url} 
-                                                   alt="Portrait" 
-                                                   className="w-full h-36 object-contain cursor-pointer hover:opacity-90 transition-opacity"
-                                                   onClick={() => openPhotoModal([prevAppData.photo1_url, prevAppData.photo2_url].filter(Boolean), 0, `${prevAppData.first_name} ${prevAppData.last_name}`)}
-                                                 />
-                                               </div>
-                                             )}
-                                             {prevAppData.photo2_url && (
-                                               <div className="w-full">
-                                                 <img 
-                                                   src={prevAppData.photo2_url} 
-                                                   alt="Full length" 
-                                                   className="w-full h-36 object-cover cursor-pointer hover:opacity-90 transition-opacity"
-                                                   onClick={() => openPhotoModal([prevAppData.photo1_url, prevAppData.photo2_url].filter(Boolean), 1, `${prevAppData.first_name} ${prevAppData.last_name}`)}
-                                                 />
-                                               </div>
-                                             )}
-                                           </div>
-                                         </div>
+                        </div>
+                        );
+                      })}
 
-                                         {/* Column 2: Information (25ch) */}
-                                         <div className="w-[25ch] flex-shrink-0 p-4">
-                                           <div className="flex items-center gap-2 mb-1">
-                                               <Avatar className="h-6 w-6 flex-shrink-0">
-                                                 <AvatarImage src={(() => {
-                                                   const photoUrl = prevAppData.photo1_url || prevAppData.photo_1_url || prevUserProfile?.avatar_url || '';
-                                                   console.log(`Photo URL for ${prevAppData.first_name}: photo1_url=${prevAppData.photo1_url}, photo_1_url=${prevAppData.photo_1_url}, avatar_url=${prevUserProfile?.avatar_url}, final=${photoUrl}`);
-                                                   return photoUrl;
-                                                 })()} />
-                                               <AvatarFallback className="text-xs">
-                                                 {prevAppData.first_name?.charAt(0) || 'U'}
-                                               </AvatarFallback>
-                                             </Avatar>
-                                               <span className="text-sm font-semibold whitespace-nowrap flex items-center gap-1">
-                                                 {/* Check if this participant is a winner - we'll need to look this up from weekly_contest_participants */}
-                                                 {prevAppData.first_name} {prevAppData.last_name} {new Date().getFullYear() - prevAppData.birth_year}
-                                               </span>
-                                           </div>
-                                           
-                                           <div 
-                                             className="text-xs text-muted-foreground mb-1 cursor-pointer hover:text-foreground transition-colors"
-                                             onClick={() => {
-                                               const newExpanded = new Set(expandedDesktopItems);
-                                               if (expandedDesktopItems.has(prevApp.id)) {
-                                                 newExpanded.delete(prevApp.id);
-                                               } else {
-                                                 newExpanded.add(prevApp.id);
-                                               }
-                                               setExpandedDesktopItems(newExpanded);
-                                             }}
-                                           >
-                                             {prevAppData.city} {prevAppData.state} {prevAppData.country}
-                                           </div>
-                                           
-                                           {/* Expanded information - desktop */}
-                                           {expandedDesktopItems.has(prevApp.id) && (
-                                             <div className="text-xs text-muted-foreground mb-1">
-                                               {prevAppData.weight_kg}kg • {prevAppData.height_cm}cm • {prevAppData.gender} • {prevAppData.birth_year} • {prevAppData.marital_status} • {prevAppData.has_children ? 'Has children' : 'No children'}
-                                             </div>
-                                           )}
-
-                                           <div className="text-xs text-muted-foreground mb-1">
-                                             {prevUserProfile?.email && (
-                                               <div className="flex items-center gap-1">
-                                                 <span 
-                                                   className="cursor-pointer" 
-                                                   title={prevUserProfile.email}
-                                                 >
-                                                   {prevUserProfile.email.length > 25 ? `${prevUserProfile.email.substring(0, 25)}...` : prevUserProfile.email}
-                                                 </span>
-                                                 <Copy 
-                                                   className="h-3 w-3 cursor-pointer hover:text-foreground" 
-                                                   onClick={() => navigator.clipboard.writeText(prevUserProfile.email)}
-                                                 />
-                                               </div>
-                                             )}
-                                           </div>
-
-                                           {/* Phone and Social Media */}
-                                           <div className="text-xs text-muted-foreground mb-3">
-                                             <div className="flex items-center gap-2">
-                                               {(() => {
-                                                 const phone = prevAppData.phone?.country && prevAppData.phone?.number 
-                                                   ? `${prevAppData.phone.country} ${prevAppData.phone.number}` 
-                                                   : 'Not provided';
-                                                 return <span>{phone}</span>;
-                                               })()}
-                                               {prevAppData.facebook_url && (
-                                                 <a
-                                                   href={prevAppData.facebook_url}
-                                                   target="_blank"
-                                                   rel="noopener noreferrer"
-                                                   className="text-blue-600 hover:text-blue-800"
-                                                 >
-                                                   <Facebook className="h-3 w-3" />
-                                                 </a>
-                                               )}
-                                             </div>
-                                           </div>
-                                         </div>
-
-                                          {/* Column 3: Status Button (20ch) - только для десктопа */}
-                                          <div className="w-[20ch] flex-shrink-0 p-4 pl-0 flex flex-col gap-2">
-                                            {/* Status dropdown at the top - desktop */}
-                                            {!showDeletedApplications && (
-                                              <Select 
-                                                value={prevApp.admin_status} 
-                                                 onValueChange={(newStatus) => {
-                                                   if (newStatus === 'delete') {
-                                                     const prevAppData = typeof prevApp.application_data === 'string' 
-                                                       ? JSON.parse(prevApp.application_data) 
-                                                       : prevApp.application_data;
-                                                     setApplicationToDelete({ 
-                                                       id: prevApp.id, 
-                                                       name: `${prevAppData.first_name} ${prevAppData.last_name}` 
-                                                     });
-                                                     setShowDeleteConfirmModal(true);
-                                                     return;
-                                                   }
-                                                   if (newStatus === 'rejected') {
-                                                     const prevAppData = typeof prevApp.application_data === 'string' 
-                                                       ? JSON.parse(prevApp.application_data) 
-                                                       : prevApp.application_data;
-                                                     setApplicationToReject({ 
-                                                       id: prevApp.id, 
-                                                       name: `${prevAppData.first_name} ${prevAppData.last_name}` 
-                                                     });
-                                                     setRejectModalOpen(true);
-                                                     return;
-                                                   }
-                                                    reviewApplication(prevApp.id, newStatus as ParticipantStatus);
-                                                 }}
-                                              >
-                                                <SelectTrigger 
-                                                   className={`w-[60%] h-7 text-xs ${
-                                                     ['this week', 'next week', 'past'].includes(prevApp.admin_status) ? 'bg-green-100 border-green-500 text-green-700' :
-                                                     prevApp.admin_status === 'rejected' ? 'bg-red-100 border-red-500 text-red-700' :
-                                                     ''
-                                                   }`}
-                                                >
-                                                  <SelectValue />
-                                                </SelectTrigger>
-                                                   <SelectContent className="z-[9999] bg-popover border shadow-lg">
-                                                       <SelectItem value="pending">Pending</SelectItem>
-                                                       <SelectItem value="rejected">Rejected</SelectItem>
-                                                      <SelectItem value="pre next week">Pre Next Week</SelectItem>
-                                                      <SelectItem value="this week">This Week</SelectItem>
-                                                      <SelectItem value="next week">Next Week</SelectItem>
-                                                      <SelectItem value="next week on site">Next Week On Site</SelectItem>
-                                                      <SelectItem value="past">Past</SelectItem>
-                                                    </SelectContent>
-                                              </Select>
-                                            )}
-                                            
-                                            {/* Status change date with reviewer login - desktop */}
-                                             <div 
-                                               className="text-xs text-muted-foreground cursor-pointer hover:text-foreground"
-                                               onClick={() => {
-                                                 setEditHistoryApplicationId(prevApp.id);
-                                                 setShowEditHistory(true);
-                                               }}
-                                              >
-                                                {(() => {
-                                                  const statusDate = prevApp.reviewed_at || prevApp.submitted_at;
-                                                  if (statusDate) {
-                                                   const date = new Date(statusDate);
-                                                   const time = date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
-                                                   const dateStr = date.toLocaleDateString('en-GB', { 
-                                                     day: 'numeric', 
-                                                     month: 'short'
-                                                   }).toLowerCase();
-                                                  const reviewerEmail = prevApp.reviewed_by && profiles.find(p => p.id === prevApp.reviewed_by)?.email;
-                                                  const reviewerLogin = reviewerEmail ? reviewerEmail.substring(0, 4) : 'syst';
-                                                  return (
-                                                    <>
-                                                      <span className="text-blue-600">{reviewerLogin}</span>
-                                                      {` ${time} - ${dateStr}`}
-                                                    </>
-                                                  );
-                                                }
-                                                return '';
-                                              })()}
-                                            </div>
-                                          </div>
-                                       </div>
-                                       
-                                       {/* Mobile layout - horizontal with full width */}
-                                       <div className="md:hidden">
-                                         <div className="flex w-full">
-                                           {/* Photos section - left side */}
-                                           <div className="flex gap-px w-[50vw] flex-shrink-0">
-                                               {prevAppData.photo1_url && (
-                                                 <div className="w-1/2">
-                                                   <img 
-                                                     src={prevAppData.photo1_url} 
-                                                     alt="Portrait" 
-                                                     className="w-full h-36 object-contain cursor-pointer hover:opacity-90 transition-opacity"
-                                                     onClick={() => openPhotoModal([prevAppData.photo1_url, prevAppData.photo2_url].filter(Boolean), 0, `${prevAppData.first_name} ${prevAppData.last_name}`)}
-                                                   />
-                                                 </div>
-                                               )}
-                                                {prevAppData.photo2_url && (
-                                                  <div className="w-1/2 relative">
-                                                    <img 
-                                                      src={prevAppData.photo2_url} 
-                                                      alt="Full length" 
-                                                      className="w-full h-36 object-cover cursor-pointer hover:opacity-90 transition-opacity"
-                                                      onClick={() => openPhotoModal([prevAppData.photo1_url, prevAppData.photo2_url].filter(Boolean), 1, `${prevAppData.first_name} ${prevAppData.last_name}`)}
-                                                    />
-                                                    {/* User avatar positioned in top right corner */}
-                                                    <div className="absolute top-2 right-2">
-                                                       <Avatar className="h-6 w-6 flex-shrink-0 border-2 border-white shadow-sm">
-                                                          <AvatarImage src={(() => {
-                                                            const photoUrl = prevAppData.photo1_url || prevAppData.photo_1_url || prevUserProfile?.avatar_url || '';
-                                                            console.log(`Avatar photo URL for ${prevAppData.first_name}: photo1_url=${prevAppData.photo1_url}, photo_1_url=${prevAppData.photo_1_url}, avatar_url=${prevUserProfile?.avatar_url}, final=${photoUrl}`);
-                                                            return photoUrl;
-                                                          })()} />
-                                                        <AvatarFallback className="text-xs">
-                                                          {prevAppData.first_name?.charAt(0) || 'U'}
-                                                        </AvatarFallback>
-                                                      </Avatar>
-                                                    </div>
-                                                  </div>
-                                                )}
-                                             </div>
-                                             
-                                               {/* Information section - right side */}
-                                               <div className="w-[50vw] flex-shrink-0 pl-2 flex flex-col h-40">
-                                                <div className="flex items-center gap-2 mb-1 mt-1">
-                                                   <span className="text-xs font-semibold whitespace-nowrap">
-                                                     {new Date().getFullYear() - prevAppData.birth_year} {prevAppData.first_name} {prevAppData.last_name}
-                                                   </span>
-                                                </div>
-                                                
-                                                 <div 
-                                                   className="text-xs text-muted-foreground mb-1 cursor-pointer hover:text-foreground transition-colors"
-                                                   onClick={() => {
-                                                     const newExpanded = new Set(expandedMobileItems);
-                                                     if (expandedMobileItems.has(prevApp.id)) {
-                                                       newExpanded.delete(prevApp.id);
-                                                     } else {
-                                                       newExpanded.add(prevApp.id);
-                                                     }
-                                                     setExpandedMobileItems(newExpanded);
-                                                   }}
-                                                 >
-                                                   {prevAppData.city} {prevAppData.country}
-                                                 </div>
-                                                 
-                                                  {/* Expanded information */}
-                                                  {expandedMobileItems.has(prevApp.id) && (
-                                                    <div className="text-xs text-muted-foreground mb-1 space-y-0 leading-none">
-                                                      <div>{prevAppData.weight_kg}kg, {prevAppData.height_cm}cm</div>
-                                                      <div>{prevAppData.marital_status}, {prevAppData.has_children ? 'Has kids' : 'No kids'}</div>
-                                                      <div className="flex items-center gap-1">
-                                                        <span>
-                                                          {prevUserProfile?.email 
-                                                            ? (prevUserProfile.email.length > 7 ? `${prevUserProfile.email.substring(0, 7)}...` : prevUserProfile.email)
-                                                            : 'No email'
-                                                          }
-                                                        </span>
-                                                        {prevUserProfile?.email && (
-                                                          <Copy 
-                                                            className="h-3 w-3 cursor-pointer hover:text-foreground" 
-                                                            onClick={() => navigator.clipboard.writeText(prevUserProfile.email)}
-                                                          />
-                                                        )}
-                                                      </div>
-                                                      <div>
-                                                        {(() => {
-                                                          const phone = prevAppData.phone?.country && prevAppData.phone?.number 
-                                                            ? `${prevAppData.phone.country} ${prevAppData.phone.number}` 
-                                                            : 'No phone';
-                                                          const facebook = prevAppData.facebook_url ? (
-                                                            <a
-                                                              href={prevAppData.facebook_url}
-                                                              target="_blank"
-                                                              rel="noopener noreferrer"
-                                                              className="text-blue-600 hover:text-blue-800"
-                                                            >
-                                                              fb
-                                                            </a>
-                                                          ) : 'no fb';
-                                                          return (
-                                                            <span>
-                                                              {phone} {facebook}
-                                                            </span>
-                                                          );
-                                                        })()}
-                                                      </div>
-                                                    </div>
-                                                  )}
-                                                  
-                                                  <div className="flex-1"></div>
-                                                 
-                                                 
-                                                  {/* Status filter with admin login on the same line */}
-                                                   {!showDeletedApplications && (
-                                                     <div className="mb-2 flex items-center gap-2">
-                                                      <Select 
-                                                        value={prevApp.admin_status}
-                                                         onValueChange={(newStatus) => {
-                                                           if (newStatus === 'delete') {
-                                                             const prevAppData = typeof prevApp.application_data === 'string' 
-                                                               ? JSON.parse(prevApp.application_data) 
-                                                               : prevApp.application_data;
-                                                             setApplicationToDelete({ 
-                                                               id: prevApp.id, 
-                                                               name: `${prevAppData.first_name} ${prevAppData.last_name}` 
-                                                             });
-                                                             setShowDeleteConfirmModal(true);
-                                                             return;
-                                                           }
-                                                           if (newStatus === 'rejected') {
-                                                             const prevAppData = typeof prevApp.application_data === 'string' 
-                                                               ? JSON.parse(prevApp.application_data) 
-                                                               : prevApp.application_data;
-                                                             setApplicationToReject({ 
-                                                               id: prevApp.id, 
-                                                               name: `${prevAppData.first_name} ${prevAppData.last_name}` 
-                                                             });
-                                                             setRejectModalOpen(true);
-                                                             return;
-                                                           }
-                                                           reviewApplication(prevApp.id, newStatus as ParticipantStatus);
-                                                         }}
-                                                      >
-                                                         <SelectTrigger 
-                                                            className={`w-24 h-7 text-xs ${
-                                                              ['this week', 'next week', 'past'].includes(prevApp.admin_status) ? 'bg-green-100 border-green-500 text-green-700' :
-                                                              prevApp.admin_status === 'rejected' ? 'bg-red-100 border-red-500 text-red-700' :
-                                                              ''
-                                                            }`}
-                                                         >
-                                                          <SelectValue />
-                                                        </SelectTrigger>
-                                                           <SelectContent className="z-[9999] bg-popover border shadow-lg">
-                                                               <SelectItem value="pending">Pending</SelectItem>
-                                                               <SelectItem value="rejected">Rejected</SelectItem>
-                                                              <SelectItem value="pre next week">Pre Next Week</SelectItem>
-                                                              <SelectItem value="this week">This Week</SelectItem>
-                                                              <SelectItem value="next week">Next Week</SelectItem>
-                                                              <SelectItem value="next week on site">Next Week On Site</SelectItem>
-                                                              <SelectItem value="past">Past</SelectItem>
-                                                            </SelectContent>
-                                                      </Select>
-                                                      
-                                                        {/* Admin login with expandable date */}
-                                                         <div className="text-xs text-muted-foreground -mt-[5px]">
-                                                           {(() => {
-                                                             const statusDate = prevApp.reviewed_at || prevApp.submitted_at;
-                                                             const reviewerEmail = prevApp.reviewed_by && profiles.find(p => p.id === prevApp.reviewed_by)?.email;
-                                                            const reviewerLogin = reviewerEmail ? reviewerEmail.substring(0, 3) : 'sys';
-                                                            
-                                                            return (
-                                                              <span 
-                                                                className="text-blue-600 cursor-pointer hover:text-blue-800"
-                                                                onClick={() => {
-                                                                  setEditHistoryApplicationId(prevApp.id);
-                                                                  setShowEditHistory(true);
-                                                                }}
-                                                              >
-                                                                {reviewerLogin}
-                                                              </span>
-                                                            );
-                                                          })()}
-                                                       </div>
-                                                    </div>
-                                                  )}
-                                               </div>
-                                         </div>
-                                       </div>
-                                       </CardContent>
-                                      
-                                       {/* Rejection reason under the card for previous applications */}
-                                      {prevApp.admin_status === 'rejected' && prevApp.notes && (
-                                        <div className="p-2 bg-destructive/10 border border-destructive/20 rounded-b-lg -mt-1">
-                                           <div className="space-y-1 text-xs leading-tight">
-                                             <div className="text-destructive/80">
-                                               {/* Always show date and admin info if available */}
-                                               {prevApp.reviewed_at && (
-                                                  <TooltipProvider>
-                                                    <Tooltip>
-                                                      <TooltipTrigger asChild>
-                                                        <span className="text-black font-medium cursor-help">
-                                                          {new Date(prevApp.reviewed_at).toLocaleDateString('en-GB', { 
-                                                            day: 'numeric', 
-                                                            month: 'short' 
-                                                          }).toLowerCase()}{' '}
-                                                          {prevApp.reviewed_by && profiles.find(p => p.id === prevApp.reviewed_by)?.email ? 
-                                                            profiles.find(p => p.id === prevApp.reviewed_by)?.email?.substring(0, 4) + ' ' : 
-                                                            'unkn '}
-                                                        </span>
-                                                      </TooltipTrigger>
-                                                      <TooltipContent>
-                                                        <p>
-                                                          {new Date(prevApp.reviewed_at).toLocaleDateString('en-GB', { 
-                                                            day: 'numeric', 
-                                                            month: 'short',
-                                                            year: 'numeric'
-                                                          }).toLowerCase()}{' '}
-                                                          {new Date(prevApp.reviewed_at).toLocaleTimeString('en-GB', {
-                                                            hour: '2-digit',
-                                                            minute: '2-digit'
-                                                          })}
-                                                          {prevApp.reviewed_by && profiles.find(p => p.id === prevApp.reviewed_by)?.email && (
-                                                            <><br />Admin: {profiles.find(p => p.id === prevApp.reviewed_by)?.email}</>
-                                                          )}
-                                                        </p>
-                                                      </TooltipContent>
-                                                    </Tooltip>
-                                                  </TooltipProvider>
-                                               )}
-                                             </div>
-                                             {prevApp.notes && prevApp.notes.trim() && (
-                                               <div className="text-destructive/70">
-                                                 <span className="font-medium">Rejection notes:</span> {prevApp.notes}
-                                               </div>
-                                              )}
-                                           </div>
-                                         </div>
-                                       )}
-                                    </Card>
-                                  );
-                                })}
-                            </div>
-                         )}
-                        
-                       </div>
-                     );
-                    })}
-                        
-                        {/* Pagination for applications */}
-                        {totalApplicationPages > 1 && (
-                          <div className="flex justify-center items-center space-x-2 mt-6">
+                        {/* Pagination for participants */}
+                        {totalPages > 1 && (
+                          <div className="flex justify-center gap-2 mt-6">
                             <Button
                               variant="outline"
                               size="sm"
-                              onClick={() => setApplicationCurrentPage(prev => Math.max(prev - 1, 1))}
+                              onClick={() => setApplicationCurrentPage(Math.max(1, applicationCurrentPage - 1))}
                               disabled={applicationCurrentPage === 1}
                             >
-                              Предыдущая
+                              Previous
                             </Button>
-                            
-                            <div className="flex space-x-1">
-                              {Array.from({ length: totalApplicationPages }, (_, i) => i + 1).map((page) => (
-                                <Button
-                                  key={page}
-                                  variant={page === applicationCurrentPage ? "default" : "outline"}
-                                  size="sm"
-                                  onClick={() => setApplicationCurrentPage(page)}
-                                  className="w-8 h-8 p-0"
-                                >
-                                  {page}
-                                </Button>
-                              ))}
-                            </div>
-                            
+                            <span className="flex items-center px-4 text-sm">
+                              Page {applicationCurrentPage} of {totalPages} (Total: {totalParticipants})
+                            </span>
                             <Button
                               variant="outline"
                               size="sm"
-                              onClick={() => setApplicationCurrentPage(prev => Math.min(prev + 1, totalApplicationPages))}
-                              disabled={applicationCurrentPage === totalApplicationPages}
+                              onClick={() => setApplicationCurrentPage(Math.min(totalPages, applicationCurrentPage + 1))}
+                              disabled={applicationCurrentPage === totalPages}
                             >
-                              Следующая
+                              Next
                             </Button>
                           </div>
                         )}
