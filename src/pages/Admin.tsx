@@ -5035,10 +5035,17 @@ const Admin = () => {
                                   <span className="font-medium">
                                     {profile.display_name || `${profile.first_name} ${profile.last_name}`}
                                   </span>
+                                  {profile.email && (
+                                    <span className="text-xs text-muted-foreground">
+                                      {profile.email}
+                                    </span>
+                                  )}
                                 </div>
-                                <div className="text-sm text-muted-foreground">
-                                  {profile.email}
-                                </div>
+                                {!profile.email && (
+                                  <div className="text-sm text-destructive">
+                                    No email
+                                  </div>
+                                )}
                               </div>
                             </div>
             
