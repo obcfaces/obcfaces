@@ -8,6 +8,3 @@ verify_jwt = false
 
 [functions.send-email]
 verify_jwt = false
-
-[functions.get-country-by-ip]
-verify_jwt = false
