@@ -351,6 +351,7 @@ const Admin = () => {
   const [user, setUser] = useState<any>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('applications');
   const [profiles, setProfiles] = useState<ProfileData[]>([]);
   const [userRoles, setUserRoles] = useState<UserRole[]>([]);
   const [contestApplications, setContestApplications] = useState<ContestApplication[]>([]);
@@ -591,6 +592,7 @@ const Admin = () => {
     };
     
     initAdmin();
+  }, []);
     
     
     // ОТКЛЮЧЕНО: realtime subscriptions для предотвращения автоматических обновлений статусов
@@ -675,7 +677,24 @@ const Admin = () => {
       supabase.removeChannel(weeklyParticipantsChannel);
     };
     */
-  }, []);
+
+  // Auto-refresh profiles every 30 seconds when on registrations tab
+  useEffect(() => {
+    let intervalId: NodeJS.Timeout;
+    
+    if (isAdmin && activeTab === 'registrations') {
+      intervalId = setInterval(() => {
+        console.log('Auto-refreshing profiles...');
+        fetchProfiles();
+      }, 30000); // Refresh every 30 seconds
+    }
+    
+    return () => {
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+    };
+  }, [isAdmin, activeTab]);
 
   // Recalculate application stats when contestApplications change
   useEffect(() => {
@@ -1284,56 +1303,60 @@ const Admin = () => {
   }, []);
 
   const fetchProfiles = async () => {
-    const { data: profilesData, error: profilesError } = await supabase
-      .from('profiles')
-      .select('*')
-      .order('created_at', { ascending: false });
+    try {
+      const { data: profilesData, error: profilesError } = await supabase
+        .from('profiles')
+        .select('*')
+        .order('created_at', { ascending: false });
 
-    if (profilesError) {
-      toast({
-        title: "Error",
-        description: "Failed to fetch profiles",
-        variant: "destructive"
+      if (profilesError) {
+        toast({
+          title: "Error",
+          description: "Failed to fetch profiles",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      const { data: authData, error: authError } = await supabase
+        .rpc('get_user_auth_data_admin');
+
+      if (authError) {
+        console.warn('Failed to fetch auth data:', authError);
+      }
+
+      // Fetch login logs for IP addresses and user agents
+      const { data: loginLogs, error: loginError } = await supabase
+        .from('user_login_logs')
+        .select('user_id, ip_address, user_agent, created_at')
+        .order('created_at', { ascending: false });
+
+      if (loginError) {
+        console.warn('Failed to fetch login logs:', loginError);
+      }
+
+      const profilesWithAuth = (profilesData || []).map(profile => {
+        const userAuthData = authData?.find(auth => auth.user_id === profile.id);
+        // Get the most recent IP address for this user
+        const userLoginLog = loginLogs?.find(log => log.user_id === profile.id);
+        
+        return {
+          ...profile,
+          auth_provider: userAuthData?.auth_provider || 'unknown',
+          // Email is stored in auth.users only, not in profiles table (security)
+          email: userAuthData?.email || null,
+          facebook_data: userAuthData?.facebook_data || null,
+          last_sign_in_at: userAuthData?.last_sign_in_at || null,
+          email_confirmed_at: userAuthData?.email_confirmed_at || null,
+          ip_address: (userLoginLog?.ip_address as string) || null,
+          user_agent: (userLoginLog?.user_agent as string) || null
+        };
       });
-      return;
+
+      setProfiles(profilesWithAuth);
+    } catch (error) {
+      console.error('Error in fetchProfiles:', error);
     }
-
-    const { data: authData, error: authError } = await supabase
-      .rpc('get_user_auth_data_admin');
-
-    if (authError) {
-      console.warn('Failed to fetch auth data:', authError);
-    }
-
-    // Fetch login logs for IP addresses and user agents
-    const { data: loginLogs, error: loginError } = await supabase
-      .from('user_login_logs')
-      .select('user_id, ip_address, user_agent, created_at')
-      .order('created_at', { ascending: false });
-
-    if (loginError) {
-      console.warn('Failed to fetch login logs:', loginError);
-    }
-
-    const profilesWithAuth = (profilesData || []).map(profile => {
-      const userAuthData = authData?.find(auth => auth.user_id === profile.id);
-      // Get the most recent IP address for this user
-      const userLoginLog = loginLogs?.find(log => log.user_id === profile.id);
-      
-      return {
-        ...profile,
-        auth_provider: userAuthData?.auth_provider || 'unknown',
-        // Email is stored in auth.users only, not in profiles table (security)
-        email: userAuthData?.email || null,
-        facebook_data: userAuthData?.facebook_data || null,
-        last_sign_in_at: userAuthData?.last_sign_in_at || null,
-        email_confirmed_at: userAuthData?.email_confirmed_at || null,
-        ip_address: (userLoginLog?.ip_address as string) || null,
-        user_agent: (userLoginLog?.user_agent as string) || null
-      };
-    });
-
-    setProfiles(profilesWithAuth);
   };
 
   const fetchUserRoles = async () => {
@@ -2003,7 +2026,7 @@ const Admin = () => {
             <WeeklyTransitionButton />
           </div>
 
-          <Tabs defaultValue="applications" className="space-y-6">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
             {/* Mobile layout: Single row with all tabs */}
             <div className="md:hidden">
               <TabsList className="grid grid-cols-8 w-full">
