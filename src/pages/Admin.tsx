@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { debounce } from '@/utils/performance';
 import { Helmet } from 'react-helmet-async';
+import { UAParser } from 'ua-parser-js';
 import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -279,6 +280,7 @@ interface ProfileData {
   avatar_url?: string;
   age?: number;
   ip_address?: string | null;
+  user_agent?: string | null;
   city?: string;
   state?: string;
   country?: string;
@@ -1303,10 +1305,10 @@ const Admin = () => {
       console.warn('Failed to fetch auth data:', authError);
     }
 
-    // Fetch login logs for IP addresses
+    // Fetch login logs for IP addresses and user agents
     const { data: loginLogs, error: loginError } = await supabase
       .from('user_login_logs')
-      .select('user_id, ip_address, created_at')
+      .select('user_id, ip_address, user_agent, created_at')
       .order('created_at', { ascending: false });
 
     if (loginError) {
@@ -1326,7 +1328,8 @@ const Admin = () => {
         facebook_data: userAuthData?.facebook_data || null,
         last_sign_in_at: userAuthData?.last_sign_in_at || null,
         email_confirmed_at: userAuthData?.email_confirmed_at || null,
-        ip_address: (userLoginLog?.ip_address as string) || null
+        ip_address: (userLoginLog?.ip_address as string) || null,
+        user_agent: (userLoginLog?.user_agent as string) || null
       };
     });
 
@@ -5062,6 +5065,18 @@ const Admin = () => {
                                     IP: {profile.ip_address}
                                   </div>
                                 )}
+                                {profile.user_agent && (() => {
+                                  const parser = new UAParser(profile.user_agent);
+                                  const device = parser.getDevice();
+                                  const os = parser.getOS();
+                                  const browser = parser.getBrowser();
+                                  
+                                  return (
+                                    <div className="text-xs text-muted-foreground">
+                                      {device.type || 'Desktop'} | {os.name || 'Unknown OS'} {os.version || ''} | {browser.name || 'Unknown'}
+                                    </div>
+                                  );
+                                })()}
                                 {profile.email && (
                                   <div className="text-xs text-muted-foreground">
                                     {profile.email}
