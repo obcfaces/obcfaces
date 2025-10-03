@@ -74,10 +74,21 @@ export const RejectReasonModal = ({
   };
 
   const handleConfirm = async () => {
-    if (selectedReasons.length === 0) return;
+    console.log('🟡 REJECT MODAL: handleConfirm called', { 
+      selectedReasonsCount: selectedReasons.length, 
+      selectedReasons, 
+      notes 
+    });
     
+    if (selectedReasons.length === 0) {
+      console.log('🟡 REJECT MODAL: No reasons selected, aborting');
+      return;
+    }
+    
+    console.log('🟡 REJECT MODAL: Calling onConfirm callback');
     await onConfirm(selectedReasons, notes);
     
+    console.log('🟡 REJECT MODAL: onConfirm completed, resetting form');
     // Reset form
     setSelectedReasons([]);
     setNotes("");
