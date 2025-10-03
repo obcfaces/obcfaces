@@ -284,7 +284,6 @@ interface ProfileData {
   city?: string;
   state?: string;
   country?: string;
-  ip_country?: string | null;
   gender?: string;
   marital_status?: string;
   has_children?: boolean;
@@ -1355,67 +1354,12 @@ const Admin = () => {
         }
       }
 
-      // Helper function to get country from IP using Supabase Edge Function
-      const getCountryFromIP = async (ip: string): Promise<string | null> => {
-        try {
-          const { data, error } = await supabase.functions.invoke('get-country-by-ip', {
-            body: { ip }
-          });
-          
-          if (error) {
-            console.error('Error fetching country for IP:', ip, error);
-            return null;
-          }
-          
-          return data?.country || null;
-        } catch (error) {
-          console.error('Error fetching country for IP:', ip, error);
-          return null;
-        }
-      };
-
-      // Get unique IP addresses and fetch countries for them
-      const uniqueIPs = [...new Set(loginLogs?.map(log => String(log.ip_address)).filter(ip => ip && ip !== 'null') || [])];
-      console.log(`🌍 Fetching countries for ${uniqueIPs.length} unique IPs...`);
-      
-      const ipToCountryMap = new Map<string, string>();
-      
-      // Fetch countries for unique IPs in batches to avoid rate limiting
-      const batchSize = 10;
-      for (let i = 0; i < uniqueIPs.length; i += batchSize) {
-        const batch = uniqueIPs.slice(i, i + batchSize);
-        const results = await Promise.all(
-          batch.map(async ip => ({
-            ip,
-            country: await getCountryFromIP(ip)
-          }))
-        );
-        results.forEach(({ ip, country }) => {
-          if (country) {
-            ipToCountryMap.set(ip, country);
-          }
-        });
-        // Small delay to avoid rate limiting
-        if (i + batchSize < uniqueIPs.length) {
-          await new Promise(resolve => setTimeout(resolve, 100));
-        }
-      }
-
-      console.log(`✅ Fetched countries for ${ipToCountryMap.size} IPs`);
-
       const profilesWithAuth = (profilesData || []).map(profile => {
         const userAuthData = authData?.find(auth => auth.user_id === profile.id);
         // Get the most recent login log with an IP address for this user
         const userLoginLog = loginLogs
           ?.filter(log => log.user_id === profile.id && log.ip_address)
           ?.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())[0];
-        
-        let ipCountry = null;
-        if (userLoginLog?.ip_address) {
-          const ipAddress = String(userLoginLog.ip_address);
-          // Get country from cache
-          ipCountry = ipToCountryMap.get(ipAddress) || null;
-        }
         
         const profileData = {
           ...profile,
@@ -1426,10 +1370,7 @@ const Admin = () => {
           last_sign_in_at: userAuthData?.last_sign_in_at || null,
           email_confirmed_at: userAuthData?.email_confirmed_at || null,
           ip_address: (userLoginLog?.ip_address as string) || null,
-          user_agent: (userLoginLog?.user_agent as string) || null,
-          // Add IP-based country, fallback to profile country
-          country: ipCountry || profile.country || null,
-          ip_country: ipCountry // Store IP-based country separately
+          user_agent: (userLoginLog?.user_agent as string) || null
         };
         
         // Log each profile's email for debugging
@@ -5197,7 +5138,7 @@ const Admin = () => {
                                 </div>
                                 {profile.ip_address && (
                                   <div className="text-xs text-muted-foreground">
-                                    IP: {profile.ip_address}{profile.ip_country && ` 🌍 ${profile.ip_country}`}
+                                    IP: {profile.ip_address}
                                   </div>
                                 )}
                                 {profile.user_agent && (() => {
