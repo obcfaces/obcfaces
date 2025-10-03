@@ -800,7 +800,7 @@ export const ContestParticipationModal = ({
       
       // Set submission success to show contact form for new applications only
       if (!editMode) {
-        setSubmissionSuccess(true);
+        setSubmissionSuccess(true); // This will show the contact form
       } else {
         // In edit mode, close modal and redirect to profile
         setIsOpen(false);
@@ -1168,9 +1168,12 @@ export const ContestParticipationModal = ({
           <div className="space-y-4">
             {/* Contact for Prize Transfer Section */}
             <div>
-              <h3 className="text-md font-semibold mb-4 text-center">
-                Add your contact info in case you win.
+              <h3 className="text-lg font-semibold mb-4 text-center">
+                🎉 Congratulations! You're in the contest!
               </h3>
+              <p className="text-sm text-muted-foreground mb-4 text-center">
+                Please provide your contact information so we can reach you if you win.
+              </p>
               
               {/* Facebook Account Input */}
               <div className="mb-4">
