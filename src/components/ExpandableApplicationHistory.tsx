@@ -165,7 +165,7 @@ export const ExpandableApplicationHistory: React.FC<ExpandableApplicationHistory
                             className="h-3 w-3 cursor-pointer hover:text-foreground" 
                             onClick={(e) => {
                               e.stopPropagation();
-                              navigator.clipboard.writeText(userProfile.email);
+                              userProfile.email && navigator.clipboard.writeText(userProfile.email);
                             }}
                           />
                         )}
