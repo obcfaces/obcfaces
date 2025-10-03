@@ -754,10 +754,10 @@ const Profile = () => {
       // Проверяем, является ли пользователь участником конкурса или имеет заявку
       console.log('is_contest_participant:', profileData.is_contest_participant);
       
-      // Также проверяем наличие участника (с admin_status)
+      // Также проверяем наличие участника (с admin_status и rejection data)
       const { data: participant } = await supabase
         .from('weekly_contest_participants')
-        .select('id, admin_status, created_at, application_data')
+        .select('id, admin_status, created_at, application_data, rejection_reason_types, rejection_reason')
         .eq('user_id', id)
         .eq('is_active', true)
         .is('deleted_at', null)
@@ -772,7 +772,9 @@ const Profile = () => {
         id: participant.id,
         admin_status: participant.admin_status,
         created_at: participant.created_at,
-        application_data: participant.application_data
+        application_data: participant.application_data,
+        rejection_reason_types: participant.rejection_reason_types,
+        rejection_reason: participant.rejection_reason
       } : null;
       
       setContestApplication(contestApplication as any);
@@ -809,7 +811,10 @@ const Profile = () => {
           city: appData?.city || 'Manila',
           faceImage: appData?.photo1_url || appData?.photo_1_url || c1face,
           fullBodyImage: appData?.photo2_url || appData?.photo_2_url || c1,
-          participantType: 'candidate' // Default type
+          participantType: 'candidate', // Default type
+          admin_status: contestApplication.admin_status,
+          rejection_reason_types: contestApplication.rejection_reason_types,
+          rejection_reason: contestApplication.rejection_reason
         }
       };
 
@@ -1465,15 +1470,56 @@ const Profile = () => {
                              </p>
                            </div>
                          );
-                       } else if (adminStatus === 'pending' || adminStatus === 'approved') {
-                         return (
-                           <div className="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4 mx-6 sm:mx-0" role="alert">
-                             <p className="font-medium">Track the status of your application here.</p>
-                           </div>
-                         );
-                       }
-                       return null;
-                     })()}
+                        } else if (adminStatus === 'pending' || adminStatus === 'approved') {
+                          return (
+                            <div className="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4 mx-6 sm:mx-0" role="alert">
+                              <p className="font-medium">Track the status of your application here.</p>
+                            </div>
+                          );
+                        } else if (adminStatus === 'rejected') {
+                          // Show rejection reason if available
+                          const rejectionReasonTypes = participationItems[0].candidateData.rejection_reason_types;
+                          const rejectionReason = participationItems[0].candidateData.rejection_reason;
+                          const hasReasons = rejectionReasonTypes && rejectionReasonTypes.length > 0;
+                          
+                          return (
+                            <div className="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 mb-4 mx-6 sm:mx-0" role="alert">
+                              <p className="font-medium mb-2">Your application has been rejected</p>
+                              {hasReasons && (
+                                <div className="space-y-1 text-sm">
+                                  {rejectionReasonTypes.map((reasonType: string, index: number) => {
+                                    const reasonText = REJECTION_REASONS[reasonType as keyof typeof REJECTION_REASONS];
+                                    return reasonText ? (
+                                      <div key={index} className="flex items-start gap-2">
+                                        <span className="text-red-600">•</span>
+                                        <span>{reasonText}</span>
+                                      </div>
+                                    ) : null;
+                                  })}
+                                  {rejectionReason && !isReasonDuplicate(rejectionReason, rejectionReasonTypes) && (
+                                    <div className="flex items-start gap-2 mt-2 pt-2 border-t border-red-200">
+                                      <span className="font-medium">Note:</span>
+                                      <span>{rejectionReason}</span>
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+                              {isOwner && (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="mt-3"
+                                  onClick={() => setShowRejectReasonModal(true)}
+                                >
+                                  <Edit className="h-4 w-4 mr-2" />
+                                  Edit Rejection Reason
+                                </Button>
+                              )}
+                            </div>
+                          );
+                        }
+                        return null;
+                      })()}
                      
                      {/* Participation items grid */}
                    <div className={`grid gap-1 sm:gap-3 ${

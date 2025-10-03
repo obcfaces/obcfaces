@@ -446,7 +446,13 @@ const Admin = () => {
   const updateParticipantStatusWithHistory = async (
     participantId: string,
     newStatus: ParticipantStatus,
-    participantName: string
+    participantName: string,
+    additionalData?: {
+      rejection_reason_types?: string[];
+      rejection_reason?: string | null;
+      reviewed_at?: string;
+      reviewed_by?: string;
+    }
   ): Promise<{ success: boolean; error?: any }> => {
     try {
       // Get current user
@@ -490,14 +496,33 @@ const Admin = () => {
         timestamp: new Date().toISOString()
       };
 
+      // Prepare update data
+      const updateData: any = {
+        admin_status: newStatus as any,
+        week_interval: weekInterval,
+        status_history: statusHistory
+      };
+
+      // Add additional data if provided (for rejection)
+      if (additionalData) {
+        if (additionalData.rejection_reason_types !== undefined) {
+          updateData.rejection_reason_types = additionalData.rejection_reason_types;
+        }
+        if (additionalData.rejection_reason !== undefined) {
+          updateData.rejection_reason = additionalData.rejection_reason;
+        }
+        if (additionalData.reviewed_at) {
+          updateData.reviewed_at = additionalData.reviewed_at;
+        }
+        if (additionalData.reviewed_by) {
+          updateData.reviewed_by = additionalData.reviewed_by;
+        }
+      }
+
       // Update participant with new status and history
       const { error: updateError } = await supabase
         .from('weekly_contest_participants')
-        .update({ 
-          admin_status: newStatus as any,
-          week_interval: weekInterval,
-          status_history: statusHistory
-        } as any)
+        .update(updateData)
         .eq('id', participantId);
 
       if (updateError) {
@@ -5802,61 +5827,64 @@ const Admin = () => {
         
          {/* Rejection reason under the card */}
         {(() => {
-          const participant = weeklyParticipants.find(p => p.user_id === application.user_id);
+          const participant: any = weeklyParticipants.find(p => p.user_id === application.user_id);
           return participant && participant.admin_status === 'rejected';
-        })() && ((application as any).rejection_reason_types || application.rejection_reason) && (
-          <div className="p-2 bg-destructive/10 border border-destructive/20 rounded-b-lg -mt-1">
-             <div className="space-y-1 text-xs leading-tight">
-               {(application as any).rejection_reason_types && (application as any).rejection_reason_types.length > 0 && (
-                 <div className="text-destructive/80">
-                   {/* Always show date and admin info if available */}
-                   {(application.rejected_at || application.reviewed_at) && (
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <span className="text-black font-medium cursor-help">
-                              {new Date(application.rejected_at || application.reviewed_at).toLocaleDateString('en-GB', { 
-                                day: 'numeric', 
-                                month: 'short' 
-                              }).toLowerCase()}{' '}
-                              {application.reviewed_by && profiles.find(p => p.id === application.reviewed_by)?.email ? 
-                                profiles.find(p => p.id === application.reviewed_by)?.email?.substring(0, 4) + ' ' : 
-                                'unkn '}
-                            </span>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>
-                              {new Date(application.rejected_at || application.reviewed_at).toLocaleDateString('en-GB', { 
-                                day: 'numeric', 
-                                month: 'short',
-                                year: 'numeric'
-                              }).toLowerCase()}{' '}
-                              {new Date(application.rejected_at || application.reviewed_at).toLocaleTimeString('en-GB', {
-                                hour: '2-digit',
-                                minute: '2-digit'
-                              })}
-                              {application.reviewed_by && profiles.find(p => p.id === application.reviewed_by)?.email && (
-                                <><br />Admin: {profiles.find(p => p.id === application.reviewed_by)?.email}</>
-                              )}
-                            </p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                   )}
-                   {(application as any).rejection_reason_types
-                     .filter((type: string) => type && REJECTION_REASONS[type as keyof typeof REJECTION_REASONS])
-                     .map((type: string) => REJECTION_REASONS[type as keyof typeof REJECTION_REASONS])
-                     .join(', ')}
-                 </div>
-               )}
-               {application.rejection_reason && application.rejection_reason.trim() && !isReasonDuplicate(application.rejection_reason, (application as any).rejection_reason_types) && (
-                 <div className="text-destructive/70">
-                   <span className="font-medium">Additional comments:</span> {application.rejection_reason}
-                 </div>
-               )}
+        })() && (() => {
+          const participant: any = weeklyParticipants.find(p => p.user_id === application.user_id);
+          return (participant?.rejection_reason_types || participant?.rejection_reason) ? (
+            <div className="p-2 bg-destructive/10 border border-destructive/20 rounded-b-lg -mt-1">
+               <div className="space-y-1 text-xs leading-tight">
+                 {participant.rejection_reason_types && participant.rejection_reason_types.length > 0 && (
+                   <div className="text-destructive/80">
+                     {/* Always show date and admin info if available */}
+                     {participant.reviewed_at && (
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <span className="text-black font-medium cursor-help">
+                                {new Date(participant.reviewed_at).toLocaleDateString('en-GB', { 
+                                  day: 'numeric', 
+                                  month: 'short' 
+                                }).toLowerCase()}{' '}
+                                {participant.reviewed_by && profiles.find(p => p.id === participant.reviewed_by)?.email ? 
+                                  profiles.find(p => p.id === participant.reviewed_by)?.email?.substring(0, 4) + ' ' : 
+                                  'unkn '}
+                              </span>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>
+                                {new Date(participant.reviewed_at).toLocaleDateString('en-GB', { 
+                                  day: 'numeric', 
+                                  month: 'short',
+                                  year: 'numeric'
+                                }).toLowerCase()}{' '}
+                                {new Date(participant.reviewed_at).toLocaleTimeString('en-GB', {
+                                  hour: '2-digit',
+                                  minute: '2-digit'
+                                })}
+                                {participant.reviewed_by && profiles.find(p => p.id === participant.reviewed_by)?.email && (
+                                  <><br />Admin: {profiles.find(p => p.id === participant.reviewed_by)?.email}</>
+                                )}
+                              </p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                     )}
+                     {participant.rejection_reason_types
+                       .filter((type: string) => type && REJECTION_REASONS[type as keyof typeof REJECTION_REASONS])
+                       .map((type: string) => REJECTION_REASONS[type as keyof typeof REJECTION_REASONS])
+                       .join(', ')}
+                   </div>
+                 )}
+                 {participant.rejection_reason && participant.rejection_reason.trim() && !isReasonDuplicate(participant.rejection_reason, participant.rejection_reason_types) && (
+                   <div className="text-destructive/70">
+                     <span className="font-medium">Additional comments:</span> {participant.rejection_reason}
+                   </div>
+                 )}
+              </div>
             </div>
-          </div>
-        )}
+          ) : null;
+        })()}
                         
                          {/* Previous applications for this user */}
                          {selectedUserApplications === application.user_id && (
@@ -6598,33 +6626,31 @@ const Admin = () => {
                const participant = filteredWeeklyParticipants.find(p => p.id === applicationToReject.id);
                if (participant) {
                  try {
-                   // Remove from weekly contest
-                   const { error: removeError } = await supabase
-                     .from('weekly_contest_participants')
-                     .update({ is_active: false })
-                     .eq('id', participant.id);
-                   
-                   if (removeError) {
-                     console.error('Error removing from weekly contest:', removeError);
-                     toast({
-                       title: "Error",
-                       description: `Failed to remove from weekly contest: ${removeError.message}`,
-                       variant: "destructive"
-                     });
-                     return;
-                   }
+                    // Get current admin for rejection tracking
+                    const { data: { user } } = await supabase.auth.getUser();
                     
-                    // Update admin_status instead of old status field
-                    if (participant.user_id) {
-                      const { error: statusUpdateError } = await supabase
-                        .from('weekly_contest_participants')
-                        .update({ admin_status: 'rejected' })
-                        .eq('user_id', participant.user_id)
-                        .eq('is_active', true);
-                      
-                      if (statusUpdateError) {
-                        console.error('Error updating admin_status:', statusUpdateError);
+                    // Update participant with rejection data using centralized function
+                    const participantName = `${participant.application_data?.first_name || ''} ${participant.application_data?.last_name || ''}`.trim();
+                    const result = await updateParticipantStatusWithHistory(
+                      participant.id,
+                      'rejected',
+                      participantName,
+                      {
+                        rejection_reason_types: reasonTypes,
+                        rejection_reason: notes || null,
+                        reviewed_at: new Date().toISOString(),
+                        reviewed_by: user?.id
                       }
+                    );
+                    
+                    if (!result.success) {
+                      console.error('Error rejecting participant:', result.error);
+                      toast({
+                        title: "Error",
+                        description: `Failed to reject participant: ${result.error}`,
+                        variant: "destructive"
+                      });
+                      return;
                     }
                    
                    // Remove participant filter
