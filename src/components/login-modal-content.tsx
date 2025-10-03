@@ -361,8 +361,7 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
         <DialogHeader>
           <DialogTitle>{getTitle()}</DialogTitle>
         </DialogHeader>
-        <div className="text-green-600 text-sm font-bold">
-          Registration successful!<br />
+        <div className="text-red-600 text-sm">
           Please check your email and click the confirmation link to activate your account.
         </div>
       </>
