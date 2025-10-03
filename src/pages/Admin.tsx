@@ -5744,14 +5744,19 @@ const Admin = () => {
                                                          return;
                                                        }
                                                        if (newStatus === 'rejected') {
+                                                         console.log('📍 DROPDOWN: User selected rejected status', { applicationId: application.id });
                                                          const appData = typeof application.application_data === 'string' 
                                                            ? JSON.parse(application.application_data) 
                                                            : application.application_data;
+                                                         console.log('📍 DROPDOWN: Application data:', appData);
+                                                         const participantName = `${appData.first_name || ''} ${appData.last_name || ''}`.trim();
+                                                         console.log('📍 DROPDOWN: Setting up reject modal for:', participantName);
                                                          setApplicationToReject({ 
                                                            id: application.id, 
-                                                           name: `${appData.firstName} ${appData.lastName}` 
+                                                           name: participantName
                                                          });
                                                          setRejectModalOpen(true);
+                                                         console.log('📍 DROPDOWN: Reject modal should now be open');
                                                          return;
                                                        }
                                                        reviewApplication(application.id, newStatus as ParticipantStatus);
