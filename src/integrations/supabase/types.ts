@@ -774,6 +774,8 @@ export type Database = {
           id: string
           is_active: boolean
           notes: string | null
+          rejection_reason: string | null
+          rejection_reason_types: string[] | null
           reviewed_at: string | null
           reviewed_by: string | null
           status_history: Json | null
@@ -793,6 +795,8 @@ export type Database = {
           id?: string
           is_active?: boolean
           notes?: string | null
+          rejection_reason?: string | null
+          rejection_reason_types?: string[] | null
           reviewed_at?: string | null
           reviewed_by?: string | null
           status_history?: Json | null
@@ -812,6 +816,8 @@ export type Database = {
           id?: string
           is_active?: boolean
           notes?: string | null
+          rejection_reason?: string | null
+          rejection_reason_types?: string[] | null
           reviewed_at?: string | null
           reviewed_by?: string | null
           status_history?: Json | null
@@ -1569,6 +1575,8 @@ export type Database = {
           participant_id: string
           photo_1_url: string
           photo_2_url: string
+          rejection_reason: string
+          rejection_reason_types: string[]
           reviewed_at: string
           reviewed_by: string
           state: string
