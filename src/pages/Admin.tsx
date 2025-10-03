@@ -1325,18 +1325,10 @@ const Admin = () => {
       return;
     }
 
-    // Get all user_ids from contest_applications to verify they came from the application form
-    const { data: contestAppsData } = await supabase
-      .from('contest_applications')
-      .select('user_id')
-      .is('deleted_at', null);
-
-    const validUserIds = new Set(contestAppsData?.map(app => app.user_id) || []);
-
-    // Filter to only include participants who have a corresponding contest_application
+    // All participants are already in weekly_contest_participants after migration
     const filteredData = (data || []).filter((app: any) => {
-      // Only show if they have a contest_application
-      return validUserIds.has(app.user_id);
+      // Show all active participants
+      return true;
     });
 
     // Keep admin_status as-is, no need to map to "status"
@@ -1698,7 +1690,7 @@ const Admin = () => {
       console.log('Reviewing application:', applicationId, 'with status:', newStatus);
       console.log('Application data:', application);
       
-      // Update only metadata in contest_applications
+      // Update weekly_contest_participants (unified table after migration)
       const updateData: any = {
         reviewed_at: currentTime,
         reviewed_by: user?.id,
@@ -1706,8 +1698,6 @@ const Admin = () => {
           notes: rejectionData?.notes || null
         })
       };
-
-      // Update weekly_contest_participants (unified table)
       const { error: appError } = await supabase
         .from('weekly_contest_participants')
         .update(updateData)
