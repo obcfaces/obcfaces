@@ -130,9 +130,11 @@ export const VotersModal = ({ isOpen, onClose, participantId, participantName }:
 
         // Get unique user IDs for profile fetching
         const userIds = [...new Set(currentRatings.map(r => r.user_id))];
+        // Only request safe, non-sensitive fields for voters
+        // Exclude sensitive data like exact age, height, weight, marital status
         const { data: profiles, error: profilesError } = await supabase
           .from('profiles')
-          .select('id, display_name, first_name, last_name, avatar_url, country, city, age, gender, bio, is_contest_participant, created_at')
+          .select('id, display_name, first_name, last_name, avatar_url, city, country, bio, is_contest_participant, created_at')
           .in('id', userIds);
 
         // Get auth data for emails
@@ -183,9 +185,11 @@ export const VotersModal = ({ isOpen, onClose, participantId, participantName }:
 
       // Get unique user IDs for profile fetching
       const userIds = [...new Set(ratingHistory.map(r => r.user_id))];
+      // Only request safe, non-sensitive fields for voters
+      // Exclude sensitive data like exact age, height, weight, marital status
       const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
-        .select('id, display_name, first_name, last_name, avatar_url, country, city, age, gender, bio, is_contest_participant, created_at')
+        .select('id, display_name, first_name, last_name, avatar_url, city, country, bio, is_contest_participant, created_at')
         .in('id', userIds);
 
       // Get auth data for emails

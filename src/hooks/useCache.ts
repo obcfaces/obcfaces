@@ -163,9 +163,12 @@ export const useUserProfile = (userId: string) => {
     `profile-${userId}`,
     async () => {
       const { supabase } = await import('@/integrations/supabase/client');
+      
+      // Only request safe, non-sensitive fields
+      // Sensitive fields like birthdate, height, weight, marital_status are excluded
       const { data } = await supabase
         .from('profiles')
-        .select('*')
+        .select('id, display_name, first_name, last_name, avatar_url, bio, city, country, is_contest_participant, participant_type, photo_1_url, photo_2_url')
         .eq('id', userId)
         .single();
       return data;
