@@ -5141,6 +5141,11 @@ const Admin = () => {
                                     </div>
                                   );
                                 })()}
+                                {(profile.country || profile.city) && (
+                                  <div className="text-xs text-muted-foreground">
+                                    📍 {profile.city ? `${profile.city}, ` : ''}{profile.country || 'Unknown Country'}
+                                  </div>
+                                )}
                                 {profile.email && (
                                   <div className="text-xs text-muted-foreground flex items-center gap-1">
                                     <span>{profile.email}</span>
