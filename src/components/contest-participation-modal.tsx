@@ -601,6 +601,7 @@ export const ContestParticipationModal = ({
           .select('id, admin_status')
           .eq('user_id', session.user.id)
           .eq('is_active', true)
+          .is('deleted_at', null)
           .not('admin_status', 'in', '("rejected")')
           .maybeSingle();
 
