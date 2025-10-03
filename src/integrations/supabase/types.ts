@@ -14,58 +14,7 @@ export type Database = {
   }
   public: {
     Tables: {
-      contest_application_history: {
-        Row: {
-          application_data: Json | null
-          application_id: string
-          change_reason: string | null
-          changed_by: string | null
-          created_at: string
-          id: string
-          notes: string | null
-          rejection_reason_types: string[] | null
-          status: string
-        }
-        Insert: {
-          application_data?: Json | null
-          application_id: string
-          change_reason?: string | null
-          changed_by?: string | null
-          created_at?: string
-          id?: string
-          notes?: string | null
-          rejection_reason_types?: string[] | null
-          status: string
-        }
-        Update: {
-          application_data?: Json | null
-          application_id?: string
-          change_reason?: string | null
-          changed_by?: string | null
-          created_at?: string
-          id?: string
-          notes?: string | null
-          rejection_reason_types?: string[] | null
-          status?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "contest_application_history_application_id_fkey"
-            columns: ["application_id"]
-            isOneToOne: false
-            referencedRelation: "contest_applications"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "contest_application_history_application_id_fkey"
-            columns: ["application_id"]
-            isOneToOne: false
-            referencedRelation: "contest_applications_backup"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      contest_applications: {
+      _archived_contest_applications: {
         Row: {
           application_data: Json | null
           created_at: string
@@ -112,6 +61,57 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      contest_application_history: {
+        Row: {
+          application_data: Json | null
+          application_id: string
+          change_reason: string | null
+          changed_by: string | null
+          created_at: string
+          id: string
+          notes: string | null
+          rejection_reason_types: string[] | null
+          status: string
+        }
+        Insert: {
+          application_data?: Json | null
+          application_id: string
+          change_reason?: string | null
+          changed_by?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          rejection_reason_types?: string[] | null
+          status: string
+        }
+        Update: {
+          application_data?: Json | null
+          application_id?: string
+          change_reason?: string | null
+          changed_by?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          rejection_reason_types?: string[] | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contest_application_history_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "_archived_contest_applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contest_application_history_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "contest_applications_backup"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       contestant_rating_history: {
         Row: {

@@ -191,16 +191,19 @@ serve(async (req) => {
       }
     }
 
-    // 4. Добавляем approved заявки как новых участников "this week"
+    // 4. Переводим approved участников в статус "this week"
+    // После миграции все участники уже в weekly_contest_participants
     const { data: approvedApplications, error: approvedError } = await supabase
-      .from('contest_applications')
+      .from('weekly_contest_participants')
       .select(`
         id,
         user_id,
         application_data,
+        admin_status,
         status
       `)
       .eq('status', 'approved')
+      .eq('admin_status', 'approved')
       .eq('is_active', true)
       .is('deleted_at', null)
 
@@ -211,55 +214,42 @@ serve(async (req) => {
 
     let approvedToThisWeek = 0
 
-    for (const application of approvedApplications || []) {
-      // Проверяем, не существует ли уже этот участник в weekly_contest_participants
-      const { data: existingParticipant } = await supabase
-        .from('weekly_contest_participants')
+    for (const participant of approvedApplications || []) {
+      // Получаем текущий активный конкурс
+      const { data: currentContest } = await supabase
+        .from('weekly_contests')
         .select('id')
-        .eq('user_id', application.user_id)
-        .eq('is_active', true)
+        .eq('status', 'active')
+        .order('week_start_date', { ascending: false })
+        .limit(1)
         .single()
 
-      if (!existingParticipant) {
-        // Получаем текущий активный конкурс
-        const { data: currentContest } = await supabase
-          .from('weekly_contests')
-          .select('id')
-          .eq('status', 'active')
-          .order('week_start_date', { ascending: false })
-          .limit(1)
-          .single()
+      if (currentContest) {
+        // Update existing participant to "this week" status
+        const statusHistory = participant.status_history || {}
+        statusHistory['this week'] = {
+          changed_at: new Date().toISOString(),
+          changed_by: null,
+          change_reason: 'Automatic weekly transition (weekly-status-transition function)',
+          week_interval: weekInterval,
+          timestamp: new Date().toISOString()
+        }
 
-        if (currentContest) {
-          // Create initial status history
-          const statusHistory = {
-            'this week': {
-              changed_at: new Date().toISOString(),
-              changed_by: null,
-              change_reason: 'Automatic weekly transition (weekly-status-transition function)',
-              week_interval: weekInterval,
-              timestamp: new Date().toISOString()
-            }
-          }
+        const { error: updateError } = await supabase
+          .from('weekly_contest_participants')
+          .update({
+            contest_id: currentContest.id,
+            admin_status: 'this week',
+            week_interval: weekInterval,
+            status_history: statusHistory
+          })
+          .eq('id', participant.id)
 
-          const { error: insertError } = await supabase
-            .from('weekly_contest_participants')
-            .insert({
-              contest_id: currentContest.id,
-              user_id: application.user_id,
-              application_data: application.application_data,
-              admin_status: 'this week',
-              week_interval: weekInterval,
-              status_history: statusHistory,
-              is_active: true
-            })
-
-          if (insertError) {
-            console.error(`Error inserting approved application ${application.id}:`, insertError)
-          } else {
-            approvedToThisWeek++
-            console.log(`Added approved application ${application.id} as "this week" participant with interval ${weekInterval}`)
-          }
+        if (updateError) {
+          console.error(`Error updating approved participant ${participant.id}:`, updateError)
+        } else {
+          approvedToThisWeek++
+          console.log(`Moved approved participant ${participant.id} to "this week" with interval ${weekInterval}`)
         }
       }
     }
