@@ -5116,13 +5116,20 @@ const Admin = () => {
                                   );
                                 })()}
                                 {profile.email && (
-                                  <div className="text-xs text-muted-foreground">
-                                    {profile.email}
+                                  <div className="text-xs text-muted-foreground flex items-center gap-1">
+                                    <span>{profile.email}</span>
+                                    <Copy 
+                                      className="h-3 w-3 cursor-pointer hover:text-foreground" 
+                                      onClick={() => {
+                                        navigator.clipboard.writeText(profile.email || '');
+                                        toast({ title: "Copied", description: "Email copied to clipboard" });
+                                      }}
+                                    />
                                   </div>
                                 )}
                                 {!profile.email && (
-                                  <div className="text-sm text-destructive">
-                                    No email
+                                  <div className="text-xs text-destructive">
+                                    No email - User ID: {profile.id?.substring(0, 8)}
                                   </div>
                                 )}
                               </div>
