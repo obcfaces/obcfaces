@@ -39,8 +39,8 @@ const handler = async (req: Request): Promise<Response> => {
 
     const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY") || "";
     
-    // Use redirect_to as the base URL if available, otherwise use site_url
-    const confirmUrl = redirect_to || "https://obcface.com";
+    // Always use obcface.com for redirects
+    const confirmUrl = "https://obcface.com";
 
     let subject = "";
     let html = "";
@@ -55,14 +55,14 @@ const handler = async (req: Request): Promise<Response> => {
             <p>Hello!</p>
             <p>Thank you for signing up. To complete your registration, please confirm your email address:</p>
             <div style="text-align: center; margin: 30px 0;">
-              <a href="${confirmUrl}?code=${token_hash}&type=${email_action_type}" 
+              <a href="${site_url}/verify?token=${token_hash}&type=${email_action_type}&redirect_to=${encodeURIComponent(confirmUrl)}" 
                  style="background-color: #e91e63; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block;">
                 Confirm Email
               </a>
             </div>
             <p>Or copy and paste this link into your browser:</p>
             <p style="word-break: break-all; background-color: #f5f5f5; padding: 10px; border-radius: 3px;">
-              ${confirmUrl}?code=${token_hash}&type=${email_action_type}
+              ${site_url}/verify?token=${token_hash}&type=${email_action_type}&redirect_to=${encodeURIComponent(confirmUrl)}
             </p>
             <p style="color: #666; font-size: 14px;">
               If you did not sign up for OBC Face, please ignore this message.
@@ -79,14 +79,14 @@ const handler = async (req: Request): Promise<Response> => {
             <p>Hello!</p>
             <p>You requested to reset your password for your OBC Face account. Click the button below to create a new password:</p>
             <div style="text-align: center; margin: 30px 0;">
-              <a href="${confirmUrl}?code=${token_hash}&type=${email_action_type}" 
+              <a href="${site_url}/verify?token=${token_hash}&type=${email_action_type}&redirect_to=${encodeURIComponent(confirmUrl)}" 
                  style="background-color: #e91e63; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block;">
                 Reset Password
               </a>
             </div>
             <p>Or copy and paste this link into your browser:</p>
             <p style="word-break: break-all; background-color: #f5f5f5; padding: 10px; border-radius: 3px;">
-              ${confirmUrl}?code=${token_hash}&type=${email_action_type}
+              ${site_url}/verify?token=${token_hash}&type=${email_action_type}&redirect_to=${encodeURIComponent(confirmUrl)}
             </p>
             <p style="color: #666; font-size: 14px;">
               If you did not request a password reset, please ignore this message.
@@ -103,14 +103,14 @@ const handler = async (req: Request): Promise<Response> => {
             <p>Hello!</p>
             <p>You requested to change the email address for your OBC Face account. Click the button below to confirm:</p>
             <div style="text-align: center; margin: 30px 0;">
-              <a href="${confirmUrl}?code=${token_hash}&type=${email_action_type}" 
+              <a href="${site_url}/verify?token=${token_hash}&type=${email_action_type}&redirect_to=${encodeURIComponent(confirmUrl)}" 
                  style="background-color: #e91e63; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block;">
                 Confirm Email Change
               </a>
             </div>
             <p>Or copy and paste this link into your browser:</p>
             <p style="word-break: break-all; background-color: #f5f5f5; padding: 10px; border-radius: 3px;">
-              ${confirmUrl}?code=${token_hash}&type=${email_action_type}
+              ${site_url}/verify?token=${token_hash}&type=${email_action_type}&redirect_to=${encodeURIComponent(confirmUrl)}
             </p>
             <p style="color: #666; font-size: 14px;">
               If you did not request an email change, please contact support immediately.
@@ -127,7 +127,7 @@ const handler = async (req: Request): Promise<Response> => {
             <p>Hello!</p>
             <p>You have a new notification from OBC Face.</p>
             <div style="text-align: center; margin: 30px 0;">
-              <a href="${confirmUrl}?code=${token_hash}&type=${email_action_type}" 
+              <a href="${site_url}/verify?token=${token_hash}&type=${email_action_type}&redirect_to=${encodeURIComponent(confirmUrl)}" 
                  style="background-color: #e91e63; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block;">
                 Go to Application
               </a>
