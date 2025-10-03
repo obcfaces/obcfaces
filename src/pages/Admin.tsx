@@ -5281,14 +5281,21 @@ const Admin = () => {
                       const applicationCountry = application.application_data?.country;
                       if (countryFilter !== 'all' && applicationCountry !== countryFilter) return false;
                       
-                      // Handle admin_status filtering - использовать напрямую admin_status
+                      // Find weekly participant if exists
+                      const weeklyParticipant = weeklyParticipants.find(p => p.user_id === application.user_id);
+                      
+                      // Handle admin_status filtering
                       if (adminStatusFilter !== 'all') {
-                        const participant = weeklyParticipants.find(p => p.user_id === application.user_id);
-                        if (!participant || participant.admin_status !== adminStatusFilter) return false;
+                        // For participants with weekly_contest_participants record
+                        if (weeklyParticipant) {
+                          if (weeklyParticipant.admin_status !== adminStatusFilter) return false;
+                        } else {
+                          // For applications without weekly_contest_participants record (only show in "all")
+                          return false;
+                        }
                       }
                       
                       // Exclude "next week" from main card section unless specifically filtering
-                      const weeklyParticipant = weeklyParticipants.find(p => p.user_id === application.user_id);
                       if (weeklyParticipant?.admin_status === 'next week' && adminStatusFilter !== 'next week') {
                         return false;
                       }
