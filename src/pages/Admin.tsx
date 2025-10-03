@@ -6662,6 +6662,10 @@ const Admin = () => {
                       return;
                     }
                    
+                   // Refresh data to show updated status
+                   await fetchWeeklyParticipants();
+                   await fetchContestApplications();
+                   
                    // Remove participant filter
                    setParticipantFilters(prev => {
                      const newFilters = { ...prev };
@@ -6671,7 +6675,7 @@ const Admin = () => {
                    
                    toast({
                      title: "Success",
-                     description: "Participant rejected and moved to Card section",
+                     description: "Participant rejected successfully",
                    });
                  } catch (error) {
                    console.error('Error rejecting participant:', error);
