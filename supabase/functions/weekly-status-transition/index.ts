@@ -34,8 +34,7 @@ serve(async (req) => {
       thisWeekToPast: 0,
       nextWeekOnSiteToThisWeek: 0,
       nextWeekToNextWeekOnSite: 0,
-      preNextWeekToNextWeek: 0,
-      approvedToThisWeek: 0
+      preNextWeekToNextWeek: 0
     }
 
     // 1. Переводим "this week" → "past", сохраняя их week_interval
@@ -191,77 +190,16 @@ serve(async (req) => {
       }
     }
 
-    // 4. Переводим approved участников в статус "this week"
-    // После миграции все участники уже в weekly_contest_participants
-    const { data: approvedApplications, error: approvedError } = await supabase
-      .from('weekly_contest_participants')
-      .select(`
-        id,
-        user_id,
-        application_data,
-        admin_status,
-        status
-      `)
-      .eq('status', 'approved')
-      .eq('admin_status', 'approved')
-      .eq('is_active', true)
-      .is('deleted_at', null)
-
-    if (approvedError) {
-      console.error('Error fetching approved applications:', approvedError)
-      throw approvedError
-    }
-
-    let approvedToThisWeek = 0
-
-    for (const participant of approvedApplications || []) {
-      // Получаем текущий активный конкурс
-      const { data: currentContest } = await supabase
-        .from('weekly_contests')
-        .select('id')
-        .eq('status', 'active')
-        .order('week_start_date', { ascending: false })
-        .limit(1)
-        .single()
-
-      if (currentContest) {
-        // Update existing participant to "this week" status
-        const statusHistory = participant.status_history || {}
-        statusHistory['this week'] = {
-          changed_at: new Date().toISOString(),
-          changed_by: null,
-          change_reason: 'Automatic weekly transition (weekly-status-transition function)',
-          week_interval: weekInterval,
-          timestamp: new Date().toISOString()
-        }
-
-        const { error: updateError } = await supabase
-          .from('weekly_contest_participants')
-          .update({
-            contest_id: currentContest.id,
-            admin_status: 'this week',
-            week_interval: weekInterval,
-            status_history: statusHistory
-          })
-          .eq('id', participant.id)
-
-        if (updateError) {
-          console.error(`Error updating approved participant ${participant.id}:`, updateError)
-        } else {
-          approvedToThisWeek++
-          console.log(`Moved approved participant ${participant.id} to "this week" with interval ${weekInterval}`)
-        }
-      }
-    }
-
-    transitions.approvedToThisWeek = approvedToThisWeek
+    // Note: 'approved' status has been removed from the system
+    // Participants are moved directly to weekly statuses (pre next week, next week, etc.)
+    console.log('Skipping approved status check - status removed from system')
 
     const summary = {
       success: true,
       weekInterval,
       transitions,
       message: `Weekly transition completed for week ${weekInterval}`,
-      totalTransitions: transitions.thisWeekToPast + transitions.nextWeekOnSiteToThisWeek + transitions.preNextWeekToNextWeek + transitions.approvedToThisWeek
+      totalTransitions: transitions.thisWeekToPast + transitions.nextWeekOnSiteToThisWeek + transitions.preNextWeekToNextWeek
     }
 
     console.log('Weekly transition summary:', summary)

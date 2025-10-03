@@ -183,7 +183,7 @@ export const ContestParticipationModal = ({
         .from('weekly_contest_participants')
         .select('*')
         .eq('user_id', session.user.id)
-        .in('admin_status', ['pending', 'approved', 'under_review', 'rejected', 'this week', 'next week', 'past'] as any)
+        .in('admin_status', ['pending', 'rejected', 'this week', 'next week', 'next week on site', 'pre next week', 'past'] as any)
         .order('created_at', { ascending: false })
         .limit(1);
 
