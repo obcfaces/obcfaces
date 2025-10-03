@@ -43,88 +43,88 @@ const handler = async (req: Request): Promise<Response> => {
     // Generate email content based on action type
     switch (email_action_type) {
       case "signup":
-        subject = "Подтвердите вашу регистрацию - OBC Face";
+        subject = "Confirm your registration - OBC Face";
         html = `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-            <h2 style="color: #333; text-align: center;">Добро пожаловать в OBC Face!</h2>
-            <p>Здравствуйте!</p>
-            <p>Спасибо за регистрацию. Для завершения регистрации, пожалуйста, подтвердите ваш email адрес:</p>
+            <h2 style="color: #333; text-align: center;">Welcome to OBC Face!</h2>
+            <p>Hello!</p>
+            <p>Thank you for signing up. To complete your registration, please confirm your email address:</p>
             <div style="text-align: center; margin: 30px 0;">
               <a href="${site_url}/auth/v1/verify?token=${token_hash}&type=${email_action_type}&redirect_to=${redirect_to}" 
                  style="background-color: #e91e63; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block;">
-                Подтвердить Email
+                Confirm Email
               </a>
             </div>
-            <p>Или скопируйте и вставьте эту ссылку в браузер:</p>
+            <p>Or copy and paste this link into your browser:</p>
             <p style="word-break: break-all; background-color: #f5f5f5; padding: 10px; border-radius: 3px;">
               ${site_url}/auth/v1/verify?token=${token_hash}&type=${email_action_type}&redirect_to=${redirect_to}
             </p>
             <p style="color: #666; font-size: 14px;">
-              Если вы не регистрировались на OBC Face, просто проигнорируйте это сообщение.
+              If you did not sign up for OBC Face, please ignore this message.
             </p>
           </div>
         `;
         break;
 
       case "recovery":
-        subject = "Сброс пароля - OBC Face";
+        subject = "Password Reset - OBC Face";
         html = `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-            <h2 style="color: #333; text-align: center;">Сброс пароля</h2>
-            <p>Здравствуйте!</p>
-            <p>Вы запросили сброс пароля для вашего аккаунта OBC Face. Нажмите на кнопку ниже для создания нового пароля:</p>
+            <h2 style="color: #333; text-align: center;">Password Reset</h2>
+            <p>Hello!</p>
+            <p>You requested to reset your password for your OBC Face account. Click the button below to create a new password:</p>
             <div style="text-align: center; margin: 30px 0;">
               <a href="${site_url}/auth/v1/verify?token=${token_hash}&type=${email_action_type}&redirect_to=${redirect_to}" 
                  style="background-color: #e91e63; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block;">
-                Сбросить пароль
+                Reset Password
               </a>
             </div>
-            <p>Или скопируйте и вставьте эту ссылку в браузер:</p>
+            <p>Or copy and paste this link into your browser:</p>
             <p style="word-break: break-all; background-color: #f5f5f5; padding: 10px; border-radius: 3px;">
               ${site_url}/auth/v1/verify?token=${token_hash}&type=${email_action_type}&redirect_to=${redirect_to}
             </p>
             <p style="color: #666; font-size: 14px;">
-              Если вы не запрашивали сброс пароля, просто проигнорируйте это сообщение.
+              If you did not request a password reset, please ignore this message.
             </p>
           </div>
         `;
         break;
 
       case "email_change":
-        subject = "Подтвердите смену email - OBC Face";
+        subject = "Confirm Email Change - OBC Face";
         html = `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-            <h2 style="color: #333; text-align: center;">Подтверждение смены email</h2>
-            <p>Здравствуйте!</p>
-            <p>Вы запросили смену email адреса для вашего аккаунта OBC Face. Нажмите на кнопку ниже для подтверждения:</p>
+            <h2 style="color: #333; text-align: center;">Email Change Confirmation</h2>
+            <p>Hello!</p>
+            <p>You requested to change the email address for your OBC Face account. Click the button below to confirm:</p>
             <div style="text-align: center; margin: 30px 0;">
               <a href="${site_url}/auth/v1/verify?token=${token_hash}&type=${email_action_type}&redirect_to=${redirect_to}" 
                  style="background-color: #e91e63; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block;">
-                Подтвердить смену email
+                Confirm Email Change
               </a>
             </div>
-            <p>Или скопируйте и вставьте эту ссылку в браузер:</p>
+            <p>Or copy and paste this link into your browser:</p>
             <p style="word-break: break-all; background-color: #f5f5f5; padding: 10px; border-radius: 3px;">
               ${site_url}/auth/v1/verify?token=${token_hash}&type=${email_action_type}&redirect_to=${redirect_to}
             </p>
             <p style="color: #666; font-size: 14px;">
-              Если вы не запрашивали смену email, немедленно свяжитесь с поддержкой.
+              If you did not request an email change, please contact support immediately.
             </p>
           </div>
         `;
         break;
 
       default:
-        subject = "Уведомление - OBC Face";
+        subject = "Notification - OBC Face";
         html = `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-            <h2 style="color: #333; text-align: center;">Уведомление от OBC Face</h2>
-            <p>Здравствуйте!</p>
-            <p>У вас есть новое уведомление от OBC Face.</p>
+            <h2 style="color: #333; text-align: center;">Notification from OBC Face</h2>
+            <p>Hello!</p>
+            <p>You have a new notification from OBC Face.</p>
             <div style="text-align: center; margin: 30px 0;">
               <a href="${site_url}/auth/v1/verify?token=${token_hash}&type=${email_action_type}&redirect_to=${redirect_to}" 
                  style="background-color: #e91e63; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block;">
-                Перейти к приложению
+                Go to Application
               </a>
             </div>
           </div>
