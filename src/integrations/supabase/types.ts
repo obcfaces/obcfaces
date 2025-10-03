@@ -420,6 +420,36 @@ export type Database = {
         }
         Relationships: []
       }
+      participant_data_access_log: {
+        Row: {
+          access_type: string
+          accessed_at: string
+          accessed_by: string | null
+          id: string
+          ip_address: unknown | null
+          participant_id: string
+          user_agent: string | null
+        }
+        Insert: {
+          access_type: string
+          accessed_at?: string
+          accessed_by?: string | null
+          id?: string
+          ip_address?: unknown | null
+          participant_id: string
+          user_agent?: string | null
+        }
+        Update: {
+          access_type?: string
+          accessed_at?: string
+          accessed_by?: string | null
+          id?: string
+          ip_address?: unknown | null
+          participant_id?: string
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
       photo_comments: {
         Row: {
           comment_text: string
@@ -1372,6 +1402,24 @@ export type Database = {
           display_name: string
           id: string
           is_contest_participant: boolean
+        }[]
+      }
+      get_safe_participant_data: {
+        Args: { weeks_offset?: number }
+        Returns: {
+          age_range: string
+          average_rating: number
+          city: string
+          country: string
+          created_at: string
+          display_name: string
+          final_rank: number
+          first_name: string
+          participant_id: string
+          photo_1_url: string
+          photo_2_url: string
+          total_votes: number
+          user_id: string
         }[]
       }
       get_unread_messages_count: {
