@@ -1703,10 +1703,10 @@ const Admin = () => {
 
   const reviewApplication = async (applicationId: string, newStatus: ParticipantStatus, rejectionData?: { reasonTypes: string[], notes: string }) => {
     const application = contestApplications.find(app => app.id === applicationId);
+    const currentTime = new Date().toISOString();
     
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      const currentTime = new Date().toISOString();
       
       console.log('Reviewing application:', applicationId, 'with status:', newStatus);
       console.log('Application data:', application);
@@ -1751,10 +1751,19 @@ const Admin = () => {
       try {
         const participantName = `${application?.application_data?.first_name || ''} ${application?.application_data?.last_name || ''}`.trim();
         
+        // Prepare rejection data if status is rejected
+        const additionalData = newStatus === 'rejected' && rejectionData ? {
+          rejection_reason_types: rejectionData.reasonTypes,
+          rejection_reason: rejectionData.notes || null,
+          reviewed_at: currentTime,
+          reviewed_by: user?.id
+        } : undefined;
+        
         const result = await updateParticipantStatusWithHistory(
           weeklyParticipant.id,
           newStatus,
-          participantName
+          participantName,
+          additionalData
         );
 
         if (result.success) {
