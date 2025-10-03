@@ -360,7 +360,7 @@ const LikedItem = ({
         if (!error && application) {
           setContestApplication({
             ...application,
-            status: application.admin_status // Map admin_status to status
+            status: application.admin_status // Use admin_status
           } as any);
         }
       } catch (error) {
