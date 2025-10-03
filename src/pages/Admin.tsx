@@ -5066,10 +5066,7 @@ const Admin = () => {
                                   </div>
                                 )}
                                 {profile.user_agent && (() => {
-                                  const parser = new UAParser(profile.user_agent);
-                                  const device = parser.getDevice();
-                                  const os = parser.getOS();
-                                  const browser = parser.getBrowser();
+                                  const { browser, device, os } = UAParser(profile.user_agent);
                                   
                                   return (
                                     <div className="text-xs text-muted-foreground">
