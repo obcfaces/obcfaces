@@ -4934,22 +4934,19 @@ const Admin = () => {
                 
                 {/* Weekly Registration Stats Dashboard */}
                 <div className="mb-6">
-                  <div className="mb-4 p-3 bg-muted rounded-lg">
-                    <div className="text-sm text-muted-foreground space-y-2">
-                      <div className="text-xs">
-                        total registrations: {dailyRegistrationStats.reduce((sum, stat) => sum + (stat.registration_count || 0), 0)}, 
-                        verified: {profiles.filter(p => p.is_approved).length}
-                      </div>
-                      <div className="grid grid-cols-7 gap-1 text-xs">
-                        {dailyRegistrationStats.map((stat, index) => (
-                          <div key={index} className="text-center p-1 bg-background rounded">
-                            <div className="font-medium text-xs">{stat.day_name}</div>
-                            <div className="text-xs text-muted-foreground">
-                              {stat.registration_count}
-                            </div>
+                  <div className="mb-4 p-4 bg-muted rounded-lg">
+                    <div className="text-sm text-muted-foreground mb-3">
+                      total registrations: {dailyRegistrationStats.reduce((sum, stat) => sum + (stat.registration_count || 0), 0)}, verified: {profiles.filter(p => p.email_confirmed_at).length}
+                    </div>
+                    <div className="grid grid-cols-7 gap-2">
+                      {dailyRegistrationStats.map((stat, index) => (
+                        <div key={index} className="text-center p-3 bg-background rounded-lg">
+                          <div className="font-medium text-sm mb-1">{stat.day_name}</div>
+                          <div className="text-2xl font-semibold">
+                            {stat.registration_count}
                           </div>
-                        ))}
-                      </div>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 </div>
