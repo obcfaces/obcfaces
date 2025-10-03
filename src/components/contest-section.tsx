@@ -96,6 +96,7 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
         .select('*')
         .in('admin_status', ['next week', 'next week on site'])
         .eq('is_active', true)
+        .is('deleted_at', null)
         .order('created_at', { ascending: false });
 
       if (error) {
@@ -149,6 +150,7 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
         .select('*')
         .eq('admin_status', 'this week')
         .eq('is_active', true)
+        .is('deleted_at', null)
         .order('created_at', { ascending: false });
 
       if (error) {

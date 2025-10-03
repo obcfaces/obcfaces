@@ -130,7 +130,8 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
           .from('weekly_contest_participants')
           .select('*')
           .in('admin_status', ['next week', 'next week on site'])
-          .eq('is_active', true);
+          .eq('is_active', true)
+          .is('deleted_at', null);
 
         let data = participants;
 
