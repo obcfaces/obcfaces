@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { ContestParticipationModal } from "@/components/contest-participation-modal";
 import LoginModalContent from "@/components/login-modal-content";
+import { Button } from "@/components/ui/button";
 
 interface AuthProtectedModalProps {
   children?: React.ReactNode;
@@ -14,6 +15,8 @@ export const AuthProtectedModal = ({ children }: AuthProtectedModalProps) => {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [existingParticipant, setExistingParticipant] = useState<any>(null);
+  const [infoMessage, setInfoMessage] = useState<string | null>(null);
+  const [isInfoModalOpen, setIsInfoModalOpen] = useState(false);
 
   useEffect(() => {
     // Subscribe to auth state changes
@@ -38,48 +41,69 @@ export const AuthProtectedModal = ({ children }: AuthProtectedModalProps) => {
       // User is authenticated, check their application status
       console.log('Checking application status for user:', session.user.id);
       
-      // Check if user has a participant record
-      const { data: participant, error } = await supabase
+      // Check if user has ANY participant record (including deleted)
+      const { data: allParticipants, error: allError } = await supabase
         .from('weekly_contest_participants')
         .select('*')
         .eq('user_id', session.user.id)
-        .eq('is_active', true)
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .maybeSingle();
+        .order('created_at', { ascending: false });
 
-      console.log('Participant check result:', { participant, error });
+      console.log('All participant records:', { allParticipants, allError });
 
-      if (error) {
-        console.error('Error checking participant status:', error);
+      if (allError) {
+        console.error('Error checking participant status:', allError);
         setEditMode(false);
         setExistingParticipant(null);
         setIsParticipationOpen(true);
         return;
       }
 
-      if (participant) {
-        const status = participant.admin_status;
-        console.log('Found participant with admin_status:', status);
-        
-        if (status === 'rejected') {
-          // Allow new participation
-          console.log('Opening participation modal for user with rejected application');
-          setEditMode(false);
-          setExistingParticipant(null);
-          setIsParticipationOpen(true);
-        } else {
-          // Open form in edit mode with existing data
-          console.log('Opening participation modal in edit mode for existing participant');
-          setEditMode(true);
-          setExistingParticipant(participant);
-          setIsParticipationOpen(true);
-        }
-      } else {
-        // No participant record exists, allow new participation
-        console.log('Opening participation modal for user with no participant record');
+      // Check for deleted record
+      const deletedParticipant = allParticipants?.find(p => p.deleted_at !== null);
+      if (deletedParticipant && !allParticipants?.some(p => p.deleted_at === null)) {
+        // Only deleted records exist, create new participation
+        console.log('User has only deleted records, creating new participation');
         setEditMode(false);
         setExistingParticipant(null);
+        setIsParticipationOpen(true);
+        return;
+      }
+
+      // Check for active participant record
+      const activeParticipant = allParticipants?.find(p => p.is_active && p.deleted_at === null);
+      
+      if (!activeParticipant) {
+        // No active participant record exists, allow new participation
+        console.log('Opening participation modal for user with no active participant record');
+        setEditMode(false);
+        setExistingParticipant(null);
+        setIsParticipationOpen(true);
+        return;
+      }
+
+      const status = activeParticipant.admin_status;
+      console.log('Found active participant with admin_status:', status);
+      
+      // Handle different statuses
+      if (status === 'past') {
+        // Show message about waiting period
+        setInfoMessage('You can participate in the contest one year after your last participation');
+        setIsInfoModalOpen(true);
+      } else if (['pre next week', 'next week', 'next week on site', 'this week'].includes(status)) {
+        // Show message about active card
+        setInfoMessage('You have an active card, you can see it in your personal account in the participant tab');
+        setIsInfoModalOpen(true);
+      } else if (['rejected', 'pending'].includes(status)) {
+        // Open form in edit mode for rejected/pending
+        console.log('Opening participation modal in edit mode for rejected/pending application');
+        setEditMode(true);
+        setExistingParticipant(activeParticipant);
+        setIsParticipationOpen(true);
+      } else {
+        // For any other status, open in edit mode
+        console.log('Opening participation modal in edit mode for existing participant');
+        setEditMode(true);
+        setExistingParticipant(activeParticipant);
         setIsParticipationOpen(true);
       }
     } else {
@@ -113,6 +137,23 @@ export const AuthProtectedModal = ({ children }: AuthProtectedModalProps) => {
         editMode={editMode}
         existingData={existingParticipant}
       />
+
+      {/* Info Modal */}
+      <Dialog open={isInfoModalOpen} onOpenChange={setIsInfoModalOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Participation Status</DialogTitle>
+            <DialogDescription className="pt-4">
+              {infoMessage}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end">
+            <Button onClick={() => setIsInfoModalOpen(false)}>
+              OK
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 };
