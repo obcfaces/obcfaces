@@ -191,6 +191,25 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
           },
         });
         
+        // Log signup with IP and user agent
+        if (data?.user) {
+          try {
+            const userAgent = navigator.userAgent;
+            const ipResponse = await fetch('https://api.ipify.org?format=json');
+            const ipData = await ipResponse.json();
+            
+            await supabase.from('user_login_logs').insert({
+              user_id: data.user.id,
+              login_method: 'email',
+              success: !error,
+              ip_address: ipData.ip,
+              user_agent: userAgent
+            });
+          } catch (logError) {
+            console.error('Error logging signup:', logError);
+          }
+        }
+        
         if (error) {
           // More specific registration error messages
           let errorMessage = "Registration error";

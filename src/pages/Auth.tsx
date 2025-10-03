@@ -86,7 +86,7 @@ const Auth = () => {
         
         console.log('Signup redirect URL:', redirectUrl);
         
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email,
           password,
           options: { 
@@ -99,6 +99,26 @@ const Auth = () => {
             }
           },
         });
+        
+        // Log signup with IP and user agent
+        if (data?.user) {
+          try {
+            const userAgent = navigator.userAgent;
+            const ipResponse = await fetch('https://api.ipify.org?format=json');
+            const ipData = await ipResponse.json();
+            
+            await supabase.from('user_login_logs').insert({
+              user_id: data.user.id,
+              login_method: 'email',
+              success: !error,
+              ip_address: ipData.ip,
+              user_agent: userAgent
+            });
+          } catch (logError) {
+            console.error('Error logging signup:', logError);
+          }
+        }
+        
         if (error) throw error;
         toast({ description: "Check your email to confirm your account." });
       } else {
