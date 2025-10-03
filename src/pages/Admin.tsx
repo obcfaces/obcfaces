@@ -2632,76 +2632,107 @@ const Admin = () => {
                       <CardContent className="p-0">
                         {/* Desktop layout */}
                         <div className="hidden md:flex">
-                          {/* Photos section - 2 columns */}
-                          <div className="flex gap-px w-[25ch] flex-shrink-0">
-                            {(participantProfile?.photo_1_url || appData.photo1_url) && (
-                              <div className="w-1/2">
-                                <img 
-                                  src={participantProfile?.photo_1_url || appData.photo1_url} 
-                                  alt="Portrait" 
-                                  className="w-full h-[149px] object-contain cursor-pointer hover:opacity-90 transition-opacity"
-                                  onClick={() => openPhotoModal([
-                                    participantProfile?.photo_1_url || appData.photo1_url, 
-                                    participantProfile?.photo_2_url || appData.photo2_url
-                                  ].filter(Boolean), 0, `${participantProfile?.first_name || appData.first_name} ${participantProfile?.last_name || appData.last_name}`)}
-                                />
+                          {/* Photos column - 25% */}
+                          <div className="w-[25%] relative flex-shrink-0 bg-muted/30">
+                            <div className="grid grid-cols-2 h-full">
+                              <div 
+                                className="relative cursor-pointer hover:opacity-75 transition-opacity overflow-hidden"
+                                onClick={() => {
+                                  const appData = participant.application_data || {};
+                                  const photos = [
+                                    appData.photo1_url || participant.photo_1_url,
+                                    appData.photo2_url || participant.photo_2_url
+                                  ].filter(Boolean);
+                                  if (photos.length > 0) {
+                                    openPhotoModal(
+                                      photos,
+                                      0,
+                                      participant.display_name || `${participant.first_name || appData.first_name} ${participant.last_name || appData.last_name}`
+                                    );
+                                  }
+                                }}
+                              >
+                                {(participant.application_data?.photo1_url || participant.photo_1_url) && (
+                                  <img 
+                                    src={participant.application_data?.photo1_url || participant.photo_1_url} 
+                                    alt="Photo 1" 
+                                    className="w-full h-full object-cover"
+                                  />
+                                )}
                               </div>
-                            )}
-                            {(participantProfile?.photo_2_url || appData.photo2_url) && (
-                              <div className="w-1/2 relative">
-                                <img 
-                                  src={participantProfile?.photo_2_url || appData.photo2_url} 
-                                  alt="Full length" 
-                                  className="w-full h-[149px] object-cover cursor-pointer hover:opacity-90 transition-opacity"
-                                  onClick={() => openPhotoModal([
-                                    participantProfile?.photo_1_url || appData.photo1_url, 
-                                    participantProfile?.photo_2_url || appData.photo2_url
-                                  ].filter(Boolean), 1, `${participantProfile?.first_name || appData.first_name} ${participantProfile?.last_name || appData.last_name}`)}
-                                />
-                                <div className="absolute top-2 right-2">
-                                  <Avatar className="h-6 w-6 flex-shrink-0 border-2 border-white shadow-sm">
-                                    <AvatarImage src={participantProfile?.photo_1_url || appData.photo1_url || participantProfile?.avatar_url || ''} />
-                                    <AvatarFallback className="text-xs">
-                                      {(participantProfile?.first_name || appData.first_name)?.charAt(0) || 'U'}
-                                    </AvatarFallback>
-                                  </Avatar>
+                              <div 
+                                className="relative cursor-pointer hover:opacity-75 transition-opacity overflow-hidden"
+                                onClick={() => {
+                                  const appData = participant.application_data || {};
+                                  const photos = [
+                                    appData.photo1_url || participant.photo_1_url,
+                                    appData.photo2_url || participant.photo_2_url
+                                  ].filter(Boolean);
+                                  if (photos.length > 1) {
+                                    openPhotoModal(
+                                      photos,
+                                      1,
+                                      participant.display_name || `${participant.first_name || appData.first_name} ${participant.last_name || appData.last_name}`
+                                    );
+                                  }
+                                }}
+                              >
+                                {(participant.application_data?.photo2_url || participant.photo_2_url) && (
+                                  <img 
+                                    src={participant.application_data?.photo2_url || participant.photo_2_url} 
+                                    alt="Photo 2" 
+                                    className="w-full h-full object-cover"
+                                  />
+                                )}
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Info column - 75% */}
+                          <div className="w-[75%] flex items-stretch">
+                            {/* Name and basic info - 30% */}
+                            <div className="w-[30%] flex flex-col justify-center px-2 border-r">
+                              <div className="font-semibold truncate text-sm">
+                                {participant.display_name || `${participant.first_name || participant.application_data?.first_name || 'Unknown'} ${participant.last_name || participant.application_data?.last_name || ''}`}
+                              </div>
+                              <div className="text-xs text-muted-foreground truncate">
+                                {participant.age || participant.application_data?.age || 'Unknown'} лет • {participant.city || participant.application_data?.city || 'Unknown'}, {participant.state || participant.application_data?.state || 'Unknown'}
+                              </div>
+                              <div className="text-xs text-muted-foreground truncate">
+                                {participant.height_cm || participant.application_data?.height_cm || 'Unknown'}см • {participant.weight_kg || participant.application_data?.weight_kg || 'Unknown'}кг
+                              </div>
+                            </div>
+
+                            {/* Week info - 15% */}
+                            <div className="w-[15%] flex items-center justify-center px-1 border-r">
+                              <div className="text-center">
+                                <div className="text-xs font-medium">Week:</div>
+                                <div className="text-xs text-muted-foreground">
+                                  {participant.week_interval || '-'}
                                 </div>
                               </div>
-                            )}
-                          </div>
-                          
-                          {/* Content section */}
-                          <div className="flex-1 p-3 flex flex-col justify-between">
-                            <div className="flex items-start justify-between">
-                              <div className="min-w-0 flex-1">
-                                <div className="space-y-1">
-                                  <h3 className="font-semibold text-sm truncate">
-                                    {participantProfile?.display_name || `${participantProfile?.first_name || appData.first_name} ${participantProfile?.last_name || appData.last_name}` || 'Unnamed participant'}
-                                  </h3>
-                                  
-                                  <div className="text-xs text-muted-foreground space-y-0.5">
-                                    <div className="flex items-center gap-2 flex-wrap">
-                                      <span>{participant.age || 'Unknown'} лет</span>
-                                      <span>•</span>
-                                      <span>{participant.city || 'Unknown'}, {participant.country || 'Unknown'}</span>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                      <span>{participant.height_cm || 'Unknown'}см</span>
-                                      <span>•</span>
-                                      <span>{participant.weight_kg || 'Unknown'}кг</span>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                      <Badge variant="outline" className="text-xs px-1 py-0">
-                                        Week: {participant.week_interval}
-                                      </Badge>
-                                    </div>
+                            </div>
+
+                            {/* Stats - 15% */}
+                            <div className="w-[15%] flex items-center justify-center px-1 border-r">
+                              <div className="flex gap-3">
+                                <div className="text-center">
+                                  <div className="text-lg font-bold text-green-600">
+                                    {participant.total_votes || 0}
+                                  </div>
+                                </div>
+                                <div className="text-center">
+                                  <div className="text-lg font-bold text-red-600">
+                                    {participant.total_dislikes || 0}
                                   </div>
                                 </div>
                               </div>
-                              
-                              {/* Status controls */}
-                              <div className="flex items-center gap-2 ml-2 flex-shrink-0">
-                                <Select 
+                            </div>
+
+                            {/* Status dropdown - 30% */}
+                            <div className="w-[30%] flex items-center justify-center px-2 gap-2">
+                              <div className="flex-1">
+                                <Select
                                   value={participant.admin_status || 'pre next week'}
                                   onValueChange={async (value) => {
                                     try {
@@ -2709,7 +2740,7 @@ const Admin = () => {
                                         toast({
                                           title: "Error",
                                           description: "No participant ID found",
-                                          variant: "destructive",
+                                          variant: "destructive"
                                         });
                                         return;
                                       }
@@ -2717,19 +2748,29 @@ const Admin = () => {
                                       const participantName = participant.display_name || 
                                         `${participant.first_name || 'Unknown'} ${participant.last_name || ''}`;
                                       
+                                      console.log('Pre Next Week: Updating participant:', {
+                                        id: participant.id,
+                                        name: participantName,
+                                        newStatus: value
+                                      });
+                                      
                                       const result = await updateParticipantStatusWithHistory(
                                         participant.id,
                                         value as ParticipantStatus,
                                         participantName
                                       );
 
+                                      console.log('Pre Next Week: Update result:', result);
+
                                       if (!result.success) {
+                                        console.error('Pre Next Week: Update failed:', result.error);
                                         toast({
                                           title: "Error",
                                           description: "Failed to update participant status",
                                           variant: "destructive",
                                         });
                                       } else {
+                                        console.log('Pre Next Week: Update successful, refreshing data...');
                                         await fetchPreNextWeekParticipants();
                                         toast({
                                           title: "Success",
@@ -2825,8 +2866,8 @@ const Admin = () => {
                                 <Select 
                                   value={participant.admin_status || 'pre next week'} 
                                   onValueChange={async (value) => {
-                                    const participantName = participantProfile?.display_name || 
-                                      `${participantProfile?.first_name || appData.first_name} ${participantProfile?.last_name || appData.last_name}`;
+                                      const participantName = participantProfile?.display_name || 
+                                        `${participantProfile?.first_name || appData.first_name} ${participantProfile?.last_name || appData.last_name}`;
                                     
                                     const result = await updateParticipantStatusWithHistory(
                                       participant.id,
@@ -3076,19 +3117,29 @@ const Admin = () => {
                                           const participantName = participant.display_name || 
                                             `${participant.first_name || 'Unknown'} ${participant.last_name || ''}`;
                                           
+                                          console.log('Next Week: Updating participant:', {
+                                            id: participant.id,
+                                            name: participantName,
+                                            newStatus: value
+                                          });
+                                          
                                           const result = await updateParticipantStatusWithHistory(
                                             participant.id,
                                             value as ParticipantStatus,
                                             participantName
                                           );
 
+                                          console.log('Next Week: Update result:', result);
+
                                           if (!result.success) {
+                                            console.error('Next Week: Update failed:', result.error);
                                             toast({
                                               title: "Error",
                                               description: "Failed to update participant status",
                                               variant: "destructive",
                                             });
                                           } else {
+                                            console.log('Next Week: Update successful, refreshing data...');
                                             await fetchNextWeekParticipants();
                                             toast({
                                               title: "Success",
