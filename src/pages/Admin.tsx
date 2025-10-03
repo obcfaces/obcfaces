@@ -5351,38 +5351,59 @@ const Admin = () => {
 
               <div className="space-y-4 px-0 md:px-6">
                 {(() => {
-                  console.log('Filtering applications, registrationsStatusFilter:', registrationsStatusFilter);
+                  console.log('🔍 NEW TAB - Filtering applications');
+                  console.log('📊 contestApplications count:', contestApplications.length);
+                  console.log('📊 weeklyParticipants count:', weeklyParticipants.length);
+                  console.log('🎯 registrationsStatusFilter:', registrationsStatusFilter);
+                  console.log('🌍 countryFilter:', countryFilter);
+                  
                   const filteredApplications = (showDeletedApplications ? deletedApplications : contestApplications)
                     .filter((application) => {
+                      const appData = application.application_data || {};
+                      const appName = `${appData.first_name} ${appData.last_name}`;
+                      
                       // Filter by country first
-                      const applicationCountry = application.application_data?.country;
-                      if (countryFilter !== 'all' && applicationCountry !== countryFilter) return false;
+                      const applicationCountry = appData.country;
+                      if (countryFilter !== 'all' && applicationCountry !== countryFilter) {
+                        console.log(`❌ ${appName} - filtered by country (${applicationCountry} !== ${countryFilter})`);
+                        return false;
+                      }
                       
                       // Find weekly participant if exists
                       const weeklyParticipant = weeklyParticipants.find(p => p.user_id === application.user_id);
+                      
+                      console.log(`🔎 Checking ${appName}:`, {
+                        user_id: application.user_id,
+                        has_weekly_participant: !!weeklyParticipant,
+                        weekly_status: weeklyParticipant?.admin_status,
+                        app_admin_status: application.admin_status
+                      });
                       
                       // Handle admin_status filtering
                       if (registrationsStatusFilter !== 'all') {
                         // If there's a weekly participant record, check its status
                         if (weeklyParticipant) {
-                          return weeklyParticipant.admin_status === registrationsStatusFilter;
+                          const matches = weeklyParticipant.admin_status === registrationsStatusFilter;
+                          console.log(`${matches ? '✅' : '❌'} ${appName} - weekly participant status check: ${weeklyParticipant.admin_status} === ${registrationsStatusFilter}`);
+                          return matches;
                         } else {
                           // For applications without weekly_contest_participants record
-                          // Show them when filtering for "pending" or "rejected" statuses
-                          // (these are typically new applications that haven't been moved to weekly contests yet)
-                          return registrationsStatusFilter === 'pending' || registrationsStatusFilter === 'rejected';
+                          const matches = registrationsStatusFilter === 'pending' || registrationsStatusFilter === 'rejected';
+                          console.log(`${matches ? '✅' : '❌'} ${appName} - no weekly participant, filter: ${registrationsStatusFilter}`);
+                          return matches;
                         }
                       }
                       
                       // When showing "all", exclude participants that are already in weekly contests
-                      // (they will be shown in their respective tabs)
                       if (registrationsStatusFilter === 'all' && weeklyParticipant) {
                         const excludedStatuses = ['next week', 'this week', 'next week on site'];
                         if (excludedStatuses.includes(weeklyParticipant.admin_status)) {
+                          console.log(`❌ ${appName} - excluded (status: ${weeklyParticipant.admin_status})`);
                           return false;
                         }
                       }
                       
+                      console.log(`✅ ${appName} - passed all filters`);
                       return true;
                     });
                   
