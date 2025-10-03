@@ -1355,19 +1355,23 @@ const Admin = () => {
         }
       }
 
-      // Helper function to get country from IP using ip-api.com (no CORS issues)
+      // Helper function to get country from IP using Supabase Edge Function
       const getCountryFromIP = async (ip: string): Promise<string | null> => {
         try {
-          // ip-api.com is free and has no CORS restrictions
-          const response = await fetch(`http://ip-api.com/json/${ip}?fields=country`);
-          if (response.ok) {
-            const data = await response.json();
-            return data.country || null;
+          const { data, error } = await supabase.functions.invoke('get-country-by-ip', {
+            body: { ip }
+          });
+          
+          if (error) {
+            console.error('Error fetching country for IP:', ip, error);
+            return null;
           }
+          
+          return data?.country || null;
         } catch (error) {
           console.error('Error fetching country for IP:', ip, error);
+          return null;
         }
-        return null;
       };
 
       // Get unique IP addresses and fetch countries for them
