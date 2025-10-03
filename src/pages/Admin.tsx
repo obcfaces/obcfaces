@@ -4261,71 +4261,64 @@ const Admin = () => {
                 <h2 className="text-xl font-semibold mb-4">All Participants</h2>
                 
                 {/* Status Statistics */}
-                <Card className="mb-6">
-                  <CardHeader>
-                    <CardTitle>Статистика по статусам</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-2">
-                      {(() => {
-                        const allParticipants = weeklyParticipants.filter(p => !p.deleted_at);
-                        const statusCounts = allParticipants.reduce((acc: any, p: any) => {
-                          const status = p.admin_status || 'unknown';
-                          acc[status] = (acc[status] || 0) + 1;
-                          return acc;
-                        }, {});
+                <div className="mb-6 p-4 bg-muted/30 rounded-lg">
+                  <h3 className="text-lg font-semibold mb-4">Статистика по статусам</h3>
+                  <div className="space-y-3">
+                    {(() => {
+                      const allParticipants = weeklyParticipants.filter(p => !p.deleted_at);
+                      const statusCounts = allParticipants.reduce((acc: any, p: any) => {
+                        const status = p.admin_status || 'unknown';
+                        acc[status] = (acc[status] || 0) + 1;
+                        return acc;
+                      }, {});
 
-                        const statusOrder = [
-                          'this week',
-                          'next week on site',
-                          'next week',
-                          'pre next week',
-                          'pending',
-                          'rejected',
-                          'past'
-                        ];
+                      const statusOrder = [
+                        'pending',
+                        'rejected',
+                        'pre next week',
+                        'next week',
+                        'next week on site',
+                        'this week',
+                        'past'
+                      ];
 
-                        const getStatusBadgeVariant = (status: string) => {
-                          switch (status) {
-                            case 'this week': return 'default';
-                            case 'next week':
-                            case 'next week on site': return 'secondary';
-                            case 'pre next week': return 'outline';
-                            case 'pending': return 'outline';
-                            case 'rejected': return 'destructive';
-                            case 'past': return 'destructive';
-                            default: return 'outline';
-                          }
-                        };
+                      const getStatusBadgeVariant = (status: string) => {
+                        switch (status) {
+                          case 'this week': return 'default';
+                          case 'next week':
+                          case 'next week on site': return 'secondary';
+                          case 'pre next week': return 'outline';
+                          case 'pending': return 'outline';
+                          case 'rejected': return 'destructive';
+                          case 'past': return 'destructive';
+                          default: return 'outline';
+                        }
+                      };
 
-                        return (
-                          <>
-                            <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg font-semibold">
-                              <span>Всего участниц:</span>
-                              <Badge variant="default" className="text-lg px-3 py-1">
-                                {allParticipants.length}
-                              </Badge>
-                            </div>
-                            {statusOrder.map(status => {
-                              const count = statusCounts[status] || 0;
-                              if (count === 0) return null;
-                              return (
-                                <div key={status} className="flex items-center justify-between p-2 hover:bg-muted/50 rounded transition-colors">
-                                  <div className="flex items-center gap-2">
-                                    <Badge variant={getStatusBadgeVariant(status)}>
-                                      {status}
-                                    </Badge>
-                                  </div>
-                                  <span className="font-medium text-lg">{count}</span>
-                                </div>
-                              );
-                            })}
-                          </>
-                        );
-                      })()}
-                    </div>
-                  </CardContent>
-                </Card>
+                      return (
+                        <>
+                          <div className="flex items-center justify-between p-3 bg-background rounded-lg">
+                            <span className="font-medium">Всего участниц:</span>
+                            <Badge variant="default" className="text-base px-3 py-1">
+                              {allParticipants.length}
+                            </Badge>
+                          </div>
+                          {statusOrder.map(status => {
+                            const count = statusCounts[status] || 0;
+                            return (
+                              <div key={status} className="flex items-center justify-between py-2">
+                                <Badge variant={getStatusBadgeVariant(status)} className="min-w-[140px]">
+                                  {status}
+                                </Badge>
+                                <span className="font-medium text-lg">{count}</span>
+                              </div>
+                            );
+                          })}
+                        </>
+                      );
+                    })()}
+                  </div>
+                </div>
                 
                 {/* Deleted participants section */}
                 {deletedParticipantsAll.length > 0 && (
