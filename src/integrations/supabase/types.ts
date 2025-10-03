@@ -1063,23 +1063,6 @@ export type Database = {
           user_has_liked: boolean
         }[]
       }
-      get_contest_applications_admin: {
-        Args: { include_deleted?: boolean }
-        Returns: {
-          application_data: Json
-          created_at: string
-          deleted_at: string
-          id: string
-          is_active: boolean
-          notes: string
-          reviewed_at: string
-          reviewed_by: string
-          status: string
-          submitted_at: string
-          updated_at: string
-          user_id: string
-        }[]
-      }
       get_contest_leaderboard: {
         Args: { contest_week_offset?: number }
         Returns: {
@@ -1130,9 +1113,8 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: {
           approved_applications: number
+          day_date: string
           day_name: string
-          day_of_week: number
-          sort_order: number
           total_applications: number
         }[]
       }
@@ -1195,10 +1177,7 @@ export type Database = {
       }
       get_next_week_applications_count: {
         Args: Record<PropertyKey, never>
-        Returns: {
-          next_week_applications: number
-          total_applications: number
-        }[]
+        Returns: number
       }
       get_next_week_daily_stats: {
         Args: Record<PropertyKey, never>
