@@ -1494,6 +1494,7 @@ export type Database = {
           facebook_data: Json
           last_sign_in_at: string
           user_id: string
+          user_metadata: Json
         }[]
       }
       get_user_comments_count: {
