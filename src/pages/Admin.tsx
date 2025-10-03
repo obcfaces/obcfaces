@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { debounce } from '@/utils/performance';
 import { Helmet } from 'react-helmet-async';
-import { Card, CardHeader, CardContent } from '@/components/ui/card';
+import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -4259,6 +4259,73 @@ const Admin = () => {
             <TabsContent value="all" className="space-y-4">
               <div className="mb-6">
                 <h2 className="text-xl font-semibold mb-4">All Participants</h2>
+                
+                {/* Status Statistics */}
+                <Card className="mb-6">
+                  <CardHeader>
+                    <CardTitle>Статистика по статусам</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-2">
+                      {(() => {
+                        const allParticipants = weeklyParticipants.filter(p => !p.deleted_at);
+                        const statusCounts = allParticipants.reduce((acc: any, p: any) => {
+                          const status = p.admin_status || 'unknown';
+                          acc[status] = (acc[status] || 0) + 1;
+                          return acc;
+                        }, {});
+
+                        const statusOrder = [
+                          'this week',
+                          'next week on site',
+                          'next week',
+                          'pre next week',
+                          'pending',
+                          'rejected',
+                          'past'
+                        ];
+
+                        const getStatusBadgeVariant = (status: string) => {
+                          switch (status) {
+                            case 'this week': return 'default';
+                            case 'next week':
+                            case 'next week on site': return 'secondary';
+                            case 'pre next week': return 'outline';
+                            case 'pending': return 'outline';
+                            case 'rejected': return 'destructive';
+                            case 'past': return 'destructive';
+                            default: return 'outline';
+                          }
+                        };
+
+                        return (
+                          <>
+                            <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg font-semibold">
+                              <span>Всего участниц:</span>
+                              <Badge variant="default" className="text-lg px-3 py-1">
+                                {allParticipants.length}
+                              </Badge>
+                            </div>
+                            {statusOrder.map(status => {
+                              const count = statusCounts[status] || 0;
+                              if (count === 0) return null;
+                              return (
+                                <div key={status} className="flex items-center justify-between p-2 hover:bg-muted/50 rounded transition-colors">
+                                  <div className="flex items-center gap-2">
+                                    <Badge variant={getStatusBadgeVariant(status)}>
+                                      {status}
+                                    </Badge>
+                                  </div>
+                                  <span className="font-medium text-lg">{count}</span>
+                                </div>
+                              );
+                            })}
+                          </>
+                        );
+                      })()}
+                    </div>
+                  </CardContent>
+                </Card>
                 
                 {/* Deleted participants section */}
                 {deletedParticipantsAll.length > 0 && (
