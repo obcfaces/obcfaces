@@ -133,7 +133,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Send email via Resend
     const emailResponse = await resend.emails.send({
-      from: "OBC Face <noreply@obcface.com>",
+      from: "OBC Face <onboarding@resend.dev>",
       to: [user.email],
       subject: subject,
       html: html,
