@@ -1427,7 +1427,8 @@ const Admin = () => {
           created_at,
           application_data
         `)
-        .eq('admin_status', 'past');
+        .eq('admin_status', 'past')
+        .is('deleted_at', null);
 
       if (pastError) {
         console.error('Error loading past participants:', pastError);

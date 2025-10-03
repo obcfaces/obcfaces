@@ -760,6 +760,7 @@ const Profile = () => {
         .select('id, admin_status, created_at, application_data')
         .eq('user_id', id)
         .eq('is_active', true)
+        .is('deleted_at', null)
         .order('created_at', { ascending: false })
         .limit(1)
         .maybeSingle();
