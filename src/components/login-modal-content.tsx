@@ -141,7 +141,7 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
         setForgotEmailSent(true);
         // Don't show toast, show in modal instead
       } else if (mode === "login") {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) {
           if (error.message === "Invalid login credentials") {
             // Стандартное сообщение с двумя ссылками
@@ -158,6 +158,21 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
           
           throw new Error("Login failed");
         }
+        
+        // Log successful login
+        if (data.user) {
+          try {
+            await supabase.from('user_login_logs').insert({
+              user_id: data.user.id,
+              login_method: 'email',
+              success: true,
+              user_agent: navigator.userAgent
+            });
+          } catch (logError) {
+            console.error('Error logging login:', logError);
+          }
+        }
+        
         toast({ description: "Login successful" });
         onAuthSuccess?.(); // Call auth success callback
       } else {
@@ -223,6 +238,18 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
               { onConflict: "id" }
             );
           if (upsertErr) console.warn("Profile creation warning:", upsertErr.message);
+          
+          // Log successful registration
+          try {
+            await supabase.from('user_login_logs').insert({
+              user_id: userId,
+              login_method: 'email',
+              success: true,
+              user_agent: navigator.userAgent
+            });
+          } catch (logError) {
+            console.error('Error logging registration:', logError);
+          }
         }
         
         if (data.session?.user) {
