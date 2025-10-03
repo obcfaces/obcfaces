@@ -747,7 +747,6 @@ export type Database = {
           reviewed_at: string | null
           reviewed_by: string | null
           status_history: Json | null
-          status_week_history: Json | null
           submitted_at: string | null
           total_votes: number | null
           user_id: string
@@ -767,7 +766,6 @@ export type Database = {
           reviewed_at?: string | null
           reviewed_by?: string | null
           status_history?: Json | null
-          status_week_history?: Json | null
           submitted_at?: string | null
           total_votes?: number | null
           user_id: string
@@ -787,7 +785,6 @@ export type Database = {
           reviewed_at?: string | null
           reviewed_by?: string | null
           status_history?: Json | null
-          status_week_history?: Json | null
           submitted_at?: string | null
           total_votes?: number | null
           user_id?: string

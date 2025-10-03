@@ -339,7 +339,6 @@ interface WeeklyContestParticipant {
     height_cm: number;
     weight_kg: number;
   } | null;
-  status_week_history?: any;
   status_history?: any;
   week_interval?: string;
 }
@@ -693,14 +692,14 @@ const Admin = () => {
         console.log('=== FILTERING PAST WEEK PARTICIPANTS ===');
         console.log('All weekly participants:', weeklyParticipants.length);
         
-        // Filter participants with 'past' admin_status and group by week intervals from status_week_history
+        // Filter participants with 'past' admin_status
         const pastParticipants = weeklyParticipants.filter(participant => {
           const adminStatus = participant.admin_status || 'this week';
           
           console.log(`Participant ${participant.id}:`, {
             name: `${participant.application_data?.first_name || ''} ${participant.application_data?.last_name || ''}`.trim(),
             adminStatus,
-            status_week_history: (participant as any).status_week_history
+            status_history: (participant as any).status_history
           });
           
           // Include only participants with 'past' status - don't include 'this week'
@@ -750,7 +749,7 @@ const Admin = () => {
     filterPastWeekParticipants();
   }, [weeklyParticipants, participantFilters, pastWeekFilter]);
 
-  // Helper function to determine week interval for participant based on admin_status and status_week_history  
+  // Helper function to determine week interval for participant based on admin_status and status_history  
   const getParticipantWeekInterval = (participant: any) => {
     const adminStatus = participant.admin_status || 'this week';
     
@@ -782,7 +781,7 @@ const Admin = () => {
       case 'next week on site':
         return '06/10-12/10/25'; // Next week
       case 'past':
-        // For 'past' status, use status_week_history to determine week interval
+        // For 'past' status, use status_history to determine week interval
         return '22/09-28/09/25'; // Default to 1 week ago if no specific interval
       case 'pending':
         return '29/09-05/10/25'; // Same as current week for pending apps
@@ -1410,7 +1409,6 @@ const Admin = () => {
           user_id,
           admin_status,
           week_interval,
-          status_week_history,
           status_history,
           final_rank,
           total_votes,
@@ -1455,7 +1453,6 @@ const Admin = () => {
             contest_start_date: item.created_at,
             is_active: item.is_active,
             admin_status: item.admin_status,
-            status_week_history: item.status_week_history || {},
             status_history: item.status_history || {},
             week_interval: item.week_interval
           };
@@ -1500,7 +1497,6 @@ const Admin = () => {
         contest_start_date: item.contest_start_date,
         is_active: item.is_active,
         admin_status: item.admin_status || 'pending',
-        status_week_history: item.status_week_history || {},
         status_history: item.status_history || {},
         week_interval: item.week_interval
       }));
@@ -3497,7 +3493,6 @@ const Admin = () => {
                       admin_status: app.admin_status,
                       participant_status: app.admin_status,
                       status_history: {},
-                      status_week_history: {},
                       week_interval: getParticipantWeekInterval({ admin_status: app.admin_status }),
                       created_at: app.submitted_at,
                       contest_id: null,
