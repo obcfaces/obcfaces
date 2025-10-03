@@ -5351,144 +5351,64 @@ const Admin = () => {
 
               <div className="space-y-4 px-0 md:px-6">
                 {(() => {
-                  console.log('🔍 NEW TAB - Filtering applications');
-                  console.log('📊 contestApplications count:', contestApplications.length);
-                  console.log('📊 weeklyParticipants count:', weeklyParticipants.length);
-                  console.log('🎯 registrationsStatusFilter:', registrationsStatusFilter);
-                  console.log('🌍 countryFilter:', countryFilter);
-                  
-                  const filteredApplications = (showDeletedApplications ? deletedApplications : contestApplications)
-                    .filter((application) => {
-                      const appData = application.application_data || {};
-                      const appName = `${appData.first_name} ${appData.last_name}`;
+                  // Теперь работаем напрямую с weeklyParticipants
+                  const filteredParticipants = weeklyParticipants
+                    .filter((participant) => {
+                      const appData = participant.application_data || {};
                       
-                      // Filter by country first
-                      const applicationCountry = appData.country;
-                      if (countryFilter !== 'all' && applicationCountry !== countryFilter) {
-                        console.log(`❌ ${appName} - filtered by country (${applicationCountry} !== ${countryFilter})`);
+                      // Filter by country
+                      if (countryFilter !== 'all' && appData.country !== countryFilter) {
                         return false;
                       }
                       
-                      // Find weekly participant if exists
-                      const weeklyParticipant = weeklyParticipants.find(p => p.user_id === application.user_id);
-                      
-                      console.log(`🔎 Checking ${appName}:`, {
-                        user_id: application.user_id,
-                        has_weekly_participant: !!weeklyParticipant,
-                        weekly_status: weeklyParticipant?.admin_status,
-                        app_admin_status: application.admin_status
-                      });
-                      
-                      // Handle admin_status filtering
+                      // Filter by admin status
                       if (registrationsStatusFilter !== 'all') {
-                        // If there's a weekly participant record, check its status
-                        if (weeklyParticipant) {
-                          const matches = weeklyParticipant.admin_status === registrationsStatusFilter;
-                          console.log(`${matches ? '✅' : '❌'} ${appName} - weekly participant status check: ${weeklyParticipant.admin_status} === ${registrationsStatusFilter}`);
-                          return matches;
-                        } else {
-                          // For applications without weekly_contest_participants record
-                          const matches = registrationsStatusFilter === 'pending' || registrationsStatusFilter === 'rejected';
-                          console.log(`${matches ? '✅' : '❌'} ${appName} - no weekly participant, filter: ${registrationsStatusFilter}`);
-                          return matches;
-                        }
+                        return participant.admin_status === registrationsStatusFilter;
                       }
                       
-                      // When showing "all", exclude participants that are already in weekly contests
-                      if (registrationsStatusFilter === 'all' && weeklyParticipant) {
-                        const excludedStatuses = ['next week', 'this week', 'next week on site'];
-                        if (excludedStatuses.includes(weeklyParticipant.admin_status)) {
-                          console.log(`❌ ${appName} - excluded (status: ${weeklyParticipant.admin_status})`);
-                          return false;
-                        }
-                      }
-                      
-                      console.log(`✅ ${appName} - passed all filters`);
                       return true;
                     });
                   
-                  const userApplicationsMap = new Map();
-                  filteredApplications.forEach(app => {
-                    if (!userApplicationsMap.has(app.user_id) || 
-                        new Date(app.submitted_at) > new Date(userApplicationsMap.get(app.user_id).submitted_at)) {
-                      userApplicationsMap.set(app.user_id, app);
-                    }
-                  });
-                  
-                  const uniqueApplications = Array.from(userApplicationsMap.values());
-                  
-                  if (uniqueApplications.length === 0) {
+                  if (filteredParticipants.length === 0) {
                     return (
                       <div className="text-center py-8 text-muted-foreground">
-                        <p className="text-lg">No applications found</p>
+                        <p className="text-lg">No participants found</p>
                       </div>
                     );
                    }
 
-                   // Function to render status badge
-                   const getApplicationStatusBadge = (status: string) => {
-                     const badgeVariant = status === 'approved' ? 'default' : 
-                                         status === 'rejected' ? 'destructive' : 
-                                         'secondary';
-                     const badgeColor = status === 'approved' ? 'bg-green-100 text-green-700 border-green-500' :
-                                       status === 'rejected' ? 'bg-red-100 text-red-700 border-red-500' :
-                                       '';
-                     
-                     return (
-                       <Badge variant={badgeVariant} className={badgeColor}>
-                         {status.charAt(0).toUpperCase() + status.slice(1)}
-                       </Badge>
-                     );
-                   };
-
-                    // Calculate pagination for applications
-                    const totalApplications = uniqueApplications.length;
-                    const totalApplicationPages = Math.ceil(totalApplications / itemsPerPage);
-                    const applicationStartIndex = (applicationCurrentPage - 1) * itemsPerPage;
-                    const applicationEndIndex = applicationStartIndex + itemsPerPage;
-                    const paginatedApplications = uniqueApplications.slice(applicationStartIndex, applicationEndIndex);
+                   // Calculate pagination
+                    const totalParticipants = filteredParticipants.length;
+                    const totalPages = Math.ceil(totalParticipants / itemsPerPage);
+                    const startIndex = (applicationCurrentPage - 1) * itemsPerPage;
+                    const endIndex = startIndex + itemsPerPage;
+                    const paginatedParticipants = filteredParticipants.slice(startIndex, endIndex);
 
                     return (
                       <>
-                        {paginatedApplications.map((application) => {
-                    const appData = typeof application.application_data === 'string' 
-                      ? JSON.parse(application.application_data) 
-                      : application.application_data;
-                    const submittedDate = new Date(application.submitted_at);
-                    const userProfile = profiles.find(p => p.id === application.user_id);
-                    const userApplicationCount = (showDeletedApplications ? deletedApplications : contestApplications)
-                      .filter(app => app.user_id === application.user_id).length;
+                        {paginatedParticipants.map((participant) => {
+                    const appData = typeof participant.application_data === 'string' 
+                      ? JSON.parse(participant.application_data) 
+                      : participant.application_data;
+                    const submittedDate = new Date(participant.created_at);
+                    const userProfile = profiles.find(p => p.id === participant.user_id);
                    
                     return (
-                      <div key={application.id}>
+                      <div key={participant.id}>
                          <Card className="overflow-hidden relative rounded-none border-l-0 border-r-0 md:rounded-lg md:border-l md:border-r h-[149px]">
                            {/* Edit button in bottom left corner */}
-                           {!showDeletedApplications && (
-                             <Button
-                               size="sm"
-                               variant="outline"
-                                onClick={() => {
-                                  setEditingParticipantData(application);
-                                  setShowParticipationModal(true);
-                                }}
-                               className="absolute bottom-0 left-0 z-20 p-1 m-0 rounded-none rounded-tr-md border-0 border-t border-r bg-background/90 hover:bg-background"
-                               title="Edit Application"
-                             >
-                               <Edit className="w-4 h-4" />
-                             </Button>
-                           )}
-                           
-                           {/* Application count badge */}
-                           {userApplicationCount > 1 && (
-                             <div 
-                               className="absolute top-0 left-0 z-10 bg-blue-500 text-white text-xs px-2 py-1 rounded-br cursor-pointer hover:bg-blue-600 transition-colors"
-                               onClick={() => setSelectedUserApplications(
-                                 selectedUserApplications === application.user_id ? null : application.user_id
-                               )}
-                             >
-                               {userApplicationCount}
-                             </div>
-                           )}
+                           <Button
+                             size="sm"
+                             variant="outline"
+                              onClick={() => {
+                                setEditingParticipantData(participant);
+                                setShowParticipationModal(true);
+                              }}
+                             className="absolute bottom-0 left-0 z-20 p-1 m-0 rounded-none rounded-tr-md border-0 border-t border-r bg-background/90 hover:bg-background"
+                             title="Edit Application"
+                           >
+                             <Edit className="w-4 h-4" />
+                           </Button>
                           
                             <CardContent className="p-0">
                               {/* Desktop layout */}
@@ -5537,10 +5457,10 @@ const Admin = () => {
                                      className="text-xs text-muted-foreground mb-1 cursor-pointer hover:text-foreground transition-colors"
                                      onClick={() => {
                                        const newExpanded = new Set(expandedDesktopItems);
-                                       if (expandedDesktopItems.has(application.id)) {
-                                         newExpanded.delete(application.id);
+                                       if (expandedDesktopItems.has(participant.id)) {
+                                         newExpanded.delete(participant.id);
                                        } else {
-                                         newExpanded.add(application.id);
+                                         newExpanded.add(participant.id);
                                        }
                                        setExpandedDesktopItems(newExpanded);
                                      }}
@@ -5549,7 +5469,7 @@ const Admin = () => {
                                    </div>
                                    
                                    {/* Expanded information - desktop */}
-                                   {expandedDesktopItems.has(application.id) && (
+                                   {expandedDesktopItems.has(participant.id) && (
                                      <div className="text-xs text-muted-foreground mb-1">
                                        {appData.weight_kg}kg • {appData.height_cm}cm • {appData.gender} • {appData.birth_year} • {appData.marital_status} • {appData.has_children ? 'Has children' : 'No children'}
                                      </div>
@@ -5595,94 +5515,34 @@ const Admin = () => {
                                   </div>
                                 </div>
 
-                                 {/* Column 3: Status Button (20ch) - только для десктопа */}
-                                  <div className="w-[20ch] flex-shrink-0 p-4 pl-0 flex flex-col gap-2 -mt-[20px]">
-                                   {/* Status dropdown at the top - desktop */}
-                                   {!showDeletedApplications && (
-                                      <Select 
-                                        value={(() => {
-                                           // Используем только admin_status
-                                           const weeklyParticipant = weeklyParticipants.find(p => p.user_id === application.user_id);
-                                           return weeklyParticipant ? weeklyParticipant.admin_status : 'pending';
-                                         })()} 
-                                        onValueChange={(newStatus) => {
-                                          if (newStatus === 'delete') {
-                                            const appData = typeof application.application_data === 'string' 
-                                              ? JSON.parse(application.application_data) 
-                                              : application.application_data;
-                                            setApplicationToDelete({ 
-                                              id: application.id, 
-                                              name: `${appData.firstName} ${appData.lastName}` 
-                                            });
-                                            setShowDeleteConfirmModal(true);
-                                            return;
-                                          }
-                                          if (newStatus === 'rejected') {
-                                            const appData = typeof application.application_data === 'string' 
-                                              ? JSON.parse(application.application_data) 
-                                              : application.application_data;
-                                            setApplicationToReject({ 
-                                              id: application.id, 
-                                              name: `${appData.firstName} ${appData.lastName}` 
-                                            });
-                                            setRejectModalOpen(true);
-                                            return;
-                                          }
-                                          reviewApplication(application.id, newStatus as ParticipantStatus);
-                                        }}
-                                     >
-                                        <SelectTrigger 
-                                           className={`w-[60%] h-7 text-xs ${
-                                             (() => {
-                                               const participant = weeklyParticipants.find(p => p.user_id === application.user_id);
-                                               const status = participant ? participant.admin_status : 'pending';
-                                               return status === 'approved' ? 'bg-green-100 border-green-500 text-green-700' :
-                                                      status === 'rejected' ? 'bg-red-100 border-red-500 text-red-700' : '';
-                                             })()
-                                           }`}
-                                       >
-                                         <SelectValue />
-                                       </SelectTrigger>
-                                           <SelectContent className="z-[9999] bg-popover border shadow-lg">
-                                               <SelectItem value="pending">Pending</SelectItem>
-                                               <SelectItem value="rejected">Rejected</SelectItem>
-                                              <SelectItem value="pre next week">Pre Next Week</SelectItem>
-                                              <SelectItem value="next week">Next Week</SelectItem>
-                                              <SelectItem value="next week on site">Next Week On Site</SelectItem>
-                                              <SelectItem value="this week">This Week</SelectItem>
-                                              <SelectItem value="past">Past</SelectItem>
-                                            </SelectContent>
-                                     </Select>
-                                   )}
+                                 {/* Column 3: Status & Actions */}
+                                  <div className="w-[20ch] flex-shrink-0 p-4 pl-0 flex flex-col gap-2">
+                                   <Select 
+                                     value={participant.admin_status}
+                                     onValueChange={(newStatus) => handleStatusChange(participant.id, newStatus as ParticipantStatus)}
+                                   >
+                                     <SelectTrigger className={`w-[60%] h-7 text-xs ${
+                                       participant.admin_status === 'this week' ? 'bg-green-100 border-green-500 text-green-700' :
+                                       participant.admin_status === 'rejected' ? 'bg-red-100 border-red-500 text-red-700' : ''
+                                     }`}>
+                                       <SelectValue />
+                                     </SelectTrigger>
+                                     <SelectContent className="z-[9999] bg-popover border shadow-lg">
+                                       <SelectItem value="pending">Pending</SelectItem>
+                                       <SelectItem value="rejected">Rejected</SelectItem>
+                                       <SelectItem value="pre next week">Pre Next Week</SelectItem>
+                                       <SelectItem value="next week">Next Week</SelectItem>
+                                       <SelectItem value="next week on site">Next Week On Site</SelectItem>
+                                       <SelectItem value="this week">This Week</SelectItem>
+                                       <SelectItem value="past">Past</SelectItem>
+                                     </SelectContent>
+                                   </Select>
                                    
-                                   {/* Status change date with reviewer login - desktop */}
-                                    <div 
-                                      className="text-xs text-muted-foreground cursor-pointer hover:text-foreground"
-                                      onClick={() => {
-                                        setEditHistoryApplicationId(application.id);
-                                        setShowEditHistory(true);
-                                      }}
-                                    >
-                                      {(() => {
-                                        const statusDate = application.reviewed_at || application.approved_at || application.rejected_at || application.submitted_at;
-                                        if (statusDate) {
-                                          const date = new Date(statusDate);
-                                          const time = date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
-                                          const dateStr = date.toLocaleDateString('en-GB', { 
-                                            day: 'numeric', 
-                                            month: 'short'
-                                          }).toLowerCase();
-                                         const reviewerEmail = application.reviewed_by && profiles.find(p => p.id === application.reviewed_by)?.email;
-                                         const reviewerLogin = reviewerEmail ? reviewerEmail.substring(0, 4) : 'syst';
-                                         return (
-                                           <>
-                                             <span className="text-blue-600">{reviewerLogin}</span>
-                                             {` ${time} - ${dateStr}`}
-                                           </>
-                                         );
-                                       }
-                                       return '';
-                                     })()}
+                                   <div className="text-xs text-muted-foreground">
+                                     {new Date(participant.created_at).toLocaleDateString('en-GB', { 
+                                       day: 'numeric', 
+                                       month: 'short'
+                                     })}
                                    </div>
                                  </div>
                               </div>
