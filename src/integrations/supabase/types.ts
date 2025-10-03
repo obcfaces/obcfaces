@@ -1495,6 +1495,8 @@ export type Database = {
           contest_id: string
           country: string
           created_at: string
+          deleted_at: string
+          display_name: string
           final_rank: number
           first_name: string
           gender: string
@@ -1503,10 +1505,14 @@ export type Database = {
           is_active: boolean
           last_name: string
           marital_status: string
+          notes: string
           participant_id: string
           photo_1_url: string
           photo_2_url: string
+          reviewed_at: string
+          reviewed_by: string
           state: string
+          submitted_at: string
           total_votes: number
           user_id: string
           week_interval: string
@@ -1521,6 +1527,7 @@ export type Database = {
           city: string
           country: string
           created_at: string
+          display_name: string
           final_rank: number
           first_name: string
           height_cm: number
@@ -1528,6 +1535,7 @@ export type Database = {
           participant_id: string
           photo_1_url: string
           photo_2_url: string
+          state: string
           total_votes: number
           user_id: string
           weight_kg: number
@@ -1541,6 +1549,7 @@ export type Database = {
           city: string
           country: string
           created_at: string
+          display_name: string
           final_rank: number
           first_name: string
           height_cm: number
