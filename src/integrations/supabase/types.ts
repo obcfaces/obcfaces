@@ -56,6 +56,13 @@ export type Database = {
             referencedRelation: "contest_applications"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "contest_application_history_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "contest_applications_backup"
+            referencedColumns: ["id"]
+          },
         ]
       }
       contest_applications: {
@@ -739,6 +746,7 @@ export type Database = {
           notes: string | null
           reviewed_at: string | null
           reviewed_by: string | null
+          status: string | null
           status_history: Json | null
           status_week_history: Json | null
           submitted_at: string | null
@@ -759,6 +767,7 @@ export type Database = {
           notes?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
+          status?: string | null
           status_history?: Json | null
           status_week_history?: Json | null
           submitted_at?: string | null
@@ -779,6 +788,7 @@ export type Database = {
           notes?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
+          status?: string | null
           status_history?: Json | null
           status_week_history?: Json | null
           submitted_at?: string | null
@@ -864,6 +874,54 @@ export type Database = {
       }
     }
     Views: {
+      contest_applications_backup: {
+        Row: {
+          application_data: Json | null
+          created_at: string | null
+          deleted_at: string | null
+          id: string | null
+          is_active: boolean | null
+          last_participation_date: string | null
+          notes: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string | null
+          submitted_at: string | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          application_data?: Json | null
+          created_at?: string | null
+          deleted_at?: string | null
+          id?: string | null
+          is_active?: boolean | null
+          last_participation_date?: string | null
+          notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string | null
+          submitted_at?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          application_data?: Json | null
+          created_at?: string | null
+          deleted_at?: string | null
+          id?: string | null
+          is_active?: boolean | null
+          last_participation_date?: string | null
+          notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string | null
+          submitted_at?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       contest_participants_public: {
         Row: {
           avatar_url: string | null
