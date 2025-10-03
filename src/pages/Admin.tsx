@@ -369,7 +369,8 @@ const Admin = () => {
   const [selectedParticipantForNextWeekVoters, setSelectedParticipantForNextWeekVoters] = useState<string>('');
   const [countryFilter, setCountryFilter] = useState<string>('all');
   const [genderFilter, setGenderFilter] = useState<string>('all');
-  const [adminStatusFilter, setAdminStatusFilter] = useState<string>('all');
+  const [adminStatusFilter, setAdminStatusFilter] = useState<string>('all'); // For Weekly tab
+  const [registrationsStatusFilter, setRegistrationsStatusFilter] = useState<string>('all'); // For Registrations/New tab
   const [allSectionStatusFilter, setAllSectionStatusFilter] = useState<string>('all');
   const [deletedParticipantsAll, setDeletedParticipantsAll] = useState<any[]>([]);
   const [showDeletedAll, setShowDeletedAll] = useState(false);
@@ -5255,9 +5256,9 @@ const Admin = () => {
                 <div className="flex gap-4 items-center justify-start">
                   <div className="flex flex-col gap-2">
                       <Select 
-                      value={adminStatusFilter} 
+                      value={registrationsStatusFilter} 
                       onValueChange={(value) => {
-                        setAdminStatusFilter(value);
+                        setRegistrationsStatusFilter(value);
                         setApplicationCurrentPage(1);
                       }}
                     >
@@ -5275,9 +5276,9 @@ const Admin = () => {
                           <SelectItem value="past">Past</SelectItem>
                        </SelectContent>
                     </Select>
-                    {adminStatusFilter !== 'all' && (
+                    {registrationsStatusFilter !== 'all' && (
                       <p className="text-xs text-muted-foreground">
-                        Filter: {adminStatusFilter}
+                        Filter: {registrationsStatusFilter}
                       </p>
                     )}
                   </div>
@@ -5301,7 +5302,7 @@ const Admin = () => {
 
               <div className="space-y-4 px-0 md:px-6">
                 {(() => {
-                  console.log('Filtering applications, adminStatusFilter:', adminStatusFilter);
+                  console.log('Filtering applications, registrationsStatusFilter:', registrationsStatusFilter);
                   const filteredApplications = (showDeletedApplications ? deletedApplications : contestApplications)
                     .filter((application) => {
                       // Filter by country first
@@ -5312,21 +5313,21 @@ const Admin = () => {
                       const weeklyParticipant = weeklyParticipants.find(p => p.user_id === application.user_id);
                       
                       // Handle admin_status filtering
-                      if (adminStatusFilter !== 'all') {
+                      if (registrationsStatusFilter !== 'all') {
                         // If there's a weekly participant record, check its status
                         if (weeklyParticipant) {
-                          return weeklyParticipant.admin_status === adminStatusFilter;
+                          return weeklyParticipant.admin_status === registrationsStatusFilter;
                         } else {
                           // For applications without weekly_contest_participants record
                           // Show them when filtering for "pending" or "rejected" statuses
                           // (these are typically new applications that haven't been moved to weekly contests yet)
-                          return adminStatusFilter === 'pending' || adminStatusFilter === 'rejected';
+                          return registrationsStatusFilter === 'pending' || registrationsStatusFilter === 'rejected';
                         }
                       }
                       
                       // When showing "all", exclude participants that are already in weekly contests
                       // (they will be shown in their respective tabs)
-                      if (adminStatusFilter === 'all' && weeklyParticipant) {
+                      if (registrationsStatusFilter === 'all' && weeklyParticipant) {
                         const excludedStatuses = ['next week', 'this week', 'next week on site'];
                         if (excludedStatuses.includes(weeklyParticipant.admin_status)) {
                           return false;
