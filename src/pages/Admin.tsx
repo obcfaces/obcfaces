@@ -2628,7 +2628,7 @@ const Admin = () => {
                   const appData = participant.application_data || {};
                   
                   return (
-                    <Card key={participant.participant_id} className="overflow-hidden relative h-[149px]">
+                    <Card key={participant.id} className="overflow-hidden relative h-[149px]">
                       <CardContent className="p-0">
                         {/* Desktop layout */}
                         <div className="hidden md:flex">
@@ -2705,7 +2705,7 @@ const Admin = () => {
                                   value={participant.admin_status || 'pre next week'}
                                   onValueChange={async (value) => {
                                     try {
-                                      if (!participant.participant_id) {
+                                      if (!participant.id) {
                                         toast({
                                           title: "Error",
                                           description: "No participant ID found",
@@ -2718,7 +2718,7 @@ const Admin = () => {
                                         `${participant.first_name || 'Unknown'} ${participant.last_name || ''}`;
                                       
                                       const result = await updateParticipantStatusWithHistory(
-                                        participant.participant_id,
+                                        participant.id,
                                         value as ParticipantStatus,
                                         participantName
                                       );
@@ -2765,7 +2765,7 @@ const Admin = () => {
                                   className="h-7 w-7 p-0"
                                   onClick={() => {
                                     setSelectedStatusHistory({
-                                      participantId: participant.participant_id,
+                                      participantId: participant.id,
                                       participantName: participant.display_name || `${participant.first_name} ${participant.last_name}`,
                                       statusHistory: participant.status_history
                                     });
@@ -2829,7 +2829,7 @@ const Admin = () => {
                                       `${participantProfile?.first_name || appData.first_name} ${participantProfile?.last_name || appData.last_name}`;
                                     
                                     const result = await updateParticipantStatusWithHistory(
-                                      participant.participant_id,
+                                      participant.id,
                                       value as ParticipantStatus,
                                       participantName
                                     );
@@ -2982,7 +2982,7 @@ const Admin = () => {
                   const appData = participant.application_data || {};
                   
                   return (
-                    <Card key={participant.participant_id} className="overflow-hidden relative h-[149px]">
+                    <Card key={participant.id} className="overflow-hidden relative h-[149px]">
                       <CardContent className="p-0">
                         {/* Desktop layout */}
                         <div className="hidden md:flex">
@@ -3063,8 +3063,8 @@ const Admin = () => {
                                       value={participant.admin_status || 'next week'}
                                       onValueChange={async (value) => {
                                         try {
-                                          if (!participant.participant_id) {
-                                            console.error('participant.participant_id is falsy:', participant.participant_id);
+                                          if (!participant.id) {
+                                            console.error('participant.id is falsy:', participant.id);
                                             toast({
                                               title: "Error",
                                               description: "No participant ID found",
@@ -3077,7 +3077,7 @@ const Admin = () => {
                                             `${participant.first_name || 'Unknown'} ${participant.last_name || ''}`;
                                           
                                           const result = await updateParticipantStatusWithHistory(
-                                            participant.participant_id,
+                                            participant.id,
                                             value as ParticipantStatus,
                                             participantName
                                           );
