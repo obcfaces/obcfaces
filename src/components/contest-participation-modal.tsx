@@ -686,69 +686,39 @@ export const ContestParticipationModal = ({
         
         dbError = error;
       } else {
-        // Check if there's a deleted record to restore
-        const { data: deletedRecord, error: deletedCheckError } = await supabase
-          .from('weekly_contest_participants')
+        // Get current active weekly contest
+        const { data: activeContest, error: contestError } = await supabase
+          .from('weekly_contests')
           .select('id')
-          .eq('user_id', session.user.id)
-          .not('deleted_at', 'is', null)
-          .order('deleted_at', { ascending: false })
+          .eq('status', 'active')
+          .order('week_start_date', { ascending: false })
           .limit(1)
           .maybeSingle();
 
-        if (deletedRecord) {
-          // Restore and update the deleted record instead of creating new one
-          console.log('Restoring deleted participant record:', deletedRecord.id);
-          
-          const { error } = await supabase
-            .from('weekly_contest_participants')
-            .update({
-              application_data: applicationData,
-              admin_status: 'pending' as any,
-              submitted_at: new Date().toISOString(),
-              deleted_at: null,
-              is_active: true
-            } as any)
-            .eq('id', deletedRecord.id);
-          
-          dbError = error;
-          setCurrentApplicationId(deletedRecord.id);
-          console.log('Restored deleted record result', { error });
-        } else {
-          // Get current active weekly contest
-          const { data: activeContest, error: contestError } = await supabase
-            .from('weekly_contests')
-            .select('id')
-            .eq('status', 'active')
-            .order('week_start_date', { ascending: false })
-            .limit(1)
-            .maybeSingle();
+        if (contestError || !activeContest) {
+          throw new Error('No active contest found. Please try again later.');
+        }
 
-          if (contestError || !activeContest) {
-            throw new Error('No active contest found. Please try again later.');
-          }
-
-          // Insert new application and get the returned data
-          console.log('Inserting new application to database with contest_id:', activeContest.id);
-          const { data: insertedData, error } = await supabase
-            .from('weekly_contest_participants')
-            .insert({
-              user_id: session.user.id,
-              contest_id: activeContest.id,
-              application_data: applicationData,
-              admin_status: 'pending' as any,
-              submitted_at: new Date().toISOString()
-            } as any)
-            .select('id')
-            .single();
-          
-          console.log('Database insert result', { insertedData, error });
-          dbError = error;
-          
-          // Store the application ID for later use in contact form
-          if (insertedData) {
-            setCurrentApplicationId(insertedData.id);
-          }
+        // Insert new application and get the returned data
+        console.log('Inserting new application to database with contest_id:', activeContest.id);
+        const { data: insertedData, error } = await supabase
+          .from('weekly_contest_participants')
+          .insert({
+            user_id: session.user.id,
+            contest_id: activeContest.id,
+            application_data: applicationData,
+            admin_status: 'pending' as any,
+            submitted_at: new Date().toISOString()
+          } as any)
+          .select('id')
+          .single();
+        
+        console.log('Database insert result', { insertedData, error });
+        dbError = error;
+        
+        // Store the application ID for later use in contact form
+        if (insertedData) {
+          setCurrentApplicationId(insertedData.id);
         }
       }
 
