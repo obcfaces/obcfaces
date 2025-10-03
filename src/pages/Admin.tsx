@@ -1370,7 +1370,10 @@ const Admin = () => {
           last_sign_in_at: userAuthData?.last_sign_in_at || null,
           email_confirmed_at: userAuthData?.email_confirmed_at || null,
           ip_address: (userLoginLog?.ip_address as string) || null,
-          user_agent: (userLoginLog?.user_agent as string) || null
+          user_agent: (userLoginLog?.user_agent as string) || null,
+          // Keep existing country and city from profile
+          country: profile.country || null,
+          city: profile.city || null
         };
         
         // Log each profile's email for debugging
