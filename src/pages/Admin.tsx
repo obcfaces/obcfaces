@@ -284,6 +284,7 @@ interface ProfileData {
   city?: string;
   state?: string;
   country?: string;
+  isDuplicateIP?: boolean;
   gender?: string;
   marital_status?: string;
   has_children?: boolean;
@@ -411,6 +412,7 @@ const Admin = () => {
    });
    const [applicationHistory, setApplicationHistory] = useState<any[]>([]);
   const [verificationFilter, setVerificationFilter] = useState<string>('all');
+  const [searchQuery, setSearchQuery] = useState('');
   const [verifyingUsers, setVerifyingUsers] = useState<Set<string>>(new Set());
   const [roleFilter, setRoleFilter] = useState<string>('all');
   const [userRoleMap, setUserRoleMap] = useState<{ [key: string]: string }>({});
@@ -5012,6 +5014,16 @@ const Admin = () => {
                   </div>
                 </div>
                 
+                {/* Search input */}
+                <div className="flex gap-2 mb-4">
+                  <Input
+                    placeholder="Поиск по имени, email или IP..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="max-w-md"
+                  />
+                </div>
+                
                 {/* Combined filters in one row */}
                 <div className="flex gap-2 mb-4">
                   <Button
@@ -5060,6 +5072,20 @@ const Admin = () => {
                         return userRole === 'admin';
                       } else if (roleFilter === 'usual') {
                         return userRole === 'usual' || !userRole;
+                      }
+
+                      // Фильтр поиска
+                      if (searchQuery.trim()) {
+                        const query = searchQuery.toLowerCase();
+                        const fullName = `${profile.first_name || ''} ${profile.last_name || ''}`.toLowerCase();
+                        const displayName = (profile.display_name || '').toLowerCase();
+                        const email = (profile.email || '').toLowerCase();
+                        const ip = (profile.ip_address || '').toLowerCase();
+                        
+                        return fullName.includes(query) || 
+                               displayName.includes(query) || 
+                               email.includes(query) || 
+                               ip.includes(query);
                       }
                       
                       return true;
@@ -5138,12 +5164,13 @@ const Admin = () => {
                                   <span className="font-medium">
                                     {profile.display_name || `${profile.first_name} ${profile.last_name}`}
                                   </span>
-                                </div>
-                                {profile.ip_address && (
-                                  <div className="text-xs text-muted-foreground">
-                                    IP: {profile.ip_address}
-                                  </div>
-                                )}
+                                 </div>
+                                 {profile.ip_address && (
+                                   <div className={`text-xs ${profile.isDuplicateIP ? 'text-red-500 font-medium' : 'text-muted-foreground'}`}>
+                                     IP: {profile.ip_address}
+                                     {profile.isDuplicateIP && ' ⚠️'}
+                                   </div>
+                                 )}
                                 {profile.user_agent && (() => {
                                   const { browser, device, os } = UAParser(profile.user_agent);
                                   
