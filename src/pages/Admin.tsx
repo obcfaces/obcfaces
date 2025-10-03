@@ -4993,6 +4993,12 @@ const Admin = () => {
                               day: 'numeric', 
                               month: 'short' 
                             })}
+                            {' '}
+                            {new Date(profile.created_at).toLocaleTimeString('en-GB', { 
+                              hour: '2-digit', 
+                              minute: '2-digit',
+                              hour12: false
+                            })}
                           </Badge>
                           
                           {/* Controls row at top right */}
