@@ -1302,29 +1302,19 @@ const Admin = () => {
       console.warn('Failed to fetch auth data:', authError);
     }
 
-    console.log('Auth data fetched:', authData?.length || 0, 'records');
-    console.log('Sample auth data:', authData?.slice(0, 3));
-
     const profilesWithAuth = (profilesData || []).map(profile => {
       const userAuthData = authData?.find(auth => auth.user_id === profile.id);
-      
-      console.log(`Mapping profile ${profile.id}:`, {
-        hasAuthData: !!userAuthData,
-        email: userAuthData?.email
-      });
       
       return {
         ...profile,
         auth_provider: userAuthData?.auth_provider || 'unknown',
-        email: userAuthData?.email || null,
+        // Приоритет: сначала email из profiles, потом из auth
+        email: profile.email || userAuthData?.email || null,
         facebook_data: userAuthData?.facebook_data || null,
         last_sign_in_at: userAuthData?.last_sign_in_at || null,
         email_confirmed_at: userAuthData?.email_confirmed_at || null
       };
     });
-
-    console.log('Profiles with auth:', profilesWithAuth.length);
-    console.log('Sample profiles with email:', profilesWithAuth.slice(0, 3).map(p => ({ id: p.id, email: p.email })));
 
     setProfiles(profilesWithAuth);
   };

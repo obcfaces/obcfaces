@@ -215,6 +215,7 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
               {
                 id: userId,
                 first_name: firstName || null,
+                email: email || null,
                 country: country || null,
                 state: stateName || null,
                 city: city || null,
