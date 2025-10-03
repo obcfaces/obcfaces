@@ -278,6 +278,7 @@ interface ProfileData {
   bio?: string;
   avatar_url?: string;
   age?: number;
+  ip_address?: string | null;
   city?: string;
   state?: string;
   country?: string;
@@ -1302,8 +1303,20 @@ const Admin = () => {
       console.warn('Failed to fetch auth data:', authError);
     }
 
+    // Fetch login logs for IP addresses
+    const { data: loginLogs, error: loginError } = await supabase
+      .from('user_login_logs')
+      .select('user_id, ip_address, created_at')
+      .order('created_at', { ascending: false });
+
+    if (loginError) {
+      console.warn('Failed to fetch login logs:', loginError);
+    }
+
     const profilesWithAuth = (profilesData || []).map(profile => {
       const userAuthData = authData?.find(auth => auth.user_id === profile.id);
+      // Get the most recent IP address for this user
+      const userLoginLog = loginLogs?.find(log => log.user_id === profile.id);
       
       return {
         ...profile,
@@ -1312,7 +1325,8 @@ const Admin = () => {
         email: profile.email || userAuthData?.email || null,
         facebook_data: userAuthData?.facebook_data || null,
         last_sign_in_at: userAuthData?.last_sign_in_at || null,
-        email_confirmed_at: userAuthData?.email_confirmed_at || null
+        email_confirmed_at: userAuthData?.email_confirmed_at || null,
+        ip_address: (userLoginLog?.ip_address as string) || null
       };
     });
 
@@ -5036,12 +5050,17 @@ const Admin = () => {
                                   <span className="font-medium">
                                     {profile.display_name || `${profile.first_name} ${profile.last_name}`}
                                   </span>
-                                  {profile.email && (
-                                    <span className="text-xs text-muted-foreground">
-                                      {profile.email}
-                                    </span>
-                                  )}
                                 </div>
+                                {profile.ip_address && (
+                                  <div className="text-xs text-muted-foreground">
+                                    IP: {profile.ip_address}
+                                  </div>
+                                )}
+                                {profile.email && (
+                                  <div className="text-xs text-muted-foreground">
+                                    {profile.email}
+                                  </div>
+                                )}
                                 {!profile.email && (
                                   <div className="text-sm text-destructive">
                                     No email
