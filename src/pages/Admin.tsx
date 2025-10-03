@@ -5710,58 +5710,66 @@ const Admin = () => {
                                                </div>
                                              )}
                                            
-                                             <div className="flex-1"></div>
-                                          
-                                              {/* Status filter positioned at bottom */}
-                                               {!showDeletedApplications && (
-                                                 <div className="absolute bottom-12 right-13 flex items-center gap-2">
-                                             <Select 
-                                               value={application.admin_status}
-                                                onValueChange={(newStatus) => {
-                                                  if (newStatus === 'delete') {
-                                                    const appData = typeof application.application_data === 'string' 
-                                                      ? JSON.parse(application.application_data) 
-                                                      : application.application_data;
-                                                    setApplicationToDelete({ 
-                                                      id: application.id, 
-                                                      name: `${appData.firstName} ${appData.lastName}` 
-                                                    });
-                                                    setShowDeleteConfirmModal(true);
-                                                    return;
-                                                  }
-                                                  if (newStatus === 'rejected') {
-                                                    const appData = typeof application.application_data === 'string' 
-                                                      ? JSON.parse(application.application_data) 
-                                                      : application.application_data;
-                                                    setApplicationToReject({ 
-                                                      id: application.id, 
-                                                      name: `${appData.firstName} ${appData.lastName}` 
-                                                    });
-                                                    setRejectModalOpen(true);
-                                                    return;
-                                                  }
-                                                  reviewApplication(application.id, newStatus as ParticipantStatus);
-                                                }}
-                                             >
-                                                <SelectTrigger 
-                                                   className={`w-24 h-7 text-xs ${
-                                                     ['this week', 'next week', 'past'].includes(application.admin_status) ? 'bg-green-100 border-green-500 text-green-700' :
-                                                     application.admin_status === 'rejected' ? 'bg-red-100 border-red-500 text-red-700' :
-                                                     ''
-                                                   }`}
-                                                >
-                                                 <SelectValue />
-                                               </SelectTrigger>
-                                                  <SelectContent className="z-[9999] bg-popover border shadow-lg">
-                                                      <SelectItem value="pending">Pending</SelectItem>
-                                                      <SelectItem value="rejected">Rejected</SelectItem>
-                                                     <SelectItem value="pre next week">Pre Next Week</SelectItem>
-                                                     <SelectItem value="next week">Next Week</SelectItem>
-                                                     <SelectItem value="next week on site">Next Week On Site</SelectItem>
-                                                     <SelectItem value="this week">This Week</SelectItem>
-                                                     <SelectItem value="past">Past</SelectItem>
-                                                  </SelectContent>
-                                             </Select>
+                                              <div className="flex-1"></div>
+                                           
+                                               {/* Status filter positioned at bottom */}
+                                                {!showDeletedApplications && (
+                                                  <div className="absolute bottom-12 right-13 flex items-center gap-2">
+                                              {(() => {
+                                                // Get current status from weeklyParticipants for real-time updates
+                                                const currentParticipant = weeklyParticipants.find(p => p.user_id === application.user_id);
+                                                const currentStatus = currentParticipant?.admin_status || application.admin_status;
+                                                
+                                                return (
+                                                  <Select 
+                                                    value={currentStatus}
+                                                     onValueChange={(newStatus) => {
+                                                       if (newStatus === 'delete') {
+                                                         const appData = typeof application.application_data === 'string' 
+                                                           ? JSON.parse(application.application_data) 
+                                                           : application.application_data;
+                                                         setApplicationToDelete({ 
+                                                           id: application.id, 
+                                                           name: `${appData.firstName} ${appData.lastName}` 
+                                                         });
+                                                         setShowDeleteConfirmModal(true);
+                                                         return;
+                                                       }
+                                                       if (newStatus === 'rejected') {
+                                                         const appData = typeof application.application_data === 'string' 
+                                                           ? JSON.parse(application.application_data) 
+                                                           : application.application_data;
+                                                         setApplicationToReject({ 
+                                                           id: application.id, 
+                                                           name: `${appData.firstName} ${appData.lastName}` 
+                                                         });
+                                                         setRejectModalOpen(true);
+                                                         return;
+                                                       }
+                                                       reviewApplication(application.id, newStatus as ParticipantStatus);
+                                                     }}
+                                                  >
+                                                     <SelectTrigger 
+                                                        className={`w-24 h-7 text-xs ${
+                                                          ['this week', 'next week', 'past'].includes(currentStatus) ? 'bg-green-100 border-green-500 text-green-700' :
+                                                          currentStatus === 'rejected' ? 'bg-red-100 border-red-500 text-red-700' :
+                                                          ''
+                                                        }`}
+                                                     >
+                                                      <SelectValue />
+                                                    </SelectTrigger>
+                                                       <SelectContent className="z-[9999] bg-popover border shadow-lg">
+                                                           <SelectItem value="pending">Pending</SelectItem>
+                                                           <SelectItem value="rejected">Rejected</SelectItem>
+                                                          <SelectItem value="pre next week">Pre Next Week</SelectItem>
+                                                          <SelectItem value="next week">Next Week</SelectItem>
+                                                          <SelectItem value="next week on site">Next Week On Site</SelectItem>
+                                                          <SelectItem value="this week">This Week</SelectItem>
+                                                          <SelectItem value="past">Past</SelectItem>
+                                                       </SelectContent>
+                                                  </Select>
+                                                );
+                                              })()}
                                              
                                               {/* Admin login with expandable date */}
                                                <div className="text-xs text-muted-foreground -mt-[5px]">
