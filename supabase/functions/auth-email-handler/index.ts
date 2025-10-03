@@ -1,9 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { Webhook } from "https://esm.sh/standardwebhooks@1.0.0";
 import { Resend } from "https://esm.sh/resend@2.0.0";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
-const hookSecret = Deno.env.get("AUTH_WEBHOOK_SECRET") || "your-webhook-secret";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -21,20 +19,7 @@ const handler = async (req: Request): Promise<Response> => {
 
   try {
     const payload = await req.text();
-    const headers = Object.fromEntries(req.headers);
-    
     console.log("Received auth webhook payload:", payload);
-
-    // Verify webhook signature if secret is set
-    if (hookSecret !== "your-webhook-secret") {
-      const wh = new Webhook(hookSecret);
-      try {
-        wh.verify(payload, headers);
-      } catch (err) {
-        console.error("Webhook verification failed:", err);
-        return new Response("Unauthorized", { status: 401 });
-      }
-    }
 
     const data = JSON.parse(payload);
     const { user, email_data } = data;
