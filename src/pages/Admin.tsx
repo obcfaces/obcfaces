@@ -284,6 +284,7 @@ interface ProfileData {
   city?: string;
   state?: string;
   country?: string;
+  ip_country?: string | null;
   gender?: string;
   marital_status?: string;
   has_children?: boolean;
@@ -1345,12 +1346,69 @@ const Admin = () => {
         console.error('❌ Failed to fetch login logs:', loginError);
       } else {
         console.log('✅ Login logs fetched:', loginLogs?.length, 'records');
+        if (loginLogs && loginLogs.length > 0) {
+          console.log('📊 Sample login log:', {
+            user_id: loginLogs[0].user_id,
+            ip_address: loginLogs[0].ip_address,
+            user_agent: loginLogs[0].user_agent?.substring(0, 50)
+          });
+        }
       }
+
+      // Helper function to get country from IP using ipapi.co
+      const getCountryFromIP = async (ip: string): Promise<string | null> => {
+        try {
+          const response = await fetch(`https://ipapi.co/${ip}/json/`);
+          if (response.ok) {
+            const data = await response.json();
+            return data.country_name || null;
+          }
+        } catch (error) {
+          console.error('Error fetching country for IP:', ip, error);
+        }
+        return null;
+      };
+
+      // Get unique IP addresses and fetch countries for them
+      const uniqueIPs = [...new Set(loginLogs?.map(log => String(log.ip_address)).filter(Boolean) || [])];
+      console.log(`🌍 Fetching countries for ${uniqueIPs.length} unique IPs...`);
+      
+      const ipToCountryMap = new Map<string, string>();
+      
+      // Fetch countries for unique IPs in batches to avoid rate limiting
+      const batchSize = 10;
+      for (let i = 0; i < uniqueIPs.length; i += batchSize) {
+        const batch = uniqueIPs.slice(i, i + batchSize);
+        const results = await Promise.all(
+          batch.map(async ip => ({
+            ip,
+            country: await getCountryFromIP(ip)
+          }))
+        );
+        results.forEach(({ ip, country }) => {
+          if (country) {
+            ipToCountryMap.set(ip, country);
+          }
+        });
+        // Small delay to avoid rate limiting
+        if (i + batchSize < uniqueIPs.length) {
+          await new Promise(resolve => setTimeout(resolve, 100));
+        }
+      }
+
+      console.log(`✅ Fetched countries for ${ipToCountryMap.size} IPs`);
 
       const profilesWithAuth = (profilesData || []).map(profile => {
         const userAuthData = authData?.find(auth => auth.user_id === profile.id);
         // Get the most recent IP address for this user
         const userLoginLog = loginLogs?.find(log => log.user_id === profile.id);
+        
+        let ipCountry = null;
+        if (userLoginLog?.ip_address) {
+          const ipAddress = String(userLoginLog.ip_address);
+          // Get country from cache
+          ipCountry = ipToCountryMap.get(ipAddress) || null;
+        }
         
         const profileData = {
           ...profile,
@@ -1361,7 +1419,10 @@ const Admin = () => {
           last_sign_in_at: userAuthData?.last_sign_in_at || null,
           email_confirmed_at: userAuthData?.email_confirmed_at || null,
           ip_address: (userLoginLog?.ip_address as string) || null,
-          user_agent: (userLoginLog?.user_agent as string) || null
+          user_agent: (userLoginLog?.user_agent as string) || null,
+          // Add IP-based country, fallback to profile country
+          country: ipCountry || profile.country || null,
+          ip_country: ipCountry // Store IP-based country separately
         };
         
         // Log each profile's email for debugging
@@ -5130,6 +5191,9 @@ const Admin = () => {
                                 {profile.ip_address && (
                                   <div className="text-xs text-muted-foreground">
                                     IP: {profile.ip_address}
+                                    {profile.ip_country && (
+                                      <span className="ml-2">🌍 {profile.ip_country}</span>
+                                    )}
                                   </div>
                                 )}
                                 {profile.user_agent && (() => {
