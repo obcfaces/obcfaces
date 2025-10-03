@@ -1322,7 +1322,17 @@ const Admin = () => {
         .rpc('get_user_auth_data_admin');
 
       if (authError) {
-        console.warn('Failed to fetch auth data:', authError);
+        console.error('❌ Failed to fetch auth data:', authError);
+      } else {
+        console.log('✅ Auth data fetched:', authData?.length, 'records');
+        // Log first record to verify structure
+        if (authData && authData.length > 0) {
+          console.log('📧 Sample auth data:', {
+            user_id: authData[0].user_id,
+            email: authData[0].email,
+            auth_provider: authData[0].auth_provider
+          });
+        }
       }
 
       // Fetch login logs for IP addresses and user agents
@@ -1332,7 +1342,9 @@ const Admin = () => {
         .order('created_at', { ascending: false });
 
       if (loginError) {
-        console.warn('Failed to fetch login logs:', loginError);
+        console.error('❌ Failed to fetch login logs:', loginError);
+      } else {
+        console.log('✅ Login logs fetched:', loginLogs?.length, 'records');
       }
 
       const profilesWithAuth = (profilesData || []).map(profile => {
@@ -1340,7 +1352,7 @@ const Admin = () => {
         // Get the most recent IP address for this user
         const userLoginLog = loginLogs?.find(log => log.user_id === profile.id);
         
-        return {
+        const profileData = {
           ...profile,
           auth_provider: userAuthData?.auth_provider || 'unknown',
           // Email is stored in auth.users only, not in profiles table (security)
@@ -1351,7 +1363,21 @@ const Admin = () => {
           ip_address: (userLoginLog?.ip_address as string) || null,
           user_agent: (userLoginLog?.user_agent as string) || null
         };
+        
+        // Log each profile's email for debugging
+        if (!profileData.email) {
+          console.warn(`⚠️ No email for user ${profile.id?.substring(0, 8)}:`, {
+            hasAuthData: !!userAuthData,
+            authDataEmail: userAuthData?.email
+          });
+        }
+        
+        return profileData;
       });
+
+      console.log('📊 Total profiles with auth data:', profilesWithAuth.length);
+      console.log('📧 Profiles with email:', profilesWithAuth.filter(p => p.email).length);
+      console.log('⚠️ Profiles without email:', profilesWithAuth.filter(p => !p.email).length);
 
       setProfiles(profilesWithAuth);
     } catch (error) {
