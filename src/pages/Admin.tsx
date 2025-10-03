@@ -428,11 +428,11 @@ const Admin = () => {
   const [regStatusFilter, setRegStatusFilter] = useState<string>('all');
   const [winStatusFilter, setWinStatusFilter] = useState<string>('all');
   const [dailyStats, setDailyStats] = useState<Array<{ day_name: string; vote_count: number; like_count: number }>>([]);
-  const [dailyApplicationStats, setDailyApplicationStats] = useState<Array<{ day_name: string; total_applications: number; approved_applications: number; day_of_week: number; sort_order: number }>>([]);
+  const [dailyApplicationStats, setDailyApplicationStats] = useState<Array<{ day_name: string; day_date?: string; total_applications: number; approved_applications: number; day_of_week?: number; sort_order?: number }>>([]);
   const [dailyRegistrationStats, setDailyRegistrationStats] = useState<Array<{ day_name: string; registration_count: number; day_of_week: number; sort_order: number }>>([]);
   const [nextWeekDailyStats, setNextWeekDailyStats] = useState<Array<{ day_name: string; like_count: number; dislike_count: number; total_votes: number }>>([]);
   const [selectedDay, setSelectedDay] = useState<{ day: number; type: 'new' | 'approved' } | null>(null);
-  const [nextWeekApplicationsCount, setNextWeekApplicationsCount] = useState<{ total: number; next_week: number }>({ total: 0, next_week: 0 });
+  const [nextWeekApplicationsCount, setNextWeekApplicationsCount] = useState<number>(0);
   const [cardSectionStats, setCardSectionStats] = useState<{ newApplications: number; movedToNextWeek: number; new_applications_count: number; moved_to_next_week_count: number }>({ newApplications: 0, movedToNextWeek: 0, new_applications_count: 0, moved_to_next_week_count: 0 });
   const [showAllCards, setShowAllCards] = useState(false);
   const [pendingPastChanges, setPendingPastChanges] = useState<{ [participantId: string]: { admin_status?: string; week_interval?: string } }>({});
@@ -1618,17 +1618,15 @@ const Admin = () => {
       
       if (error) {
         console.error('Error fetching next week applications count:', error);
+        setNextWeekApplicationsCount(0);
         return;
       }
 
-      if (data && data.length > 0) {
-        setNextWeekApplicationsCount({
-          total: Number(data[0].total_applications || 0),
-          next_week: Number(data[0].next_week_applications || 0)
-        });
-      }
+      // Function returns a bigint directly, not an array
+      setNextWeekApplicationsCount(Number(data || 0));
     } catch (error) {
       console.error('Error in fetchNextWeekApplicationsCount:', error);
+      setNextWeekApplicationsCount(0);
     }
   };
 
