@@ -5313,23 +5313,24 @@ const Admin = () => {
                       
                       // Handle admin_status filtering
                       if (adminStatusFilter !== 'all') {
-                        // For participants with weekly_contest_participants record
+                        // If there's a weekly participant record, check its status
                         if (weeklyParticipant) {
-                          if (weeklyParticipant.admin_status !== adminStatusFilter) return false;
+                          return weeklyParticipant.admin_status === adminStatusFilter;
                         } else {
-                          // For applications without weekly_contest_participants record (only show in "all")
-                          return false;
+                          // For applications without weekly_contest_participants record
+                          // Show them when filtering for "pending" or "rejected" statuses
+                          // (these are typically new applications that haven't been moved to weekly contests yet)
+                          return adminStatusFilter === 'pending' || adminStatusFilter === 'rejected';
                         }
                       }
                       
-                      // Exclude "next week" from main card section unless specifically filtering
-                      if (weeklyParticipant?.admin_status === 'next week' && adminStatusFilter !== 'next week') {
-                        return false;
-                      }
-                      
-                      // Exclude "this week" from main card section unless specifically filtering
-                      if (weeklyParticipant?.admin_status === 'this week' && adminStatusFilter !== 'this week') {
-                        return false;
+                      // When showing "all", exclude participants that are already in weekly contests
+                      // (they will be shown in their respective tabs)
+                      if (adminStatusFilter === 'all' && weeklyParticipant) {
+                        const excludedStatuses = ['next week', 'this week', 'next week on site'];
+                        if (excludedStatuses.includes(weeklyParticipant.admin_status)) {
+                          return false;
+                        }
                       }
                       
                       return true;
