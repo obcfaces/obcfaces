@@ -1395,6 +1395,18 @@ export type Database = {
           total_votes: number
         }[]
       }
+      get_safe_contest_participant_profile: {
+        Args: { participant_id_param: string }
+        Returns: {
+          avatar_url: string
+          bio: string
+          display_name: string
+          first_name: string
+          id: string
+          photo_1_url: string
+          photo_2_url: string
+        }[]
+      }
       get_safe_contestant_info: {
         Args: { contestant_user_id: string }
         Returns: {
