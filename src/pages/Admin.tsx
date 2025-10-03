@@ -1355,13 +1355,14 @@ const Admin = () => {
         }
       }
 
-      // Helper function to get country from IP using ipapi.co
+      // Helper function to get country from IP using ip-api.com (no CORS issues)
       const getCountryFromIP = async (ip: string): Promise<string | null> => {
         try {
-          const response = await fetch(`https://ipapi.co/${ip}/json/`);
+          // ip-api.com is free and has no CORS restrictions
+          const response = await fetch(`http://ip-api.com/json/${ip}?fields=country`);
           if (response.ok) {
             const data = await response.json();
-            return data.country_name || null;
+            return data.country || null;
           }
         } catch (error) {
           console.error('Error fetching country for IP:', ip, error);
@@ -1370,7 +1371,7 @@ const Admin = () => {
       };
 
       // Get unique IP addresses and fetch countries for them
-      const uniqueIPs = [...new Set(loginLogs?.map(log => String(log.ip_address)).filter(Boolean) || [])];
+      const uniqueIPs = [...new Set(loginLogs?.map(log => String(log.ip_address)).filter(ip => ip && ip !== 'null') || [])];
       console.log(`🌍 Fetching countries for ${uniqueIPs.length} unique IPs...`);
       
       const ipToCountryMap = new Map<string, string>();
@@ -5192,10 +5193,7 @@ const Admin = () => {
                                 </div>
                                 {profile.ip_address && (
                                   <div className="text-xs text-muted-foreground">
-                                    IP: {profile.ip_address}
-                                    {profile.ip_country && (
-                                      <span className="ml-2">🌍 {profile.ip_country}</span>
-                                    )}
+                                    IP: {profile.ip_address}{profile.ip_country && ` 🌍 ${profile.ip_country}`}
                                   </div>
                                 )}
                                 {profile.user_agent && (() => {
