@@ -5516,7 +5516,7 @@ const Admin = () => {
                                   <div className="flex-1"></div>
                                   
                                   {/* Status filter */}
-                                  <div className="absolute bottom-12 right-0 flex items-center gap-1">
+                                  <div className="absolute bottom-12 right-2 flex items-center gap-1">
                                     <Select 
                                       value={participant.admin_status || 'pending'}
                                       onValueChange={(value) => {
