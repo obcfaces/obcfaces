@@ -5149,20 +5149,17 @@ const Admin = () => {
               </div>
 
               {(() => {
-                // КРИТИЧНО: Фильтруем только НЕ удалённые карточки с pending и rejected
-                const allParticipants = weeklyParticipants.filter(p => !p.deleted_at);
-                const filteredParticipants = allParticipants.filter(p => {
-                  // ПЕРВЫЙ ФИЛЬТР: Только НЕ удалённые
-                  if (p.deleted_at !== null) {
-                    return false;
-                  }
+                // Фильтруем только НЕ удалённые карточки с pending и rejected
+                const filteredByStatus = weeklyParticipants.filter(p => {
+                  // Только НЕ удалённые
+                  if (p.deleted_at) return false;
                   
-                  // ВТОРОЙ ФИЛЬТР: Только pending и rejected
+                  // Только pending и rejected
                   if (p.admin_status !== 'pending' && p.admin_status !== 'rejected') {
                     return false;
                   }
                   
-                  // Фильтр по статусу (из dropdown)
+                  // Фильтр по статусу из dropdown
                   if (registrationsStatusFilter !== 'all' && p.admin_status !== registrationsStatusFilter) {
                     return false;
                   }
@@ -5176,11 +5173,16 @@ const Admin = () => {
                   return true;
                 });
 
-                // Сортировка по дате создания карточки (created_at) - новые сверху
-                const sortedParticipants = [...filteredParticipants].sort((a, b) => {
+                // Удаляем дубликаты по user_id
+                const uniqueParticipants = filteredByStatus.filter((participant, index, arr) => 
+                  arr.findIndex(p => p.user_id === participant.user_id) === index
+                );
+
+                // Сортировка по дате создания (новые сверху)
+                const sortedParticipants = uniqueParticipants.sort((a, b) => {
                   const dateA = new Date(a.created_at || 0).getTime();
                   const dateB = new Date(b.created_at || 0).getTime();
-                  return dateB - dateA; // newest first
+                  return dateB - dateA;
                 });
 
                 if (sortedParticipants.length === 0) {
