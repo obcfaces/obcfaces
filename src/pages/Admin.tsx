@@ -978,11 +978,35 @@ const Admin = () => {
         .eq('user_id', userId)
         .order('created_at', { ascending: false });
 
-      const { data: allRatings } = await supabase
+      // Fetch all ratings with participant details
+      const { data: allRatingsRaw } = await supabase
         .from('contestant_ratings')
-        .select('created_at')
+        .select('id, rating, created_at, participant_id, contestant_user_id')
         .eq('user_id', userId)
         .order('created_at', { ascending: false });
+
+      // Get unique participant IDs from ratings
+      const participantIds = new Set<string>();
+      allRatingsRaw?.forEach(rating => {
+        if (rating.participant_id) participantIds.add(rating.participant_id);
+        if (rating.contestant_user_id) participantIds.add(rating.contestant_user_id);
+      });
+
+      // Fetch participant profiles
+      const { data: participantProfiles } = await supabase
+        .from('profiles')
+        .select('id, display_name, first_name, last_name, avatar_url')
+        .in('id', Array.from(participantIds));
+
+      // Merge ratings with profile data
+      const allRatings = allRatingsRaw?.map(rating => {
+        const profileId = rating.contestant_user_id || rating.participant_id;
+        const profile = participantProfiles?.find(p => p.id === profileId);
+        return {
+          ...rating,
+          profile
+        };
+      }) || [];
 
       const likesCount = allLikes?.length || 0;
       const ratingsCount = allRatings?.length || 0;
@@ -1019,22 +1043,23 @@ const Admin = () => {
         const nextLogin = uniqueLogins[index + 1];
         const previousLoginTime = nextLogin ? new Date(nextLogin.created_at) : new Date(0);
 
-        // Count likes between this login and previous login
-        const sessionLikes = allLikes?.filter(like => {
+        // Filter likes between this login and previous login
+        const sessionLikesData = allLikes?.filter(like => {
           const likeTime = new Date(like.created_at);
           return likeTime >= previousLoginTime && likeTime <= currentLoginTime;
-        }).length || 0;
+        }) || [];
 
-        // Count ratings between this login and previous login
-        const sessionRatings = allRatings?.filter(rating => {
+        // Filter ratings between this login and previous login
+        const sessionRatingsData = allRatings?.filter(rating => {
           const ratingTime = new Date(rating.created_at);
           return ratingTime >= previousLoginTime && ratingTime <= currentLoginTime;
-        }).length || 0;
+        }) || [];
 
         return {
           created_at: login.created_at,
-          likes: sessionLikes,
-          ratings: sessionRatings
+          likes: sessionLikesData.length,
+          ratings: sessionRatingsData.length,
+          ratingsDetails: sessionRatingsData // Include full rating details
         };
       });
 
@@ -6386,31 +6411,56 @@ const Admin = () => {
                           {expandedUserActivity.has(profile.id) && userActivityData[profile.id] && (
                             <div className="w-full p-4 bg-muted/30 rounded-lg border">
                               <h4 className="text-sm font-medium mb-3">История активности:</h4>
-                              <div className="space-y-2">
-                                {userActivityData[profile.id].logins?.map((login: any, idx: number) => (
-                                  <div key={idx} className="flex items-center justify-between text-xs p-2 bg-background rounded">
-                                    <div className="flex items-center gap-4 flex-1">
-                                      <span className="text-muted-foreground">
-                                        • Вход: {new Date(login.created_at).toLocaleDateString('ru-RU', { 
-                                          day: 'numeric', 
-                                          month: 'short',
-                                          hour: '2-digit',
-                                          minute: '2-digit'
-                                        })}
-                                      </span>
-                                    </div>
-                                    <div className="flex items-center gap-4">
-                                      <div className="flex items-center gap-1">
-                                        <Heart className="h-3 w-3 text-red-500" />
-                                        <span>{login.likes || 0}</span>
-                                      </div>
-                                      <div className="flex items-center gap-1">
-                                        <Star className="h-3 w-3 text-yellow-500" />
-                                        <span>{login.ratings || 0}</span>
-                                      </div>
-                                    </div>
-                                  </div>
-                                ))}
+                               <div className="space-y-2">
+                                 {userActivityData[profile.id].logins?.map((login: any, idx: number) => (
+                                   <div key={idx} className="p-2 bg-background rounded border">
+                                     <div className="flex items-center justify-between text-xs mb-2">
+                                       <div className="flex items-center gap-4 flex-1">
+                                         <span className="text-muted-foreground">
+                                           • Вход: {new Date(login.created_at).toLocaleDateString('ru-RU', { 
+                                             day: 'numeric', 
+                                             month: 'short',
+                                             hour: '2-digit',
+                                             minute: '2-digit'
+                                           })}
+                                         </span>
+                                       </div>
+                                       <div className="flex items-center gap-4">
+                                         <div className="flex items-center gap-1">
+                                           <Heart className="h-3 w-3 text-red-500" />
+                                           <span>{login.likes || 0}</span>
+                                         </div>
+                                         <div className="flex items-center gap-1">
+                                           <Star className="h-3 w-3 text-yellow-500" />
+                                           <span>{login.ratings || 0}</span>
+                                         </div>
+                                       </div>
+                                     </div>
+                                     
+                                     {/* Show rating details */}
+                                     {login.ratingsDetails && login.ratingsDetails.length > 0 && (
+                                       <div className="mt-2 pl-4 border-l-2 border-yellow-500/30 space-y-1">
+                                         {login.ratingsDetails.map((rating: any, rIdx: number) => (
+                                           <div key={rIdx} className="flex items-center gap-2 text-xs">
+                                             <Avatar className="h-6 w-6">
+                                               <AvatarImage src={rating.profile?.avatar_url || ''} />
+                                               <AvatarFallback className="text-xs">
+                                                 {rating.profile?.display_name?.[0] || rating.profile?.first_name?.[0] || 'U'}
+                                               </AvatarFallback>
+                                             </Avatar>
+                                             <span className="flex-1 truncate text-muted-foreground">
+                                               {rating.profile?.display_name || `${rating.profile?.first_name || ''} ${rating.profile?.last_name || ''}`.trim() || 'Unknown'}
+                                             </span>
+                                             <div className="flex items-center gap-1 font-medium text-yellow-600">
+                                               <Star className="h-3 w-3 fill-yellow-500" />
+                                               <span>{rating.rating}</span>
+                                             </div>
+                                           </div>
+                                         ))}
+                                       </div>
+                                     )}
+                                   </div>
+                                 ))}
                                 {userActivityData[profile.id].intervals && userActivityData[profile.id].intervals.length > 0 && (
                                   <div className="mt-3 pt-3 border-t">
                                     <div className="text-xs text-muted-foreground font-medium mb-2">Интервалы участия:</div>
