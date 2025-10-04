@@ -6300,6 +6300,10 @@ const Admin = () => {
                                </div>
 
                                {/* Stats in bottom right corner - Combined button */}
+                               {(() => {
+                                 console.log('🎨 Rendering stats button for profile:', profile.id, 'Likes:', userStatsCount[profile.id]?.likes, 'Ratings:', userStatsCount[profile.id]?.ratings);
+                                 return null;
+                               })()}
                                <div className="absolute bottom-2 right-2 z-10">
                               <Button
                                 variant="ghost"
