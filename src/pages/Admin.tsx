@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { debounce } from '@/utils/performance';
@@ -466,6 +466,7 @@ const Admin = () => {
   const [expandedIPs, setExpandedIPs] = useState<Set<string>>(new Set());
   const [regPaginationPage, setRegPaginationPage] = useState(1);
   const regItemsPerPage = 20;
+  const fetchedStatsRef = useRef<Set<string>>(new Set());
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -974,6 +975,13 @@ const Admin = () => {
   };
 
   const fetchUserStats = async (userId: string) => {
+    // Prevent duplicate fetches
+    if (fetchedStatsRef.current.has(userId)) {
+      console.log('📊 Stats already fetched for:', userId);
+      return;
+    }
+    
+    fetchedStatsRef.current.add(userId);
     setLoadingUserStats(prev => new Set(prev).add(userId));
     try {
       // Fetch all likes and ratings with timestamps
@@ -1728,13 +1736,13 @@ const Admin = () => {
       const paginatedProfiles = filteredProfiles.slice(startIdx, endIdx);
       
       paginatedProfiles.forEach(profile => {
-        if (!userStatsCount[profile.id] && !loadingUserStats.has(profile.id)) {
+        if (!fetchedStatsRef.current.has(profile.id)) {
           console.log('📊 Fetching stats for profile in Reg tab:', profile.id);
           fetchUserStats(profile.id);
         }
       });
     }
-  }, [activeTab, regPaginationPage, profiles, userRoleMap, roleFilter, searchQuery, userStatsCount, loadingUserStats]);
+  }, [activeTab, regPaginationPage, profiles, userRoleMap, roleFilter, searchQuery]);
 
   const fetchContestApplications = async () => {
     console.log('Fetching contest applications...');
