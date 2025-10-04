@@ -82,8 +82,9 @@ export const RejectReasonModal = ({
       notes 
     });
     
-    if (selectedReasons.length === 0) {
-      console.log('🟡 REJECT MODAL: No reasons selected, aborting');
+    // Allow submission if either reasons are selected OR notes are provided
+    if (selectedReasons.length === 0 && !notes.trim()) {
+      console.log('🟡 REJECT MODAL: No reasons or notes provided, aborting');
       return;
     }
     
@@ -156,7 +157,7 @@ export const RejectReasonModal = ({
           <Button 
             variant="destructive" 
             onClick={handleConfirm} 
-            disabled={selectedReasons.length === 0 || isLoading}
+            disabled={(selectedReasons.length === 0 && !notes.trim()) || isLoading}
           >
             {isLoading ? "Rejecting..." : "Reject Application"}
           </Button>
