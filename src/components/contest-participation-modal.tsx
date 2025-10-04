@@ -1400,7 +1400,7 @@ export const ContestParticipationModal = ({
             </div>
           </div>
         ) : (
-          <form onSubmit={handleProfileSubmit} className="space-y-3">
+          <form onSubmit={handleProfileSubmit} className="space-y-3 max-w-md mx-auto">
             <div className="text-center mb-4">
               <h2 className="text-lg font-semibold text-foreground">Contest Registration Form</h2>
             </div>
