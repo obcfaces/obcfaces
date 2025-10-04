@@ -328,6 +328,7 @@ interface WeeklyContestParticipant {
   total_votes?: number;
   average_rating?: number;
   created_at?: string;
+  submitted_at?: string; // Add submitted_at field for sorting
   contest_start_date?: string; // Add this field for filtering by week
   is_active: boolean;
   admin_status?: string;
@@ -5178,11 +5179,12 @@ const Admin = () => {
                   arr.findIndex(p => p.user_id === participant.user_id) === index
                 );
 
-                // Сортировка по дате создания (новые сверху)
+                // Сортировка по дате регистрации (новые сверху) - используем submitted_at или created_at
                 const sortedParticipants = uniqueParticipants.sort((a, b) => {
-                  const dateA = new Date(a.created_at || 0).getTime();
-                  const dateB = new Date(b.created_at || 0).getTime();
-                  return dateB - dateA;
+                  // Приоритет: submitted_at > created_at > 0
+                  const dateA = new Date(a.submitted_at || a.created_at || 0).getTime();
+                  const dateB = new Date(b.submitted_at || b.created_at || 0).getTime();
+                  return dateB - dateA; // Самые новые сверху
                 });
 
                 if (sortedParticipants.length === 0) {
