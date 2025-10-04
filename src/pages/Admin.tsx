@@ -6144,7 +6144,7 @@ const Admin = () => {
                       </Select>
                     </div>
                     <div>
-                      <Label htmlFor="edit-has-children">Do you have children?</Label>
+                      <Label htmlFor="edit-has-children">Have kids?</Label>
                       <Select
                         value={editingApplicationData.application_data?.has_children?.toString() || ''}
                         onValueChange={(value) => setEditingApplicationData(prev => ({
