@@ -14,6 +14,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
@@ -5855,7 +5856,7 @@ const Admin = () => {
                       return true;
                     })
                      .map(profile => (
-                       <Card key={profile.id} className="p-4 relative overflow-hidden">
+                       <Card key={profile.id} className="p-3 relative overflow-hidden">
                           {/* Registration date badge in top left corner */}
                           <Badge 
                             variant="outline" 
@@ -5873,33 +5874,15 @@ const Admin = () => {
                             })}
                           </Badge>
                           
-                          {/* Controls row at top right */}
-                          <div className="flex items-center justify-end gap-2 mb-2">
-                            <Select
-                              value={userRoleMap[profile.id] || 'usual'}
-                              onValueChange={(value) => handleRoleChange(
-                                profile.id, 
-                                profile.display_name || `${profile.first_name} ${profile.last_name}`,
-                                value
-                              )}
-                              disabled={assigningRoles.has(profile.id)}
-                            >
-                              <SelectTrigger className="w-20 h-6 text-xs">
-                                <SelectValue />
-                              </SelectTrigger>
-                               <SelectContent className="z-[9999] bg-popover border shadow-lg">
-                                 <SelectItem value="usual">Usual</SelectItem>
-                                 <SelectItem value="admin">Admin</SelectItem>
-                               </SelectContent>
-                            </Select>
-                            
+                          {/* Controls menu in top right */}
+                          <div className="absolute top-0 right-0 flex items-center gap-1">
                             {profile.email_confirmed_at ? (
-                              <Badge variant="default" className="bg-green-100 text-green-700 text-xs">
+                              <Badge variant="default" className="bg-green-100 text-green-700 text-xs rounded-none rounded-bl-md">
                                 Verified
                               </Badge>
                             ) : (
                               <>
-                                <Badge variant="secondary" className="text-xs">
+                                <Badge variant="secondary" className="text-xs rounded-none">
                                   Unverified
                                 </Badge>
                                 <Button
@@ -5907,15 +5890,49 @@ const Admin = () => {
                                   variant="outline"
                                   onClick={() => handleEmailVerification(profile.id)}
                                   disabled={verifyingUsers.has(profile.id)}
-                                  className="h-6 px-2 text-xs"
+                                  className="h-6 px-2 text-xs rounded-none rounded-bl-md"
                                 >
                                   {verifyingUsers.has(profile.id) ? 'Verifying...' : 'Verify'}
                                 </Button>
                               </>
                             )}
+                            
+                            {/* Three dots menu for role */}
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="sm" className="h-6 w-6 p-0 rounded-none rounded-bl-md">
+                                  <span className="text-lg leading-none">⋮</span>
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end" className="z-[9999] bg-popover border shadow-lg">
+                                <DropdownMenuItem
+                                  onClick={() => {
+                                    const currentRole = userRoleMap[profile.id] || 'usual';
+                                    if (currentRole === 'admin') {
+                                      handleRoleChange(
+                                        profile.id,
+                                        profile.display_name || `${profile.first_name} ${profile.last_name}`,
+                                        'usual'
+                                      );
+                                    } else {
+                                      if (confirm(`Вы уверены, что хотите назначить роль Admin для ${profile.display_name || `${profile.first_name} ${profile.last_name}`}?`)) {
+                                        handleRoleChange(
+                                          profile.id,
+                                          profile.display_name || `${profile.first_name} ${profile.last_name}`,
+                                          'admin'
+                                        );
+                                      }
+                                    }
+                                  }}
+                                  className="cursor-pointer"
+                                >
+                                  {(userRoleMap[profile.id] || 'usual') === 'admin' ? '✓ Admin' : 'Make Admin'}
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
                           </div>
                           
-                          <div className="flex items-center justify-between">
+                          <div className="flex items-center justify-between mt-6">
                             <div className="flex items-center gap-3">
                               <Avatar>
                                 <AvatarImage src={profile.avatar_url || ''} />
@@ -5935,6 +5952,11 @@ const Admin = () => {
                                      {profile.isDuplicateIP && ' ⚠️'}
                                    </div>
                                  )}
+                                {(profile.country || profile.city) && (
+                                  <div className="text-xs text-muted-foreground">
+                                    📍 {profile.city ? `${profile.city}, ` : ''}{profile.country || 'Unknown Country'}
+                                  </div>
+                                )}
                                 {profile.user_agent && (() => {
                                   const { browser, device, os } = UAParser(profile.user_agent);
                                   
@@ -5944,11 +5966,6 @@ const Admin = () => {
                                     </div>
                                   );
                                 })()}
-                                {(profile.country || profile.city) && (
-                                  <div className="text-xs text-muted-foreground">
-                                    📍 {profile.city ? `${profile.city}, ` : ''}{profile.country || 'Unknown Country'}
-                                  </div>
-                                )}
                                 {profile.email && (
                                   <div className="text-xs text-muted-foreground flex items-center gap-1">
                                     <span>{profile.email}</span>
@@ -5968,14 +5985,6 @@ const Admin = () => {
                                 )}
                               </div>
                             </div>
-            
-            {/* Right side - empty now since controls moved above name */}
-            <div className="hidden md:flex items-center gap-2">
-            </div>
-            
-            {/* Mobile - empty now since controls moved above name */}
-            <div className="block md:hidden">
-            </div>
                          </div>
                        </Card>
                     ))}
