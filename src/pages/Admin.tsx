@@ -5498,21 +5498,6 @@ const Admin = () => {
                                     {appData.city} {appData.country}
                                   </div>
                                   
-                                  {/* Rejection reasons display - mobile */}
-                                  {participant.admin_status === 'rejected' && (participant as any).rejection_reason_types && (
-                                    <div className="mb-2 p-2 bg-red-100 border border-red-300 rounded text-xs max-h-24 overflow-y-auto">
-                                      <div className="font-semibold text-red-700 mb-1">Rejected:</div>
-                                      <div className="space-y-0.5 text-red-600">
-                                        {((participant as any).rejection_reason_types as string[]).slice(0, 2).map((reasonType: string, idx: number) => (
-                                          <div key={idx} className="text-[10px]">• {REJECTION_REASONS[reasonType as keyof typeof REJECTION_REASONS]?.substring(0, 40) || reasonType}</div>
-                                        ))}
-                                        {((participant as any).rejection_reason_types as string[]).length > 2 && (
-                                          <div className="text-[10px] text-red-500">...and {((participant as any).rejection_reason_types as string[]).length - 2} more</div>
-                                        )}
-                                      </div>
-                                    </div>
-                                  )}
-                                  
                                   <div className="flex-1"></div>
                                   
                                   {/* Status filter */}
