@@ -6414,29 +6414,30 @@ const Admin = () => {
                                      Ratings ({userRatingsData[profile.id].length})
                                    </h4>
                                    <div className="space-y-2 max-h-60 overflow-y-auto">
-                                     {userRatingsData[profile.id].map((rating: any) => (
-                                       <div key={rating.id} className="flex items-center gap-2 text-xs p-2 bg-muted rounded">
-                                         <Avatar className="h-8 w-8">
-                                           <AvatarImage src={rating.profiles?.avatar_url || ''} />
-                                           <AvatarFallback>
-                                             {rating.profiles?.display_name?.charAt(0) || rating.contestant_name?.charAt(0) || 'U'}
-                                           </AvatarFallback>
-                                         </Avatar>
-                                         <div className="flex-1">
-                                           <div className="font-medium">
-                                             {rating.profiles?.display_name || rating.contestant_name}
-                                           </div>
-                                           <div className="flex items-center gap-1">
-                                             <MiniStars rating={rating.rating} />
-                                             <span className="text-muted-foreground">({rating.rating})</span>
-                                           </div>
-                                         </div>
-                                         <div className="text-muted-foreground text-xs">
-                                           {new Date(rating.created_at).toLocaleDateString('en-GB')}
-                                         </div>
-                                       </div>
-                                     ))}
-                                   </div>
+                                      {userRatingsData[profile.id].map((rating: any) => (
+                                        <div key={rating.id} className="flex items-center gap-2 text-xs p-2 bg-muted rounded">
+                                          <div className="relative h-16 w-16 flex-shrink-0">
+                                            <img 
+                                              src={rating.profiles?.photo_1_url || rating.profiles?.avatar_url || ''} 
+                                              alt={rating.profiles?.display_name || rating.contestant_name || 'Participant'}
+                                              className="h-full w-full object-cover rounded"
+                                            />
+                                          </div>
+                                          <div className="flex-1">
+                                            <div className="font-medium">
+                                              {rating.profiles?.display_name || rating.contestant_name}
+                                            </div>
+                                            <div className="flex items-center gap-1 mt-1">
+                                              <MiniStars rating={rating.rating} />
+                                              <span className="text-muted-foreground font-semibold">({rating.rating})</span>
+                                            </div>
+                                            <div className="text-muted-foreground text-xs mt-1">
+                                              {new Date(rating.created_at).toLocaleDateString('en-GB')}
+                                            </div>
+                                          </div>
+                                        </div>
+                                      ))}
+                                    </div>
                                  </div>
                                )}
 
@@ -6448,27 +6449,28 @@ const Admin = () => {
                                      Likes ({userLikesData[profile.id].length})
                                    </h4>
                                    <div className="space-y-2 max-h-60 overflow-y-auto">
-                                     {userLikesData[profile.id]
-                                       .filter((like: any) => like.profile)
-                                       .map((like: any) => (
-                                         <div key={like.id} className="flex items-center gap-2 text-xs p-2 bg-muted rounded">
-                                           <Avatar className="h-8 w-8">
-                                             <AvatarImage src={like.profile?.avatar_url || ''} />
-                                             <AvatarFallback>
-                                               {like.profile?.display_name?.charAt(0) || 'U'}
-                                             </AvatarFallback>
-                                           </Avatar>
-                                           <div className="flex-1">
-                                             <div className="font-medium">
-                                               {like.profile?.display_name || `${like.profile?.first_name} ${like.profile?.last_name}`}
-                                             </div>
-                                           </div>
-                                           <div className="text-muted-foreground text-xs">
-                                             {new Date(like.created_at).toLocaleDateString('en-GB')}
-                                           </div>
-                                         </div>
-                                       ))}
-                                   </div>
+                                      {userLikesData[profile.id]
+                                        .filter((like: any) => like.profile)
+                                        .map((like: any) => (
+                                          <div key={like.id} className="flex items-center gap-2 text-xs p-2 bg-muted rounded">
+                                            <div className="relative h-16 w-16 flex-shrink-0">
+                                              <img 
+                                                src={like.profile?.photo_1_url || like.profile?.avatar_url || ''} 
+                                                alt={like.profile?.display_name || 'Participant'}
+                                                className="h-full w-full object-cover rounded"
+                                              />
+                                            </div>
+                                            <div className="flex-1">
+                                              <div className="font-medium">
+                                                {like.profile?.display_name || `${like.profile?.first_name} ${like.profile?.last_name}`}
+                                              </div>
+                                              <div className="text-muted-foreground text-xs mt-1">
+                                                {new Date(like.created_at).toLocaleDateString('en-GB')}
+                                              </div>
+                                            </div>
+                                          </div>
+                                        ))}
+                                    </div>
                                  </div>
                                )}
 
