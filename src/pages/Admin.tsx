@@ -1684,6 +1684,48 @@ const Admin = () => {
     });
   }, [profiles]);
 
+  // Fetch stats for visible profiles in Reg tab when page changes
+  useEffect(() => {
+    if (activeTab === 'reg') {
+      const filteredProfiles = profiles.filter(profile => {
+        // Same filtering logic as in render
+        const userRole = userRoleMap[profile.id] || 'usual';
+        
+        if (roleFilter === 'admin') {
+          return userRole === 'admin';
+        } else if (roleFilter === 'usual') {
+          return userRole === 'usual' || !userRole;
+        }
+
+        if (searchQuery.trim()) {
+          const query = searchQuery.toLowerCase();
+          const fullName = `${profile.first_name || ''} ${profile.last_name || ''}`.toLowerCase();
+          const displayName = (profile.display_name || '').toLowerCase();
+          const email = (profile.email || '').toLowerCase();
+          const ip = (profile.ip_address || '').toLowerCase();
+          
+          return fullName.includes(query) || 
+                 displayName.includes(query) || 
+                 email.includes(query) || 
+                 ip.includes(query);
+        }
+        
+        return true;
+      });
+
+      const startIdx = (regPaginationPage - 1) * regItemsPerPage;
+      const endIdx = startIdx + regItemsPerPage;
+      const paginatedProfiles = filteredProfiles.slice(startIdx, endIdx);
+      
+      paginatedProfiles.forEach(profile => {
+        if (!userStatsCount[profile.id]) {
+          console.log('📊 Fetching stats for profile in Reg tab:', profile.id);
+          fetchUserStats(profile.id);
+        }
+      });
+    }
+  }, [activeTab, regPaginationPage, profiles, userRoleMap, roleFilter, searchQuery]);
+
   const fetchContestApplications = async () => {
     console.log('Fetching contest applications...');
     // Query unified table ONLY for NEW application statuses (pending, rejected)
