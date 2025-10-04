@@ -6299,46 +6299,27 @@ const Admin = () => {
                                  </div>
                                </div>
 
-                               {/* Stats in bottom right corner - Combined button */}
-                               {(() => {
-                                 console.log('🎨 Rendering stats button for profile:', profile.id, 'Likes:', userStatsCount[profile.id]?.likes, 'Ratings:', userStatsCount[profile.id]?.ratings);
-                                 return null;
-                               })()}
+                               {/* TEST BUTTON - Simple text button */}
                                <div 
                                 className="absolute bottom-2 right-2 z-50" 
                                 style={{ pointerEvents: 'auto' }}
                                 onClickCapture={(e) => e.stopPropagation()}
                               >
                               <Button
-                                variant="ghost"
+                                variant="default"
                                 size="sm"
-                                className="h-auto p-1 flex items-center gap-2 hover:bg-muted cursor-pointer bg-white/90 shadow-sm"
+                                className="bg-primary text-primary-foreground hover:bg-primary/90"
                                 style={{ pointerEvents: 'auto' }}
                                 onMouseDown={(e) => {
                                   e.preventDefault();
                                   e.stopPropagation();
-                                  console.log('🔘 Button clicked for profile:', profile.id);
+                                  console.log('🔘 TEST BUTTON CLICKED for profile:', profile.id);
                                   toggleUserStats(profile.id);
                                 }}
                               >
-                                <div className="flex items-center gap-1">
-                                  <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
-                                  {loadingUserStats.has(profile.id) ? (
-                                    <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
-                                  ) : (
-                                    <span className="text-xs font-medium">{userStatsCount[profile.id]?.ratings || 0}</span>
-                                  )}
-                                </div>
-                                <div className="flex items-center gap-1">
-                                  <Heart className="h-4 w-4 text-red-500 fill-red-500" />
-                                  {loadingUserStats.has(profile.id) ? (
-                                    <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
-                                  ) : (
-                                    <span className="text-xs font-medium">{userStatsCount[profile.id]?.likes || 0}</span>
-                                  )}
-                                </div>
+                                STATS
                               </Button>
-                            </div>
+                              </div>
 
                             {/* Expandable content - Shows all interactions */}
                             {expandedUserStats.has(profile.id) && (
