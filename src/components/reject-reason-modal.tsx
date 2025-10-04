@@ -28,7 +28,8 @@ export type RejectionReasonType =
   | 'second_photo_scaled'
   | 'second_photo_editing'
   | 'both_photos_quality'
-  | 'suspicion_not_own_photos';
+  | 'suspicion_not_own_photos'
+  | 'wrong_gender_contest';
 
 const REJECTION_REASONS = {
   first_photo_makeup: "First photo – No makeup allowed.",
@@ -46,7 +47,8 @@ const REJECTION_REASONS = {
   second_photo_scaled: "Second photo – Scaled photos (e.g., 0.5x zoom) are not allowed.",
   second_photo_editing: "Second photo – Photo editing and filters are not allowed.",
   both_photos_quality: "Both photos – The quality is too low.",
-  suspicion_not_own_photos: "Suspicion that the user is not using their own photos."
+  suspicion_not_own_photos: "Suspicion that the user is not using their own photos.",
+  wrong_gender_contest: "You applied for a women's contest – we will open a men's contest soon."
 };
 
 interface RejectReasonModalProps {
