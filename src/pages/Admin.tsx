@@ -5764,7 +5764,7 @@ const Admin = () => {
                 <div className="mb-6">
                   <div className="mb-4 p-4 bg-muted rounded-lg">
                     <div className="text-sm text-muted-foreground mb-3">
-                      total registrations: {dailyRegistrationStats.reduce((sum, stat) => sum + (stat.registration_count || 0), 0)}, verified: {profiles.filter(p => p.email_confirmed_at).length}
+                      total registrations: {dailyRegistrationStats.reduce((sum, stat) => sum + (stat.registration_count || 0), 0)} - {dailyRegistrationStats.reduce((sum, stat) => sum + (stat.registration_count || 0), 0) - profiles.filter(p => p.email_confirmed_at).length}
                     </div>
                     <div className="grid grid-cols-7 gap-2">
                       {dailyRegistrationStats.map((stat, index) => (
