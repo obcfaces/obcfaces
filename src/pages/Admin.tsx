@@ -1609,7 +1609,9 @@ const Admin = () => {
           created_at,
           submitted_at,
           deleted_at,
-          application_data
+          application_data,
+          rejection_reason_types,
+          rejection_reason
         `)
         .in('admin_status', ['pending', 'rejected'])
         .is('deleted_at', null);
@@ -1651,7 +1653,9 @@ const Admin = () => {
             is_active: item.is_active,
             admin_status: item.admin_status,
             status_history: item.status_history || {},
-            week_interval: item.week_interval
+            week_interval: item.week_interval,
+            rejection_reason_types: item.rejection_reason_types,
+            rejection_reason: item.rejection_reason
           };
         });
         
@@ -1697,7 +1701,9 @@ const Admin = () => {
         is_active: item.is_active,
         admin_status: item.admin_status || 'pending',
         status_history: item.status_history || {},
-        week_interval: item.week_interval
+        week_interval: item.week_interval,
+        rejection_reason_types: item.rejection_reason_types,
+        rejection_reason: item.rejection_reason
       }));
 
       console.log('Admin statuses distribution:', 
