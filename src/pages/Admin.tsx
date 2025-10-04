@@ -990,27 +990,68 @@ const Admin = () => {
         }
       }));
 
-      // Fetch activity data
+      // Fetch activity data - unique logins with stats for each session
       const { data: logins } = await supabase
         .from('user_login_logs')
         .select('created_at')
         .eq('user_id', userId)
-        .order('created_at', { ascending: false })
-        .limit(10);
+        .order('created_at', { ascending: false });
+
+      // Get unique login dates (group by date)
+      const uniqueLogins = logins?.reduce((acc: any[], login) => {
+        const loginDate = new Date(login.created_at);
+        const dateKey = loginDate.toDateString();
+        
+        if (!acc.find(l => new Date(l.created_at).toDateString() === dateKey)) {
+          acc.push(login);
+        }
+        return acc;
+      }, []) || [];
+
+      // For each unique login, get stats from that period
+      const loginsWithStats = await Promise.all(
+        uniqueLogins.map(async (login) => {
+          const loginDate = new Date(login.created_at);
+          const nextDay = new Date(loginDate);
+          nextDay.setDate(nextDay.getDate() + 1);
+
+          // Count likes for this session
+          const { count: sessionLikes } = await supabase
+            .from('likes')
+            .select('*', { count: 'exact', head: true })
+            .eq('user_id', userId)
+            .gte('created_at', loginDate.toISOString())
+            .lt('created_at', nextDay.toISOString());
+
+          // Count ratings for this session
+          const { count: sessionRatings } = await supabase
+            .from('contestant_ratings')
+            .select('*', { count: 'exact', head: true })
+            .eq('user_id', userId)
+            .gte('created_at', loginDate.toISOString())
+            .lt('created_at', nextDay.toISOString());
+
+          return {
+            created_at: login.created_at,
+            likes: sessionLikes || 0,
+            ratings: sessionRatings || 0
+          };
+        })
+      );
 
       const { data: participations } = await supabase
         .from('weekly_contest_participants')
         .select('week_interval, created_at')
         .eq('user_id', userId);
 
-      const lastActivity = logins?.[0]?.created_at || null;
+      const lastActivity = uniqueLogins[0]?.created_at || null;
 
       setUserActivityData(prev => ({
         ...prev,
         [userId]: {
           lastActivity,
-          logins: logins || [],
-          intervals: participations?.map(p => p.week_interval).filter(Boolean) || [],
+          logins: loginsWithStats,
+          intervals: participations ? [...new Set(participations.map(p => p.week_interval).filter(Boolean))] : [],
           likesCount: likesCount || 0,
           ratingsCount: ratingsCount || 0
         }
@@ -6018,19 +6059,20 @@ const Admin = () => {
                       <div className="space-y-4">
                         <div className="grid gap-4">
                           {paginatedProfiles.map(profile => {
-                          const lastActivity = userActivityData[profile.id]?.lastActivity;
-                          const now = new Date();
-                          const activityDate = lastActivity ? new Date(lastActivity) : null;
-                          const daysDiff = activityDate ? Math.floor((now.getTime() - activityDate.getTime()) / (1000 * 60 * 60 * 24)) : null;
-                          
-                          let activityColor = 'bg-red-100 text-red-700';
-                          if (daysDiff !== null) {
-                            if (daysDiff < 2) activityColor = 'bg-green-100 text-green-700';
-                            else if (daysDiff < 7) activityColor = 'bg-yellow-100 text-yellow-700';
-                          }
+                            const lastActivity = userActivityData[profile.id]?.lastActivity;
+                            const now = new Date();
+                            const activityDate = lastActivity ? new Date(lastActivity) : null;
+                            const daysDiff = activityDate ? Math.floor((now.getTime() - activityDate.getTime()) / (1000 * 60 * 60 * 24)) : null;
+                            
+                            let activityColor = 'bg-red-100 text-red-700';
+                            if (daysDiff !== null) {
+                              if (daysDiff < 2) activityColor = 'bg-green-100 text-green-700';
+                              else if (daysDiff < 7) activityColor = 'bg-yellow-100 text-yellow-700';
+                            }
 
-                          return (
-                            <Card key={profile.id} className="p-3 relative overflow-hidden">
+                            return (
+                              <React.Fragment key={profile.id}>
+                                <Card className="p-3 relative overflow-hidden">
                               {/* Registration date badge in top left corner */}
                               <Badge 
                                 variant="outline" 
@@ -6128,25 +6170,6 @@ const Admin = () => {
                                 </DropdownMenu>
                               </div>
                           
-                              {/* Activity history expandable */}
-                              {expandedUserActivity.has(profile.id) && userActivityData[profile.id] && (
-                                <div className="mt-8 mb-4 p-3 bg-muted/50 rounded-lg">
-                                  <h4 className="text-sm font-medium mb-2">История активности:</h4>
-                                  <div className="space-y-1 text-xs text-muted-foreground">
-                                    {userActivityData[profile.id].logins?.map((login: any, idx: number) => (
-                                      <div key={idx}>
-                                        • Вход: {new Date(login.created_at).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
-                                      </div>
-                                    ))}
-                                    {userActivityData[profile.id].intervals?.map((interval: string, idx: number) => (
-                                      <div key={idx}>• Интервал: {interval}</div>
-                                    ))}
-                                    <div>• Лайков: {userActivityData[profile.id].likesCount || 0}</div>
-                                    <div>• Голосов: {userActivityData[profile.id].ratingsCount || 0}</div>
-                                  </div>
-                                </div>
-                              )}
-                              
                               <div className="flex items-center justify-between mt-6">
                                 <div className="flex items-center gap-3">
                                   <Avatar>
@@ -6299,9 +6322,54 @@ const Admin = () => {
                                    No activity yet
                                  </div>
                                )}
-                             </div>
-                           )}
+                              </div>
+                            )}
                           </Card>
+                          
+                          {/* Activity history expandable - outside card, full width */}
+                          {expandedUserActivity.has(profile.id) && userActivityData[profile.id] && (
+                            <div className="w-full p-4 bg-muted/30 rounded-lg border">
+                              <h4 className="text-sm font-medium mb-3">История активности:</h4>
+                              <div className="space-y-2">
+                                {userActivityData[profile.id].logins?.map((login: any, idx: number) => (
+                                  <div key={idx} className="flex items-center justify-between text-xs p-2 bg-background rounded">
+                                    <div className="flex items-center gap-4 flex-1">
+                                      <span className="text-muted-foreground">
+                                        • Вход: {new Date(login.created_at).toLocaleDateString('ru-RU', { 
+                                          day: 'numeric', 
+                                          month: 'short',
+                                          hour: '2-digit',
+                                          minute: '2-digit'
+                                        })}
+                                      </span>
+                                    </div>
+                                    <div className="flex items-center gap-4">
+                                      <div className="flex items-center gap-1">
+                                        <Heart className="h-3 w-3 text-red-500" />
+                                        <span>{login.likes || 0}</span>
+                                      </div>
+                                      <div className="flex items-center gap-1">
+                                        <Star className="h-3 w-3 text-yellow-500" />
+                                        <span>{login.ratings || 0}</span>
+                                      </div>
+                                    </div>
+                                  </div>
+                                ))}
+                                {userActivityData[profile.id].intervals && userActivityData[profile.id].intervals.length > 0 && (
+                                  <div className="mt-3 pt-3 border-t">
+                                    <div className="text-xs text-muted-foreground font-medium mb-2">Интервалы участия:</div>
+                                    <div className="flex flex-wrap gap-2">
+                                      {userActivityData[profile.id].intervals.map((interval: string, idx: number) => (
+                                        <Badge key={idx} variant="outline" className="text-xs">
+                                          {interval}
+                                        </Badge>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                            )}
                           );
                         })}
                         </div>
