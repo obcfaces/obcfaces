@@ -6299,26 +6299,22 @@ const Admin = () => {
                                  </div>
                                </div>
 
-                               {/* TEST BUTTON - Simple text button */}
+                               {/* TEST BUTTON - Simple div instead of Button */}
                                <div 
-                                className="absolute bottom-2 right-2 z-50" 
+                                className="absolute bottom-2 right-2 z-50 bg-primary text-primary-foreground px-3 py-1 rounded cursor-pointer font-medium text-sm hover:bg-primary/90 select-none" 
                                 style={{ pointerEvents: 'auto' }}
-                                onClickCapture={(e) => e.stopPropagation()}
-                              >
-                              <Button
-                                variant="default"
-                                size="sm"
-                                className="bg-primary text-primary-foreground hover:bg-primary/90"
-                                style={{ pointerEvents: 'auto' }}
-                                onMouseDown={(e) => {
+                                onClick={(e) => {
                                   e.preventDefault();
                                   e.stopPropagation();
-                                  console.log('🔘 TEST BUTTON CLICKED for profile:', profile.id);
+                                  console.log('🔘 DIV CLICKED for profile:', profile.id);
+                                  alert('Clicked! Profile: ' + profile.id);
                                   toggleUserStats(profile.id);
+                                }}
+                                onMouseDown={(e) => {
+                                  console.log('🔘 MOUSEDOWN on div for profile:', profile.id);
                                 }}
                               >
                                 STATS
-                              </Button>
                               </div>
 
                             {/* Expandable content - Shows all interactions */}
