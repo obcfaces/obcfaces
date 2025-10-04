@@ -1481,6 +1481,7 @@ const Profile = () => {
                           const rejectionReasonTypes = participationItems[0].candidateData.rejection_reason_types;
                           const rejectionReason = participationItems[0].candidateData.rejection_reason;
                           const hasReasons = rejectionReasonTypes && rejectionReasonTypes.length > 0;
+                          const hasCustomNote = rejectionReason && rejectionReason.trim();
                           
                           return (
                             <div className="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 mb-4 mx-6 sm:mx-0" role="alert">
@@ -1496,12 +1497,14 @@ const Profile = () => {
                                       </div>
                                     ) : null;
                                   })}
-                                  {rejectionReason && !isReasonDuplicate(rejectionReason, rejectionReasonTypes) && (
-                                    <div className="flex items-start gap-2 mt-2 pt-2 border-t border-red-200">
-                                      <span className="font-medium">Note:</span>
-                                      <span>{rejectionReason}</span>
-                                    </div>
-                                  )}
+                                </div>
+                              )}
+                              {hasCustomNote && !isReasonDuplicate(rejectionReason, rejectionReasonTypes || []) && (
+                                <div className={`text-sm ${hasReasons ? 'mt-2 pt-2 border-t border-red-200' : ''}`}>
+                                  <div className="flex items-start gap-2">
+                                    {hasReasons && <span className="font-medium">Note:</span>}
+                                    <span>{rejectionReason}</span>
+                                  </div>
                                 </div>
                               )}
                               {isOwner && (
