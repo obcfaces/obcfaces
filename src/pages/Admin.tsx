@@ -5209,15 +5209,20 @@ const Admin = () => {
                       const appData = participant.application_data || {};
                       const userProfile = profiles.find(p => p.id === participant.user_id);
                       
+                      const registrationDate = participant.submitted_at || participant.created_at;
+                      const isValidDate = registrationDate && !isNaN(new Date(registrationDate).getTime());
+                      
                       return (
                         <Card key={participant.id} className="relative p-4">
-                          {/* Registration date in top-left corner */}
-                          <div className="absolute top-0 left-0 px-2 py-1 bg-muted text-xs font-medium">
-                            {new Date(participant.submitted_at || participant.created_at).toLocaleDateString('en-GB', {
-                              day: 'numeric',
-                              month: 'short'
-                            }).toLowerCase()}
-                          </div>
+                          {/* Registration date in top-left corner - only show if valid */}
+                          {isValidDate && (
+                            <div className="absolute top-0 left-0 px-2 py-1 bg-muted text-xs font-medium">
+                              {new Date(registrationDate).toLocaleDateString('en-GB', {
+                                day: 'numeric',
+                                month: 'short'
+                              }).toLowerCase()}
+                            </div>
+                          )}
                           
                           <div className="flex gap-4 mt-6">
                             {/* Photos */}
