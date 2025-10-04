@@ -2077,8 +2077,8 @@ const Admin = () => {
             {/* Mobile layout: Single row with all tabs */}
             <div className="md:hidden">
               <TabsList className="grid grid-cols-8 w-full">
-                <TabsTrigger value="applications" className="text-xs">
-                  New
+                <TabsTrigger value="new1" className="text-xs">
+                  New1
                 </TabsTrigger>
                 <TabsTrigger value="prenextweek" className="text-xs">
                   Pre
@@ -2106,8 +2106,8 @@ const Admin = () => {
             
             {/* Desktop layout - single row */}
             <TabsList className="hidden md:flex">
-              <TabsTrigger value="applications">
-                New
+              <TabsTrigger value="new1">
+                New1
               </TabsTrigger>
               <TabsTrigger value="prenextweek">
                 Pre
@@ -5107,10 +5107,10 @@ const Admin = () => {
               })()}
             </TabsContent>
 
-            <TabsContent value="applications" className="space-y-4">
-              
-              {/* Simple view - only pending and rejected from weeklyParticipants */}
+            <TabsContent value="new1" className="space-y-4">
               <div className="mb-6">
+                <h2 className="text-xl font-semibold mb-4">New Applications (New1)</h2>
+                
                 <div className="flex gap-2 items-center mb-4">
                   <Select 
                     value={registrationsStatusFilter} 
@@ -5149,39 +5149,43 @@ const Admin = () => {
               </div>
 
               {(() => {
-                // Filter participants by pending and rejected statuses (exclude deleted)
+                // КРИТИЧНО: Фильтруем только НЕ удалённые карточки с pending и rejected
                 const filteredParticipants = weeklyParticipants.filter(p => {
-                  // Filter by status
+                  // ПЕРВЫЙ ФИЛЬТР: Только НЕ удалённые
+                  if (p.deleted_at !== null) {
+                    return false;
+                  }
+                  
+                  // ВТОРОЙ ФИЛЬТР: Только pending и rejected
+                  if (p.admin_status !== 'pending' && p.admin_status !== 'rejected') {
+                    return false;
+                  }
+                  
+                  // Фильтр по статусу (из dropdown)
                   if (registrationsStatusFilter !== 'all' && p.admin_status !== registrationsStatusFilter) {
                     return false;
                   }
                   
-                  // Filter by country
+                  // Фильтр по стране
                   if (countryFilter !== 'all') {
                     const country = p.application_data?.country;
                     if (country !== countryFilter) return false;
                   }
                   
-                  // Only show pending and rejected, exclude deleted
-                  return (p.admin_status === 'pending' || p.admin_status === 'rejected') && !p.deleted_at;
+                  return true;
                 });
 
-                // Sort by registration date (newest first)
+                // Сортировка по дате создания карточки (created_at) - новые сверху
                 const sortedParticipants = [...filteredParticipants].sort((a, b) => {
-                  // Get profile data to access created_at (registration date)
-                  const profileA = profiles.find(p => p.id === a.user_id);
-                  const profileB = profiles.find(p => p.id === b.user_id);
-                  
-                  const dateA = new Date(profileA?.created_at || a.created_at || 0).getTime();
-                  const dateB = new Date(profileB?.created_at || b.created_at || 0).getTime();
-                  
+                  const dateA = new Date(a.created_at || 0).getTime();
+                  const dateB = new Date(b.created_at || 0).getTime();
                   return dateB - dateA; // newest first
                 });
 
                 if (sortedParticipants.length === 0) {
                   return (
                     <div className="text-center py-8">
-                      <p className="text-muted-foreground">No applications found</p>
+                      <p className="text-muted-foreground">No new applications found</p>
                     </div>
                   );
                 }
@@ -5227,6 +5231,15 @@ const Admin = () => {
                                 <div>{appData.city}, {appData.country}</div>
                                 <div>Age: {new Date().getFullYear() - (appData.birth_year || 2000)}</div>
                                 <div>{userProfile?.email || 'No email'}</div>
+                                <div className="text-xs opacity-70">
+                                  Card created: {new Date(participant.created_at).toLocaleDateString('en-GB', { 
+                                    day: '2-digit', 
+                                    month: 'short', 
+                                    year: 'numeric',
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                  })}
+                                </div>
                               </div>
                             </div>
                             
