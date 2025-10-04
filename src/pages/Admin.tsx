@@ -1230,20 +1230,22 @@ const Admin = () => {
   };
 
   const toggleUserStats = async (userId: string) => {
+    console.log('🔵 toggleUserStats called for user:', userId);
     const isExpanded = expandedUserStats.has(userId);
     
     if (isExpanded) {
+      console.log('🔵 Collapsing stats for user:', userId);
       setExpandedUserStats(prev => {
         const next = new Set(prev);
         next.delete(userId);
         return next;
       });
     } else {
+      console.log('🔵 Expanding stats for user:', userId);
       setExpandedUserStats(prev => new Set(prev).add(userId));
-      // Fetch data if not already loaded
-      if (!userLikesData[userId] && !userRatingsData[userId]) {
-        await fetchUserLikesAndRatings(userId);
-      }
+      // Always fetch data when expanding to ensure fresh data
+      console.log('🔵 Calling fetchUserLikesAndRatings for user:', userId);
+      await fetchUserLikesAndRatings(userId);
     }
   };
 
