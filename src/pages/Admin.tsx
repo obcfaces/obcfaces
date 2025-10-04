@@ -5212,29 +5212,14 @@ const Admin = () => {
                       // Определяем дату для отображения
                       const displayDate = participant.submitted_at || participant.created_at || userProfile?.created_at || new Date().toISOString();
                       
-                      // Логирование для отладки
-                      const fullName = `${appData.first_name || ''} ${appData.last_name || ''}`.trim();
-                      if (fullName.includes('Ruby')) {
-                        console.log('Ruby date debug:', {
-                          name: fullName,
-                          submitted_at: participant.submitted_at,
-                          created_at: participant.created_at,
-                          user_created_at: userProfile?.created_at,
-                          displayDate: displayDate,
-                          formatted: new Date(displayDate).toLocaleDateString('en-GB', {
-                            day: 'numeric',
-                            month: 'short'
-                          }).toLowerCase()
-                        });
-                      }
-                      
                       return (
                         <Card key={participant.id} className="relative p-4">
                           {/* Registration date in top-left corner */}
                           <div className="absolute top-0 left-0 px-2 py-1 bg-muted text-xs font-medium">
                             {new Date(displayDate).toLocaleDateString('en-GB', {
                               day: 'numeric',
-                              month: 'short'
+                              month: 'short',
+                              timeZone: 'UTC'
                             }).toLowerCase()}
                           </div>
                           
