@@ -1181,15 +1181,19 @@ const Admin = () => {
   };
 
   const toggleUserStats = async (userId: string) => {
+    console.log('🔘 Toggle user stats clicked for:', userId);
     const isExpanded = expandedUserStats.has(userId);
+    console.log('📊 Is expanded:', isExpanded);
     
     if (isExpanded) {
+      console.log('❌ Collapsing stats');
       setExpandedUserStats(prev => {
         const next = new Set(prev);
         next.delete(userId);
         return next;
       });
     } else {
+      console.log('✅ Expanding stats, fetching data...');
       setExpandedUserStats(prev => new Set(prev).add(userId));
       await fetchUserLikesAndRatings(userId);
     }
