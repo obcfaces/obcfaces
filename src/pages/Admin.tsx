@@ -456,8 +456,6 @@ const Admin = () => {
   const [statusHistoryModalOpen, setStatusHistoryModalOpen] = useState(false);
   const [selectedStatusHistory, setSelectedStatusHistory] = useState<{ participantId: string; participantName: string; statusHistory: any } | null>(null);
   const [expandedUserStats, setExpandedUserStats] = useState<Set<string>>(new Set());
-  const [expandedUserLikes, setExpandedUserLikes] = useState<Set<string>>(new Set());
-  const [expandedUserRatings, setExpandedUserRatings] = useState<Set<string>>(new Set());
   const [userLikesData, setUserLikesData] = useState<Record<string, any[]>>({});
   const [userRatingsData, setUserRatingsData] = useState<Record<string, any[]>>({});
   const [userStatsCount, setUserStatsCount] = useState<Record<string, { likes: number; ratings: number }>>({});
@@ -1202,68 +1200,21 @@ const Admin = () => {
     }
   };
 
-  const toggleUserLikes = async (userId: string) => {
-    const isExpanded = expandedUserLikes.has(userId);
-    
-    if (isExpanded) {
-      setExpandedUserLikes(prev => {
-        const next = new Set(prev);
-        next.delete(userId);
-        return next;
-      });
-    } else {
-      setExpandedUserLikes(prev => new Set(prev).add(userId));
-      // Fetch data if not already loaded
-      if (!userLikesData[userId]) {
-        await fetchUserLikesAndRatings(userId);
-      }
-    }
-  };
-
-  const toggleUserRatings = async (userId: string) => {
-    const isExpanded = expandedUserRatings.has(userId);
-    
-    if (isExpanded) {
-      setExpandedUserRatings(prev => {
-        const next = new Set(prev);
-        next.delete(userId);
-        return next;
-      });
-    } else {
-      setExpandedUserRatings(prev => new Set(prev).add(userId));
-      // Fetch data if not already loaded
-      if (!userRatingsData[userId]) {
-        await fetchUserLikesAndRatings(userId);
-      }
-    }
-  };
-
   const toggleUserStats = async (userId: string) => {
-    console.log('🔘 Toggle user stats clicked for:', userId);
-    console.log('📊 Current expandedUserStats:', Array.from(expandedUserStats));
-    console.log('📊 Current userLikesData:', userLikesData[userId]);
-    console.log('📊 Current userRatingsData:', userRatingsData[userId]);
-    
     const isExpanded = expandedUserStats.has(userId);
-    console.log('📊 Is expanded:', isExpanded);
     
     if (isExpanded) {
-      console.log('❌ Collapsing stats');
       setExpandedUserStats(prev => {
         const next = new Set(prev);
         next.delete(userId);
         return next;
       });
     } else {
-      console.log('✅ Expanding stats, fetching data...');
-      setExpandedUserStats(prev => {
-        const next = new Set(prev).add(userId);
-        console.log('📊 New expandedUserStats:', Array.from(next));
-        return next;
-      });
-      console.log('📞 Calling fetchUserLikesAndRatings...');
-      await fetchUserLikesAndRatings(userId);
-      console.log('✅ fetchUserLikesAndRatings completed');
+      setExpandedUserStats(prev => new Set(prev).add(userId));
+      // Fetch data if not already loaded
+      if (!userLikesData[userId] && !userRatingsData[userId]) {
+        await fetchUserLikesAndRatings(userId);
+      }
     }
   };
 
@@ -6317,40 +6268,38 @@ const Admin = () => {
                                  </div>
                                </div>
 
-                              {/* Stats in bottom right corner */}
-                              <div className="absolute bottom-2 right-2 flex items-center gap-3">
+                               {/* Stats in bottom right corner - Combined button */}
+                               <div className="absolute bottom-2 right-2">
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                className="h-auto p-1 flex items-center gap-1 hover:bg-muted"
-                                onClick={() => toggleUserRatings(profile.id)}
+                                className="h-auto p-1 flex items-center gap-2 hover:bg-muted"
+                                onClick={() => toggleUserStats(profile.id)}
                               >
-                                <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
-                                {loadingUserStats.has(profile.id) ? (
-                                  <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
-                                ) : (
-                                  <span className="text-xs font-medium">{userStatsCount[profile.id]?.ratings || 0}</span>
-                                )}
+                                <div className="flex items-center gap-1">
+                                  <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
+                                  {loadingUserStats.has(profile.id) ? (
+                                    <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
+                                  ) : (
+                                    <span className="text-xs font-medium">{userStatsCount[profile.id]?.ratings || 0}</span>
+                                  )}
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <Heart className="h-4 w-4 text-red-500 fill-red-500" />
+                                  {loadingUserStats.has(profile.id) ? (
+                                    <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
+                                  ) : (
+                                    <span className="text-xs font-medium">{userStatsCount[profile.id]?.likes || 0}</span>
+                                  )}
+                                </div>
                               </Button>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="h-auto p-1 flex items-center gap-1 hover:bg-muted"
-                                onClick={() => toggleUserLikes(profile.id)}
-                              >
-                                <Heart className="h-4 w-4 text-red-500 fill-red-500" />
-                                {loadingUserStats.has(profile.id) ? (
-                                  <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
-                                ) : (
-                                  <span className="text-xs font-medium">{userStatsCount[profile.id]?.likes || 0}</span>
-                                )}
-                              </Button>
-                           </div>
+                            </div>
 
-                            {/* Expandable Ratings */}
-                            {expandedUserRatings.has(profile.id) && (
-                              <div className="mt-4 pt-4 border-t">
-                                {userRatingsData[profile.id] && userRatingsData[profile.id].length > 0 ? (
+                            {/* Expandable content - Shows all interactions */}
+                            {expandedUserStats.has(profile.id) && (
+                              <div className="mt-4 pt-4 border-t space-y-3">
+                                {/* Ratings */}
+                                {userRatingsData[profile.id] && userRatingsData[profile.id].length > 0 && (
                                   <div>
                                     <h4 className="text-sm font-semibold mb-2 flex items-center gap-1">
                                       <Star className="h-4 w-4 text-yellow-500" />
@@ -6382,18 +6331,10 @@ const Admin = () => {
                                        ))}
                                      </div>
                                   </div>
-                                ) : (
-                                  <div className="text-sm text-muted-foreground text-center py-4">
-                                    No ratings yet
-                                  </div>
                                 )}
-                               </div>
-                             )}
 
-                            {/* Expandable Likes */}
-                            {expandedUserLikes.has(profile.id) && (
-                              <div className="mt-4 pt-4 border-t">
-                                {userLikesData[profile.id] && userLikesData[profile.id].length > 0 ? (
+                                {/* Likes */}
+                                {userLikesData[profile.id] && userLikesData[profile.id].length > 0 && (
                                   <div>
                                     <h4 className="text-sm font-semibold mb-2 flex items-center gap-1">
                                       <Heart className="h-4 w-4 text-red-500" />
@@ -6423,9 +6364,12 @@ const Admin = () => {
                                          ))}
                                      </div>
                                   </div>
-                                ) : (
+                                )}
+
+                                {(!userRatingsData[profile.id] || userRatingsData[profile.id].length === 0) &&
+                                 (!userLikesData[profile.id] || userLikesData[profile.id].length === 0) && (
                                   <div className="text-sm text-muted-foreground text-center py-4">
-                                    No likes yet
+                                    No activity yet
                                   </div>
                                 )}
                                </div>
