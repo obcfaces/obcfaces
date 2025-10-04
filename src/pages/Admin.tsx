@@ -970,23 +970,27 @@ const Admin = () => {
 
   const fetchUserStats = async (userId: string) => {
     try {
-      // Fetch likes count
-      const { count: likesCount } = await supabase
+      // Fetch all likes and ratings with timestamps
+      const { data: allLikes } = await supabase
         .from('likes')
-        .select('*', { count: 'exact', head: true })
-        .eq('user_id', userId);
+        .select('created_at')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false });
 
-      // Fetch ratings count
-      const { count: ratingsCount } = await supabase
+      const { data: allRatings } = await supabase
         .from('contestant_ratings')
-        .select('*', { count: 'exact', head: true })
-        .eq('user_id', userId);
+        .select('created_at')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false });
+
+      const likesCount = allLikes?.length || 0;
+      const ratingsCount = allRatings?.length || 0;
 
       setUserStatsCount(prev => ({
         ...prev,
         [userId]: {
-          likes: likesCount || 0,
-          ratings: ratingsCount || 0
+          likes: likesCount,
+          ratings: ratingsCount
         }
       }));
 
@@ -1008,36 +1012,30 @@ const Admin = () => {
         return acc;
       }, []) || [];
 
-      // For each unique login, get stats from that period
-      const loginsWithStats = await Promise.all(
-        uniqueLogins.map(async (login) => {
-          const loginDate = new Date(login.created_at);
-          const nextDay = new Date(loginDate);
-          nextDay.setDate(nextDay.getDate() + 1);
+      // For each unique login, calculate stats between this login and the next
+      const loginsWithStats = uniqueLogins.map((login, index) => {
+        const currentLoginTime = new Date(login.created_at);
+        const nextLogin = uniqueLogins[index + 1];
+        const previousLoginTime = nextLogin ? new Date(nextLogin.created_at) : new Date(0);
 
-          // Count likes for this session
-          const { count: sessionLikes } = await supabase
-            .from('likes')
-            .select('*', { count: 'exact', head: true })
-            .eq('user_id', userId)
-            .gte('created_at', loginDate.toISOString())
-            .lt('created_at', nextDay.toISOString());
+        // Count likes between this login and previous login
+        const sessionLikes = allLikes?.filter(like => {
+          const likeTime = new Date(like.created_at);
+          return likeTime >= previousLoginTime && likeTime <= currentLoginTime;
+        }).length || 0;
 
-          // Count ratings for this session
-          const { count: sessionRatings } = await supabase
-            .from('contestant_ratings')
-            .select('*', { count: 'exact', head: true })
-            .eq('user_id', userId)
-            .gte('created_at', loginDate.toISOString())
-            .lt('created_at', nextDay.toISOString());
+        // Count ratings between this login and previous login
+        const sessionRatings = allRatings?.filter(rating => {
+          const ratingTime = new Date(rating.created_at);
+          return ratingTime >= previousLoginTime && ratingTime <= currentLoginTime;
+        }).length || 0;
 
-          return {
-            created_at: login.created_at,
-            likes: sessionLikes || 0,
-            ratings: sessionRatings || 0
-          };
-        })
-      );
+        return {
+          created_at: login.created_at,
+          likes: sessionLikes,
+          ratings: sessionRatings
+        };
+      });
 
       const { data: participations } = await supabase
         .from('weekly_contest_participants')
@@ -1052,8 +1050,8 @@ const Admin = () => {
           lastActivity,
           logins: loginsWithStats,
           intervals: participations ? [...new Set(participations.map(p => p.week_interval).filter(Boolean))] : [],
-          likesCount: likesCount || 0,
-          ratingsCount: ratingsCount || 0
+          likesCount,
+          ratingsCount
         }
       }));
     } catch (error) {
