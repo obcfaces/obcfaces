@@ -459,6 +459,7 @@ const Admin = () => {
   const [userStatsCount, setUserStatsCount] = useState<Record<string, { likes: number; ratings: number }>>({});
   const [expandedUserActivity, setExpandedUserActivity] = useState<Set<string>>(new Set());
   const [userActivityData, setUserActivityData] = useState<Record<string, any>>({});
+  const [expandedIPs, setExpandedIPs] = useState<Set<string>>(new Set());
   const [regPaginationPage, setRegPaginationPage] = useState(1);
   const regItemsPerPage = 20;
   const navigate = useNavigate();
@@ -6184,7 +6185,20 @@ const Admin = () => {
                                     </div>
                                     {profile.ip_address && (
                                       <div className={`text-xs ${profile.isDuplicateIP ? 'text-red-500 font-medium' : 'text-muted-foreground'}`}>
-                                        IP: {profile.ip_address}
+                                        IP: <button
+                                          onClick={() => {
+                                            const newExpanded = new Set(expandedIPs);
+                                            if (expandedIPs.has(profile.ip_address)) {
+                                              newExpanded.delete(profile.ip_address);
+                                            } else {
+                                              newExpanded.add(profile.ip_address);
+                                            }
+                                            setExpandedIPs(newExpanded);
+                                          }}
+                                          className="hover:underline cursor-pointer"
+                                        >
+                                          {profile.ip_address} ({paginatedProfiles.filter(p => p.ip_address === profile.ip_address).length})
+                                        </button>
                                         {profile.isDuplicateIP && ' ⚠️'}
                                       </div>
                                     )}
@@ -6323,6 +6337,50 @@ const Admin = () => {
                               </div>
                             )}
                           </Card>
+                          
+                          {/* IP Address Cards - Show all users with same IP when expanded */}
+                          {profile.ip_address && expandedIPs.has(profile.ip_address) && (
+                            <div className="w-full p-4 bg-muted/30 rounded-lg border mb-4">
+                              <h4 className="text-sm font-medium mb-3">Все регистрации с IP {profile.ip_address}:</h4>
+                              <div className="space-y-2">
+                                {paginatedProfiles
+                                  .filter(p => p.ip_address === profile.ip_address)
+                                  .map(ipProfile => (
+                                    <div key={`ip-${ipProfile.id}`} className="p-3 bg-background rounded border">
+                                      <div className="flex items-start gap-3">
+                                        <Avatar className="h-10 w-10">
+                                          <AvatarImage src={ipProfile.avatar_url || ''} />
+                                          <AvatarFallback>
+                                            {ipProfile.first_name?.[0]}{ipProfile.last_name?.[0]}
+                                          </AvatarFallback>
+                                        </Avatar>
+                                        <div className="flex-1 min-w-0">
+                                          <div className="font-medium truncate">
+                                            {ipProfile.display_name || `${ipProfile.first_name} ${ipProfile.last_name}`}
+                                          </div>
+                                          <div className="text-xs text-muted-foreground truncate">
+                                            {ipProfile.email}
+                                          </div>
+                                          <div className="text-xs text-muted-foreground mt-1">
+                                            Зарегистрирован: {new Date(ipProfile.created_at).toLocaleString('ru-RU')}
+                                          </div>
+                                          {ipProfile.user_agent && (() => {
+                                            const parser = new UAParser(ipProfile.user_agent);
+                                            const result = parser.getResult();
+                                            return (
+                                              <div className="text-xs text-muted-foreground mt-1">
+                                                {result.os.name && `${result.os.name} ${result.os.version || ''}`}
+                                                {result.browser.name && ` | ${result.browser.name}`}
+                                              </div>
+                                            );
+                                          })()}
+                                        </div>
+                                      </div>
+                                    </div>
+                                  ))}
+                              </div>
+                            </div>
+                          )}
                           
                           {/* Activity history expandable - outside card, full width */}
                           {expandedUserActivity.has(profile.id) && userActivityData[profile.id] && (
