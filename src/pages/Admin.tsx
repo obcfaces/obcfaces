@@ -456,6 +456,8 @@ const Admin = () => {
   const [statusHistoryModalOpen, setStatusHistoryModalOpen] = useState(false);
   const [selectedStatusHistory, setSelectedStatusHistory] = useState<{ participantId: string; participantName: string; statusHistory: any } | null>(null);
   const [expandedUserStats, setExpandedUserStats] = useState<Set<string>>(new Set());
+  const [expandedUserLikes, setExpandedUserLikes] = useState<Set<string>>(new Set());
+  const [expandedUserRatings, setExpandedUserRatings] = useState<Set<string>>(new Set());
   const [userLikesData, setUserLikesData] = useState<Record<string, any[]>>({});
   const [userRatingsData, setUserRatingsData] = useState<Record<string, any[]>>({});
   const [userStatsCount, setUserStatsCount] = useState<Record<string, { likes: number; ratings: number }>>({});
@@ -1197,6 +1199,42 @@ const Admin = () => {
       console.log('✅ User activity data set successfully');
     } catch (error) {
       console.error('❌ Error fetching user likes and ratings:', error);
+    }
+  };
+
+  const toggleUserLikes = async (userId: string) => {
+    const isExpanded = expandedUserLikes.has(userId);
+    
+    if (isExpanded) {
+      setExpandedUserLikes(prev => {
+        const next = new Set(prev);
+        next.delete(userId);
+        return next;
+      });
+    } else {
+      setExpandedUserLikes(prev => new Set(prev).add(userId));
+      // Fetch data if not already loaded
+      if (!userLikesData[userId]) {
+        await fetchUserLikesAndRatings(userId);
+      }
+    }
+  };
+
+  const toggleUserRatings = async (userId: string) => {
+    const isExpanded = expandedUserRatings.has(userId);
+    
+    if (isExpanded) {
+      setExpandedUserRatings(prev => {
+        const next = new Set(prev);
+        next.delete(userId);
+        return next;
+      });
+    } else {
+      setExpandedUserRatings(prev => new Set(prev).add(userId));
+      // Fetch data if not already loaded
+      if (!userRatingsData[userId]) {
+        await fetchUserLikesAndRatings(userId);
+      }
     }
   };
 
@@ -6281,113 +6319,117 @@ const Admin = () => {
 
                               {/* Stats in bottom right corner */}
                               <div className="absolute bottom-2 right-2 flex items-center gap-3">
-                             <Button
-                               variant="ghost"
-                               size="sm"
-                               className="h-auto p-1 flex items-center gap-1 hover:bg-muted"
-                               onClick={() => toggleUserStats(profile.id)}
-                             >
-                               <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
-                               {loadingUserStats.has(profile.id) ? (
-                                 <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
-                               ) : (
-                                 <span className="text-xs font-medium">{userStatsCount[profile.id]?.ratings || 0}</span>
-                               )}
-                             </Button>
-                             <Button
-                               variant="ghost"
-                               size="sm"
-                               className="h-auto p-1 flex items-center gap-1 hover:bg-muted"
-                               onClick={() => toggleUserStats(profile.id)}
-                             >
-                               <Heart className="h-4 w-4 text-red-500 fill-red-500" />
-                               {loadingUserStats.has(profile.id) ? (
-                                 <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
-                               ) : (
-                                 <span className="text-xs font-medium">{userStatsCount[profile.id]?.likes || 0}</span>
-                               )}
-                             </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-auto p-1 flex items-center gap-1 hover:bg-muted"
+                                onClick={() => toggleUserRatings(profile.id)}
+                              >
+                                <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
+                                {loadingUserStats.has(profile.id) ? (
+                                  <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
+                                ) : (
+                                  <span className="text-xs font-medium">{userStatsCount[profile.id]?.ratings || 0}</span>
+                                )}
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-auto p-1 flex items-center gap-1 hover:bg-muted"
+                                onClick={() => toggleUserLikes(profile.id)}
+                              >
+                                <Heart className="h-4 w-4 text-red-500 fill-red-500" />
+                                {loadingUserStats.has(profile.id) ? (
+                                  <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
+                                ) : (
+                                  <span className="text-xs font-medium">{userStatsCount[profile.id]?.likes || 0}</span>
+                                )}
+                              </Button>
                            </div>
 
-                           {/* Expandable content */}
-                           {expandedUserStats.has(profile.id) && (
-                             <div className="mt-4 pt-4 border-t space-y-3">
-                               {/* Ratings */}
-                               {userRatingsData[profile.id] && userRatingsData[profile.id].length > 0 && (
-                                 <div>
-                                   <h4 className="text-sm font-semibold mb-2 flex items-center gap-1">
-                                     <Star className="h-4 w-4 text-yellow-500" />
-                                     Ratings ({userRatingsData[profile.id].length})
-                                   </h4>
-                                   <div className="space-y-2 max-h-60 overflow-y-auto">
-                                      {userRatingsData[profile.id].map((rating: any) => (
-                                        <div key={rating.id} className="flex items-center gap-2 text-xs p-2 bg-muted rounded">
-                                          <div className="relative h-16 w-16 flex-shrink-0">
-                                            <img 
-                                              src={rating.profiles?.photo_1_url || rating.profiles?.avatar_url || ''} 
-                                              alt={rating.profiles?.display_name || rating.contestant_name || 'Participant'}
-                                              className="h-full w-full object-cover rounded"
-                                            />
-                                          </div>
-                                          <div className="flex-1">
-                                            <div className="font-medium">
-                                              {rating.profiles?.display_name || rating.contestant_name}
-                                            </div>
-                                            <div className="flex items-center gap-1 mt-1">
-                                              <MiniStars rating={rating.rating} />
-                                              <span className="text-muted-foreground font-semibold">({rating.rating})</span>
-                                            </div>
-                                            <div className="text-muted-foreground text-xs mt-1">
-                                              {new Date(rating.created_at).toLocaleDateString('en-GB')}
-                                            </div>
-                                          </div>
-                                        </div>
-                                      ))}
-                                    </div>
-                                 </div>
-                               )}
+                            {/* Expandable Ratings */}
+                            {expandedUserRatings.has(profile.id) && (
+                              <div className="mt-4 pt-4 border-t">
+                                {userRatingsData[profile.id] && userRatingsData[profile.id].length > 0 ? (
+                                  <div>
+                                    <h4 className="text-sm font-semibold mb-2 flex items-center gap-1">
+                                      <Star className="h-4 w-4 text-yellow-500" />
+                                      Ratings ({userRatingsData[profile.id].length})
+                                    </h4>
+                                    <div className="space-y-2 max-h-60 overflow-y-auto">
+                                       {userRatingsData[profile.id].map((rating: any) => (
+                                         <div key={rating.id} className="flex items-center gap-2 text-xs p-2 bg-muted rounded">
+                                           <div className="relative h-16 w-16 flex-shrink-0">
+                                             <img 
+                                               src={rating.profiles?.photo_1_url || rating.profiles?.avatar_url || ''} 
+                                               alt={rating.profiles?.display_name || rating.contestant_name || 'Participant'}
+                                               className="h-full w-full object-cover rounded"
+                                             />
+                                           </div>
+                                           <div className="flex-1">
+                                             <div className="font-medium">
+                                               {rating.profiles?.display_name || rating.contestant_name}
+                                             </div>
+                                             <div className="flex items-center gap-1 mt-1">
+                                               <MiniStars rating={rating.rating} />
+                                               <span className="text-muted-foreground font-semibold">({rating.rating})</span>
+                                             </div>
+                                             <div className="text-muted-foreground text-xs mt-1">
+                                               {new Date(rating.created_at).toLocaleDateString('en-GB')}
+                                             </div>
+                                           </div>
+                                         </div>
+                                       ))}
+                                     </div>
+                                  </div>
+                                ) : (
+                                  <div className="text-sm text-muted-foreground text-center py-4">
+                                    No ratings yet
+                                  </div>
+                                )}
+                               </div>
+                             )}
 
-                               {/* Likes */}
-                               {userLikesData[profile.id] && userLikesData[profile.id].length > 0 && (
-                                 <div>
-                                   <h4 className="text-sm font-semibold mb-2 flex items-center gap-1">
-                                     <Heart className="h-4 w-4 text-red-500" />
-                                     Likes ({userLikesData[profile.id].length})
-                                   </h4>
-                                   <div className="space-y-2 max-h-60 overflow-y-auto">
-                                      {userLikesData[profile.id]
-                                        .filter((like: any) => like.profile)
-                                        .map((like: any) => (
-                                          <div key={like.id} className="flex items-center gap-2 text-xs p-2 bg-muted rounded">
-                                            <div className="relative h-16 w-16 flex-shrink-0">
-                                              <img 
-                                                src={like.profile?.photo_1_url || like.profile?.avatar_url || ''} 
-                                                alt={like.profile?.display_name || 'Participant'}
-                                                className="h-full w-full object-cover rounded"
-                                              />
-                                            </div>
-                                            <div className="flex-1">
-                                              <div className="font-medium">
-                                                {like.profile?.display_name || `${like.profile?.first_name} ${like.profile?.last_name}`}
-                                              </div>
-                                              <div className="text-muted-foreground text-xs mt-1">
-                                                {new Date(like.created_at).toLocaleDateString('en-GB')}
-                                              </div>
-                                            </div>
-                                          </div>
-                                        ))}
-                                    </div>
-                                 </div>
-                               )}
-
-                               {(!userRatingsData[profile.id] || userRatingsData[profile.id].length === 0) &&
-                                (!userLikesData[profile.id] || userLikesData[profile.id].length === 0) && (
-                                 <div className="text-sm text-muted-foreground text-center py-4">
-                                   No activity yet
-                                 </div>
-                               )}
-                              </div>
-                            )}
+                            {/* Expandable Likes */}
+                            {expandedUserLikes.has(profile.id) && (
+                              <div className="mt-4 pt-4 border-t">
+                                {userLikesData[profile.id] && userLikesData[profile.id].length > 0 ? (
+                                  <div>
+                                    <h4 className="text-sm font-semibold mb-2 flex items-center gap-1">
+                                      <Heart className="h-4 w-4 text-red-500" />
+                                      Likes ({userLikesData[profile.id].length})
+                                    </h4>
+                                    <div className="space-y-2 max-h-60 overflow-y-auto">
+                                       {userLikesData[profile.id]
+                                         .filter((like: any) => like.profile)
+                                         .map((like: any) => (
+                                           <div key={like.id} className="flex items-center gap-2 text-xs p-2 bg-muted rounded">
+                                             <div className="relative h-16 w-16 flex-shrink-0">
+                                               <img 
+                                                 src={like.profile?.photo_1_url || like.profile?.avatar_url || ''} 
+                                                 alt={like.profile?.display_name || 'Participant'}
+                                                 className="h-full w-full object-cover rounded"
+                                               />
+                                             </div>
+                                             <div className="flex-1">
+                                               <div className="font-medium">
+                                                 {like.profile?.display_name || `${like.profile?.first_name} ${like.profile?.last_name}`}
+                                               </div>
+                                               <div className="text-muted-foreground text-xs mt-1">
+                                                 {new Date(like.created_at).toLocaleDateString('en-GB')}
+                                               </div>
+                                             </div>
+                                           </div>
+                                         ))}
+                                     </div>
+                                  </div>
+                                ) : (
+                                  <div className="text-sm text-muted-foreground text-center py-4">
+                                    No likes yet
+                                  </div>
+                                )}
+                               </div>
+                             )}
                           </Card>
                           
                           {/* IP Address Cards - Show all users with same IP when expanded */}
