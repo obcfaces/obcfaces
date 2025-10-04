@@ -735,7 +735,9 @@ const Admin = () => {
       console.log('Filtering by admin_status:', adminStatusFilter);
       
       // Filter ONLY by admin_status - no other parameters
-      const filteredByStatus = weeklyParticipants.filter(p => p.admin_status === adminStatusFilter);
+      const filteredByStatus = adminStatusFilter === 'all' 
+        ? weeklyParticipants 
+        : weeklyParticipants.filter(p => p.admin_status === adminStatusFilter);
 
       // Remove duplicates based on user_id
       const uniqueParticipants = filteredByStatus.filter((participant, index, arr) => 
