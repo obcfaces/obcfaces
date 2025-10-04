@@ -174,7 +174,7 @@ export const ContestSuccessModal = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md [&>button]:hidden">
         <DialogHeader>
           <DialogTitle className="text-center text-xl font-bold text-primary">
             You're in! Your Chance to Shine ✨
