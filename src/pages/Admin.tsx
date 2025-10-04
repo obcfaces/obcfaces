@@ -5166,7 +5166,19 @@ const Admin = () => {
                   return (p.admin_status === 'pending' || p.admin_status === 'rejected') && !p.deleted_at;
                 });
 
-                if (filteredParticipants.length === 0) {
+                // Sort by registration date (newest first)
+                const sortedParticipants = [...filteredParticipants].sort((a, b) => {
+                  // Get profile data to access created_at (registration date)
+                  const profileA = profiles.find(p => p.id === a.user_id);
+                  const profileB = profiles.find(p => p.id === b.user_id);
+                  
+                  const dateA = new Date(profileA?.created_at || a.created_at || 0).getTime();
+                  const dateB = new Date(profileB?.created_at || b.created_at || 0).getTime();
+                  
+                  return dateB - dateA; // newest first
+                });
+
+                if (sortedParticipants.length === 0) {
                   return (
                     <div className="text-center py-8">
                       <p className="text-muted-foreground">No applications found</p>
@@ -5175,11 +5187,11 @@ const Admin = () => {
                 }
 
                 // Пагинация
-                const totalItems = filteredParticipants.length;
+                const totalItems = sortedParticipants.length;
                 const totalPages = Math.ceil(totalItems / itemsPerPage);
                 const startIndex = (registrationsCurrentPage - 1) * itemsPerPage;
                 const endIndex = startIndex + itemsPerPage;
-                const paginatedItems = filteredParticipants.slice(startIndex, endIndex);
+                const paginatedItems = sortedParticipants.slice(startIndex, endIndex);
 
                 return (
                   <>
