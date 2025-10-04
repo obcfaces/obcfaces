@@ -6452,16 +6452,16 @@ const Admin = () => {
                                            })}
                                          </span>
                                        </div>
-                                       <div className="flex items-center gap-4">
-                                         <div className="flex items-center gap-1">
-                                           <Heart className="h-3 w-3 text-red-500" />
-                                           <span>{login.likes || 0}</span>
-                                         </div>
-                                         <div className="flex items-center gap-1">
-                                           <Star className="h-3 w-3 text-yellow-500" />
-                                           <span>{login.ratings || 0}</span>
-                                         </div>
-                                       </div>
+                                        <div className="flex items-center gap-4">
+                                          <div className="flex items-center gap-1">
+                                            <Heart className="h-3 w-3 text-red-500" />
+                                            <span>{login.likesCount || 0}</span>
+                                          </div>
+                                          <div className="flex items-center gap-1">
+                                            <Star className="h-3 w-3 text-yellow-500" />
+                                            <span>{login.ratingsCount || 0}</span>
+                                          </div>
+                                        </div>
                                      </div>
                                      
                                      {/* Show rating details */}
