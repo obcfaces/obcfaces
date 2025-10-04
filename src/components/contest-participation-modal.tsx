@@ -1047,7 +1047,7 @@ export const ContestParticipationModal = ({
         </DialogTrigger>
       )}
       <DialogContent className="w-full sm:!w-[600px] sm:!max-w-[600px] !max-w-full !left-0 !right-0 sm:!left-1/2 sm:!right-auto sm:!-translate-x-1/2 max-h-[95vh] bg-background p-0 overflow-hidden sm:rounded-lg rounded-none">
-        <div className="px-6 py-4 border-b">
+        <div className="px-6 sm:px-6 px-4 py-4 border-b">
           <DialogHeader>
             <DialogTitle>
               {currentStep === 'auth' ? 'Sign in' : ''}
@@ -1056,7 +1056,7 @@ export const ContestParticipationModal = ({
         </div>
         
         <ScrollArea className="flex-1 max-h-[calc(95vh-100px)]">
-          <div className="px-6 py-4">
+          <div className="px-6 sm:px-6 px-4 py-4">
             {currentStep === 'auth' ? (
               <form onSubmit={handleAuth} className="space-y-3 max-w-xs mx-auto">
             {authError && (
@@ -1609,7 +1609,7 @@ export const ContestParticipationModal = ({
                     <div className="text-center">
                       <div className="text-xs font-medium mb-2">Body photo</div>
                       <div className="space-y-1 text-xs">
-                        <div className="text-red-600">Whole body from head to toe.</div>
+                        <div className="text-red-600">Whole body from head to toe. No 0.5 photos</div>
                         <div className="text-red-600">Tight-clothed.</div>
                         <div className="text-red-600">No dresses, no skirts.</div>
                       </div>
