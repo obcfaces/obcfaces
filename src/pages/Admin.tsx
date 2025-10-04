@@ -5150,7 +5150,8 @@ const Admin = () => {
 
               {(() => {
                 // КРИТИЧНО: Фильтруем только НЕ удалённые карточки с pending и rejected
-                const filteredParticipants = weeklyParticipants.filter(p => {
+                const allParticipants = weeklyParticipants.filter(p => !p.deleted_at);
+                const filteredParticipants = allParticipants.filter(p => {
                   // ПЕРВЫЙ ФИЛЬТР: Только НЕ удалённые
                   if (p.deleted_at !== null) {
                     return false;
