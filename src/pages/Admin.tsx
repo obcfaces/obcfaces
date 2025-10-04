@@ -2560,25 +2560,6 @@ const Admin = () => {
                     </div>
                   </div>
                 </div>
-                
-                <Select value={adminStatusFilter} onValueChange={(value) => {
-                  setAdminStatusFilter(value);
-                  setWeeklyCurrentPage(1);
-                }}>
-                  <SelectTrigger className="w-48">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="z-[9999] bg-popover border shadow-lg">
-                    <SelectItem value="all">All</SelectItem>
-                    <SelectItem value="pending">Pending</SelectItem>
-                    <SelectItem value="rejected">Rejected</SelectItem>
-                    <SelectItem value="pre next week">Pre Next Week</SelectItem>
-                    <SelectItem value="this week">This Week</SelectItem>
-                    <SelectItem value="next week">Next Week</SelectItem>
-                    <SelectItem value="next week on site">Next Week On Site</SelectItem>
-                    <SelectItem value="past">Past</SelectItem>
-                  </SelectContent>
-                </Select>
               </div>
               
               {(() => {
@@ -3080,48 +3061,6 @@ const Admin = () => {
 
             <TabsContent value="prenextweek" className="space-y-4">
               <div className="mb-6">
-                {/* Фильтр по admin_status */}
-                <div className="mb-4">
-                  <Label className="text-sm font-medium mb-2 block">Admin Status Filter:</Label>
-                  <Select value={preStatusFilter} onValueChange={(value) => {
-                    setPreStatusFilter(value);
-                    setPreNextWeekCurrentPage(1);
-                  }}>
-                    <SelectTrigger className="w-[200px]">
-                      <SelectValue placeholder="Select status" />
-                    </SelectTrigger>
-                    <SelectContent className="z-[9999] bg-popover border shadow-lg">
-                      <SelectItem value="all">All</SelectItem>
-                       <SelectItem value="pending">Pending</SelectItem>
-                       <SelectItem value="rejected">Rejected</SelectItem>
-                      <SelectItem value="pre next week">Pre Next Week</SelectItem>
-                      <SelectItem value="next week">Next Week</SelectItem>
-                      <SelectItem value="next week on site">Next Week On Site</SelectItem>
-                      <SelectItem value="this week">This Week</SelectItem>
-                      <SelectItem value="past">Past</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                {/* Фильтр по неделям для pre next week */}
-                <div className="mb-4 flex gap-4">
-                  <Select value={preNextWeekFilter} onValueChange={(value) => {
-                    setPreNextWeekFilter(value);
-                    setPreNextWeekCurrentPage(1);
-                  }}>
-                    <SelectTrigger className="w-48">
-                      <SelectValue placeholder="Filter by week" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All weeks</SelectItem>
-                      {/* Динамические недели на основе данных */}
-                      {Array.from(new Set(preNextWeekParticipants.map(p => p.week_interval))).map(interval => (
-                        <SelectItem key={interval} value={interval}>{interval}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
                 <div>
                   <h2 className="text-xl font-semibold">Pre Next Week Participants</h2>
                   <p className="text-muted-foreground">Participants queued for upcoming weeks</p>
@@ -3507,49 +3446,6 @@ const Admin = () => {
 
             <TabsContent value="nextweek" className="space-y-4">
               <div className="mb-6">
-                {/* Фильтр по admin_status */}
-                <div className="mb-4">
-                  <Label className="text-sm font-medium mb-2 block">Admin Status Filter:</Label>
-                  <Select value={nextStatusFilter} onValueChange={(value) => {
-                    setNextStatusFilter(value);
-                    setNextWeekCurrentPage(1);
-                  }}>
-                    <SelectTrigger className="w-[200px]">
-                      <SelectValue placeholder="Select status" />
-                    </SelectTrigger>
-                    <SelectContent className="z-[9999] bg-popover border shadow-lg">
-                      <SelectItem value="all">All</SelectItem>
-                       <SelectItem value="pending">Pending</SelectItem>
-                       <SelectItem value="rejected">Rejected</SelectItem>
-                      <SelectItem value="pre next week">Pre Next Week</SelectItem>
-                      <SelectItem value="next week">Next Week</SelectItem>
-                      <SelectItem value="next week on site">Next Week On Site</SelectItem>
-                      <SelectItem value="this week">This Week</SelectItem>
-                      <SelectItem value="past">Past</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                {/* Фильтр по неделям для next week */}
-                <div className="mb-4 flex gap-4">
-                  <Select value={nextWeekFilter} onValueChange={(value) => {
-                    setNextWeekFilter(value);
-                    setNextWeekCurrentPage(1);
-                  }}>
-                    <SelectTrigger className="w-48">
-                      <SelectValue placeholder="Filter by week" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All weeks</SelectItem>
-                      <SelectItem value="current">Current week only</SelectItem>
-                      {/* Динамические недели на основе данных */}
-                      {Array.from(new Set(nextWeekParticipants.map(p => p.week_interval))).map(interval => (
-                        <SelectItem key={interval} value={interval}>{interval}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
                 {/* Stats for next week */}
                 <div className="mb-4 p-3 bg-muted rounded-lg">
                   <div className="text-sm text-muted-foreground space-y-2">
