@@ -1504,8 +1504,8 @@ const Admin = () => {
     try {
       console.log('Fetching weekly participants from database...');
       
-      // Fetch participants for current week and past 3 weeks using optimized RPC function
-      const weekOffsets = [0, -1, -2, -3];
+      // Fetch participants for next week, current week and past 3 weeks using optimized RPC function
+      const weekOffsets = [1, 0, -1, -2, -3];
       const results = await Promise.allSettled(
         weekOffsets.map(offset => 
           supabase.rpc('get_weekly_contest_participants_admin', { weeks_offset: offset })
