@@ -1088,18 +1088,22 @@ const Admin = () => {
   };
 
   const fetchUserLikesAndRatings = async (userId: string) => {
-    if (userLikesData[userId] && userRatingsData[userId]) {
-      return; // Already fetched
-    }
-
     try {
+      console.log('🔍 Fetching activity for user:', userId);
+
       // Fetch user's likes with participant profile data
-      const { data: likesRaw } = await supabase
+      const { data: likesRaw, error: likesError } = await supabase
         .from('likes')
         .select('id, content_id, created_at')
         .eq('user_id', userId)
         .eq('content_type', 'contest')
         .order('created_at', { ascending: false });
+
+      if (likesError) {
+        console.error('❌ Error fetching likes:', likesError);
+      }
+      
+      console.log(`📋 Found ${likesRaw?.length || 0} likes for user ${userId}`);
 
       // Get unique user IDs from likes content_id patterns
       const likedUserIds = new Set<string>();
@@ -1111,11 +1115,21 @@ const Admin = () => {
         }
       });
 
-      // Fetch profile data for liked users
-      const { data: likedProfiles } = await supabase
-        .from('profiles')
-        .select('id, display_name, first_name, last_name, avatar_url, photo_1_url, photo_2_url')
-        .in('id', Array.from(likedUserIds));
+      console.log(`👤 Found ${likedUserIds.size} unique liked user IDs`);
+
+      // Fetch profile data for liked users (only if there are any)
+      let likedProfiles: any[] = [];
+      if (likedUserIds.size > 0) {
+        const { data, error: profilesError } = await supabase
+          .from('profiles')
+          .select('id, display_name, first_name, last_name, avatar_url, photo_1_url, photo_2_url')
+          .in('id', Array.from(likedUserIds));
+        
+        if (profilesError) {
+          console.error('❌ Error fetching liked profiles:', profilesError);
+        }
+        likedProfiles = data || [];
+      }
 
       // Merge likes with profile data
       const likesData = likesRaw?.map(like => {
@@ -1125,10 +1139,12 @@ const Admin = () => {
           ...like,
           profile
         };
-      }).filter(like => like.profile);
+      }).filter(like => like.profile) || [];
+
+      console.log(`✅ Processed ${likesData.length} likes with profiles`);
 
       // Fetch ratings with participant info
-      const { data: ratingsData } = await supabase
+      const { data: ratingsData, error: ratingsError } = await supabase
         .from('contestant_ratings')
         .select(`
           id,
@@ -1149,10 +1165,18 @@ const Admin = () => {
         .eq('user_id', userId)
         .order('created_at', { ascending: false });
 
-      setUserLikesData(prev => ({ ...prev, [userId]: likesData || [] }));
+      if (ratingsError) {
+        console.error('❌ Error fetching ratings:', ratingsError);
+      }
+
+      console.log(`⭐ Found ${ratingsData?.length || 0} ratings for user ${userId}`);
+
+      setUserLikesData(prev => ({ ...prev, [userId]: likesData }));
       setUserRatingsData(prev => ({ ...prev, [userId]: ratingsData || [] }));
+      
+      console.log('✅ User activity data set successfully');
     } catch (error) {
-      console.error('Error fetching user likes and ratings:', error);
+      console.error('❌ Error fetching user likes and ratings:', error);
     }
   };
 
