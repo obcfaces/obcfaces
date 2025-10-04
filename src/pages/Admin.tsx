@@ -713,16 +713,13 @@ const Admin = () => {
     }
   }, [contestApplications]);
 
-  // Handle Weekly Contest participants filtering - simplified to use only admin_status
+  // Handle Weekly Contest participants filtering - only by admin_status
   useEffect(() => {
     const filterWeeklyParticipants = async () => {
       console.log('Filtering by admin_status:', adminStatusFilter);
       
-      // For weekly section (This Week), show only "this week" status by default
-      // If specific status filter is selected, show that status instead
-      const filteredByStatus = adminStatusFilter === 'all' 
-        ? weeklyParticipants.filter(p => p.admin_status === 'this week' && !p.deleted_at)
-        : weeklyParticipants.filter(p => p.admin_status === adminStatusFilter && !p.deleted_at);
+      // Filter ONLY by admin_status - no other parameters
+      const filteredByStatus = weeklyParticipants.filter(p => p.admin_status === adminStatusFilter);
 
       // Remove duplicates based on user_id
       const uniqueParticipants = filteredByStatus.filter((participant, index, arr) => 
@@ -1661,13 +1658,11 @@ const Admin = () => {
     try {
       console.log('Fetching next week participants...');
       
-      // Get ALL participants with next week or next week on site status directly from table
+      // Get ALL participants with next week or next week on site status - no other filters
       const { data: nextWeekData, error } = await supabase
         .from('weekly_contest_participants')
         .select('*')
         .in('admin_status', ['next week', 'next week on site'])
-        .eq('is_active', true)
-        .is('deleted_at', null)
         .order('created_at', { ascending: false });
       
       if (error) {
@@ -1687,13 +1682,11 @@ const Admin = () => {
     try {
       console.log('Fetching pre next week participants...');
       
-      // Get ALL participants with pre next week status directly from table
+      // Get ALL participants with pre next week status - no other filters
       const { data: preNextWeekData, error } = await supabase
         .from('weekly_contest_participants')
         .select('*')
         .eq('admin_status', 'pre next week')
-        .eq('is_active', true)
-        .is('deleted_at', null)
         .order('created_at', { ascending: false });
       
       if (error) {
