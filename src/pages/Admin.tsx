@@ -5288,8 +5288,8 @@ const Admin = () => {
                       const isExpanded = expandedMobileItems.has(participant.id);
                       
                       return (
-                        <div key={participant.id} className="space-y-2">
-                          <Card className={`overflow-hidden relative mx-0 rounded-lg h-[149px] ${participant.admin_status === 'rejected' ? 'bg-red-50 border-red-200' : ''}`}>
+                        <div key={participant.id} className="space-y-0">
+                          <Card className={`overflow-hidden relative mx-0 rounded-lg h-[149px] ${participant.admin_status === 'rejected' ? 'bg-red-50 border-red-200' : ''} ${participant.admin_status === 'rejected' ? 'rounded-b-none' : ''}`}>
                           <CardContent className="p-0">
                             {/* Desktop layout */}
                             <div className="hidden md:flex md:overflow-visible">
@@ -5374,24 +5374,6 @@ const Admin = () => {
                                   )}
                                 </div>
                                 
-                                {/* Rejection reasons display */}
-                                {participant.admin_status === 'rejected' && (participant as any).rejection_reason_types && (
-                                  <div className="mb-2 p-2 bg-red-100 border border-red-300 rounded text-xs">
-                                    <div className="font-semibold text-red-700 mb-1">Rejection Reasons:</div>
-                                    <div className="space-y-1 text-red-600">
-                                      {((participant as any).rejection_reason_types as string[]).map((reasonType: string, idx: number) => (
-                                        <div key={idx}>• {REJECTION_REASONS[reasonType as keyof typeof REJECTION_REASONS] || reasonType}</div>
-                                      ))}
-                                    </div>
-                                    {(participant as any).rejection_reason && (
-                                      <div className="mt-1 pt-1 border-t border-red-200">
-                                        <div className="font-semibold text-red-700">Note:</div>
-                                        <div className="text-red-600">{(participant as any).rejection_reason}</div>
-                                      </div>
-                                    )}
-                                  </div>
-                                )}
-
                                 <div className="flex items-center gap-2 mt-2">
                                   <Select 
                                     value={participant.admin_status || 'pending'}
@@ -5588,6 +5570,28 @@ const Admin = () => {
                             </div>
                           </CardContent>
                         </Card>
+                        
+                        {/* Rejection reasons banner - displayed below card with no gap */}
+                        {participant.admin_status === 'rejected' && ((participant as any).rejection_reason_types || (participant as any).rejection_reason) && (
+                          <div className="bg-red-200 border-x border-b border-red-300 rounded-b-lg p-3 text-xs">
+                            {(participant as any).rejection_reason_types && (participant as any).rejection_reason_types.length > 0 && (
+                              <>
+                                <div className="font-semibold text-red-800 mb-1">Rejection Reasons:</div>
+                                <div className="space-y-1 text-red-700">
+                                  {((participant as any).rejection_reason_types as string[]).map((reasonType: string, idx: number) => (
+                                    <div key={idx}>• {REJECTION_REASONS[reasonType as keyof typeof REJECTION_REASONS] || reasonType}</div>
+                                  ))}
+                                </div>
+                              </>
+                            )}
+                            {(participant as any).rejection_reason && (
+                              <div className={`${(participant as any).rejection_reason_types && (participant as any).rejection_reason_types.length > 0 ? 'mt-2 pt-2 border-t border-red-300' : ''}`}>
+                                <div className="font-semibold text-red-800 mb-1">Additional Note:</div>
+                                <div className="text-red-700">{(participant as any).rejection_reason}</div>
+                              </div>
+                            )}
+                          </div>
+                        )}
                         
                         {/* Badge for application count */}
                         {userApplicationsCount > 1 && (
