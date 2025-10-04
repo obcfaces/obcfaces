@@ -5557,24 +5557,50 @@ const Admin = () => {
                         </Card>
                         
                         {/* Rejection reasons banner - displayed below card with no gap */}
-                        {participant.admin_status === 'rejected' && ((participant as any).rejection_reason_types || (participant as any).rejection_reason) && (
+                        {participant.admin_status === 'rejected' && (
                           <div className="bg-red-200 border-x border-b border-red-300 rounded-b-lg p-3 text-xs">
-                            {(participant as any).rejection_reason_types && (participant as any).rejection_reason_types.length > 0 && (
-                              <>
-                                <div className="font-semibold text-red-800 mb-1">Rejection Reasons:</div>
-                                <div className="space-y-1 text-red-700">
-                                  {((participant as any).rejection_reason_types as string[]).map((reasonType: string, idx: number) => (
-                                    <div key={idx}>• {REJECTION_REASONS[reasonType as keyof typeof REJECTION_REASONS] || reasonType}</div>
-                                  ))}
-                                </div>
-                              </>
-                            )}
-                            {(participant as any).rejection_reason && (
-                              <div className={`${(participant as any).rejection_reason_types && (participant as any).rejection_reason_types.length > 0 ? 'mt-2 pt-2 border-t border-red-300' : ''}`}>
-                                <div className="font-semibold text-red-800 mb-1">Additional Note:</div>
-                                <div className="text-red-700">{(participant as any).rejection_reason}</div>
-                              </div>
-                            )}
+                            {(() => {
+                              const hasReasons = (participant as any).rejection_reason_types && (participant as any).rejection_reason_types.length > 0;
+                              const hasNote = (participant as any).rejection_reason && (participant as any).rejection_reason.trim();
+                              
+                              console.log('🟡 Rejection data for participant:', {
+                                id: participant.id,
+                                name: `${appData.first_name} ${appData.last_name}`,
+                                rejection_reason_types: (participant as any).rejection_reason_types,
+                                rejection_reason: (participant as any).rejection_reason,
+                                hasReasons,
+                                hasNote
+                              });
+                              
+                              if (!hasReasons && !hasNote) {
+                                return (
+                                  <div className="text-red-800 italic">
+                                    No rejection reason provided. Please update the rejection reason.
+                                  </div>
+                                );
+                              }
+                              
+                              return (
+                                <>
+                                  {hasReasons && (
+                                    <>
+                                      <div className="font-semibold text-red-800 mb-1">Rejection Reasons:</div>
+                                      <div className="space-y-1 text-red-700">
+                                        {((participant as any).rejection_reason_types as string[]).map((reasonType: string, idx: number) => (
+                                          <div key={idx}>• {REJECTION_REASONS[reasonType as keyof typeof REJECTION_REASONS] || reasonType}</div>
+                                        ))}
+                                      </div>
+                                    </>
+                                  )}
+                                  {hasNote && (
+                                    <div className={`${hasReasons ? 'mt-2 pt-2 border-t border-red-300' : ''}`}>
+                                      <div className="font-semibold text-red-800 mb-1">Additional Note:</div>
+                                      <div className="text-red-700">{(participant as any).rejection_reason}</div>
+                                    </div>
+                                  )}
+                                </>
+                              );
+                            })()}
                           </div>
                         )}
                         
