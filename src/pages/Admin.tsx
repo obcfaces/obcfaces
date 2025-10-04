@@ -714,8 +714,8 @@ const Admin = () => {
       // For weekly section (This Week), show only "this week" status by default
       // If specific status filter is selected, show that status instead
       const filteredByStatus = adminStatusFilter === 'all' 
-        ? weeklyParticipants.filter(p => p.admin_status === 'this week')
-        : weeklyParticipants.filter(p => p.admin_status === adminStatusFilter);
+        ? weeklyParticipants.filter(p => p.admin_status === 'this week' && !p.deleted_at)
+        : weeklyParticipants.filter(p => p.admin_status === adminStatusFilter && !p.deleted_at);
 
       // Remove duplicates based on user_id
       const uniqueParticipants = filteredByStatus.filter((participant, index, arr) => 
@@ -750,18 +750,19 @@ const Admin = () => {
         console.log('=== FILTERING PAST WEEK PARTICIPANTS ===');
         console.log('All weekly participants:', weeklyParticipants.length);
         
-        // Filter participants with 'past' admin_status
+        // Filter participants with 'past' admin_status (exclude deleted)
         const pastParticipants = weeklyParticipants.filter(participant => {
           const adminStatus = participant.admin_status || 'this week';
           
           console.log(`Participant ${participant.id}:`, {
             name: `${participant.application_data?.first_name || ''} ${participant.application_data?.last_name || ''}`.trim(),
             adminStatus,
-            status_history: (participant as any).status_history
+            status_history: (participant as any).status_history,
+            deleted_at: participant.deleted_at
           });
           
-          // Include only participants with 'past' status - don't include 'this week'
-          return adminStatus === 'past';
+          // Include only participants with 'past' status and not deleted
+          return adminStatus === 'past' && !participant.deleted_at;
         });
 
         // Load rating stats for each participant (past and this week) - использовать данные из weekly_contest_participants
@@ -4893,7 +4894,7 @@ const Admin = () => {
               </div>
 
               {(() => {
-                // Filter participants by pending and rejected statuses
+                // Filter participants by pending and rejected statuses (exclude deleted)
                 const filteredParticipants = weeklyParticipants.filter(p => {
                   // Filter by status
                   if (registrationsStatusFilter !== 'all' && p.admin_status !== registrationsStatusFilter) {
@@ -4906,8 +4907,8 @@ const Admin = () => {
                     if (country !== countryFilter) return false;
                   }
                   
-                  // Only show pending and rejected
-                  return p.admin_status === 'pending' || p.admin_status === 'rejected';
+                  // Only show pending and rejected, exclude deleted
+                  return (p.admin_status === 'pending' || p.admin_status === 'rejected') && !p.deleted_at;
                 });
 
                 if (filteredParticipants.length === 0) {
