@@ -1542,7 +1542,7 @@ export const ContestParticipationModal = ({
                 onValueChange={(value) => handleFieldChange('has_children', value === 'true')}
               >
                 <SelectTrigger className={getFieldClasses('has_children', "text-sm")}>
-                  <SelectValue placeholder="Do you have children?" />
+                  <SelectValue placeholder="Have kids?" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="true">Yes</SelectItem>
