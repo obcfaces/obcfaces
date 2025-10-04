@@ -6300,12 +6300,13 @@ const Admin = () => {
                                </div>
 
                                {/* Stats in bottom right corner - Combined button */}
-                               <div className="absolute bottom-2 right-2">
+                               <div className="absolute bottom-2 right-2 z-10">
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                className="h-auto p-1 flex items-center gap-2 hover:bg-muted"
-                                onClick={() => {
+                                className="h-auto p-1 flex items-center gap-2 hover:bg-muted pointer-events-auto cursor-pointer"
+                                onClick={(e) => {
+                                  e.stopPropagation();
                                   console.log('🔘 Button clicked for profile:', profile.id);
                                   toggleUserStats(profile.id);
                                 }}
