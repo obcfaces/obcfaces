@@ -1728,13 +1728,13 @@ const Admin = () => {
       const paginatedProfiles = filteredProfiles.slice(startIdx, endIdx);
       
       paginatedProfiles.forEach(profile => {
-        if (!userStatsCount[profile.id]) {
+        if (!userStatsCount[profile.id] && !loadingUserStats.has(profile.id)) {
           console.log('📊 Fetching stats for profile in Reg tab:', profile.id);
           fetchUserStats(profile.id);
         }
       });
     }
-  }, [activeTab, regPaginationPage, profiles, userRoleMap, roleFilter, searchQuery]);
+  }, [activeTab, regPaginationPage, profiles, userRoleMap, roleFilter, searchQuery, userStatsCount, loadingUserStats]);
 
   const fetchContestApplications = async () => {
     console.log('Fetching contest applications...');
