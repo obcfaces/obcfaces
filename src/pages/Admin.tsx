@@ -6304,12 +6304,14 @@ const Admin = () => {
                                  console.log('🎨 Rendering stats button for profile:', profile.id, 'Likes:', userStatsCount[profile.id]?.likes, 'Ratings:', userStatsCount[profile.id]?.ratings);
                                  return null;
                                })()}
-                               <div className="absolute bottom-2 right-2 z-10">
+                               <div className="absolute bottom-2 right-2 z-50" style={{ pointerEvents: 'auto' }}>
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                className="h-auto p-1 flex items-center gap-2 hover:bg-muted pointer-events-auto cursor-pointer"
+                                className="h-auto p-1 flex items-center gap-2 hover:bg-muted cursor-pointer bg-white/90 shadow-sm"
+                                style={{ pointerEvents: 'auto' }}
                                 onClick={(e) => {
+                                  e.preventDefault();
                                   e.stopPropagation();
                                   console.log('🔘 Button clicked for profile:', profile.id);
                                   toggleUserStats(profile.id);
