@@ -16,6 +16,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 import { useToast } from '@/hooks/use-toast';
 import { MiniStars } from '@/components/mini-stars';
 import { 
@@ -405,6 +406,11 @@ const Admin = () => {
   const [applicationCurrentPage, setApplicationCurrentPage] = useState(1);
   const [participantCurrentPage, setParticipantCurrentPage] = useState(1);
   const [pastCurrentPage, setPastCurrentPage] = useState(1);
+  const [weeklyCurrentPage, setWeeklyCurrentPage] = useState(1);
+  const [preNextWeekCurrentPage, setPreNextWeekCurrentPage] = useState(1);
+  const [nextWeekCurrentPage, setNextWeekCurrentPage] = useState(1);
+  const [allCurrentPage, setAllCurrentPage] = useState(1);
+  const [registrationsCurrentPage, setRegistrationsCurrentPage] = useState(1);
   const [pastWeekIntervalFilter, setPastWeekIntervalFilter] = useState<string>('all'); // Новый фильтр для интервалов недель
    const [expandedAdminDates, setExpandedAdminDates] = useState<Set<string>>(new Set());
    const [adminDatePopup, setAdminDatePopup] = useState<{ show: boolean; date: string; admin: string; applicationId: string }>({ 
@@ -2150,7 +2156,7 @@ const Admin = () => {
                 
                 <Select value={adminStatusFilter} onValueChange={(value) => {
                   setAdminStatusFilter(value);
-                  setParticipantCurrentPage(1);
+                  setWeeklyCurrentPage(1);
                 }}>
                   <SelectTrigger className="w-48">
                     <SelectValue />
@@ -2186,7 +2192,7 @@ const Admin = () => {
                 // Calculate pagination for weekly participants
                 const totalParticipants = filteredWeeklyParticipants.length;
                 const totalParticipantPages = Math.ceil(totalParticipants / itemsPerPage);
-                const participantStartIndex = (participantCurrentPage - 1) * itemsPerPage;
+                const participantStartIndex = (weeklyCurrentPage - 1) * itemsPerPage;
                 const participantEndIndex = participantStartIndex + itemsPerPage;
                 const paginatedParticipants = filteredWeeklyParticipants.slice(participantStartIndex, participantEndIndex);
 
@@ -2604,39 +2610,61 @@ const Admin = () => {
                 
                 {/* Pagination for participants */}
                 {totalParticipantPages > 1 && (
-                  <div className="flex justify-center items-center space-x-2 mt-6">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setParticipantCurrentPage(prev => Math.max(prev - 1, 1))}
-                      disabled={participantCurrentPage === 1}
-                    >
-                      Предыдущая
-                    </Button>
-                    
-                    <div className="flex space-x-1">
-                      {Array.from({ length: totalParticipantPages }, (_, i) => i + 1).map((page) => (
-                        <Button
-                          key={page}
-                          variant={page === participantCurrentPage ? "default" : "outline"}
-                          size="sm"
-                          onClick={() => setParticipantCurrentPage(page)}
-                          className="w-8 h-8 p-0"
-                        >
-                          {page}
-                        </Button>
-                      ))}
-                    </div>
-                    
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setParticipantCurrentPage(prev => Math.min(prev + 1, totalParticipantPages))}
-                      disabled={participantCurrentPage === totalParticipantPages}
-                    >
-                      Следующая
-                    </Button>
-                  </div>
+                  <Pagination className="mt-6">
+                    <PaginationContent>
+                      <PaginationItem>
+                        <PaginationPrevious 
+                          href="#"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            setWeeklyCurrentPage(prev => Math.max(prev - 1, 1));
+                          }}
+                          aria-disabled={weeklyCurrentPage === 1}
+                          className={weeklyCurrentPage === 1 ? 'pointer-events-none opacity-50' : ''}
+                        />
+                      </PaginationItem>
+                      
+                      {Array.from({ length: Math.min(totalParticipantPages, 7) }, (_, i) => {
+                        let pageNumber;
+                        if (totalParticipantPages <= 7) {
+                          pageNumber = i + 1;
+                        } else if (weeklyCurrentPage <= 4) {
+                          pageNumber = i + 1;
+                        } else if (weeklyCurrentPage >= totalParticipantPages - 3) {
+                          pageNumber = totalParticipantPages - 6 + i;
+                        } else {
+                          pageNumber = weeklyCurrentPage - 3 + i;
+                        }
+                        
+                        return (
+                          <PaginationItem key={pageNumber}>
+                            <PaginationLink
+                              href="#"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                setWeeklyCurrentPage(pageNumber);
+                              }}
+                              isActive={pageNumber === weeklyCurrentPage}
+                            >
+                              {pageNumber}
+                            </PaginationLink>
+                          </PaginationItem>
+                        );
+                      })}
+                      
+                      <PaginationItem>
+                        <PaginationNext 
+                          href="#"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            setWeeklyCurrentPage(prev => Math.min(prev + 1, totalParticipantPages));
+                          }}
+                          aria-disabled={weeklyCurrentPage === totalParticipantPages}
+                          className={weeklyCurrentPage === totalParticipantPages ? 'pointer-events-none opacity-50' : ''}
+                        />
+                      </PaginationItem>
+                    </PaginationContent>
+                  </Pagination>
                 )}
                 </>
               );
@@ -2648,7 +2676,10 @@ const Admin = () => {
                 {/* Фильтр по admin_status */}
                 <div className="mb-4">
                   <Label className="text-sm font-medium mb-2 block">Admin Status Filter:</Label>
-                  <Select value={preStatusFilter} onValueChange={setPreStatusFilter}>
+                  <Select value={preStatusFilter} onValueChange={(value) => {
+                    setPreStatusFilter(value);
+                    setPreNextWeekCurrentPage(1);
+                  }}>
                     <SelectTrigger className="w-[200px]">
                       <SelectValue placeholder="Select status" />
                     </SelectTrigger>
@@ -2667,7 +2698,10 @@ const Admin = () => {
                 
                 {/* Фильтр по неделям для pre next week */}
                 <div className="mb-4 flex gap-4">
-                  <Select value={preNextWeekFilter} onValueChange={setPreNextWeekFilter}>
+                  <Select value={preNextWeekFilter} onValueChange={(value) => {
+                    setPreNextWeekFilter(value);
+                    setPreNextWeekCurrentPage(1);
+                  }}>
                     <SelectTrigger className="w-48">
                       <SelectValue placeholder="Filter by week" />
                     </SelectTrigger>
@@ -2703,7 +2737,16 @@ const Admin = () => {
                   );
                 }
                 
-                return filteredParticipants.map((participant) => {
+                // Пагинация
+                const totalItems = filteredParticipants.length;
+                const totalPages = Math.ceil(totalItems / itemsPerPage);
+                const startIndex = (preNextWeekCurrentPage - 1) * itemsPerPage;
+                const endIndex = startIndex + itemsPerPage;
+                const paginatedItems = filteredParticipants.slice(startIndex, endIndex);
+                
+                return (
+                  <>
+                    {paginatedItems.map((participant) => {
                   const participantProfile = profiles.find(p => p.id === participant.user_id);
                   const appData = participant.application_data || {};
                   
@@ -2990,7 +3033,68 @@ const Admin = () => {
                       </CardContent>
                     </Card>
                   );
-                });
+                    })}
+                    
+                    {/* Pagination */}
+                    {totalPages > 1 && (
+                      <Pagination className="mt-6">
+                        <PaginationContent>
+                          <PaginationItem>
+                            <PaginationPrevious 
+                              href="#"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                setPreNextWeekCurrentPage(prev => Math.max(prev - 1, 1));
+                              }}
+                              aria-disabled={preNextWeekCurrentPage === 1}
+                              className={preNextWeekCurrentPage === 1 ? 'pointer-events-none opacity-50' : ''}
+                            />
+                          </PaginationItem>
+                          
+                          {Array.from({ length: Math.min(totalPages, 7) }, (_, i) => {
+                            let pageNumber;
+                            if (totalPages <= 7) {
+                              pageNumber = i + 1;
+                            } else if (preNextWeekCurrentPage <= 4) {
+                              pageNumber = i + 1;
+                            } else if (preNextWeekCurrentPage >= totalPages - 3) {
+                              pageNumber = totalPages - 6 + i;
+                            } else {
+                              pageNumber = preNextWeekCurrentPage - 3 + i;
+                            }
+                            
+                            return (
+                              <PaginationItem key={pageNumber}>
+                                <PaginationLink
+                                  href="#"
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    setPreNextWeekCurrentPage(pageNumber);
+                                  }}
+                                  isActive={pageNumber === preNextWeekCurrentPage}
+                                >
+                                  {pageNumber}
+                                </PaginationLink>
+                              </PaginationItem>
+                            );
+                          })}
+                          
+                          <PaginationItem>
+                            <PaginationNext 
+                              href="#"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                setPreNextWeekCurrentPage(prev => Math.min(prev + 1, totalPages));
+                              }}
+                              aria-disabled={preNextWeekCurrentPage === totalPages}
+                              className={preNextWeekCurrentPage === totalPages ? 'pointer-events-none opacity-50' : ''}
+                            />
+                          </PaginationItem>
+                        </PaginationContent>
+                      </Pagination>
+                    )}
+                  </>
+                );
               })()}
             </TabsContent>
 
@@ -2999,7 +3103,10 @@ const Admin = () => {
                 {/* Фильтр по admin_status */}
                 <div className="mb-4">
                   <Label className="text-sm font-medium mb-2 block">Admin Status Filter:</Label>
-                  <Select value={nextStatusFilter} onValueChange={setNextStatusFilter}>
+                  <Select value={nextStatusFilter} onValueChange={(value) => {
+                    setNextStatusFilter(value);
+                    setNextWeekCurrentPage(1);
+                  }}>
                     <SelectTrigger className="w-[200px]">
                       <SelectValue placeholder="Select status" />
                     </SelectTrigger>
@@ -3018,7 +3125,10 @@ const Admin = () => {
                 
                 {/* Фильтр по неделям для next week */}
                 <div className="mb-4 flex gap-4">
-                  <Select value={nextWeekFilter} onValueChange={setNextWeekFilter}>
+                  <Select value={nextWeekFilter} onValueChange={(value) => {
+                    setNextWeekFilter(value);
+                    setNextWeekCurrentPage(1);
+                  }}>
                     <SelectTrigger className="w-48">
                       <SelectValue placeholder="Filter by week" />
                     </SelectTrigger>
@@ -3098,7 +3208,16 @@ const Admin = () => {
                   );
                 }
                 
-                return deduplicatedParticipants.map((participant) => {
+                // Пагинация
+                const totalItems = deduplicatedParticipants.length;
+                const totalPages = Math.ceil(totalItems / itemsPerPage);
+                const startIndex = (nextWeekCurrentPage - 1) * itemsPerPage;
+                const endIndex = startIndex + itemsPerPage;
+                const paginatedItems = deduplicatedParticipants.slice(startIndex, endIndex);
+                
+                return (
+                  <>
+                    {paginatedItems.map((participant) => {
                   const participantProfile = profiles.find(p => p.id === participant.user_id);
                   const appData = participant.application_data || {};
                   
@@ -3402,7 +3521,68 @@ const Admin = () => {
                       </CardContent>
                     </Card>
                   );
-                });
+                    })}
+                    
+                    {/* Pagination */}
+                    {totalPages > 1 && (
+                      <Pagination className="mt-6">
+                        <PaginationContent>
+                          <PaginationItem>
+                            <PaginationPrevious 
+                              href="#"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                setNextWeekCurrentPage(prev => Math.max(prev - 1, 1));
+                              }}
+                              aria-disabled={nextWeekCurrentPage === 1}
+                              className={nextWeekCurrentPage === 1 ? 'pointer-events-none opacity-50' : ''}
+                            />
+                          </PaginationItem>
+                          
+                          {Array.from({ length: Math.min(totalPages, 7) }, (_, i) => {
+                            let pageNumber;
+                            if (totalPages <= 7) {
+                              pageNumber = i + 1;
+                            } else if (nextWeekCurrentPage <= 4) {
+                              pageNumber = i + 1;
+                            } else if (nextWeekCurrentPage >= totalPages - 3) {
+                              pageNumber = totalPages - 6 + i;
+                            } else {
+                              pageNumber = nextWeekCurrentPage - 3 + i;
+                            }
+                            
+                            return (
+                              <PaginationItem key={pageNumber}>
+                                <PaginationLink
+                                  href="#"
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    setNextWeekCurrentPage(pageNumber);
+                                  }}
+                                  isActive={pageNumber === nextWeekCurrentPage}
+                                >
+                                  {pageNumber}
+                                </PaginationLink>
+                              </PaginationItem>
+                            );
+                          })}
+                          
+                          <PaginationItem>
+                            <PaginationNext 
+                              href="#"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                setNextWeekCurrentPage(prev => Math.min(prev + 1, totalPages));
+                              }}
+                              aria-disabled={nextWeekCurrentPage === totalPages}
+                              className={nextWeekCurrentPage === totalPages ? 'pointer-events-none opacity-50' : ''}
+                            />
+                          </PaginationItem>
+                        </PaginationContent>
+                      </Pagination>
+                    )}
+                  </>
+                );
               })()}
             </TabsContent>
 
@@ -4554,7 +4734,10 @@ const Admin = () => {
                 {/* Status Filter - Admin Status Only */}
                 <div className="mb-4">
                   <Label className="text-sm font-medium mb-2 block">Admin Status Filter:</Label>
-                  <Select value={allSectionStatusFilter} onValueChange={setAllSectionStatusFilter}>
+                  <Select value={allSectionStatusFilter} onValueChange={(value) => {
+                    setAllSectionStatusFilter(value);
+                    setAllCurrentPage(1);
+                  }}>
                     <SelectTrigger className="w-full max-w-md">
                       <SelectValue placeholder="Select admin status" />
                     </SelectTrigger>
@@ -4596,9 +4779,16 @@ const Admin = () => {
                   );
                 }
 
+                // Пагинация
+                const totalItems = filteredParticipants.length;
+                const totalPages = Math.ceil(totalItems / itemsPerPage);
+                const startIndex = (allCurrentPage - 1) * itemsPerPage;
+                const endIndex = startIndex + itemsPerPage;
+                const paginatedItems = filteredParticipants.slice(startIndex, endIndex);
+
                 return (
                   <>
-                    {filteredParticipants.map((participant) => {
+                    {paginatedItems.map((participant) => {
                       const participantProfile = profiles.find(p => p.id === participant.user_id);
                       const appData = participant.application_data || {};
                       
@@ -4850,9 +5040,68 @@ const Admin = () => {
                               </div>
                             </div>
                           </CardContent>
-                        </Card>
+                          </Card>
                       );
                     })}
+                    
+                    {/* Pagination */}
+                    {totalPages > 1 && (
+                      <Pagination className="mt-6">
+                        <PaginationContent>
+                          <PaginationItem>
+                            <PaginationPrevious 
+                              href="#"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                setAllCurrentPage(prev => Math.max(prev - 1, 1));
+                              }}
+                              aria-disabled={allCurrentPage === 1}
+                              className={allCurrentPage === 1 ? 'pointer-events-none opacity-50' : ''}
+                            />
+                          </PaginationItem>
+                          
+                          {Array.from({ length: Math.min(totalPages, 7) }, (_, i) => {
+                            let pageNumber;
+                            if (totalPages <= 7) {
+                              pageNumber = i + 1;
+                            } else if (allCurrentPage <= 4) {
+                              pageNumber = i + 1;
+                            } else if (allCurrentPage >= totalPages - 3) {
+                              pageNumber = totalPages - 6 + i;
+                            } else {
+                              pageNumber = allCurrentPage - 3 + i;
+                            }
+                            
+                            return (
+                              <PaginationItem key={pageNumber}>
+                                <PaginationLink
+                                  href="#"
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    setAllCurrentPage(pageNumber);
+                                  }}
+                                  isActive={pageNumber === allCurrentPage}
+                                >
+                                  {pageNumber}
+                                </PaginationLink>
+                              </PaginationItem>
+                            );
+                          })}
+                          
+                          <PaginationItem>
+                            <PaginationNext 
+                              href="#"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                setAllCurrentPage(prev => Math.min(prev + 1, totalPages));
+                              }}
+                              aria-disabled={allCurrentPage === totalPages}
+                              className={allCurrentPage === totalPages ? 'pointer-events-none opacity-50' : ''}
+                            />
+                          </PaginationItem>
+                        </PaginationContent>
+                      </Pagination>
+                    )}
                   </>
                 );
               })()}
@@ -4865,7 +5114,10 @@ const Admin = () => {
                 <div className="flex gap-2 items-center mb-4">
                   <Select 
                     value={registrationsStatusFilter} 
-                    onValueChange={setRegistrationsStatusFilter}
+                    onValueChange={(value) => {
+                      setRegistrationsStatusFilter(value);
+                      setRegistrationsCurrentPage(1);
+                    }}
                   >
                     <SelectTrigger className="w-40">
                       <SelectValue placeholder="Filter status" />
@@ -4879,7 +5131,10 @@ const Admin = () => {
                   
                   <Select 
                     value={countryFilter} 
-                    onValueChange={setCountryFilter}
+                    onValueChange={(value) => {
+                      setCountryFilter(value);
+                      setRegistrationsCurrentPage(1);
+                    }}
                   >
                     <SelectTrigger className="w-40">
                       <SelectValue placeholder="Filter country" />
@@ -4919,9 +5174,17 @@ const Admin = () => {
                   );
                 }
 
+                // Пагинация
+                const totalItems = filteredParticipants.length;
+                const totalPages = Math.ceil(totalItems / itemsPerPage);
+                const startIndex = (registrationsCurrentPage - 1) * itemsPerPage;
+                const endIndex = startIndex + itemsPerPage;
+                const paginatedItems = filteredParticipants.slice(startIndex, endIndex);
+
                 return (
-                  <div className="space-y-4">
-                    {filteredParticipants.map(participant => {
+                  <>
+                    <div className="space-y-4">
+                      {paginatedItems.map(participant => {
                       const appData = participant.application_data || {};
                       const userProfile = profiles.find(p => p.id === participant.user_id);
                       
@@ -4989,7 +5252,67 @@ const Admin = () => {
                         </Card>
                       );
                     })}
-                  </div>
+                    </div>
+                    
+                    {/* Pagination */}
+                    {totalPages > 1 && (
+                      <Pagination className="mt-6">
+                        <PaginationContent>
+                          <PaginationItem>
+                            <PaginationPrevious 
+                              href="#"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                setRegistrationsCurrentPage(prev => Math.max(prev - 1, 1));
+                              }}
+                              aria-disabled={registrationsCurrentPage === 1}
+                              className={registrationsCurrentPage === 1 ? 'pointer-events-none opacity-50' : ''}
+                            />
+                          </PaginationItem>
+                          
+                          {Array.from({ length: Math.min(totalPages, 7) }, (_, i) => {
+                            let pageNumber;
+                            if (totalPages <= 7) {
+                              pageNumber = i + 1;
+                            } else if (registrationsCurrentPage <= 4) {
+                              pageNumber = i + 1;
+                            } else if (registrationsCurrentPage >= totalPages - 3) {
+                              pageNumber = totalPages - 6 + i;
+                            } else {
+                              pageNumber = registrationsCurrentPage - 3 + i;
+                            }
+                            
+                            return (
+                              <PaginationItem key={pageNumber}>
+                                <PaginationLink
+                                  href="#"
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    setRegistrationsCurrentPage(pageNumber);
+                                  }}
+                                  isActive={pageNumber === registrationsCurrentPage}
+                                >
+                                  {pageNumber}
+                                </PaginationLink>
+                              </PaginationItem>
+                            );
+                          })}
+                          
+                          <PaginationItem>
+                            <PaginationNext 
+                              href="#"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                setRegistrationsCurrentPage(prev => Math.min(prev + 1, totalPages));
+                              }}
+                              aria-disabled={registrationsCurrentPage === totalPages}
+                              className={registrationsCurrentPage === totalPages ? 'pointer-events-none opacity-50' : ''}
+                            />
+                          </PaginationItem>
+                        </PaginationContent>
+                      </Pagination>
+                    )}
+                  </>
                 );
               })()}
             </TabsContent>
