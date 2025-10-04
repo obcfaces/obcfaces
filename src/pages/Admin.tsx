@@ -23,7 +23,7 @@ import { MiniStars } from '@/components/mini-stars';
 import { 
   Calendar, FileText, UserCog, Eye, Edit, Check, X, Trash2, 
   RotateCcw, Copy, Facebook, Minus, AlertCircle, Trophy, ChevronDown, ChevronUp, Shield, Info,
-  Star, Heart
+  Star, Heart, Loader2
 } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
@@ -459,6 +459,8 @@ const Admin = () => {
   const [userLikesData, setUserLikesData] = useState<Record<string, any[]>>({});
   const [userRatingsData, setUserRatingsData] = useState<Record<string, any[]>>({});
   const [userStatsCount, setUserStatsCount] = useState<Record<string, { likes: number; ratings: number }>>({});
+  const [loadingUserStats, setLoadingUserStats] = useState<Set<string>>(new Set());
+  const [updatingStatuses, setUpdatingStatuses] = useState<Set<string>>(new Set());
   const [expandedUserActivity, setExpandedUserActivity] = useState<Set<string>>(new Set());
   const [userActivityData, setUserActivityData] = useState<Record<string, any>>({});
   const [expandedIPs, setExpandedIPs] = useState<Set<string>>(new Set());
@@ -972,6 +974,7 @@ const Admin = () => {
   };
 
   const fetchUserStats = async (userId: string) => {
+    setLoadingUserStats(prev => new Set(prev).add(userId));
     try {
       // Fetch all likes and ratings with timestamps
       const { data: allLikes } = await supabase
@@ -1028,42 +1031,43 @@ const Admin = () => {
         .eq('user_id', userId)
         .order('created_at', { ascending: false });
 
-      // Get unique login dates (group by date)
+      // Get unique login dates
       const uniqueLogins = logins?.reduce((acc: any[], login) => {
-        const loginDate = new Date(login.created_at);
-        const dateKey = loginDate.toDateString();
-        
-        if (!acc.find(l => new Date(l.created_at).toDateString() === dateKey)) {
+        const loginDate = new Date(login.created_at).toLocaleDateString();
+        if (!acc.find(l => new Date(l.created_at).toLocaleDateString() === loginDate)) {
           acc.push(login);
         }
         return acc;
       }, []) || [];
 
-      // For each unique login, calculate stats between this login and the next
-      const loginsWithStats = uniqueLogins.map((login, index) => {
-        const currentLoginTime = new Date(login.created_at);
-        const nextLogin = uniqueLogins[index + 1];
-        const previousLoginTime = nextLogin ? new Date(nextLogin.created_at) : new Date(0);
+      // Get stats for each unique login
+      const loginsWithStats = await Promise.all(uniqueLogins.map(async (login) => {
+        const loginDate = new Date(login.created_at);
+        const nextDay = new Date(loginDate);
+        nextDay.setDate(nextDay.getDate() + 1);
 
-        // Filter likes between this login and previous login
-        const sessionLikesData = allLikes?.filter(like => {
-          const likeTime = new Date(like.created_at);
-          return likeTime >= previousLoginTime && likeTime <= currentLoginTime;
-        }) || [];
+        // Count likes for this day
+        const { count: likesOnDay } = await supabase
+          .from('likes')
+          .select('*', { count: 'exact', head: true })
+          .eq('user_id', userId)
+          .gte('created_at', loginDate.toISOString())
+          .lt('created_at', nextDay.toISOString());
 
-        // Filter ratings between this login and previous login
-        const sessionRatingsData = allRatings?.filter(rating => {
-          const ratingTime = new Date(rating.created_at);
-          return ratingTime >= previousLoginTime && ratingTime <= currentLoginTime;
-        }) || [];
+        // Count ratings for this day
+        const { count: ratingsOnDay } = await supabase
+          .from('contestant_ratings')
+          .select('*', { count: 'exact', head: true })
+          .eq('user_id', userId)
+          .gte('created_at', loginDate.toISOString())
+          .lt('created_at', nextDay.toISOString());
 
         return {
-          created_at: login.created_at,
-          likes: sessionLikesData.length,
-          ratings: sessionRatingsData.length,
-          ratingsDetails: sessionRatingsData // Include full rating details
+          ...login,
+          likesCount: likesOnDay || 0,
+          ratingsCount: ratingsOnDay || 0
         };
-      });
+      }));
 
       const { data: participations } = await supabase
         .from('weekly_contest_participants')
@@ -1084,6 +1088,12 @@ const Admin = () => {
       }));
     } catch (error) {
       console.error('Error fetching user stats:', error);
+    } finally {
+      setLoadingUserStats(prev => {
+        const next = new Set(prev);
+        next.delete(userId);
+        return next;
+      });
     }
   };
 
@@ -4609,8 +4619,9 @@ const Admin = () => {
                                 <Button
                                   size="sm"
                                   className="w-full h-7 text-xs"
-                                  disabled={!pendingPastChanges[participant.id]}
+                                  disabled={!pendingPastChanges[participant.id] || updatingStatuses.has(participant.id)}
                                   onClick={async () => {
+                                    setUpdatingStatuses(prev => new Set(prev).add(participant.id));
                                     try {
                                       const changes = pendingPastChanges[participant.id];
                                       const participantName = `${appData.first_name || ''} ${appData.last_name || ''}`.trim();
@@ -4658,22 +4669,34 @@ const Admin = () => {
                                         description: "Changes saved successfully with history",
                                       });
                                       setPendingPastChanges(prev => {
-                                        const updated = { ...prev };
-                                        delete updated[participant.id];
-                                        return updated;
+                                        const newPending = { ...prev };
+                                        delete newPending[participant.id];
+                                        return newPending;
                                       });
+                                      
+                                      // Refresh data
                                       fetchWeeklyParticipants();
                                     } catch (error) {
-                                      console.error('Error updating participant:', error);
+                                      console.error('Error saving changes:', error);
                                       toast({
                                         title: "Error",
-                                        description: "An unexpected error occurred",
+                                        description: "Failed to save changes",
                                         variant: "destructive",
+                                      });
+                                    } finally {
+                                      setUpdatingStatuses(prev => {
+                                        const next = new Set(prev);
+                                        next.delete(participant.id);
+                                        return next;
                                       });
                                     }
                                   }}
                                 >
-                                  Сохранить
+                                  {updatingStatuses.has(participant.id) ? (
+                                    <><Loader2 className="mr-2 h-3 w-3 animate-spin" /> Saving...</>
+                                  ) : (
+                                    'Save Changes'
+                                  )}
                                 </Button>
                                
                                {participant.final_rank && (
@@ -6359,7 +6382,11 @@ const Admin = () => {
                                onClick={() => toggleUserStats(profile.id)}
                              >
                                <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
-                               <span className="text-xs font-medium">{userStatsCount[profile.id]?.ratings || 0}</span>
+                               {loadingUserStats.has(profile.id) ? (
+                                 <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
+                               ) : (
+                                 <span className="text-xs font-medium">{userStatsCount[profile.id]?.ratings || 0}</span>
+                               )}
                              </Button>
                              <Button
                                variant="ghost"
@@ -6368,7 +6395,11 @@ const Admin = () => {
                                onClick={() => toggleUserStats(profile.id)}
                              >
                                <Heart className="h-4 w-4 text-red-500 fill-red-500" />
-                               <span className="text-xs font-medium">{userStatsCount[profile.id]?.likes || 0}</span>
+                               {loadingUserStats.has(profile.id) ? (
+                                 <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
+                               ) : (
+                                 <span className="text-xs font-medium">{userStatsCount[profile.id]?.likes || 0}</span>
+                               )}
                              </Button>
                            </div>
 
