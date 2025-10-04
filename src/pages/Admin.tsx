@@ -5279,8 +5279,17 @@ const Admin = () => {
                       const participantProfile = profiles.find(p => p.id === participant.user_id);
                       const appData = participant.application_data || {};
                       
+                      // Count previous applications for this user
+                      const userApplicationsCount = weeklyParticipants.filter(p => 
+                        p.user_id === participant.user_id
+                      ).length;
+                      
+                      // Check if this user has edit history
+                      const isExpanded = expandedMobileItems.has(participant.id);
+                      
                       return (
-                        <Card key={participant.id} className="overflow-hidden relative mx-0 rounded-lg h-[149px]">
+                        <div key={participant.id} className="space-y-2">
+                          <Card className={`overflow-hidden relative mx-0 rounded-lg h-[149px] ${participant.admin_status === 'rejected' ? 'bg-red-50 border-red-200' : ''}`}>
                           <CardContent className="p-0">
                             {/* Desktop layout */}
                             <div className="hidden md:flex md:overflow-visible">
@@ -5364,31 +5373,58 @@ const Admin = () => {
                                     </div>
                                   )}
                                 </div>
+                                
+                                {/* Rejection reasons display */}
+                                {participant.admin_status === 'rejected' && (participant as any).rejection_reason_types && (
+                                  <div className="mb-2 p-2 bg-red-100 border border-red-300 rounded text-xs">
+                                    <div className="font-semibold text-red-700 mb-1">Rejection Reasons:</div>
+                                    <div className="space-y-1 text-red-600">
+                                      {((participant as any).rejection_reason_types as string[]).map((reasonType: string, idx: number) => (
+                                        <div key={idx}>• {REJECTION_REASONS[reasonType as keyof typeof REJECTION_REASONS] || reasonType}</div>
+                                      ))}
+                                    </div>
+                                    {(participant as any).rejection_reason && (
+                                      <div className="mt-1 pt-1 border-t border-red-200">
+                                        <div className="font-semibold text-red-700">Note:</div>
+                                        <div className="text-red-600">{(participant as any).rejection_reason}</div>
+                                      </div>
+                                    )}
+                                  </div>
+                                )}
 
                                 <div className="flex items-center gap-2 mt-2">
                                   <Select 
                                     value={participant.admin_status || 'pending'}
                                     onValueChange={(value) => {
-                                      const updateStatus = async () => {
-                                        const result = await updateParticipantStatusWithHistory(
-                                          participant.id,
-                                          value as ParticipantStatus,
-                                          `${appData.first_name} ${appData.last_name}`
-                                        );
+                                      // If changing to rejected status, open reject modal
+                                      if (value === 'rejected') {
+                                        setApplicationToReject({
+                                          id: participant.id,
+                                          name: `${appData.first_name} ${appData.last_name}`
+                                        });
+                                        setRejectModalOpen(true);
+                                      } else {
+                                        const updateStatus = async () => {
+                                          const result = await updateParticipantStatusWithHistory(
+                                            participant.id,
+                                            value as ParticipantStatus,
+                                            `${appData.first_name} ${appData.last_name}`
+                                          );
 
-                                        if (!result.success) {
-                                          toast({
-                                            title: "Error",
-                                            description: "Failed to update participant status",
-                                            variant: "destructive"
-                                          });
-                                        } else {
-                                          fetchWeeklyParticipants();
-                                          fetchContestApplications();
-                                        }
-                                      };
+                                          if (!result.success) {
+                                            toast({
+                                              title: "Error",
+                                              description: "Failed to update participant status",
+                                              variant: "destructive"
+                                            });
+                                          } else {
+                                            fetchWeeklyParticipants();
+                                            fetchContestApplications();
+                                          }
+                                        };
 
-                                      updateStatus();
+                                        updateStatus();
+                                      }
                                     }}
                                   >
                                     <SelectTrigger className={`w-28 h-6 text-xs ${getStatusBackgroundColor(participant.admin_status || 'pending')}`}>
@@ -5480,6 +5516,21 @@ const Admin = () => {
                                     {appData.city} {appData.country}
                                   </div>
                                   
+                                  {/* Rejection reasons display - mobile */}
+                                  {participant.admin_status === 'rejected' && (participant as any).rejection_reason_types && (
+                                    <div className="mb-2 p-2 bg-red-100 border border-red-300 rounded text-xs max-h-24 overflow-y-auto">
+                                      <div className="font-semibold text-red-700 mb-1">Rejected:</div>
+                                      <div className="space-y-0.5 text-red-600">
+                                        {((participant as any).rejection_reason_types as string[]).slice(0, 2).map((reasonType: string, idx: number) => (
+                                          <div key={idx} className="text-[10px]">• {REJECTION_REASONS[reasonType as keyof typeof REJECTION_REASONS]?.substring(0, 40) || reasonType}</div>
+                                        ))}
+                                        {((participant as any).rejection_reason_types as string[]).length > 2 && (
+                                          <div className="text-[10px] text-red-500">...and {((participant as any).rejection_reason_types as string[]).length - 2} more</div>
+                                        )}
+                                      </div>
+                                    </div>
+                                  )}
+                                  
                                   <div className="flex-1"></div>
                                   
                                   {/* Status filter */}
@@ -5487,26 +5538,35 @@ const Admin = () => {
                                     <Select 
                                       value={participant.admin_status || 'pending'}
                                       onValueChange={(value) => {
-                                        const updateStatus = async () => {
-                                          const result = await updateParticipantStatusWithHistory(
-                                            participant.id,
-                                            value as ParticipantStatus,
-                                            `${appData.first_name} ${appData.last_name}`
-                                          );
+                                        // If changing to rejected status, open reject modal
+                                        if (value === 'rejected') {
+                                          setApplicationToReject({
+                                            id: participant.id,
+                                            name: `${appData.first_name} ${appData.last_name}`
+                                          });
+                                          setRejectModalOpen(true);
+                                        } else {
+                                          const updateStatus = async () => {
+                                            const result = await updateParticipantStatusWithHistory(
+                                              participant.id,
+                                              value as ParticipantStatus,
+                                              `${appData.first_name} ${appData.last_name}`
+                                            );
 
-                                          if (!result.success) {
-                                            toast({
-                                              title: "Error",
-                                              description: "Failed to update participant status",
-                                              variant: "destructive"
-                                            });
-                                          } else {
-                                            fetchWeeklyParticipants();
-                                            fetchContestApplications();
-                                          }
-                                        };
+                                            if (!result.success) {
+                                              toast({
+                                                title: "Error",
+                                                description: "Failed to update participant status",
+                                                variant: "destructive"
+                                              });
+                                            } else {
+                                              fetchWeeklyParticipants();
+                                              fetchContestApplications();
+                                            }
+                                          };
 
-                                        updateStatus();
+                                          updateStatus();
+                                        }
                                       }}
                                     >
                                       <SelectTrigger className="w-24 h-7 text-xs">
@@ -5527,7 +5587,93 @@ const Admin = () => {
                               </div>
                             </div>
                           </CardContent>
-                          </Card>
+                        </Card>
+                        
+                        {/* Badge for application count */}
+                        {userApplicationsCount > 1 && (
+                          <div className="flex items-center justify-center">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => {
+                                const newExpanded = new Set(expandedMobileItems);
+                                if (isExpanded) {
+                                  newExpanded.delete(participant.id);
+                                } else {
+                                  newExpanded.add(participant.id);
+                                }
+                                setExpandedMobileItems(newExpanded);
+                              }}
+                              className="h-6 text-xs px-2"
+                            >
+                              <Badge variant="secondary" className="mr-1">{userApplicationsCount}</Badge>
+                              {isExpanded ? 'Hide History' : 'Show History'}
+                            </Button>
+                          </div>
+                        )}
+                        
+                        {/* Expandable history for previous applications */}
+                        {userApplicationsCount > 1 && (
+                          <ExpandableApplicationHistory
+                            applications={weeklyParticipants.map(p => ({
+                              id: p.id,
+                              user_id: p.user_id,
+                              status: p.admin_status || 'pending',
+                              submitted_at: p.submitted_at || p.created_at || new Date().toISOString(),
+                              application_data: p.application_data,
+                              rejection_reason: (p as any).rejection_reason
+                            }))}
+                            currentApplicationId={participant.id}
+                            userId={participant.user_id}
+                            isExpanded={isExpanded}
+                            showDeletedApplications={false}
+                            profiles={profiles}
+                            onEdit={(app) => {
+                              setEditingApplicationId(app.id);
+                              setEditingApplicationData(app);
+                              setShowEditModal(true);
+                            }}
+                            onReview={async (id, status) => {
+                              const result = await updateParticipantStatusWithHistory(
+                                id,
+                                status as ParticipantStatus,
+                                `${appData.first_name} ${appData.last_name}`
+                              );
+                              if (result.success) {
+                                fetchWeeklyParticipants();
+                                fetchContestApplications();
+                              }
+                            }}
+                            onReject={(id, name) => {
+                              setApplicationToReject({ id, name });
+                              setRejectModalOpen(true);
+                            }}
+                            onDelete={async (id) => {
+                              const { error } = await supabase
+                                .from('weekly_contest_participants')
+                                .update({ deleted_at: new Date().toISOString() })
+                                .eq('id', id);
+                              if (!error) {
+                                fetchWeeklyParticipants();
+                              }
+                            }}
+                            onRestore={async (id) => {
+                              const { error } = await supabase
+                                .from('weekly_contest_participants')
+                                .update({ deleted_at: null })
+                                .eq('id', id);
+                              if (!error) {
+                                fetchWeeklyParticipants();
+                              }
+                            }}
+                            getApplicationStatusBadge={(status) => (
+                              <Badge variant={status === 'rejected' ? 'destructive' : status === 'pending' ? 'outline' : 'default'}>
+                                {status}
+                              </Badge>
+                            )}
+                          />
+                        )}
+                      </div>
                       );
                     })}
                     
