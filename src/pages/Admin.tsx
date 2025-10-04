@@ -5589,19 +5589,15 @@ const Admin = () => {
                               return (
                                 <>
                                   {hasReasons && (
-                                    <>
-                                      <div className="font-semibold text-red-800 mb-1">Rejection Reasons:</div>
-                                      <div className="space-y-1 text-red-700">
-                                        {((participant as any).rejection_reason_types as string[]).map((reasonType: string, idx: number) => (
-                                          <div key={idx}>• {REJECTION_REASONS[reasonType as keyof typeof REJECTION_REASONS] || reasonType}</div>
-                                        ))}
-                                      </div>
-                                    </>
+                                    <div className="space-y-1 text-red-700">
+                                      {((participant as any).rejection_reason_types as string[]).map((reasonType: string, idx: number) => (
+                                        <div key={idx}>• {REJECTION_REASONS[reasonType as keyof typeof REJECTION_REASONS] || reasonType}</div>
+                                      ))}
+                                    </div>
                                   )}
                                   {hasNote && (
-                                    <div className={`${hasReasons ? 'mt-2 pt-2 border-t border-red-300' : ''}`}>
-                                      <div className="font-semibold text-red-800 mb-1">Additional Note:</div>
-                                      <div className="text-red-700">{(participant as any).rejection_reason}</div>
+                                    <div className={`text-red-700 ${hasReasons ? 'mt-2 pt-2 border-t border-red-300' : ''}`}>
+                                      {(participant as any).rejection_reason}
                                     </div>
                                   )}
                                 </>
