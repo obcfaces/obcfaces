@@ -6369,12 +6369,13 @@ const Admin = () => {
                                 )}
                               </div>
                             </div>
-                            )}
-                          );
-                        })}
-                        </div>
+                          )}
+                        </React.Fragment>
+                      );
+                    })}
+                    </div>
 
-                        {/* Pagination */}
+                      {/* Pagination */}
                       {totalRegPages > 1 && (
                         <Pagination className="mt-6">
                           <PaginationContent>
@@ -6431,11 +6432,11 @@ const Admin = () => {
                             </PaginationItem>
                           </PaginationContent>
                         </Pagination>
-                        )}
-                      </div>
-                    );
-                  })()}
-                </TabsContent>
+                      )}
+                    </div>
+                  );
+                })()}
+              </TabsContent>
 
               <TabsContent value="winnercontent" className="space-y-4">
                 <div className="mb-6">
