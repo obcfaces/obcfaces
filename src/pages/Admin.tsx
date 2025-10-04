@@ -457,6 +457,10 @@ const Admin = () => {
   const [userLikesData, setUserLikesData] = useState<Record<string, any[]>>({});
   const [userRatingsData, setUserRatingsData] = useState<Record<string, any[]>>({});
   const [userStatsCount, setUserStatsCount] = useState<Record<string, { likes: number; ratings: number }>>({});
+  const [expandedUserActivity, setExpandedUserActivity] = useState<Set<string>>(new Set());
+  const [userActivityData, setUserActivityData] = useState<Record<string, any>>({});
+  const [regPaginationPage, setRegPaginationPage] = useState(1);
+  const regItemsPerPage = 20;
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -983,6 +987,32 @@ const Admin = () => {
         [userId]: {
           likes: likesCount || 0,
           ratings: ratingsCount || 0
+        }
+      }));
+
+      // Fetch activity data
+      const { data: logins } = await supabase
+        .from('user_login_logs')
+        .select('created_at')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+        .limit(10);
+
+      const { data: participations } = await supabase
+        .from('weekly_contest_participants')
+        .select('week_interval, created_at')
+        .eq('user_id', userId);
+
+      const lastActivity = logins?.[0]?.created_at || null;
+
+      setUserActivityData(prev => ({
+        ...prev,
+        [userId]: {
+          lastActivity,
+          logins: logins || [],
+          intervals: participations?.map(p => p.week_interval).filter(Boolean) || [],
+          likesCount: likesCount || 0,
+          ratingsCount: ratingsCount || 0
         }
       }));
     } catch (error) {
@@ -5943,11 +5973,10 @@ const Admin = () => {
                   >
                     Admin
                   </Button>
-                </div>
+                 </div>
 
-                <div className="grid gap-4">
-                  {profiles
-                    .filter(profile => {
+                {(() => {
+                    const filteredProfiles = profiles.filter(profile => {
                       // Фильтр верификации
                       if (verificationFilter === 'verified') {
                         if (!profile.email_confirmed_at) return false;
@@ -5978,141 +6007,203 @@ const Admin = () => {
                       }
                       
                       return true;
-                    })
-                     .map(profile => (
-                       <Card key={profile.id} className="p-3 relative overflow-hidden">
-                          {/* Registration date badge in top left corner */}
-                          <Badge 
-                            variant="outline" 
-                            className="absolute top-0 left-0 text-xs bg-background/50 backdrop-blur-sm font-normal rounded-none rounded-br-md"
-                          >
-                            {new Date(profile.created_at).toLocaleDateString('en-GB', { 
-                              day: 'numeric', 
-                              month: 'short' 
-                            })}
-                            {' '}
-                            {new Date(profile.created_at).toLocaleTimeString('en-GB', { 
-                              hour: '2-digit', 
-                              minute: '2-digit',
-                              hour12: false
-                            })}
-                          </Badge>
-                          
-                          {/* Controls menu in top right */}
-                          <div className="absolute top-0 right-0 flex items-center gap-1">
-                            {profile.email_confirmed_at ? (
-                              <Badge variant="default" className="bg-green-100 text-green-700 text-xs rounded-none rounded-bl-md">
-                                Verified
-                              </Badge>
-                            ) : (
-                              <>
-                                <Badge variant="secondary" className="text-xs rounded-none">
-                                  Unverified
-                                </Badge>
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() => handleEmailVerification(profile.id)}
-                                  disabled={verifyingUsers.has(profile.id)}
-                                  className="h-6 px-2 text-xs rounded-none rounded-bl-md"
-                                >
-                                  {verifyingUsers.has(profile.id) ? 'Verifying...' : 'Verify'}
-                                </Button>
-                              </>
-                            )}
-                            
-                            {/* Three dots menu for role */}
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="sm" className="h-6 w-6 p-0 rounded-none rounded-bl-md">
-                                  <span className="text-lg leading-none">⋮</span>
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end" className="z-[9999] bg-popover border shadow-lg">
-                                <DropdownMenuItem
-                                  onClick={() => {
-                                    const currentRole = userRoleMap[profile.id] || 'usual';
-                                    if (currentRole === 'admin') {
-                                      handleRoleChange(
-                                        profile.id,
-                                        profile.display_name || `${profile.first_name} ${profile.last_name}`,
-                                        'usual'
-                                      );
-                                    } else {
-                                      if (confirm(`Вы уверены, что хотите назначить роль Admin для ${profile.display_name || `${profile.first_name} ${profile.last_name}`}?`)) {
-                                        handleRoleChange(
-                                          profile.id,
-                                          profile.display_name || `${profile.first_name} ${profile.last_name}`,
-                                          'admin'
-                                        );
-                                      }
-                                    }
-                                  }}
-                                  className="cursor-pointer"
-                                >
-                                  {(userRoleMap[profile.id] || 'usual') === 'admin' ? '✓ Admin' : 'Make Admin'}
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          </div>
-                          
-                          <div className="flex items-center justify-between mt-6">
-                            <div className="flex items-center gap-3">
-                              <Avatar>
-                                <AvatarImage src={profile.avatar_url || ''} />
-                                <AvatarFallback>
-                                  {profile.display_name?.charAt(0) || profile.first_name?.charAt(0) || 'U'}
-                                </AvatarFallback>
-                              </Avatar>
-                              <div>
-                                <div className="flex items-center gap-2">
-                                  <span className="font-medium">
-                                    {profile.display_name || `${profile.first_name} ${profile.last_name}`}
-                                  </span>
-                                 </div>
-                                 {profile.ip_address && (
-                                   <div className={`text-xs ${profile.isDuplicateIP ? 'text-red-500 font-medium' : 'text-muted-foreground'}`}>
-                                     IP: {profile.ip_address}
-                                     {profile.isDuplicateIP && ' ⚠️'}
-                                   </div>
-                                 )}
-                                {(profile.country || profile.city) && (
-                                  <div className="text-xs text-muted-foreground">
-                                    📍 {profile.city ? `${profile.city}, ` : ''}{profile.country || 'Unknown Country'}
-                                  </div>
-                                )}
-                                {profile.user_agent && (() => {
-                                  const { browser, device, os } = UAParser(profile.user_agent);
-                                  
-                                  return (
-                                    <div className="text-xs text-muted-foreground">
-                                      {device.type || 'Desktop'} | {os.name || 'Unknown OS'} {os.version || ''} | {browser.name || 'Unknown'}
-                                    </div>
-                                  );
-                                })()}
-                                {profile.email && (
-                                  <div className="text-xs text-muted-foreground flex items-center gap-1">
-                                    <span>{profile.email}</span>
-                                    <Copy 
-                                      className="h-3 w-3 cursor-pointer hover:text-foreground" 
-                                      onClick={() => {
-                                        navigator.clipboard.writeText(profile.email || '');
-                                        toast({ title: "Copied", description: "Email copied to clipboard" });
-                                      }}
-                                    />
-                                  </div>
-                                )}
-                                 {!profile.email && (
-                                   <div className="text-xs text-destructive">
-                                     No email - User ID: {profile.id?.substring(0, 8)}
-                                   </div>
-                                 )}
-                               </div>
-                             </div>
-                           </div>
+                    });
 
-                           {/* Stats in bottom right corner */}
-                           <div className="absolute bottom-2 right-2 flex items-center gap-3">
+                    const totalRegPages = Math.ceil(filteredProfiles.length / regItemsPerPage);
+                    const startIdx = (regPaginationPage - 1) * regItemsPerPage;
+                    const endIdx = startIdx + regItemsPerPage;
+                    const paginatedProfiles = filteredProfiles.slice(startIdx, endIdx);
+
+                     return (
+                      <div className="space-y-4">
+                        <div className="grid gap-4">
+                          {paginatedProfiles.map(profile => {
+                          const lastActivity = userActivityData[profile.id]?.lastActivity;
+                          const now = new Date();
+                          const activityDate = lastActivity ? new Date(lastActivity) : null;
+                          const daysDiff = activityDate ? Math.floor((now.getTime() - activityDate.getTime()) / (1000 * 60 * 60 * 24)) : null;
+                          
+                          let activityColor = 'bg-red-100 text-red-700';
+                          if (daysDiff !== null) {
+                            if (daysDiff < 2) activityColor = 'bg-green-100 text-green-700';
+                            else if (daysDiff < 7) activityColor = 'bg-yellow-100 text-yellow-700';
+                          }
+
+                          return (
+                            <Card key={profile.id} className="p-3 relative overflow-hidden">
+                              {/* Registration date badge in top left corner */}
+                              <Badge 
+                                variant="outline" 
+                                className="absolute top-0 left-0 text-xs bg-background/50 backdrop-blur-sm font-normal rounded-none rounded-br-md"
+                              >
+                                {new Date(profile.created_at).toLocaleDateString('en-GB', { 
+                                  day: 'numeric', 
+                                  month: 'short' 
+                                })}
+                                {' '}
+                                {new Date(profile.created_at).toLocaleTimeString('en-GB', { 
+                                  hour: '2-digit', 
+                                  minute: '2-digit',
+                                  hour12: false
+                                })}
+                              </Badge>
+                              
+                              {/* Last activity badge */}
+                              {activityDate && (
+                                <Badge 
+                                  variant="outline" 
+                                  className={`absolute top-0 left-28 text-xs font-normal rounded-none rounded-br-md cursor-pointer ${activityColor}`}
+                                  onClick={() => {
+                                    const newExpanded = new Set(expandedUserActivity);
+                                    if (expandedUserActivity.has(profile.id)) {
+                                      newExpanded.delete(profile.id);
+                                    } else {
+                                      newExpanded.add(profile.id);
+                                    }
+                                    setExpandedUserActivity(newExpanded);
+                                  }}
+                                >
+                                  {activityDate.toLocaleDateString('en-GB', { 
+                                    day: 'numeric', 
+                                    month: 'short' 
+                                  })}
+                                </Badge>
+                              )}
+                          
+                              {/* Controls menu in top right */}
+                              <div className="absolute top-0 right-0 flex items-center gap-1">
+                                {profile.email_confirmed_at ? (
+                                  <Badge variant="default" className="bg-green-100 text-green-700 text-xs rounded-none rounded-bl-md">
+                                    Verified
+                                  </Badge>
+                                ) : (
+                                  <>
+                                    <Badge variant="secondary" className="text-xs rounded-none">
+                                      Unverified
+                                    </Badge>
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={() => handleEmailVerification(profile.id)}
+                                      disabled={verifyingUsers.has(profile.id)}
+                                      className="h-6 px-2 text-xs rounded-none rounded-bl-md"
+                                    >
+                                      {verifyingUsers.has(profile.id) ? 'Verifying...' : 'Verify'}
+                                    </Button>
+                                  </>
+                                )}
+                                
+                                {/* Three dots menu for role */}
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger asChild>
+                                    <Button variant="ghost" size="sm" className="h-6 w-6 p-0 rounded-none rounded-bl-md">
+                                      <span className="text-lg leading-none">⋮</span>
+                                    </Button>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent align="end" className="z-[9999] bg-popover border shadow-lg">
+                                    <DropdownMenuItem
+                                      onClick={() => {
+                                        const currentRole = userRoleMap[profile.id] || 'usual';
+                                        if (currentRole === 'admin') {
+                                          handleRoleChange(
+                                            profile.id,
+                                            profile.display_name || `${profile.first_name} ${profile.last_name}`,
+                                            'usual'
+                                          );
+                                        } else {
+                                          if (confirm(`Вы уверены, что хотите назначить роль Admin для ${profile.display_name || `${profile.first_name} ${profile.last_name}`}?`)) {
+                                            handleRoleChange(
+                                              profile.id,
+                                              profile.display_name || `${profile.first_name} ${profile.last_name}`,
+                                              'admin'
+                                            );
+                                          }
+                                        }
+                                      }}
+                                      className="cursor-pointer"
+                                    >
+                                      {(userRoleMap[profile.id] || 'usual') === 'admin' ? '✓ Admin' : 'Make Admin'}
+                                    </DropdownMenuItem>
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
+                              </div>
+                          
+                              {/* Activity history expandable */}
+                              {expandedUserActivity.has(profile.id) && userActivityData[profile.id] && (
+                                <div className="mt-8 mb-4 p-3 bg-muted/50 rounded-lg">
+                                  <h4 className="text-sm font-medium mb-2">История активности:</h4>
+                                  <div className="space-y-1 text-xs text-muted-foreground">
+                                    {userActivityData[profile.id].logins?.map((login: any, idx: number) => (
+                                      <div key={idx}>
+                                        • Вход: {new Date(login.created_at).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                                      </div>
+                                    ))}
+                                    {userActivityData[profile.id].intervals?.map((interval: string, idx: number) => (
+                                      <div key={idx}>• Интервал: {interval}</div>
+                                    ))}
+                                    <div>• Лайков: {userActivityData[profile.id].likesCount || 0}</div>
+                                    <div>• Голосов: {userActivityData[profile.id].ratingsCount || 0}</div>
+                                  </div>
+                                </div>
+                              )}
+                              
+                              <div className="flex items-center justify-between mt-6">
+                                <div className="flex items-center gap-3">
+                                  <Avatar>
+                                    <AvatarImage src={profile.avatar_url || ''} />
+                                    <AvatarFallback>
+                                      {profile.display_name?.charAt(0) || profile.first_name?.charAt(0) || 'U'}
+                                    </AvatarFallback>
+                                  </Avatar>
+                                  <div>
+                                    <div className="flex items-center gap-2">
+                                      <span className="font-medium">
+                                        {profile.display_name || `${profile.first_name} ${profile.last_name}`}
+                                      </span>
+                                    </div>
+                                    {profile.ip_address && (
+                                      <div className={`text-xs ${profile.isDuplicateIP ? 'text-red-500 font-medium' : 'text-muted-foreground'}`}>
+                                        IP: {profile.ip_address}
+                                        {profile.isDuplicateIP && ' ⚠️'}
+                                      </div>
+                                    )}
+                                    {(profile.country || profile.city) && (
+                                      <div className="text-xs text-muted-foreground">
+                                        📍 {profile.city ? `${profile.city}, ` : ''}{profile.country || 'Unknown Country'}
+                                      </div>
+                                    )}
+                                    {profile.user_agent && (() => {
+                                      const { browser, device, os } = UAParser(profile.user_agent);
+                                      
+                                      return (
+                                        <div className="text-xs text-muted-foreground">
+                                          {device.type || 'Desktop'} | {os.name || 'Unknown OS'} {os.version || ''} | {browser.name || 'Unknown'}
+                                        </div>
+                                      );
+                                    })()}
+                                    {profile.email && (
+                                      <div className="text-xs text-muted-foreground flex items-center gap-1">
+                                        <span>{profile.email}</span>
+                                        <Copy 
+                                          className="h-3 w-3 cursor-pointer hover:text-foreground" 
+                                          onClick={() => {
+                                            navigator.clipboard.writeText(profile.email || '');
+                                            toast({ title: "Copied", description: "Email copied to clipboard" });
+                                          }}
+                                        />
+                                      </div>
+                                    )}
+                                    {!profile.email && (
+                                      <div className="text-xs text-destructive">
+                                        No email - User ID: {profile.id?.substring(0, 8)}
+                                      </div>
+                                    )}
+                                   </div>
+                                 </div>
+                               </div>
+
+                              {/* Stats in bottom right corner */}
+                              <div className="absolute bottom-2 right-2 flex items-center gap-3">
                              <Button
                                variant="ghost"
                                size="sm"
@@ -6210,10 +6301,73 @@ const Admin = () => {
                                )}
                              </div>
                            )}
-                         </Card>
-                       ))}
-                   </div>
-              </TabsContent>
+                          </Card>
+                          );
+                        })}
+                        </div>
+
+                        {/* Pagination */}
+                      {totalRegPages > 1 && (
+                        <Pagination className="mt-6">
+                          <PaginationContent>
+                            <PaginationItem>
+                              <PaginationPrevious 
+                                href="#"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  setRegPaginationPage(prev => Math.max(prev - 1, 1));
+                                }}
+                                aria-disabled={regPaginationPage === 1}
+                                className={regPaginationPage === 1 ? 'pointer-events-none opacity-50' : ''}
+                              />
+                            </PaginationItem>
+                            
+                            {Array.from({ length: Math.min(totalRegPages, 7) }, (_, i) => {
+                              let pageNumber;
+                              if (totalRegPages <= 7) {
+                                pageNumber = i + 1;
+                              } else if (regPaginationPage <= 4) {
+                                pageNumber = i + 1;
+                              } else if (regPaginationPage >= totalRegPages - 3) {
+                                pageNumber = totalRegPages - 6 + i;
+                              } else {
+                                pageNumber = regPaginationPage - 3 + i;
+                              }
+                              
+                              return (
+                                <PaginationItem key={pageNumber}>
+                                  <PaginationLink
+                                    href="#"
+                                    onClick={(e) => {
+                                      e.preventDefault();
+                                      setRegPaginationPage(pageNumber);
+                                    }}
+                                    isActive={pageNumber === regPaginationPage}
+                                  >
+                                    {pageNumber}
+                                  </PaginationLink>
+                                </PaginationItem>
+                              );
+                            })}
+                            
+                            <PaginationItem>
+                              <PaginationNext 
+                                href="#"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  setRegPaginationPage(prev => Math.min(prev + 1, totalRegPages));
+                                }}
+                                aria-disabled={regPaginationPage === totalRegPages}
+                                className={regPaginationPage === totalRegPages ? 'pointer-events-none opacity-50' : ''}
+                              />
+                            </PaginationItem>
+                          </PaginationContent>
+                        </Pagination>
+                        )}
+                      </div>
+                    );
+                  })()}
+                </TabsContent>
 
               <TabsContent value="winnercontent" className="space-y-4">
                 <div className="mb-6">
