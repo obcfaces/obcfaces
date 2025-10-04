@@ -5223,15 +5223,16 @@ const Admin = () => {
                       
                       return (
                         <Card key={participant.id} className="relative p-4">
-                          {/* Registration date in top-left corner */}
-                          {isValidDate && (
-                            <div className="absolute top-0 left-0 px-2 py-1 bg-muted text-xs font-medium">
-                              {new Date(displayDate).toLocaleDateString('en-GB', {
-                                day: 'numeric',
-                                month: 'short'
-                              }).toLowerCase()}
-                            </div>
-                          )}
+                          {/* Registration date in top-left corner - always show */}
+                          <div className="absolute top-0 left-0 px-2 py-1 bg-muted text-xs font-medium">
+                            {isValidDate 
+                              ? new Date(displayDate).toLocaleDateString('en-GB', {
+                                  day: 'numeric',
+                                  month: 'short'
+                                }).toLowerCase()
+                              : 'Invalid Date'
+                            }
+                          </div>
                           
                           <div className="flex gap-4 mt-6">
                             {/* Photos */}
