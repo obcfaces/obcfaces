@@ -284,6 +284,7 @@ interface ProfileData {
   age?: number;
   ip_address?: string | null;
   user_agent?: string | null;
+  device_info?: string | null;
   city?: string;
   state?: string;
   country?: string;
@@ -357,6 +358,7 @@ const Admin = () => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('applications');
+  const [statType, setStatType] = useState<'ip' | 'country' | 'device' | 'os'>('country');
   const [profiles, setProfiles] = useState<ProfileData[]>([]);
   const [userRoles, setUserRoles] = useState<UserRole[]>([]);
   const [contestApplications, setContestApplications] = useState<ContestApplication[]>([]);
@@ -5971,7 +5973,7 @@ const Admin = () => {
                           </PaginationItem>
                         </PaginationContent>
                       </Pagination>
-                    )}
+                     )}
                   </>
                 );
               })()}
@@ -6038,9 +6040,234 @@ const Admin = () => {
                   >
                     Admin
                   </Button>
+                  <Button
+                    variant={activeTab === 'stat' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setActiveTab('stat')}
+                  >
+                    Stat
+                  </Button>
                  </div>
 
-                {(() => {
+                {activeTab === 'stat' && (
+                  <div className="space-y-6 mb-6">
+                    <div className="flex gap-4 flex-wrap">
+                      <Button
+                        variant={statType === 'country' ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => setStatType('country')}
+                      >
+                        По странам
+                      </Button>
+                      <Button
+                        variant={statType === 'ip' ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => setStatType('ip')}
+                      >
+                        По IP
+                      </Button>
+                      <Button
+                        variant={statType === 'device' ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => setStatType('device')}
+                      >
+                        По устройствам
+                      </Button>
+                      <Button
+                        variant={statType === 'os' ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => setStatType('os')}
+                      >
+                        По системам
+                      </Button>
+                    </div>
+
+                    <div className="bg-muted/50 rounded-lg p-6">
+                      {statType === 'country' && (
+                        <div className="space-y-4">
+                          <h3 className="text-lg font-semibold">Статистика по странам</h3>
+                          <div className="grid gap-3">
+                            {Object.entries(
+                              profiles.reduce((acc, profile) => {
+                                const country = profile.country || 'Unknown';
+                                acc[country] = (acc[country] || 0) + 1;
+                                return acc;
+                              }, {} as Record<string, number>)
+                            )
+                              .sort(([, a], [, b]) => b - a)
+                              .map(([country, count]) => {
+                                const uniqueIPs = new Set(profiles.filter(p => (p.country || 'Unknown') === country).map(p => p.ip_address || 'unknown')).size;
+                                const devices = profiles.filter(p => (p.country || 'Unknown') === country);
+                                const mobileCount = devices.filter(p => (p.device_info || '').toLowerCase().includes('mobile')).length;
+                                const tabletCount = devices.filter(p => (p.device_info || '').toLowerCase().includes('tablet')).length;
+                                const desktopCount = devices.length - mobileCount - tabletCount;
+                                
+                                return (
+                                  <div key={country} className="p-4 bg-background rounded border">
+                                    <div className="flex justify-between items-start mb-2">
+                                      <span className="font-medium text-lg">{country}</span>
+                                      <span className="text-lg font-bold text-primary">{count} регистраций</span>
+                                    </div>
+                                    <div className="flex gap-4 text-sm text-muted-foreground">
+                                      <span>IP: {uniqueIPs}</span>
+                                      <span>📱 {mobileCount}</span>
+                                      <span>💻 {desktopCount}</span>
+                                      {tabletCount > 0 && <span>📲 {tabletCount}</span>}
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                          </div>
+                        </div>
+                      )}
+
+                      {statType === 'ip' && (
+                        <div className="space-y-4">
+                          <h3 className="text-lg font-semibold">Статистика по IP адресам</h3>
+                          <div className="grid gap-3">
+                            {Object.entries(
+                              profiles.reduce((acc, profile) => {
+                                const ip = profile.ip_address || 'Unknown';
+                                acc[ip] = (acc[ip] || 0) + 1;
+                                return acc;
+                              }, {} as Record<string, number>)
+                            )
+                              .sort(([, a], [, b]) => b - a)
+                              .map(([ip, count]) => {
+                                const ipProfiles = profiles.filter(p => (p.ip_address || 'Unknown') === ip);
+                                const countries = new Set(ipProfiles.map(p => p.country || 'Unknown'));
+                                const devices = ipProfiles;
+                                const mobileCount = devices.filter(p => (p.device_info || '').toLowerCase().includes('mobile')).length;
+                                const desktopCount = devices.filter(p => !(p.device_info || '').toLowerCase().includes('mobile') && !(p.device_info || '').toLowerCase().includes('tablet')).length;
+                                
+                                return (
+                                  <div key={ip} className="p-4 bg-background rounded border">
+                                    <div className="flex justify-between items-start mb-2">
+                                      <span className="font-medium font-mono text-sm">{ip}</span>
+                                      <span className="text-lg font-bold text-primary">{count} регистраций</span>
+                                    </div>
+                                    <div className="flex gap-4 text-sm text-muted-foreground flex-wrap">
+                                      <span>Страны: {[...countries].join(', ')}</span>
+                                      <span>📱 {mobileCount}</span>
+                                      <span>💻 {desktopCount}</span>
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                          </div>
+                        </div>
+                      )}
+
+                      {statType === 'device' && (
+                        <div className="space-y-4">
+                          <h3 className="text-lg font-semibold">Статистика по устройствам</h3>
+                          <div className="grid gap-3">
+                            {Object.entries(
+                              profiles.reduce((acc, profile) => {
+                                const deviceInfo = profile.device_info || '';
+                                let device = 'Unknown';
+                                if (deviceInfo.toLowerCase().includes('mobile')) {
+                                  device = 'Mobile';
+                                } else if (deviceInfo.toLowerCase().includes('tablet')) {
+                                  device = 'Tablet';
+                                } else if (deviceInfo) {
+                                  device = 'Desktop';
+                                }
+                                acc[device] = (acc[device] || 0) + 1;
+                                return acc;
+                              }, {} as Record<string, number>)
+                            )
+                              .sort(([, a], [, b]) => b - a)
+                              .map(([device, count]) => {
+                                const deviceProfiles = profiles.filter(p => {
+                                  const info = p.device_info || '';
+                                  if (device === 'Mobile') return info.toLowerCase().includes('mobile');
+                                  if (device === 'Tablet') return info.toLowerCase().includes('tablet');
+                                  if (device === 'Desktop') return info && !info.toLowerCase().includes('mobile') && !info.toLowerCase().includes('tablet');
+                                  return !info;
+                                });
+                                const uniqueIPs = new Set(deviceProfiles.map(p => p.ip_address || 'unknown')).size;
+                                const countries = new Set(deviceProfiles.map(p => p.country || 'Unknown'));
+                                
+                                return (
+                                  <div key={device} className="p-4 bg-background rounded border">
+                                    <div className="flex justify-between items-start mb-2">
+                                      <span className="font-medium text-lg">{device}</span>
+                                      <span className="text-lg font-bold text-primary">{count} регистраций</span>
+                                    </div>
+                                    <div className="flex gap-4 text-sm text-muted-foreground">
+                                      <span>IP: {uniqueIPs}</span>
+                                      <span>Страны: {countries.size}</span>
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                          </div>
+                        </div>
+                      )}
+
+                      {statType === 'os' && (
+                        <div className="space-y-4">
+                          <h3 className="text-lg font-semibold">Статистика по операционным системам</h3>
+                          <div className="grid gap-3">
+                            {Object.entries(
+                              profiles.reduce((acc, profile) => {
+                                const deviceInfo = profile.device_info || '';
+                                let os = 'Unknown';
+                                if (deviceInfo.includes('Windows')) {
+                                  os = 'Windows';
+                                } else if (deviceInfo.includes('iOS')) {
+                                  os = 'iOS';
+                                } else if (deviceInfo.includes('Android')) {
+                                  os = 'Android';
+                                } else if (deviceInfo.includes('Mac OS')) {
+                                  os = 'macOS';
+                                } else if (deviceInfo.includes('Linux')) {
+                                  os = 'Linux';
+                                }
+                                acc[os] = (acc[os] || 0) + 1;
+                                return acc;
+                              }, {} as Record<string, number>)
+                            )
+                              .sort(([, a], [, b]) => b - a)
+                              .map(([os, count]) => {
+                                const osProfiles = profiles.filter(p => {
+                                  const info = p.device_info || '';
+                                  if (os === 'Windows') return info.includes('Windows');
+                                  if (os === 'iOS') return info.includes('iOS');
+                                  if (os === 'Android') return info.includes('Android');
+                                  if (os === 'macOS') return info.includes('Mac OS');
+                                  if (os === 'Linux') return info.includes('Linux');
+                                  return !info || (!info.includes('Windows') && !info.includes('iOS') && !info.includes('Android') && !info.includes('Mac OS') && !info.includes('Linux'));
+                                });
+                                const uniqueIPs = new Set(osProfiles.map(p => p.ip_address || 'unknown')).size;
+                                const countries = new Set(osProfiles.map(p => p.country || 'Unknown'));
+                                const mobileCount = osProfiles.filter(p => (p.device_info || '').toLowerCase().includes('mobile')).length;
+                                const desktopCount = osProfiles.length - mobileCount;
+                                
+                                return (
+                                  <div key={os} className="p-4 bg-background rounded border">
+                                    <div className="flex justify-between items-start mb-2">
+                                      <span className="font-medium text-lg">{os}</span>
+                                      <span className="text-lg font-bold text-primary">{count} регистраций</span>
+                                    </div>
+                                    <div className="flex gap-4 text-sm text-muted-foreground">
+                                      <span>IP: {uniqueIPs}</span>
+                                      <span>Страны: {countries.size}</span>
+                                      <span>📱 {mobileCount}</span>
+                                      <span>💻 {desktopCount}</span>
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {activeTab !== 'stat' && (() => {
                     const filteredProfiles = profiles.filter(profile => {
                       // Фильтр верификации
                       if (verificationFilter === 'verified') {
