@@ -5209,29 +5209,17 @@ const Admin = () => {
                       const appData = participant.application_data || {};
                       const userProfile = profiles.find(p => p.id === participant.user_id);
                       
-                      // Приоритет: submitted_at > created_at карточки > created_at пользователя
-                      let displayDate = participant.submitted_at || participant.created_at;
-                      let isCardDate = true;
-                      
-                      // Если дата карточки невалидна, используем дату регистрации пользователя
-                      if (!displayDate || isNaN(new Date(displayDate).getTime())) {
-                        displayDate = userProfile?.created_at;
-                        isCardDate = false;
-                      }
-                      
-                      const isValidDate = displayDate && !isNaN(new Date(displayDate).getTime());
+                      // Определяем дату для отображения
+                      const displayDate = participant.submitted_at || participant.created_at || userProfile?.created_at || new Date().toISOString();
                       
                       return (
                         <Card key={participant.id} className="relative p-4">
-                          {/* Registration date in top-left corner - always show */}
+                          {/* Registration date in top-left corner */}
                           <div className="absolute top-0 left-0 px-2 py-1 bg-muted text-xs font-medium">
-                            {isValidDate 
-                              ? new Date(displayDate).toLocaleDateString('en-GB', {
-                                  day: 'numeric',
-                                  month: 'short'
-                                }).toLowerCase()
-                              : 'Invalid Date'
-                            }
+                            {new Date(displayDate).toLocaleDateString('en-GB', {
+                              day: 'numeric',
+                              month: 'short'
+                            }).toLowerCase()}
                           </div>
                           
                           <div className="flex gap-4 mt-6">
