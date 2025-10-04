@@ -5209,15 +5209,24 @@ const Admin = () => {
                       const appData = participant.application_data || {};
                       const userProfile = profiles.find(p => p.id === participant.user_id);
                       
-                      const registrationDate = participant.submitted_at || participant.created_at;
-                      const isValidDate = registrationDate && !isNaN(new Date(registrationDate).getTime());
+                      // Приоритет: submitted_at > created_at карточки > created_at пользователя
+                      let displayDate = participant.submitted_at || participant.created_at;
+                      let isCardDate = true;
+                      
+                      // Если дата карточки невалидна, используем дату регистрации пользователя
+                      if (!displayDate || isNaN(new Date(displayDate).getTime())) {
+                        displayDate = userProfile?.created_at;
+                        isCardDate = false;
+                      }
+                      
+                      const isValidDate = displayDate && !isNaN(new Date(displayDate).getTime());
                       
                       return (
                         <Card key={participant.id} className="relative p-4">
-                          {/* Registration date in top-left corner - only show if valid */}
+                          {/* Registration date in top-left corner */}
                           {isValidDate && (
                             <div className="absolute top-0 left-0 px-2 py-1 bg-muted text-xs font-medium">
-                              {new Date(registrationDate).toLocaleDateString('en-GB', {
+                              {new Date(displayDate).toLocaleDateString('en-GB', {
                                 day: 'numeric',
                                 month: 'short'
                               }).toLowerCase()}
