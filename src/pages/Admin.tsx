@@ -22,7 +22,8 @@ import { useToast } from '@/hooks/use-toast';
 import { MiniStars } from '@/components/mini-stars';
 import { 
   Calendar, FileText, UserCog, Eye, Edit, Check, X, Trash2, 
-  RotateCcw, Copy, Facebook, Minus, AlertCircle, Trophy, ChevronDown, ChevronUp, Shield, Info
+  RotateCcw, Copy, Facebook, Minus, AlertCircle, Trophy, ChevronDown, ChevronUp, Shield, Info,
+  Star, Heart
 } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
@@ -452,6 +453,10 @@ const Admin = () => {
   const [pendingPastChanges, setPendingPastChanges] = useState<{ [participantId: string]: { admin_status?: string; week_interval?: string } }>({});
   const [statusHistoryModalOpen, setStatusHistoryModalOpen] = useState(false);
   const [selectedStatusHistory, setSelectedStatusHistory] = useState<{ participantId: string; participantName: string; statusHistory: any } | null>(null);
+  const [expandedUserStats, setExpandedUserStats] = useState<Set<string>>(new Set());
+  const [userLikesData, setUserLikesData] = useState<Record<string, any[]>>({});
+  const [userRatingsData, setUserRatingsData] = useState<Record<string, any[]>>({});
+  const [userStatsCount, setUserStatsCount] = useState<Record<string, { likes: number; ratings: number }>>({});
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -959,6 +964,116 @@ const Admin = () => {
     }
   };
 
+  const fetchUserStats = async (userId: string) => {
+    try {
+      // Fetch likes count
+      const { count: likesCount } = await supabase
+        .from('likes')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', userId);
+
+      // Fetch ratings count
+      const { count: ratingsCount } = await supabase
+        .from('contestant_ratings')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', userId);
+
+      setUserStatsCount(prev => ({
+        ...prev,
+        [userId]: {
+          likes: likesCount || 0,
+          ratings: ratingsCount || 0
+        }
+      }));
+    } catch (error) {
+      console.error('Error fetching user stats:', error);
+    }
+  };
+
+  const fetchUserLikesAndRatings = async (userId: string) => {
+    if (userLikesData[userId] && userRatingsData[userId]) {
+      return; // Already fetched
+    }
+
+    try {
+      // Fetch user's likes with participant profile data
+      const { data: likesRaw } = await supabase
+        .from('likes')
+        .select('id, content_id, created_at')
+        .eq('user_id', userId)
+        .eq('content_type', 'contest')
+        .order('created_at', { ascending: false });
+
+      // Get unique user IDs from likes content_id patterns
+      const likedUserIds = new Set<string>();
+      likesRaw?.forEach(like => {
+        // Extract user ID from patterns like "contestant-user-{uuid}" or "contestant-card-{name}"
+        const match = like.content_id.match(/contestant-user-([a-f0-9-]+)/);
+        if (match) {
+          likedUserIds.add(match[1]);
+        }
+      });
+
+      // Fetch profile data for liked users
+      const { data: likedProfiles } = await supabase
+        .from('profiles')
+        .select('id, display_name, first_name, last_name, avatar_url, photo_1_url, photo_2_url')
+        .in('id', Array.from(likedUserIds));
+
+      // Merge likes with profile data
+      const likesData = likesRaw?.map(like => {
+        const match = like.content_id.match(/contestant-user-([a-f0-9-]+)/);
+        const profile = match ? likedProfiles?.find(p => p.id === match[1]) : null;
+        return {
+          ...like,
+          profile
+        };
+      }).filter(like => like.profile);
+
+      // Fetch ratings with participant info
+      const { data: ratingsData } = await supabase
+        .from('contestant_ratings')
+        .select(`
+          id,
+          rating,
+          contestant_name,
+          created_at,
+          contestant_user_id,
+          profiles:contestant_user_id (
+            id,
+            display_name,
+            first_name,
+            last_name,
+            avatar_url,
+            photo_1_url,
+            photo_2_url
+          )
+        `)
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false });
+
+      setUserLikesData(prev => ({ ...prev, [userId]: likesData || [] }));
+      setUserRatingsData(prev => ({ ...prev, [userId]: ratingsData || [] }));
+    } catch (error) {
+      console.error('Error fetching user likes and ratings:', error);
+    }
+  };
+
+  const toggleUserStats = async (userId: string) => {
+    const isExpanded = expandedUserStats.has(userId);
+    
+    if (isExpanded) {
+      setExpandedUserStats(prev => {
+        const next = new Set(prev);
+        next.delete(userId);
+        return next;
+      });
+    } else {
+      setExpandedUserStats(prev => new Set(prev).add(userId));
+      await fetchUserLikesAndRatings(userId);
+    }
+  };
+
   const handleRoleChange = (userId: string, userName: string, newRole: string) => {
     if (newRole === 'admin') {
       setRoleChangeUser({ id: userId, name: userName, newRole });
@@ -1424,6 +1539,15 @@ const Admin = () => {
     });
     setUserRoleMap(roleMap);
   };
+
+  // Fetch stats for all visible profiles
+  useEffect(() => {
+    profiles.forEach(profile => {
+      if (!userStatsCount[profile.id]) {
+        fetchUserStats(profile.id);
+      }
+    });
+  }, [profiles]);
 
   const fetchContestApplications = async () => {
     console.log('Fetching contest applications...');
@@ -5978,17 +6102,117 @@ const Admin = () => {
                                     />
                                   </div>
                                 )}
-                                {!profile.email && (
-                                  <div className="text-xs text-destructive">
-                                    No email - User ID: {profile.id?.substring(0, 8)}
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-                         </div>
-                       </Card>
-                    ))}
-                </div>
+                                 {!profile.email && (
+                                   <div className="text-xs text-destructive">
+                                     No email - User ID: {profile.id?.substring(0, 8)}
+                                   </div>
+                                 )}
+                               </div>
+                             </div>
+                           </div>
+
+                           {/* Stats in bottom right corner */}
+                           <div className="absolute bottom-2 right-2 flex items-center gap-3">
+                             <Button
+                               variant="ghost"
+                               size="sm"
+                               className="h-auto p-1 flex items-center gap-1 hover:bg-muted"
+                               onClick={() => toggleUserStats(profile.id)}
+                             >
+                               <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
+                               <span className="text-xs font-medium">{userStatsCount[profile.id]?.ratings || 0}</span>
+                             </Button>
+                             <Button
+                               variant="ghost"
+                               size="sm"
+                               className="h-auto p-1 flex items-center gap-1 hover:bg-muted"
+                               onClick={() => toggleUserStats(profile.id)}
+                             >
+                               <Heart className="h-4 w-4 text-red-500 fill-red-500" />
+                               <span className="text-xs font-medium">{userStatsCount[profile.id]?.likes || 0}</span>
+                             </Button>
+                           </div>
+
+                           {/* Expandable content */}
+                           {expandedUserStats.has(profile.id) && (
+                             <div className="mt-4 pt-4 border-t space-y-3">
+                               {/* Ratings */}
+                               {userRatingsData[profile.id] && userRatingsData[profile.id].length > 0 && (
+                                 <div>
+                                   <h4 className="text-sm font-semibold mb-2 flex items-center gap-1">
+                                     <Star className="h-4 w-4 text-yellow-500" />
+                                     Ratings ({userRatingsData[profile.id].length})
+                                   </h4>
+                                   <div className="space-y-2 max-h-60 overflow-y-auto">
+                                     {userRatingsData[profile.id].map((rating: any) => (
+                                       <div key={rating.id} className="flex items-center gap-2 text-xs p-2 bg-muted rounded">
+                                         <Avatar className="h-8 w-8">
+                                           <AvatarImage src={rating.profiles?.avatar_url || ''} />
+                                           <AvatarFallback>
+                                             {rating.profiles?.display_name?.charAt(0) || rating.contestant_name?.charAt(0) || 'U'}
+                                           </AvatarFallback>
+                                         </Avatar>
+                                         <div className="flex-1">
+                                           <div className="font-medium">
+                                             {rating.profiles?.display_name || rating.contestant_name}
+                                           </div>
+                                           <div className="flex items-center gap-1">
+                                             <MiniStars rating={rating.rating} />
+                                             <span className="text-muted-foreground">({rating.rating})</span>
+                                           </div>
+                                         </div>
+                                         <div className="text-muted-foreground text-xs">
+                                           {new Date(rating.created_at).toLocaleDateString('en-GB')}
+                                         </div>
+                                       </div>
+                                     ))}
+                                   </div>
+                                 </div>
+                               )}
+
+                               {/* Likes */}
+                               {userLikesData[profile.id] && userLikesData[profile.id].length > 0 && (
+                                 <div>
+                                   <h4 className="text-sm font-semibold mb-2 flex items-center gap-1">
+                                     <Heart className="h-4 w-4 text-red-500" />
+                                     Likes ({userLikesData[profile.id].length})
+                                   </h4>
+                                   <div className="space-y-2 max-h-60 overflow-y-auto">
+                                     {userLikesData[profile.id]
+                                       .filter((like: any) => like.profile)
+                                       .map((like: any) => (
+                                         <div key={like.id} className="flex items-center gap-2 text-xs p-2 bg-muted rounded">
+                                           <Avatar className="h-8 w-8">
+                                             <AvatarImage src={like.profile?.avatar_url || ''} />
+                                             <AvatarFallback>
+                                               {like.profile?.display_name?.charAt(0) || 'U'}
+                                             </AvatarFallback>
+                                           </Avatar>
+                                           <div className="flex-1">
+                                             <div className="font-medium">
+                                               {like.profile?.display_name || `${like.profile?.first_name} ${like.profile?.last_name}`}
+                                             </div>
+                                           </div>
+                                           <div className="text-muted-foreground text-xs">
+                                             {new Date(like.created_at).toLocaleDateString('en-GB')}
+                                           </div>
+                                         </div>
+                                       ))}
+                                   </div>
+                                 </div>
+                               )}
+
+                               {(!userRatingsData[profile.id] || userRatingsData[profile.id].length === 0) &&
+                                (!userLikesData[profile.id] || userLikesData[profile.id].length === 0) && (
+                                 <div className="text-sm text-muted-foreground text-center py-4">
+                                   No activity yet
+                                 </div>
+                               )}
+                             </div>
+                           )}
+                         </Card>
+                       ))}
+                   </div>
               </TabsContent>
 
               <TabsContent value="winnercontent" className="space-y-4">
