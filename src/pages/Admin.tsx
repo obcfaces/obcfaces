@@ -1182,6 +1182,10 @@ const Admin = () => {
 
   const toggleUserStats = async (userId: string) => {
     console.log('🔘 Toggle user stats clicked for:', userId);
+    console.log('📊 Current expandedUserStats:', Array.from(expandedUserStats));
+    console.log('📊 Current userLikesData:', userLikesData[userId]);
+    console.log('📊 Current userRatingsData:', userRatingsData[userId]);
+    
     const isExpanded = expandedUserStats.has(userId);
     console.log('📊 Is expanded:', isExpanded);
     
@@ -1194,8 +1198,14 @@ const Admin = () => {
       });
     } else {
       console.log('✅ Expanding stats, fetching data...');
-      setExpandedUserStats(prev => new Set(prev).add(userId));
+      setExpandedUserStats(prev => {
+        const next = new Set(prev).add(userId);
+        console.log('📊 New expandedUserStats:', Array.from(next));
+        return next;
+      });
+      console.log('📞 Calling fetchUserLikesAndRatings...');
       await fetchUserLikesAndRatings(userId);
+      console.log('✅ fetchUserLikesAndRatings completed');
     }
   };
 
