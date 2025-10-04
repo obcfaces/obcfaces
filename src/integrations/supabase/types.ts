@@ -1594,16 +1594,16 @@ export type Database = {
       get_weekly_contest_participants_admin: {
         Args: { weeks_offset?: number }
         Returns: {
-          admin_status: string
+          admin_status: Database["public"]["Enums"]["participant_admin_status"]
           age: number
-          application_data: Json
+          avatar_url: string
           average_rating: number
           city: string
           contest_id: string
+          contest_start_date: string
           country: string
           created_at: string
           deleted_at: string
-          display_name: string
           final_rank: number
           first_name: string
           gender: string
@@ -1612,15 +1612,12 @@ export type Database = {
           is_active: boolean
           last_name: string
           marital_status: string
-          notes: string
           participant_id: string
           photo_1_url: string
           photo_2_url: string
-          rejection_reason: string
-          rejection_reason_types: string[]
-          reviewed_at: string
-          reviewed_by: string
           state: string
+          status_assigned_date: string
+          status_history: Json
           submitted_at: string
           total_votes: number
           user_id: string

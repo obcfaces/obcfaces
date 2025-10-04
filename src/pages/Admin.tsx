@@ -1538,6 +1538,8 @@ const Admin = () => {
           average_rating,
           is_active,
           created_at,
+          submitted_at,
+          deleted_at,
           application_data
         `)
         .eq('admin_status', 'past')
@@ -1574,6 +1576,9 @@ const Admin = () => {
             average_rating: item.average_rating || '0',
             status_assigned_date: item.created_at,
             contest_start_date: item.created_at,
+            created_at: item.created_at,
+            submitted_at: item.submitted_at,
+            deleted_at: item.deleted_at,
             is_active: item.is_active,
             admin_status: item.admin_status,
             status_history: item.status_history || {},
@@ -1616,7 +1621,9 @@ const Admin = () => {
         final_rank: item.final_rank,
         total_votes: item.total_votes || 0,
         average_rating: parseFloat(item.average_rating || '0'),
-        created_at: item.contest_start_date || item.status_assigned_date,
+        created_at: item.created_at || item.contest_start_date || item.status_assigned_date,
+        submitted_at: item.submitted_at,
+        deleted_at: item.deleted_at,
         contest_start_date: item.contest_start_date,
         is_active: item.is_active,
         admin_status: item.admin_status || 'pending',
