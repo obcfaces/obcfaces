@@ -6222,14 +6222,14 @@ const Admin = () => {
                                      toggleUserActivity(profile.id);
                                    }}
                                  >
-                                   <Star className="h-4 w-4 text-yellow-500" />
-                                   {loadingActivity.has(profile.id) ? (
-                                     <Loader2 className="h-3 w-3 animate-spin" />
-                                   ) : (
-                                     <span className="text-xs font-medium">
-                                       {userActivityStats[profile.id]?.ratingsCount ?? 0}
-                                     </span>
-                                   )}
+                                    <Star className="h-4 w-4 text-yellow-500" />
+                                    {loadingActivity.has(profile.id) || !userActivityStats[profile.id] ? (
+                                      <Loader2 className="h-3 w-3 animate-spin" />
+                                    ) : (
+                                      <span className="text-xs font-medium">
+                                        {userActivityStats[profile.id]?.ratingsCount ?? 0}
+                                      </span>
+                                    )}
                                  </button>
 
                                  {/* Likes given by this user */}
@@ -6241,14 +6241,14 @@ const Admin = () => {
                                      toggleUserActivity(profile.id);
                                    }}
                                  >
-                                   <Heart className="h-4 w-4 text-red-500" />
-                                   {loadingActivity.has(profile.id) ? (
-                                     <Loader2 className="h-3 w-3 animate-spin" />
-                                   ) : (
-                                     <span className="text-xs font-medium">
-                                       {userActivityStats[profile.id]?.likesCount ?? 0}
-                                     </span>
-                                   )}
+                                    <Heart className="h-4 w-4 text-red-500" />
+                                    {loadingActivity.has(profile.id) || !userActivityStats[profile.id] ? (
+                                      <Loader2 className="h-3 w-3 animate-spin" />
+                                    ) : (
+                                      <span className="text-xs font-medium">
+                                        {userActivityStats[profile.id]?.likesCount ?? 0}
+                                      </span>
+                                    )}
                                  </button>
                                </div>
 
