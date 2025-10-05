@@ -107,15 +107,21 @@ const Contest = () => {
             const intervalMonday = parseIntervalToMonday(interval);
             if (!intervalMonday) return null;
             
-            // Calculate difference in weeks
+            // Calculate difference in weeks from when status changed to 'past'
+            // week_interval показывает неделю, когда статус сменился на 'past'
+            // Поэтому если сегодня 06.10 (понедельник), а интервал 06/10-12/10/25:
+            // diffWeeks = 0, но карточка должна быть в "1 WEEK AGO"
             const diffTime = currentMonday.getTime() - intervalMonday.getTime();
             const diffWeeks = Math.floor(diffTime / (7 * 24 * 60 * 60 * 1000));
             
-            console.log(`Interval ${interval}: Monday=${intervalMonday}, WeeksAgo=${diffWeeks}`);
+            // +1 потому что неделя перехода в past считается как "1 week ago"
+            const weeksAgo = diffWeeks + 1;
+            
+            console.log(`Interval ${interval}: Monday=${intervalMonday}, DiffWeeks=${diffWeeks}, WeeksAgo=${weeksAgo}`);
             
             return {
               interval,
-              weeksAgo: diffWeeks
+              weeksAgo
             };
           })
           .filter(item => item !== null && item.weeksAgo > 0) // Only past weeks
