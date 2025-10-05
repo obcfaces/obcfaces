@@ -103,10 +103,22 @@ serve(async (req) => {
     const transitions = []
     const currentTime = new Date().toISOString()
 
-    // Move 'this week' to 'past' (simplified - only one past status)
+    // Get current week interval in DD/MM-DD/MM/YY format
+    const { data: currentWeekIntervalData, error: intervalError } = await supabase
+      .rpc('get_current_week_interval')
+    
+    if (intervalError) {
+      console.error('Error getting current week interval:', intervalError)
+      throw intervalError
+    }
+    
+    const weekInterval = currentWeekIntervalData || ''
+    console.log(`Current week interval: ${weekInterval}`)
+
+    // Move 'this week' to 'past' with week_interval preservation
     const { data: thisWeekToUpdate, error: fetchThisWeekError } = await supabase
       .from('weekly_contest_participants')
-      .select('id, status_history')
+      .select('id, status_history, week_interval')
       .eq('admin_status', 'this week')
 
     if (!fetchThisWeekError && thisWeekToUpdate) {
@@ -118,22 +130,34 @@ serve(async (req) => {
             changed_at: currentTime,
             changed_by: 'SYSTEM',
             changed_via: 'EDGE_FUNCTION_weekly-transition',
-            previous_status: 'this week'
+            previous_status: 'this week',
+            preserved_week_interval: participant.week_interval || weekInterval
           }
         }
 
+        // ВАЖНО: Сохраняем week_interval участника (НЕ изменяем его)
         await supabase
           .from('weekly_contest_participants')
           .update({ 
             admin_status: 'past',
             status_history: updatedHistory
+            // week_interval НЕ меняется - остается тем же, что был у 'this week'
           })
           .eq('id', participant.id)
       }
-      transitions.push(`Moved ${thisWeekToUpdate.length} participants from 'this week' to 'past'`)
+      transitions.push(`Moved ${thisWeekToUpdate.length} participants from 'this week' to 'past' (preserved week_interval)`)
     }
 
-    // Move 'next week on site' to 'this week'
+    // Get next week interval for the upcoming week
+    const nextMonday = new Date(currentMonday)
+    nextMonday.setDate(currentMonday.getDate() + 7)
+    const nextSunday = new Date(nextMonday)
+    nextSunday.setDate(nextMonday.getDate() + 6)
+    
+    const nextWeekInterval = `${nextMonday.getDate().toString().padStart(2, '0')}/${(nextMonday.getMonth() + 1).toString().padStart(2, '0')}-${nextSunday.getDate().toString().padStart(2, '0')}/${(nextSunday.getMonth() + 1).toString().padStart(2, '0')}/${nextSunday.getFullYear().toString().slice(-2)}`
+    console.log(`Next week interval: ${nextWeekInterval}`)
+
+    // Move 'next week on site' to 'this week' and assign current week interval
     const { data: nextWeekToUpdate, error: fetchNextWeekError } = await supabase
       .from('weekly_contest_participants')
       .select('id, status_history')
@@ -148,19 +172,54 @@ serve(async (req) => {
             changed_at: currentTime,
             changed_by: 'SYSTEM',
             changed_via: 'EDGE_FUNCTION_weekly-transition',
-            previous_status: 'next week on site'
+            previous_status: 'next week on site',
+            assigned_week_interval: weekInterval
+          }
+        }
+
+        // Присваиваем week_interval текущей недели
+        await supabase
+          .from('weekly_contest_participants')
+          .update({ 
+            admin_status: 'this week',
+            week_interval: weekInterval,
+            status_history: updatedHistory
+          })
+          .eq('id', participant.id)
+      }
+      transitions.push(`Moved ${nextWeekToUpdate.length} participants from 'next week on site' to 'this week' (assigned week_interval: ${weekInterval})`)
+    }
+
+    // Move 'pre next week' to 'next week' and assign next week interval  
+    const { data: preNextWeekToUpdate, error: fetchPreNextWeekError } = await supabase
+      .from('weekly_contest_participants')
+      .select('id, status_history')
+      .eq('admin_status', 'pre next week')
+
+    if (!fetchPreNextWeekError && preNextWeekToUpdate) {
+      for (const participant of preNextWeekToUpdate) {
+        const currentHistory = (participant.status_history as Record<string, any>) || {}
+        const updatedHistory = {
+          ...currentHistory,
+          'next week': {
+            changed_at: currentTime,
+            changed_by: 'SYSTEM',
+            changed_via: 'EDGE_FUNCTION_weekly-transition',
+            previous_status: 'pre next week',
+            assigned_week_interval: nextWeekInterval
           }
         }
 
         await supabase
           .from('weekly_contest_participants')
           .update({ 
-            admin_status: 'this week',
+            admin_status: 'next week',
+            week_interval: nextWeekInterval,
             status_history: updatedHistory
           })
           .eq('id', participant.id)
       }
-      transitions.push(`Moved ${nextWeekToUpdate.length} participants from 'next week on site' to 'this week'`)
+      transitions.push(`Moved ${preNextWeekToUpdate.length} participants from 'pre next week' to 'next week' (assigned week_interval: ${nextWeekInterval})`)
     }
 
     // 4. Create new contest for current week if it doesn't exist
