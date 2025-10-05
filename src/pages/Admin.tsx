@@ -6299,17 +6299,42 @@ const Admin = () => {
                                  </div>
                                </div>
 
+                               {/* Stats Icons - Show counts for likes and ratings */}
                                <div 
-                                className="absolute bottom-2 right-2 z-50 bg-primary text-primary-foreground px-3 py-1 rounded cursor-pointer font-medium text-sm hover:bg-primary/90 select-none" 
+                                className="absolute bottom-2 right-2 z-50 flex gap-2" 
                                 style={{ pointerEvents: 'auto' }}
-                                onClick={(e) => {
-                                  e.preventDefault();
-                                  e.stopPropagation();
-                                  console.log('🔘 Stats button clicked for profile:', profile.id);
-                                  toggleUserStats(profile.id);
-                                }}
                               >
-                                STATS
+                                {/* Ratings Icon */}
+                                <div 
+                                  className="flex items-center gap-1 bg-background/90 px-2 py-1 rounded cursor-pointer hover:bg-background shadow-sm border"
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    console.log('🔘 Stats clicked for profile:', profile.id);
+                                    toggleUserStats(profile.id);
+                                  }}
+                                >
+                                  <Star className="h-4 w-4 text-yellow-500" />
+                                  <span className="text-xs font-medium">
+                                    {userRatingsData[profile.id]?.length || 0}
+                                  </span>
+                                </div>
+
+                                {/* Likes Icon */}
+                                <div 
+                                  className="flex items-center gap-1 bg-background/90 px-2 py-1 rounded cursor-pointer hover:bg-background shadow-sm border"
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    console.log('🔘 Stats clicked for profile:', profile.id);
+                                    toggleUserStats(profile.id);
+                                  }}
+                                >
+                                  <Heart className="h-4 w-4 text-red-500" />
+                                  <span className="text-xs font-medium">
+                                    {userLikesData[profile.id]?.length || 0}
+                                  </span>
+                                </div>
                               </div>
 
                             {/* Expandable content - Shows all interactions */}
