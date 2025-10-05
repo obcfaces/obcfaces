@@ -1188,12 +1188,7 @@ const Admin = () => {
   };
 
   const handleRoleChange = (userId: string, userName: string, newRole: string) => {
-    if (newRole === 'admin') {
-      setRoleChangeUser({ id: userId, name: userName, newRole });
-      setShowRoleConfirmModal(true);
-    } else {
-      assignUserRole(userId, newRole);
-    }
+    assignUserRole(userId, newRole);
   };
 
   const assignUserRole = async (userId: string, role: string) => {
@@ -1214,7 +1209,7 @@ const Admin = () => {
           .from('user_roles')
           .insert([{ 
             user_id: userId, 
-            role: role as 'admin' | 'moderator' | 'user' | 'suspicious'
+            role: role as 'admin' | 'moderator' | 'suspicious'
           }]);
 
         if (insertError) throw insertError;
@@ -1226,8 +1221,14 @@ const Admin = () => {
         [userId]: role
       }));
 
-      const roleDescription = role === 'usual' ? 'usual user' : 
-                             role === 'suspicious' ? 'suspicious (cannot vote)' : role;
+      const roleDescriptions: Record<string, string> = {
+        'usual': 'usual user',
+        'suspicious': 'suspicious (cannot vote)',
+        'moderator': 'moderator',
+        'admin': 'admin'
+      };
+      
+      const roleDescription = roleDescriptions[role] || role;
 
       toast({
         title: "Success",
@@ -6266,15 +6267,32 @@ const Admin = () => {
                           
                               {/* Controls menu in top right */}
                               <div className="absolute top-0 right-0 flex items-center gap-1">
-                                {/* Check for suspicious role */}
+                                {/* Role badge */}
                                 {(() => {
-                                  const profileRoles = userRoles.filter(ur => ur.user_id === profile.id);
-                                  const isSuspicious = profileRoles.some(ur => ur.role === 'suspicious');
+                                  const currentRole = userRoleMap[profile.id] || 'usual';
                                   
-                                  if (isSuspicious) {
+                                  if (currentRole === 'suspicious') {
                                     return (
-                                      <Badge variant="destructive" className="text-xs rounded-none">
+                                      <Badge variant="destructive" className="text-xs rounded-none bg-red-500 text-white hover:bg-red-600">
                                         Suspicious
+                                      </Badge>
+                                    );
+                                  } else if (currentRole === 'usual') {
+                                    return (
+                                      <Badge variant="secondary" className="text-xs rounded-none bg-gray-500 text-white hover:bg-gray-600">
+                                        Usual
+                                      </Badge>
+                                    );
+                                  } else if (currentRole === 'moderator') {
+                                    return (
+                                      <Badge className="text-xs rounded-none bg-yellow-500 text-white hover:bg-yellow-600">
+                                        Moderator
+                                      </Badge>
+                                    );
+                                  } else if (currentRole === 'admin') {
+                                    return (
+                                      <Badge className="text-xs rounded-none bg-blue-500 text-white hover:bg-blue-600">
+                                        Admin
                                       </Badge>
                                     );
                                   }
@@ -6313,6 +6331,40 @@ const Admin = () => {
                                     <DropdownMenuItem
                                       onClick={() => {
                                         const currentRole = userRoleMap[profile.id] || 'usual';
+                                        const userName = profile.display_name || `${profile.first_name} ${profile.last_name}`;
+                                        if (currentRole === 'suspicious') {
+                                          handleRoleChange(profile.id, userName, 'usual');
+                                        } else {
+                                          if (confirm(`Вы уверены, что хотите пометить ${userName} как подозрительного? Этот пользователь не сможет голосовать.`)) {
+                                            handleRoleChange(profile.id, userName, 'suspicious');
+                                          }
+                                        }
+                                      }}
+                                      className="cursor-pointer"
+                                    >
+                                      {(userRoleMap[profile.id] || 'usual') === 'suspicious' ? '✓ ' : ''}Mark as Suspicious
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem
+                                      onClick={() => {
+                                        const userName = profile.display_name || `${profile.first_name} ${profile.last_name}`;
+                                        handleRoleChange(profile.id, userName, 'usual');
+                                      }}
+                                      className="cursor-pointer"
+                                    >
+                                      {(userRoleMap[profile.id] || 'usual') === 'usual' ? '✓ ' : ''}Mark as Usual
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem
+                                      onClick={() => {
+                                        const userName = profile.display_name || `${profile.first_name} ${profile.last_name}`;
+                                        handleRoleChange(profile.id, userName, 'moderator');
+                                      }}
+                                      className="cursor-pointer"
+                                    >
+                                      {(userRoleMap[profile.id] || 'usual') === 'moderator' ? '✓ ' : ''}Make Moderator
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem
+                                      onClick={() => {
+                                        const currentRole = userRoleMap[profile.id] || 'usual';
                                         if (currentRole === 'admin') {
                                           handleRoleChange(
                                             profile.id,
@@ -6331,23 +6383,7 @@ const Admin = () => {
                                       }}
                                       className="cursor-pointer"
                                     >
-                                      {(userRoleMap[profile.id] || 'usual') === 'admin' ? '✓ Admin' : 'Make Admin'}
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem
-                                      onClick={() => {
-                                        const currentRole = userRoleMap[profile.id] || 'usual';
-                                        const userName = profile.display_name || `${profile.first_name} ${profile.last_name}`;
-                                        if (currentRole === 'suspicious') {
-                                          handleRoleChange(profile.id, userName, 'usual');
-                                        } else {
-                                          if (confirm(`Вы уверены, что хотите пометить ${userName} как подозрительного? Этот пользователь не сможет голосовать.`)) {
-                                            handleRoleChange(profile.id, userName, 'suspicious');
-                                          }
-                                        }
-                                      }}
-                                      className="cursor-pointer"
-                                    >
-                                      {(userRoleMap[profile.id] || 'usual') === 'suspicious' ? '✓ Suspicious' : 'Mark as Suspicious'}
+                                      {(userRoleMap[profile.id] || 'usual') === 'admin' ? '✓ ' : ''}Make Admin
                                     </DropdownMenuItem>
                                   </DropdownMenuContent>
                                 </DropdownMenu>
