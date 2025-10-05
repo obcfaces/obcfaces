@@ -60,12 +60,15 @@ const Contest = () => {
             const parts = interval.split('-');
             if (parts.length !== 2) return new Date(0);
             
-            const [dayMonth, yearPart] = parts[1].split('/');
-            const day = parseInt(dayMonth);
-            const month = parseInt(parts[1].split('/')[0]);
-            const year = 2000 + parseInt(parts[1].split('/')[2]);
+            // Second part is "DD/MM/YY"
+            const endParts = parts[1].split('/');
+            if (endParts.length !== 3) return new Date(0);
             
-            return new Date(year, month - 1, day);
+            const day = parseInt(endParts[0]);
+            const month = parseInt(endParts[1]) - 1; // JS months are 0-indexed
+            const year = 2000 + parseInt(endParts[2]);
+            
+            return new Date(year, month, day);
           };
           
           return getEndDate(b).getTime() - getEndDate(a).getTime();
