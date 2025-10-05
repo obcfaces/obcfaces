@@ -623,7 +623,6 @@ const Admin = () => {
             break;
 
           case 'registrations':
-          case 'reg':
             await Promise.allSettled([
               fetchProfiles(),
               fetchUserRoles(),
