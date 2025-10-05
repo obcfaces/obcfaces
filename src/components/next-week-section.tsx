@@ -69,6 +69,8 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
   const [isVotesLoaded, setIsVotesLoaded] = useState(false);
   const [userInitialized, setUserInitialized] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const [imagesLoaded, setImagesLoaded] = useState(false);
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
@@ -258,14 +260,49 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
     filterCandidates();
   }, [user, userInitialized]);
 
+  // Preload first card images when candidates load
+  useEffect(() => {
+    if (filteredCandidates.length > 0 && currentIndex === 0) {
+      preloadNextCard(0).then(() => {
+        setImagesLoaded(true);
+      });
+    }
+  }, [filteredCandidates]);
+
+  // Preload next card images
+  const preloadNextCard = async (nextIndex: number) => {
+    if (nextIndex >= filteredCandidates.length) return true;
+    
+    const nextCandidate = filteredCandidates[nextIndex];
+    if (!nextCandidate) return true;
+
+    const images = [nextCandidate.faceImage, nextCandidate.fullBodyImage].filter(Boolean);
+    
+    const imagePromises = images.map(src => {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = resolve;
+        img.onerror = resolve; // Resolve even on error to not block transition
+        img.src = src;
+      });
+    });
+
+    await Promise.all(imagePromises);
+    return true;
+  };
+
   const handleLike = async () => {
     if (!user) {
       setShowLoginModal(true);
       return;
     }
     
-    if (currentIndex < filteredCandidates.length) {
+    if (currentIndex < filteredCandidates.length && !isTransitioning) {
       const currentCandidate = filteredCandidates[currentIndex];
+      const nextIndex = currentIndex + 1;
+      
+      setIsTransitioning(true);
+      setImagesLoaded(false);
       
       // Save vote to database
       try {
@@ -299,9 +336,14 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
         console.error('Error saving vote:', error);
       }
       
+      // Preload next card before showing it
+      await preloadNextCard(nextIndex);
+      
       setHistory(prev => [...prev, currentIndex]);
-      setCurrentIndex(prev => prev + 1);
+      setCurrentIndex(nextIndex);
       setRemainingCandidates(prev => prev - 1);
+      setImagesLoaded(true);
+      setIsTransitioning(false);
     }
   };
 
@@ -311,8 +353,12 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
       return;
     }
     
-    if (currentIndex < filteredCandidates.length) {
+    if (currentIndex < filteredCandidates.length && !isTransitioning) {
       const currentCandidate = filteredCandidates[currentIndex];
+      const nextIndex = currentIndex + 1;
+      
+      setIsTransitioning(true);
+      setImagesLoaded(false);
       
       // Save vote to database
       try {
@@ -327,9 +373,14 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
         console.error('Error saving vote:', error);
       }
       
+      // Preload next card before showing it
+      await preloadNextCard(nextIndex);
+      
       setHistory(prev => [...prev, currentIndex]);
-      setCurrentIndex(prev => prev + 1);
+      setCurrentIndex(nextIndex);
       setRemainingCandidates(prev => prev - 1);
+      setImagesLoaded(true);
+      setIsTransitioning(false);
     }
   };
 
@@ -339,11 +390,20 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
       return;
     }
     
-    if (history.length > 0) {
+    if (history.length > 0 && !isTransitioning) {
       const previousIndex = history[history.length - 1];
+      setIsTransitioning(true);
+      setImagesLoaded(false);
+      
       setHistory(prev => prev.slice(0, -1));
       setCurrentIndex(previousIndex);
       setRemainingCandidates(prev => prev + 1);
+      
+      // Small delay for transition
+      setTimeout(() => {
+        setImagesLoaded(true);
+        setIsTransitioning(false);
+      }, 100);
     }
   };
 
@@ -374,15 +434,27 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
         </div>
       ) : filteredCandidates.length > 0 && currentIndex < filteredCandidates.length ? (
         <div className="flex flex-col items-center">
-          <div className="w-full px-0 sm:px-6 max-w-full overflow-hidden">
-            <ContestantCard
-              {...currentCandidate}
-              rank={0}
-              viewMode={viewMode}
-              showDislike={true}
-              hideCardActions={true}
-            />
+          <div className={`w-full px-0 sm:px-6 max-w-full overflow-hidden transition-opacity duration-300 ${
+            isTransitioning || !imagesLoaded ? 'opacity-0' : 'opacity-100 animate-fade-in'
+          }`}>
+            {!isTransitioning && imagesLoaded && (
+              <ContestantCard
+                {...currentCandidate}
+                rank={0}
+                viewMode={viewMode}
+                showDislike={true}
+                hideCardActions={true}
+              />
+            )}
           </div>
+          
+          {isTransitioning && (
+            <div className="w-full px-0 sm:px-6 max-w-full overflow-hidden py-24">
+              <div className="flex justify-center items-center">
+                <div className="animate-pulse text-muted-foreground">Loading next candidate...</div>
+              </div>
+            </div>
+          )}
           
           <div className="flex items-center justify-center gap-6 mt-6 pb-6">
             <div className="flex items-center gap-4">
@@ -403,18 +475,20 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
             
             <Button
               onClick={handleDislike}
+              disabled={isTransitioning}
               variant="outline"
               size="lg"
-              className="rounded-full w-16 h-16 p-0 border-2 border-red-300 hover:border-red-500 hover:bg-red-50"
+              className="rounded-full w-16 h-16 p-0 border-2 border-red-300 hover:border-red-500 hover:bg-red-50 disabled:opacity-50"
             >
               <ThumbsDown className="w-8 h-8 text-red-500" />
             </Button>
             
             <Button
               onClick={handleLike}
+              disabled={isTransitioning}
               variant="outline"
               size="lg"
-              className="rounded-full w-16 h-16 p-0 border-2 border-green-300 hover:border-green-500 hover:bg-green-50"
+              className="rounded-full w-16 h-16 p-0 border-2 border-green-300 hover:border-green-500 hover:bg-green-50 disabled:opacity-50"
             >
               <ThumbsUp className="w-8 h-8 text-green-500" />
             </Button>
