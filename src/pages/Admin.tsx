@@ -6096,14 +6096,31 @@ const Admin = () => {
                         </Button>
                       </div>
                       
-                      {/* Ряд 3: Gmail<1 фильтр */}
+                      {/* Ряд 3: Gmail фильтры */}
                       <div className="flex gap-2 flex-wrap">
                         <Button
-                          variant={suspiciousEmailFilter === 'gmail' ? 'default' : 'outline'}
+                          variant={suspiciousEmailFilter === 'gmail-auto' ? 'default' : 'outline'}
                           size="sm"
-                          onClick={() => setSuspiciousEmailFilter('gmail')}
+                          onClick={() => setSuspiciousEmailFilter('gmail-auto')}
                         >
                           Gmail&lt;1
+                          {(() => {
+                            const count = profiles.filter(p => {
+                              const isGmail = p.email?.toLowerCase().endsWith('@gmail.com') || false;
+                              const wasNotReallyVerified = !p.email_confirmed_at || 
+                                (p.created_at && p.email_confirmed_at && 
+                                  Math.abs(new Date(p.email_confirmed_at).getTime() - new Date(p.created_at).getTime()) < 1000);
+                              return isGmail && wasNotReallyVerified;
+                            }).length;
+                            return count > 0 ? ` (${count})` : '';
+                          })()}
+                        </Button>
+                        <Button
+                          variant={suspiciousEmailFilter === 'gmail-voted' ? 'default' : 'outline'}
+                          size="sm"
+                          onClick={() => setSuspiciousEmailFilter('gmail-voted')}
+                        >
+                          Gmail&lt;1 + voted
                           {(() => {
                             const count = profiles.filter(p => {
                               const isGmail = p.email?.toLowerCase().endsWith('@gmail.com') || false;
@@ -6130,8 +6147,17 @@ const Admin = () => {
                         if (profile.email_confirmed_at) return false;
                       }
                       
-                      // Фильтр по Gmail<1 (только те кто голосовал)
-                      if (suspiciousEmailFilter === 'gmail') {
+                      // Фильтр по Gmail<1 (все)
+                      if (suspiciousEmailFilter === 'gmail-auto') {
+                        const isGmail = profile.email?.toLowerCase().endsWith('@gmail.com') || false;
+                        const wasNotReallyVerified = !profile.email_confirmed_at || 
+                          (profile.created_at && profile.email_confirmed_at && 
+                            Math.abs(new Date(profile.email_confirmed_at).getTime() - new Date(profile.created_at).getTime()) < 1000);
+                        if (!(isGmail && wasNotReallyVerified)) return false;
+                      }
+                      
+                      // Фильтр по Gmail<1 + voted (только те кто голосовал)
+                      if (suspiciousEmailFilter === 'gmail-voted') {
                         const isGmail = profile.email?.toLowerCase().endsWith('@gmail.com') || false;
                         const hasVoted = usersWhoVoted.has(profile.id);
                         const wasNotReallyVerified = !profile.email_confirmed_at || 
@@ -6185,7 +6211,12 @@ const Admin = () => {
                         <div className="text-sm text-muted-foreground">
                           Showing {paginatedProfiles.length} of {filteredProfiles.length} {filteredProfiles.length === 1 ? 'result' : 'results'} 
                           {filteredProfiles.length > regItemsPerPage && ` (page ${regPaginationPage} of ${totalRegPages})`}
-                          {suspiciousEmailFilter === 'gmail' && (
+                          {suspiciousEmailFilter === 'gmail-auto' && (
+                            <span className="ml-2 text-xs text-orange-600 font-medium">
+                              (auto-confirmed &lt;1 sec)
+                            </span>
+                          )}
+                          {suspiciousEmailFilter === 'gmail-voted' && (
                             <span className="ml-2 text-xs text-orange-600 font-medium">
                               (voted, auto-confirmed &lt;1 sec)
                             </span>
