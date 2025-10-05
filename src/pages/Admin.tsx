@@ -6371,25 +6371,21 @@ const Admin = () => {
                                   return null;
                                 })()}
                                 
-                                {profile.email_confirmed_at ? (
-                                  <Badge variant="default" className="bg-green-100 text-green-700 text-xs rounded-none rounded-bl-md">
-                                    Verified
-                                  </Badge>
-                                ) : (
-                                  <>
-                                    <Badge variant="secondary" className="text-xs rounded-none">
-                                      Unverified
-                                    </Badge>
-                                    <Button
-                                      size="sm"
-                                      variant="outline"
-                                      onClick={() => handleEmailVerification(profile.id)}
-                                      disabled={verifyingUsers.has(profile.id)}
-                                      className="h-6 px-2 text-xs rounded-none rounded-bl-md"
-                                    >
-                                      {verifyingUsers.has(profile.id) ? 'Verifying...' : 'Verify'}
-                                    </Button>
-                                  </>
+                                {/* Only show Verify button if not verified */}
+                                {!profile.email_confirmed_at && (
+                                  <Button
+                                    size="sm"
+                                    variant="destructive"
+                                    onClick={() => {
+                                      if (confirm(`Are you sure you want to verify email for ${profile.display_name || `${profile.first_name} ${profile.last_name}`}?`)) {
+                                        handleEmailVerification(profile.id);
+                                      }
+                                    }}
+                                    disabled={verifyingUsers.has(profile.id)}
+                                    className="h-6 px-2 text-xs rounded-none rounded-bl-md bg-red-100 text-red-700 hover:bg-red-200"
+                                  >
+                                    {verifyingUsers.has(profile.id) ? 'Verifying...' : 'Verify'}
+                                  </Button>
                                 )}
                                 
                                 {/* Three dots menu for role */}
