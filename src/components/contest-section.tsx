@@ -338,6 +338,51 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
     }
   };
 
+  // Load user ratings for all participants BEFORE rendering
+  const loadUserRatingsForParticipants = async (participants: any[], userId: string) => {
+    if (!userId || !participants || participants.length === 0) {
+      return {};
+    }
+    
+    console.log('Loading user ratings for', participants.length, 'participants');
+    
+    const participantIds = participants
+      .map(p => p.id)
+      .filter(id => id && id !== '00000000-0000-0000-0000-000000000000');
+    
+    if (participantIds.length === 0) {
+      return {};
+    }
+    
+    try {
+      // Load all ratings for this user in one query
+      const { data: ratings, error } = await supabase
+        .from('contestant_ratings')
+        .select('participant_id, rating')
+        .eq('user_id', userId)
+        .in('participant_id', participantIds);
+      
+      if (error) {
+        console.error('Error loading user ratings:', error);
+        return {};
+      }
+      
+      // Convert to map for quick lookup
+      const ratingsMap: Record<string, number> = {};
+      ratings?.forEach(r => {
+        if (r.participant_id) {
+          ratingsMap[r.participant_id] = r.rating;
+        }
+      });
+      
+      console.log('Loaded user ratings map:', ratingsMap);
+      return ratingsMap;
+    } catch (error) {
+      console.error('Error loading user ratings:', error);
+      return {};
+    }
+  };
+
   // Load admin participants for 3 WEEKS AGO section (participants with admin_status = 'past' and specific week interval)
   const loadThreeWeeksAgoAdminParticipants = async () => {
     try {
@@ -430,37 +475,40 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
       }
       
       // Load participants for all users (authenticated and unauthenticated)
+      let participantsData: any[] = [];
+      
       if (title === "THIS WEEK") {
         console.log('Loading THIS WEEK participants');
-        const thisWeekData = await loadThisWeekParticipants();
-        console.log('Loaded THIS WEEK participants:', thisWeekData.length);
-        setRealContestants(thisWeekData);
-        setAdminParticipants(thisWeekData);
+        participantsData = await loadThisWeekParticipants();
+        console.log('Loaded THIS WEEK participants:', participantsData.length);
       } else if (title === "NEXT WEEK") {
         console.log('Loading NEXT WEEK participants');
-        const nextWeekData = await loadNextWeekParticipants();
-        console.log('Loaded NEXT WEEK participants:', nextWeekData.length);
-        setRealContestants(nextWeekData);
-        setAdminParticipants(nextWeekData);
+        participantsData = await loadNextWeekParticipants();
+        console.log('Loaded NEXT WEEK participants:', participantsData.length);
       } else if (title === "1 WEEK AGO") {
         console.log('Loading 1 WEEK AGO participants');
-        const pastWeekData = await loadPastWeekParticipants();
-        console.log('Loaded 1 WEEK AGO participants:', pastWeekData.length);
-        setRealContestants(pastWeekData);
-        setAdminParticipants(pastWeekData);
+        participantsData = await loadPastWeekParticipants();
+        console.log('Loaded 1 WEEK AGO participants:', participantsData.length);
       } else if (title === "2 WEEKS AGO") {
         console.log('Loading 2 WEEKS AGO participants');
-        const twoWeeksAgoData = await loadTwoWeeksAgoAdminParticipants();
-        console.log('Loaded 2 WEEKS AGO participants:', twoWeeksAgoData.length);
-        setRealContestants(twoWeeksAgoData);
-        setAdminParticipants(twoWeeksAgoData);
+        participantsData = await loadTwoWeeksAgoAdminParticipants();
+        console.log('Loaded 2 WEEKS AGO participants:', participantsData.length);
       } else if (title === "3 WEEKS AGO") {
         console.log('Loading 3 WEEKS AGO participants');
-        const threeWeeksAgoData = await loadThreeWeeksAgoAdminParticipants();
-        console.log('Loaded 3 WEEKS AGO participants:', threeWeeksAgoData.length);
-        setRealContestants(threeWeeksAgoData);
-        setAdminParticipants(threeWeeksAgoData);
+        participantsData = await loadThreeWeeksAgoAdminParticipants();
+        console.log('Loaded 3 WEEKS AGO participants:', participantsData.length);
       }
+      
+      // Load user ratings BEFORE setting participants
+      let userRatingsMap: Record<string, number> = {};
+      if (currentUser?.id && participantsData.length > 0) {
+        console.log('Loading user ratings for authenticated user:', currentUser.id);
+        userRatingsMap = await loadUserRatingsForParticipants(participantsData, currentUser.id);
+      }
+      
+      // Store participants data with ratings info
+      setRealContestants(participantsData);
+      setAdminParticipants(participantsData);
     };
     
     getCurrentUser();
@@ -488,9 +536,16 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
       console.log('Starting loadParticipants for:', title);
       setIsLoading(true);
       
+      // Load user ratings if user is authenticated
+      let userRatingsMap: Record<string, number> = {};
+      if (user?.id && realContestants.length > 0) {
+        console.log('Loading user ratings for authenticated user:', user.id);
+        userRatingsMap = await loadUserRatingsForParticipants(realContestants, user.id);
+      }
+      
       // For THIS WEEK section, admin participants are already loaded in the first useEffect
       // Use realContestants data instead of empty array
-      const contestantsData = await getContestantsSync(realContestants);
+      const contestantsData = await getContestantsSync(realContestants, userRatingsMap);
       setContestants(contestantsData || []);
       setIsLoading(false);
     };
@@ -597,8 +652,8 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
               faceImage: profileData.photo_1_url || appData.photo1_url || testContestantFace,
               fullBodyImage: profileData.photo_2_url || appData.photo2_url || testContestantFull,
               additionalPhotos: [],
-              // For THIS WEEK: always start with isVoted=false, let the card component check user's actual vote
-              isVoted: showWinner ? true : false,
+              // Check if user has voted using pre-loaded ratings map
+              isVoted: contestant.id && userRatingsMap[contestant.id] ? true : false,
               isWinner: false, // Will be set after sorting
               prize: undefined, // Will be set after sorting
               isRealContestant: true
