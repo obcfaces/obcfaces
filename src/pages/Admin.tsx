@@ -657,6 +657,18 @@ const Admin = () => {
             ]);
             break;
 
+          case 'nextweek':
+            await Promise.allSettled([
+              fetchNextWeekParticipants(),
+              fetchNextWeekDailyStats()
+            ]);
+            break;
+
+          case 'prenextweek':
+            await fetchPreNextWeekParticipants();
+            break;
+
+          case 'pastweek':
           case 'past':
             await fetchWeeklyParticipants();
             break;
