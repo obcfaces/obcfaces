@@ -452,6 +452,7 @@ const Admin = () => {
   const [dailyApplicationStats, setDailyApplicationStats] = useState<Array<{ day_name: string; day_date?: string; total_applications: number; approved_applications: number; day_of_week?: number; sort_order?: number }>>([]);
   const [dailyRegistrationStats, setDailyRegistrationStats] = useState<Array<{ day_name: string; registration_count: number; day_of_week: number; sort_order: number }>>([]);
   const [nextWeekDailyStats, setNextWeekDailyStats] = useState<Array<{ day_name: string; like_count: number; dislike_count: number; total_votes: number }>>([]);
+  const [nextWeekVotesStats, setNextWeekVotesStats] = useState<Record<string, { like_count: number; dislike_count: number }>>({});
   const [selectedDay, setSelectedDay] = useState<{ day: number; type: 'new' | 'approved' } | null>(null);
   const [nextWeekApplicationsCount, setNextWeekApplicationsCount] = useState<number>(0);
   const [cardSectionStats, setCardSectionStats] = useState<{ newApplications: number; movedToNextWeek: number; new_applications_count: number; moved_to_next_week_count: number }>({ newApplications: 0, movedToNextWeek: 0, new_applications_count: 0, moved_to_next_week_count: 0 });
@@ -660,7 +661,8 @@ const Admin = () => {
           case 'nextweek':
             await Promise.allSettled([
               fetchNextWeekParticipants(),
-              fetchNextWeekDailyStats()
+              fetchNextWeekDailyStats(),
+              fetchNextWeekVotesStats()
             ]);
             break;
 
@@ -2123,6 +2125,39 @@ const Admin = () => {
     }
   };
 
+  // Fetch Next Week votes statistics (likes/dislikes per candidate)
+  const fetchNextWeekVotesStats = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('next_week_votes')
+        .select('candidate_name, vote_type');
+
+      if (error) {
+        console.error('Error fetching next week votes stats:', error);
+        return;
+      }
+
+      // Aggregate votes by candidate name
+      const stats: Record<string, { like_count: number; dislike_count: number }> = {};
+      
+      (data || []).forEach(vote => {
+        if (!stats[vote.candidate_name]) {
+          stats[vote.candidate_name] = { like_count: 0, dislike_count: 0 };
+        }
+        if (vote.vote_type === 'like') {
+          stats[vote.candidate_name].like_count++;
+        } else if (vote.vote_type === 'dislike') {
+          stats[vote.candidate_name].dislike_count++;
+        }
+      });
+
+      console.log('Next week votes stats:', stats);
+      setNextWeekVotesStats(stats);
+    } catch (error) {
+      console.error('Error in fetchNextWeekVotesStats:', error);
+    }
+  };
+
   const fetchCardSectionStats = async () => {
     try {
       const { data, error } = await supabase.rpc('get_card_section_stats');
@@ -3521,6 +3556,8 @@ const Admin = () => {
                     {paginatedItems.map((participant) => {
                   const participantProfile = profiles.find(p => p.id === participant.user_id);
                   const appData = participant.application_data || {};
+                  const participantName = participantProfile?.display_name || `${participantProfile?.first_name || appData.first_name} ${participantProfile?.last_name || appData.last_name}` || 'Unnamed';
+                  const voteStats = nextWeekVotesStats[participantName] || { like_count: 0, dislike_count: 0 };
                   
                   return (
                     <Card key={participant.id} className="overflow-hidden relative h-[149px]">
@@ -3683,20 +3720,20 @@ const Admin = () => {
                                       setSelectedParticipantForNextWeekVoters(participantName);
                                       setNextWeekVotersModalOpen(true);
                                     }}
-                                  >
-                                    <span className="font-medium">{participant.like_count || 0}</span>
-                                  </button>
-                                  <button
-                                    className="flex items-center gap-1 text-red-600 hover:underline cursor-pointer"
-                                    onClick={() => {
-                                      const participantName = participantProfile?.display_name || `${participantProfile?.first_name || appData.first_name} ${participantProfile?.last_name || appData.last_name}` || 'Unnamed';
-                                      console.log('Opening NextWeekVotersModal for dislikes:', participantName);
-                                      setSelectedParticipantForNextWeekVoters(participantName);
-                                      setNextWeekVotersModalOpen(true);
-                                    }}
-                                  >
-                                    <span className="font-medium">{participant.dislike_count || 0}</span>
-                                  </button>
+                                   >
+                                     <span className="font-medium">{voteStats.like_count}</span>
+                                   </button>
+                                   <button
+                                     className="flex items-center gap-1 text-red-600 hover:underline cursor-pointer"
+                                     onClick={() => {
+                                       const participantName = participantProfile?.display_name || `${participantProfile?.first_name || appData.first_name} ${participantProfile?.last_name || appData.last_name}` || 'Unnamed';
+                                       console.log('Opening NextWeekVotersModal for dislikes:', participantName);
+                                       setSelectedParticipantForNextWeekVoters(participantName);
+                                       setNextWeekVotersModalOpen(true);
+                                     }}
+                                   >
+                                     <span className="font-medium">{voteStats.dislike_count}</span>
+                                   </button>
                                 </div>
                               </div>
                           </div>
@@ -3761,20 +3798,20 @@ const Admin = () => {
                                       setSelectedParticipantForNextWeekVoters(participantName);
                                       setNextWeekVotersModalOpen(true);
                                     }}
-                                  >
-                                    <span className="font-medium">{participant.like_count || 0}</span>
-                                  </button>
-                                  <button
-                                    className="flex items-center gap-1 text-red-600 hover:underline cursor-pointer"
-                                    onClick={() => {
-                                      const participantName = participantProfile?.display_name || `${participantProfile?.first_name || appData.first_name} ${participantProfile?.last_name || appData.last_name}` || 'Unnamed';
-                                      console.log('Opening NextWeekVotersModal for dislikes (mobile):', participantName);
-                                      setSelectedParticipantForNextWeekVoters(participantName);
-                                      setNextWeekVotersModalOpen(true);
-                                    }}
-                                  >
-                                    <span className="font-medium">{participant.dislike_count || 0}</span>
-                                  </button>
+                                   >
+                                     <span className="font-medium">{voteStats.like_count}</span>
+                                   </button>
+                                   <button
+                                     className="flex items-center gap-1 text-red-600 hover:underline cursor-pointer"
+                                     onClick={() => {
+                                       const participantName = participantProfile?.display_name || `${participantProfile?.first_name || appData.first_name} ${participantProfile?.last_name || appData.last_name}` || 'Unnamed';
+                                       console.log('Opening NextWeekVotersModal for dislikes (mobile):', participantName);
+                                       setSelectedParticipantForNextWeekVoters(participantName);
+                                       setNextWeekVotersModalOpen(true);
+                                     }}
+                                   >
+                                     <span className="font-medium">{voteStats.dislike_count}</span>
+                                   </button>
                                 </div>
                                 <Select 
                                  value={participant.admin_status || 'next week on site'} 
