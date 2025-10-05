@@ -582,9 +582,10 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
   };
 
   // Define contestants based on week type (synchronous version)
-  const getContestantsSync = async (participantsData: any[] = realContestants) => {
+  const getContestantsSync = async (participantsData: any[] = realContestants, providedUserRatingsMap: Record<string, number> = {}) => {
     // Use the actual participants data passed to the function
     const actualParticipants = participantsData.length > 0 ? participantsData : realContestants;
+    const userRatingsMap = providedUserRatingsMap; // Use provided ratings map
     
     console.log(`getContestantsSync called for ${title}:`, { 
       participantsDataLength: participantsData.length, 
@@ -592,7 +593,8 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
       actualParticipantsLength: actualParticipants.length,
       isAdmin,
       adminParticipantsLength: adminParticipants.length,
-      participantsData: participantsData.slice(0, 2) // Log first 2 for debugging
+      participantsData: participantsData.slice(0, 2), // Log first 2 for debugging
+      userRatingsMapSize: Object.keys(userRatingsMap).length
     });
 
     // For "THIS WEEK" section, show only admin participants if user is admin
