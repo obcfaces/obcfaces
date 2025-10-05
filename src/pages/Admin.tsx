@@ -427,6 +427,7 @@ const Admin = () => {
   const [verificationFilter, setVerificationFilter] = useState<string>('all');
   const [suspiciousEmailFilter, setSuspiciousEmailFilter] = useState<string>('all'); // gmail or other
   const [searchQuery, setSearchQuery] = useState('');
+  const [usersWhoVoted, setUsersWhoVoted] = useState<Set<string>>(new Set());
   const [verifyingUsers, setVerifyingUsers] = useState<Set<string>>(new Set());
   const [roleFilter, setRoleFilter] = useState<string>('all');
   const [userRoleMap, setUserRoleMap] = useState<{ [key: string]: string }>({});
@@ -629,6 +630,7 @@ const Admin = () => {
             await Promise.allSettled([
               fetchProfiles(),
               fetchUserRoles(),
+              fetchUsersWhoVoted(),
               fetchDailyRegistrationStats()
             ]);
             break;
@@ -770,6 +772,7 @@ const Admin = () => {
       intervalId = setInterval(() => {
         console.log('Auto-refreshing profiles...');
         fetchProfiles();
+        fetchUsersWhoVoted();
       }, 30000); // Refresh every 30 seconds
     }
     
@@ -1633,6 +1636,27 @@ const Admin = () => {
       setEmailDomainVotingStats(data || []);
     } catch (error) {
       console.error('Error fetching email domain voting stats:', error);
+    }
+  };
+
+  // Fetch users who have voted
+  const fetchUsersWhoVoted = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('contestant_ratings')
+        .select('user_id');
+      
+      if (error) {
+        console.error('Error fetching users who voted:', error);
+        return;
+      }
+
+      // Create a Set of unique user IDs who have voted
+      const votedUserIds = new Set(data?.map(r => r.user_id) || []);
+      setUsersWhoVoted(votedUserIds);
+      console.log('✅ Users who voted:', votedUserIds.size);
+    } catch (error) {
+      console.error('Error in fetchUsersWhoVoted:', error);
     }
   };
 
@@ -6059,6 +6083,13 @@ const Admin = () => {
                           }}
                         >
                           All Suspicious
+                          {(() => {
+                            const count = profiles.filter(p => {
+                              const isSuspicious = userRoles.filter(ur => ur.user_id === p.id).some(ur => ur.role === 'suspicious');
+                              return isSuspicious;
+                            }).length;
+                            return count > 0 ? ` (${count})` : '';
+                          })()}
                         </Button>
                         <Button
                           variant={suspiciousEmailFilter === 'gmail' ? 'default' : 'outline'}
@@ -6069,6 +6100,16 @@ const Admin = () => {
                           }}
                         >
                           Gmail
+                          {(() => {
+                            const count = profiles.filter(p => {
+                              const isSuspicious = userRoles.filter(ur => ur.user_id === p.id).some(ur => ur.role === 'suspicious');
+                              const isGmail = p.email?.toLowerCase().endsWith('@gmail.com') || false;
+                              const isEmailConfirmed = !!p.email_confirmed_at;
+                              const hasVoted = usersWhoVoted.has(p.id);
+                              return isSuspicious && isGmail && isEmailConfirmed && hasVoted;
+                            }).length;
+                            return count > 0 ? ` (${count})` : '';
+                          })()}
                         </Button>
                         <Button
                           variant={suspiciousEmailFilter === 'other' ? 'default' : 'outline'}
@@ -6079,6 +6120,16 @@ const Admin = () => {
                           }}
                         >
                           Other Domains
+                          {(() => {
+                            const count = profiles.filter(p => {
+                              const isSuspicious = userRoles.filter(ur => ur.user_id === p.id).some(ur => ur.role === 'suspicious');
+                              const isNotGmail = !p.email?.toLowerCase().endsWith('@gmail.com');
+                              const isEmailConfirmed = !!p.email_confirmed_at;
+                              const hasVoted = usersWhoVoted.has(p.id);
+                              return isSuspicious && isNotGmail && isEmailConfirmed && hasVoted;
+                            }).length;
+                            return count > 0 ? ` (${count})` : '';
+                          })()}
                         </Button>
                       </div>
                     </div>
@@ -6106,12 +6157,21 @@ const Admin = () => {
                         const isSuspicious = profileRoles.some(ur => ur.role === 'suspicious');
                         if (!isSuspicious) return false;
                         
+                        // Дополнительные критерии для фильтров Gmail и Other Domains:
+                        // - email подтвержден (email_confirmed_at != NULL)
+                        // - пользователь голосовал
+                        const isEmailConfirmed = !!profile.email_confirmed_at;
+                        const hasVoted = usersWhoVoted.has(profile.id);
+                        
                         // Подфильтр по типу почты
                         if (suspiciousEmailFilter === 'gmail') {
-                          return profile.email?.toLowerCase().endsWith('@gmail.com') || false;
+                          const isGmail = profile.email?.toLowerCase().endsWith('@gmail.com') || false;
+                          return isGmail && isEmailConfirmed && hasVoted;
                         } else if (suspiciousEmailFilter === 'other') {
-                          return !profile.email?.toLowerCase().endsWith('@gmail.com');
+                          const isNotGmail = !profile.email?.toLowerCase().endsWith('@gmail.com');
+                          return isNotGmail && isEmailConfirmed && hasVoted;
                         }
+                        // "All Suspicious" - показывать всех подозрительных без доп. фильтров
                         return true;
                       }
 
@@ -6139,6 +6199,16 @@ const Admin = () => {
 
                      return (
                       <div className="space-y-4">
+                        {/* Results count */}
+                        <div className="text-sm text-muted-foreground">
+                          Showing {filteredProfiles.length} {filteredProfiles.length === 1 ? 'result' : 'results'}
+                          {roleFilter === 'suspicious' && suspiciousEmailFilter !== 'all' && (
+                            <span className="ml-2 text-xs">
+                              (confirmed email + voted)
+                            </span>
+                          )}
+                        </div>
+                        
                         <div className="grid gap-4">
                           {paginatedProfiles.map(profile => {
                             const lastActivity = userActivityData[profile.id]?.lastActivity;
