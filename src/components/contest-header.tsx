@@ -54,7 +54,7 @@ export function ContestHeader({ activeSection, onSectionChange }: ContestHeaderP
           </div>
           <div className="flex items-center gap-2">
             <span>💰</span>
-            <span>Annual winner takes 200,000 PHP</span>
+            <span>Annual winner takes 100,000 PHP</span>
           </div>
         </div>
         
