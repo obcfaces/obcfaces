@@ -1593,20 +1593,54 @@ const Admin = () => {
   // Auto-fetch activity stats for visible profiles in Reg tab
   useEffect(() => {
     if (activeTab === 'reg' && profiles.length > 0) {
-      console.log('🔵 Reg tab active, auto-fetching activity for', profiles.length, 'profiles');
-      profiles.forEach(profile => {
-        if (!userActivityStats[profile.id] && !loadingActivity.has(profile.id)) {
-          console.log('📊 Fetching activity for profile:', profile.id, profile.display_name);
-          fetchUserActivity(profile.id);
-        } else {
-          console.log('⏭️ Skipping profile (already loaded/loading):', profile.id, {
-            hasStats: !!userActivityStats[profile.id],
-            isLoading: loadingActivity.has(profile.id)
-          });
-        }
-      });
+      console.log('🔵 Reg tab active, profiles count:', profiles.length);
+      
+      // Small delay to ensure state is ready
+      const timer = setTimeout(() => {
+        // Get current page profiles
+        const filteredProfiles = profiles.filter(profile => {
+          const userRole = userRoleMap[profile.id] || 'usual';
+          
+          if (roleFilter === 'admin') {
+            return userRole === 'admin';
+          } else if (roleFilter === 'usual') {
+            return userRole === 'usual' || !userRole;
+          }
+
+          if (searchQuery.trim()) {
+            const query = searchQuery.toLowerCase();
+            const fullName = `${profile.first_name || ''} ${profile.last_name || ''}`.toLowerCase();
+            const displayName = (profile.display_name || '').toLowerCase();
+            const email = (profile.email || '').toLowerCase();
+            const ip = (profile.ip_address || '').toLowerCase();
+            
+            return fullName.includes(query) || 
+                   displayName.includes(query) || 
+                   email.includes(query) || 
+                   ip.includes(query);
+          }
+          
+          return true;
+        });
+
+        const startIdx = (regPaginationPage - 1) * regItemsPerPage;
+        const endIdx = startIdx + regItemsPerPage;
+        const paginatedProfiles = filteredProfiles.slice(startIdx, endIdx);
+        
+        console.log('📄 Visible profiles on current page:', paginatedProfiles.length);
+        
+        // Fetch activity for ALL visible profiles immediately
+        paginatedProfiles.forEach(profile => {
+          if (!userActivityStats[profile.id] && !loadingActivity.has(profile.id)) {
+            console.log('📊 Auto-fetching activity for profile:', profile.id, profile.display_name);
+            fetchUserActivity(profile.id);
+          }
+        });
+      }, 100);
+      
+      return () => clearTimeout(timer);
     }
-  }, [activeTab, profiles]);
+  }, [activeTab, profiles, regPaginationPage, roleFilter, searchQuery, userRoleMap]);
 
   const fetchContestApplications = async () => {
     console.log('Fetching contest applications...');
