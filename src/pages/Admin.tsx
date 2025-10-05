@@ -434,6 +434,8 @@ const Admin = () => {
   const [showRoleConfirmModal, setShowRoleConfirmModal] = useState(false);
   const [roleChangeUser, setRoleChangeUser] = useState<{ id: string; name: string; newRole: string } | null>(null);
   const [assigningRoles, setAssigningRoles] = useState<Set<string>>(new Set());
+  const [selectedUsers, setSelectedUsers] = useState<Set<string>>(new Set());
+  const [bulkAssigningRole, setBulkAssigningRole] = useState(false);
   const [showWinnerContentModal, setShowWinnerContentModal] = useState(false);
   const [selectedWinner, setSelectedWinner] = useState<{ participantId: string; userId: string; name: string } | null>(null);
   const [nextWeekFilter, setNextWeekFilter] = useState<string>('all'); // Новый фильтр для next week
@@ -2406,6 +2408,79 @@ const Admin = () => {
       title: "Success",
       description: `Role ${role} assigned successfully`,
     });
+
+    await fetchUserRoles();
+  };
+
+  // Bulk assign suspicious role
+  const bulkAssignSuspicious = async () => {
+    if (selectedUsers.size === 0) {
+      toast({
+        title: "No users selected",
+        description: "Please select users first",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setBulkAssigningRole(true);
+    let successCount = 0;
+    let errorCount = 0;
+
+    for (const userId of selectedUsers) {
+      try {
+        const { error } = await supabase
+          .from('user_roles')
+          .upsert({
+            user_id: userId,
+            role: 'suspicious'
+          });
+
+        if (error) {
+          errorCount++;
+          console.error(`Failed to assign role to user ${userId}:`, error);
+        } else {
+          successCount++;
+        }
+      } catch (err) {
+        errorCount++;
+        console.error(`Error assigning role to user ${userId}:`, err);
+      }
+    }
+
+    setBulkAssigningRole(false);
+    setSelectedUsers(new Set());
+
+    toast({
+      title: errorCount > 0 ? "Partially completed" : "Success",
+      description: `Assigned suspicious role to ${successCount} users${errorCount > 0 ? `, ${errorCount} failed` : ''}`,
+      variant: errorCount > 0 ? "destructive" : "default"
+    });
+
+    await fetchUserRoles();
+  };
+
+  // Toggle user selection
+  const toggleUserSelection = (userId: string) => {
+    setSelectedUsers(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(userId)) {
+        newSet.delete(userId);
+      } else {
+        newSet.add(userId);
+      }
+      return newSet;
+    });
+  };
+
+  // Select/deselect all visible users
+  const toggleSelectAll = (visibleProfiles: any[]) => {
+    if (selectedUsers.size === visibleProfiles.length && visibleProfiles.length > 0) {
+      setSelectedUsers(new Set());
+    } else {
+      setSelectedUsers(new Set(visibleProfiles.map(p => p.id)));
+    }
+  };
 
     fetchUserRoles();
   };
@@ -6221,6 +6296,23 @@ const Admin = () => {
                             </span>
                           )}
                         </div>
+                        )}
+
+                        {/* Results count */}
+                        <div className="text-sm text-muted-foreground">
+                          Showing {paginatedProfiles.length} of {filteredProfiles.length} {filteredProfiles.length === 1 ? 'result' : 'results'} 
+                          {filteredProfiles.length > regItemsPerPage && ` (page ${regPaginationPage} of ${totalRegPages})`}
+                          {suspiciousEmailFilter === 'gmail-auto' && (
+                            <span className="ml-2 text-xs text-orange-600 font-medium">
+                              (auto-confirmed &lt;1 sec, no votes)
+                            </span>
+                          )}
+                          {suspiciousEmailFilter === 'gmail-voted' && (
+                            <span className="ml-2 text-xs text-orange-600 font-medium">
+                              (voted, auto-confirmed &lt;1 sec)
+                            </span>
+                          )}
+                        </div>
 
                         <div className="grid gap-4">
                           {paginatedProfiles.map(profile => {
@@ -7072,6 +7164,7 @@ const Admin = () => {
             </Tabs>
           </div>
         </div>
+      </div>
 
       {/* Admin Photo Modal */}
       <AdminPhotoModal
