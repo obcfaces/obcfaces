@@ -6098,7 +6098,7 @@ const Admin = () => {
                       </div>
                       
                       {/* Ряд 3: Gmail фильтры */}
-                      <div className="flex gap-2 flex-wrap">
+                      <div className="flex gap-2 flex-wrap items-center">
                         <Button
                           variant={suspiciousEmailFilter === 'gmail-auto' ? 'default' : 'outline'}
                           size="sm"
@@ -6133,6 +6133,71 @@ const Admin = () => {
                             return count > 0 ? ` (${count})` : '';
                           })()}
                         </Button>
+                        
+                        {/* Массовое присвоение Suspicious для Gmail фильтров */}
+                        {(suspiciousEmailFilter === 'gmail-auto' || suspiciousEmailFilter === 'gmail-voted') && (
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={async () => {
+                              const gmailUsers = profiles.filter(p => {
+                                const isGmail = p.email?.toLowerCase().endsWith('@gmail.com') || false;
+                                const hasVoted = usersWhoVoted.has(p.id);
+                                const wasAutoConfirmed = p.created_at && p.email_confirmed_at && 
+                                  Math.abs(new Date(p.email_confirmed_at).getTime() - new Date(p.created_at).getTime()) < 1000;
+                                
+                                if (suspiciousEmailFilter === 'gmail-auto') {
+                                  return isGmail && wasAutoConfirmed && !hasVoted;
+                                } else {
+                                  return isGmail && hasVoted && wasAutoConfirmed;
+                                }
+                              });
+                              
+                              if (gmailUsers.length === 0) {
+                                toast({ title: 'No users found', variant: 'default' });
+                                return;
+                              }
+                              
+                              const confirmed = window.confirm(`Mark ${gmailUsers.length} Gmail users as Suspicious?`);
+                              if (!confirmed) return;
+                              
+                              try {
+                                const results = await Promise.allSettled(
+                                  gmailUsers.map(user => 
+                                    supabase.from('user_roles').upsert({
+                                      user_id: user.id,
+                                      role: 'suspicious'
+                                    }, {
+                                      onConflict: 'user_id,role',
+                                      ignoreDuplicates: false
+                                    })
+                                  )
+                                );
+                                
+                                const successCount = results.filter(r => r.status === 'fulfilled').length;
+                                const failCount = results.filter(r => r.status === 'rejected').length;
+                                
+                                if (successCount > 0) {
+                                  toast({ 
+                                    title: `✓ Marked ${successCount} users as Suspicious${failCount > 0 ? ` (${failCount} failed)` : ''}`,
+                                    variant: 'default'
+                                  });
+                                  
+                                  // Обновляем данные
+                                  const { data: updatedRoles } = await supabase.from('user_roles').select('*');
+                                  if (updatedRoles) setUserRoles(updatedRoles);
+                                } else {
+                                  toast({ title: 'Failed to update users', variant: 'destructive' });
+                                }
+                              } catch (error) {
+                                console.error('Error marking users as suspicious:', error);
+                                toast({ title: 'Error updating users', variant: 'destructive' });
+                              }
+                            }}
+                          >
+                            Mark all as Suspicious
+                          </Button>
+                        )}
                       </div>
                     </div>
 
