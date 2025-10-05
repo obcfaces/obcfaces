@@ -6133,6 +6133,21 @@ const Admin = () => {
                           
                               {/* Controls menu in top right */}
                               <div className="absolute top-0 right-0 flex items-center gap-1">
+                                {/* Check for suspicious role */}
+                                {(() => {
+                                  const profileRoles = userRoles.filter(ur => ur.user_id === profile.id);
+                                  const isSuspicious = profileRoles.some(ur => ur.role === 'suspicious');
+                                  
+                                  if (isSuspicious) {
+                                    return (
+                                      <Badge variant="destructive" className="text-xs rounded-none">
+                                        Suspicious
+                                      </Badge>
+                                    );
+                                  }
+                                  return null;
+                                })()}
+                                
                                 {profile.email_confirmed_at ? (
                                   <Badge variant="default" className="bg-green-100 text-green-700 text-xs rounded-none rounded-bl-md">
                                     Verified

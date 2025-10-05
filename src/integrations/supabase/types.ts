@@ -1860,6 +1860,10 @@ export type Database = {
         Args: { target_user_id: string }
         Returns: boolean
       }
+      is_suspicious_email_domain: {
+        Args: { email: string }
+        Returns: boolean
+      }
       mark_conversation_as_read: {
         Args: { conversation_id_param: string; user_id_param: string }
         Returns: undefined
@@ -1899,7 +1903,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "admin" | "moderator" | "user"
+      app_role: "admin" | "moderator" | "user" | "suspicious"
       participant_admin_status:
         | "pending"
         | "rejected"
@@ -2047,7 +2051,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "moderator", "user"],
+      app_role: ["admin", "moderator", "user", "suspicious"],
       participant_admin_status: [
         "pending",
         "rejected",
