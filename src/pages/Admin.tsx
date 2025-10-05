@@ -6107,10 +6107,11 @@ const Admin = () => {
                           {(() => {
                             const count = profiles.filter(p => {
                               const isGmail = p.email?.toLowerCase().endsWith('@gmail.com') || false;
+                              const hasVoted = usersWhoVoted.has(p.id);
                               const wasNotReallyVerified = !p.email_confirmed_at || 
                                 (p.created_at && p.email_confirmed_at && 
                                   Math.abs(new Date(p.email_confirmed_at).getTime() - new Date(p.created_at).getTime()) < 1000);
-                              return isGmail && wasNotReallyVerified;
+                              return isGmail && hasVoted && wasNotReallyVerified;
                             }).length;
                             return count > 0 ? ` (${count})` : '';
                           })()}
