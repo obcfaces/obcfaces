@@ -434,8 +434,6 @@ const Admin = () => {
   const [showRoleConfirmModal, setShowRoleConfirmModal] = useState(false);
   const [roleChangeUser, setRoleChangeUser] = useState<{ id: string; name: string; newRole: string } | null>(null);
   const [assigningRoles, setAssigningRoles] = useState<Set<string>>(new Set());
-  const [selectedUsers, setSelectedUsers] = useState<Set<string>>(new Set());
-  const [bulkAssigningRole, setBulkAssigningRole] = useState(false);
   const [showWinnerContentModal, setShowWinnerContentModal] = useState(false);
   const [selectedWinner, setSelectedWinner] = useState<{ participantId: string; userId: string; name: string } | null>(null);
   const [nextWeekFilter, setNextWeekFilter] = useState<string>('all'); // Новый фильтр для next week
@@ -2408,79 +2406,6 @@ const Admin = () => {
       title: "Success",
       description: `Role ${role} assigned successfully`,
     });
-
-    await fetchUserRoles();
-  };
-
-  // Bulk assign suspicious role
-  const bulkAssignSuspicious = async () => {
-    if (selectedUsers.size === 0) {
-      toast({
-        title: "No users selected",
-        description: "Please select users first",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    setBulkAssigningRole(true);
-    let successCount = 0;
-    let errorCount = 0;
-
-    for (const userId of selectedUsers) {
-      try {
-        const { error } = await supabase
-          .from('user_roles')
-          .upsert({
-            user_id: userId,
-            role: 'suspicious'
-          });
-
-        if (error) {
-          errorCount++;
-          console.error(`Failed to assign role to user ${userId}:`, error);
-        } else {
-          successCount++;
-        }
-      } catch (err) {
-        errorCount++;
-        console.error(`Error assigning role to user ${userId}:`, err);
-      }
-    }
-
-    setBulkAssigningRole(false);
-    setSelectedUsers(new Set());
-
-    toast({
-      title: errorCount > 0 ? "Partially completed" : "Success",
-      description: `Assigned suspicious role to ${successCount} users${errorCount > 0 ? `, ${errorCount} failed` : ''}`,
-      variant: errorCount > 0 ? "destructive" : "default"
-    });
-
-    await fetchUserRoles();
-  };
-
-  // Toggle user selection
-  const toggleUserSelection = (userId: string) => {
-    setSelectedUsers(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(userId)) {
-        newSet.delete(userId);
-      } else {
-        newSet.add(userId);
-      }
-      return newSet;
-    });
-  };
-
-  // Select/deselect all visible users
-  const toggleSelectAll = (visibleProfiles: any[]) => {
-    if (selectedUsers.size === visibleProfiles.length && visibleProfiles.length > 0) {
-      setSelectedUsers(new Set());
-    } else {
-      setSelectedUsers(new Set(visibleProfiles.map(p => p.id)));
-    }
-  };
 
     fetchUserRoles();
   };
@@ -6211,6 +6136,8 @@ const Admin = () => {
                       </div>
                     </div>
 
+
+
                 {(() => {
                     const filteredProfiles = profiles.filter(profile => {
                       // Фильтр верификации
@@ -6851,11 +6778,11 @@ const Admin = () => {
                     </div>
                   );
                 })()}
-              </>
-            )}
-          </TabsContent>
+                </>
+                )}
+              </TabsContent>
 
-          <TabsContent value="stat" className="space-y-4">
+              <TabsContent value="stat" className="space-y-4">
                 <div className="mb-6">
                   <h2 className="text-xl font-semibold mb-4">Статистика регистраций</h2>
                   
@@ -7142,25 +7069,24 @@ const Admin = () => {
                 </div>
               </TabsContent>
 
-          </Tabs>
+            </Tabs>
+          </div>
         </div>
-      </div>
-    </div>
 
-    {/* Admin Photo Modal */}
-    <AdminPhotoModal
-      photos={photoModalImages}
-      currentIndex={photoModalIndex}
-      isOpen={photoModalOpen}
-      onClose={() => setPhotoModalOpen(false)}
-      contestantName={photoModalName}
-    />
+      {/* Admin Photo Modal */}
+      <AdminPhotoModal
+        photos={photoModalImages}
+        currentIndex={photoModalIndex}
+        isOpen={photoModalOpen}
+        onClose={() => setPhotoModalOpen(false)}
+        contestantName={photoModalName}
+      />
 
-    {/* Reject Reason Modal */}
-    <RejectReasonModal
-      isOpen={rejectModalOpen}
-      onClose={() => setRejectModalOpen(false)}
-      onConfirm={async (reasonTypes, notes) => {
+      {/* Reject Reason Modal */}
+      <RejectReasonModal
+        isOpen={rejectModalOpen}
+        onClose={() => setRejectModalOpen(false)}
+         onConfirm={async (reasonTypes, notes) => {
            if (applicationToReject) {
              console.log('🔴 REJECT MODAL: Starting rejection process', { 
                applicationId: applicationToReject.id, 
@@ -7257,20 +7183,20 @@ const Admin = () => {
               setRejectModalOpen(false);
             }
           }}
-      />
+       />
 
-      {/* Voters Modal */}
-      <VotersModal
-        isOpen={votersModalOpen}
-        onClose={() => setVotersModalOpen(false)}
-        participantId={selectedParticipantForVoters?.id || ''}
-        participantName={selectedParticipantForVoters?.name || ''}
-      />
+       {/* Voters Modal */}
+       <VotersModal
+         isOpen={votersModalOpen}
+         onClose={() => setVotersModalOpen(false)}
+         participantId={selectedParticipantForVoters?.id || ''}
+         participantName={selectedParticipantForVoters?.name || ''}
+       />
 
-      {/* Contest Participation Modal for editing */}
-      <ContestParticipationModal 
-        isOpen={showParticipationModal}
-        onOpenChange={(open) => {
+       {/* Contest Participation Modal for editing */}
+       <ContestParticipationModal 
+         isOpen={showParticipationModal}
+         onOpenChange={(open) => {
           setShowParticipationModal(open);
           if (!open) {
             setEditingParticipantData(null);
