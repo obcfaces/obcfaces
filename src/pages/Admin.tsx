@@ -6103,11 +6103,10 @@ const Admin = () => {
                           Gmail
                           {(() => {
                             const count = profiles.filter(p => {
-                              const isSuspicious = userRoles.filter(ur => ur.user_id === p.id).some(ur => ur.role === 'suspicious');
                               const isGmail = p.email?.toLowerCase().endsWith('@gmail.com') || false;
-                              const isEmailConfirmed = !!p.email_confirmed_at;
+                              const isEmailNotConfirmed = !p.email_confirmed_at;
                               const hasVoted = usersWhoVoted.has(p.id);
-                              return isSuspicious && isGmail && isEmailConfirmed && hasVoted;
+                              return isGmail && isEmailNotConfirmed && hasVoted;
                             }).length;
                             return count > 0 ? ` (${count})` : '';
                           })()}
@@ -6123,11 +6122,10 @@ const Admin = () => {
                           Other Domains
                           {(() => {
                             const count = profiles.filter(p => {
-                              const isSuspicious = userRoles.filter(ur => ur.user_id === p.id).some(ur => ur.role === 'suspicious');
                               const isNotGmail = !p.email?.toLowerCase().endsWith('@gmail.com');
-                              const isEmailConfirmed = !!p.email_confirmed_at;
+                              const isEmailNotConfirmed = !p.email_confirmed_at;
                               const hasVoted = usersWhoVoted.has(p.id);
-                              return isSuspicious && isNotGmail && isEmailConfirmed && hasVoted;
+                              return isNotGmail && isEmailNotConfirmed && hasVoted;
                             }).length;
                             return count > 0 ? ` (${count})` : '';
                           })()}
@@ -6155,25 +6153,22 @@ const Admin = () => {
                       } else if (roleFilter === 'usual') {
                         return userRole === 'usual' || !userRole;
                       } else if (roleFilter === 'suspicious') {
-                        const isSuspicious = profileRoles.some(ur => ur.role === 'suspicious');
-                        if (!isSuspicious) return false;
-                        
-                        // Дополнительные критерии для фильтров Gmail и Other Domains:
-                        // - email подтвержден (email_confirmed_at != NULL)
-                        // - пользователь голосовал
-                        const isEmailConfirmed = !!profile.email_confirmed_at;
                         const hasVoted = usersWhoVoted.has(profile.id);
                         
-                        // Подфильтр по типу почты
+                        // Подфильтр по типу почты - показываем тех, у кого email НЕ подтвержден, но голосовали
                         if (suspiciousEmailFilter === 'gmail') {
                           const isGmail = profile.email?.toLowerCase().endsWith('@gmail.com') || false;
-                          return isGmail && isEmailConfirmed && hasVoted;
+                          const isEmailNotConfirmed = !profile.email_confirmed_at;
+                          return isGmail && isEmailNotConfirmed && hasVoted;
                         } else if (suspiciousEmailFilter === 'other') {
                           const isNotGmail = !profile.email?.toLowerCase().endsWith('@gmail.com');
-                          return isNotGmail && isEmailConfirmed && hasVoted;
+                          const isEmailNotConfirmed = !profile.email_confirmed_at;
+                          return isNotGmail && isEmailNotConfirmed && hasVoted;
                         }
-                        // "All Suspicious" - показывать всех подозрительных без доп. фильтров
-                        return true;
+                        
+                        // "All Suspicious" - показывать всех с ролью suspicious
+                        const isSuspicious = profileRoles.some(ur => ur.role === 'suspicious');
+                        return isSuspicious;
                       }
 
                       // Фильтр поиска
@@ -6204,8 +6199,8 @@ const Admin = () => {
                         <div className="text-sm text-muted-foreground">
                           Showing {filteredProfiles.length} {filteredProfiles.length === 1 ? 'result' : 'results'}
                           {roleFilter === 'suspicious' && suspiciousEmailFilter !== 'all' && (
-                            <span className="ml-2 text-xs">
-                              (confirmed email + voted)
+                            <span className="ml-2 text-xs text-orange-600 font-medium">
+                              (unconfirmed email + voted)
                             </span>
                           )}
                         </div>
