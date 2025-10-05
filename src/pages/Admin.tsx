@@ -1680,7 +1680,7 @@ const Admin = () => {
     }, 200);
     
     return () => clearTimeout(timer);
-  }, [activeTab, profiles.length, regPaginationPage, roleFilter, searchQuery, loading]);
+  }, [activeTab, profiles.length, regPaginationPage, roleFilter, searchQuery, verificationFilter, loading]);
 
   const fetchContestApplications = async () => {
     console.log('Fetching contest applications...');
