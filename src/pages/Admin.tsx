@@ -425,6 +425,7 @@ const Admin = () => {
    });
    const [applicationHistory, setApplicationHistory] = useState<any[]>([]);
   const [verificationFilter, setVerificationFilter] = useState<string>('all');
+  const [suspiciousEmailFilter, setSuspiciousEmailFilter] = useState<string>('all'); // gmail or other
   const [searchQuery, setSearchQuery] = useState('');
   const [verifyingUsers, setVerifyingUsers] = useState<Set<string>>(new Set());
   const [roleFilter, setRoleFilter] = useState<string>('all');
@@ -6002,7 +6003,7 @@ const Admin = () => {
                 {!tabLoading.registrations && (
                   <>
                     {/* Combined filters in one row */}
-                    <div className="flex gap-2 mb-4">
+                    <div className="flex gap-2 mb-4 flex-wrap">
                       <Button
                         variant={verificationFilter === 'all' ? 'default' : 'outline'}
                         size="sm"
@@ -6034,10 +6035,41 @@ const Admin = () => {
                       <Button
                         variant={roleFilter === 'suspicious' ? 'destructive' : 'outline'}
                         size="sm"
-                        onClick={() => setRoleFilter('suspicious')}
+                        onClick={() => {
+                          setRoleFilter('suspicious');
+                          setSuspiciousEmailFilter('all');
+                        }}
                       >
                         Suspicious
                       </Button>
+                      
+                      {/* Suspicious email subfilters */}
+                      {roleFilter === 'suspicious' && (
+                        <>
+                          <div className="w-px h-8 bg-border" />
+                          <Button
+                            variant={suspiciousEmailFilter === 'all' ? 'default' : 'outline'}
+                            size="sm"
+                            onClick={() => setSuspiciousEmailFilter('all')}
+                          >
+                            All Suspicious
+                          </Button>
+                          <Button
+                            variant={suspiciousEmailFilter === 'gmail' ? 'default' : 'outline'}
+                            size="sm"
+                            onClick={() => setSuspiciousEmailFilter('gmail')}
+                          >
+                            Gmail
+                          </Button>
+                          <Button
+                            variant={suspiciousEmailFilter === 'other' ? 'default' : 'outline'}
+                            size="sm"
+                            onClick={() => setSuspiciousEmailFilter('other')}
+                          >
+                            Other Domains
+                          </Button>
+                        </>
+                      )}
                     </div>
                   </>
                 )}
@@ -6060,7 +6092,16 @@ const Admin = () => {
                       } else if (roleFilter === 'usual') {
                         return userRole === 'usual' || !userRole;
                       } else if (roleFilter === 'suspicious') {
-                        return profileRoles.some(ur => ur.role === 'suspicious');
+                        const isSuspicious = profileRoles.some(ur => ur.role === 'suspicious');
+                        if (!isSuspicious) return false;
+                        
+                        // Подфильтр по типу почты
+                        if (suspiciousEmailFilter === 'gmail') {
+                          return profile.email?.toLowerCase().endsWith('@gmail.com') || false;
+                        } else if (suspiciousEmailFilter === 'other') {
+                          return !profile.email?.toLowerCase().endsWith('@gmail.com');
+                        }
+                        return true;
                       }
 
                       // Фильтр поиска
