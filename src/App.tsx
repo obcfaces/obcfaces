@@ -13,6 +13,7 @@ import { SocialWidgets } from "@/components/social-widgets";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { CookieConsent } from "@/components/cookie-consent";
 import { ReferralBanner } from "@/components/referral-banner";
+import { useDeviceFingerprint } from "@/hooks/useDeviceFingerprint";
 
 // Lazy load heavy pages that aren't needed initially
 const Admin = lazy(() => import("./pages/Admin"));
@@ -46,6 +47,9 @@ const ConditionalSocialWidgets = () => {
 
 const App = () => {
   console.log("App component rendering - with lazy loading optimization");
+  
+  // Инициализируем fingerprint tracking
+  useDeviceFingerprint();
   
   return (
     <div className="min-h-screen w-full flex flex-col">

@@ -755,9 +755,101 @@ export type Database = {
         }
         Relationships: []
       }
+      user_device_fingerprints: {
+        Row: {
+          audio_fingerprint: string | null
+          canvas_fingerprint: string | null
+          cookies_enabled: boolean | null
+          created_at: string
+          device_memory: number | null
+          do_not_track: boolean | null
+          fingerprint_id: string
+          first_seen_at: string
+          hardware_concurrency: number | null
+          id: string
+          installed_fonts: string[] | null
+          ip_address: unknown | null
+          language: string | null
+          languages: string[] | null
+          last_seen_at: string
+          platform: string | null
+          screen_color_depth: number | null
+          screen_resolution: string | null
+          timezone: string | null
+          timezone_offset: number | null
+          touch_support: boolean | null
+          updated_at: string
+          user_agent: string | null
+          user_id: string | null
+          visit_count: number
+          webgl_renderer: string | null
+          webgl_vendor: string | null
+        }
+        Insert: {
+          audio_fingerprint?: string | null
+          canvas_fingerprint?: string | null
+          cookies_enabled?: boolean | null
+          created_at?: string
+          device_memory?: number | null
+          do_not_track?: boolean | null
+          fingerprint_id: string
+          first_seen_at?: string
+          hardware_concurrency?: number | null
+          id?: string
+          installed_fonts?: string[] | null
+          ip_address?: unknown | null
+          language?: string | null
+          languages?: string[] | null
+          last_seen_at?: string
+          platform?: string | null
+          screen_color_depth?: number | null
+          screen_resolution?: string | null
+          timezone?: string | null
+          timezone_offset?: number | null
+          touch_support?: boolean | null
+          updated_at?: string
+          user_agent?: string | null
+          user_id?: string | null
+          visit_count?: number
+          webgl_renderer?: string | null
+          webgl_vendor?: string | null
+        }
+        Update: {
+          audio_fingerprint?: string | null
+          canvas_fingerprint?: string | null
+          cookies_enabled?: boolean | null
+          created_at?: string
+          device_memory?: number | null
+          do_not_track?: boolean | null
+          fingerprint_id?: string
+          first_seen_at?: string
+          hardware_concurrency?: number | null
+          id?: string
+          installed_fonts?: string[] | null
+          ip_address?: unknown | null
+          language?: string | null
+          languages?: string[] | null
+          last_seen_at?: string
+          platform?: string | null
+          screen_color_depth?: number | null
+          screen_resolution?: string | null
+          timezone?: string | null
+          timezone_offset?: number | null
+          touch_support?: boolean | null
+          updated_at?: string
+          user_agent?: string | null
+          user_id?: string | null
+          visit_count?: number
+          webgl_renderer?: string | null
+          webgl_vendor?: string | null
+        }
+        Relationships: []
+      }
       user_login_logs: {
         Row: {
           created_at: string
+          device_fingerprint_id: string | null
+          fingerprint_id: string | null
           id: string
           ip_address: unknown | null
           login_method: string
@@ -767,6 +859,8 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          device_fingerprint_id?: string | null
+          fingerprint_id?: string | null
           id?: string
           ip_address?: unknown | null
           login_method?: string
@@ -776,6 +870,8 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          device_fingerprint_id?: string | null
+          fingerprint_id?: string | null
           id?: string
           ip_address?: unknown | null
           login_method?: string
@@ -783,7 +879,15 @@ export type Database = {
           user_agent?: string | null
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "user_login_logs_device_fingerprint_id_fkey"
+            columns: ["device_fingerprint_id"]
+            isOneToOne: false
+            referencedRelation: "user_device_fingerprints"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
