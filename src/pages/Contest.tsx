@@ -37,6 +37,7 @@ const Contest = () => {
     
     const loadPastWeekIntervals = async () => {
       try {
+        console.log('Loading past week intervals...');
         // Get all unique week_interval values from past participants
         const { data, error } = await supabase
           .from('weekly_contest_participants')
@@ -50,8 +51,12 @@ const Contest = () => {
           return;
         }
         
+        console.log('Raw data from DB:', data);
+        
         // Get unique intervals and sort them (newest first)
         const uniqueIntervals = Array.from(new Set(data?.map(p => p.week_interval).filter(Boolean) as string[]));
+        
+        console.log('Unique intervals before sorting:', uniqueIntervals);
         
         // Sort by date (parse DD/MM-DD/MM/YY format) - newest first
         const sortedIntervals = uniqueIntervals.sort((a, b) => {
@@ -75,7 +80,7 @@ const Contest = () => {
           return getEndDate(b).getTime() - getEndDate(a).getTime();
         });
         
-        console.log('Past week intervals:', sortedIntervals);
+        console.log('Past week intervals after sorting:', sortedIntervals);
         setPastWeekIntervals(sortedIntervals);
       } catch (error) {
         console.error('Error loading past week intervals:', error);
