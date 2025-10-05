@@ -6344,7 +6344,7 @@ const Admin = () => {
                           
                               {/* Controls menu in top right */}
                               <div className="absolute top-0 right-0 flex items-center gap-1">
-                                {/* Role badge */}
+                                {/* Role badge - only show if not 'usual' */}
                                 {(() => {
                                   const currentRole = userRoleMap[profile.id] || 'usual';
                                   
@@ -6352,12 +6352,6 @@ const Admin = () => {
                                     return (
                                       <Badge variant="destructive" className="text-xs rounded-none bg-red-500 text-white hover:bg-red-600">
                                         Suspicious
-                                      </Badge>
-                                    );
-                                  } else if (currentRole === 'usual') {
-                                    return (
-                                      <Badge variant="secondary" className="text-xs rounded-none bg-gray-500 text-white hover:bg-gray-600">
-                                        Usual
                                       </Badge>
                                     );
                                   } else if (currentRole === 'moderator') {
@@ -6373,6 +6367,7 @@ const Admin = () => {
                                       </Badge>
                                     );
                                   }
+                                  // Don't show 'Usual' badge
                                   return null;
                                 })()}
                                 
