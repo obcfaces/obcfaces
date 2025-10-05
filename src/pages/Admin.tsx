@@ -6108,10 +6108,9 @@ const Admin = () => {
                             const count = profiles.filter(p => {
                               const isGmail = p.email?.toLowerCase().endsWith('@gmail.com') || false;
                               const hasVoted = usersWhoVoted.has(p.id);
-                              const wasNotReallyVerified = !p.email_confirmed_at || 
-                                (p.created_at && p.email_confirmed_at && 
-                                  Math.abs(new Date(p.email_confirmed_at).getTime() - new Date(p.created_at).getTime()) < 1000);
-                              return isGmail && wasNotReallyVerified && !hasVoted;
+                              const wasAutoConfirmed = p.created_at && p.email_confirmed_at && 
+                                Math.abs(new Date(p.email_confirmed_at).getTime() - new Date(p.created_at).getTime()) < 1000;
+                              return isGmail && wasAutoConfirmed && !hasVoted;
                             }).length;
                             return count > 0 ? ` (${count})` : '';
                           })()}
@@ -6126,10 +6125,9 @@ const Admin = () => {
                             const count = profiles.filter(p => {
                               const isGmail = p.email?.toLowerCase().endsWith('@gmail.com') || false;
                               const hasVoted = usersWhoVoted.has(p.id);
-                              const wasNotReallyVerified = !p.email_confirmed_at || 
-                                (p.created_at && p.email_confirmed_at && 
-                                  Math.abs(new Date(p.email_confirmed_at).getTime() - new Date(p.created_at).getTime()) < 1000);
-                              return isGmail && hasVoted && wasNotReallyVerified;
+                              const wasAutoConfirmed = p.created_at && p.email_confirmed_at && 
+                                Math.abs(new Date(p.email_confirmed_at).getTime() - new Date(p.created_at).getTime()) < 1000;
+                              return isGmail && hasVoted && wasAutoConfirmed;
                             }).length;
                             return count > 0 ? ` (${count})` : '';
                           })()}
@@ -6152,20 +6150,18 @@ const Admin = () => {
                       if (suspiciousEmailFilter === 'gmail-auto') {
                         const isGmail = profile.email?.toLowerCase().endsWith('@gmail.com') || false;
                         const hasVoted = usersWhoVoted.has(profile.id);
-                        const wasNotReallyVerified = !profile.email_confirmed_at || 
-                          (profile.created_at && profile.email_confirmed_at && 
-                            Math.abs(new Date(profile.email_confirmed_at).getTime() - new Date(profile.created_at).getTime()) < 1000);
-                        if (!(isGmail && wasNotReallyVerified && !hasVoted)) return false;
+                        const wasAutoConfirmed = profile.created_at && profile.email_confirmed_at && 
+                          Math.abs(new Date(profile.email_confirmed_at).getTime() - new Date(profile.created_at).getTime()) < 1000;
+                        if (!(isGmail && wasAutoConfirmed && !hasVoted)) return false;
                       }
                       
                       // Фильтр по Gmail<1 + voted (только те кто голосовал)
                       if (suspiciousEmailFilter === 'gmail-voted') {
                         const isGmail = profile.email?.toLowerCase().endsWith('@gmail.com') || false;
                         const hasVoted = usersWhoVoted.has(profile.id);
-                        const wasNotReallyVerified = !profile.email_confirmed_at || 
-                          (profile.created_at && profile.email_confirmed_at && 
-                            Math.abs(new Date(profile.email_confirmed_at).getTime() - new Date(profile.created_at).getTime()) < 1000);
-                        if (!(isGmail && hasVoted && wasNotReallyVerified)) return false;
+                        const wasAutoConfirmed = profile.created_at && profile.email_confirmed_at && 
+                          Math.abs(new Date(profile.email_confirmed_at).getTime() - new Date(profile.created_at).getTime()) < 1000;
+                        if (!(isGmail && hasVoted && wasAutoConfirmed)) return false;
                       }
 
                       // Фильтр ролей
