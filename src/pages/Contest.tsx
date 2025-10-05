@@ -13,8 +13,47 @@ const Contest = () => {
   const [activeSection, setActiveSection] = useState("Contest");
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [pastWeekIntervals, setPastWeekIntervals] = useState<string[]>([]);
+  const [pastWeekIntervals, setPastWeekIntervals] = useState<Array<{interval: string, weeksAgo: number}>>([]);
   const navigate = useNavigate();
+  
+  // Helper function to get current Monday in Philippine time
+  const getCurrentMonday = () => {
+    const now = new Date();
+    const philippineTime = new Date(now.toLocaleString("en-US", {timeZone: "Asia/Manila"}));
+    const currentDayOfWeek = philippineTime.getDay();
+    const daysToSubtract = currentDayOfWeek === 0 ? 6 : currentDayOfWeek - 1;
+    const currentMonday = new Date(philippineTime);
+    currentMonday.setDate(philippineTime.getDate() - daysToSubtract);
+    currentMonday.setHours(0, 0, 0, 0);
+    return currentMonday;
+  };
+  
+  // Helper function to parse week_interval and get the Monday date
+  const parseIntervalToMonday = (interval: string): Date | null => {
+    try {
+      // Format: "DD/MM-DD/MM/YY"
+      const parts = interval.split('-');
+      if (parts.length !== 2) return null;
+      
+      // First part is "DD/MM" (Monday)
+      const startParts = parts[0].split('/');
+      if (startParts.length !== 2) return null;
+      
+      // Second part is "DD/MM/YY" (Sunday) - we get year from here
+      const endParts = parts[1].split('/');
+      if (endParts.length !== 3) return null;
+      
+      const day = parseInt(startParts[0]);
+      const month = parseInt(startParts[1]) - 1; // JS months are 0-indexed
+      const year = parseInt(endParts[2]);
+      const fullYear = year < 50 ? 2000 + year : 1900 + year;
+      
+      return new Date(fullYear, month, day, 0, 0, 0, 0);
+    } catch (error) {
+      console.error('Error parsing interval:', interval, error);
+      return null;
+    }
+  };
   
   useEffect(() => {
     const checkAdminStatus = async () => {
@@ -53,35 +92,37 @@ const Contest = () => {
         
         console.log('Raw data from DB:', data);
         
-        // Get unique intervals and sort them (newest first)
+        // Get unique intervals
         const uniqueIntervals = Array.from(new Set(data?.map(p => p.week_interval).filter(Boolean) as string[]));
         
-        console.log('Unique intervals before sorting:', uniqueIntervals);
+        console.log('Unique intervals before processing:', uniqueIntervals);
         
-        // Sort by date (parse DD/MM-DD/MM/YY format) - newest first
-        const sortedIntervals = uniqueIntervals.sort((a, b) => {
-          // Extract end date from format "DD/MM-DD/MM/YY"
-          const getEndDate = (interval: string) => {
-            const parts = interval.split('-');
-            if (parts.length !== 2) return new Date(0);
-            
-            // Second part is "DD/MM/YY"
-            const endParts = parts[1].split('/');
-            if (endParts.length !== 3) return new Date(0);
-            
-            const day = parseInt(endParts[0]);
-            const month = parseInt(endParts[1]) - 1; // JS months are 0-indexed
-            const year = parseInt(endParts[2]);
-            const fullYear = year < 50 ? 2000 + year : 1900 + year; // Handle 2-digit years
-            
-            return new Date(fullYear, month, day);
-          };
-          
-          return getEndDate(b).getTime() - getEndDate(a).getTime();
-        });
+        // Get current Monday in Philippine time
+        const currentMonday = getCurrentMonday();
+        console.log('Current Monday (Philippine time):', currentMonday);
         
-        console.log('Past week intervals after sorting:', sortedIntervals);
-        setPastWeekIntervals(sortedIntervals);
+        // Calculate weeks difference for each interval
+        const intervalsWithWeeks = uniqueIntervals
+          .map(interval => {
+            const intervalMonday = parseIntervalToMonday(interval);
+            if (!intervalMonday) return null;
+            
+            // Calculate difference in weeks
+            const diffTime = currentMonday.getTime() - intervalMonday.getTime();
+            const diffWeeks = Math.floor(diffTime / (7 * 24 * 60 * 60 * 1000));
+            
+            console.log(`Interval ${interval}: Monday=${intervalMonday}, WeeksAgo=${diffWeeks}`);
+            
+            return {
+              interval,
+              weeksAgo: diffWeeks
+            };
+          })
+          .filter(item => item !== null && item.weeksAgo > 0) // Only past weeks
+          .sort((a, b) => a!.weeksAgo - b!.weeksAgo) as Array<{interval: string, weeksAgo: number}>;
+        
+        console.log('Past week intervals with weeks calculation:', intervalsWithWeeks);
+        setPastWeekIntervals(intervalsWithWeeks);
       } catch (error) {
         console.error('Error loading past week intervals:', error);
       }
@@ -128,21 +169,20 @@ const Contest = () => {
           />
           
           {/* Dynamically generate sections for all past weeks */}
-          {pastWeekIntervals.map((interval, index) => {
-            const weekNumber = index + 1;
-            const weekLabel = weekNumber === 1 ? '1 WEEK AGO' : `${weekNumber} WEEKS AGO`;
+          {pastWeekIntervals.map((item) => {
+            const weekLabel = item.weeksAgo === 1 ? '1 WEEK AGO' : `${item.weeksAgo} WEEKS AGO`;
             
             return (
               <ContestSection
-                key={interval}
+                key={item.interval}
                 title={weekLabel}
                 subtitle={`${weekLabel.toLowerCase()} results`}
                 description={`See the winners from ${weekLabel.toLowerCase()}`}
                 isActive={false}
                 showWinner={true}
                 viewMode={viewMode}
-                weekOffset={-weekNumber}
-                weekInterval={interval}
+                weekOffset={-item.weeksAgo}
+                weekInterval={item.interval}
               />
             );
           })}
