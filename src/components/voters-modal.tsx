@@ -101,7 +101,7 @@ export const VotersModal = ({ isOpen, onClose, participantId, participantName }:
       const { data: ratingHistory, error: historyError } = await supabase
         .from('contestant_rating_history')
         .select('user_id, old_rating, new_rating, action_type, changed_at')
-        .or(`participant_id.eq.${participantId},contestant_user_id.eq.${participantData.user_id}`)
+        .eq('participant_id', participantId) // CHANGED: Using only participant_id
         .order('user_id', { ascending: true })
         .order('changed_at', { ascending: false });
 
@@ -113,7 +113,7 @@ export const VotersModal = ({ isOpen, onClose, participantId, participantName }:
         const { data: currentRatings, error: currentRatingsError } = await supabase
           .from('contestant_ratings')
           .select('user_id, rating, created_at')
-          .or(`participant_id.eq.${participantId},contestant_user_id.eq.${participantData.user_id}`)
+          .eq('participant_id', participantId) // CHANGED: Using only participant_id
           .order('user_id', { ascending: true })
           .order('created_at', { ascending: false });
         
@@ -296,7 +296,7 @@ export const VotersModal = ({ isOpen, onClose, participantId, participantName }:
         .select(`
           rating,
           created_at,
-          contestant_user_id,
+          participant_id,
           contestant_name
         `)
         .eq('user_id', userId)
@@ -321,26 +321,37 @@ export const VotersModal = ({ isOpen, onClose, participantId, participantName }:
         return;
       }
 
-      // Get profiles for rated users
-      const ratedUserIds = ratings?.map(r => r.contestant_user_id).filter(Boolean) || [];
+      // Get participant data for rated participants
+      const ratedParticipantIds = ratings?.map(r => r.participant_id).filter(Boolean) || [];
+      const { data: participants } = await supabase
+        .from('weekly_contest_participants')
+        .select('id, user_id, application_data')
+        .in('id', ratedParticipantIds);
+      
+      // Get profiles for the users
+      const userIds = participants?.map(p => p.user_id).filter(Boolean) || [];
       const { data: profiles } = await supabase
         .from('profiles')
         .select('id, display_name, first_name, last_name, avatar_url')
-        .in('id', ratedUserIds);
+        .in('id', userIds);
 
       // Combine data
       const activityMap = new Map<string, UserActivity>();
 
       // Process ratings
       ratings?.forEach(rating => {
-        if (rating.contestant_user_id) {
-          const profile = profiles?.find(p => p.id === rating.contestant_user_id);
-          const key = rating.contestant_user_id;
-          const name = profile?.display_name || `${profile?.first_name || ''} ${profile?.last_name || ''}`.trim() || rating.contestant_name;
+        if (rating.participant_id) {
+          const participant = participants?.find(p => p.id === rating.participant_id);
+          const profile = profiles?.find(p => p.id === participant?.user_id);
+          const key = rating.participant_id;
+          const appData = participant?.application_data as any;
+          const firstName = appData?.first_name || '';
+          const lastName = appData?.last_name || '';
+          const name = profile?.display_name || `${firstName} ${lastName}`.trim() || rating.contestant_name;
           
           activityMap.set(key, {
             target_name: name,
-            target_user_id: rating.contestant_user_id,
+            target_user_id: participant?.user_id || '',
             rating: rating.rating,
             like_count: 0,
             last_activity: rating.created_at,
