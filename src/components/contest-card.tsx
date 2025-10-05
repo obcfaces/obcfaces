@@ -732,19 +732,19 @@ export function ContestantCard({
                    <span>{dislikesCount}</span>
                  </button>
                )}
-               <button
-                 type="button"
-                 className={cn(
-                   "inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors",
-                   hasCommented && "text-contest-blue"
-                 )}
-                 onClick={handleComment}
-                 aria-label="Comments"
-               >
-                 <MessageCircle className={cn("w-4 h-4", hasCommented ? "text-contest-blue" : "text-gray-500")} strokeWidth={1} />
-                 <span className="hidden sm:inline">Comment</span>
-                  <span>{cardData.comments}</span>
-               </button>
+                <button
+                  type="button"
+                  className={cn(
+                    "inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors",
+                    hasCommented && "text-contest-blue"
+                  )}
+                  onClick={() => openModal(0)}
+                  aria-label="Comments"
+                >
+                  <MessageCircle className={cn("w-4 h-4", hasCommented ? "text-contest-blue" : "text-gray-500")} strokeWidth={1} />
+                  <span className="hidden sm:inline">Comment</span>
+                   <span>{cardData.comments}</span>
+                </button>
                <button
                  type="button"
                  className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
