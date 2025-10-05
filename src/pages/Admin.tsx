@@ -6210,10 +6210,6 @@ const Admin = () => {
                         </Button>
                       </div>
                     </div>
-                  </>
-                )}
-
-
 
                 {(() => {
                     const filteredProfiles = profiles.filter(profile => {
@@ -6855,9 +6851,11 @@ const Admin = () => {
                     </div>
                   );
                 })()}
-              </TabsContent>
+              </>
+            )}
+          </TabsContent>
 
-              <TabsContent value="stat" className="space-y-4">
+          <TabsContent value="stat" className="space-y-4">
                 <div className="mb-6">
                   <h2 className="text-xl font-semibold mb-4">Статистика регистраций</h2>
                   
@@ -7144,25 +7142,25 @@ const Admin = () => {
                 </div>
               </TabsContent>
 
-            </Tabs>
-          </div>
+          </Tabs>
         </div>
       </div>
+    </div>
 
-      {/* Admin Photo Modal */}
-      <AdminPhotoModal
-        photos={photoModalImages}
-        currentIndex={photoModalIndex}
-        isOpen={photoModalOpen}
-        onClose={() => setPhotoModalOpen(false)}
-        contestantName={photoModalName}
-      />
+    {/* Admin Photo Modal */}
+    <AdminPhotoModal
+      photos={photoModalImages}
+      currentIndex={photoModalIndex}
+      isOpen={photoModalOpen}
+      onClose={() => setPhotoModalOpen(false)}
+      contestantName={photoModalName}
+    />
 
-      {/* Reject Reason Modal */}
-      <RejectReasonModal
-        isOpen={rejectModalOpen}
-        onClose={() => setRejectModalOpen(false)}
-        onConfirm={async (reasonTypes, notes) => {
+    {/* Reject Reason Modal */}
+    <RejectReasonModal
+      isOpen={rejectModalOpen}
+      onClose={() => setRejectModalOpen(false)}
+      onConfirm={async (reasonTypes, notes) => {
            if (applicationToReject) {
              console.log('🔴 REJECT MODAL: Starting rejection process', { 
                applicationId: applicationToReject.id, 
@@ -7259,20 +7257,20 @@ const Admin = () => {
               setRejectModalOpen(false);
             }
           }}
-       />
+      />
 
-       {/* Voters Modal */}
-       <VotersModal
-         isOpen={votersModalOpen}
-         onClose={() => setVotersModalOpen(false)}
-         participantId={selectedParticipantForVoters?.id || ''}
-         participantName={selectedParticipantForVoters?.name || ''}
-       />
+      {/* Voters Modal */}
+      <VotersModal
+        isOpen={votersModalOpen}
+        onClose={() => setVotersModalOpen(false)}
+        participantId={selectedParticipantForVoters?.id || ''}
+        participantName={selectedParticipantForVoters?.name || ''}
+      />
 
-       {/* Contest Participation Modal for editing */}
-       <ContestParticipationModal 
-         isOpen={showParticipationModal}
-         onOpenChange={(open) => {
+      {/* Contest Participation Modal for editing */}
+      <ContestParticipationModal 
+        isOpen={showParticipationModal}
+        onOpenChange={(open) => {
           setShowParticipationModal(open);
           if (!open) {
             setEditingParticipantData(null);
