@@ -986,46 +986,85 @@ const Admin = () => {
     fetchedStatsRef.current.add(userId);
     setLoadingUserStats(prev => new Set(prev).add(userId));
     try {
-      // Fetch all likes and ratings with timestamps
-      const { data: allLikes } = await supabase
+      // Fetch likes with participant profiles
+      const { data: likesData, error: likesError } = await supabase
         .from('likes')
-        .select('created_at')
+        .select(`
+          id,
+          content_id,
+          content_type,
+          participant_id,
+          created_at,
+          profiles:participant_id (
+            id,
+            display_name,
+            first_name,
+            last_name,
+            avatar_url,
+            photo_1_url,
+            photo_2_url
+          )
+        `)
         .eq('user_id', userId)
+        .eq('content_type', 'contest')
         .order('created_at', { ascending: false });
 
-      // Fetch all ratings with participant details
-      const { data: allRatingsRaw } = await supabase
+      if (likesError) {
+        console.error('❌ Error fetching likes:', likesError);
+      }
+
+      console.log(`❤️ Found ${likesData?.length || 0} likes for user ${userId}`);
+
+      // Process likes to ensure profile exists
+      const likesWithProfiles = (likesData || []).map(like => ({
+        ...like,
+        profile: like.profiles
+      })).filter(like => like.profile);
+
+      // Fetch ratings with participant info
+      const { data: ratingsData, error: ratingsError } = await supabase
         .from('contestant_ratings')
-        .select('id, rating, created_at, participant_id, contestant_user_id')
+        .select(`
+          id,
+          rating,
+          contestant_name,
+          created_at,
+          contestant_user_id,
+          participant_id,
+          profiles:contestant_user_id (
+            id,
+            display_name,
+            first_name,
+            last_name,
+            avatar_url,
+            photo_1_url,
+            photo_2_url
+          )
+        `)
         .eq('user_id', userId)
         .order('created_at', { ascending: false });
 
-      // Get unique participant IDs from ratings
-      const participantIds = new Set<string>();
-      allRatingsRaw?.forEach(rating => {
-        if (rating.participant_id) participantIds.add(rating.participant_id);
-        if (rating.contestant_user_id) participantIds.add(rating.contestant_user_id);
-      });
+      if (ratingsError) {
+        console.error('❌ Error fetching ratings:', ratingsError);
+      }
 
-      // Fetch participant profiles
-      const { data: participantProfiles } = await supabase
-        .from('profiles')
-        .select('id, display_name, first_name, last_name, avatar_url')
-        .in('id', Array.from(participantIds));
+      console.log(`⭐ Found ${ratingsData?.length || 0} ratings for user ${userId}`);
 
-      // Merge ratings with profile data
-      const allRatings = allRatingsRaw?.map(rating => {
-        const profileId = rating.contestant_user_id || rating.participant_id;
-        const profile = participantProfiles?.find(p => p.id === profileId);
-        return {
-          ...rating,
-          profile
-        };
-      }) || [];
+      const likesCount = likesWithProfiles.length;
+      const ratingsCount = ratingsData?.length || 0;
 
-      const likesCount = allLikes?.length || 0;
-      const ratingsCount = allRatings?.length || 0;
+      // Save full data for expansion
+      setUserLikesData(prev => ({
+        ...prev,
+        [userId]: likesWithProfiles
+      }));
+      
+      setUserRatingsData(prev => ({
+        ...prev,
+        [userId]: ratingsData || []
+      }));
 
+      // Save counts for display
       setUserStatsCount(prev => ({
         ...prev,
         [userId]: {
