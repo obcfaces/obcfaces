@@ -6412,9 +6412,7 @@ const Admin = () => {
                                         if (currentRole === 'suspicious') {
                                           handleRoleChange(profile.id, userName, 'usual');
                                         } else {
-                                          if (confirm(`Вы уверены, что хотите пометить ${userName} как подозрительного? Этот пользователь не сможет голосовать.`)) {
-                                            handleRoleChange(profile.id, userName, 'suspicious');
-                                          }
+                                          handleRoleChange(profile.id, userName, 'suspicious');
                                         }
                                       }}
                                       className="cursor-pointer"
@@ -6449,13 +6447,11 @@ const Admin = () => {
                                             'usual'
                                           );
                                         } else {
-                                          if (confirm(`Вы уверены, что хотите назначить роль Admin для ${profile.display_name || `${profile.first_name} ${profile.last_name}`}?`)) {
-                                            handleRoleChange(
-                                              profile.id,
-                                              profile.display_name || `${profile.first_name} ${profile.last_name}`,
-                                              'admin'
-                                            );
-                                          }
+                                          handleRoleChange(
+                                            profile.id,
+                                            profile.display_name || `${profile.first_name} ${profile.last_name}`,
+                                            'admin'
+                                          );
                                         }
                                       }}
                                       className="cursor-pointer"
