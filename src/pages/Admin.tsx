@@ -6129,15 +6129,16 @@ const Admin = () => {
                         if (profile.email_confirmed_at) return false;
                       }
                       
-                      // Фильтр по Gmail<1 (независимо от ролей и голосов)
+                      // Фильтр по Gmail<1 (только те кто голосовал)
                       if (suspiciousEmailFilter === 'gmail') {
                         const isGmail = profile.email?.toLowerCase().endsWith('@gmail.com') || false;
+                        const hasVoted = usersWhoVoted.has(profile.id);
                         const wasNotReallyVerified = !profile.email_confirmed_at || 
                           (profile.created_at && profile.email_confirmed_at && 
                             Math.abs(new Date(profile.email_confirmed_at).getTime() - new Date(profile.created_at).getTime()) < 1000);
-                        if (!(isGmail && wasNotReallyVerified)) return false;
+                        if (!(isGmail && hasVoted && wasNotReallyVerified)) return false;
                       }
-                      
+
                       // Фильтр ролей
                       if (roleFilter !== 'all') {
                         const profileRoles = userRoles.filter(ur => ur.user_id === profile.id);
@@ -6184,11 +6185,11 @@ const Admin = () => {
                           Showing {filteredProfiles.length} {filteredProfiles.length === 1 ? 'result' : 'results'}
                           {suspiciousEmailFilter === 'gmail' && (
                             <span className="ml-2 text-xs text-orange-600 font-medium">
-                              (auto-confirmed &lt;1 sec)
+                              (voted, auto-confirmed &lt;1 sec)
                             </span>
                           )}
                         </div>
-                        
+
                         <div className="grid gap-4">
                           {paginatedProfiles.map(profile => {
                             const lastActivity = userActivityData[profile.id]?.lastActivity;
