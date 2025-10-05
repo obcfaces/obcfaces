@@ -178,11 +178,36 @@ const Contest = () => {
           {pastWeekIntervals.map((item) => {
             const weekLabel = item.weeksAgo === 1 ? '1 WEEK AGO' : `${item.weeksAgo} WEEKS AGO`;
             
+            // Format interval for display: "06/10-12/10/25" -> "06 Oct - 12 Oct 2025"
+            const formatInterval = (interval: string): string => {
+              try {
+                const parts = interval.split('-');
+                if (parts.length !== 2) return interval;
+                
+                const startParts = parts[0].split('/'); // ["06", "10"]
+                const endParts = parts[1].split('/');   // ["12", "10", "25"]
+                
+                if (startParts.length !== 2 || endParts.length !== 3) return interval;
+                
+                const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                const startMonth = months[parseInt(startParts[1]) - 1];
+                const endMonth = months[parseInt(endParts[1]) - 1];
+                const year = `20${endParts[2]}`;
+                
+                return `${startParts[0]} ${startMonth} - ${endParts[0]} ${endMonth} ${year}`;
+              } catch (error) {
+                console.error('Error formatting interval:', error);
+                return interval;
+              }
+            };
+            
+            const formattedInterval = formatInterval(item.interval);
+            
             return (
               <ContestSection
                 key={item.interval}
                 title={weekLabel}
-                subtitle={`${weekLabel.toLowerCase()} results`}
+                subtitle={formattedInterval}
                 description={`See the winners from ${weekLabel.toLowerCase()}`}
                 isActive={false}
                 showWinner={true}
