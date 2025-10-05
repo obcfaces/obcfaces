@@ -6030,8 +6030,9 @@ const Admin = () => {
                 
                 {!tabLoading.registrations && (
                   <>
-                    {/* Combined filters in one row */}
+                    {/* Фильтры в три ряда */}
                     <div className="space-y-2 mb-4">
+                      {/* Ряд 1: Верификация */}
                       <div className="flex gap-2 flex-wrap">
                         <Button
                           variant={verificationFilter === 'all' ? 'default' : 'outline'}
@@ -6041,12 +6042,23 @@ const Admin = () => {
                           All Users
                         </Button>
                         <Button
+                          variant={verificationFilter === 'verified' ? 'default' : 'outline'}
+                          size="sm"
+                          onClick={() => setVerificationFilter('verified')}
+                        >
+                          Verified
+                        </Button>
+                        <Button
                           variant={verificationFilter === 'unverified' ? 'default' : 'outline'}
                           size="sm"
                           onClick={() => setVerificationFilter('unverified')}
                         >
                           Unverified
                         </Button>
+                      </div>
+                      
+                      {/* Ряд 2: Роли */}
+                      <div className="flex gap-2 flex-wrap">
                         <Button
                           variant={roleFilter === 'all' ? 'default' : 'outline'}
                           size="sm"
@@ -6055,90 +6067,55 @@ const Admin = () => {
                           All Roles
                         </Button>
                         <Button
+                          variant={roleFilter === 'suspicious' ? 'destructive' : 'outline'}
+                          size="sm"
+                          onClick={() => setRoleFilter('suspicious')}
+                        >
+                          Suspicious
+                        </Button>
+                        <Button
+                          variant={roleFilter === 'usual' ? 'default' : 'outline'}
+                          size="sm"
+                          onClick={() => setRoleFilter('usual')}
+                        >
+                          Usual
+                        </Button>
+                        <Button
+                          variant={roleFilter === 'moderator' ? 'default' : 'outline'}
+                          size="sm"
+                          onClick={() => setRoleFilter('moderator')}
+                        >
+                          Moderator
+                        </Button>
+                        <Button
                           variant={roleFilter === 'admin' ? 'default' : 'outline'}
                           size="sm"
                           onClick={() => setRoleFilter('admin')}
                         >
                           Admin
                         </Button>
-                        <Button
-                          variant={roleFilter === 'suspicious' ? 'destructive' : 'outline'}
-                          size="sm"
-                          onClick={() => {
-                            setRoleFilter('suspicious');
-                            setSuspiciousEmailFilter('all');
-                          }}
-                        >
-                          Suspicious
-                        </Button>
                       </div>
                       
-                      {/* Email type filters - independent from roles */}
+                      {/* Ряд 3: Gmail<1 фильтр */}
                       <div className="flex gap-2 flex-wrap">
                         <Button
                           variant={suspiciousEmailFilter === 'gmail' ? 'default' : 'outline'}
                           size="sm"
-                          onClick={() => {
-                            setSuspiciousEmailFilter('gmail');
-                          }}
+                          onClick={() => setSuspiciousEmailFilter('gmail')}
                         >
-                          Gmail
+                          Gmail&lt;1
                           {(() => {
                             const count = profiles.filter(p => {
                               const isGmail = p.email?.toLowerCase().endsWith('@gmail.com') || false;
-                              const hasVoted = usersWhoVoted.has(p.id);
                               const wasNotReallyVerified = !p.email_confirmed_at || 
                                 (p.created_at && p.email_confirmed_at && 
                                   Math.abs(new Date(p.email_confirmed_at).getTime() - new Date(p.created_at).getTime()) < 1000);
-                              return isGmail && hasVoted && wasNotReallyVerified;
-                            }).length;
-                            return count > 0 ? ` (${count})` : '';
-                          })()}
-                        </Button>
-                        <Button
-                          variant={suspiciousEmailFilter === 'other' ? 'default' : 'outline'}
-                          size="sm"
-                          onClick={() => {
-                            setSuspiciousEmailFilter('other');
-                          }}
-                        >
-                          Other Domains
-                          {(() => {
-                            const count = profiles.filter(p => {
-                              const isNotGmail = !p.email?.toLowerCase().endsWith('@gmail.com');
-                              const hasVoted = usersWhoVoted.has(p.id);
-                              const wasNotReallyVerified = !p.email_confirmed_at || 
-                                (p.created_at && p.email_confirmed_at && 
-                                  Math.abs(new Date(p.email_confirmed_at).getTime() - new Date(p.created_at).getTime()) < 1000);
-                              return isNotGmail && hasVoted && wasNotReallyVerified;
+                              return isGmail && wasNotReallyVerified;
                             }).length;
                             return count > 0 ? ` (${count})` : '';
                           })()}
                         </Button>
                       </div>
-                      
-                      {/* Suspicious subfilters */}
-                      {roleFilter === 'suspicious' && (
-                      <div className="flex gap-2 flex-wrap pl-4">
-                        <Button
-                          variant={suspiciousEmailFilter === 'all' ? 'default' : 'outline'}
-                          size="sm"
-                          onClick={() => {
-                            setRoleFilter('suspicious');
-                            setSuspiciousEmailFilter('all');
-                          }}
-                        >
-                          All Suspicious
-                          {(() => {
-                            const count = profiles.filter(p => {
-                              const isSuspicious = userRoles.filter(ur => ur.user_id === p.id).some(ur => ur.role === 'suspicious');
-                              return isSuspicious;
-                            }).length;
-                            return count > 0 ? ` (${count})` : '';
-                          })()}
-                        </Button>
-                      </div>
-                      )}
                     </div>
 
 
@@ -6152,33 +6129,30 @@ const Admin = () => {
                         if (profile.email_confirmed_at) return false;
                       }
                       
-                      // Фильтр по email типу (независимо от ролей)
-                      const hasVoted = usersWhoVoted.has(profile.id);
+                      // Фильтр по Gmail<1 (независимо от ролей и голосов)
                       if (suspiciousEmailFilter === 'gmail') {
                         const isGmail = profile.email?.toLowerCase().endsWith('@gmail.com') || false;
                         const wasNotReallyVerified = !profile.email_confirmed_at || 
                           (profile.created_at && profile.email_confirmed_at && 
                             Math.abs(new Date(profile.email_confirmed_at).getTime() - new Date(profile.created_at).getTime()) < 1000);
-                        if (!(isGmail && hasVoted && wasNotReallyVerified)) return false;
-                      } else if (suspiciousEmailFilter === 'other') {
-                        const isNotGmail = !profile.email?.toLowerCase().endsWith('@gmail.com');
-                        const wasNotReallyVerified = !profile.email_confirmed_at || 
-                          (profile.created_at && profile.email_confirmed_at && 
-                            Math.abs(new Date(profile.email_confirmed_at).getTime() - new Date(profile.created_at).getTime()) < 1000);
-                        if (!(isNotGmail && hasVoted && wasNotReallyVerified)) return false;
+                        if (!(isGmail && wasNotReallyVerified)) return false;
                       }
                       
                       // Фильтр ролей
-                      const profileRoles = userRoles.filter(ur => ur.user_id === profile.id);
-                      const userRole = userRoleMap[profile.id] || 'usual';
-                      
-                      if (roleFilter === 'admin') {
-                        return userRole === 'admin';
-                      } else if (roleFilter === 'usual') {
-                        return userRole === 'usual' || !userRole;
-                      } else if (roleFilter === 'suspicious') {
-                        const isSuspicious = profileRoles.some(ur => ur.role === 'suspicious');
-                        return isSuspicious;
+                      if (roleFilter !== 'all') {
+                        const profileRoles = userRoles.filter(ur => ur.user_id === profile.id);
+                        const userRole = userRoleMap[profile.id] || 'usual';
+                        
+                        if (roleFilter === 'admin') {
+                          if (userRole !== 'admin') return false;
+                        } else if (roleFilter === 'moderator') {
+                          if (userRole !== 'moderator') return false;
+                        } else if (roleFilter === 'usual') {
+                          if (userRole !== 'usual' && userRole) return false;
+                        } else if (roleFilter === 'suspicious') {
+                          const isSuspicious = profileRoles.some(ur => ur.role === 'suspicious');
+                          if (!isSuspicious) return false;
+                        }
                       }
 
                       // Фильтр поиска
@@ -6208,9 +6182,9 @@ const Admin = () => {
                         {/* Results count */}
                         <div className="text-sm text-muted-foreground">
                           Showing {filteredProfiles.length} {filteredProfiles.length === 1 ? 'result' : 'results'}
-                          {(suspiciousEmailFilter === 'gmail' || suspiciousEmailFilter === 'other') && (
+                          {suspiciousEmailFilter === 'gmail' && (
                             <span className="ml-2 text-xs text-orange-600 font-medium">
-                              (voted without real email verification)
+                              (auto-confirmed &lt;1 sec)
                             </span>
                           )}
                         </div>
