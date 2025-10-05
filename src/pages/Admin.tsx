@@ -1211,7 +1211,7 @@ const Admin = () => {
           .from('user_roles')
           .insert([{ 
             user_id: userId, 
-            role: role as 'admin' | 'moderator' | 'user'
+            role: role as 'admin' | 'moderator' | 'user' | 'suspicious'
           }]);
 
         if (insertError) throw insertError;
@@ -1223,9 +1223,12 @@ const Admin = () => {
         [userId]: role
       }));
 
+      const roleDescription = role === 'usual' ? 'usual user' : 
+                             role === 'suspicious' ? 'suspicious (cannot vote)' : role;
+
       toast({
         title: "Success",
-        description: `User role updated to ${role === 'usual' ? 'usual user' : role}`,
+        description: `User role updated to ${roleDescription}`,
       });
 
       // Обновляем данные
@@ -6259,6 +6262,22 @@ const Admin = () => {
                                       className="cursor-pointer"
                                     >
                                       {(userRoleMap[profile.id] || 'usual') === 'admin' ? '✓ Admin' : 'Make Admin'}
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem
+                                      onClick={() => {
+                                        const currentRole = userRoleMap[profile.id] || 'usual';
+                                        const userName = profile.display_name || `${profile.first_name} ${profile.last_name}`;
+                                        if (currentRole === 'suspicious') {
+                                          handleRoleChange(profile.id, userName, 'usual');
+                                        } else {
+                                          if (confirm(`Вы уверены, что хотите пометить ${userName} как подозрительного? Этот пользователь не сможет голосовать.`)) {
+                                            handleRoleChange(profile.id, userName, 'suspicious');
+                                          }
+                                        }
+                                      }}
+                                      className="cursor-pointer"
+                                    >
+                                      {(userRoleMap[profile.id] || 'usual') === 'suspicious' ? '✓ Suspicious' : 'Mark as Suspicious'}
                                     </DropdownMenuItem>
                                   </DropdownMenuContent>
                                 </DropdownMenu>
