@@ -983,6 +983,7 @@ const Admin = () => {
       return;
     }
     
+    console.log('🔵 START fetching stats for user:', userId);
     fetchedStatsRef.current.add(userId);
     setLoadingUserStats(prev => new Set(prev).add(userId));
     try {
@@ -1065,13 +1066,17 @@ const Admin = () => {
       }));
 
       // Save counts for display
-      setUserStatsCount(prev => ({
-        ...prev,
-        [userId]: {
-          likes: likesCount,
-          ratings: ratingsCount
-        }
-      }));
+      setUserStatsCount(prev => {
+        const newCounts = {
+          ...prev,
+          [userId]: {
+            likes: likesCount,
+            ratings: ratingsCount
+          }
+        };
+        console.log(`💾 Saved counts for user ${userId}:`, newCounts[userId], 'Total in state:', Object.keys(newCounts).length);
+        return newCounts;
+      });
 
       // Fetch activity data - unique logins with stats for each session
       const { data: logins } = await supabase
@@ -1744,14 +1749,17 @@ const Admin = () => {
     setUserRoleMap(roleMap);
   };
 
-  // Fetch stats for all visible profiles
+  // Fetch stats for all visible profiles - ALWAYS
   useEffect(() => {
-    profiles.forEach(profile => {
-      if (!userStatsCount[profile.id]) {
-        fetchUserStats(profile.id);
-      }
-    });
-  }, [profiles]);
+    if (activeTab === 'reg') {
+      profiles.forEach(profile => {
+        if (!fetchedStatsRef.current.has(profile.id)) {
+          console.log('📊 Auto-fetching stats for profile:', profile.id);
+          fetchUserStats(profile.id);
+        }
+      });
+    }
+  }, [profiles, activeTab]);
 
   // Fetch stats for visible profiles in Reg tab when page changes
   useEffect(() => {
