@@ -1751,8 +1751,8 @@ const Admin = () => {
 
   // Fetch stats for all visible profiles - ALWAYS
   useEffect(() => {
-    if (activeTab === 'registrations') {
-      console.log('🔵 Registrations tab active, fetching stats for', profiles.length, 'profiles');
+    if (activeTab === 'reg') {
+      console.log('🔵 Reg tab active, fetching stats for', profiles.length, 'profiles');
       profiles.forEach(profile => {
         if (!fetchedStatsRef.current.has(profile.id)) {
           console.log('📊 Auto-fetching stats for profile:', profile.id);
@@ -1762,9 +1762,9 @@ const Admin = () => {
     }
   }, [profiles, activeTab]);
 
-  // Fetch stats for visible profiles in Registrations tab when page changes
+  // Fetch stats for visible profiles in Reg tab when page changes
   useEffect(() => {
-    if (activeTab === 'registrations') {
+    if (activeTab === 'reg') {
       const filteredProfiles = profiles.filter(profile => {
         // Same filtering logic as in render
         const userRole = userRoleMap[profile.id] || 'usual';
