@@ -1627,58 +1627,69 @@ const Admin = () => {
   };
 
   // Auto-fetch activity stats for visible profiles in Reg tab
+  // Auto-fetch activity stats for visible profiles in Reg tab
   useEffect(() => {
-    if (activeTab === 'reg' && profiles.length > 0 && !loading) {
-      console.log('🔵 Reg tab active, profiles count:', profiles.length);
-      
-      // Small delay to ensure state is ready
-      const timer = setTimeout(() => {
-        // Get current page profiles
-        const filteredProfiles = profiles.filter(profile => {
-          const userRole = userRoleMap[profile.id] || 'usual';
-          
-          if (roleFilter === 'admin') {
-            return userRole === 'admin';
-          } else if (roleFilter === 'usual') {
-            return userRole === 'usual' || !userRole;
-          }
-
-          if (searchQuery.trim()) {
-            const query = searchQuery.toLowerCase();
-            const fullName = `${profile.first_name || ''} ${profile.last_name || ''}`.toLowerCase();
-            const displayName = (profile.display_name || '').toLowerCase();
-            const email = (profile.email || '').toLowerCase();
-            const ip = (profile.ip_address || '').toLowerCase();
-            
-            return fullName.includes(query) || 
-                   displayName.includes(query) || 
-                   email.includes(query) || 
-                   ip.includes(query);
-          }
-          
-          return true;
-        });
-
-        const startIdx = (regPaginationPage - 1) * regItemsPerPage;
-        const endIdx = startIdx + regItemsPerPage;
-        const paginatedProfiles = filteredProfiles.slice(startIdx, endIdx);
-        
-        console.log('📄 Visible profiles on current page:', paginatedProfiles.length);
-        
-        // Fetch activity for visible profiles that don't have stats yet
-        paginatedProfiles.forEach(profile => {
-          const hasStats = userActivityStats[profile.id] !== undefined;
-          const isLoading = loadingActivity.has(profile.id);
-          
-          if (!hasStats && !isLoading) {
-            console.log('📊 Auto-fetching activity for profile:', profile.id, profile.display_name);
-            fetchUserActivity(profile.id);
-          }
-        });
-      }, 100);
-      
-      return () => clearTimeout(timer);
+    if (activeTab !== 'reg' || profiles.length === 0 || loading) {
+      return;
     }
+
+    console.log('🔵 Reg tab active, profiles count:', profiles.length);
+    
+    // Small delay to ensure state is ready
+    const timer = setTimeout(() => {
+      // Get current page profiles
+      const filteredProfiles = profiles.filter(profile => {
+        const userRole = userRoleMap[profile.id] || 'usual';
+        
+        if (roleFilter === 'admin') {
+          return userRole === 'admin';
+        } else if (roleFilter === 'usual') {
+          return userRole === 'usual' || !userRole;
+        }
+
+        if (searchQuery.trim()) {
+          const query = searchQuery.toLowerCase();
+          const fullName = `${profile.first_name || ''} ${profile.last_name || ''}`.toLowerCase();
+          const displayName = (profile.display_name || '').toLowerCase();
+          const email = (profile.email || '').toLowerCase();
+          const ip = (profile.ip_address || '').toLowerCase();
+          
+          return fullName.includes(query) || 
+                 displayName.includes(query) || 
+                 email.includes(query) || 
+                 ip.includes(query);
+        }
+        
+        return true;
+      });
+
+      const startIdx = (regPaginationPage - 1) * regItemsPerPage;
+      const endIdx = startIdx + regItemsPerPage;
+      const paginatedProfiles = filteredProfiles.slice(startIdx, endIdx);
+      
+      console.log('📄 Visible profiles on current page:', paginatedProfiles.length);
+      
+      // Fetch activity for visible profiles
+      paginatedProfiles.forEach(profile => {
+        // Access current state values directly
+        setUserActivityStats(currentStats => {
+          setLoadingActivity(currentLoading => {
+            const hasStats = currentStats[profile.id] !== undefined;
+            const isCurrentlyLoading = currentLoading.has(profile.id);
+            
+            if (!hasStats && !isCurrentlyLoading) {
+              console.log('📊 Auto-fetching activity for profile:', profile.id, profile.display_name);
+              fetchUserActivity(profile.id);
+            }
+            
+            return currentLoading;
+          });
+          return currentStats;
+        });
+      });
+    }, 150);
+    
+    return () => clearTimeout(timer);
   }, [activeTab, profiles.length, regPaginationPage, roleFilter, searchQuery, loading]);
 
   const fetchContestApplications = async () => {
