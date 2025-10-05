@@ -6105,7 +6105,12 @@ const Admin = () => {
                             const count = profiles.filter(p => {
                               const isGmail = p.email?.toLowerCase().endsWith('@gmail.com') || false;
                               const hasVoted = usersWhoVoted.has(p.id);
-                              return isGmail && hasVoted;
+                              // Проверяем что email НЕ был подтвержден через реальную верификацию
+                              // Если email_confirmed_at NULL или разница с created_at < 60 секунд (автоподтверждение)
+                              const wasNotReallyVerified = !p.email_confirmed_at || 
+                                (p.created_at && p.email_confirmed_at && 
+                                  Math.abs(new Date(p.email_confirmed_at).getTime() - new Date(p.created_at).getTime()) < 60000);
+                              return isGmail && hasVoted && wasNotReallyVerified;
                             }).length;
                             return count > 0 ? ` (${count})` : '';
                           })()}
@@ -6123,7 +6128,11 @@ const Admin = () => {
                             const count = profiles.filter(p => {
                               const isNotGmail = !p.email?.toLowerCase().endsWith('@gmail.com');
                               const hasVoted = usersWhoVoted.has(p.id);
-                              return isNotGmail && hasVoted;
+                              // Проверяем что email НЕ был подтвержден через реальную верификацию
+                              const wasNotReallyVerified = !p.email_confirmed_at || 
+                                (p.created_at && p.email_confirmed_at && 
+                                  Math.abs(new Date(p.email_confirmed_at).getTime() - new Date(p.created_at).getTime()) < 60000);
+                              return isNotGmail && hasVoted && wasNotReallyVerified;
                             }).length;
                             return count > 0 ? ` (${count})` : '';
                           })()}
@@ -6153,13 +6162,20 @@ const Admin = () => {
                       } else if (roleFilter === 'suspicious') {
                         const hasVoted = usersWhoVoted.has(profile.id);
                         
-                        // Подфильтр по типу почты - показываем всех кто голосовал
+                        // Подфильтр по типу почты - показываем тех кто голосовал БЕЗ реальной верификации
                         if (suspiciousEmailFilter === 'gmail') {
                           const isGmail = profile.email?.toLowerCase().endsWith('@gmail.com') || false;
-                          return isGmail && hasVoted;
+                          // Email не подтвержден ИЛИ подтвержден автоматически (разница < 60 сек)
+                          const wasNotReallyVerified = !profile.email_confirmed_at || 
+                            (profile.created_at && profile.email_confirmed_at && 
+                              Math.abs(new Date(profile.email_confirmed_at).getTime() - new Date(profile.created_at).getTime()) < 60000);
+                          return isGmail && hasVoted && wasNotReallyVerified;
                         } else if (suspiciousEmailFilter === 'other') {
                           const isNotGmail = !profile.email?.toLowerCase().endsWith('@gmail.com');
-                          return isNotGmail && hasVoted;
+                          const wasNotReallyVerified = !profile.email_confirmed_at || 
+                            (profile.created_at && profile.email_confirmed_at && 
+                              Math.abs(new Date(profile.email_confirmed_at).getTime() - new Date(profile.created_at).getTime()) < 60000);
+                          return isNotGmail && hasVoted && wasNotReallyVerified;
                         }
                         
                         // "All Suspicious" - показывать всех с ролью suspicious
@@ -6196,7 +6212,7 @@ const Admin = () => {
                           Showing {filteredProfiles.length} {filteredProfiles.length === 1 ? 'result' : 'results'}
                           {roleFilter === 'suspicious' && suspiciousEmailFilter !== 'all' && (
                             <span className="ml-2 text-xs text-orange-600 font-medium">
-                              (voted users)
+                              (voted without real email verification)
                             </span>
                           )}
                         </div>
