@@ -105,7 +105,16 @@ const Index = () => {
           
           <NextWeekSection viewMode={viewMode} />
           
-          <section className="max-w-6xl mx-auto pt-2 mb-1 sm:mb-3 mt-2 bg-background rounded-lg shadow-sm shadow-foreground/10">
+          {/* Fair voting banner */}
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 mt-6 mb-4">
+            <div className="bg-red-500 text-white px-4 py-3 rounded-lg shadow-lg">
+              <p className="text-sm sm:text-base font-semibold text-center">
+                To keep things fair, we removed fake accounts and boosted votes. What you see here is 100% real.
+              </p>
+            </div>
+          </div>
+          
+          <section className="max-w-6xl mx-auto pt-2 mb-1 sm:mb-3 bg-background rounded-lg shadow-sm shadow-foreground/10">
           <ContestSection
             title="THIS WEEK"
             subtitle={getWeekRange(0)}
