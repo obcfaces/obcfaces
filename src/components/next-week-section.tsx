@@ -262,14 +262,25 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
 
   // Preload first card images when candidates load
   useEffect(() => {
-    if (filteredCandidates.length > 0 && currentIndex === 0) {
-      preloadNextCard(0).then(() => {
+    if (filteredCandidates.length > 0 && !imagesLoaded) {
+      const loadFirstCard = async () => {
+        await preloadNextCard(currentIndex);
         setImagesLoaded(true);
-      });
+      };
+      
+      // Add timeout fallback
+      const timeout = setTimeout(() => {
+        console.log('⚠️ Image preload timeout, showing card anyway');
+        setImagesLoaded(true);
+      }, 5000);
+      
+      loadFirstCard().finally(() => clearTimeout(timeout));
+      
+      return () => clearTimeout(timeout);
     }
-  }, [filteredCandidates]);
+  }, [filteredCandidates, currentIndex]);
 
-  // Preload next card images
+  // Preload next card images with timeout
   const preloadNextCard = async (nextIndex: number) => {
     if (nextIndex >= filteredCandidates.length) return true;
     
@@ -278,16 +289,25 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
 
     const images = [nextCandidate.faceImage, nextCandidate.fullBodyImage].filter(Boolean);
     
-    const imagePromises = images.map(src => {
-      return new Promise((resolve, reject) => {
-        const img = new Image();
-        img.onload = resolve;
-        img.onerror = resolve; // Resolve even on error to not block transition
-        img.src = src;
+    try {
+      const imagePromises = images.map(src => {
+        return Promise.race([
+          new Promise((resolve, reject) => {
+            const img = new Image();
+            img.onload = resolve;
+            img.onerror = resolve; // Resolve even on error
+            img.src = src;
+          }),
+          // Timeout after 3 seconds
+          new Promise(resolve => setTimeout(resolve, 3000))
+        ]);
       });
-    });
 
-    await Promise.all(imagePromises);
+      await Promise.all(imagePromises);
+    } catch (error) {
+      console.error('Error preloading images:', error);
+    }
+    
     return true;
   };
 
@@ -304,8 +324,8 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
       setIsTransitioning(true);
       setImagesLoaded(false);
       
-      // Save vote to database
       try {
+        // Save vote to database
         await supabase
           .from('next_week_votes')
           .insert({
@@ -336,8 +356,11 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
         console.error('Error saving vote:', error);
       }
       
-      // Preload next card before showing it
-      await preloadNextCard(nextIndex);
+      // Preload next card with timeout fallback
+      const preloadPromise = preloadNextCard(nextIndex);
+      const timeoutPromise = new Promise(resolve => setTimeout(resolve, 5000));
+      
+      await Promise.race([preloadPromise, timeoutPromise]);
       
       setHistory(prev => [...prev, currentIndex]);
       setCurrentIndex(nextIndex);
@@ -360,8 +383,8 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
       setIsTransitioning(true);
       setImagesLoaded(false);
       
-      // Save vote to database
       try {
+        // Save vote to database
         await supabase
           .from('next_week_votes')
           .insert({
@@ -373,8 +396,11 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
         console.error('Error saving vote:', error);
       }
       
-      // Preload next card before showing it
-      await preloadNextCard(nextIndex);
+      // Preload next card with timeout fallback
+      const preloadPromise = preloadNextCard(nextIndex);
+      const timeoutPromise = new Promise(resolve => setTimeout(resolve, 5000));
+      
+      await Promise.race([preloadPromise, timeoutPromise]);
       
       setHistory(prev => [...prev, currentIndex]);
       setCurrentIndex(nextIndex);
