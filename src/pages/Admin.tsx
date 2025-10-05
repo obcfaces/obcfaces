@@ -6104,9 +6104,8 @@ const Admin = () => {
                           {(() => {
                             const count = profiles.filter(p => {
                               const isGmail = p.email?.toLowerCase().endsWith('@gmail.com') || false;
-                              const isEmailNotConfirmed = !p.email_confirmed_at;
                               const hasVoted = usersWhoVoted.has(p.id);
-                              return isGmail && isEmailNotConfirmed && hasVoted;
+                              return isGmail && hasVoted;
                             }).length;
                             return count > 0 ? ` (${count})` : '';
                           })()}
@@ -6123,9 +6122,8 @@ const Admin = () => {
                           {(() => {
                             const count = profiles.filter(p => {
                               const isNotGmail = !p.email?.toLowerCase().endsWith('@gmail.com');
-                              const isEmailNotConfirmed = !p.email_confirmed_at;
                               const hasVoted = usersWhoVoted.has(p.id);
-                              return isNotGmail && isEmailNotConfirmed && hasVoted;
+                              return isNotGmail && hasVoted;
                             }).length;
                             return count > 0 ? ` (${count})` : '';
                           })()}
@@ -6155,15 +6153,13 @@ const Admin = () => {
                       } else if (roleFilter === 'suspicious') {
                         const hasVoted = usersWhoVoted.has(profile.id);
                         
-                        // Подфильтр по типу почты - показываем тех, у кого email НЕ подтвержден, но голосовали
+                        // Подфильтр по типу почты - показываем всех кто голосовал
                         if (suspiciousEmailFilter === 'gmail') {
                           const isGmail = profile.email?.toLowerCase().endsWith('@gmail.com') || false;
-                          const isEmailNotConfirmed = !profile.email_confirmed_at;
-                          return isGmail && isEmailNotConfirmed && hasVoted;
+                          return isGmail && hasVoted;
                         } else if (suspiciousEmailFilter === 'other') {
                           const isNotGmail = !profile.email?.toLowerCase().endsWith('@gmail.com');
-                          const isEmailNotConfirmed = !profile.email_confirmed_at;
-                          return isNotGmail && isEmailNotConfirmed && hasVoted;
+                          return isNotGmail && hasVoted;
                         }
                         
                         // "All Suspicious" - показывать всех с ролью suspicious
@@ -6200,7 +6196,7 @@ const Admin = () => {
                           Showing {filteredProfiles.length} {filteredProfiles.length === 1 ? 'result' : 'results'}
                           {roleFilter === 'suspicious' && suspiciousEmailFilter !== 'all' && (
                             <span className="ml-2 text-xs text-orange-600 font-medium">
-                              (unconfirmed email + voted) - Total voted users: {usersWhoVoted.size}
+                              (voted users)
                             </span>
                           )}
                         </div>
