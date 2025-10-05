@@ -6182,7 +6182,8 @@ const Admin = () => {
                       <div className="space-y-4">
                         {/* Results count */}
                         <div className="text-sm text-muted-foreground">
-                          Showing {filteredProfiles.length} {filteredProfiles.length === 1 ? 'result' : 'results'}
+                          Showing {paginatedProfiles.length} of {filteredProfiles.length} {filteredProfiles.length === 1 ? 'result' : 'results'} 
+                          {filteredProfiles.length > regItemsPerPage && ` (page ${regPaginationPage} of ${totalRegPages})`}
                           {suspiciousEmailFilter === 'gmail' && (
                             <span className="ml-2 text-xs text-orange-600 font-medium">
                               (voted, auto-confirmed &lt;1 sec)
