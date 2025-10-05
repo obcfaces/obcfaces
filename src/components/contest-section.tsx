@@ -883,6 +883,17 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
         </div>
       )}
 
+      {/* Fair voting banner for THIS WEEK */}
+      {title === "THIS WEEK" && (
+        <div className="px-4 sm:px-6 mb-6">
+          <div className="bg-red-500 text-white px-4 py-3 rounded-lg shadow-lg">
+            <p className="text-sm sm:text-base text-center">
+              To keep things fair, we removed fake accounts and boosted votes. What you see here is 100% real.
+            </p>
+          </div>
+        </div>
+      )}
+
       {isLoading ? (
         <div className="px-0 sm:px-6 grid grid-cols-1 lg:grid-cols-2 gap-1 sm:gap-3 max-w-full overflow-hidden">
           {/* Loading skeleton */}
