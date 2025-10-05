@@ -118,7 +118,6 @@ export type Database = {
           action_type: string
           changed_at: string
           contestant_name: string
-          contestant_user_id: string | null
           created_at: string
           id: string
           new_rating: number
@@ -131,7 +130,6 @@ export type Database = {
           action_type?: string
           changed_at?: string
           contestant_name: string
-          contestant_user_id?: string | null
           created_at?: string
           id?: string
           new_rating: number
@@ -144,7 +142,6 @@ export type Database = {
           action_type?: string
           changed_at?: string
           contestant_name?: string
-          contestant_user_id?: string | null
           created_at?: string
           id?: string
           new_rating?: number
@@ -158,7 +155,6 @@ export type Database = {
       contestant_ratings: {
         Row: {
           contestant_name: string
-          contestant_user_id: string | null
           created_at: string
           id: string
           participant_id: string | null
@@ -168,7 +164,6 @@ export type Database = {
         }
         Insert: {
           contestant_name: string
-          contestant_user_id?: string | null
           created_at?: string
           id?: string
           participant_id?: string | null
@@ -178,7 +173,6 @@ export type Database = {
         }
         Update: {
           contestant_name?: string
-          contestant_user_id?: string | null
           created_at?: string
           id?: string
           participant_id?: string | null
@@ -1141,28 +1135,6 @@ export type Database = {
           is_contest_participant?: boolean | null
         }
         Relationships: []
-      }
-      participant_stats: {
-        Row: {
-          avg_rating: number | null
-          contest_id: string | null
-          contest_status: string | null
-          first_name: string | null
-          last_name: string | null
-          total_ratings: number | null
-          user_id: string | null
-          week_end_date: string | null
-          week_start_date: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "weekly_contest_participants_contest_id_fkey"
-            columns: ["contest_id"]
-            isOneToOne: false
-            referencedRelation: "weekly_contests"
-            referencedColumns: ["id"]
-          },
-        ]
       }
     }
     Functions: {
