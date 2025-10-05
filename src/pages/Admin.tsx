@@ -2057,6 +2057,7 @@ const Admin = () => {
         .from('weekly_contest_participants')
         .select('*')
         .in('admin_status', ['next week', 'next week on site'])
+        .is('deleted_at', null)
         .order('created_at', { ascending: false });
       
       if (error) {
