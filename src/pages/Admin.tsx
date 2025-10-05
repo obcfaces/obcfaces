@@ -6210,6 +6210,8 @@ const Admin = () => {
                         </Button>
                       </div>
                     </div>
+                  </>
+                )}
 
 
 
@@ -6281,23 +6283,6 @@ const Admin = () => {
 
                      return (
                       <div className="space-y-4">
-                        {/* Results count */}
-                        <div className="text-sm text-muted-foreground">
-                          Showing {paginatedProfiles.length} of {filteredProfiles.length} {filteredProfiles.length === 1 ? 'result' : 'results'} 
-                          {filteredProfiles.length > regItemsPerPage && ` (page ${regPaginationPage} of ${totalRegPages})`}
-                          {suspiciousEmailFilter === 'gmail-auto' && (
-                            <span className="ml-2 text-xs text-orange-600 font-medium">
-                              (auto-confirmed &lt;1 sec, no votes)
-                            </span>
-                          )}
-                          {suspiciousEmailFilter === 'gmail-voted' && (
-                            <span className="ml-2 text-xs text-orange-600 font-medium">
-                              (voted, auto-confirmed &lt;1 sec)
-                            </span>
-                          )}
-                        </div>
-                        )}
-
                         {/* Results count */}
                         <div className="text-sm text-muted-foreground">
                           Showing {paginatedProfiles.length} of {filteredProfiles.length} {filteredProfiles.length === 1 ? 'result' : 'results'} 
@@ -6870,8 +6855,6 @@ const Admin = () => {
                     </div>
                   );
                 })()}
-                </>
-                )}
               </TabsContent>
 
               <TabsContent value="stat" className="space-y-4">
@@ -7179,7 +7162,7 @@ const Admin = () => {
       <RejectReasonModal
         isOpen={rejectModalOpen}
         onClose={() => setRejectModalOpen(false)}
-         onConfirm={async (reasonTypes, notes) => {
+        onConfirm={async (reasonTypes, notes) => {
            if (applicationToReject) {
              console.log('🔴 REJECT MODAL: Starting rejection process', { 
                applicationId: applicationToReject.id, 
