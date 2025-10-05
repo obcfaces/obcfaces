@@ -3472,14 +3472,8 @@ const Admin = () => {
                   let weekMatch = true;
                   if (nextWeekFilter === 'all') {
                     weekMatch = true;
-                  } else if (nextWeekFilter === 'current') {
-                    // Показываем только текущую неделю
-                    const currentWeekStart = new Date();
-                    const currentDay = currentWeekStart.getDay();
-                    const mondayOffset = currentDay === 0 ? -6 : 1 - currentDay;
-                    currentWeekStart.setDate(currentWeekStart.getDate() + mondayOffset);
-                    weekMatch = p.status_assigned_date >= currentWeekStart.toISOString().split('T')[0];
                   } else {
+                    // Фильтруем по week_interval
                     weekMatch = p.week_interval === nextWeekFilter;
                   }
                   return statusMatch && weekMatch;
