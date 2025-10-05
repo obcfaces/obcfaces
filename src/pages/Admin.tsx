@@ -6031,6 +6031,13 @@ const Admin = () => {
                       >
                         Admin
                       </Button>
+                      <Button
+                        variant={roleFilter === 'suspicious' ? 'destructive' : 'outline'}
+                        size="sm"
+                        onClick={() => setRoleFilter('suspicious')}
+                      >
+                        Suspicious
+                      </Button>
                     </div>
                   </>
                 )}
@@ -6045,11 +6052,15 @@ const Admin = () => {
                       }
                       
                       // Фильтр ролей
+                      const profileRoles = userRoles.filter(ur => ur.user_id === profile.id);
                       const userRole = userRoleMap[profile.id] || 'usual';
+                      
                       if (roleFilter === 'admin') {
                         return userRole === 'admin';
                       } else if (roleFilter === 'usual') {
                         return userRole === 'usual' || !userRole;
+                      } else if (roleFilter === 'suspicious') {
+                        return profileRoles.some(ur => ur.role === 'suspicious');
                       }
 
                       // Фильтр поиска
