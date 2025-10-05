@@ -4,20 +4,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
+import { lazy, Suspense } from "react";
 import Index from "./pages/Index";
-import NotFound from "./pages/NotFound";
-import Auth from "./pages/Auth";
-import Account from "./pages/Account";
-import Profile from "./pages/Profile";
-import Contest from "./pages/Contest";
-import Terms from "./pages/Terms";
-import Privacy from "./pages/Privacy";
-import CookiePolicy from "./pages/CookiePolicy";
-import Messages from "./pages/Messages";
-import Likes from "./pages/Likes";
-import Admin from "./pages/Admin";
-import ResetPassword from "./pages/ResetPassword";
-import TestTransition from "./pages/TestTransition";
 import AuthCallbackHandler from "@/components/auth-callback-handler";
 import TopBar from "@/components/top-bar";
 import { Footer } from "@/components/footer";
@@ -25,6 +13,21 @@ import { SocialWidgets } from "@/components/social-widgets";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { CookieConsent } from "@/components/cookie-consent";
 import { ReferralBanner } from "@/components/referral-banner";
+
+// Lazy load heavy pages that aren't needed initially
+const Admin = lazy(() => import("./pages/Admin"));
+const Contest = lazy(() => import("./pages/Contest"));
+const Profile = lazy(() => import("./pages/Profile"));
+const Messages = lazy(() => import("./pages/Messages"));
+const Likes = lazy(() => import("./pages/Likes"));
+const Account = lazy(() => import("./pages/Account"));
+const Auth = lazy(() => import("./pages/Auth"));
+const Terms = lazy(() => import("./pages/Terms"));
+const Privacy = lazy(() => import("./pages/Privacy"));
+const CookiePolicy = lazy(() => import("./pages/CookiePolicy"));
+const ResetPassword = lazy(() => import("./pages/ResetPassword"));
+const TestTransition = lazy(() => import("./pages/TestTransition"));
+const NotFound = lazy(() => import("./pages/NotFound"));
 
 
 
@@ -42,7 +45,7 @@ const ConditionalSocialWidgets = () => {
 };
 
 const App = () => {
-  console.log("App component rendering - fixed Route error");
+  console.log("App component rendering - with lazy loading optimization");
   
   return (
     <div className="min-h-screen w-full flex flex-col">
@@ -57,23 +60,29 @@ const App = () => {
               <ReferralBanner />
               <TopBar />
               <main className="w-full flex-1">
-                <Routes>
-                  <Route path="/" element={<Index />} />
-                  <Route path="/contest" element={<Contest />} />
-                  <Route path="/auth" element={<Auth />} />
-                  <Route path="/account" element={<Account />} />
-                  <Route path="/u/:id" element={<Profile />} />
-                  <Route path="/messages" element={<Messages />} />
-                  <Route path="/admin" element={<Admin />} />
-                  <Route path="/terms" element={<Terms />} />
-                  <Route path="/privacy" element={<Privacy />} />
-                  <Route path="/cookie-policy" element={<CookiePolicy />} />
-                  <Route path="/likes" element={<Likes />} />
-                  <Route path="/reset-password" element={<ResetPassword />} />
-                  <Route path="/test-transition" element={<TestTransition />} />
-                  {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
+                <Suspense fallback={
+                  <div className="flex items-center justify-center min-h-screen">
+                    <div className="animate-pulse text-muted-foreground">Loading...</div>
+                  </div>
+                }>
+                  <Routes>
+                    <Route path="/" element={<Index />} />
+                    <Route path="/contest" element={<Contest />} />
+                    <Route path="/auth" element={<Auth />} />
+                    <Route path="/account" element={<Account />} />
+                    <Route path="/u/:id" element={<Profile />} />
+                    <Route path="/messages" element={<Messages />} />
+                    <Route path="/admin" element={<Admin />} />
+                    <Route path="/terms" element={<Terms />} />
+                    <Route path="/privacy" element={<Privacy />} />
+                    <Route path="/cookie-policy" element={<CookiePolicy />} />
+                    <Route path="/likes" element={<Likes />} />
+                    <Route path="/reset-password" element={<ResetPassword />} />
+                    <Route path="/test-transition" element={<TestTransition />} />
+                    {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                </Suspense>
               </main>
               <Footer />
               <ConditionalSocialWidgets />
