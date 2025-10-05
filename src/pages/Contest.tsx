@@ -53,7 +53,7 @@ const Contest = () => {
         // Get unique intervals and sort them (newest first)
         const uniqueIntervals = Array.from(new Set(data?.map(p => p.week_interval).filter(Boolean) as string[]));
         
-        // Sort by date (parse DD/MM-DD/MM/YY format)
+        // Sort by date (parse DD/MM-DD/MM/YY format) - newest first
         const sortedIntervals = uniqueIntervals.sort((a, b) => {
           // Extract end date from format "DD/MM-DD/MM/YY"
           const getEndDate = (interval: string) => {
@@ -66,9 +66,10 @@ const Contest = () => {
             
             const day = parseInt(endParts[0]);
             const month = parseInt(endParts[1]) - 1; // JS months are 0-indexed
-            const year = 2000 + parseInt(endParts[2]);
+            const year = parseInt(endParts[2]);
+            const fullYear = year < 50 ? 2000 + year : 1900 + year; // Handle 2-digit years
             
-            return new Date(year, month, day);
+            return new Date(fullYear, month, day);
           };
           
           return getEndDate(b).getTime() - getEndDate(a).getTime();
