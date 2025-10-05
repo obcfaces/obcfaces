@@ -387,8 +387,7 @@ export function ContestantCard({
       const ratingData = {
         user_id: propUser.id,
         contestant_name: name,
-        participant_id: profileId, // Use participant_id for the rating
-        // contestant_user_id: userId, // COMMENTED OUT - migrating to participant_id only
+        participant_id: profileId,
         rating: rating
       };
       

@@ -585,8 +585,7 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
             const contestantData = {
               rank: contestant.final_rank || 0,
               name: `${appData.first_name || 'Unknown'} ${appData.last_name || ''}`.trim(),
-              profileId: contestant.id, // Use participant id for rating queries
-              // userId: contestant.user_id, // COMMENTED OUT - migrating to participant_id only
+              profileId: contestant.id,
               country: profileData.country || (appData.country === 'PH' ? 'Philippines' : (appData.country || 'Unknown')),
               city: profileData.city || appData.city || 'Unknown',
               age: profileData.age || (appData.birth_year ? new Date().getFullYear() - parseInt(appData.birth_year) : 0),
@@ -670,7 +669,6 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
               rank: contestant.final_rank || 0,
               name: `${appData.first_name || 'Unknown'} ${appData.last_name || ''}`.trim(),
               profileId: contestant.id,
-              // userId: contestant.user_id, // COMMENTED OUT - migrating to participant_id only
               country: profileData.country || (appData.country === 'PH' ? 'Philippines' : (appData.country || 'Unknown')),
               city: profileData.city || appData.city || 'Unknown',
               age: profileData.age || (appData.birth_year ? new Date().getFullYear() - parseInt(appData.birth_year) : 0),
@@ -738,7 +736,6 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
               rank: contestant.final_rank || 0,
               name: `${appData.first_name || 'Unknown'} ${appData.last_name || ''}`.trim(),
               profileId: contestant.id,
-              // userId: contestant.user_id, // COMMENTED OUT - migrating to participant_id only
               country: profileData.country || (appData.country === 'PH' ? 'Philippines' : (appData.country || 'Unknown')),
               city: profileData.city || appData.city || 'Unknown',
               age: profileData.age || (appData.birth_year ? new Date().getFullYear() - parseInt(appData.birth_year) : 0),
@@ -799,8 +796,7 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
           const contestantData = {
             rank: contestant.final_rank || 0,
             name: `${contestant.first_name || 'Unknown'} ${contestant.last_name || ''}`.trim(),
-            profileId: contestant.participant_id, // Use participant_id for rating queries
-            // userId: contestant.user_id, // COMMENTED OUT - migrating to participant_id only
+            profileId: contestant.participant_id,
             country: contestant.country || 'Unknown',
             city: contestant.city || 'Unknown',
             age: contestant.age || 0,

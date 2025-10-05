@@ -101,7 +101,7 @@ export const VotersModal = ({ isOpen, onClose, participantId, participantName }:
       const { data: ratingHistory, error: historyError } = await supabase
         .from('contestant_rating_history')
         .select('user_id, old_rating, new_rating, action_type, changed_at')
-        .eq('participant_id', participantId) // CHANGED: Using only participant_id
+        .eq('participant_id', participantId)
         .order('user_id', { ascending: true })
         .order('changed_at', { ascending: false });
 
@@ -113,7 +113,7 @@ export const VotersModal = ({ isOpen, onClose, participantId, participantName }:
         const { data: currentRatings, error: currentRatingsError } = await supabase
           .from('contestant_ratings')
           .select('user_id, rating, created_at')
-          .eq('participant_id', participantId) // CHANGED: Using only participant_id
+          .eq('participant_id', participantId)
           .order('user_id', { ascending: true })
           .order('created_at', { ascending: false });
         
