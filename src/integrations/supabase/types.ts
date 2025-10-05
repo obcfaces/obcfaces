@@ -1193,6 +1193,13 @@ export type Database = {
           new_applications_count: number
         }[]
       }
+      get_clean_participant_rating_stats: {
+        Args: { target_participant_id: string }
+        Returns: {
+          average_rating: number
+          total_votes: number
+        }[]
+      }
       get_content_like_stats: {
         Args: {
           content_id_param: string
