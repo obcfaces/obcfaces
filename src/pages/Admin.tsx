@@ -4264,17 +4264,15 @@ const Admin = () => {
 
                 // Sort by rating (highest first) before pagination
                 const sortedFiltered = filteredByWeek.sort((a, b) => {
-                  // Sort by final_rank first (winners at top)
-                  if (a.final_rank && !b.final_rank) return -1;
-                  if (!a.final_rank && b.final_rank) return 1;
-                  if (a.final_rank && b.final_rank) return a.final_rank - b.final_rank;
+                  // For past participants, sort ONLY by current average_rating and total_votes
+                  // DO NOT use final_rank as it may be from a different week
                   
-                  // Then by average_rating (highest first)
+                  // Sort by average_rating (highest first)
                   const ratingA = Number(a.average_rating) || 0;
                   const ratingB = Number(b.average_rating) || 0;
                   if (ratingB !== ratingA) return ratingB - ratingA;
                   
-                  // Finally by total_votes (highest first)
+                  // Then by total_votes (highest first)
                   const votesA = Number(a.total_votes) || 0;
                   const votesB = Number(b.total_votes) || 0;
                   return votesB - votesA;
