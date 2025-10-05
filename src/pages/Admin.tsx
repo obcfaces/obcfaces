@@ -6542,7 +6542,7 @@ const Admin = () => {
                                    }}
                                  >
                                     <Star className="h-4 w-4 text-yellow-500" />
-                                    {!userActivityStats[profile.id] ? (
+                                    {loadingActivity.has(profile.id) ? (
                                       <Loader2 className="h-3 w-3 animate-spin" />
                                     ) : (
                                       <span className="text-xs font-medium">
@@ -6561,7 +6561,7 @@ const Admin = () => {
                                    }}
                                  >
                                     <Heart className="h-4 w-4 text-red-500" />
-                                    {!userActivityStats[profile.id] ? (
+                                    {loadingActivity.has(profile.id) ? (
                                       <Loader2 className="h-3 w-3 animate-spin" />
                                     ) : (
                                       <span className="text-xs font-medium">
