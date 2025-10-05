@@ -1751,7 +1751,8 @@ const Admin = () => {
 
   // Fetch stats for all visible profiles - ALWAYS
   useEffect(() => {
-    if (activeTab === 'reg') {
+    if (activeTab === 'registrations') {
+      console.log('🔵 Registrations tab active, fetching stats for', profiles.length, 'profiles');
       profiles.forEach(profile => {
         if (!fetchedStatsRef.current.has(profile.id)) {
           console.log('📊 Auto-fetching stats for profile:', profile.id);
@@ -1761,9 +1762,9 @@ const Admin = () => {
     }
   }, [profiles, activeTab]);
 
-  // Fetch stats for visible profiles in Reg tab when page changes
+  // Fetch stats for visible profiles in Registrations tab when page changes
   useEffect(() => {
-    if (activeTab === 'reg') {
+    if (activeTab === 'registrations') {
       const filteredProfiles = profiles.filter(profile => {
         // Same filtering logic as in render
         const userRole = userRoleMap[profile.id] || 'usual';
@@ -1794,9 +1795,10 @@ const Admin = () => {
       const endIdx = startIdx + regItemsPerPage;
       const paginatedProfiles = filteredProfiles.slice(startIdx, endIdx);
       
+      console.log('📄 Page changed, checking stats for', paginatedProfiles.length, 'visible profiles');
       paginatedProfiles.forEach(profile => {
         if (!fetchedStatsRef.current.has(profile.id)) {
-          console.log('📊 Fetching stats for profile in Reg tab:', profile.id);
+          console.log('📊 Fetching stats for paginated profile:', profile.id);
           fetchUserStats(profile.id);
         }
       });
