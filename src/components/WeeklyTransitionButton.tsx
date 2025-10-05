@@ -8,6 +8,7 @@ export const WeeklyTransitionButton = () => {
   const { toast } = useToast();
   const [isRunningTransition, setIsRunningTransition] = React.useState(false);
   const [isRunningStatus, setIsRunningStatus] = React.useState(false);
+  const [isRunningPreNext, setIsRunningPreNext] = React.useState(false);
 
   const handleWeeklyTransition = async () => {
     if (isRunningTransition) return;
@@ -101,8 +102,59 @@ export const WeeklyTransitionButton = () => {
     }
   };
 
+  const handlePreNextWeekTransition = async () => {
+    if (isRunningPreNext) return;
+    
+    setIsRunningPreNext(true);
+    
+    try {
+      console.log('Calling transition-pre-next-week edge function...');
+      
+      const { data, error } = await supabase.functions.invoke('transition-pre-next-week', {
+        body: {}
+      });
+
+      if (error) throw error;
+
+      console.log('Pre next week transition result:', data);
+      
+      let message = data.message || 'Transition completed!';
+      if (data.transitionCount !== undefined) {
+        message = `Transitioned ${data.transitionCount} participants from "pre next week" to "next week" (${data.nextWeekInterval})`;
+      }
+
+      toast({
+        title: "Pre Next Week → Next Week",
+        description: message,
+      });
+
+      // Reload page after 2 seconds to show updated data
+      setTimeout(() => window.location.reload(), 2000);
+
+    } catch (error) {
+      console.error('Error running pre next week transition:', error);
+      toast({
+        title: "Error",
+        description: "Failed to run transition: " + (error as Error).message,
+        variant: "destructive",
+      });
+    } finally {
+      setIsRunningPreNext(false);
+    }
+  };
+
   return (
-    <div className="flex gap-2">
+    <div className="flex gap-2 flex-wrap">
+      <Button 
+        onClick={handlePreNextWeekTransition}
+        variant="default" 
+        className="flex items-center gap-2"
+        disabled={isRunningPreNext}
+      >
+        <RefreshCw className={`h-4 w-4 ${isRunningPreNext ? 'animate-spin' : ''}`} />
+        {isRunningPreNext ? "Running..." : "Pre Next Week → Next Week"}
+      </Button>
+
       <Button 
         onClick={handleStatusTransition}
         variant="outline" 
@@ -110,7 +162,7 @@ export const WeeklyTransitionButton = () => {
         disabled={isRunningStatus}
       >
         <RefreshCw className={`h-4 w-4 ${isRunningStatus ? 'animate-spin' : ''}`} />
-        {isRunningStatus ? "Running..." : "Run Status Transition"}
+        {isRunningStatus ? "Running..." : "All Status Transitions"}
       </Button>
       
       <Button 
@@ -120,7 +172,7 @@ export const WeeklyTransitionButton = () => {
         disabled={isRunningTransition}
       >
         <Clock className="h-4 w-4" />
-        {isRunningTransition ? "Running..." : "Run Weekly Transition"}
+        {isRunningTransition ? "Running..." : "Weekly Transition"}
       </Button>
     </div>
   );
