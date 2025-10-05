@@ -6003,73 +6003,81 @@ const Admin = () => {
                 {!tabLoading.registrations && (
                   <>
                     {/* Combined filters in one row */}
-                    <div className="flex gap-2 mb-4 flex-wrap">
-                      <Button
-                        variant={verificationFilter === 'all' ? 'default' : 'outline'}
-                        size="sm"
-                        onClick={() => setVerificationFilter('all')}
-                      >
-                        All Users
-                      </Button>
-                      <Button
-                        variant={verificationFilter === 'unverified' ? 'default' : 'outline'}
-                        size="sm"
-                        onClick={() => setVerificationFilter('unverified')}
-                      >
-                        Unverified
-                      </Button>
-                      <Button
-                        variant={roleFilter === 'all' ? 'default' : 'outline'}
-                        size="sm"
-                        onClick={() => setRoleFilter('all')}
-                      >
-                        All Roles
-                      </Button>
-                      <Button
-                        variant={roleFilter === 'admin' ? 'default' : 'outline'}
-                        size="sm"
-                        onClick={() => setRoleFilter('admin')}
-                      >
-                        Admin
-                      </Button>
-                      <Button
-                        variant={roleFilter === 'suspicious' ? 'destructive' : 'outline'}
-                        size="sm"
-                        onClick={() => {
-                          setRoleFilter('suspicious');
-                          setSuspiciousEmailFilter('all');
-                        }}
-                      >
-                        Suspicious
-                      </Button>
+                    <div className="space-y-2 mb-4">
+                      <div className="flex gap-2 flex-wrap">
+                        <Button
+                          variant={verificationFilter === 'all' ? 'default' : 'outline'}
+                          size="sm"
+                          onClick={() => setVerificationFilter('all')}
+                        >
+                          All Users
+                        </Button>
+                        <Button
+                          variant={verificationFilter === 'unverified' ? 'default' : 'outline'}
+                          size="sm"
+                          onClick={() => setVerificationFilter('unverified')}
+                        >
+                          Unverified
+                        </Button>
+                        <Button
+                          variant={roleFilter === 'all' ? 'default' : 'outline'}
+                          size="sm"
+                          onClick={() => setRoleFilter('all')}
+                        >
+                          All Roles
+                        </Button>
+                        <Button
+                          variant={roleFilter === 'admin' ? 'default' : 'outline'}
+                          size="sm"
+                          onClick={() => setRoleFilter('admin')}
+                        >
+                          Admin
+                        </Button>
+                        <Button
+                          variant={roleFilter === 'suspicious' ? 'destructive' : 'outline'}
+                          size="sm"
+                          onClick={() => {
+                            setRoleFilter('suspicious');
+                            setSuspiciousEmailFilter('all');
+                          }}
+                        >
+                          Suspicious
+                        </Button>
+                      </div>
                       
-                      {/* Suspicious email subfilters */}
-                      {roleFilter === 'suspicious' && (
-                        <>
-                          <div className="w-px h-8 bg-border" />
-                          <Button
-                            variant={suspiciousEmailFilter === 'all' ? 'default' : 'outline'}
-                            size="sm"
-                            onClick={() => setSuspiciousEmailFilter('all')}
-                          >
-                            All Suspicious
-                          </Button>
-                          <Button
-                            variant={suspiciousEmailFilter === 'gmail' ? 'default' : 'outline'}
-                            size="sm"
-                            onClick={() => setSuspiciousEmailFilter('gmail')}
-                          >
-                            Gmail
-                          </Button>
-                          <Button
-                            variant={suspiciousEmailFilter === 'other' ? 'default' : 'outline'}
-                            size="sm"
-                            onClick={() => setSuspiciousEmailFilter('other')}
-                          >
-                            Other Domains
-                          </Button>
-                        </>
-                      )}
+                      {/* Suspicious email subfilters - always visible under Suspicious */}
+                      <div className="flex gap-2 flex-wrap pl-4">
+                        <Button
+                          variant={suspiciousEmailFilter === 'all' ? 'default' : 'outline'}
+                          size="sm"
+                          onClick={() => {
+                            setRoleFilter('suspicious');
+                            setSuspiciousEmailFilter('all');
+                          }}
+                        >
+                          All Suspicious
+                        </Button>
+                        <Button
+                          variant={suspiciousEmailFilter === 'gmail' ? 'default' : 'outline'}
+                          size="sm"
+                          onClick={() => {
+                            setRoleFilter('suspicious');
+                            setSuspiciousEmailFilter('gmail');
+                          }}
+                        >
+                          Gmail
+                        </Button>
+                        <Button
+                          variant={suspiciousEmailFilter === 'other' ? 'default' : 'outline'}
+                          size="sm"
+                          onClick={() => {
+                            setRoleFilter('suspicious');
+                            setSuspiciousEmailFilter('other');
+                          }}
+                        >
+                          Other Domains
+                        </Button>
+                      </div>
                     </div>
                   </>
                 )}
