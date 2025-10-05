@@ -4262,12 +4262,30 @@ const Admin = () => {
                   );
                 }
 
+                // Sort by rating (highest first) before pagination
+                const sortedFiltered = filteredByWeek.sort((a, b) => {
+                  // Sort by final_rank first (winners at top)
+                  if (a.final_rank && !b.final_rank) return -1;
+                  if (!a.final_rank && b.final_rank) return 1;
+                  if (a.final_rank && b.final_rank) return a.final_rank - b.final_rank;
+                  
+                  // Then by average_rating (highest first)
+                  const ratingA = Number(a.average_rating) || 0;
+                  const ratingB = Number(b.average_rating) || 0;
+                  if (ratingB !== ratingA) return ratingB - ratingA;
+                  
+                  // Finally by total_votes (highest first)
+                  const votesA = Number(a.total_votes) || 0;
+                  const votesB = Number(b.total_votes) || 0;
+                  return votesB - votesA;
+                });
+
                 // Apply pagination for Past section when showAllCards is active
-                const totalPastParticipants = filteredByWeek.length;
+                const totalPastParticipants = sortedFiltered.length;
                 const totalPastPages = Math.ceil(totalPastParticipants / itemsPerPage);
                 const pastStartIndex = (pastCurrentPage - 1) * itemsPerPage;
                 const pastEndIndex = pastStartIndex + itemsPerPage;
-                const paginatedPastParticipants = showAllCards ? filteredByWeek.slice(pastStartIndex, pastEndIndex) : filteredByWeek;
+                const paginatedPastParticipants = showAllCards ? sortedFiltered.slice(pastStartIndex, pastEndIndex) : sortedFiltered;
 
                 return (
                   <>
@@ -4351,6 +4369,22 @@ const Admin = () => {
                                 {appData.weight_kg}kg • {appData.height_cm}cm • {appData.gender} • {appData.birth_year} • {appData.marital_status} • {appData.has_children ? 'Has children' : 'No children'}
                               </div>
                             )}
+
+                            {/* Rating and Votes Display */}
+                            <div className="flex items-center gap-3 mb-2">
+                              <div className="flex items-center gap-1">
+                                <Star className="h-3 w-3 text-yellow-500 fill-yellow-500" />
+                                <span className="text-xs font-semibold">
+                                  {Number(participant.average_rating || 0).toFixed(1)}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <Heart className="h-3 w-3 text-pink-500 fill-pink-500" />
+                                <span className="text-xs font-semibold">
+                                  {participant.total_votes || 0}
+                                </span>
+                              </div>
+                            </div>
 
                             <div className="text-xs text-muted-foreground mb-1">
                               {participantProfile?.email && (
