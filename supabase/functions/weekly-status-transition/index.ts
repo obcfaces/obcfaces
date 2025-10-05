@@ -140,7 +140,53 @@ serve(async (req) => {
       }
     }
 
-    // 3. Переводим "pre next week" → "next week" с новым интервалом
+    // 3. Переводим "pre next week" → "next week" с интервалом СЛЕДУЮЩЕЙ недели
+    // Рассчитываем интервал следующей недели (на неделю вперед от текущей)
+    const { data: nextWeekIntervalData, error: nextIntervalError } = await supabase
+      .rpc('get_current_week_interval')
+    
+    if (nextIntervalError) {
+      console.error('Error getting next week interval:', nextIntervalError)
+      throw nextIntervalError
+    }
+
+    // Calculate next week's interval
+    // Current interval format is DD/MM-DD/MM/YY (e.g., "29/09-05/10/25")
+    // We need to add 7 days to get next week's interval (e.g., "06/10-12/10/25")
+    const currentIntervalParts = (nextWeekIntervalData as string).split('-')
+    const startDateParts = currentIntervalParts[0].split('/')
+    const endDateStr = currentIntervalParts[1]
+    const endDateParts = endDateStr.split('/')
+    
+    // Parse current end date to calculate next week
+    const year = parseInt('20' + endDateParts[2])
+    const month = parseInt(endDateParts[1]) - 1 // JS months are 0-indexed
+    const day = parseInt(endDateParts[0])
+    
+    const currentEndDate = new Date(year, month, day)
+    
+    // Next week starts the day after current week ends
+    const nextWeekStart = new Date(currentEndDate)
+    nextWeekStart.setDate(nextWeekStart.getDate() + 1)
+    
+    // Next week ends 6 days after it starts
+    const nextWeekEnd = new Date(nextWeekStart)
+    nextWeekEnd.setDate(nextWeekEnd.getDate() + 6)
+    
+    // Format as DD/MM-DD/MM/YY
+    const formatDate = (date: Date) => {
+      const day = String(date.getDate()).padStart(2, '0')
+      const month = String(date.getMonth() + 1).padStart(2, '0')
+      return `${day}/${month}`
+    }
+    
+    const formatYear = (date: Date) => {
+      return String(date.getFullYear()).slice(-2)
+    }
+    
+    const nextWeekInterval = `${formatDate(nextWeekStart)}-${formatDate(nextWeekEnd)}/${formatYear(nextWeekEnd)}`
+    console.log('Next week interval calculated:', nextWeekInterval)
+
     const { data: preNextWeekParticipants, error: preNextWeekError } = await supabase
       .from('weekly_contest_participants')
       .select('id, status_history')
@@ -169,7 +215,7 @@ serve(async (req) => {
         changed_at: new Date().toISOString(),
         changed_by: null,
         change_reason: 'Automatic weekly transition (weekly-status-transition function)',
-        week_interval: weekInterval,
+        week_interval: nextWeekInterval, // Use NEXT week's interval
         timestamp: new Date().toISOString()
       }
 
@@ -177,7 +223,7 @@ serve(async (req) => {
         .from('weekly_contest_participants')
         .update({
           admin_status: 'next week',
-          week_interval: weekInterval,
+          week_interval: nextWeekInterval, // Set to 06/10-12/10/25
           status_history: statusHistory
         })
         .eq('id', participant.id)
@@ -186,7 +232,7 @@ serve(async (req) => {
         console.error(`Error updating participant ${participant.id}:`, updateError)
       } else {
         transitions.preNextWeekToNextWeek++
-        console.log(`Moved participant ${participant.id} from "pre next week" to "next week" with interval ${weekInterval}`)
+        console.log(`Moved participant ${participant.id} from "pre next week" to "next week" with interval ${nextWeekInterval}`)
       }
     }
 
