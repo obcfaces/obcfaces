@@ -1646,16 +1646,17 @@ const Admin = () => {
       const { data, error } = await supabase
         .from('contestant_ratings')
         .select('user_id');
-      
+
       if (error) {
         console.error('Error fetching users who voted:', error);
         return;
       }
 
       // Create a Set of unique user IDs who have voted
-      const votedUserIds = new Set(data?.map(r => r.user_id) || []);
+      const votedUserIds = new Set(data?.map(r => r.user_id).filter(Boolean) || []);
       setUsersWhoVoted(votedUserIds);
-      console.log('✅ Users who voted:', votedUserIds.size);
+      console.log('✅ Users who voted count:', votedUserIds.size);
+      console.log('📊 Sample voted user IDs:', Array.from(votedUserIds).slice(0, 5));
     } catch (error) {
       console.error('Error in fetchUsersWhoVoted:', error);
     }
