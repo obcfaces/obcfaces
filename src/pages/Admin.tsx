@@ -1108,13 +1108,31 @@ const Admin = () => {
   };
 
   const fetchUserLikesAndRatings = async (userId: string) => {
+    console.log('📊 Fetching likes and ratings for user:', userId);
+    
+    // Add to loading set
+    setLoadingUserStats(prev => new Set(prev).add(userId));
+    
     try {
-      console.log('🔍 Fetching activity for user:', userId);
-
-      // Fetch user's likes
-      const { data: likesRaw, error: likesError } = await supabase
+      // Fetch likes with participant profiles
+      const { data: likesData, error: likesError } = await supabase
         .from('likes')
-        .select('id, content_id, participant_id, created_at')
+        .select(`
+          id,
+          content_id,
+          content_type,
+          participant_id,
+          created_at,
+          profiles:participant_id (
+            id,
+            display_name,
+            first_name,
+            last_name,
+            avatar_url,
+            photo_1_url,
+            photo_2_url
+          )
+        `)
         .eq('user_id', userId)
         .eq('content_type', 'contest')
         .order('created_at', { ascending: false });
@@ -1122,60 +1140,16 @@ const Admin = () => {
       if (likesError) {
         console.error('❌ Error fetching likes:', likesError);
       }
-      
-      console.log(`📋 Found ${likesRaw?.length || 0} likes for user ${userId}:`, likesRaw);
 
-      // Get unique participant IDs from likes
-      const participantIds = new Set<string>();
-      likesRaw?.forEach(like => {
-        if (like.participant_id) {
-          participantIds.add(like.participant_id);
-        }
-      });
+      console.log(`❤️ Found ${likesData?.length || 0} likes for user ${userId}:`, likesData);
 
-      console.log(`👤 Found ${participantIds.size} unique participant IDs from likes`);
-
-      // Fetch participant data with profiles
-      let likesWithProfiles: any[] = [];
-      if (participantIds.size > 0) {
-        const { data: participants, error: participantsError } = await supabase
-          .from('weekly_contest_participants')
-          .select(`
-            id,
-            user_id,
-            application_data
-          `)
-          .in('id', Array.from(participantIds));
-        
-        if (participantsError) {
-          console.error('❌ Error fetching participants:', participantsError);
-        }
-
-        console.log('Participants data:', participants);
-
-        // Get user IDs from participants
-        const userIds = participants?.map(p => p.user_id).filter(Boolean) || [];
-        
-        // Fetch profiles for these users
-        const { data: profiles, error: profilesError } = await supabase
-          .from('profiles')
-          .select('id, display_name, first_name, last_name, avatar_url, photo_1_url, photo_2_url')
-          .in('id', userIds);
-
-        if (profilesError) {
-          console.error('❌ Error fetching profiles:', profilesError);
-        }
-
-        console.log('Profiles data:', profiles);
-
-        // Merge likes with participant and profile data
-        likesWithProfiles = likesRaw?.map(like => {
-          const participant = participants?.find(p => p.id === like.participant_id);
-          const profile = participant ? profiles?.find(p => p.id === participant.user_id) : null;
+      // Process likes to ensure profile exists
+      let likesWithProfiles = [];
+      if (likesData) {
+        likesWithProfiles = likesData.map(like => {
           return {
             ...like,
-            participant,
-            profile
+            profile: like.profiles
           };
         }).filter(like => like.profile) || [];
       }
@@ -1223,9 +1197,25 @@ const Admin = () => {
         return newData;
       });
       
+      // Update counts
+      setUserStatsCount(prev => ({
+        ...prev,
+        [userId]: {
+          likes: likesWithProfiles.length,
+          ratings: ratingsData?.length || 0
+        }
+      }));
+      
       console.log('✅ User activity data set successfully');
     } catch (error) {
       console.error('❌ Error fetching user likes and ratings:', error);
+    } finally {
+      // Remove from loading set
+      setLoadingUserStats(prev => {
+        const next = new Set(prev);
+        next.delete(userId);
+        return next;
+      });
     }
   };
 
@@ -6315,9 +6305,13 @@ const Admin = () => {
                                   }}
                                 >
                                   <Star className="h-4 w-4 text-yellow-500" />
-                                  <span className="text-xs font-medium">
-                                    {userRatingsData[profile.id]?.length || 0}
-                                  </span>
+                                  {loadingUserStats.has(profile.id) ? (
+                                    <Loader2 className="h-3 w-3 animate-spin" />
+                                  ) : (
+                                    <span className="text-xs font-medium">
+                                      {userStatsCount[profile.id]?.ratings ?? userRatingsData[profile.id]?.length ?? 0}
+                                    </span>
+                                  )}
                                 </div>
 
                                 {/* Likes Icon */}
@@ -6331,9 +6325,13 @@ const Admin = () => {
                                   }}
                                 >
                                   <Heart className="h-4 w-4 text-red-500" />
-                                  <span className="text-xs font-medium">
-                                    {userLikesData[profile.id]?.length || 0}
-                                  </span>
+                                  {loadingUserStats.has(profile.id) ? (
+                                    <Loader2 className="h-3 w-3 animate-spin" />
+                                  ) : (
+                                    <span className="text-xs font-medium">
+                                      {userStatsCount[profile.id]?.likes ?? userLikesData[profile.id]?.length ?? 0}
+                                    </span>
+                                  )}
                                 </div>
                               </div>
 
