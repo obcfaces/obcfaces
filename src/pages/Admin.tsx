@@ -1102,7 +1102,6 @@ const Admin = () => {
           id,
           rating,
           contestant_name,
-          contestant_user_id,
           participant_id,
           created_at
         `)
@@ -1119,7 +1118,7 @@ const Admin = () => {
       let ratingsWithProfiles = [];
       if (ratingsData && ratingsData.length > 0) {
         const contestantIds = ratingsData
-          .map(rating => rating.contestant_user_id || rating.participant_id)
+          .map(rating => rating.participant_id) // CHANGED: Using only participant_id
           .filter(id => id != null);
         
         if (contestantIds.length > 0) {
@@ -1134,8 +1133,8 @@ const Admin = () => {
           
           ratingsWithProfiles = ratingsData.map(rating => ({
             ...rating,
-            profiles: (rating.contestant_user_id || rating.participant_id) 
-              ? profilesMap.get(rating.contestant_user_id || rating.participant_id) 
+            profiles: rating.participant_id 
+              ? profilesMap.get(rating.participant_id) // CHANGED: Using only participant_id
               : null
           }));
         }

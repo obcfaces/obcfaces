@@ -388,7 +388,7 @@ export function ContestantCard({
         user_id: propUser.id,
         contestant_name: name,
         participant_id: profileId, // Use participant_id for the rating
-        contestant_user_id: userId, // Add contestant_user_id for proper rating queries
+        // contestant_user_id: userId, // COMMENTED OUT - migrating to participant_id only
         rating: rating
       };
       
