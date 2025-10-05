@@ -5932,67 +5932,82 @@ const Admin = () => {
             </TabsContent>
 
               <TabsContent value="registrations" className="space-y-4">
-                
-                {/* Weekly Registration Stats Dashboard */}
-                <div className="mb-6">
-                  <div className="mb-4 p-4 bg-muted rounded-lg">
-                    <div className="text-sm text-muted-foreground mb-3">
-                      total registrations: {dailyRegistrationStats.reduce((sum, stat) => sum + (stat.registration_count || 0), 0)} - {dailyRegistrationStats.reduce((sum, stat) => sum + (stat.registration_count || 0), 0) - profiles.filter(p => p.email_confirmed_at).length}
-                    </div>
-                    <div className="grid grid-cols-7 gap-2">
-                      {dailyRegistrationStats.map((stat, index) => (
-                        <div key={index} className="text-center p-3 bg-background rounded-lg">
-                          <div className="font-medium text-sm mb-1">{stat.day_name}</div>
-                          <div className="text-2xl font-semibold">
-                            {stat.registration_count}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
+                {tabLoading.registrations ? (
+                  <div className="flex items-center justify-center py-12">
+                    <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
                   </div>
-                </div>
+                ) : (
+                  <>
+                    {/* Weekly Registration Stats Dashboard */}
+                    <div className="mb-6">
+                      <div className="mb-4 p-4 bg-muted rounded-lg">
+                        <div className="text-sm text-muted-foreground mb-3">
+                          total registrations: {dailyRegistrationStats.reduce((sum, stat) => sum + (stat.registration_count || 0), 0)} - {dailyRegistrationStats.reduce((sum, stat) => sum + (stat.registration_count || 0), 0) - profiles.filter(p => p.email_confirmed_at).length}
+                        </div>
+                        <div className="grid grid-cols-7 gap-2">
+                          {dailyRegistrationStats.map((stat, index) => (
+                            <div key={index} className="text-center p-3 bg-background rounded-lg">
+                              <div className="font-medium text-sm mb-1">{stat.day_name}</div>
+                              <div className="text-2xl font-semibold">
+                                {stat.registration_count}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                )}
                 
-                {/* Search input */}
-                <div className="flex gap-2 mb-4">
-                  <Input
-                    placeholder="Поиск по имени, email или IP..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="max-w-md"
-                  />
-                </div>
+                {!tabLoading.registrations && (
+                  <>
+                    {/* Search input */}
+                    <div className="flex gap-2 mb-4">
+                      <Input
+                        placeholder="Поиск по имени, email или IP..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="max-w-md"
+                      />
+                    </div>
+                  </>
+                )}
                 
-                {/* Combined filters in one row */}
-                <div className="flex gap-2 mb-4">
-                  <Button
-                    variant={verificationFilter === 'all' ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => setVerificationFilter('all')}
-                  >
-                    All Users
-                  </Button>
-                  <Button
-                    variant={verificationFilter === 'unverified' ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => setVerificationFilter('unverified')}
-                  >
-                    Unverified
-                  </Button>
-                  <Button
-                    variant={roleFilter === 'all' ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => setRoleFilter('all')}
-                  >
-                    All Roles
-                  </Button>
-                  <Button
-                    variant={roleFilter === 'admin' ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => setRoleFilter('admin')}
-                  >
-                    Admin
-                  </Button>
-                 </div>
+                {!tabLoading.registrations && (
+                  <>
+                    {/* Combined filters in one row */}
+                    <div className="flex gap-2 mb-4">
+                      <Button
+                        variant={verificationFilter === 'all' ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => setVerificationFilter('all')}
+                      >
+                        All Users
+                      </Button>
+                      <Button
+                        variant={verificationFilter === 'unverified' ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => setVerificationFilter('unverified')}
+                      >
+                        Unverified
+                      </Button>
+                      <Button
+                        variant={roleFilter === 'all' ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => setRoleFilter('all')}
+                      >
+                        All Roles
+                      </Button>
+                      <Button
+                        variant={roleFilter === 'admin' ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => setRoleFilter('admin')}
+                      >
+                        Admin
+                      </Button>
+                    </div>
+                  </>
+                )}
 
                 {(() => {
                     const filteredProfiles = profiles.filter(profile => {
