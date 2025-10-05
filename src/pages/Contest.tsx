@@ -102,6 +102,16 @@ const Contest = () => {
             viewMode={viewMode}
             weekOffset={-3}
           />
+          
+          <ContestSection
+            title="4 WEEKS AGO"
+            subtitle="Four weeks ago results"
+            description="See the winners from 4 weeks ago"
+            isActive={false}
+            showWinner={true}
+            viewMode={viewMode}
+            weekOffset={-4}
+          />
         </div>
       </main>
     </>

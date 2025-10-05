@@ -206,14 +206,14 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
     try {
       console.log('🔄 Loading 1 WEEK AGO participants for PUBLIC...');
       
-      // Get participants with admin_status = 'past' and week interval matching 1 WEEK AGO (29/09-05/10/25)
+      // Get participants with admin_status = 'past' and week interval matching 1 WEEK AGO (06/10-12/10/25)
       const { data: participants, error } = await supabase
         .from('weekly_contest_participants')
         .select('*')
         .eq('admin_status', 'past')
         .eq('is_active', true)
         .is('deleted_at', null)
-        .eq('week_interval', '29/09-05/10/25');
+        .eq('week_interval', '06/10-12/10/25');
 
       if (error) {
         console.error('❌ Error loading 1 WEEK AGO participants:', error);
@@ -269,14 +269,14 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
     try {
       console.log('🔄 Loading 2 WEEKS AGO participants for PUBLIC...');
       
-      // Get participants with admin_status = 'past' and week interval '22/09-28/09/25'
+      // Get participants with admin_status = 'past' and week interval '29/09-05/10/25'
       const { data: participants, error } = await supabase
         .from('weekly_contest_participants')
         .select('*')
         .eq('admin_status', 'past')
         .eq('is_active', true)
         .is('deleted_at', null)
-        .eq('week_interval', '22/09-28/09/25');
+        .eq('week_interval', '29/09-05/10/25');
 
       if (error) {
         console.error('❌ Error loading 2 WEEKS AGO participants:', error);
@@ -388,14 +388,14 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
     try {
       console.log('🔄 Loading 3 WEEKS AGO participants for PUBLIC...');
       
-      // Get participants with admin_status = 'past' and week interval '15/09-21/09/25'
+      // Get participants with admin_status = 'past' and week interval '22/09-28/09/25'
       const { data: participants, error } = await supabase
         .from('weekly_contest_participants')
         .select('*')
         .eq('admin_status', 'past')
         .eq('is_active', true)
         .is('deleted_at', null)
-        .eq('week_interval', '15/09-21/09/25');
+        .eq('week_interval', '22/09-28/09/25');
 
       if (error) {
         console.error('❌ Error loading 3 WEEKS AGO participants:', error);
@@ -457,6 +457,80 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
     }
   };
 
+  // Load admin participants for 4 WEEKS AGO section (participants with admin_status = 'past' and specific week interval)
+  const loadFourWeeksAgoAdminParticipants = async () => {
+    try {
+      console.log('🔄 Loading 4 WEEKS AGO participants for PUBLIC...');
+      
+      // Get participants with admin_status = 'past' and week interval '15/09-21/09/25'
+      const { data: participants, error } = await supabase
+        .from('weekly_contest_participants')
+        .select('*')
+        .eq('admin_status', 'past')
+        .eq('is_active', true)
+        .is('deleted_at', null)
+        .eq('week_interval', '15/09-21/09/25');
+
+      if (error) {
+        console.error('❌ Error loading 4 WEEKS AGO participants:', error);
+        return [];
+      }
+
+      console.log('✅ Raw 4 WEEKS AGO participants found:', participants?.length);
+      if (participants && participants.length > 0) {
+        console.log('📋 4 WEEKS AGO participants:', participants.map(p => {
+          const appData = (p.application_data as any) || {};
+          return {
+            name: `${appData.first_name || ''} ${appData.last_name || ''}`.trim(),
+            week_interval: p.week_interval
+          };
+        }));
+      }
+
+      if (!participants || participants.length === 0) {
+        return [];
+      }
+
+      // Get user IDs and fetch their profiles using secure RPC function
+      const userIds = participants.map(p => p.user_id);
+      const { data: profilesData, error: profilesError } = await (supabase.rpc as any)('get_public_contest_participant_photos', { participant_user_ids: userIds });
+      
+      const profiles = (profilesData || []) as Array<{ 
+        id: string; 
+        photo_1_url: string | null; 
+        photo_2_url: string | null; 
+        avatar_url: string | null;
+        age: number | null;
+        city: string | null;
+        country: string | null;
+        height_cm: number | null;
+        weight_kg: number | null;
+      }>;
+
+      if (profilesError) {
+        console.error('Error loading profiles for 4 weeks ago:', profilesError);
+        return [];
+      }
+
+      console.log('4 weeks ago profiles data:', profiles?.length, profiles);
+
+      // Combine participants with their profiles
+      const combined = participants.map(participant => {
+        const profile = profiles?.find(p => p.id === participant.user_id);
+        return {
+          ...participant,
+          profiles: profile
+        };
+      });
+
+      console.log('Combined 4 weeks ago participants data:', combined?.length, combined);
+      return combined || [];
+    } catch (error) {
+      console.error('Error loading 4 weeks ago admin participants:', error);
+      return [];
+    }
+  };
+
   // Get user session once for the entire section and listen for changes
   useEffect(() => {
     console.log('ContestSection useEffect triggered for:', title);
@@ -497,6 +571,10 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
         console.log('Loading 3 WEEKS AGO participants');
         participantsData = await loadThreeWeeksAgoAdminParticipants();
         console.log('Loaded 3 WEEKS AGO participants:', participantsData.length);
+      } else if (title === "4 WEEKS AGO") {
+        console.log('Loading 4 WEEKS AGO participants');
+        participantsData = await loadFourWeeksAgoAdminParticipants();
+        console.log('Loaded 4 WEEKS AGO participants:', participantsData.length);
       }
       
       // Load user ratings BEFORE setting participants
