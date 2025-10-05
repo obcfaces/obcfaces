@@ -1628,7 +1628,7 @@ const Admin = () => {
 
   // Auto-fetch activity stats for visible profiles in Reg tab
   useEffect(() => {
-    if (activeTab === 'reg' && profiles.length > 0) {
+    if (activeTab === 'reg' && profiles.length > 0 && !loading) {
       console.log('🔵 Reg tab active, profiles count:', profiles.length);
       
       // Small delay to ensure state is ready
@@ -1665,9 +1665,12 @@ const Admin = () => {
         
         console.log('📄 Visible profiles on current page:', paginatedProfiles.length);
         
-        // Fetch activity for ALL visible profiles immediately
+        // Fetch activity for visible profiles that don't have stats yet
         paginatedProfiles.forEach(profile => {
-          if (!userActivityStats[profile.id] && !loadingActivity.has(profile.id)) {
+          const hasStats = userActivityStats[profile.id] !== undefined;
+          const isLoading = loadingActivity.has(profile.id);
+          
+          if (!hasStats && !isLoading) {
             console.log('📊 Auto-fetching activity for profile:', profile.id, profile.display_name);
             fetchUserActivity(profile.id);
           }
@@ -1676,7 +1679,7 @@ const Admin = () => {
       
       return () => clearTimeout(timer);
     }
-  }, [activeTab, profiles, regPaginationPage, roleFilter, searchQuery, userRoleMap]);
+  }, [activeTab, profiles.length, regPaginationPage, roleFilter, searchQuery, loading]);
 
   const fetchContestApplications = async () => {
     console.log('Fetching contest applications...');
