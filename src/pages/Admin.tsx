@@ -2472,12 +2472,8 @@ const Admin = () => {
             </TabsList>
 
             <TabsContent value="weekly" className="space-y-4">
-              {tabLoading['weekly'] ? (
-                <div className="flex justify-center items-center py-20">
-                  <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-                </div>
-              ) : (
-              <div className="mb-6">{/* Compact stats line */}
+              <div className="mb-6">
+                {/* Compact stats line */}
                 <div className="mb-4 p-3 bg-muted rounded-lg">
                   <div className="text-sm text-muted-foreground space-y-2">
                     <div className="text-xs">
@@ -2993,17 +2989,9 @@ const Admin = () => {
                 </>
               );
               })()}
-              </>
-              )}
             </TabsContent>
 
             <TabsContent value="prenextweek" className="space-y-4">
-              {tabLoading['prenextweek'] ? (
-                <div className="flex justify-center items-center py-20">
-                  <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-                </div>
-              ) : (
-                <>
               <div className="mb-6">
                 <div>
                   <h2 className="text-xl font-semibold">Pre Next Week Participants</h2>
@@ -3386,15 +3374,9 @@ const Admin = () => {
                   </>
                 );
               })()}
-              )}
             </TabsContent>
 
             <TabsContent value="nextweek" className="space-y-4">
-              {tabLoading['nextweek'] ? (
-                <div className="flex justify-center items-center py-20">
-                  <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-                </div>
-              ) : (
               <div className="mb-6">
                 {/* Stats for next week */}
                 <div className="mb-4 p-3 bg-muted rounded-lg">
@@ -3837,15 +3819,9 @@ const Admin = () => {
                   </>
                 );
               })()}
-              )}
             </TabsContent>
 
             <TabsContent value="pastweek" className="space-y-4">
-              {tabLoading['pastweek'] || tabLoading['past'] ? (
-                <div className="flex justify-center items-center py-20">
-                  <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-                </div>
-              ) : (
               <div className="mb-6">
                 {/* Stats display - mobile and desktop */}
                 <div className="mb-4 p-3 bg-muted rounded-lg">
@@ -4879,15 +4855,9 @@ const Admin = () => {
                 </>
               );
               })()}
-              )}
             </TabsContent>
 
             <TabsContent value="all" className="space-y-4">
-              {tabLoading['all'] || tabLoading['applications'] ? (
-                <div className="flex justify-center items-center py-20">
-                  <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-                </div>
-              ) : (
               <div className="mb-6">
                 <h2 className="text-xl font-semibold mb-4">All Participants</h2>
                 
@@ -5383,20 +5353,14 @@ const Admin = () => {
                   </>
                 );
               })()}
-              )}
             </TabsContent>
 
             <TabsContent value="new1" className="space-y-4">
-              {tabLoading['new1'] || tabLoading['new'] || tabLoading['applications'] ? (
-                <div className="flex justify-center items-center py-20">
-                  <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-                </div>
-              ) : (
               <div className="mb-6">
                 <h2 className="text-xl font-semibold mb-4">New Applications (New1)</h2>
                 
                 <div className="flex gap-2 items-center mb-4">
-                  <Select 
+                  <Select
                     value={registrationsStatusFilter} 
                     onValueChange={(value) => {
                       setRegistrationsStatusFilter(value);
@@ -5960,15 +5924,9 @@ const Admin = () => {
                   </>
                 );
               })()}
-              )}
             </TabsContent>
 
               <TabsContent value="registrations" className="space-y-4">
-                {tabLoading['registrations'] || tabLoading['reg'] ? (
-                  <div className="flex justify-center items-center py-20">
-                    <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-                  </div>
-                ) : (
                 
                 {/* Weekly Registration Stats Dashboard */}
                 <div className="mb-6">
@@ -6562,15 +6520,9 @@ const Admin = () => {
                     </div>
                   );
                 })()}
-                )}
               </TabsContent>
 
               <TabsContent value="stat" className="space-y-4">
-                {tabLoading['stat'] || tabLoading['stats'] || tabLoading['statistics'] ? (
-                  <div className="flex justify-center items-center py-20">
-                    <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-                  </div>
-                ) : (
                 <div className="mb-6">
                   <h2 className="text-xl font-semibold mb-4">Статистика регистраций</h2>
                   
@@ -6788,15 +6740,9 @@ const Admin = () => {
                     )}
                   </div>
                 </div>
-                )}
               </TabsContent>
 
               <TabsContent value="winnercontent" className="space-y-4">
-                {tabLoading['winnercontent'] ? (
-                  <div className="flex justify-center items-center py-20">
-                    <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-                  </div>
-                ) : (
                 <div className="mb-6">
                   <h2 className="text-xl font-semibold">Управление контентом победителей</h2>
                   <p className="text-muted-foreground">Добавление и редактирование дополнительного контента для карточек победительниц</p>
@@ -6829,7 +6775,6 @@ const Admin = () => {
                     </div>
                   )}
                 </div>
-                )}
               </TabsContent>
 
             </Tabs>
