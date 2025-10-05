@@ -888,7 +888,7 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
         <div className="px-4 sm:px-6 mb-6">
           <div className="bg-red-500 text-white px-4 py-3 rounded-lg shadow-lg">
             <p className="text-sm sm:text-base text-center">
-              To keep things fair, we removed fake accounts and boosted votes. What you see here is 100% real.
+              To keep things fair, we removed fake accounts. What you see here is 100% real.
             </p>
           </div>
         </div>
