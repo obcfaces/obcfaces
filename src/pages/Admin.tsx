@@ -1633,61 +1633,52 @@ const Admin = () => {
       return;
     }
 
-    console.log('🔵 Reg tab active, profiles count:', profiles.length);
+    console.log('🔵 Reg tab active, starting auto-fetch for visible profiles');
     
-    // Small delay to ensure state is ready
+    // Get current page profiles
+    const filteredProfiles = profiles.filter(profile => {
+      const userRole = userRoleMap[profile.id] || 'usual';
+      
+      if (roleFilter === 'admin') {
+        return userRole === 'admin';
+      } else if (roleFilter === 'usual') {
+        return userRole === 'usual' || !userRole;
+      }
+
+      if (searchQuery.trim()) {
+        const query = searchQuery.toLowerCase();
+        const fullName = `${profile.first_name || ''} ${profile.last_name || ''}`.toLowerCase();
+        const displayName = (profile.display_name || '').toLowerCase();
+        const email = (profile.email || '').toLowerCase();
+        const ip = (profile.ip_address || '').toLowerCase();
+        
+        return fullName.includes(query) || 
+               displayName.includes(query) || 
+               email.includes(query) || 
+               ip.includes(query);
+      }
+      
+      return true;
+    });
+
+    const startIdx = (regPaginationPage - 1) * regItemsPerPage;
+    const endIdx = startIdx + regItemsPerPage;
+    const paginatedProfiles = filteredProfiles.slice(startIdx, endIdx);
+    
+    console.log('📄 Visible profiles on current page:', paginatedProfiles.length);
+    
+    // Delay fetch to avoid race conditions
     const timer = setTimeout(() => {
-      // Get current page profiles
-      const filteredProfiles = profiles.filter(profile => {
-        const userRole = userRoleMap[profile.id] || 'usual';
-        
-        if (roleFilter === 'admin') {
-          return userRole === 'admin';
-        } else if (roleFilter === 'usual') {
-          return userRole === 'usual' || !userRole;
-        }
-
-        if (searchQuery.trim()) {
-          const query = searchQuery.toLowerCase();
-          const fullName = `${profile.first_name || ''} ${profile.last_name || ''}`.toLowerCase();
-          const displayName = (profile.display_name || '').toLowerCase();
-          const email = (profile.email || '').toLowerCase();
-          const ip = (profile.ip_address || '').toLowerCase();
-          
-          return fullName.includes(query) || 
-                 displayName.includes(query) || 
-                 email.includes(query) || 
-                 ip.includes(query);
-        }
-        
-        return true;
-      });
-
-      const startIdx = (regPaginationPage - 1) * regItemsPerPage;
-      const endIdx = startIdx + regItemsPerPage;
-      const paginatedProfiles = filteredProfiles.slice(startIdx, endIdx);
-      
-      console.log('📄 Visible profiles on current page:', paginatedProfiles.length);
-      
-      // Fetch activity for visible profiles
       paginatedProfiles.forEach(profile => {
-        // Access current state values directly
-        setUserActivityStats(currentStats => {
-          setLoadingActivity(currentLoading => {
-            const hasStats = currentStats[profile.id] !== undefined;
-            const isCurrentlyLoading = currentLoading.has(profile.id);
-            
-            if (!hasStats && !isCurrentlyLoading) {
-              console.log('📊 Auto-fetching activity for profile:', profile.id, profile.display_name);
-              fetchUserActivity(profile.id);
-            }
-            
-            return currentLoading;
-          });
-          return currentStats;
-        });
+        // Check if we need to fetch - directly check the ref values
+        if (!loadingActivity.has(profile.id) && !userActivityStats[profile.id]) {
+          console.log('📊 Auto-fetching activity for:', profile.id, profile.display_name);
+          fetchUserActivity(profile.id);
+        } else {
+          console.log('⏭️ Skipping fetch for:', profile.id, 'loading:', loadingActivity.has(profile.id), 'hasStats:', !!userActivityStats[profile.id]);
+        }
       });
-    }, 150);
+    }, 200);
     
     return () => clearTimeout(timer);
   }, [activeTab, profiles.length, regPaginationPage, roleFilter, searchQuery, loading]);
@@ -6237,7 +6228,7 @@ const Admin = () => {
                                    }}
                                  >
                                     <Star className="h-4 w-4 text-yellow-500" />
-                                    {loadingActivity.has(profile.id) || !userActivityStats[profile.id] ? (
+                                    {loadingActivity.has(profile.id) && !userActivityStats[profile.id] ? (
                                       <Loader2 className="h-3 w-3 animate-spin" />
                                     ) : (
                                       <span className="text-xs font-medium">
@@ -6256,7 +6247,7 @@ const Admin = () => {
                                    }}
                                  >
                                     <Heart className="h-4 w-4 text-red-500" />
-                                    {loadingActivity.has(profile.id) || !userActivityStats[profile.id] ? (
+                                    {loadingActivity.has(profile.id) && !userActivityStats[profile.id] ? (
                                       <Loader2 className="h-3 w-3 animate-spin" />
                                     ) : (
                                       <span className="text-xs font-medium">
