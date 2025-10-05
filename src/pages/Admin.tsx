@@ -212,36 +212,31 @@ const getAvailableWeekIntervals = () => {
 const createDynamicPastWeekFilters = () => {
   // Используем правильные статические интервалы для 2025 года
   const staticWeeks = [
-    '29/09-05/10/25', // 1 week ago
-    '22/09-28/09/25', // 2 weeks ago  
-    '15/09-21/09/25', // 3 weeks ago
+    '06/10-12/10/25', // Текущая неделя (для past статуса после transition)
+    '29/09-05/10/25', // Бывший "1 week ago"
+    '22/09-28/09/25', // Бывший "2 weeks ago"  
+    '15/09-21/09/25', // Бывший "3 weeks ago"
     '08/09-14/09/25', // 4 weeks ago
     '01/09-07/09/25', // 5 weeks ago
     '18/08-24/08/25'  // 6 weeks ago
   ];
   
-  // Не нужен console.log здесь - будет логировать один раз при создании
-  
   // Return static weeks already sorted
   const sortedWeeks = staticWeeks;
   
-  // Create filters for each week
+  // Create filters for each week - просто показываем интервал даты
   const filters: Array<{ id: string; label: string; mobileLabel: string; weekInterval?: string }> = [
     { id: 'all', label: 'All Past Weeks', mobileLabel: 'All Past' }
   ];
   
-  let weekCounter = 1;
+  let weekCounter = 0; // Начинаем с 0 для первого интервала
   sortedWeeks.forEach(week => {
-    const filterLabel = weekCounter <= 2 
-      ? `${weekCounter} week${weekCounter === 1 ? '' : 's'} ago (${week})`
-      : `${weekCounter} weeks ago (${week})`;
-    
-    const mobileLabel = weekCounter <= 2 
-      ? `${weekCounter} week${weekCounter === 1 ? '' : 's'} ago`
-      : `${weekCounter} weeks ago`;
+    // Лейбл - просто интервал дат
+    const filterLabel = week;
+    const mobileLabel = week;
     
     filters.push({
-      id: `past week ${weekCounter}`,
+      id: `past week ${weekCounter + 1}`,
       label: filterLabel,
       mobileLabel: mobileLabel,
       weekInterval: week
