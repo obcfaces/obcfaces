@@ -6200,7 +6200,7 @@ const Admin = () => {
                           Showing {filteredProfiles.length} {filteredProfiles.length === 1 ? 'result' : 'results'}
                           {roleFilter === 'suspicious' && suspiciousEmailFilter !== 'all' && (
                             <span className="ml-2 text-xs text-orange-600 font-medium">
-                              (unconfirmed email + voted)
+                              (unconfirmed email + voted) - Total voted users: {usersWhoVoted.size}
                             </span>
                           )}
                         </div>
