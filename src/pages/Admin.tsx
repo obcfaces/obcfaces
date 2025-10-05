@@ -4008,7 +4008,9 @@ const Admin = () => {
                       <>
                         {/* Desktop filters */}
                         <div className="hidden md:flex gap-2 flex-wrap">
-                          {filterCounts.map((filter) => {
+                          {filterCounts
+                            .filter(filter => filter.id === 'all' || filter.count > 0)
+                            .map((filter) => {
                             // Extract the week label and date range
                             const match = filter.label.match(/^(.+?)\s*\((.+?)\)$/);
                             const weekLabel = match ? match[1] : filter.label;
@@ -4057,7 +4059,9 @@ const Admin = () => {
                         
                         {/* Mobile filters */}
                          <div className="md:hidden grid grid-cols-2 gap-2">
-                          {filterCounts.map((filter) => {
+                          {filterCounts
+                            .filter(filter => filter.id === 'all' || filter.count > 0)
+                            .map((filter) => {
                             // Extract the week label and date range for mobile
                             const match = filter.mobileLabel.match(/^(.+?)\s*\((.+?)\)$/);
                             const weekLabel = match ? match[1] : filter.mobileLabel;
