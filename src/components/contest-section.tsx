@@ -21,8 +21,9 @@ interface ContestSectionProps {
   titleSuffix?: string;
   noWrapTitle?: boolean;
   viewMode?: 'compact' | 'full';
-  filters?: React.ReactNode; // Add filters prop
-  weekOffset?: number; // Add weekOffset prop
+  filters?: React.ReactNode;
+  weekOffset?: number;
+  weekInterval?: string; // Add weekInterval prop for dynamic past weeks
 }
 
 // Helper function to get week range dates (Monday-Sunday) - правильные для 2025
@@ -48,7 +49,7 @@ const getWeekRange = (weeksOffset: number = 0) => {
   }
 };
 
-export function ContestSection({ title, subtitle, description, isActive, showWinner, centerSubtitle, titleSuffix, noWrapTitle, viewMode: controlledViewMode, filters, weekOffset = 0 }: ContestSectionProps) {
+export function ContestSection({ title, subtitle, description, isActive, showWinner, centerSubtitle, titleSuffix, noWrapTitle, viewMode: controlledViewMode, filters, weekOffset = 0, weekInterval }: ContestSectionProps) {
   const [localViewMode] = useState<'compact' | 'full'>('compact');
   const viewMode = controlledViewMode ?? localViewMode;
   const [ratings, setRatings] = useState<Record<number, number>>({
@@ -135,6 +136,57 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
       return participantsWithProfiles || [];
     } catch (error) {
       console.error('Error loading NEXT WEEK participants:', error);
+      return [];
+    }
+  };
+  
+  // Generic function to load past week participants by week_interval
+  const loadPastWeekParticipantsByInterval = async (interval: string) => {
+    try {
+      console.log(`🔄 Loading participants for interval: ${interval}`);
+      
+      const { data: participants, error } = await supabase
+        .from('weekly_contest_participants')
+        .select('*')
+        .eq('admin_status', 'past')
+        .eq('is_active', true)
+        .is('deleted_at', null)
+        .eq('week_interval', interval);
+
+      if (error) {
+        console.error(`❌ Error loading participants for ${interval}:`, error);
+        return [];
+      }
+
+      console.log(`✅ Found ${participants?.length} participants for ${interval}`);
+
+      if (!participants || participants.length === 0) {
+        return [];
+      }
+
+      const userIds = participants.map(p => p.user_id);
+      const { data: profilesData } = await (supabase.rpc as any)('get_public_contest_participant_photos', { participant_user_ids: userIds });
+      
+      const profiles = (profilesData || []) as Array<{ 
+        id: string; 
+        photo_1_url: string | null; 
+        photo_2_url: string | null; 
+        avatar_url: string | null;
+        age: number | null;
+        city: string | null;
+        country: string | null;
+        height_cm: number | null;
+        weight_kg: number | null;
+      }>;
+
+      const participantsWithProfiles = participants.map(participant => ({
+        ...participant,
+        profiles: profiles?.find(p => p.id === participant.user_id) || null
+      }));
+
+      return participantsWithProfiles || [];
+    } catch (error) {
+      console.error(`Error loading participants for ${interval}:`, error);
       return [];
     }
   };
@@ -559,22 +611,11 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
         console.log('Loading NEXT WEEK participants');
         participantsData = await loadNextWeekParticipants();
         console.log('Loaded NEXT WEEK participants:', participantsData.length);
-      } else if (title === "1 WEEK AGO") {
-        console.log('Loading 1 WEEK AGO participants');
-        participantsData = await loadPastWeekParticipants();
-        console.log('Loaded 1 WEEK AGO participants:', participantsData.length);
-      } else if (title === "2 WEEKS AGO") {
-        console.log('Loading 2 WEEKS AGO participants');
-        participantsData = await loadTwoWeeksAgoAdminParticipants();
-        console.log('Loaded 2 WEEKS AGO participants:', participantsData.length);
-      } else if (title === "3 WEEKS AGO") {
-        console.log('Loading 3 WEEKS AGO participants');
-        participantsData = await loadThreeWeeksAgoAdminParticipants();
-        console.log('Loaded 3 WEEKS AGO participants:', participantsData.length);
-      } else if (title === "4 WEEKS AGO") {
-        console.log('Loading 4 WEEKS AGO participants');
-        participantsData = await loadFourWeeksAgoAdminParticipants();
-        console.log('Loaded 4 WEEKS AGO participants:', participantsData.length);
+      } else if (title.includes("WEEK") && title.includes("AGO") && weekInterval) {
+        // For all past weeks, use the weekInterval prop
+        console.log(`Loading participants for ${title} with interval ${weekInterval}`);
+        participantsData = await loadPastWeekParticipantsByInterval(weekInterval);
+        console.log(`Loaded ${title} participants:`, participantsData.length);
       }
       
       // Load user ratings BEFORE setting participants

@@ -13,6 +13,7 @@ const Contest = () => {
   const [activeSection, setActiveSection] = useState("Contest");
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [pastWeekIntervals, setPastWeekIntervals] = useState<string[]>([]);
   const navigate = useNavigate();
   
   useEffect(() => {
@@ -34,7 +35,51 @@ const Contest = () => {
       }
     };
     
+    const loadPastWeekIntervals = async () => {
+      try {
+        // Get all unique week_interval values from past participants
+        const { data, error } = await supabase
+          .from('weekly_contest_participants')
+          .select('week_interval')
+          .eq('admin_status', 'past')
+          .eq('is_active', true)
+          .is('deleted_at', null);
+        
+        if (error) {
+          console.error('Error loading past week intervals:', error);
+          return;
+        }
+        
+        // Get unique intervals and sort them (newest first)
+        const uniqueIntervals = Array.from(new Set(data?.map(p => p.week_interval).filter(Boolean) as string[]));
+        
+        // Sort by date (parse DD/MM-DD/MM/YY format)
+        const sortedIntervals = uniqueIntervals.sort((a, b) => {
+          // Extract end date from format "DD/MM-DD/MM/YY"
+          const getEndDate = (interval: string) => {
+            const parts = interval.split('-');
+            if (parts.length !== 2) return new Date(0);
+            
+            const [dayMonth, yearPart] = parts[1].split('/');
+            const day = parseInt(dayMonth);
+            const month = parseInt(parts[1].split('/')[0]);
+            const year = 2000 + parseInt(parts[1].split('/')[2]);
+            
+            return new Date(year, month - 1, day);
+          };
+          
+          return getEndDate(b).getTime() - getEndDate(a).getTime();
+        });
+        
+        console.log('Past week intervals:', sortedIntervals);
+        setPastWeekIntervals(sortedIntervals);
+      } catch (error) {
+        console.error('Error loading past week intervals:', error);
+      }
+    };
+    
     checkAdminStatus();
+    loadPastWeekIntervals();
   }, []);
 
   if (loading) {
@@ -73,45 +118,25 @@ const Contest = () => {
             weekOffset={0}
           />
           
-          <ContestSection
-            title="1 WEEK AGO"
-            subtitle="Previous week results"
-            description="See who won last week"
-            isActive={false}
-            showWinner={true}
-            viewMode={viewMode}
-            weekOffset={-1}
-          />
-          
-          <ContestSection
-            title="2 WEEKS AGO"
-            subtitle="Two weeks ago results"
-            description="See the winners from 2 weeks ago"
-            isActive={false}
-            showWinner={true}
-            viewMode={viewMode}
-            weekOffset={-2}
-          />
-          
-          <ContestSection
-            title="3 WEEKS AGO"
-            subtitle="Three weeks ago results"
-            description="See the winners from 3 weeks ago"
-            isActive={false}
-            showWinner={true}
-            viewMode={viewMode}
-            weekOffset={-3}
-          />
-          
-          <ContestSection
-            title="4 WEEKS AGO"
-            subtitle="Four weeks ago results"
-            description="See the winners from 4 weeks ago"
-            isActive={false}
-            showWinner={true}
-            viewMode={viewMode}
-            weekOffset={-4}
-          />
+          {/* Dynamically generate sections for all past weeks */}
+          {pastWeekIntervals.map((interval, index) => {
+            const weekNumber = index + 1;
+            const weekLabel = weekNumber === 1 ? '1 WEEK AGO' : `${weekNumber} WEEKS AGO`;
+            
+            return (
+              <ContestSection
+                key={interval}
+                title={weekLabel}
+                subtitle={`${weekLabel.toLowerCase()} results`}
+                description={`See the winners from ${weekLabel.toLowerCase()}`}
+                isActive={false}
+                showWinner={true}
+                viewMode={viewMode}
+                weekOffset={-weekNumber}
+                weekInterval={interval}
+              />
+            );
+          })}
         </div>
       </main>
     </>
