@@ -393,11 +393,34 @@ export function ContestantCard({
       
       console.log('Saving rating to database:', ratingData);
       
-      // Use upsert to handle one rating per user per participant
-      const { data, error } = await supabase
+      // First check if rating exists and update it, or insert new one
+      const { data: existingRating } = await supabase
         .from('contestant_ratings')
-        .upsert(ratingData)
-        .select();
+        .select('id')
+        .eq('user_id', propUser.id)
+        .eq('participant_id', profileId)
+        .maybeSingle();
+
+      let data, error;
+      
+      if (existingRating) {
+        // Update existing rating
+        const result = await supabase
+          .from('contestant_ratings')
+          .update({ rating: rating, updated_at: new Date().toISOString() })
+          .eq('id', existingRating.id)
+          .select();
+        data = result.data;
+        error = result.error;
+      } else {
+        // Insert new rating
+        const result = await supabase
+          .from('contestant_ratings')
+          .insert(ratingData)
+          .select();
+        data = result.data;
+        error = result.error;
+      }
       
       console.log('Rating upsert result:', { data, error });
       
