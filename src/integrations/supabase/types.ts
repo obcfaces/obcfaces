@@ -1222,6 +1222,16 @@ export type Database = {
           user_count: number
         }[]
       }
+      get_email_domain_voting_stats: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          avg_rating: number
+          domain: string
+          total_likes: number
+          total_votes: number
+          user_count: number
+        }[]
+      }
       get_follow_stats: {
         Args: { target_user_id: string }
         Returns: {
