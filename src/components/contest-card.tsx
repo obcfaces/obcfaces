@@ -414,10 +414,8 @@ export function ContestantCard({
       // Store in localStorage for persistence
       localStorage.setItem(`rating-${name}-${propUser.id}`, rating.toString());
       
-      // Call onRate callback if provided (for parent component to refresh rankings)
-      if (onRate) {
-        onRate(rating);
-      }
+      // Don't call onRate callback to avoid infinite loops
+      // Real-time subscription in parent component will handle updates
       
       console.log('Rating saved successfully');
     } catch (error) {
