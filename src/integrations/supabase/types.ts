@@ -1215,6 +1215,13 @@ export type Database = {
           is_contest_participant: boolean
         }[]
       }
+      get_email_domain_stats: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          domain: string
+          user_count: number
+        }[]
+      }
       get_follow_stats: {
         Args: { target_user_id: string }
         Returns: {

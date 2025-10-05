@@ -360,7 +360,7 @@ const Admin = () => {
   const [tabLoading, setTabLoading] = useState<Record<string, boolean>>({});
   const [tabDataLoaded, setTabDataLoaded] = useState<Record<string, boolean>>({});
   const [activeTab, setActiveTab] = useState('applications');
-  const [statType, setStatType] = useState<'ip' | 'country' | 'device' | 'os'>('country');
+  const [statType, setStatType] = useState<'ip' | 'country' | 'device' | 'os' | 'email'>('country');
   const [profiles, setProfiles] = useState<ProfileData[]>([]);
   const [userRoles, setUserRoles] = useState<UserRole[]>([]);
   const [contestApplications, setContestApplications] = useState<ContestApplication[]>([]);
@@ -460,6 +460,7 @@ const Admin = () => {
   // User activity stats for Reg tab
   const [userActivityStats, setUserActivityStats] = useState<Record<string, { likesCount: number; ratingsCount: number; likes: any[]; ratings: any[] }>>({});
   const [loadingActivity, setLoadingActivity] = useState<Set<string>>(new Set());
+  const [emailDomainStats, setEmailDomainStats] = useState<Array<{ domain: string; user_count: number }>>([]);
   const [expandedActivity, setExpandedActivity] = useState<Set<string>>(new Set());
   const [updatingStatuses, setUpdatingStatuses] = useState<Set<string>>(new Set());
   const [expandedUserActivity, setExpandedUserActivity] = useState<Set<string>>(new Set());
@@ -632,10 +633,12 @@ const Admin = () => {
 
           case 'statistics':
           case 'stats':
+          case 'stat':
             await Promise.allSettled([
               fetchDailyStats(),
               fetchDailyApplicationStats(),
-              fetchDailyRegistrationStats()
+              fetchDailyRegistrationStats(),
+              fetchEmailDomainStats()
             ]);
             break;
 
@@ -1602,6 +1605,17 @@ const Admin = () => {
       setProfiles(profilesWithAuth);
     } catch (error) {
       console.error('Error in fetchProfiles:', error);
+    }
+  };
+
+  // Fetch email domain statistics
+  const fetchEmailDomainStats = async () => {
+    try {
+      const { data, error } = await supabase.rpc('get_email_domain_stats');
+      if (error) throw error;
+      setEmailDomainStats(data || []);
+    } catch (error) {
+      console.error('Error fetching email domain stats:', error);
     }
   };
 
@@ -6554,6 +6568,13 @@ const Admin = () => {
                       По странам
                     </Button>
                     <Button
+                      variant={statType === 'email' ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setStatType('email')}
+                    >
+                      По email доменам
+                    </Button>
+                    <Button
                       variant={statType === 'ip' ? 'default' : 'outline'}
                       size="sm"
                       onClick={() => setStatType('ip')}
@@ -6577,6 +6598,26 @@ const Admin = () => {
                   </div>
 
                   <div className="bg-muted/50 rounded-lg p-6">
+                    {statType === 'email' && (
+                      <div className="space-y-4">
+                        <h3 className="text-lg font-semibold">Статистика по email доменам</h3>
+                        <div className="grid gap-3">
+                          {emailDomainStats.length > 0 ? (
+                            emailDomainStats.map((stat, index) => (
+                              <div key={index} className="p-4 bg-background rounded border">
+                                <div className="flex justify-between items-center">
+                                  <span className="font-medium font-mono text-lg">@{stat.domain}</span>
+                                  <span className="text-lg font-bold text-primary">{stat.user_count}</span>
+                                </div>
+                              </div>
+                            ))
+                          ) : (
+                            <p className="text-sm text-muted-foreground">Загрузка данных...</p>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                    
                     {statType === 'country' && (
                       <div className="space-y-4">
                         <h3 className="text-lg font-semibold">Статистика по странам</h3>
