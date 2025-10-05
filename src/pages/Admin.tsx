@@ -1628,7 +1628,7 @@ const Admin = () => {
   // Auto-fetch activity stats for visible profiles in Reg tab
   // Auto-fetch activity stats for visible profiles in Reg tab
   useEffect(() => {
-    if (activeTab !== 'reg' || profiles.length === 0 || loading) {
+    if (activeTab !== 'registrations' || profiles.length === 0 || loading || tabLoading.registrations) {
       return;
     }
 
