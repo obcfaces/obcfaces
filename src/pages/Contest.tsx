@@ -76,8 +76,7 @@ const Contest = () => {
     
     const loadPastWeekIntervals = async () => {
       try {
-        console.log('Loading past week intervals...');
-        // Get all unique week_interval values from past participants
+        console.log('=== LOADING PAST WEEK INTERVALS ===');
         const { data, error } = await supabase
           .from('weekly_contest_participants')
           .select('week_interval')
@@ -92,43 +91,34 @@ const Contest = () => {
         
         console.log('Raw data from DB:', data);
         
-        // Get unique intervals
         const uniqueIntervals = Array.from(new Set(data?.map(p => p.week_interval).filter(Boolean) as string[]));
         
-        console.log('Unique intervals before processing:', uniqueIntervals);
+        console.log('Unique intervals:', uniqueIntervals);
         console.log('Total intervals found:', uniqueIntervals.length);
         
-        // Get current Monday in Philippine time
         const currentMonday = getCurrentMonday();
         console.log('Current Monday (Philippine time):', currentMonday);
         
-        // Calculate weeks difference for each interval
         const intervalsWithWeeks = uniqueIntervals
           .map(interval => {
             const intervalMonday = parseIntervalToMonday(interval);
             if (!intervalMonday) return null;
             
-            // Calculate difference in weeks from when status changed to 'past'
-            // week_interval показывает неделю, когда статус сменился на 'past'
-            // Поэтому если сегодня 06.10 (понедельник), а интервал 06/10-12/10/25:
-            // diffWeeks = 0, но карточка должна быть в "1 WEEK AGO"
             const diffTime = currentMonday.getTime() - intervalMonday.getTime();
             const diffWeeks = Math.floor(diffTime / (7 * 24 * 60 * 60 * 1000));
-            
-            // +1 потому что неделя перехода в past считается как "1 week ago"
             const weeksAgo = diffWeeks + 1;
             
-            console.log(`Interval ${interval}: Monday=${intervalMonday}, DiffWeeks=${diffWeeks}, WeeksAgo=${weeksAgo}`);
+            console.log(`Interval ${interval}: Monday=${intervalMonday.toLocaleDateString()}, DiffWeeks=${diffWeeks}, WeeksAgo=${weeksAgo}`);
             
             return {
               interval,
               weeksAgo
             };
           })
-          .filter(item => item !== null && item.weeksAgo > 0) // Only past weeks
+          .filter(item => item !== null && item.weeksAgo > 0)
           .sort((a, b) => a!.weeksAgo - b!.weeksAgo) as Array<{interval: string, weeksAgo: number}>;
         
-        console.log('Past week intervals with weeks calculation:', intervalsWithWeeks);
+        console.log('Final intervals with weeks:', intervalsWithWeeks);
         setPastWeekIntervals(intervalsWithWeeks);
       } catch (error) {
         console.error('Error loading past week intervals:', error);
