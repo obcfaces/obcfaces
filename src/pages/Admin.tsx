@@ -978,39 +978,60 @@ const Admin = () => {
   // Fetch user activity: how many likes and ratings this user gave to others
   const fetchUserActivity = async (userId: string) => {
     if (loadingActivity.has(userId)) {
+      console.log('⏭️ Already loading activity for:', userId);
       return; // Already loading
     }
     
+    console.log('🔄 Starting to fetch activity for user:', userId);
     setLoadingActivity(prev => new Set(prev).add(userId));
     
     try {
       // Fetch likes given by this user
+      console.log('📍 Fetching likes for user:', userId);
       const { data: likesData, error: likesError } = await supabase
         .from('likes')
         .select(`
           id,
           content_id,
           participant_id,
-          created_at,
-          profiles:participant_id (
-            id,
-            display_name,
-            first_name,
-            last_name,
-            avatar_url,
-            photo_1_url,
-            photo_2_url
-          )
+          created_at
         `)
         .eq('user_id', userId)
         .eq('content_type', 'contest')
         .order('created_at', { ascending: false });
 
       if (likesError) {
-        console.error('Error fetching likes:', likesError);
+        console.error('❌ Error fetching likes:', likesError);
+      } else {
+        console.log('✅ Likes fetched:', likesData?.length || 0);
+      }
+
+      // Fetch profile data for liked participants separately
+      let likesWithProfiles = [];
+      if (likesData && likesData.length > 0) {
+        const participantIds = likesData
+          .map(like => like.participant_id)
+          .filter(id => id != null);
+        
+        if (participantIds.length > 0) {
+          const { data: profilesData } = await supabase
+            .from('profiles')
+            .select('id, display_name, first_name, last_name, avatar_url, photo_1_url, photo_2_url')
+            .in('id', participantIds);
+          
+          const profilesMap = new Map(
+            (profilesData || []).map(p => [p.id, p])
+          );
+          
+          likesWithProfiles = likesData.map(like => ({
+            ...like,
+            profiles: like.participant_id ? profilesMap.get(like.participant_id) : null
+          })).filter(like => like.profiles);
+        }
       }
 
       // Fetch ratings given by this user
+      console.log('⭐ Fetching ratings for user:', userId);
       const { data: ratingsData, error: ratingsError } = await supabase
         .from('contestant_ratings')
         .select(`
@@ -1018,38 +1039,63 @@ const Admin = () => {
           rating,
           contestant_name,
           contestant_user_id,
-          created_at,
-          profiles:contestant_user_id (
-            id,
-            display_name,
-            first_name,
-            last_name,
-            avatar_url,
-            photo_1_url,
-            photo_2_url
-          )
+          participant_id,
+          created_at
         `)
         .eq('user_id', userId)
         .order('created_at', { ascending: false });
 
       if (ratingsError) {
-        console.error('Error fetching ratings:', ratingsError);
+        console.error('❌ Error fetching ratings:', ratingsError);
+      } else {
+        console.log('✅ Ratings fetched:', ratingsData?.length || 0);
       }
 
-      const likes = (likesData || []).filter(like => like.profiles);
-      const ratings = ratingsData || [];
+      // Fetch profile data for rated contestants separately
+      let ratingsWithProfiles = [];
+      if (ratingsData && ratingsData.length > 0) {
+        const contestantIds = ratingsData
+          .map(rating => rating.contestant_user_id || rating.participant_id)
+          .filter(id => id != null);
+        
+        if (contestantIds.length > 0) {
+          const { data: profilesData } = await supabase
+            .from('profiles')
+            .select('id, display_name, first_name, last_name, avatar_url, photo_1_url, photo_2_url')
+            .in('id', contestantIds);
+          
+          const profilesMap = new Map(
+            (profilesData || []).map(p => [p.id, p])
+          );
+          
+          ratingsWithProfiles = ratingsData.map(rating => ({
+            ...rating,
+            profiles: (rating.contestant_user_id || rating.participant_id) 
+              ? profilesMap.get(rating.contestant_user_id || rating.participant_id) 
+              : null
+          }));
+        }
+      }
+
+      const finalLikes = likesWithProfiles;
+      const finalRatings = ratingsWithProfiles || [];
+
+      console.log('📊 Final stats for user', userId, ':', {
+        likesCount: finalLikes.length,
+        ratingsCount: finalRatings.length
+      });
 
       setUserActivityStats(prev => ({
         ...prev,
         [userId]: {
-          likesCount: likes.length,
-          ratingsCount: ratings.length,
-          likes,
-          ratings
+          likesCount: finalLikes.length,
+          ratingsCount: finalRatings.length,
+          likes: finalLikes,
+          ratings: finalRatings
         }
       }));
     } catch (error) {
-      console.error('Error fetching user activity:', error);
+      console.error('❌ Error fetching user activity:', error);
     } finally {
       setLoadingActivity(prev => {
         const next = new Set(prev);
@@ -1547,9 +1593,16 @@ const Admin = () => {
   // Auto-fetch activity stats for visible profiles in Reg tab
   useEffect(() => {
     if (activeTab === 'reg' && profiles.length > 0) {
+      console.log('🔵 Reg tab active, auto-fetching activity for', profiles.length, 'profiles');
       profiles.forEach(profile => {
         if (!userActivityStats[profile.id] && !loadingActivity.has(profile.id)) {
+          console.log('📊 Fetching activity for profile:', profile.id, profile.display_name);
           fetchUserActivity(profile.id);
+        } else {
+          console.log('⏭️ Skipping profile (already loaded/loading):', profile.id, {
+            hasStats: !!userActivityStats[profile.id],
+            isLoading: loadingActivity.has(profile.id)
+          });
         }
       });
     }
