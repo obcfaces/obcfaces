@@ -71,6 +71,7 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
   const [isAdmin, setIsAdmin] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [imagesLoaded, setImagesLoaded] = useState(false);
+  const [preloadedIndexes, setPreloadedIndexes] = useState<Set<number>>(new Set());
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
@@ -260,50 +261,70 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
     filterCandidates();
   }, [user, userInitialized]);
 
-  // Preload first card images when candidates load
+  // Preload first 3 cards images when candidates load
   useEffect(() => {
     if (filteredCandidates.length > 0 && !imagesLoaded) {
-      const loadFirstCard = async () => {
-        await preloadNextCard(currentIndex);
+      const loadInitialCards = async () => {
+        // Preload current + next 2 cards
+        const promises = [];
+        for (let i = 0; i < Math.min(3, filteredCandidates.length); i++) {
+          promises.push(preloadCard(i));
+        }
+        await Promise.all(promises);
         setImagesLoaded(true);
       };
       
-      // Add timeout fallback
       const timeout = setTimeout(() => {
         console.log('⚠️ Image preload timeout, showing card anyway');
         setImagesLoaded(true);
       }, 5000);
       
-      loadFirstCard().finally(() => clearTimeout(timeout));
+      loadInitialCards().finally(() => clearTimeout(timeout));
       
       return () => clearTimeout(timeout);
     }
-  }, [filteredCandidates, currentIndex]);
+  }, [filteredCandidates]);
 
-  // Preload next card images with timeout
-  const preloadNextCard = async (nextIndex: number) => {
-    if (nextIndex >= filteredCandidates.length) return true;
+  // Preload next cards in background whenever currentIndex changes
+  useEffect(() => {
+    if (filteredCandidates.length > 0 && imagesLoaded) {
+      const preloadNextCards = async () => {
+        // Preload next 3 cards
+        for (let i = 1; i <= 3; i++) {
+          const nextIdx = currentIndex + i;
+          if (nextIdx < filteredCandidates.length && !preloadedIndexes.has(nextIdx)) {
+            preloadCard(nextIdx);
+          }
+        }
+      };
+      preloadNextCards();
+    }
+  }, [currentIndex, filteredCandidates, imagesLoaded]);
+
+  // Improved preload function with tracking
+  const preloadCard = async (index: number) => {
+    if (index >= filteredCandidates.length || preloadedIndexes.has(index)) return true;
     
-    const nextCandidate = filteredCandidates[nextIndex];
-    if (!nextCandidate) return true;
+    const candidate = filteredCandidates[index];
+    if (!candidate) return true;
 
-    const images = [nextCandidate.faceImage, nextCandidate.fullBodyImage].filter(Boolean);
+    const images = [candidate.faceImage, candidate.fullBodyImage].filter(Boolean);
     
     try {
       const imagePromises = images.map(src => {
         return Promise.race([
-          new Promise((resolve, reject) => {
+          new Promise((resolve) => {
             const img = new Image();
             img.onload = resolve;
-            img.onerror = resolve; // Resolve even on error
+            img.onerror = resolve;
             img.src = src;
           }),
-          // Timeout after 3 seconds
           new Promise(resolve => setTimeout(resolve, 3000))
         ]);
       });
 
       await Promise.all(imagePromises);
+      setPreloadedIndexes(prev => new Set(prev).add(index));
     } catch (error) {
       console.error('Error preloading images:', error);
     }
@@ -322,7 +343,6 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
       const nextIndex = currentIndex + 1;
       
       setIsTransitioning(true);
-      setImagesLoaded(false);
       
       try {
         // Save vote to database
@@ -356,17 +376,15 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
         console.error('Error saving vote:', error);
       }
       
-      // Preload next card with timeout fallback
-      const preloadPromise = preloadNextCard(nextIndex);
-      const timeoutPromise = new Promise(resolve => setTimeout(resolve, 5000));
-      
-      await Promise.race([preloadPromise, timeoutPromise]);
-      
+      // Instant transition since images are preloaded
       setHistory(prev => [...prev, currentIndex]);
       setCurrentIndex(nextIndex);
       setRemainingCandidates(prev => prev - 1);
-      setImagesLoaded(true);
-      setIsTransitioning(false);
+      
+      // Quick transition
+      setTimeout(() => {
+        setIsTransitioning(false);
+      }, 150);
     }
   };
 
@@ -381,7 +399,6 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
       const nextIndex = currentIndex + 1;
       
       setIsTransitioning(true);
-      setImagesLoaded(false);
       
       try {
         // Save vote to database
@@ -396,17 +413,15 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
         console.error('Error saving vote:', error);
       }
       
-      // Preload next card with timeout fallback
-      const preloadPromise = preloadNextCard(nextIndex);
-      const timeoutPromise = new Promise(resolve => setTimeout(resolve, 5000));
-      
-      await Promise.race([preloadPromise, timeoutPromise]);
-      
+      // Instant transition since images are preloaded
       setHistory(prev => [...prev, currentIndex]);
       setCurrentIndex(nextIndex);
       setRemainingCandidates(prev => prev - 1);
-      setImagesLoaded(true);
-      setIsTransitioning(false);
+      
+      // Quick transition
+      setTimeout(() => {
+        setIsTransitioning(false);
+      }, 150);
     }
   };
 
@@ -419,15 +434,13 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
     if (history.length > 0 && !isTransitioning) {
       const previousIndex = history[history.length - 1];
       setIsTransitioning(true);
-      setImagesLoaded(false);
       
       setHistory(prev => prev.slice(0, -1));
       setCurrentIndex(previousIndex);
       setRemainingCandidates(prev => prev + 1);
       
-      // Small delay for transition
+      // Quick transition
       setTimeout(() => {
-        setImagesLoaded(true);
         setIsTransitioning(false);
       }, 100);
     }
@@ -460,25 +473,21 @@ export function NextWeekSection({ viewMode = 'full' }: NextWeekSectionProps) {
         </div>
       ) : filteredCandidates.length > 0 && currentIndex < filteredCandidates.length ? (
         <div className="flex flex-col items-center">
-          <div className={`w-full px-0 sm:px-6 max-w-full overflow-hidden transition-opacity duration-300 ${
-            isTransitioning || !imagesLoaded ? 'opacity-0' : 'opacity-100 animate-fade-in'
+          <div className={`w-full px-0 sm:px-6 max-w-full overflow-hidden transition-opacity duration-200 ${
+            isTransitioning ? 'opacity-0' : 'opacity-100'
           }`}>
-            {!isTransitioning && imagesLoaded && (
-              <ContestantCard
-                {...currentCandidate}
-                rank={0}
-                viewMode={viewMode}
-                showDislike={true}
-                hideCardActions={true}
-              />
-            )}
+            <ContestantCard
+              {...currentCandidate}
+              rank={0}
+              viewMode={viewMode}
+              showDislike={true}
+              hideCardActions={true}
+            />
           </div>
           
           {isTransitioning && (
-            <div className="w-full px-0 sm:px-6 max-w-full overflow-hidden py-24">
-              <div className="flex justify-center items-center">
-                <div className="animate-pulse text-muted-foreground">Loading next candidate...</div>
-              </div>
+            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+              <div className="animate-pulse text-muted-foreground text-sm">Loading...</div>
             </div>
           )}
           
