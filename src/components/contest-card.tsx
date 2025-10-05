@@ -396,10 +396,7 @@ export function ContestantCard({
       // Use upsert to handle one rating per user per participant
       const { data, error } = await supabase
         .from('contestant_ratings')
-        .upsert(ratingData, { 
-          onConflict: 'user_id,participant_id',
-          ignoreDuplicates: false 
-        })
+        .upsert(ratingData)
         .select();
       
       console.log('Rating upsert result:', { data, error });
