@@ -6106,10 +6106,10 @@ const Admin = () => {
                               const isGmail = p.email?.toLowerCase().endsWith('@gmail.com') || false;
                               const hasVoted = usersWhoVoted.has(p.id);
                               // Проверяем что email НЕ был подтвержден через реальную верификацию
-                              // Если email_confirmed_at NULL или разница с created_at < 2 секунд (автоподтверждение)
+                              // Если email_confirmed_at NULL или разница с created_at < 1 секунды (автоподтверждение)
                               const wasNotReallyVerified = !p.email_confirmed_at || 
                                 (p.created_at && p.email_confirmed_at && 
-                                  Math.abs(new Date(p.email_confirmed_at).getTime() - new Date(p.created_at).getTime()) < 2000);
+                                  Math.abs(new Date(p.email_confirmed_at).getTime() - new Date(p.created_at).getTime()) < 1000);
                               return isGmail && hasVoted && wasNotReallyVerified;
                             }).length;
                             return count > 0 ? ` (${count})` : '';
@@ -6131,7 +6131,7 @@ const Admin = () => {
                               // Проверяем что email НЕ был подтвержден через реальную верификацию
                               const wasNotReallyVerified = !p.email_confirmed_at || 
                                 (p.created_at && p.email_confirmed_at && 
-                                  Math.abs(new Date(p.email_confirmed_at).getTime() - new Date(p.created_at).getTime()) < 2000);
+                                  Math.abs(new Date(p.email_confirmed_at).getTime() - new Date(p.created_at).getTime()) < 1000);
                               return isNotGmail && hasVoted && wasNotReallyVerified;
                             }).length;
                             return count > 0 ? ` (${count})` : '';
@@ -6165,16 +6165,16 @@ const Admin = () => {
                         // Подфильтр по типу почты - показываем тех кто голосовал БЕЗ реальной верификации
                         if (suspiciousEmailFilter === 'gmail') {
                           const isGmail = profile.email?.toLowerCase().endsWith('@gmail.com') || false;
-                          // Email не подтвержден ИЛИ подтвержден автоматически (разница < 2 сек)
+                          // Email не подтвержден ИЛИ подтвержден автоматически (разница < 1 сек)
                           const wasNotReallyVerified = !profile.email_confirmed_at || 
                             (profile.created_at && profile.email_confirmed_at && 
-                              Math.abs(new Date(profile.email_confirmed_at).getTime() - new Date(profile.created_at).getTime()) < 2000);
+                              Math.abs(new Date(profile.email_confirmed_at).getTime() - new Date(profile.created_at).getTime()) < 1000);
                           return isGmail && hasVoted && wasNotReallyVerified;
                         } else if (suspiciousEmailFilter === 'other') {
                           const isNotGmail = !profile.email?.toLowerCase().endsWith('@gmail.com');
                           const wasNotReallyVerified = !profile.email_confirmed_at || 
                             (profile.created_at && profile.email_confirmed_at && 
-                              Math.abs(new Date(profile.email_confirmed_at).getTime() - new Date(profile.created_at).getTime()) < 2000);
+                              Math.abs(new Date(profile.email_confirmed_at).getTime() - new Date(profile.created_at).getTime()) < 1000);
                           return isNotGmail && hasVoted && wasNotReallyVerified;
                         }
                         
