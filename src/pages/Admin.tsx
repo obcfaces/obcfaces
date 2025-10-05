@@ -461,6 +461,7 @@ const Admin = () => {
   const [userActivityStats, setUserActivityStats] = useState<Record<string, { likesCount: number; ratingsCount: number; likes: any[]; ratings: any[] }>>({});
   const [loadingActivity, setLoadingActivity] = useState<Set<string>>(new Set());
   const [emailDomainStats, setEmailDomainStats] = useState<Array<{ domain: string; user_count: number }>>([]);
+  const [emailDomainVotingStats, setEmailDomainVotingStats] = useState<Array<{ domain: string; user_count: number; total_votes: number; total_likes: number; avg_rating: number }>>([]);
   const [expandedActivity, setExpandedActivity] = useState<Set<string>>(new Set());
   const [updatingStatuses, setUpdatingStatuses] = useState<Set<string>>(new Set());
   const [expandedUserActivity, setExpandedUserActivity] = useState<Set<string>>(new Set());
@@ -638,7 +639,8 @@ const Admin = () => {
               fetchDailyStats(),
               fetchDailyApplicationStats(),
               fetchDailyRegistrationStats(),
-              fetchEmailDomainStats()
+              fetchEmailDomainStats(),
+              fetchEmailDomainVotingStats()
             ]);
             break;
 
@@ -1616,6 +1618,17 @@ const Admin = () => {
       setEmailDomainStats(data || []);
     } catch (error) {
       console.error('Error fetching email domain stats:', error);
+    }
+  };
+
+  // Fetch email domain voting statistics
+  const fetchEmailDomainVotingStats = async () => {
+    try {
+      const { data, error } = await supabase.rpc('get_email_domain_voting_stats');
+      if (error) throw error;
+      setEmailDomainVotingStats(data || []);
+    } catch (error) {
+      console.error('Error fetching email domain voting stats:', error);
     }
   };
 
@@ -6602,12 +6615,17 @@ const Admin = () => {
                       <div className="space-y-4">
                         <h3 className="text-lg font-semibold">Статистика по email доменам</h3>
                         <div className="grid gap-3">
-                          {emailDomainStats.length > 0 ? (
-                            emailDomainStats.map((stat, index) => (
+                          {emailDomainVotingStats.length > 0 ? (
+                            emailDomainVotingStats.map((stat, index) => (
                               <div key={index} className="p-4 bg-background rounded border">
-                                <div className="flex justify-between items-center">
+                                <div className="flex justify-between items-start mb-2">
                                   <span className="font-medium font-mono text-lg">@{stat.domain}</span>
-                                  <span className="text-lg font-bold text-primary">{stat.user_count}</span>
+                                  <span className="text-lg font-bold text-primary">{stat.user_count} пользователей</span>
+                                </div>
+                                <div className="flex gap-4 text-sm text-muted-foreground flex-wrap">
+                                  <span>⭐ Голосов: {stat.total_votes}</span>
+                                  <span>❤️ Лайков: {stat.total_likes}</span>
+                                  <span>📊 Средний рейтинг: {stat.avg_rating}</span>
                                 </div>
                               </div>
                             ))
