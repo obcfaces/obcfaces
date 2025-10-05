@@ -455,11 +455,10 @@ const Admin = () => {
   const [pendingPastChanges, setPendingPastChanges] = useState<{ [participantId: string]: { admin_status?: string; week_interval?: string } }>({});
   const [statusHistoryModalOpen, setStatusHistoryModalOpen] = useState(false);
   const [selectedStatusHistory, setSelectedStatusHistory] = useState<{ participantId: string; participantName: string; statusHistory: any } | null>(null);
-  const [expandedUserStats, setExpandedUserStats] = useState<Set<string>>(new Set());
-  const [userLikesData, setUserLikesData] = useState<Record<string, any[]>>({});
-  const [userRatingsData, setUserRatingsData] = useState<Record<string, any[]>>({});
-  const [userStatsCount, setUserStatsCount] = useState<Record<string, { likes: number; ratings: number }>>({});
-  const [loadingUserStats, setLoadingUserStats] = useState<Set<string>>(new Set());
+  // User activity stats for Reg tab
+  const [userActivityStats, setUserActivityStats] = useState<Record<string, { likesCount: number; ratingsCount: number; likes: any[]; ratings: any[] }>>({});
+  const [loadingActivity, setLoadingActivity] = useState<Set<string>>(new Set());
+  const [expandedActivity, setExpandedActivity] = useState<Set<string>>(new Set());
   const [updatingStatuses, setUpdatingStatuses] = useState<Set<string>>(new Set());
   const [expandedUserActivity, setExpandedUserActivity] = useState<Set<string>>(new Set());
   const [userActivityData, setUserActivityData] = useState<Record<string, any>>({});
@@ -976,24 +975,21 @@ const Admin = () => {
     }
   };
 
-  const fetchUserStats = async (userId: string) => {
-    // Prevent duplicate fetches
-    if (fetchedStatsRef.current.has(userId)) {
-      console.log('📊 Stats already fetched for:', userId);
-      return;
+  // Fetch user activity: how many likes and ratings this user gave to others
+  const fetchUserActivity = async (userId: string) => {
+    if (loadingActivity.has(userId)) {
+      return; // Already loading
     }
     
-    console.log('🔵 START fetching stats for user:', userId);
-    fetchedStatsRef.current.add(userId);
-    setLoadingUserStats(prev => new Set(prev).add(userId));
+    setLoadingActivity(prev => new Set(prev).add(userId));
+    
     try {
-      // Fetch likes with participant profiles
+      // Fetch likes given by this user
       const { data: likesData, error: likesError } = await supabase
         .from('likes')
         .select(`
           id,
           content_id,
-          content_type,
           participant_id,
           created_at,
           profiles:participant_id (
@@ -1011,27 +1007,18 @@ const Admin = () => {
         .order('created_at', { ascending: false });
 
       if (likesError) {
-        console.error('❌ Error fetching likes:', likesError);
+        console.error('Error fetching likes:', likesError);
       }
 
-      console.log(`❤️ Found ${likesData?.length || 0} likes for user ${userId}`);
-
-      // Process likes to ensure profile exists
-      const likesWithProfiles = (likesData || []).map(like => ({
-        ...like,
-        profile: like.profiles
-      })).filter(like => like.profile);
-
-      // Fetch ratings with participant info
+      // Fetch ratings given by this user
       const { data: ratingsData, error: ratingsError } = await supabase
         .from('contestant_ratings')
         .select(`
           id,
           rating,
           contestant_name,
-          created_at,
           contestant_user_id,
-          participant_id,
+          created_at,
           profiles:contestant_user_id (
             id,
             display_name,
@@ -1046,104 +1033,25 @@ const Admin = () => {
         .order('created_at', { ascending: false });
 
       if (ratingsError) {
-        console.error('❌ Error fetching ratings:', ratingsError);
+        console.error('Error fetching ratings:', ratingsError);
       }
 
-      console.log(`⭐ Found ${ratingsData?.length || 0} ratings for user ${userId}`);
+      const likes = (likesData || []).filter(like => like.profiles);
+      const ratings = ratingsData || [];
 
-      const likesCount = likesWithProfiles.length;
-      const ratingsCount = ratingsData?.length || 0;
-
-      // Save full data for expansion
-      setUserLikesData(prev => ({
-        ...prev,
-        [userId]: likesWithProfiles
-      }));
-      
-      setUserRatingsData(prev => ({
-        ...prev,
-        [userId]: ratingsData || []
-      }));
-
-      // Save counts for display
-      setUserStatsCount(prev => {
-        const newCounts = {
-          ...prev,
-          [userId]: {
-            likes: likesCount,
-            ratings: ratingsCount
-          }
-        };
-        console.log(`💾 Saved counts for user ${userId}:`, newCounts[userId], 'Total in state:', Object.keys(newCounts).length);
-        return newCounts;
-      });
-
-      // Fetch activity data - unique logins with stats for each session
-      const { data: logins } = await supabase
-        .from('user_login_logs')
-        .select('created_at')
-        .eq('user_id', userId)
-        .order('created_at', { ascending: false });
-
-      // Get unique login dates
-      const uniqueLogins = logins?.reduce((acc: any[], login) => {
-        const loginDate = new Date(login.created_at).toLocaleDateString();
-        if (!acc.find(l => new Date(l.created_at).toLocaleDateString() === loginDate)) {
-          acc.push(login);
-        }
-        return acc;
-      }, []) || [];
-
-      // Get stats for each unique login
-      const loginsWithStats = await Promise.all(uniqueLogins.map(async (login) => {
-        const loginDate = new Date(login.created_at);
-        const nextDay = new Date(loginDate);
-        nextDay.setDate(nextDay.getDate() + 1);
-
-        // Count likes for this day
-        const { count: likesOnDay } = await supabase
-          .from('likes')
-          .select('*', { count: 'exact', head: true })
-          .eq('user_id', userId)
-          .gte('created_at', loginDate.toISOString())
-          .lt('created_at', nextDay.toISOString());
-
-        // Count ratings for this day
-        const { count: ratingsOnDay } = await supabase
-          .from('contestant_ratings')
-          .select('*', { count: 'exact', head: true })
-          .eq('user_id', userId)
-          .gte('created_at', loginDate.toISOString())
-          .lt('created_at', nextDay.toISOString());
-
-        return {
-          ...login,
-          likesCount: likesOnDay || 0,
-          ratingsCount: ratingsOnDay || 0
-        };
-      }));
-
-      const { data: participations } = await supabase
-        .from('weekly_contest_participants')
-        .select('week_interval, created_at')
-        .eq('user_id', userId);
-
-      const lastActivity = uniqueLogins[0]?.created_at || null;
-
-      setUserActivityData(prev => ({
+      setUserActivityStats(prev => ({
         ...prev,
         [userId]: {
-          lastActivity,
-          logins: loginsWithStats,
-          intervals: participations ? [...new Set(participations.map(p => p.week_interval).filter(Boolean))] : [],
-          likesCount,
-          ratingsCount
+          likesCount: likes.length,
+          ratingsCount: ratings.length,
+          likes,
+          ratings
         }
       }));
     } catch (error) {
-      console.error('Error fetching user stats:', error);
+      console.error('Error fetching user activity:', error);
     } finally {
-      setLoadingUserStats(prev => {
+      setLoadingActivity(prev => {
         const next = new Set(prev);
         next.delete(userId);
         return next;
@@ -1151,135 +1059,22 @@ const Admin = () => {
     }
   };
 
-  const fetchUserLikesAndRatings = async (userId: string) => {
-    console.log('📊 Fetching likes and ratings for user:', userId);
-    
-    // Add to loading set
-    setLoadingUserStats(prev => new Set(prev).add(userId));
-    
-    try {
-      // Fetch likes with participant profiles
-      const { data: likesData, error: likesError } = await supabase
-        .from('likes')
-        .select(`
-          id,
-          content_id,
-          content_type,
-          participant_id,
-          created_at,
-          profiles:participant_id (
-            id,
-            display_name,
-            first_name,
-            last_name,
-            avatar_url,
-            photo_1_url,
-            photo_2_url
-          )
-        `)
-        .eq('user_id', userId)
-        .eq('content_type', 'contest')
-        .order('created_at', { ascending: false });
-
-      if (likesError) {
-        console.error('❌ Error fetching likes:', likesError);
-      }
-
-      console.log(`❤️ Found ${likesData?.length || 0} likes for user ${userId}:`, likesData);
-
-      // Process likes to ensure profile exists
-      let likesWithProfiles = [];
-      if (likesData) {
-        likesWithProfiles = likesData.map(like => {
-          return {
-            ...like,
-            profile: like.profiles
-          };
-        }).filter(like => like.profile) || [];
-      }
-
-      console.log(`✅ Processed ${likesWithProfiles.length} likes with profiles`);
-
-      // Fetch ratings with participant info
-      const { data: ratingsData, error: ratingsError } = await supabase
-        .from('contestant_ratings')
-        .select(`
-          id,
-          rating,
-          contestant_name,
-          created_at,
-          contestant_user_id,
-          participant_id,
-          profiles:contestant_user_id (
-            id,
-            display_name,
-            first_name,
-            last_name,
-            avatar_url,
-            photo_1_url,
-            photo_2_url
-          )
-        `)
-        .eq('user_id', userId)
-        .order('created_at', { ascending: false });
-
-      if (ratingsError) {
-        console.error('❌ Error fetching ratings:', ratingsError);
-      }
-
-      console.log(`⭐ Found ${ratingsData?.length || 0} ratings for user ${userId}:`, ratingsData);
-
-      setUserLikesData(prev => {
-        const newData = { ...prev, [userId]: likesWithProfiles };
-        console.log('Setting likes data:', newData);
-        return newData;
-      });
-      
-      setUserRatingsData(prev => {
-        const newData = { ...prev, [userId]: ratingsData || [] };
-        console.log('Setting ratings data:', newData);
-        return newData;
-      });
-      
-      // Update counts
-      setUserStatsCount(prev => ({
-        ...prev,
-        [userId]: {
-          likes: likesWithProfiles.length,
-          ratings: ratingsData?.length || 0
-        }
-      }));
-      
-      console.log('✅ User activity data set successfully');
-    } catch (error) {
-      console.error('❌ Error fetching user likes and ratings:', error);
-    } finally {
-      // Remove from loading set
-      setLoadingUserStats(prev => {
-        const next = new Set(prev);
-        next.delete(userId);
-        return next;
-      });
-    }
-  };
-
-  const toggleUserStats = async (userId: string) => {
-    console.log('🔵 toggleUserStats called for user:', userId);
-    const isExpanded = expandedUserStats.has(userId);
+  // Toggle expanded view for user activity
+  const toggleUserActivity = (userId: string) => {
+    const isExpanded = expandedActivity.has(userId);
     
     if (isExpanded) {
-      console.log('🔵 Collapsing stats for user:', userId);
-      setExpandedUserStats(prev => {
+      setExpandedActivity(prev => {
         const next = new Set(prev);
         next.delete(userId);
         return next;
       });
     } else {
-      console.log('🔵 Expanding stats for user:', userId);
-      setExpandedUserStats(prev => new Set(prev).add(userId));
-      // Always fetch data when expanding to ensure fresh data
-      console.log('🔵 Calling fetchUserLikesAndRatings for user:', userId);
-      await fetchUserLikesAndRatings(userId);
+      setExpandedActivity(prev => new Set(prev).add(userId));
+      // Fetch data if not already loaded
+      if (!userActivityStats[userId]) {
+        fetchUserActivity(userId);
+      }
     }
   };
 
@@ -1749,61 +1544,16 @@ const Admin = () => {
     setUserRoleMap(roleMap);
   };
 
-  // Fetch stats for all visible profiles - ALWAYS
+  // Auto-fetch activity stats for visible profiles in Reg tab
   useEffect(() => {
-    if (activeTab === 'reg') {
-      console.log('🔵 Reg tab active, fetching stats for', profiles.length, 'profiles');
+    if (activeTab === 'reg' && profiles.length > 0) {
       profiles.forEach(profile => {
-        if (!fetchedStatsRef.current.has(profile.id)) {
-          console.log('📊 Auto-fetching stats for profile:', profile.id);
-          fetchUserStats(profile.id);
+        if (!userActivityStats[profile.id] && !loadingActivity.has(profile.id)) {
+          fetchUserActivity(profile.id);
         }
       });
     }
-  }, [profiles, activeTab]);
-
-  // Fetch stats for visible profiles in Reg tab when page changes
-  useEffect(() => {
-    if (activeTab === 'reg') {
-      const filteredProfiles = profiles.filter(profile => {
-        // Same filtering logic as in render
-        const userRole = userRoleMap[profile.id] || 'usual';
-        
-        if (roleFilter === 'admin') {
-          return userRole === 'admin';
-        } else if (roleFilter === 'usual') {
-          return userRole === 'usual' || !userRole;
-        }
-
-        if (searchQuery.trim()) {
-          const query = searchQuery.toLowerCase();
-          const fullName = `${profile.first_name || ''} ${profile.last_name || ''}`.toLowerCase();
-          const displayName = (profile.display_name || '').toLowerCase();
-          const email = (profile.email || '').toLowerCase();
-          const ip = (profile.ip_address || '').toLowerCase();
-          
-          return fullName.includes(query) || 
-                 displayName.includes(query) || 
-                 email.includes(query) || 
-                 ip.includes(query);
-        }
-        
-        return true;
-      });
-
-      const startIdx = (regPaginationPage - 1) * regItemsPerPage;
-      const endIdx = startIdx + regItemsPerPage;
-      const paginatedProfiles = filteredProfiles.slice(startIdx, endIdx);
-      
-      console.log('📄 Page changed, checking stats for', paginatedProfiles.length, 'visible profiles');
-      paginatedProfiles.forEach(profile => {
-        if (!fetchedStatsRef.current.has(profile.id)) {
-          console.log('📊 Fetching stats for paginated profile:', profile.id);
-          fetchUserStats(profile.id);
-        }
-      });
-    }
-  }, [activeTab, regPaginationPage, profiles, userRoleMap, roleFilter, searchQuery]);
+  }, [activeTab, profiles]);
 
   const fetchContestApplications = async () => {
     console.log('Fetching contest applications...');
@@ -6338,137 +6088,134 @@ const Admin = () => {
                                  </div>
                                </div>
 
-                               {/* Stats Icons - Show counts for likes and ratings */}
-                               <div 
-                                className="absolute bottom-2 right-2 z-50 flex gap-2" 
-                                style={{ pointerEvents: 'auto' }}
-                              >
-                                {/* Ratings Icon */}
-                                <div 
-                                  className="flex items-center gap-1 bg-background/90 px-2 py-1 rounded cursor-pointer hover:bg-background shadow-sm border"
-                                  onClick={(e) => {
-                                    e.preventDefault();
-                                    e.stopPropagation();
-                                    console.log('🔘 Stats clicked for profile:', profile.id);
-                                    toggleUserStats(profile.id);
-                                  }}
-                                >
-                                  <Star className="h-4 w-4 text-yellow-500" />
-                                  {loadingUserStats.has(profile.id) ? (
-                                    <Loader2 className="h-3 w-3 animate-spin" />
-                                  ) : (
-                                    <span className="text-xs font-medium">
-                                      {userStatsCount[profile.id]?.ratings ?? userRatingsData[profile.id]?.length ?? 0}
-                                    </span>
-                                  )}
-                                </div>
+                               {/* User Activity Icons */}
+                               <div className="absolute bottom-2 right-2 flex gap-2">
+                                 {/* Ratings given by this user */}
+                                 <button
+                                   className="flex items-center gap-1 bg-background/90 px-2 py-1 rounded hover:bg-background shadow-sm border transition-colors"
+                                   onClick={(e) => {
+                                     e.preventDefault();
+                                     e.stopPropagation();
+                                     toggleUserActivity(profile.id);
+                                   }}
+                                 >
+                                   <Star className="h-4 w-4 text-yellow-500" />
+                                   {loadingActivity.has(profile.id) ? (
+                                     <Loader2 className="h-3 w-3 animate-spin" />
+                                   ) : (
+                                     <span className="text-xs font-medium">
+                                       {userActivityStats[profile.id]?.ratingsCount ?? 0}
+                                     </span>
+                                   )}
+                                 </button>
 
-                                {/* Likes Icon */}
-                                <div 
-                                  className="flex items-center gap-1 bg-background/90 px-2 py-1 rounded cursor-pointer hover:bg-background shadow-sm border"
-                                  onClick={(e) => {
-                                    e.preventDefault();
-                                    e.stopPropagation();
-                                    console.log('🔘 Stats clicked for profile:', profile.id);
-                                    toggleUserStats(profile.id);
-                                  }}
-                                >
-                                  <Heart className="h-4 w-4 text-red-500" />
-                                  {loadingUserStats.has(profile.id) ? (
-                                    <Loader2 className="h-3 w-3 animate-spin" />
-                                  ) : (
-                                    <span className="text-xs font-medium">
-                                      {userStatsCount[profile.id]?.likes ?? userLikesData[profile.id]?.length ?? 0}
-                                    </span>
-                                  )}
-                                </div>
-                              </div>
+                                 {/* Likes given by this user */}
+                                 <button
+                                   className="flex items-center gap-1 bg-background/90 px-2 py-1 rounded hover:bg-background shadow-sm border transition-colors"
+                                   onClick={(e) => {
+                                     e.preventDefault();
+                                     e.stopPropagation();
+                                     toggleUserActivity(profile.id);
+                                   }}
+                                 >
+                                   <Heart className="h-4 w-4 text-red-500" />
+                                   {loadingActivity.has(profile.id) ? (
+                                     <Loader2 className="h-3 w-3 animate-spin" />
+                                   ) : (
+                                     <span className="text-xs font-medium">
+                                       {userActivityStats[profile.id]?.likesCount ?? 0}
+                                     </span>
+                                   )}
+                                 </button>
+                               </div>
 
-                            {/* Expandable content - Shows all interactions */}
-                            {expandedUserStats.has(profile.id) && (
-                              <div className="mt-4 pt-4 border-t space-y-3">
-                                {/* Ratings */}
-                                {userRatingsData[profile.id] && userRatingsData[profile.id].length > 0 && (
-                                  <div>
-                                    <h4 className="text-sm font-semibold mb-2 flex items-center gap-1">
-                                      <Star className="h-4 w-4 text-yellow-500" />
-                                      Ratings ({userRatingsData[profile.id].length})
-                                    </h4>
-                                    <div className="space-y-2 max-h-60 overflow-y-auto">
-                                       {userRatingsData[profile.id].map((rating: any) => (
-                                         <div key={rating.id} className="flex items-center gap-2 text-xs p-2 bg-muted rounded">
-                                           <div className="relative h-16 w-16 flex-shrink-0">
-                                             <img 
-                                               src={rating.profiles?.photo_1_url || rating.profiles?.avatar_url || ''} 
-                                               alt={rating.profiles?.display_name || rating.contestant_name || 'Participant'}
-                                               className="h-full w-full object-cover rounded"
-                                             />
-                                           </div>
-                                           <div className="flex-1">
-                                             <div className="font-medium">
-                                               {rating.profiles?.display_name || rating.contestant_name}
-                                             </div>
-                                             <div className="flex items-center gap-1 mt-1">
-                                               <MiniStars rating={rating.rating} />
-                                               <span className="text-muted-foreground font-semibold">({rating.rating})</span>
-                                             </div>
-                                             <div className="text-muted-foreground text-xs mt-1">
-                                               {new Date(rating.created_at).toLocaleDateString('en-GB')}
-                                             </div>
+                               {/* Expanded activity details */}
+                               {expandedActivity.has(profile.id) && (
+                                 <div className="mt-4 pt-4 border-t space-y-4">
+                                   {loadingActivity.has(profile.id) ? (
+                                     <div className="flex justify-center py-8">
+                                       <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                                     </div>
+                                   ) : (
+                                     <>
+                                       {/* Ratings given */}
+                                       {userActivityStats[profile.id]?.ratings && userActivityStats[profile.id].ratings.length > 0 && (
+                                         <div>
+                                           <h4 className="text-sm font-semibold mb-2 flex items-center gap-1">
+                                             <Star className="h-4 w-4 text-yellow-500" />
+                                             Ratings ({userActivityStats[profile.id].ratingsCount})
+                                           </h4>
+                                           <div className="space-y-2 max-h-60 overflow-y-auto">
+                                             {userActivityStats[profile.id].ratings.map((rating: any) => (
+                                               <div key={rating.id} className="flex items-center gap-2 text-xs p-2 bg-muted rounded">
+                                                 <div className="relative h-16 w-16 flex-shrink-0">
+                                                   <img 
+                                                     src={rating.profiles?.photo_1_url || rating.profiles?.avatar_url || ''} 
+                                                     alt={rating.profiles?.display_name || rating.contestant_name}
+                                                     className="h-full w-full object-cover rounded"
+                                                   />
+                                                 </div>
+                                                 <div className="flex-1">
+                                                   <div className="font-medium">
+                                                     {rating.profiles?.display_name || rating.contestant_name}
+                                                   </div>
+                                                   <div className="flex items-center gap-1 mt-1">
+                                                     <MiniStars rating={rating.rating} />
+                                                     <span className="text-muted-foreground font-semibold">({rating.rating})</span>
+                                                   </div>
+                                                   <div className="text-muted-foreground text-xs mt-1">
+                                                     {new Date(rating.created_at).toLocaleDateString('en-GB')}
+                                                   </div>
+                                                 </div>
+                                               </div>
+                                             ))}
                                            </div>
                                          </div>
-                                       ))}
-                                     </div>
-                                  </div>
-                                )}
+                                       )}
 
-                                {/* Likes */}
-                                {userLikesData[profile.id] && userLikesData[profile.id].length > 0 && (
-                                  <div>
-                                    <h4 className="text-sm font-semibold mb-2 flex items-center gap-1">
-                                      <Heart className="h-4 w-4 text-red-500" />
-                                      Likes ({userLikesData[profile.id].length})
-                                    </h4>
-                                     <div className="space-y-2 max-h-60 overflow-y-auto">
-                                       {(() => {
-                                         console.log('📊 Rendering likes for user:', profile.id, userLikesData[profile.id]);
-                                         return userLikesData[profile.id]
-                                           .filter((like: any) => {
-                                             console.log('Like item:', like);
-                                             return like.profile;
-                                           })
-                                           .map((like: any) => (
-                                             <div key={like.id} className="flex items-center gap-2 text-xs p-2 bg-muted rounded">
-                                               <div className="relative h-16 w-16 flex-shrink-0">
-                                                 <img 
-                                                   src={like.profile?.photo_1_url || like.profile?.avatar_url || ''} 
-                                                   alt={like.profile?.display_name || 'Participant'}
-                                                   className="h-full w-full object-cover rounded"
-                                                 />
-                                               </div>
-                                               <div className="flex-1">
-                                                 <div className="font-medium">
-                                                   {like.profile?.display_name || `${like.profile?.first_name || ''} ${like.profile?.last_name || ''}`}
+                                       {/* Likes given */}
+                                       {userActivityStats[profile.id]?.likes && userActivityStats[profile.id].likes.length > 0 && (
+                                         <div>
+                                           <h4 className="text-sm font-semibold mb-2 flex items-center gap-1">
+                                             <Heart className="h-4 w-4 text-red-500" />
+                                             Likes ({userActivityStats[profile.id].likesCount})
+                                           </h4>
+                                           <div className="space-y-2 max-h-60 overflow-y-auto">
+                                             {userActivityStats[profile.id].likes.map((like: any) => (
+                                               <div key={like.id} className="flex items-center gap-2 text-xs p-2 bg-muted rounded">
+                                                 <div className="relative h-16 w-16 flex-shrink-0">
+                                                   <img 
+                                                     src={like.profiles?.photo_1_url || like.profiles?.avatar_url || ''} 
+                                                     alt={like.profiles?.display_name}
+                                                     className="h-full w-full object-cover rounded"
+                                                   />
                                                  </div>
-                                                 <div className="text-muted-foreground text-xs mt-1">
-                                                   {new Date(like.created_at).toLocaleDateString('en-GB')}
+                                                 <div className="flex-1">
+                                                   <div className="font-medium">
+                                                     {like.profiles?.display_name || 
+                                                      `${like.profiles?.first_name || ''} ${like.profiles?.last_name || ''}`.trim()}
+                                                   </div>
+                                                   <div className="text-muted-foreground text-xs mt-1">
+                                                     {new Date(like.created_at).toLocaleDateString('en-GB')}
+                                                   </div>
                                                  </div>
                                                </div>
-                                             </div>
-                                           ));
-                                       })()}
-                                     </div>
-                                  </div>
-                                )}
+                                             ))}
+                                           </div>
+                                         </div>
+                                       )}
 
-                                {(!userRatingsData[profile.id] || userRatingsData[profile.id].length === 0) &&
-                                 (!userLikesData[profile.id] || userLikesData[profile.id].length === 0) && (
-                                  <div className="text-sm text-muted-foreground text-center py-4">
-                                    No activity yet
-                                  </div>
-                                )}
-                               </div>
-                             )}
+                                       {/* No activity message */}
+                                       {(!userActivityStats[profile.id]?.ratings || userActivityStats[profile.id].ratings.length === 0) &&
+                                        (!userActivityStats[profile.id]?.likes || userActivityStats[profile.id].likes.length === 0) && (
+                                         <div className="text-center text-muted-foreground py-4">
+                                           No activity yet
+                                         </div>
+                                       )}
+                                     </>
+                                   )}
+                                 </div>
+                               )}
                           </Card>
                           
                           {/* IP Address Cards - Show all users with same IP when expanded */}
