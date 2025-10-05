@@ -19,38 +19,32 @@ serve(async (req) => {
 
     console.log('Starting pre next week → next week transition...')
 
-    // Get current week interval
-    const { data: currentIntervalData, error: intervalError } = await supabase
-      .rpc('get_current_week_interval')
+    // Calculate current week Monday using get_week_monday
+    const today = new Date()
+    const { data: currentMonday, error: mondayError } = await supabase
+      .rpc('get_week_monday', { input_date: today.toISOString().split('T')[0] })
 
-    if (intervalError) {
-      console.error('Error getting current week interval:', intervalError)
-      throw intervalError
+    if (mondayError) {
+      console.error('Error getting week Monday:', mondayError)
+      throw mondayError
     }
 
-    console.log('Current week interval:', currentIntervalData)
+    console.log('Current Monday:', currentMonday)
 
-    // Calculate next week's interval
-    // Current interval format is DD/MM-DD/MM/YY (e.g., "29/09-05/10/25")
-    // We need to add 7 days to get next week's interval (e.g., "06/10-12/10/25")
-    const currentIntervalParts = (currentIntervalData as string).split('-')
-    const endDateStr = currentIntervalParts[1]
-    const endDateParts = endDateStr.split('/')
+    // Parse the Monday date
+    const mondayDate = new Date(currentMonday as string)
     
-    // Parse current end date to calculate next week
-    const year = parseInt('20' + endDateParts[2])
-    const month = parseInt(endDateParts[1]) - 1 // JS months are 0-indexed
-    const day = parseInt(endDateParts[0])
+    // Current week ends on Sunday (6 days after Monday)
+    const currentSunday = new Date(mondayDate)
+    currentSunday.setDate(currentSunday.getDate() + 6)
     
-    const currentEndDate = new Date(year, month, day)
+    // Next week starts the day after current Sunday
+    const nextWeekMonday = new Date(currentSunday)
+    nextWeekMonday.setDate(nextWeekMonday.getDate() + 1)
     
-    // Next week starts the day after current week ends
-    const nextWeekStart = new Date(currentEndDate)
-    nextWeekStart.setDate(nextWeekStart.getDate() + 1)
-    
-    // Next week ends 6 days after it starts
-    const nextWeekEnd = new Date(nextWeekStart)
-    nextWeekEnd.setDate(nextWeekEnd.getDate() + 6)
+    // Next week ends 6 days after next Monday
+    const nextWeekSunday = new Date(nextWeekMonday)
+    nextWeekSunday.setDate(nextWeekSunday.getDate() + 6)
     
     // Format as DD/MM-DD/MM/YY
     const formatDate = (date: Date) => {
@@ -63,7 +57,7 @@ serve(async (req) => {
       return String(date.getFullYear()).slice(-2)
     }
     
-    const nextWeekInterval = `${formatDate(nextWeekStart)}-${formatDate(nextWeekEnd)}/${formatYear(nextWeekEnd)}`
+    const nextWeekInterval = `${formatDate(nextWeekMonday)}-${formatDate(nextWeekSunday)}/${formatYear(nextWeekSunday)}`
     console.log('Next week interval calculated:', nextWeekInterval)
 
     // Get all "pre next week" participants
@@ -125,7 +119,7 @@ serve(async (req) => {
 
     const summary = {
       success: true,
-      currentWeekInterval: currentIntervalData,
+      currentMonday: currentMonday,
       nextWeekInterval: nextWeekInterval,
       transitionCount,
       message: `Transitioned ${transitionCount} participants from "pre next week" to "next week" (${nextWeekInterval})`
