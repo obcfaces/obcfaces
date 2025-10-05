@@ -115,7 +115,7 @@ serve(async (req) => {
     const weekInterval = currentWeekIntervalData || ''
     console.log(`Current week interval: ${weekInterval}`)
 
-    // Move 'this week' to 'past' with week_interval preservation
+    // Move 'this week' to 'past' and ASSIGN current week interval
     const { data: thisWeekToUpdate, error: fetchThisWeekError } = await supabase
       .from('weekly_contest_participants')
       .select('id, status_history, week_interval')
@@ -131,21 +131,22 @@ serve(async (req) => {
             changed_by: 'SYSTEM',
             changed_via: 'EDGE_FUNCTION_weekly-transition',
             previous_status: 'this week',
-            preserved_week_interval: participant.week_interval || weekInterval
+            previous_week_interval: participant.week_interval,
+            assigned_week_interval: weekInterval
           }
         }
 
-        // ВАЖНО: Сохраняем week_interval участника (НЕ изменяем его)
+        // ВАЖНО: Присваиваем week_interval ТЕКУЩЕЙ недели (когда переходят в past)
         await supabase
           .from('weekly_contest_participants')
           .update({ 
             admin_status: 'past',
+            week_interval: weekInterval, // Присваиваем текущий интервал
             status_history: updatedHistory
-            // week_interval НЕ меняется - остается тем же, что был у 'this week'
           })
           .eq('id', participant.id)
       }
-      transitions.push(`Moved ${thisWeekToUpdate.length} participants from 'this week' to 'past' (preserved week_interval)`)
+      transitions.push(`Moved ${thisWeekToUpdate.length} participants from 'this week' to 'past' (assigned week_interval: ${weekInterval})`)
     }
 
     // Get next week interval for the upcoming week
