@@ -115,23 +115,27 @@ export function ProfilePhotoModal({
         console.log('Comments for post:', { postId: matchingPostId, comments });
 
         if (comments) {
-          // Get user profiles separately
-          const userIds = [...new Set(comments.map(c => c.user_id))];
-          const { data: profiles } = await supabase
-            .from('profiles')
-            .select('id, display_name')
-            .in('id', userIds);
+        // Get user profiles separately
+        const userIds = [...new Set(comments.map(c => c.user_id))];
+        const { data: profiles } = await supabase
+          .from('profiles')
+          .select('id, display_name, first_name, last_name')
+          .in('id', userIds);
 
-          const formattedComments: Comment[] = comments.map(comment => {
-            const profile = profiles?.find(p => p.id === comment.user_id);
-            return {
-              id: comment.id,
-              author: profile?.display_name || 'User',
-              authorId: comment.user_id,
-              text: comment.comment_text,
-              timestamp: new Date(comment.created_at).toLocaleString()
-            };
-          });
+        const formattedComments: Comment[] = comments.map(comment => {
+          const profile = profiles?.find(p => p.id === comment.user_id);
+          const authorName = profile?.display_name || 
+                           (profile?.first_name && profile?.last_name 
+                             ? `${profile.first_name} ${profile.last_name}` 
+                             : profile?.first_name || 'User');
+          return {
+            id: comment.id,
+            author: authorName,
+            authorId: comment.user_id,
+            text: comment.comment_text,
+            timestamp: new Date(comment.created_at).toLocaleString()
+          };
+        });
           
           console.log('Setting comments for activeIndex:', { activeIndex, comments: formattedComments });
           
@@ -368,14 +372,18 @@ export function ProfilePhotoModal({
               const userIds = [...new Set(freshComments.map(c => c.user_id))];
               const { data: profiles } = await supabase
                 .from('profiles')
-                .select('id, display_name')
+                .select('id, display_name, first_name, last_name')
                 .in('id', userIds);
 
               const formattedComments: Comment[] = freshComments.map(comment => {
                 const profile = profiles?.find(p => p.id === comment.user_id);
+                const authorName = profile?.display_name || 
+                               (profile?.first_name && profile?.last_name 
+                                 ? `${profile.first_name} ${profile.last_name}` 
+                                 : profile?.first_name || 'User');
                 return {
                   id: comment.id,
-                  author: profile?.display_name || 'User',
+                  author: authorName,
                   authorId: comment.user_id,
                   text: comment.comment_text,
                   timestamp: new Date(comment.created_at).toLocaleString()
