@@ -4238,57 +4238,6 @@ const Admin = () => {
                       </SelectContent>
                     </Select>
                   </div>
-                  
-                  {/* Winner Content Manager Button */}
-                  <div className="border-t pt-4">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        // Find winner from current filtered participants by interval
-                        console.log('🔍 Button clicked - Current filter:', pastWeekIntervalFilter);
-                        console.log('📊 filteredPastByInterval length:', filteredPastByInterval.length);
-                        console.log('📋 All participants in filter:', filteredPastByInterval.map(p => {
-                          const appData = p.application_data || {};
-                          return {
-                            name: `${appData.first_name} ${appData.last_name}`,
-                            participantId: p.id,
-                            interval: p.week_interval,
-                            rank: p.final_rank
-                          };
-                        }));
-                        
-                        const winner = filteredPastByInterval.find(p => p.final_rank === 1);
-                        console.log('🏆 Found winner:', winner ? {
-                          participantId: winner.id,
-                          name: `${winner.application_data?.first_name} ${winner.application_data?.last_name}`,
-                          interval: winner.week_interval
-                        } : 'NO WINNER');
-                        
-                        if (winner) {
-                          const appData = winner.application_data || {};
-                          const winnerData = {
-                            participantId: winner.id,
-                            userId: winner.user_id,
-                            name: `${appData.first_name} ${appData.last_name}`
-                          };
-                          console.log('✅ Setting selectedWinner to:', winnerData);
-                          setSelectedWinner(winnerData);
-                          setShowWinnerContentModal(true);
-                        } else {
-                          toast({
-                            title: "Победительница не найдена",
-                            description: "В текущем фильтре нет победительницы",
-                            variant: "destructive"
-                          });
-                        }
-                      }}
-                      className="gap-2"
-                    >
-                      <Trophy className="h-4 w-4" />
-                      Управление контентом победительницы
-                    </Button>
-                  </div>
                 </div>
               </div>
               
