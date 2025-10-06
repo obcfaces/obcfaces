@@ -90,23 +90,19 @@ const Contest = () => {
         }
         
         console.log('Raw data from DB (count):', data?.length);
-        console.log('Raw data sample:', data?.slice(0, 5));
         
         const uniqueIntervals = Array.from(new Set(data?.map(p => p.week_interval).filter(Boolean) as string[]));
         
         console.log('🔍 Unique intervals found:', uniqueIntervals);
-        console.log('🔍 Total unique intervals:', uniqueIntervals.length);
         console.log('🔍 Contains 15/09-21/09/25?', uniqueIntervals.includes('15/09-21/09/25'));
         
         const currentMonday = getCurrentMonday();
-        console.log('Current Monday (Philippine time):', currentMonday.toLocaleDateString('en-US'));
+        console.log('📅 Current Monday (Philippine time):', currentMonday.toLocaleDateString('en-US'));
         
         const intervalsWithWeeks = uniqueIntervals
           .map(interval => {
-            console.log(`🔧 Processing interval: ${interval}`);
             const intervalMonday = parseIntervalToMonday(interval);
             if (!intervalMonday) {
-              console.log(`❌ Failed to parse interval: ${interval}`);
               return null;
             }
             
@@ -115,12 +111,7 @@ const Contest = () => {
             const diffDays = Math.floor(diffTime / (24 * 60 * 60 * 1000));
             const weeksAgo = Math.floor(diffDays / 7);
             
-            console.log(`✅ Interval ${interval} parsed successfully:`, {
-              intervalMonday: intervalMonday.toLocaleDateString('en-US'),
-              currentMonday: currentMonday.toLocaleDateString('en-US'),
-              diffDays,
-              weeksAgo
-            });
+            console.log(`✅ ${interval}: ${weeksAgo} weeks ago (${diffDays} days)`);
             
             return {
               interval,
@@ -131,7 +122,6 @@ const Contest = () => {
           .sort((a, b) => a!.weeksAgo - b!.weeksAgo) as Array<{interval: string, weeksAgo: number}>;
         
         console.log('✅ Final intervals to display:', intervalsWithWeeks);
-        console.log('✅ Total intervals:', intervalsWithWeeks.length);
         
         setPastWeekIntervals(intervalsWithWeeks);
       } catch (error) {
