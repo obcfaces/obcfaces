@@ -7385,7 +7385,12 @@ const Admin = () => {
              console.log('🔴 REJECT MODAL: Starting rejection process', { 
                applicationId: applicationToReject.id, 
                reasonTypes, 
-               notes 
+               reasonTypes_type: typeof reasonTypes,
+               reasonTypes_isArray: Array.isArray(reasonTypes),
+               reasonTypes_value: reasonTypes,
+               notes,
+               notes_type: typeof notes,
+               notes_value: notes
              });
              
              // Check if this is a weekly contest participant or regular application
@@ -7405,28 +7410,27 @@ const Admin = () => {
                     
                     // Update participant with rejection data using centralized function
                     const participantName = `${participant.application_data?.first_name || ''} ${participant.application_data?.last_name || ''}`.trim();
+                    
+                    const additionalData = {
+                      rejection_reason_types: reasonTypes,
+                      rejection_reason: notes || null,
+                      reviewed_at: new Date().toISOString(),
+                      reviewed_by: user?.id
+                    };
+                    
                     console.log('🔴 Calling updateParticipantStatusWithHistory with:', {
                       participantId: participant.id,
                       status: 'rejected',
                       participantName,
-                      additionalData: {
-                        rejection_reason_types: reasonTypes,
-                        rejection_reason: notes || null,
-                        reviewed_at: new Date().toISOString(),
-                        reviewed_by: user?.id
-                      }
+                      additionalData: additionalData,
+                      additionalData_stringified: JSON.stringify(additionalData, null, 2)
                     });
                     
                     const result = await updateParticipantStatusWithHistory(
                       participant.id,
                       'rejected',
                       participantName,
-                      {
-                        rejection_reason_types: reasonTypes,
-                        rejection_reason: notes || null,
-                        reviewed_at: new Date().toISOString(),
-                        reviewed_by: user?.id
-                      }
+                      additionalData
                     );
                     
                     console.log('🔴 updateParticipantStatusWithHistory result:', result);
