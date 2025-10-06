@@ -1411,7 +1411,6 @@ export const ContestParticipationModal = ({
                                 .from('weekly_contest_participants')
                                 .update({
                                   application_data: updatedApplicationData,
-                                  updated_at: new Date().toISOString(),
                                   notes: `Contact information updated: ${contactForm.contact ? 'Phone updated' : ''} ${contactForm.facebookUrl ? 'Facebook updated' : ''}`.trim()
                                 } as any)
                                 .eq('id', currentApplicationId);
