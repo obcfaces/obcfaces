@@ -456,6 +456,7 @@ const Admin = () => {
   const [nextWeekDailyStats, setNextWeekDailyStats] = useState<Array<{ day_name: string; like_count: number; dislike_count: number; total_votes: number }>>([]);
   const [nextWeekVotesStats, setNextWeekVotesStats] = useState<Record<string, { like_count: number; dislike_count: number }>>({});
   const [selectedDay, setSelectedDay] = useState<{ day: number; type: 'new' | 'approved' } | null>(null);
+  const [selectedRegistrationDay, setSelectedRegistrationDay] = useState<{ dayName: string; showSuspicious: boolean } | null>(null);
   const [nextWeekApplicationsCount, setNextWeekApplicationsCount] = useState<number>(0);
   const [cardSectionStats, setCardSectionStats] = useState<{ newApplications: number; movedToNextWeek: number; new_applications_count: number; moved_to_next_week_count: number }>({ newApplications: 0, movedToNextWeek: 0, new_applications_count: 0, moved_to_next_week_count: 0 });
   const [showAllCards, setShowAllCards] = useState(false);
@@ -6273,12 +6274,34 @@ const Admin = () => {
                           {dailyRegistrationStats.map((stat, index) => (
                             <div key={index} className="text-center p-2 bg-background rounded-lg">
                               <div className="font-medium text-xs mb-1">{stat.day_name}</div>
-                              <div className="text-lg font-semibold">
+                              <button
+                                onClick={() => setSelectedRegistrationDay(
+                                  selectedRegistrationDay?.dayName === stat.day_name && !selectedRegistrationDay?.showSuspicious
+                                    ? null 
+                                    : { dayName: stat.day_name, showSuspicious: false }
+                                )}
+                                className={`text-lg font-semibold hover:text-primary transition-colors ${
+                                  selectedRegistrationDay?.dayName === stat.day_name && !selectedRegistrationDay?.showSuspicious
+                                    ? 'text-primary underline'
+                                    : ''
+                                }`}
+                              >
                                 {stat.registration_count}
-                              </div>
-                              <div className="text-xs text-destructive mt-0.5">
+                              </button>
+                              <button
+                                onClick={() => setSelectedRegistrationDay(
+                                  selectedRegistrationDay?.dayName === stat.day_name && selectedRegistrationDay?.showSuspicious
+                                    ? null
+                                    : { dayName: stat.day_name, showSuspicious: true }
+                                )}
+                                className={`text-xs text-destructive mt-0.5 hover:underline transition-all ${
+                                  selectedRegistrationDay?.dayName === stat.day_name && selectedRegistrationDay?.showSuspicious
+                                    ? 'font-bold underline'
+                                    : ''
+                                }`}
+                              >
                                 {stat.suspicious_count || 0}
-                              </div>
+                              </button>
                             </div>
                           ))}
                         </div>
@@ -6393,6 +6416,36 @@ const Admin = () => {
 
                 {(() => {
                     const filteredProfiles = profiles.filter(profile => {
+                      // Фильтр по дню регистрации
+                      if (selectedRegistrationDay) {
+                        if (!profile.created_at) return false;
+                        
+                        // Convert created_at to Asia/Manila timezone and get day name
+                        const userDate = new Date(profile.created_at);
+                        const manilaDate = new Date(userDate.toLocaleString("en-US", { timeZone: "Asia/Manila" }));
+                        const dayName = manilaDate.toLocaleDateString('en-US', { weekday: 'short', timeZone: 'Asia/Manila' });
+                        
+                        if (dayName !== selectedRegistrationDay.dayName) return false;
+                        
+                        // Если нужно показать только подозрительных
+                        if (selectedRegistrationDay.showSuspicious) {
+                          // Exclude users with 'suspicious' role
+                          const hasSuspiciousRole = userRoles.some(role => 
+                            role.user_id === profile.id && role.role === 'suspicious'
+                          );
+                          if (hasSuspiciousRole) return false;
+                          
+                          // Check criteria for suspicious users
+                          const emailNotWhitelisted = profile.email ? !isEmailDomainWhitelisted(profile.email) : false;
+                          const wasAutoConfirmed = profile.created_at && profile.email_confirmed_at && 
+                            Math.abs(new Date(profile.email_confirmed_at).getTime() - new Date(profile.created_at).getTime()) < 1000;
+                          const formFillTime = profile.raw_user_meta_data?.form_fill_time_seconds;
+                          const fastFormFill = formFillTime !== undefined && formFillTime !== null && formFillTime < 5;
+                          
+                          if (!(emailNotWhitelisted || wasAutoConfirmed || fastFormFill)) return false;
+                        }
+                      }
+                      
                       // Фильтр верификации
                       if (verificationFilter === 'verified') {
                         if (!profile.email_confirmed_at) return false;
@@ -6465,6 +6518,18 @@ const Admin = () => {
                         <div className="text-sm text-muted-foreground">
                           Showing {paginatedProfiles.length} of {filteredProfiles.length} {filteredProfiles.length === 1 ? 'result' : 'results'} 
                           {filteredProfiles.length > regItemsPerPage && ` (page ${regPaginationPage} of ${totalRegPages})`}
+                          {selectedRegistrationDay && (
+                            <span className="ml-2 text-xs font-medium text-primary">
+                              (registered on {selectedRegistrationDay.dayName}
+                              {selectedRegistrationDay.showSuspicious && ' - suspicious only'})
+                              <button
+                                onClick={() => setSelectedRegistrationDay(null)}
+                                className="ml-1 text-destructive hover:underline"
+                              >
+                                ✕
+                              </button>
+                            </span>
+                          )}
                           {suspiciousEmailFilter === 'maybe-suspicious' && (
                             <span className="ml-2 text-xs text-destructive font-medium">
                               (not whitelisted email OR auto-confirmed &lt;1 sec OR duplicate fingerprint OR fast form fill &lt;5 sec, excluding "suspicious" role)
