@@ -579,8 +579,8 @@ const LikedItem = ({
             </Button>
           )}
           
-          {/* Participant Type Badge */}
-          {showStatusBadge && getParticipantBadge(currentParticipantType)}
+          {/* Participant Type Badge - Hidden temporarily */}
+          {/* {showStatusBadge && getParticipantBadge(currentParticipantType)} */}
           {/* Main two photos */}
           <div className="flex-shrink-0 flex h-full relative gap-px">
             <div className="relative">
@@ -869,8 +869,8 @@ const LikedItem = ({
         {/* Photos section */}
         <div className="relative">
           <div className="grid grid-cols-2 gap-px">
-            {/* Participant Type Badge */}
-            {showStatusBadge && getParticipantBadge(currentParticipantType, true)}
+            {/* Participant Type Badge - Hidden temporarily */}
+            {/* {showStatusBadge && getParticipantBadge(currentParticipantType, true)} */}
             <div className="relative">
               <img 
                 src={displayFaceImage} 
