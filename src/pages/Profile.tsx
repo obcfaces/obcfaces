@@ -1512,15 +1512,51 @@ const Profile = () => {
                                   variant="outline"
                                   size="sm"
                                   className="mt-3"
-                                  onClick={() => {
-                                    // Dispatch event with application data to open the modal - same as edit button in card
-                                    const applicationData = participationItems[0].candidateData;
-                                    window.dispatchEvent(new CustomEvent('openEditModal', { 
-                                      detail: { 
-                                        editMode: true,
-                                        existingData: applicationData
-                                      } 
-                                    }));
+                                  onClick={async () => {
+                                    console.log('Edit application button clicked! Loading user application data...');
+                                    
+                                    try {
+                                      const { data: { session } } = await supabase.auth.getSession();
+                                      if (!session) {
+                                        toast({ description: "Please log in to continue" });
+                                        return;
+                                      }
+
+                                      // Load latest application data from database - same as edit icon in card
+                                      const { data: latestApplication, error } = await supabase
+                                        .from('weekly_contest_participants')
+                                        .select('*')
+                                        .eq('user_id', session.user.id)
+                                        .in('admin_status', ['pending', 'rejected', 'this week', 'next week', 'past'] as any)
+                                        .order('created_at', { ascending: false })
+                                        .limit(1)
+                                        .maybeSingle();
+
+                                      console.log('Loaded application data:', latestApplication);
+                                      
+                                      if (error) {
+                                        console.error('Error loading application:', error);
+                                        toast({ description: "Error loading application data" });
+                                        return;
+                                      }
+
+                                      if (!latestApplication) {
+                                        console.log('No application found for user');
+                                        toast({ description: "Application not found" });
+                                        return;
+                                      }
+
+                                      // Dispatch event with application data to open the modal
+                                      window.dispatchEvent(new CustomEvent('openEditModal', { 
+                                        detail: { 
+                                          editMode: true,
+                                          existingData: latestApplication
+                                        } 
+                                      }));
+                                    } catch (error) {
+                                      console.error('Error loading application data:', error);
+                                      toast({ description: "Error loading data" });
+                                    }
                                   }}
                                 >
                                   <Edit className="h-4 w-4 mr-2" />
