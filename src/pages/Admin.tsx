@@ -6270,38 +6270,46 @@ const Admin = () => {
                         <div className="text-xs text-muted-foreground mb-3">
                           total registrations: {dailyRegistrationStats.reduce((sum, stat) => sum + (stat.registration_count || 0), 0)} - {dailyRegistrationStats.reduce((sum, stat) => sum + (stat.registration_count || 0), 0) - profiles.filter(p => p.email_confirmed_at).length}
                         </div>
-                        <div className="grid grid-cols-7 gap-2">
+                        <div className="grid grid-cols-7 gap-0 w-full">
                           {dailyRegistrationStats.map((stat, index) => (
-                            <div key={index} className="text-center p-2 bg-background rounded-lg">
+                            <div 
+                              key={index} 
+                              className={`text-center p-2 bg-background ${
+                                index < dailyRegistrationStats.length - 1 ? 'border-r border-border' : ''
+                              }`}
+                            >
                               <div className="font-medium text-xs mb-1">{stat.day_name}</div>
-                              <button
-                                onClick={() => setSelectedRegistrationDay(
-                                  selectedRegistrationDay?.dayName === stat.day_name && !selectedRegistrationDay?.showSuspicious
-                                    ? null 
-                                    : { dayName: stat.day_name, showSuspicious: false }
-                                )}
-                                className={`text-lg font-semibold hover:text-primary transition-colors ${
-                                  selectedRegistrationDay?.dayName === stat.day_name && !selectedRegistrationDay?.showSuspicious
-                                    ? 'text-primary underline'
-                                    : ''
-                                }`}
-                              >
-                                {stat.registration_count}
-                              </button>
-                              <button
-                                onClick={() => setSelectedRegistrationDay(
-                                  selectedRegistrationDay?.dayName === stat.day_name && selectedRegistrationDay?.showSuspicious
-                                    ? null
-                                    : { dayName: stat.day_name, showSuspicious: true }
-                                )}
-                                className={`text-xs text-destructive mt-0.5 hover:underline transition-all ${
-                                  selectedRegistrationDay?.dayName === stat.day_name && selectedRegistrationDay?.showSuspicious
-                                    ? 'font-bold underline'
-                                    : ''
-                                }`}
-                              >
-                                {stat.suspicious_count || 0}
-                              </button>
+                              <div className="flex items-center justify-center gap-0.5">
+                                <button
+                                  onClick={() => setSelectedRegistrationDay(
+                                    selectedRegistrationDay?.dayName === stat.day_name && !selectedRegistrationDay?.showSuspicious
+                                      ? null 
+                                      : { dayName: stat.day_name, showSuspicious: false }
+                                  )}
+                                  className={`text-base font-semibold hover:text-primary transition-colors ${
+                                    selectedRegistrationDay?.dayName === stat.day_name && !selectedRegistrationDay?.showSuspicious
+                                      ? 'text-primary underline'
+                                      : ''
+                                  }`}
+                                >
+                                  {stat.registration_count}
+                                </button>
+                                <span className="text-muted-foreground">-</span>
+                                <button
+                                  onClick={() => setSelectedRegistrationDay(
+                                    selectedRegistrationDay?.dayName === stat.day_name && selectedRegistrationDay?.showSuspicious
+                                      ? null
+                                      : { dayName: stat.day_name, showSuspicious: true }
+                                  )}
+                                  className={`text-xs text-destructive hover:underline transition-all ${
+                                    selectedRegistrationDay?.dayName === stat.day_name && selectedRegistrationDay?.showSuspicious
+                                      ? 'font-bold underline'
+                                      : ''
+                                  }`}
+                                >
+                                  {stat.suspicious_count || 0}
+                                </button>
+                              </div>
                             </div>
                           ))}
                         </div>
@@ -6616,6 +6624,23 @@ const Admin = () => {
                                         Admin
                                       </Badge>
                                     );
+                                  } else {
+                                    // Check if user is "maybe suspicious" (but not marked as suspicious)
+                                    const emailNotWhitelisted = profile.email ? !isEmailDomainWhitelisted(profile.email) : false;
+                                    const wasAutoConfirmed = profile.created_at && profile.email_confirmed_at && 
+                                      Math.abs(new Date(profile.email_confirmed_at).getTime() - new Date(profile.created_at).getTime()) < 1000;
+                                    const formFillTime = profile.raw_user_meta_data?.form_fill_time_seconds;
+                                    const fastFormFill = formFillTime !== undefined && formFillTime !== null && formFillTime < 5;
+                                    
+                                    const isMaybeSuspicious = emailNotWhitelisted || wasAutoConfirmed || fastFormFill;
+                                    
+                                    if (isMaybeSuspicious) {
+                                      return (
+                                        <Badge variant="outline" className="text-xs rounded-none bg-orange-100 text-orange-700 border-orange-300">
+                                          Maybe
+                                        </Badge>
+                                      );
+                                    }
                                   }
                                   // Don't show 'Usual' badge
                                   return null;
