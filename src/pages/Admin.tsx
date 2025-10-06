@@ -6635,10 +6635,27 @@ const Admin = () => {
                                     const isMaybeSuspicious = emailNotWhitelisted || wasAutoConfirmed || fastFormFill;
                                     
                                     if (isMaybeSuspicious) {
+                                      const reasons = [];
+                                      if (emailNotWhitelisted) reasons.push("Email domain not whitelisted");
+                                      if (wasAutoConfirmed) reasons.push("Email auto-confirmed in <1 sec");
+                                      if (fastFormFill) reasons.push("Form filled in <5 sec");
+                                      
                                       return (
-                                        <Badge variant="outline" className="text-xs rounded-none bg-orange-100 text-orange-700 border-orange-300">
-                                          Maybe
-                                        </Badge>
+                                        <Tooltip>
+                                          <TooltipTrigger asChild>
+                                            <Badge variant="outline" className="text-xs rounded-none bg-orange-100 text-orange-700 border-orange-300 cursor-help">
+                                              Maybe
+                                            </Badge>
+                                          </TooltipTrigger>
+                                          <TooltipContent>
+                                            <div className="text-sm">
+                                              <div className="font-medium mb-1">Reasons:</div>
+                                              {reasons.map((reason, idx) => (
+                                                <div key={idx} className="text-xs">• {reason}</div>
+                                              ))}
+                                            </div>
+                                          </TooltipContent>
+                                        </Tooltip>
                                       );
                                     }
                                   }
