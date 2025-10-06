@@ -126,6 +126,29 @@ export const ContestParticipationModal = ({
         });
       }
       
+      // Load profile data from Supabase if user_id is available
+      if (existingData.user_id) {
+        supabase
+          .from('profiles')
+          .select('gender, marital_status, has_children, state, birthdate')
+          .eq('id', existingData.user_id)
+          .maybeSingle()
+          .then(({ data: profile, error }) => {
+            if (profile && !error) {
+              console.log('Loaded profile data:', profile);
+              // Update form data with profile information if not already in application_data
+              setFormData(prev => ({
+                ...prev,
+                gender: applicationData.gender || profile.gender || "",
+                marital_status: applicationData.marital_status || profile.marital_status || "",
+                has_children: applicationData.has_children !== undefined ? applicationData.has_children : (profile.has_children || undefined),
+                state: applicationData.state || profile.state || "",
+                stateCode: applicationData.state || profile.state || "",
+              }));
+            }
+          });
+      }
+      
       return {
         first_name: applicationData.first_name || "",
         last_name: applicationData.last_name || "",
