@@ -4511,22 +4511,28 @@ const Admin = () => {
                           {/* Column 3: Пустая колонка вместо Status History для Past */}
                           <div className="w-[40ch] flex-shrink-0 p-2 flex items-center justify-center">
                             {participant.final_rank === 1 && (
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="h-12 w-12 p-0 hover:bg-primary/10"
-                                onClick={() => {
-                                  setSelectedWinner({
-                                    participantId: participant.id,
-                                    userId: participant.user_id,
-                                    name: `${appData.first_name} ${appData.last_name}`
-                                  });
-                                  setShowWinnerContentModal(true);
-                                }}
-                                title="Управление видео и контентом победительницы"
-                              >
-                                <Video className="h-8 w-8 text-yellow-600" />
-                              </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-12 w-12 p-0 hover:bg-primary/10"
+                        onClick={() => {
+                          console.log('Opening winner modal for participant:', {
+                            participantId: participant.id,
+                            userId: participant.user_id,
+                            name: `${appData.first_name} ${appData.last_name}`,
+                            weekInterval: participant.week_interval
+                          });
+                          setSelectedWinner({
+                            participantId: participant.id,
+                            userId: participant.user_id,
+                            name: `${appData.first_name} ${appData.last_name}`
+                          });
+                          setShowWinnerContentModal(true);
+                        }}
+                        title="Управление видео и контентом победительницы"
+                      >
+                        <Video className="h-8 w-8 text-yellow-600" />
+                      </Button>
                             )}
                           </div>
 
@@ -4687,6 +4693,12 @@ const Admin = () => {
                                         variant="outline"
                                         className="w-full h-7 text-xs gap-1"
                                         onClick={() => {
+                                          console.log('Opening winner modal (mobile) for participant:', {
+                                            participantId: participant.id,
+                                            userId: participant.user_id,
+                                            name: `${appData.first_name} ${appData.last_name}`,
+                                            weekInterval: participant.week_interval
+                                          });
                                           setSelectedWinner({
                                             participantId: participant.id,
                                             userId: participant.user_id,
