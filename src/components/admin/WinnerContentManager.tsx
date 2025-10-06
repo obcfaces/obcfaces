@@ -6,6 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { Upload, Save, Trash, Eye, Crown, Image as ImageIcon, Video } from 'lucide-react';
+import { CompactCardLayout } from '@/components/CompactCardLayout';
+import { getCountryDisplayName } from '@/lib/utils';
 
 interface WinnerContentManagerProps {
   participantId?: string;
@@ -497,113 +499,48 @@ export function WinnerContentManager({
               Предварительный просмотр
             </h4>
             
-            {/* Full card preview - как на сайте */}
+            {/* Используем CompactCardLayout для точного отображения как на сайте */}
             <div className="border rounded-lg overflow-hidden bg-white">
-              {/* First row - реальная карточка победительницы */}
-              <div className="flex border-b">
-                {/* Face photo */}
-                <div className="w-24 sm:w-28 md:w-32 h-32">
-                  {(participantData.application_data as any)?.facePhotoUrl || (participantData.application_data as any)?.photo1_url ? (
-                    <img 
-                      src={(participantData.application_data as any)?.facePhotoUrl || (participantData.application_data as any)?.photo1_url} 
-                      alt="Face" 
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full bg-gray-200 flex items-center justify-center text-xs text-gray-500">
-                      Фото лица
-                    </div>
-                  )}
-                </div>
-                {/* Full body photo */}
-                <div className="w-24 sm:w-28 md:w-32 h-32">
-                  {(participantData.application_data as any)?.fullBodyPhotoUrl || (participantData.application_data as any)?.photo2_url ? (
-                    <img 
-                      src={(participantData.application_data as any)?.fullBodyPhotoUrl || (participantData.application_data as any)?.photo2_url} 
-                      alt="Full body" 
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full bg-gray-300 flex items-center justify-center text-xs text-gray-500">
-                      Полное фото
-                    </div>
-                  )}
-                </div>
-                {/* Info area */}
-                <div className="flex-1 p-2 flex flex-col justify-between bg-white">
-                  <div>
-                    <h3 className="font-semibold text-base">
-                      {(participantData.application_data as any)?.firstName || (participantData.application_data as any)?.first_name} {(participantData.application_data as any)?.lastName || (participantData.application_data as any)?.last_name}
-                    </h3>
-                    <div className="text-sm text-muted-foreground">
-                      {(participantData.application_data as any)?.age} yo · {(participantData.application_data as any)?.weight || (participantData.application_data as any)?.weight_kg} kg · {(participantData.application_data as any)?.height || (participantData.application_data as any)?.height_cm} cm
-                    </div>
-                    <div className="text-sm text-contest-blue">
-                      {(participantData.application_data as any)?.country} · {(participantData.application_data as any)?.city}
-                    </div>
-                  </div>
-                  <div className="flex justify-end gap-2 text-xs text-muted-foreground">
-                    <span>👍 Like</span>
-                    <span>💬 Comment</span>
-                    <span>↗ Share</span>
-                  </div>
-                </div>
-              </div>
-              
-              {/* Winner content header */}
-              <div className="px-4 py-2 bg-gray-50 border-b">
-                <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
-                  <Eye className="w-4 h-4" />
-                  <span>Контент победительницы</span>
-                </div>
-              </div>
-              
-              {/* Second row - контент победительницы */}
-              <div className="flex">
-                {/* Payment proof photo - same width as face photo */}
-                <div className="w-24 sm:w-28 md:w-32 h-32">
-                  {content.payment_proof_url ? (
-                    <img 
-                      src={content.payment_proof_url} 
-                      alt="Payment proof" 
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full bg-gray-100 flex items-center justify-center text-xs text-gray-400">
-                      Фото
-                    </div>
-                  )}
-                </div>
-                
-                {/* Testimonial video - same width as full body photo */}
-                <div className="w-24 sm:w-28 md:w-32 h-32">
-                  {content.testimonial_video_url ? (
-                    <video 
-                      src={content.testimonial_video_url} 
-                      className="w-full h-full object-cover"
-                      controls
-                      playsInline
-                    />
-                  ) : (
-                    <div className="w-full h-full bg-gray-100 flex items-center justify-center text-xs text-gray-400">
-                      Видео
-                    </div>
-                  )}
-                </div>
-                
-                {/* Testimonial text - takes remaining space */}
-                <div className="flex-1 p-2 flex items-center">
-                  {content.testimonial_text ? (
-                    <div className="w-full p-2 bg-blue-50 rounded text-sm italic text-gray-700">
-                      {content.testimonial_text}
-                    </div>
-                  ) : (
-                    <div className="w-full h-full bg-gray-50 rounded flex items-center justify-center text-xs text-gray-400">
-                      Текст отзыва
-                    </div>
-                  )}
-                </div>
-              </div>
+              <CompactCardLayout
+                name={`${(participantData.application_data as any)?.firstName || (participantData.application_data as any)?.first_name || ''} ${(participantData.application_data as any)?.lastName || (participantData.application_data as any)?.last_name || ''}`}
+                age={(participantData.application_data as any)?.age || 0}
+                weight={(participantData.application_data as any)?.weight || (participantData.application_data as any)?.weight_kg || 0}
+                height={(participantData.application_data as any)?.height || (participantData.application_data as any)?.height_cm || 0}
+                country={(participantData.application_data as any)?.country || ''}
+                city={(participantData.application_data as any)?.city || ''}
+                profileId={participantData.id}
+                faceImage={(participantData.application_data as any)?.facePhotoUrl || (participantData.application_data as any)?.photo1_url || ''}
+                fullBodyImage={(participantData.application_data as any)?.fullBodyPhotoUrl || (participantData.application_data as any)?.photo2_url || ''}
+                additionalPhotos={(participantData.application_data as any)?.additionalPhotos || []}
+                isVoted={true}
+                isEditing={false}
+                showThanks={false}
+                isExample={false}
+                isThisWeek={false}
+                isWinner={true}
+                rank={1}
+                userRating={0}
+                localAverageRating={0}
+                localTotalVotes={0}
+                hideCardActions={true}
+                cardData={{ likes: 0, comments: 0 }}
+                isLiked={[false, false]}
+                hasCommented={false}
+                isDisliked={false}
+                dislikesCount={0}
+                showDislike={false}
+                propUser={null}
+                winnerContent={content}
+                openModal={() => {}}
+                handleLike={() => {}}
+                handleComment={() => {}}
+                handleDislike={() => {}}
+                openShareModal={() => {}}
+                handleRate={() => {}}
+                setShowLoginModal={() => {}}
+                setUserRating={() => {}}
+                setIsEditing={() => {}}
+              />
             </div>
           </div>
         )}
