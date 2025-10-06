@@ -21,6 +21,7 @@ const Auth = () => {
   const [loading, setLoading] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [resetEmail, setResetEmail] = useState("");
+  const [formStartTime, setFormStartTime] = useState<number | null>(null);
 
   // Country options for Facebook-style dropdown
   const countryOptions = [
@@ -43,7 +44,13 @@ const Auth = () => {
 
   useEffect(() => {
     const m = searchParams.get("mode");
-    if (m === "signup" || m === "login") setMode(m);
+    if (m === "signup" || m === "login") {
+      setMode(m);
+      // Start timing when switching to signup mode
+      if (m === "signup") {
+        setFormStartTime(Date.now());
+      }
+    }
   }, [searchParams]);
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
@@ -86,6 +93,9 @@ const Auth = () => {
         
         console.log('Signup redirect URL:', redirectUrl);
         
+        // Calculate form fill time
+        const formFillTime = formStartTime ? Math.floor((Date.now() - formStartTime) / 1000) : null;
+        
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
@@ -95,7 +105,8 @@ const Auth = () => {
               display_name: displayName,
               gender: gender,
               country: country,
-              bio: bio
+              bio: bio,
+              form_fill_time_seconds: formFillTime
             }
           },
         });

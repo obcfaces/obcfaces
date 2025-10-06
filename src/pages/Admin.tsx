@@ -292,6 +292,10 @@ interface ProfileData {
   height_cm?: number;
   photo_1_url?: string;
   photo_2_url?: string;
+  raw_user_meta_data?: {
+    form_fill_time_seconds?: number;
+    [key: string]: any;
+  };
 }
 
 interface ContestApplication {
@@ -1403,8 +1407,12 @@ const Admin = () => {
           const hasDuplicateFingerprint = userFingerprint?.fingerprint_id ? 
             (fingerprintMap.get(userFingerprint.fingerprint_id)?.size || 0) > 1 : false;
           
+          // 4. Fast form fill (< 5 seconds)
+          const formFillTime = user.raw_user_meta_data?.form_fill_time_seconds;
+          const fastFormFill = formFillTime !== undefined && formFillTime !== null && formFillTime < 5;
+          
           // User is suspicious if ANY of the conditions is true
-          return emailNotWhitelisted || wasAutoConfirmedQuickly || hasDuplicateFingerprint;
+          return emailNotWhitelisted || wasAutoConfirmedQuickly || hasDuplicateFingerprint || fastFormFill;
         }).length;
         
         return {
@@ -6422,8 +6430,10 @@ const Admin = () => {
                               const emailNotWhitelisted = p.email ? !isEmailDomainWhitelisted(p.email) : false;
                               const wasAutoConfirmed = p.created_at && p.email_confirmed_at && 
                                 Math.abs(new Date(p.email_confirmed_at).getTime() - new Date(p.created_at).getTime()) < 1000;
+                              const formFillTime = p.raw_user_meta_data?.form_fill_time_seconds;
+                              const fastFormFill = formFillTime !== undefined && formFillTime !== null && formFillTime < 5;
                               
-                              return emailNotWhitelisted || wasAutoConfirmed;
+                              return emailNotWhitelisted || wasAutoConfirmed || fastFormFill;
                             }).length;
                             return count > 0 ? ` (${count})` : '';
                           })()}
@@ -6554,9 +6564,11 @@ const Admin = () => {
                         const wasAutoConfirmed = profile.created_at && profile.email_confirmed_at && 
                           Math.abs(new Date(profile.email_confirmed_at).getTime() - new Date(profile.created_at).getTime()) < 1000;
                         
-                        // TODO: Add fingerprint check when data is available
+                        // Check form fill time (< 5 seconds)
+                        const formFillTime = profile.raw_user_meta_data?.form_fill_time_seconds;
+                        const fastFormFill = formFillTime !== undefined && formFillTime !== null && formFillTime < 5;
                         
-                        if (!(emailNotWhitelisted || wasAutoConfirmed)) return false;
+                        if (!(emailNotWhitelisted || wasAutoConfirmed || fastFormFill)) return false;
                       }
                       
                       // Фильтр по Gmail<1 - voted (не голосовали)
