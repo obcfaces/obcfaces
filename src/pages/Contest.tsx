@@ -133,10 +133,6 @@ const Contest = () => {
         console.log('✅ Final intervals to display:', intervalsWithWeeks);
         console.log('✅ Total intervals:', intervalsWithWeeks.length);
         
-        // DEBUG: Show alert with intervals
-        const intervalsList = intervalsWithWeeks.map(i => `${i.interval} (${i.weeksAgo} weeks ago)`).join('\n');
-        alert(`Loaded ${intervalsWithWeeks.length} past week intervals:\n\n${intervalsList}`);
-        
         setPastWeekIntervals(intervalsWithWeeks);
       } catch (error) {
         console.error('Error loading past week intervals:', error);
