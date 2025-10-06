@@ -375,10 +375,10 @@ export function CompactCardLayout({
       {/* Winner Content - shown only for winners in compact mode */}
       {hasWinnerContent && (
         <div className="border-t">
-          {/* Winner Content Row */}
-          <div className="flex">
+          {/* Winner Content Row - same structure as main card */}
+          <div className="flex h-36 sm:h-40 md:h-44 gap-px relative">
             {/* Payment proof photo - same width as face photo */}
-            <div className="w-24 sm:w-28 md:w-32 h-32">
+            <div className="relative w-24 sm:w-28 md:w-32">
               {winnerContent.payment_proof_url ? (
                 <img 
                   src={winnerContent.payment_proof_url} 
@@ -394,7 +394,7 @@ export function CompactCardLayout({
             </div>
 
             {/* Testimonial video - same width as full body photo */}
-            <div className="w-24 sm:w-28 md:w-32 h-32">
+            <div className="relative w-24 sm:w-28 md:w-32">
               {winnerContent.testimonial_video_url ? (
                 <video 
                   src={winnerContent.testimonial_video_url}
@@ -409,10 +409,10 @@ export function CompactCardLayout({
               )}
             </div>
 
-            {/* Testimonial text - takes remaining space like content area */}
-            <div className="flex-1 p-2 flex items-center">
+            {/* Testimonial text - takes remaining space like content area with scroll */}
+            <div className="flex-1 p-1 sm:p-2 md:p-3 bg-white overflow-auto">
               {winnerContent.testimonial_text ? (
-                <div className="w-full p-2 bg-blue-50 rounded text-sm italic text-gray-700">
+                <div className="text-sm italic text-gray-700">
                   {winnerContent.testimonial_text}
                 </div>
               ) : (
