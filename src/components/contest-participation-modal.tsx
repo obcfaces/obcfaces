@@ -1348,21 +1348,34 @@ export const ContestParticipationModal = ({
                                return;
                              }
 
-                              // Get the specific application by ID
+                              // Get the specific application by ID using maybeSingle
                               const { data: application, error: fetchError } = await supabase
                                 .from('weekly_contest_participants')
-                                .select('application_data, user_id, admin_status')
+                                .select('application_data, user_id, admin_status, id')
                                 .eq('id', currentApplicationId)
-                                .single();
+                                .maybeSingle();
 
-                             if (fetchError || !application) {
+                             if (fetchError) {
                                console.error('❌ Application fetch error:', {
                                  error: fetchError,
+                                 message: fetchError.message,
+                                 details: fetchError.details,
+                                 hint: fetchError.hint,
                                  applicationId: currentApplicationId
                                });
                                toast({
                                  title: "Error",
-                                 description: "Application not found.",
+                                 description: `Failed to load application: ${fetchError.message}`,
+                                 variant: "destructive"
+                               });
+                               return;
+                             }
+                             
+                             if (!application) {
+                               console.error('❌ No application found with ID:', currentApplicationId);
+                               toast({
+                                 title: "Error",
+                                 description: "Application not found. Please try submitting your application again.",
                                  variant: "destructive"
                                });
                                return;
