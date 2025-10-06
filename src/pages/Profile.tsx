@@ -1513,15 +1513,14 @@ const Profile = () => {
                                   size="sm"
                                   className="mt-3"
                                   onClick={() => {
-                                    // Open edit modal with existing application data
-                                    setEditModalData({
-                                      id: participationItems[0].candidateData.id,
-                                      admin_status: participationItems[0].candidateData.admin_status,
-                                      rejection_reason_types: participationItems[0].candidateData.rejection_reason_types,
-                                      rejection_reason: participationItems[0].candidateData.rejection_reason,
-                                      ...participationItems[0].candidateData.application_data
-                                    });
-                                    setIsEditModalOpen(true);
+                                    // Dispatch event with application data to open the modal - same as edit button in card
+                                    const applicationData = participationItems[0].candidateData;
+                                    window.dispatchEvent(new CustomEvent('openEditModal', { 
+                                      detail: { 
+                                        editMode: true,
+                                        existingData: applicationData
+                                      } 
+                                    }));
                                   }}
                                 >
                                   <Edit className="h-4 w-4 mr-2" />
