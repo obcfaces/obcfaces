@@ -1525,7 +1525,7 @@ const Profile = () => {
                                   }}
                                 >
                                   <Edit className="h-4 w-4 mr-2" />
-                                  Edit Application
+                                  Edit application
                                 </Button>
                               )}
                             </div>
