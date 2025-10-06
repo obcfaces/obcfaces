@@ -103,6 +103,9 @@ export const RejectReasonModal = ({
     onClose();
   };
 
+
+  console.log('🟢 REJECT MODAL: Rendering, isOpen=', isOpen, 'selectedReasons=', selectedReasons, 'notes=', notes);
+  
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-lg">
@@ -122,9 +125,10 @@ export const RejectReasonModal = ({
                   <Checkbox
                     id={key}
                     checked={selectedReasons.includes(key as RejectionReasonType)}
-                    onCheckedChange={(checked) => 
-                      handleReasonToggle(key as RejectionReasonType, checked as boolean)
-                    }
+                    onCheckedChange={(checked) => {
+                      console.log('🟣 CHECKBOX CHANGED:', key, checked);
+                      handleReasonToggle(key as RejectionReasonType, checked as boolean);
+                    }}
                     className="mt-1"
                   />
                   <label 
@@ -144,21 +148,36 @@ export const RejectReasonModal = ({
               id="notes"
               placeholder="Additional information..."
               value={notes}
-              onChange={(e) => setNotes(e.target.value)}
+              onChange={(e) => {
+                console.log('🟣 TEXTAREA CHANGED:', e.target.value);
+                setNotes(e.target.value);
+              }}
               rows={3}
             />
           </div>
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={handleClose} disabled={isLoading}>
+          <Button 
+            variant="outline" 
+            onClick={() => {
+              console.log('🔵 CANCEL CLICKED');
+              handleClose();
+            }} 
+            disabled={isLoading}
+          >
             Cancel
           </Button>
           <Button 
             variant="destructive" 
-            onClick={async () => {
-              console.log('🔵 BUTTON CLICKED! selectedReasons:', selectedReasons, 'notes:', notes);
+            onClick={async (e) => {
+              console.log('🔵 REJECT BUTTON CLICKED! Event:', e);
+              console.log('🔵 selectedReasons:', selectedReasons);
+              console.log('🔵 notes:', notes);
+              console.log('🔵 isLoading:', isLoading);
+              console.log('🔵 Calling handleConfirm...');
               await handleConfirm();
+              console.log('🔵 handleConfirm completed');
             }} 
             disabled={(selectedReasons.length === 0 && !notes.trim()) || isLoading}
           >
