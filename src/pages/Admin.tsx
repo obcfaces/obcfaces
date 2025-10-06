@@ -1379,7 +1379,8 @@ const Admin = () => {
       });
       
       // Calculate suspicious counts for each day
-      const statsWithSuspicious = (data || []).map(stat => {
+      const dayOrder = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+      const statsWithSuspicious = (data || []).map((stat, index) => {
         // Get all users registered on this day
         const dayUsers = profiles.filter(p => {
           if (!p.created_at) return false;
@@ -1417,16 +1418,16 @@ const Admin = () => {
         }).length;
         
         return {
-          ...stat,
-          suspicious_count: suspiciousCount
+          day_name: stat.day_name,
+          registration_count: stat.registration_count,
+          suspicious_count: suspiciousCount,
+          day_of_week: dayOrder.indexOf(stat.day_name) + 1,
+          sort_order: dayOrder.indexOf(stat.day_name)
         };
       });
       
-      // Ensure proper ordering: Monday to Sunday
-      const dayOrder = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-      const sortedData = statsWithSuspicious.sort((a, b) => {
-        return dayOrder.indexOf(a.day_name) - dayOrder.indexOf(b.day_name);
-      });
+      // Data is already sorted by the map operation above
+      const sortedData = statsWithSuspicious;
       
       setDailyRegistrationStats(sortedData);
     } catch (error) {
