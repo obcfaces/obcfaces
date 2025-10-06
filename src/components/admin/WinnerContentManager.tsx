@@ -85,7 +85,7 @@ export function WinnerContentManager({
     if (!participantId) return;
     
     try {
-      console.log('Fetching participant data for:', participantId);
+      console.log('🔍 Fetching participant data for:', participantId);
       const { data, error } = await supabase
         .from('weekly_contest_participants')
         .select('id, user_id, application_data')
@@ -95,11 +95,12 @@ export function WinnerContentManager({
       if (error) throw error;
       
       if (data) {
-        console.log('Participant data loaded:', data);
+        console.log('✅ Participant data loaded:', JSON.stringify(data, null, 2));
+        console.log('📋 Application data keys:', Object.keys(data.application_data || {}));
         setParticipantData(data as ParticipantData);
       }
     } catch (error) {
-      console.error('Error fetching participant data:', error);
+      console.error('❌ Error fetching participant data:', error);
     }
   };
 
@@ -502,9 +503,9 @@ export function WinnerContentManager({
               <div className="flex border-b">
                 {/* Face photo */}
                 <div className="w-24 sm:w-28 md:w-32 h-32">
-                  {participantData.application_data?.facePhotoUrl ? (
+                  {(participantData.application_data as any)?.facePhotoUrl || (participantData.application_data as any)?.photo1_url ? (
                     <img 
-                      src={participantData.application_data.facePhotoUrl} 
+                      src={(participantData.application_data as any)?.facePhotoUrl || (participantData.application_data as any)?.photo1_url} 
                       alt="Face" 
                       className="w-full h-full object-cover"
                     />
@@ -516,9 +517,9 @@ export function WinnerContentManager({
                 </div>
                 {/* Full body photo */}
                 <div className="w-24 sm:w-28 md:w-32 h-32">
-                  {participantData.application_data?.fullBodyPhotoUrl ? (
+                  {(participantData.application_data as any)?.fullBodyPhotoUrl || (participantData.application_data as any)?.photo2_url ? (
                     <img 
-                      src={participantData.application_data.fullBodyPhotoUrl} 
+                      src={(participantData.application_data as any)?.fullBodyPhotoUrl || (participantData.application_data as any)?.photo2_url} 
                       alt="Full body" 
                       className="w-full h-full object-cover"
                     />
@@ -532,13 +533,13 @@ export function WinnerContentManager({
                 <div className="flex-1 p-2 flex flex-col justify-between bg-white">
                   <div>
                     <h3 className="font-semibold text-base">
-                      {participantData.application_data?.firstName} {participantData.application_data?.lastName}
+                      {(participantData.application_data as any)?.firstName || (participantData.application_data as any)?.first_name} {(participantData.application_data as any)?.lastName || (participantData.application_data as any)?.last_name}
                     </h3>
                     <div className="text-sm text-muted-foreground">
-                      {participantData.application_data?.age} yo · {participantData.application_data?.weight} kg · {participantData.application_data?.height} cm
+                      {(participantData.application_data as any)?.age} yo · {(participantData.application_data as any)?.weight || (participantData.application_data as any)?.weight_kg} kg · {(participantData.application_data as any)?.height || (participantData.application_data as any)?.height_cm} cm
                     </div>
                     <div className="text-sm text-contest-blue">
-                      {participantData.application_data?.country} · {participantData.application_data?.city}
+                      {(participantData.application_data as any)?.country} · {(participantData.application_data as any)?.city}
                     </div>
                   </div>
                   <div className="flex justify-end gap-2 text-xs text-muted-foreground">
