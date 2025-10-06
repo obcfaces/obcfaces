@@ -7822,32 +7822,30 @@ const Admin = () => {
       />
 
       {/* Winner Content Manager Modal */}
-      <Dialog 
-        key={selectedWinner?.participantId || 'no-winner'}
-        open={showWinnerContentModal} 
-        onOpenChange={(open) => {
-          setShowWinnerContentModal(open);
-          if (!open) {
-            // Reset selected winner when closing modal
-            console.log('🔴 Closing modal, resetting selectedWinner');
-            setSelectedWinner(null);
-          }
-        }}
-      >
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Управление контентом победительницы</DialogTitle>
-          </DialogHeader>
-          {selectedWinner && (
+      {showWinnerContentModal && selectedWinner && (
+        <Dialog 
+          open={showWinnerContentModal} 
+          onOpenChange={(open) => {
+            setShowWinnerContentModal(open);
+            if (!open) {
+              // Reset selected winner when closing modal
+              console.log('🔴 Closing modal, resetting selectedWinner');
+              setTimeout(() => setSelectedWinner(null), 100);
+            }
+          }}
+        >
+          <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Управление контентом победительницы</DialogTitle>
+            </DialogHeader>
             <WinnerContentManager
-              key={selectedWinner.participantId}
               participantId={selectedWinner.participantId}
               userId={selectedWinner.userId}
               participantName={selectedWinner.name}
             />
-          )}
-        </DialogContent>
-      </Dialog>
+          </DialogContent>
+        </Dialog>
+      )}
 
       {/* Status History Modal */}
       {selectedStatusHistory && (
