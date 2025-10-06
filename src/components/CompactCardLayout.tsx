@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ThumbsUp, MessageCircle, Share2, ThumbsDown } from "lucide-react";
+import { ThumbsUp, MessageCircle, Share2, ThumbsDown, Eye } from "lucide-react";
 import { Link } from "react-router-dom";
 import { cn, getCountryDisplayName } from "@/lib/utils";
 import { VotingOverlay } from "./VotingOverlay";
@@ -363,6 +363,14 @@ export function CompactCardLayout({
       {/* Winner Content Row - Second Row for Winners */}
       {hasWinnerContent && (
         <>
+          {/* Winner Content Header */}
+          <div className="col-span-full mt-4 mb-2">
+            <div className="flex items-center gap-2 text-lg font-semibold text-foreground">
+              <Eye className="w-5 h-5" />
+              <span>Контент победительницы</span>
+            </div>
+          </div>
+          
           {/* Payment proof image - same width as face photo */}
           <div className="relative">
             {winnerContent.payment_proof_url ? (
