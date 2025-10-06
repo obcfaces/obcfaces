@@ -611,11 +611,11 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
         console.log('Loading NEXT WEEK participants');
         participantsData = await loadNextWeekParticipants();
         console.log('Loaded NEXT WEEK participants:', participantsData.length);
-      } else if (title.includes("WEEK") && title.includes("AGO") && weekInterval) {
+      } else if (weekInterval) {
         // For all past weeks, use the weekInterval prop
-        console.log(`Loading participants for ${title} with interval ${weekInterval}`);
+        console.log(`🔍 Loading participants for ${title} with interval ${weekInterval}`);
         participantsData = await loadPastWeekParticipantsByInterval(weekInterval);
-        console.log(`Loaded ${title} participants:`, participantsData.length);
+        console.log(`✅ Loaded ${title} participants:`, participantsData.length);
       }
       
       // Load user ratings BEFORE setting participants
