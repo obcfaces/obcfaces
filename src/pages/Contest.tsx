@@ -102,35 +102,36 @@ const Contest = () => {
         
         const currentMonday = getCurrentMonday();
         
-        const intervalsWithWeeks = uniqueIntervals
-          .map(interval => {
-            const intervalMonday = parseIntervalToMonday(interval);
-            if (!intervalMonday) {
-              return null;
-            }
-            
-            const diffTime = currentMonday.getTime() - intervalMonday.getTime();
-            const diffDays = Math.floor(diffTime / (24 * 60 * 60 * 1000));
-            const weeksAgo = Math.floor(diffDays / 7);
-            
-            return {
-              interval,
-              weeksAgo
-            };
-          })
-          .filter(item => item !== null) as Array<{interval: string, weeksAgo: number}>;
+        // Используем Map для хранения уникальных интервалов
+        const intervalsMap = new Map<string, {interval: string, weeksAgo: number}>();
         
-        // Принудительно добавляем 4 WEEKS AGO если его нет
-        const has4WeeksAgo = intervalsWithWeeks.some(item => item.interval === '15/09-21/09/25');
-        if (!has4WeeksAgo) {
-          intervalsWithWeeks.push({
+        uniqueIntervals.forEach(interval => {
+          const intervalMonday = parseIntervalToMonday(interval);
+          if (!intervalMonday) {
+            return;
+          }
+          
+          const diffTime = currentMonday.getTime() - intervalMonday.getTime();
+          const diffDays = Math.floor(diffTime / (24 * 60 * 60 * 1000));
+          const weeksAgo = Math.floor(diffDays / 7);
+          
+          intervalsMap.set(interval, {
+            interval,
+            weeksAgo
+          });
+        });
+        
+        // Принудительно добавляем 15/09-21/09/25 если его нет
+        if (!intervalsMap.has('15/09-21/09/25')) {
+          intervalsMap.set('15/09-21/09/25', {
             interval: '15/09-21/09/25',
             weeksAgo: 3 // будет отображаться как 4 WEEKS AGO (weeksAgo + 1)
           });
         }
         
-        // Сортируем по weeksAgo
-        intervalsWithWeeks.sort((a, b) => a.weeksAgo - b.weeksAgo);
+        // Конвертируем Map в массив и сортируем
+        const intervalsWithWeeks = Array.from(intervalsMap.values())
+          .sort((a, b) => a.weeksAgo - b.weeksAgo);
         
         console.log('✅ Final intervals:', intervalsWithWeeks);
         
