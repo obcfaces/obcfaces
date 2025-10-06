@@ -1361,84 +1361,17 @@ const Admin = () => {
   const fetchDailyRegistrationStats = async () => {
     try {
       const { data, error } = await supabase.rpc('get_daily_registration_stats');
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching daily registration stats:', error);
+        throw error;
+      }
       
-      // Get all users from auth.users (we need this for suspicious detection)
-      const { data: authUsers } = await supabase.auth.admin.listUsers();
+      console.log('📊 Daily registration stats fetched:', data);
       
-      // Get all user device fingerprints to detect duplicates
-      const { data: fingerprintsData } = await supabase
-        .from('user_device_fingerprints')
-        .select('fingerprint_id, user_id');
-      
-      // Create map of fingerprint_id -> count of unique users
-      const fingerprintMap = new Map<string, Set<string>>();
-      (fingerprintsData || []).forEach(fp => {
-        if (!fp.fingerprint_id || !fp.user_id) return;
-        if (!fingerprintMap.has(fp.fingerprint_id)) {
-          fingerprintMap.set(fp.fingerprint_id, new Set());
-        }
-        fingerprintMap.get(fp.fingerprint_id)!.add(fp.user_id);
-      });
-      
-      // Calculate suspicious counts for each day
-      const dayOrder = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-      const statsWithSuspicious = (data || []).map((stat) => {
-        // Get all users registered on this day in Asia/Manila timezone
-        const dayUsers = (authUsers?.users || []).filter(user => {
-          if (!user.created_at) return false;
-          
-          // Convert created_at to Asia/Manila timezone and get day name
-          const userDate = new Date(user.created_at);
-          const manilaDate = new Date(userDate.toLocaleString("en-US", { timeZone: "Asia/Manila" }));
-          const dayName = manilaDate.toLocaleDateString('en-US', { weekday: 'short', timeZone: 'Asia/Manila' });
-          
-          return dayName === stat.day_name;
-        });
-        
-        // Count suspicious users
-        const suspiciousCount = dayUsers.filter(user => {
-          // Check if user has 'suspicious' role - EXCLUDE these from "maybe suspicious"
-          const hasSuspiciousRole = userRoles.some(role => 
-            role.user_id === user.id && role.role === 'suspicious'
-          );
-          if (hasSuspiciousRole) return false;
-          
-          // 1. Email not in whitelist
-          const emailNotWhitelisted = user.email ? !isEmailDomainWhitelisted(user.email) : false;
-          
-          // 2. Auto-confirmed email < 1 second
-          const wasAutoConfirmedQuickly = user.created_at && user.email_confirmed_at && 
-            Math.abs(new Date(user.email_confirmed_at).getTime() - new Date(user.created_at).getTime()) < 1000;
-          
-          // 3. Duplicate fingerprint (more than 1 user with same fingerprint)
-          const userFingerprint = fingerprintsData?.find(fp => fp.user_id === user.id);
-          const hasDuplicateFingerprint = userFingerprint?.fingerprint_id ? 
-            (fingerprintMap.get(userFingerprint.fingerprint_id)?.size || 0) > 1 : false;
-          
-          // 4. Fast form fill (< 5 seconds)
-          const formFillTime = (user.user_metadata as any)?.form_fill_time_seconds;
-          const fastFormFill = formFillTime !== undefined && formFillTime !== null && formFillTime < 5;
-          
-          // User is suspicious if ANY of the conditions is true
-          return emailNotWhitelisted || wasAutoConfirmedQuickly || hasDuplicateFingerprint || fastFormFill;
-        }).length;
-        
-        return {
-          day_name: stat.day_name,
-          registration_count: stat.registration_count,
-          suspicious_count: suspiciousCount,
-          day_of_week: dayOrder.indexOf(stat.day_name) + 1,
-          sort_order: dayOrder.indexOf(stat.day_name)
-        };
-      });
-      
-      // Data is already sorted by the map operation above
-      const sortedData = statsWithSuspicious;
-      
-      setDailyRegistrationStats(sortedData);
+      // Data already contains all needed fields including suspicious_count
+      setDailyRegistrationStats(data || []);
     } catch (error) {
-      console.error('Error fetching daily registration stats:', error);
+      console.error('Error in fetchDailyRegistrationStats:', error);
     }
   };
 
