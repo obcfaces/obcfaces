@@ -7806,13 +7806,18 @@ const Admin = () => {
       />
 
       {/* Winner Content Manager Modal */}
-      <Dialog open={showWinnerContentModal} onOpenChange={setShowWinnerContentModal}>
+      <Dialog 
+        key={selectedWinner?.participantId || 'no-winner'}
+        open={showWinnerContentModal} 
+        onOpenChange={setShowWinnerContentModal}
+      >
         <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Управление контентом победительницы</DialogTitle>
           </DialogHeader>
           {selectedWinner && (
             <WinnerContentManager
+              key={selectedWinner.participantId}
               participantId={selectedWinner.participantId}
               userId={selectedWinner.userId}
               participantName={selectedWinner.name}
