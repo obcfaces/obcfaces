@@ -183,7 +183,9 @@ const Contest = () => {
           
           {/* Dynamically generate sections for all past weeks */}
           {pastWeekIntervals.map((item) => {
-            const weekLabel = item.weeksAgo === 1 ? '1 WEEK AGO' : `${item.weeksAgo} WEEKS AGO`;
+            // Add +1 to weeksAgo because THIS WEEK takes the current week slot
+            const adjustedWeeksAgo = item.weeksAgo + 1;
+            const weekLabel = adjustedWeeksAgo === 1 ? '1 WEEK AGO' : `${adjustedWeeksAgo} WEEKS AGO`;
             
             // Format interval for display: "06/10-12/10/25" -> "06 Oct - 12 Oct 2025"
             const formatInterval = (interval: string): string => {
@@ -222,7 +224,7 @@ const Contest = () => {
                 isActive={false}
                 showWinner={true}
                 viewMode={viewMode}
-                weekOffset={-item.weeksAgo}
+                weekOffset={-adjustedWeeksAgo}
                 weekInterval={item.interval}
               />
             );
