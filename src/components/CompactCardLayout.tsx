@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ThumbsUp, MessageCircle, Share2, ThumbsDown, Eye } from "lucide-react";
+import { ThumbsUp, MessageCircle, Share2, ThumbsDown, Eye, Play } from "lucide-react";
 import { Link } from "react-router-dom";
 import { cn, getCountryDisplayName } from "@/lib/utils";
 import { VotingOverlay } from "./VotingOverlay";
@@ -412,7 +412,7 @@ export function CompactCardLayout({
                   />
                   <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                     <div className="bg-black/50 rounded-full p-3">
-                      <Eye className="w-6 h-6 text-white" />
+                      <Play className="w-6 h-6 text-white" fill="white" />
                     </div>
                   </div>
                 </div>
@@ -426,7 +426,7 @@ export function CompactCardLayout({
             {/* Testimonial text - takes remaining space like content area with scroll */}
             <div className="flex-1 p-1 sm:p-2 md:p-3 bg-white overflow-auto">
               {winnerContent.testimonial_text ? (
-                <div className="text-xs italic text-gray-700 text-justify">
+                <div className="text-xs italic text-gray-700 text-left">
                   {winnerContent.testimonial_text}
                 </div>
               ) : (
