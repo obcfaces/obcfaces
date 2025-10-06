@@ -1270,7 +1270,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: {
           day_name: string
+          day_of_week: number
           registration_count: number
+          sort_order: number
+          suspicious_count: number
         }[]
       }
       get_daily_voting_stats: {
