@@ -39,6 +39,7 @@ import { WeeklyTransitionButton } from '@/components/WeeklyTransitionButton';
 import { WinnerContentManager } from '@/components/admin/WinnerContentManager';
 import { ParticipantStatusHistory } from '@/components/admin/ParticipantStatusHistory';
 import { ParticipantStatusHistoryModal } from '@/components/admin/ParticipantStatusHistoryModal';
+import { isEmailDomainWhitelisted } from '@/utils/email-whitelist';
 
 // Unified status type for participants - only real statuses from DB
 type ParticipantStatus = 'pending' | 'rejected' | 'pre next week' | 'this week' | 'next week' | 'next week on site' | 'past';
@@ -446,7 +447,7 @@ const Admin = () => {
   const [winStatusFilter, setWinStatusFilter] = useState<string>('all');
   const [dailyStats, setDailyStats] = useState<Array<{ day_name: string; vote_count: number; like_count: number }>>([]);
   const [dailyApplicationStats, setDailyApplicationStats] = useState<Array<{ day_name: string; day_date?: string; total_applications: number; approved_applications: number; day_of_week?: number; sort_order?: number }>>([]);
-  const [dailyRegistrationStats, setDailyRegistrationStats] = useState<Array<{ day_name: string; registration_count: number; day_of_week: number; sort_order: number }>>([]);
+  const [dailyRegistrationStats, setDailyRegistrationStats] = useState<Array<{ day_name: string; registration_count: number; suspicious_count: number; day_of_week: number; sort_order: number }>>([]);
   const [nextWeekDailyStats, setNextWeekDailyStats] = useState<Array<{ day_name: string; like_count: number; dislike_count: number; total_votes: number }>>([]);
   const [nextWeekVotesStats, setNextWeekVotesStats] = useState<Record<string, { like_count: number; dislike_count: number }>>({});
   const [selectedDay, setSelectedDay] = useState<{ day: number; type: 'new' | 'approved' } | null>(null);
@@ -1357,9 +1358,64 @@ const Admin = () => {
       const { data, error } = await supabase.rpc('get_daily_registration_stats');
       if (error) throw error;
       
+      // Get all user device fingerprints to detect duplicates
+      const { data: fingerprintsData } = await supabase
+        .from('user_device_fingerprints')
+        .select('fingerprint_id, user_id');
+      
+      // Create map of fingerprint_id -> count of unique users
+      const fingerprintMap = new Map<string, Set<string>>();
+      (fingerprintsData || []).forEach(fp => {
+        if (!fp.fingerprint_id || !fp.user_id) return;
+        if (!fingerprintMap.has(fp.fingerprint_id)) {
+          fingerprintMap.set(fp.fingerprint_id, new Set());
+        }
+        fingerprintMap.get(fp.fingerprint_id)!.add(fp.user_id);
+      });
+      
+      // Calculate suspicious counts for each day
+      const statsWithSuspicious = (data || []).map(stat => {
+        // Get all users registered on this day
+        const dayUsers = profiles.filter(p => {
+          if (!p.created_at) return false;
+          const userDate = new Date(p.created_at);
+          const dayName = userDate.toLocaleDateString('en-US', { weekday: 'short' });
+          return dayName === stat.day_name;
+        });
+        
+        // Count suspicious users
+        const suspiciousCount = dayUsers.filter(user => {
+          // Check if user has 'suspicious' role - EXCLUDE these from "maybe suspicious"
+          const hasSuspiciousRole = userRoles.some(role => 
+            role.user_id === user.id && role.role === 'suspicious'
+          );
+          if (hasSuspiciousRole) return false;
+          
+          // 1. Email not in whitelist
+          const emailNotWhitelisted = user.email ? !isEmailDomainWhitelisted(user.email) : false;
+          
+          // 2. Auto-confirmed email < 1 second
+          const wasAutoConfirmedQuickly = user.created_at && user.email_confirmed_at && 
+            Math.abs(new Date(user.email_confirmed_at).getTime() - new Date(user.created_at).getTime()) < 1000;
+          
+          // 3. Duplicate fingerprint (more than 1 user with same fingerprint)
+          const userFingerprint = fingerprintsData?.find(fp => fp.user_id === user.id);
+          const hasDuplicateFingerprint = userFingerprint?.fingerprint_id ? 
+            (fingerprintMap.get(userFingerprint.fingerprint_id)?.size || 0) > 1 : false;
+          
+          // User is suspicious if ANY of the conditions is true
+          return emailNotWhitelisted || wasAutoConfirmedQuickly || hasDuplicateFingerprint;
+        }).length;
+        
+        return {
+          ...stat,
+          suspicious_count: suspiciousCount
+        };
+      });
+      
       // Ensure proper ordering: Monday to Sunday
       const dayOrder = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-      const sortedData = (data || []).sort((a, b) => {
+      const sortedData = statsWithSuspicious.sort((a, b) => {
         return dayOrder.indexOf(a.day_name) - dayOrder.indexOf(b.day_name);
       });
       
@@ -6243,15 +6299,18 @@ const Admin = () => {
                     {/* Weekly Registration Stats Dashboard */}
                     <div className="mb-6">
                       <div className="mb-4 p-4 bg-muted rounded-lg">
-                        <div className="text-sm text-muted-foreground mb-3">
+                        <div className="text-xs text-muted-foreground mb-3">
                           total registrations: {dailyRegistrationStats.reduce((sum, stat) => sum + (stat.registration_count || 0), 0)} - {dailyRegistrationStats.reduce((sum, stat) => sum + (stat.registration_count || 0), 0) - profiles.filter(p => p.email_confirmed_at).length}
                         </div>
                         <div className="grid grid-cols-7 gap-2">
                           {dailyRegistrationStats.map((stat, index) => (
-                            <div key={index} className="text-center p-3 bg-background rounded-lg">
-                              <div className="font-medium text-sm mb-1">{stat.day_name}</div>
-                              <div className="text-2xl font-semibold">
+                            <div key={index} className="text-center p-2 bg-background rounded-lg">
+                              <div className="font-medium text-xs mb-1">{stat.day_name}</div>
+                              <div className="text-lg font-semibold">
                                 {stat.registration_count}
+                              </div>
+                              <div className="text-xs text-destructive mt-0.5">
+                                {stat.suspicious_count || 0}
                               </div>
                             </div>
                           ))}
@@ -6345,6 +6404,30 @@ const Admin = () => {
                       
                       {/* Ряд 3: Gmail фильтры */}
                       <div className="flex gap-2 flex-wrap items-center">
+                        <Button
+                          variant={suspiciousEmailFilter === 'maybe-suspicious' ? 'destructive' : 'outline'}
+                          size="sm"
+                          onClick={() => setSuspiciousEmailFilter('maybe-suspicious')}
+                        >
+                          Maybe Suspicious
+                          {(() => {
+                            const count = profiles.filter(p => {
+                              // Exclude users with 'suspicious' role
+                              const hasSuspiciousRole = userRoles.some(role => 
+                                role.user_id === p.id && role.role === 'suspicious'
+                              );
+                              if (hasSuspiciousRole) return false;
+                              
+                              // Check criteria
+                              const emailNotWhitelisted = p.email ? !isEmailDomainWhitelisted(p.email) : false;
+                              const wasAutoConfirmed = p.created_at && p.email_confirmed_at && 
+                                Math.abs(new Date(p.email_confirmed_at).getTime() - new Date(p.created_at).getTime()) < 1000;
+                              
+                              return emailNotWhitelisted || wasAutoConfirmed;
+                            }).length;
+                            return count > 0 ? ` (${count})` : '';
+                          })()}
+                        </Button>
                         <Button
                           variant={suspiciousEmailFilter === 'gmail-auto' ? 'default' : 'outline'}
                           size="sm"
@@ -6458,6 +6541,24 @@ const Admin = () => {
                         if (profile.email_confirmed_at) return false;
                       }
                       
+                      // Фильтр "Maybe Suspicious"
+                      if (suspiciousEmailFilter === 'maybe-suspicious') {
+                        // Exclude users with 'suspicious' role
+                        const hasSuspiciousRole = userRoles.some(role => 
+                          role.user_id === profile.id && role.role === 'suspicious'
+                        );
+                        if (hasSuspiciousRole) return false;
+                        
+                        // Check criteria
+                        const emailNotWhitelisted = profile.email ? !isEmailDomainWhitelisted(profile.email) : false;
+                        const wasAutoConfirmed = profile.created_at && profile.email_confirmed_at && 
+                          Math.abs(new Date(profile.email_confirmed_at).getTime() - new Date(profile.created_at).getTime()) < 1000;
+                        
+                        // TODO: Add fingerprint check when data is available
+                        
+                        if (!(emailNotWhitelisted || wasAutoConfirmed)) return false;
+                      }
+                      
                       // Фильтр по Gmail<1 - voted (не голосовали)
                       if (suspiciousEmailFilter === 'gmail-auto') {
                         const isGmail = profile.email?.toLowerCase().endsWith('@gmail.com') || false;
@@ -6521,6 +6622,11 @@ const Admin = () => {
                         <div className="text-sm text-muted-foreground">
                           Showing {paginatedProfiles.length} of {filteredProfiles.length} {filteredProfiles.length === 1 ? 'result' : 'results'} 
                           {filteredProfiles.length > regItemsPerPage && ` (page ${regPaginationPage} of ${totalRegPages})`}
+                          {suspiciousEmailFilter === 'maybe-suspicious' && (
+                            <span className="ml-2 text-xs text-destructive font-medium">
+                              (not whitelisted email OR auto-confirmed &lt;1 sec OR duplicate fingerprint, excluding "suspicious" role)
+                            </span>
+                          )}
                           {suspiciousEmailFilter === 'gmail-auto' && (
                             <span className="ml-2 text-xs text-orange-600 font-medium">
                               (auto-confirmed &lt;1 sec, no votes)
