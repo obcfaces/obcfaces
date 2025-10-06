@@ -22,6 +22,22 @@ interface WinnerContent {
   testimonial_text?: string;
 }
 
+interface ParticipantData {
+  id: string;
+  user_id: string;
+  application_data: {
+    firstName: string;
+    lastName: string;
+    age: number;
+    weight: number;
+    height: number;
+    country: string;
+    city: string;
+    facePhotoUrl: string;
+    fullBodyPhotoUrl: string;
+  };
+}
+
 export function WinnerContentManager({ 
   participantId, 
   userId, 
@@ -34,6 +50,7 @@ export function WinnerContentManager({
     testimonial_video_url: '',
     testimonial_text: ''
   });
+  const [participantData, setParticipantData] = useState<ParticipantData | null>(null);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
@@ -52,13 +69,39 @@ export function WinnerContentManager({
       testimonial_video_url: '',
       testimonial_text: ''
     });
+    setParticipantData(null);
     
     if (participantId || userId) {
       fetchWinnerContent();
+      if (participantId) {
+        fetchParticipantData();
+      }
     } else {
       console.log('⚠️ No participantId or userId provided');
     }
   }, [participantId, userId]);
+
+  const fetchParticipantData = async () => {
+    if (!participantId) return;
+    
+    try {
+      console.log('Fetching participant data for:', participantId);
+      const { data, error } = await supabase
+        .from('weekly_contest_participants')
+        .select('id, user_id, application_data')
+        .eq('id', participantId)
+        .single();
+      
+      if (error) throw error;
+      
+      if (data) {
+        console.log('Participant data loaded:', data);
+        setParticipantData(data as ParticipantData);
+      }
+    } catch (error) {
+      console.error('Error fetching participant data:', error);
+    }
+  };
 
   const fetchWinnerContent = async () => {
     if (!participantId && !userId) return;
@@ -446,7 +489,7 @@ export function WinnerContentManager({
         </div>
 
         {/* Preview section */}
-        {(content.payment_proof_url || content.testimonial_video_url || content.testimonial_text) && (
+        {(content.payment_proof_url || content.testimonial_video_url || content.testimonial_text) && participantData && (
           <div className="border-t pt-4 space-y-4">
             <h4 className="text-sm font-medium mb-2 flex items-center gap-2">
               <Eye className="h-4 w-4" />
@@ -455,21 +498,48 @@ export function WinnerContentManager({
             
             {/* Full card preview - как на сайте */}
             <div className="border rounded-lg overflow-hidden bg-white">
-              {/* First row - основная карточка (пример) */}
+              {/* First row - реальная карточка победительницы */}
               <div className="flex border-b">
                 {/* Face photo */}
-                <div className="w-24 sm:w-28 md:w-32 h-32 bg-gray-200 flex items-center justify-center text-xs text-gray-500">
-                  Фото лица
+                <div className="w-24 sm:w-28 md:w-32 h-32">
+                  {participantData.application_data?.facePhotoUrl ? (
+                    <img 
+                      src={participantData.application_data.facePhotoUrl} 
+                      alt="Face" 
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gray-200 flex items-center justify-center text-xs text-gray-500">
+                      Фото лица
+                    </div>
+                  )}
                 </div>
                 {/* Full body photo */}
-                <div className="w-24 sm:w-28 md:w-32 h-32 bg-gray-300 flex items-center justify-center text-xs text-gray-500">
-                  Полное фото
+                <div className="w-24 sm:w-28 md:w-32 h-32">
+                  {participantData.application_data?.fullBodyPhotoUrl ? (
+                    <img 
+                      src={participantData.application_data.fullBodyPhotoUrl} 
+                      alt="Full body" 
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gray-300 flex items-center justify-center text-xs text-gray-500">
+                      Полное фото
+                    </div>
+                  )}
                 </div>
                 {/* Info area */}
                 <div className="flex-1 p-2 flex flex-col justify-between bg-white">
                   <div>
-                    <h3 className="font-semibold text-base">{participantName || 'Имя участницы'}</h3>
-                    <div className="text-sm text-muted-foreground">Информация участницы</div>
+                    <h3 className="font-semibold text-base">
+                      {participantData.application_data?.firstName} {participantData.application_data?.lastName}
+                    </h3>
+                    <div className="text-sm text-muted-foreground">
+                      {participantData.application_data?.age} yo · {participantData.application_data?.weight} kg · {participantData.application_data?.height} cm
+                    </div>
+                    <div className="text-sm text-contest-blue">
+                      {participantData.application_data?.country} · {participantData.application_data?.city}
+                    </div>
                   </div>
                   <div className="flex justify-end gap-2 text-xs text-muted-foreground">
                     <span>👍 Like</span>
