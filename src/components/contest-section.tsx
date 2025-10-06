@@ -671,28 +671,26 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
 
     loadParticipants();
 
-    // Set up real-time subscription for contest participant updates
-    if (["THIS WEEK", "NEXT WEEK", "1 WEEK AGO", "2 WEEKS AGO", "3 WEEKS AGO"].includes(title)) {
-      const channel = supabase
-        .channel('contest_participant_updates')
-        .on(
-          'postgres_changes',
-          {
-            event: '*',
-            schema: 'public',
-            table: 'weekly_contest_participants'
-          },
-          (payload) => {
-            console.log('Weekly contest participants changed:', payload);
-            loadParticipants();
-          }
-        )
-        .subscribe();
+    // Set up real-time subscription for all contest sections
+    const channel = supabase
+      .channel('contest_participant_updates')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'weekly_contest_participants'
+        },
+        (payload) => {
+          console.log('Weekly contest participants changed:', payload);
+          loadParticipants();
+        }
+      )
+      .subscribe();
 
-      return () => {
-        supabase.removeChannel(channel);
-      };
-    }
+    return () => {
+      supabase.removeChannel(channel);
+    };
    }, [title, user, isAdmin, adminParticipants.length, realContestants.length]);
 
   const handleRate = async (contestantId: number, rating: number) => {
