@@ -401,6 +401,7 @@ const Admin = () => {
   const [participantFilters, setParticipantFilters] = useState<{ [key: string]: string }>({});
   const [pastWeekParticipants, setPastWeekParticipants] = useState<any[]>([]);
   const [pastWeekFilter, setPastWeekFilter] = useState<string>('all');
+  const [pastWeekIntervalFilter, setPastWeekIntervalFilter] = useState<string>('all');
   
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
@@ -413,7 +414,7 @@ const Admin = () => {
   const [nextWeekCurrentPage, setNextWeekCurrentPage] = useState(1);
   const [allCurrentPage, setAllCurrentPage] = useState(1);
   const [registrationsCurrentPage, setRegistrationsCurrentPage] = useState(1);
-  const [pastWeekIntervalFilter, setPastWeekIntervalFilter] = useState<string>('all'); // Новый фильтр для интервалов недель
+  
    const [expandedAdminDates, setExpandedAdminDates] = useState<Set<string>>(new Set());
    const [adminDatePopup, setAdminDatePopup] = useState<{ show: boolean; date: string; admin: string; applicationId: string }>({ 
      show: false, date: '', admin: '', applicationId: '' 
@@ -960,6 +961,18 @@ const Admin = () => {
       }
     }
   }, [pastWeekIntervalFilter]);
+
+  // Memoized filtered past participants by week interval
+  const filteredPastByInterval = useMemo(() => {
+    if (pastWeekIntervalFilter === 'all') {
+      return pastWeekParticipants;
+    }
+    
+    return pastWeekParticipants.filter(participant => {
+      const participantInterval = participant.week_interval || getParticipantWeekInterval(participant);
+      return participantInterval === pastWeekIntervalFilter;
+    });
+  }, [pastWeekParticipants, pastWeekIntervalFilter]);
 
   // Helper function to get participant display info with winner indication
   const getParticipantDisplayInfo = (participant: any) => {
@@ -4208,8 +4221,12 @@ const Admin = () => {
                       variant="outline"
                       size="sm"
                       onClick={() => {
-                        // Find winner from current filtered participants
-                        const winner = pastWeekParticipants.find(p => p.final_rank === 1);
+                        // Find winner from current filtered participants by interval
+                        const winner = filteredPastByInterval.find(p => p.final_rank === 1);
+                        console.log('Looking for winner in interval:', pastWeekIntervalFilter);
+                        console.log('Filtered participants:', filteredPastByInterval.length);
+                        console.log('Found winner:', winner);
+                        
                         if (winner) {
                           const appData = winner.application_data || {};
                           setSelectedWinner({
