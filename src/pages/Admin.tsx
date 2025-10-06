@@ -1363,6 +1363,9 @@ const Admin = () => {
       const { data, error } = await supabase.rpc('get_daily_registration_stats');
       if (error) throw error;
       
+      // Get all users from auth.users (we need this for suspicious detection)
+      const { data: authUsers } = await supabase.auth.admin.listUsers();
+      
       // Get all user device fingerprints to detect duplicates
       const { data: fingerprintsData } = await supabase
         .from('user_device_fingerprints')
@@ -1380,12 +1383,16 @@ const Admin = () => {
       
       // Calculate suspicious counts for each day
       const dayOrder = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-      const statsWithSuspicious = (data || []).map((stat, index) => {
-        // Get all users registered on this day
-        const dayUsers = profiles.filter(p => {
-          if (!p.created_at) return false;
-          const userDate = new Date(p.created_at);
-          const dayName = userDate.toLocaleDateString('en-US', { weekday: 'short' });
+      const statsWithSuspicious = (data || []).map((stat) => {
+        // Get all users registered on this day in Asia/Manila timezone
+        const dayUsers = (authUsers?.users || []).filter(user => {
+          if (!user.created_at) return false;
+          
+          // Convert created_at to Asia/Manila timezone and get day name
+          const userDate = new Date(user.created_at);
+          const manilaDate = new Date(userDate.toLocaleString("en-US", { timeZone: "Asia/Manila" }));
+          const dayName = manilaDate.toLocaleDateString('en-US', { weekday: 'short', timeZone: 'Asia/Manila' });
+          
           return dayName === stat.day_name;
         });
         
@@ -1410,7 +1417,7 @@ const Admin = () => {
             (fingerprintMap.get(userFingerprint.fingerprint_id)?.size || 0) > 1 : false;
           
           // 4. Fast form fill (< 5 seconds)
-          const formFillTime = user.raw_user_meta_data?.form_fill_time_seconds;
+          const formFillTime = (user.user_metadata as any)?.form_fill_time_seconds;
           const fastFormFill = formFillTime !== undefined && formFillTime !== null && formFillTime < 5;
           
           // User is suspicious if ANY of the conditions is true
