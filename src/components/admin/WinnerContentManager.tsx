@@ -43,6 +43,16 @@ export function WinnerContentManager({
 
   useEffect(() => {
     console.log('🔄 WinnerContentManager useEffect triggered:', { participantId, userId });
+    
+    // ВАЖНО: Сначала очищаем старое состояние
+    setContent({
+      participant_id: participantId || '',
+      user_id: userId || '',
+      payment_proof_url: '',
+      testimonial_video_url: '',
+      testimonial_text: ''
+    });
+    
     if (participantId || userId) {
       fetchWinnerContent();
     } else {
