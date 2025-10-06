@@ -6346,72 +6346,61 @@ const Admin = () => {
                   <>
                     {/* Фильтры в три ряда */}
                     <div className="space-y-2 mb-4">
-                      {/* Ряд 1: Верификация */}
-                      <div className="flex gap-2 flex-wrap">
-                        <Button
-                          variant={verificationFilter === 'all' ? 'default' : 'outline'}
-                          size="sm"
-                          onClick={() => setVerificationFilter('all')}
-                        >
-                          All Users
-                        </Button>
-                        <Button
-                          variant={verificationFilter === 'verified' ? 'default' : 'outline'}
-                          size="sm"
-                          onClick={() => setVerificationFilter('verified')}
-                        >
-                          Verified
-                        </Button>
-                        <Button
-                          variant={verificationFilter === 'unverified' ? 'default' : 'outline'}
-                          size="sm"
-                          onClick={() => setVerificationFilter('unverified')}
-                        >
-                          Unverified
-                        </Button>
-                      </div>
-                      
-                      {/* Ряд 2: Роли */}
-                      <div className="flex gap-2 flex-wrap">
-                        <Button
-                          variant={roleFilter === 'all' ? 'default' : 'outline'}
-                          size="sm"
-                          onClick={() => setRoleFilter('all')}
-                        >
-                          All Roles
-                        </Button>
-                        <Button
-                          variant={roleFilter === 'suspicious' ? 'destructive' : 'outline'}
-                          size="sm"
-                          onClick={() => setRoleFilter('suspicious')}
-                        >
-                          Suspicious
-                        </Button>
-                        <Button
-                          variant={roleFilter === 'usual' ? 'default' : 'outline'}
-                          size="sm"
-                          onClick={() => setRoleFilter('usual')}
-                        >
-                          Usual
-                        </Button>
-                        <Button
-                          variant={roleFilter === 'moderator' ? 'default' : 'outline'}
-                          size="sm"
-                          onClick={() => setRoleFilter('moderator')}
-                        >
-                          Moderator
-                        </Button>
-                        <Button
-                          variant={roleFilter === 'admin' ? 'default' : 'outline'}
-                          size="sm"
-                          onClick={() => setRoleFilter('admin')}
-                        >
-                          Admin
-                        </Button>
-                      </div>
-                      
-                      {/* Ряд 3: Maybe Suspicious filter */}
+                      {/* Фильтры в виде dropdown */}
                       <div className="flex gap-2 flex-wrap items-center">
+                        {/* Verification Filter Dropdown */}
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="outline" size="sm" className="min-w-[140px] justify-between">
+                              {verificationFilter === 'all' ? 'All Users' : 
+                               verificationFilter === 'verified' ? 'Verified' : 'Unverified'}
+                              <ChevronDown className="ml-2 h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent className="w-[140px] bg-background z-50">
+                            <DropdownMenuItem onClick={() => setVerificationFilter('all')}>
+                              All Users
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => setVerificationFilter('verified')}>
+                              Verified
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => setVerificationFilter('unverified')}>
+                              Unverified
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+
+                        {/* Roles Filter Dropdown */}
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="outline" size="sm" className="min-w-[140px] justify-between">
+                              {roleFilter === 'all' ? 'All Roles' :
+                               roleFilter === 'suspicious' ? 'Suspicious' :
+                               roleFilter === 'usual' ? 'Usual' :
+                               roleFilter === 'moderator' ? 'Moderator' : 'Admin'}
+                              <ChevronDown className="ml-2 h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent className="w-[140px] bg-background z-50">
+                            <DropdownMenuItem onClick={() => setRoleFilter('all')}>
+                              All Roles
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => setRoleFilter('suspicious')}>
+                              Suspicious
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => setRoleFilter('usual')}>
+                              Usual
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => setRoleFilter('moderator')}>
+                              Moderator
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => setRoleFilter('admin')}>
+                              Admin
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+
+                        {/* Maybe Suspicious Filter Button */}
                         <Button
                           variant={suspiciousEmailFilter === 'maybe-suspicious' ? 'destructive' : 'outline'}
                           size="sm"
