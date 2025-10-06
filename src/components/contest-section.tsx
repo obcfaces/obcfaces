@@ -647,7 +647,7 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
     });
     
     return () => subscription.unsubscribe();
-  }, [title]);
+  }, [title, weekInterval]); // Add weekInterval to dependencies
 
 
   // Load participants based on title
