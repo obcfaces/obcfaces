@@ -89,13 +89,22 @@ export const ContestParticipationModal = ({
       
       // Handle birthdate from multiple possible sources
       let birthdate = null;
+      let birthDay = "";
+      let birthMonth = "";
+      let birthYear = "";
+      
       if (applicationData.birthdate) {
         birthdate = new Date(applicationData.birthdate);
+        birthDay = birthdate.getDate().toString();
+        birthMonth = (birthdate.getMonth() + 1).toString();
+        birthYear = birthdate.getFullYear().toString();
       } else if (applicationData.birth_year && applicationData.birth_month && applicationData.birth_day) {
-        birthdate = new Date(applicationData.birth_year, applicationData.birth_month - 1, applicationData.birth_day);
+        birthDay = applicationData.birth_day?.toString() || "";
+        birthMonth = applicationData.birth_month?.toString() || "";
+        birthYear = applicationData.birth_year?.toString() || "";
       }
       
-      console.log('Parsed birthdate:', birthdate);
+      console.log('Parsed birthdate:', { birthDay, birthMonth, birthYear });
 
       // Load existing contact data for the contact form
       if (applicationData.phone || applicationData.facebook_url) {
@@ -121,27 +130,16 @@ export const ContestParticipationModal = ({
         stateCode: applicationData.state || "",
         city: applicationData.city || "",
         gender: applicationData.gender || "",
-        birth_day: birthdate ? birthdate.getDate().toString() : (applicationData.birth_day?.toString() || ""),
-        birth_month: birthdate ? (birthdate.getMonth() + 1).toString() : (applicationData.birth_month?.toString() || ""),
-        birth_year: birthdate ? birthdate.getFullYear().toString() : (applicationData.birth_year?.toString() || ""),
+        birth_day: birthDay,
+        birth_month: birthMonth,
+        birth_year: birthYear,
         marital_status: applicationData.marital_status || "",
-        has_children: applicationData.has_children as boolean | undefined,
+        has_children: applicationData.has_children !== undefined ? applicationData.has_children : undefined,
         height_cm: applicationData.height_cm ? applicationData.height_cm.toString() : "",
         height_ft: "",
         weight_kg: applicationData.weight_kg ? applicationData.weight_kg.toString() : "",
         measurement_system: "metric",
       };
-      
-      // Initialize contact form with existing data
-      setTimeout(() => {
-        setContactForm({
-          name: `${applicationData.first_name || ''} ${applicationData.last_name || ''}`.trim(),
-          contact: applicationData.phone?.number || '',
-          message: '',
-          countryCode: applicationData.phone?.country_code || applicationData.country || '',
-          facebookUrl: applicationData.facebook_url || ''
-        });
-      }, 0);
     }
     
     try {
