@@ -5,7 +5,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { Upload, Save, Trash, Eye, Crown, Image as ImageIcon, Video, Play } from 'lucide-react';
+import { Upload, Save, Trash, Eye, Crown, Image as ImageIcon, Video, Play, X } from 'lucide-react';
 import { CompactCardLayout } from '@/components/CompactCardLayout';
 import { getCountryDisplayName } from '@/lib/utils';
 
@@ -434,7 +434,7 @@ export function WinnerContentManager({
             {/* Второй ряд - контент победительницы с загрузкой */}
             <div className="border-t">
               <div className="flex h-36 sm:h-40 md:h-44 gap-px relative">
-                {/* Payment proof photo - с кнопкой загрузки */}
+                {/* Payment proof photo - с кнопкой загрузки и удаления */}
                 <div className="relative w-24 sm:w-28 md:w-32 group">
                   {content.payment_proof_url ? (
                     <>
@@ -443,7 +443,7 @@ export function WinnerContentManager({
                         alt="Payment proof" 
                         className="w-full h-full object-cover"
                       />
-                      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                         <Button
                           type="button"
                           onClick={() => photoInputRef.current?.click()}
@@ -452,6 +452,14 @@ export function WinnerContentManager({
                           variant="secondary"
                         >
                           <Upload className="h-3 w-3" />
+                        </Button>
+                        <Button
+                          type="button"
+                          onClick={() => setContent(prev => ({ ...prev, payment_proof_url: '' }))}
+                          size="sm"
+                          variant="destructive"
+                        >
+                          <X className="h-3 w-3" />
                         </Button>
                       </div>
                     </>
@@ -474,7 +482,7 @@ export function WinnerContentManager({
                   />
                 </div>
 
-                {/* Testimonial video - с кнопкой загрузки */}
+                {/* Testimonial video - с кнопкой загрузки и удаления */}
                 <div className="relative w-24 sm:w-28 md:w-32 group">
                   {content.testimonial_video_url ? (
                     <>
@@ -483,7 +491,7 @@ export function WinnerContentManager({
                         className="w-full h-full object-cover"
                         playsInline
                       />
-                      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                         <Button
                           type="button"
                           onClick={() => videoInputRef.current?.click()}
@@ -493,12 +501,22 @@ export function WinnerContentManager({
                         >
                           <Upload className="h-3 w-3" />
                         </Button>
+                        <Button
+                          type="button"
+                          onClick={() => setContent(prev => ({ ...prev, testimonial_video_url: '' }))}
+                          size="sm"
+                          variant="destructive"
+                        >
+                          <X className="h-3 w-3" />
+                        </Button>
                       </div>
-                      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                        <div className="bg-black/50 rounded-full p-3">
-                          <Play className="w-6 h-6 text-white" fill="white" />
+                      {!uploadingVideo && (
+                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none group-hover:opacity-0 transition-opacity">
+                          <div className="bg-black/50 rounded-full p-3">
+                            <Play className="w-6 h-6 text-white" fill="white" />
+                          </div>
                         </div>
-                      </div>
+                      )}
                     </>
                   ) : (
                     <div 
