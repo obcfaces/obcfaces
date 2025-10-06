@@ -701,13 +701,20 @@ export const ContestParticipationModal = ({
 
       if (editMode && existingData) {
         // Update existing application
+        // Only change status to 'pending' if current status is 'rejected', otherwise keep current status
+        const updateData: any = {
+          application_data: applicationData,
+          submitted_at: new Date().toISOString()
+        };
+        
+        // Only update status to pending if currently rejected
+        if (existingData.status === 'rejected' || (existingData as any).admin_status === 'rejected') {
+          updateData.admin_status = 'pending';
+        }
+        
         const { error } = await supabase
           .from('weekly_contest_participants')
-          .update({
-            application_data: applicationData,
-            admin_status: 'pending' as any,
-            submitted_at: new Date().toISOString()
-          } as any)
+          .update(updateData)
           .eq('id', existingData.id);
         
         dbError = error;
