@@ -113,8 +113,11 @@ export function ContestantCard({
   // Use unified card data hook with stable dependencies
   const { data: cardData, loading: cardDataLoading, refresh: refreshCardData } = useCardData(name, propUser?.id, profileId);
   
-  // Get winner content for this participant
-  const { winnerContent } = useWinnerContent(profileId, propUser?.id);
+  // Get winner content for this participant (only for winners)
+  const { winnerContent } = useWinnerContent(
+    isWinner ? profileId : undefined,
+    isWinner ? userId : undefined
+  );
 
   // Initialize local state when props change
   useEffect(() => {
@@ -884,6 +887,7 @@ export function ContestantCard({
               dislikesCount={dislikesCount}
               showDislike={showDislike}
               propUser={propUser}
+              winnerContent={winnerContent}
               openModal={openModal}
               handleLike={handleLike}
               handleComment={markAsCommented}

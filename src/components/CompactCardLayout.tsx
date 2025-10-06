@@ -4,6 +4,12 @@ import { Link } from "react-router-dom";
 import { cn, getCountryDisplayName } from "@/lib/utils";
 import { VotingOverlay } from "./VotingOverlay";
 
+interface WinnerContent {
+  payment_proof_url?: string;
+  testimonial_video_url?: string;
+  testimonial_text?: string;
+}
+
 interface CompactCardLayoutProps {
   // Basic info
   name: string;
@@ -42,6 +48,9 @@ interface CompactCardLayoutProps {
   
   // User
   propUser: any;
+  
+  // Winner content
+  winnerContent?: WinnerContent | null;
   
   // Handlers
   openModal: (index: number) => void;
@@ -84,6 +93,7 @@ export function CompactCardLayout({
   dislikesCount,
   showDislike,
   propUser,
+  winnerContent,
   openModal,
   handleLike,
   handleComment,
@@ -94,6 +104,12 @@ export function CompactCardLayout({
   setUserRating,
   setIsEditing
 }: CompactCardLayoutProps) {
+  const hasWinnerContent = isWinner && winnerContent && (
+    winnerContent.payment_proof_url || 
+    winnerContent.testimonial_video_url || 
+    winnerContent.testimonial_text
+  );
+
   return (
     <>
       <div className="relative">
@@ -343,6 +359,47 @@ export function CompactCardLayout({
           </div>
         )}
       </div>
+      
+      {/* Winner Content Row - Second Row for Winners */}
+      {hasWinnerContent && (
+        <div className="col-span-full mt-2 border-t border-gray-200 pt-2">
+          <div className="flex gap-2">
+            {/* Left side: Payment proof and video */}
+            <div className="flex gap-1">
+              {winnerContent.payment_proof_url && (
+                <div className="w-24 sm:w-28 md:w-32">
+                  <img
+                    src={winnerContent.payment_proof_url}
+                    alt="Payment proof"
+                    className="w-full h-full object-cover cursor-pointer hover:opacity-90 transition-opacity rounded"
+                    onClick={() => {
+                      // Open in modal or new window
+                      window.open(winnerContent.payment_proof_url, '_blank');
+                    }}
+                  />
+                </div>
+              )}
+              {winnerContent.testimonial_video_url && (
+                <div className="w-24 sm:w-28 md:w-32">
+                  <video
+                    src={winnerContent.testimonial_video_url}
+                    className="w-full h-full object-cover cursor-pointer rounded"
+                    controls
+                    playsInline
+                  />
+                </div>
+              )}
+            </div>
+            
+            {/* Right side: Testimonial text */}
+            {winnerContent.testimonial_text && (
+              <div className="flex-1 p-2 bg-blue-50 rounded text-sm italic text-gray-700">
+                {winnerContent.testimonial_text}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </>
   );
 }
