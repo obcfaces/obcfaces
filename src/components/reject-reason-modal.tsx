@@ -88,13 +88,19 @@ export const RejectReasonModal = ({
       return;
     }
     
-    console.log('🟡 REJECT MODAL: Calling onConfirm callback');
-    await onConfirm(selectedReasons, notes);
+    console.log('🟡 REJECT MODAL: Calling onConfirm callback with data:', { selectedReasons, notes });
     
-    console.log('🟡 REJECT MODAL: onConfirm completed, resetting form');
-    // Reset form
-    setSelectedReasons([]);
-    setNotes("");
+    try {
+      await onConfirm(selectedReasons, notes);
+      console.log('🟡 REJECT MODAL: onConfirm completed successfully');
+      
+      // Reset form only AFTER successful save
+      setSelectedReasons([]);
+      setNotes("");
+    } catch (error) {
+      console.error('🟡 REJECT MODAL: Error in onConfirm:', error);
+      // Don't reset form if there was an error
+    }
   };
 
   const handleClose = () => {

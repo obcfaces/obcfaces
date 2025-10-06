@@ -7381,7 +7381,10 @@ const Admin = () => {
       {/* Reject Reason Modal */}
       <RejectReasonModal
         isOpen={rejectModalOpen}
-        onClose={() => setRejectModalOpen(false)}
+        onClose={() => {
+          setRejectModalOpen(false);
+          setApplicationToReject(null);
+        }}
          onConfirm={async (reasonTypes, notes) => {
            if (applicationToReject) {
              console.log('🔴 REJECT MODAL: Starting rejection process', { 
@@ -7460,9 +7463,13 @@ const Admin = () => {
                     return newFilters;
                   });
                   
+                  // Close modal and clear state AFTER successful save
+                  setRejectModalOpen(false);
+                  setApplicationToReject(null);
+                  
                   toast({
                     title: "Success",
-                    description: "Participant rejected successfully",
+                    description: `Participant rejected with ${reasonTypes.length} reason(s)`,
                   });
                  } catch (error) {
                    console.error('🔴 EXCEPTION in rejection process:', error);
@@ -7477,10 +7484,11 @@ const Admin = () => {
                console.log('🔴 Not a weekly participant, calling reviewApplication');
                // Regular application rejection
                await reviewApplication(applicationToReject.id, 'rejected', { reasonTypes, notes });
+               
+               // Close modal and clear state AFTER successful save
+               setRejectModalOpen(false);
+               setApplicationToReject(null);
               }
-              
-              setApplicationToReject(null);
-              setRejectModalOpen(false);
             }
           }}
        />
