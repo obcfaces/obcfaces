@@ -1,8 +1,15 @@
-import { ThumbsUp, MessageCircle, Share2, ThumbsDown, Crown } from "lucide-react";
+import { ThumbsUp, MessageCircle, Share2, ThumbsDown, Crown, Eye } from "lucide-react";
 import { Link } from "react-router-dom";
 import { cn, getCountryDisplayName } from "@/lib/utils";
 import { VotingOverlay } from "./VotingOverlay";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+
+interface WinnerContent {
+  payment_proof_url?: string;
+  testimonial_video_url?: string;
+  testimonial_text?: string;
+}
+
 
 interface FullCardLayoutProps {
   // Basic info
@@ -46,6 +53,9 @@ interface FullCardLayoutProps {
   // User
   propUser: any;
   
+  // Winner content
+  winnerContent?: WinnerContent | null;
+  
   // Handlers
   openModal: (index: number) => void;
   handleLike: (photoIndex: number) => void;
@@ -88,6 +98,7 @@ export function FullCardLayout({
   dislikesCount,
   showDislike,
   propUser,
+  winnerContent,
   openModal,
   handleLike,
   handleComment,
@@ -98,6 +109,12 @@ export function FullCardLayout({
   setUserRating,
   setIsEditing
 }: FullCardLayoutProps) {
+  const hasWinnerContent = isWinner && winnerContent && (
+    winnerContent.payment_proof_url || 
+    winnerContent.testimonial_video_url || 
+    winnerContent.testimonial_text
+  );
+
   return (
     <>
       {/* Winner header */}
@@ -303,6 +320,67 @@ export function FullCardLayout({
           )}
         </div>
       </div>
+      
+      {/* Winner Content Row - Second Row for Winners */}
+      {hasWinnerContent && (
+        <div className="border-t mt-0">
+          {/* Winner Content Header */}
+          <div className="px-4 py-2 bg-gray-50 border-b">
+            <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
+              <Eye className="w-4 h-4" />
+              <span>Контент победительницы</span>
+            </div>
+          </div>
+          
+          {/* Winner Content Row */}
+          <div className="flex">
+            {/* Payment proof photo - same width as face photo */}
+            <div className="w-24 sm:w-28 md:w-32 h-32">
+              {winnerContent.payment_proof_url ? (
+                <img 
+                  src={winnerContent.payment_proof_url} 
+                  alt="Payment proof" 
+                  className="w-full h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                  onClick={() => window.open(winnerContent.payment_proof_url, '_blank')}
+                />
+              ) : (
+                <div className="w-full h-full bg-gray-100 flex items-center justify-center text-xs text-gray-400">
+                  Фото
+                </div>
+              )}
+            </div>
+
+            {/* Testimonial video - same width as full body photo */}
+            <div className="w-24 sm:w-28 md:w-32 h-32">
+              {winnerContent.testimonial_video_url ? (
+                <video 
+                  src={winnerContent.testimonial_video_url}
+                  className="w-full h-full object-cover cursor-pointer"
+                  controls
+                  playsInline
+                />
+              ) : (
+                <div className="w-full h-full bg-gray-100 flex items-center justify-center text-xs text-gray-400">
+                  Видео
+                </div>
+              )}
+            </div>
+
+            {/* Testimonial text - takes remaining space */}
+            <div className="flex-1 p-2 flex items-center">
+              {winnerContent.testimonial_text ? (
+                <div className="w-full p-2 bg-blue-50 rounded text-sm italic text-gray-700">
+                  {winnerContent.testimonial_text}
+                </div>
+              ) : (
+                <div className="w-full h-full bg-gray-50 rounded flex items-center justify-center text-xs text-gray-400">
+                  Текст отзыва
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

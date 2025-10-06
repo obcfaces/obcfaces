@@ -362,54 +362,63 @@ export function CompactCardLayout({
       
       {/* Winner Content Row - Second Row for Winners */}
       {hasWinnerContent && (
-        <>
+        <div className="col-span-3 border-t">
           {/* Winner Content Header */}
-          <div className="col-span-full mt-4 mb-2">
-            <div className="flex items-center gap-2 text-lg font-semibold text-foreground">
-              <Eye className="w-5 h-5" />
+          <div className="px-4 py-2 bg-gray-50 border-b">
+            <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
+              <Eye className="w-4 h-4" />
               <span>Контент победительницы</span>
             </div>
           </div>
           
-          {/* Payment proof image - same width as face photo */}
-          <div className="relative">
-            {winnerContent.payment_proof_url ? (
-              <img 
-                src={winnerContent.payment_proof_url} 
-                alt="Payment proof"
-                className="w-24 sm:w-28 md:w-32 h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
-                onClick={() => window.open(winnerContent.payment_proof_url, '_blank')}
-              />
-            ) : (
-              <div className="w-24 sm:w-28 md:w-32 h-full bg-gray-100" />
-            )}
+          {/* Winner Content Row */}
+          <div className="flex">
+            {/* Payment proof photo - same width as face photo */}
+            <div className="w-24 sm:w-28 md:w-32 h-32">
+              {winnerContent.payment_proof_url ? (
+                <img 
+                  src={winnerContent.payment_proof_url} 
+                  alt="Payment proof" 
+                  className="w-full h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                  onClick={() => window.open(winnerContent.payment_proof_url, '_blank')}
+                />
+              ) : (
+                <div className="w-full h-full bg-gray-100 flex items-center justify-center text-xs text-gray-400">
+                  Фото
+                </div>
+              )}
+            </div>
+
+            {/* Testimonial video - same width as full body photo */}
+            <div className="w-24 sm:w-28 md:w-32 h-32">
+              {winnerContent.testimonial_video_url ? (
+                <video 
+                  src={winnerContent.testimonial_video_url}
+                  className="w-full h-full object-cover cursor-pointer"
+                  controls
+                  playsInline
+                />
+              ) : (
+                <div className="w-full h-full bg-gray-100 flex items-center justify-center text-xs text-gray-400">
+                  Видео
+                </div>
+              )}
+            </div>
+
+            {/* Testimonial text - takes remaining space like content area */}
+            <div className="flex-1 p-2 flex items-center">
+              {winnerContent.testimonial_text ? (
+                <div className="w-full p-2 bg-blue-50 rounded text-sm italic text-gray-700">
+                  {winnerContent.testimonial_text}
+                </div>
+              ) : (
+                <div className="w-full h-full bg-gray-50 rounded flex items-center justify-center text-xs text-gray-400">
+                  Текст отзыва
+                </div>
+              )}
+            </div>
           </div>
-          
-          {/* Testimonial video - same width as full body photo */}
-          <div className="relative">
-            {winnerContent.testimonial_video_url ? (
-              <video
-                src={winnerContent.testimonial_video_url}
-                className="w-24 sm:w-28 md:w-32 h-full object-cover rounded"
-                controls
-                playsInline
-              />
-            ) : (
-              <div className="w-24 sm:w-28 md:w-32 h-full bg-gray-100" />
-            )}
-          </div>
-          
-          {/* Testimonial text - takes remaining space like content area */}
-          <div className="flex-1 p-1 sm:p-2 md:p-3 flex items-center">
-            {winnerContent.testimonial_text ? (
-              <div className="w-full p-2 bg-blue-50 rounded text-sm italic text-gray-700">
-                {winnerContent.testimonial_text}
-              </div>
-            ) : (
-              <div className="w-full bg-gray-50 rounded h-full" />
-            )}
-          </div>
-        </>
+        </div>
       )}
     </>
   );
