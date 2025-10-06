@@ -613,9 +613,10 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
         console.log('Loaded NEXT WEEK participants:', participantsData.length);
       } else if (weekInterval) {
         // For all past weeks, use the weekInterval prop
-        console.log(`🔍 Loading participants for ${title} with interval ${weekInterval}`);
+        console.log(`🔍 [${title}] Loading participants with weekInterval: "${weekInterval}"`);
         participantsData = await loadPastWeekParticipantsByInterval(weekInterval);
-        console.log(`✅ Loaded ${title} participants:`, participantsData.length);
+        console.log(`✅ [${title}] Loaded ${participantsData.length} participants for interval ${weekInterval}`);
+        console.log(`📋 [${title}] Participants data:`, participantsData);
       } else {
         console.warn(`⚠️ No loading logic matched for section: ${title}, weekInterval: ${weekInterval}`);
       }
