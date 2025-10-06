@@ -172,29 +172,22 @@ const Contest = () => {
             // Format interval for display: "06/10-12/10/25" -> "06 Oct - 12 Oct 2025"
             const formatInterval = (interval: string): string => {
               try {
-                console.log('Formatting interval:', interval);
                 const parts = interval.split('-');
-                if (parts.length !== 2) {
-                  console.log('Invalid parts length:', parts.length);
-                  return interval;
-                }
+                if (parts.length !== 2) return interval;
                 
                 const startParts = parts[0].split('/'); // ["06", "10"]
                 const endParts = parts[1].split('/');   // ["12", "10", "25"]
                 
-                if (startParts.length !== 2 || endParts.length !== 3) {
-                  console.log('Invalid start/end parts:', startParts.length, endParts.length);
-                  return interval;
-                }
+                if (startParts.length !== 2 || endParts.length !== 3) return interval;
                 
                 const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                const startDay = startParts[0];
                 const startMonth = months[parseInt(startParts[1]) - 1];
+                const endDay = endParts[0];
                 const endMonth = months[parseInt(endParts[1]) - 1];
                 const year = `20${endParts[2]}`;
                 
-                const formatted = `${startParts[0]} ${startMonth} - ${endParts[0]} ${endMonth} ${year}`;
-                console.log('Formatted result:', formatted);
-                return formatted;
+                return `${startDay} ${startMonth} - ${endDay} ${endMonth} ${year}`;
               } catch (error) {
                 console.error('Error formatting interval:', error);
                 return interval;
