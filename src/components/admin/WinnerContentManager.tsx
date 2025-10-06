@@ -52,20 +52,35 @@ export function WinnerContentManager({
     
     setLoading(true);
     try {
+      console.log('Fetching winner content for:', { participantId, userId });
       let query = supabase.from('winner_content').select('*');
       
       if (participantId) {
+        console.log('Querying by participant_id:', participantId);
         query = query.eq('participant_id', participantId);
       } else if (userId) {
+        console.log('Querying by user_id:', userId);
         query = query.eq('user_id', userId);
       }
       
       const { data, error } = await query.maybeSingle();
       
+      console.log('Winner content query result:', { data, error });
+      
       if (error) throw error;
       
       if (data) {
+        console.log('Setting winner content:', data);
         setContent(data);
+      } else {
+        console.log('No winner content found, resetting to default');
+        setContent({
+          participant_id: participantId || '',
+          user_id: userId || '',
+          payment_proof_url: '',
+          testimonial_video_url: '',
+          testimonial_text: ''
+        });
       }
     } catch (error) {
       console.error('Error fetching winner content:', error);
