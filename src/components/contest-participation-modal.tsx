@@ -1319,8 +1319,16 @@ export const ContestParticipationModal = ({
                           }
 
                          try {
+                           console.log('📞 Starting contact save process:', {
+                             currentApplicationId,
+                             phone: contactForm.contact,
+                             facebook: contactForm.facebookUrl,
+                             countryCode: contactForm.countryCode || formData.countryCode
+                           });
+                           
                            const { data: { session } } = await supabase.auth.getSession();
                            if (!session) {
+                             console.error('❌ No session found');
                              toast({
                                title: "Error",
                                description: "Authentication required.",
@@ -1331,6 +1339,7 @@ export const ContestParticipationModal = ({
 
                              // Use the specific application ID from the current submission
                              if (!currentApplicationId) {
+                               console.error('❌ No currentApplicationId');
                                toast({
                                  title: "Error",
                                  description: "No application found to update.",
@@ -1342,18 +1351,30 @@ export const ContestParticipationModal = ({
                               // Get the specific application by ID
                               const { data: application, error: fetchError } = await supabase
                                 .from('weekly_contest_participants')
-                                .select('application_data')
+                                .select('application_data, user_id, admin_status')
                                 .eq('id', currentApplicationId)
                                 .single();
 
                              if (fetchError || !application) {
-                              toast({
-                                title: "Error",
-                                description: "Application not found.",
-                                variant: "destructive"
-                              });
-                              return;
-                            }
+                               console.error('❌ Application fetch error:', {
+                                 error: fetchError,
+                                 applicationId: currentApplicationId
+                               });
+                               toast({
+                                 title: "Error",
+                                 description: "Application not found.",
+                                 variant: "destructive"
+                               });
+                               return;
+                             }
+                             
+                             console.log('📋 Application found:', {
+                               id: currentApplicationId,
+                               userId: application.user_id,
+                               sessionUserId: session.user.id,
+                               status: application.admin_status,
+                               hasExistingData: !!application.application_data
+                             });
 
                            // Get the selected country info
                            const selectedCountry = Country.getCountryByCode(contactForm.countryCode || formData.countryCode);
@@ -1383,13 +1404,27 @@ export const ContestParticipationModal = ({
                                 .eq('id', currentApplicationId);
 
                            if (updateError) {
+                             console.error('❌ Database update error:', {
+                               error: updateError,
+                               message: updateError.message,
+                               details: updateError.details,
+                               hint: updateError.hint,
+                               code: updateError.code,
+                               applicationId: currentApplicationId
+                             });
                              toast({
                                title: "Error",
-                               description: "Failed to save contact information.",
+                               description: `Failed to save contact information: ${updateError.message}`,
                                variant: "destructive"
                              });
                              return;
                            }
+                           
+                           console.log('✅ Contact information saved successfully:', {
+                             applicationId: currentApplicationId,
+                             phone: updatedApplicationData.phone,
+                             facebook: updatedApplicationData.facebook_url
+                           });
                         
                               
                               // Show success modal only if not in edit mode
