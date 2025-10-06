@@ -110,7 +110,15 @@ export function CompactCardLayout({
     winnerContent.testimonial_text
   );
 
-  return (
+  // Wrapper for winner cards
+  const CardWrapper = ({ children }: { children: React.ReactNode }) => {
+    if (hasWinnerContent) {
+      return <div className="flex flex-col">{children}</div>;
+    }
+    return <>{children}</>;
+  };
+
+  const mainCard = (
     <>
       <div className="relative">
         <img 
@@ -163,7 +171,6 @@ export function CompactCardLayout({
         </div>
       )}
       
-      {/* Content area */}
       {/* Content area */}
       <div className="flex-1 p-1 sm:p-2 md:p-3 flex flex-col relative">
         <VotingOverlay
@@ -359,9 +366,15 @@ export function CompactCardLayout({
            </div>
          )}
        </div>
+    </>
+  );
+
+  return (
+    <CardWrapper>
+      {mainCard}
       {/* Winner Content - shown only for winners in compact mode */}
       {hasWinnerContent && (
-        <div className="col-span-3 border-t mt-2">
+        <div className="border-t">
           {/* Winner Content Row */}
           <div className="flex">
             {/* Payment proof photo - same width as face photo */}
@@ -411,6 +424,6 @@ export function CompactCardLayout({
           </div>
         </div>
       )}
-    </>
+    </CardWrapper>
   );
 }
