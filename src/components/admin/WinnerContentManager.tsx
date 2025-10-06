@@ -5,7 +5,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { Upload, Save, Trash, Eye, Crown, Image as ImageIcon, Video } from 'lucide-react';
+import { Upload, Save, Trash, Eye, Crown, Image as ImageIcon, Video, Play } from 'lucide-react';
 import { CompactCardLayout } from '@/components/CompactCardLayout';
 import { getCountryDisplayName } from '@/lib/utils';
 
@@ -373,6 +373,10 @@ export function WinnerContentManager({
     return <div className="p-4">Загрузка...</div>;
   }
 
+  if (!participantData) {
+    return <div className="p-4">Нет данных участника</div>;
+  }
+
   return (
     <Card className="w-full max-w-2xl">
       <CardHeader>
@@ -383,91 +387,150 @@ export function WinnerContentManager({
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        {/* Photo Upload */}
-        <div>
-          <label className="text-sm font-medium mb-2 block">Фото для победительницы</label>
-          <div className="flex gap-2">
-            <Input
-              type="url"
-              placeholder="или введите URL изображения"
-              value={content.payment_proof_url || ''}
-              onChange={(e) => setContent(prev => ({ ...prev, payment_proof_url: e.target.value }))}
-              className="flex-1"
-            />
-            <input
-              ref={photoInputRef}
-              type="file"
-              accept="image/*"
-              onChange={handlePhotoUpload}
-              className="hidden"
-            />
-            <Button
-              type="button"
-              onClick={() => photoInputRef.current?.click()}
-              disabled={uploadingPhoto}
-              variant="outline"
-              size="sm"
-            >
-              <ImageIcon className="h-4 w-4 mr-2" />
-              {uploadingPhoto ? 'Загрузка...' : 'Загрузить'}
-            </Button>
-          </div>
-          {content.payment_proof_url && (
-            <img 
-              src={content.payment_proof_url} 
-              alt="Preview" 
-              className="mt-2 w-32 h-32 object-cover rounded"
-            />
-          )}
-        </div>
+        {/* Preview section - всегда показываем */}
+        <div className="space-y-4">
+          <h4 className="text-sm font-medium mb-2 flex items-center gap-2">
+            <Eye className="h-4 w-4" />
+            Предварительный просмотр
+          </h4>
+          
+          {/* Карточка победителя - первый ряд (используем CompactCardLayout) */}
+          <div className="border rounded-lg overflow-hidden bg-white">
+            <div className="flex h-36 sm:h-40 md:h-44 gap-px relative">
+              <div className="relative">
+                <img 
+                  src={(participantData.application_data as any)?.facePhotoUrl || (participantData.application_data as any)?.photo1_url || ''} 
+                  alt="Face"
+                  className="w-24 sm:w-28 md:w-32 h-full object-cover"
+                />
+                <div className="absolute top-0 left-0 bg-black/70 text-white text-xs font-bold min-w-[20px] h-[20px] flex items-center justify-center">
+                  1
+                </div>
+              </div>
+              <div className="relative">
+                <img 
+                  src={(participantData.application_data as any)?.fullBodyPhotoUrl || (participantData.application_data as any)?.photo2_url || ''} 
+                  alt="Full body"
+                  className="w-24 sm:w-28 md:w-32 h-full object-cover"
+                />
+              </div>
+              <div className="flex-1 p-1 sm:p-2 md:p-3 flex flex-col relative bg-white">
+                <div className="flex items-start justify-between">
+                  <div className="min-w-0 flex-1 mr-2">
+                    <h3 className="font-semibold text-contest-text text-base sm:text-lg truncate">
+                      {(participantData.application_data as any)?.firstName || (participantData.application_data as any)?.first_name} {(participantData.application_data as any)?.lastName || (participantData.application_data as any)?.last_name}
+                    </h3>
+                    <div className="text-xs sm:text-sm text-muted-foreground font-normal">
+                      {(participantData.application_data as any)?.age} yo · {(participantData.application_data as any)?.weight || (participantData.application_data as any)?.weight_kg} kg · {(participantData.application_data as any)?.height || (participantData.application_data as any)?.height_cm} cm
+                    </div>
+                    <div className="text-sm sm:text-base text-contest-blue truncate">
+                      {getCountryDisplayName((participantData.application_data as any)?.country || '')} · {(participantData.application_data as any)?.city}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            {/* Второй ряд - контент победительницы с загрузкой */}
+            <div className="border-t">
+              <div className="flex h-36 sm:h-40 md:h-44 gap-px relative">
+                {/* Payment proof photo - с кнопкой загрузки */}
+                <div className="relative w-24 sm:w-28 md:w-32 group">
+                  {content.payment_proof_url ? (
+                    <>
+                      <img 
+                        src={content.payment_proof_url} 
+                        alt="Payment proof" 
+                        className="w-full h-full object-cover"
+                      />
+                      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <Button
+                          type="button"
+                          onClick={() => photoInputRef.current?.click()}
+                          disabled={uploadingPhoto}
+                          size="sm"
+                          variant="secondary"
+                        >
+                          <Upload className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    </>
+                  ) : (
+                    <div 
+                      className="w-full h-full bg-gray-100 flex flex-col items-center justify-center text-xs text-gray-400 cursor-pointer hover:bg-gray-200 transition-colors"
+                      onClick={() => photoInputRef.current?.click()}
+                    >
+                      <ImageIcon className="h-6 w-6 mb-1" />
+                      <span>Фото</span>
+                      <span className="text-[10px]">Кликните</span>
+                    </div>
+                  )}
+                  <input
+                    ref={photoInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handlePhotoUpload}
+                    className="hidden"
+                  />
+                </div>
 
-        {/* Video Upload */}
-        <div>
-          <label className="text-sm font-medium mb-2 block">Видео для победительницы</label>
-          <div className="flex gap-2">
-            <Input
-              type="url"
-              placeholder="или введите URL видео"
-              value={content.testimonial_video_url || ''}
-              onChange={(e) => setContent(prev => ({ ...prev, testimonial_video_url: e.target.value }))}
-              className="flex-1"
-            />
-            <input
-              ref={videoInputRef}
-              type="file"
-              accept="video/*"
-              onChange={handleVideoUpload}
-              className="hidden"
-            />
-            <Button
-              type="button"
-              onClick={() => videoInputRef.current?.click()}
-              disabled={uploadingVideo}
-              variant="outline"
-              size="sm"
-            >
-              <Video className="h-4 w-4 mr-2" />
-              {uploadingVideo ? 'Загрузка...' : 'Загрузить'}
-            </Button>
-          </div>
-          {content.testimonial_video_url && (
-            <video 
-              src={content.testimonial_video_url} 
-              className="mt-2 w-32 h-32 object-cover rounded"
-              controls
-            />
-          )}
-        </div>
+                {/* Testimonial video - с кнопкой загрузки */}
+                <div className="relative w-24 sm:w-28 md:w-32 group">
+                  {content.testimonial_video_url ? (
+                    <>
+                      <video 
+                        src={content.testimonial_video_url}
+                        className="w-full h-full object-cover"
+                        playsInline
+                      />
+                      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <Button
+                          type="button"
+                          onClick={() => videoInputRef.current?.click()}
+                          disabled={uploadingVideo}
+                          size="sm"
+                          variant="secondary"
+                        >
+                          <Upload className="h-3 w-3" />
+                        </Button>
+                      </div>
+                      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                        <div className="bg-black/50 rounded-full p-3">
+                          <Play className="w-6 h-6 text-white" fill="white" />
+                        </div>
+                      </div>
+                    </>
+                  ) : (
+                    <div 
+                      className="w-full h-full bg-gray-100 flex flex-col items-center justify-center text-xs text-gray-400 cursor-pointer hover:bg-gray-200 transition-colors"
+                      onClick={() => videoInputRef.current?.click()}
+                    >
+                      <Video className="h-6 w-6 mb-1" />
+                      <span>Видео</span>
+                      <span className="text-[10px]">Кликните</span>
+                    </div>
+                  )}
+                  <input
+                    ref={videoInputRef}
+                    type="file"
+                    accept="video/*"
+                    onChange={handleVideoUpload}
+                    className="hidden"
+                  />
+                </div>
 
-        {/* Text */}
-        <div>
-          <label className="text-sm font-medium mb-2 block">Текст отзыва победительницы</label>
-          <Textarea
-            placeholder="Введите текст отзыва победительницы..."
-            value={content.testimonial_text || ''}
-            onChange={(e) => setContent(prev => ({ ...prev, testimonial_text: e.target.value }))}
-            rows={4}
-          />
+                {/* Testimonial text - с полем ввода */}
+                <div className="flex-1 p-1 sm:p-2 md:p-3 bg-white overflow-auto">
+                  <Textarea
+                    placeholder="Введите текст отзыва победительницы..."
+                    value={content.testimonial_text || ''}
+                    onChange={(e) => setContent(prev => ({ ...prev, testimonial_text: e.target.value }))}
+                    className="w-full h-full text-xs italic resize-none border-0 focus-visible:ring-0 p-0"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
         <div className="flex gap-2 pt-4">
@@ -490,60 +553,6 @@ export function WinnerContentManager({
             </Button>
           )}
         </div>
-
-        {/* Preview section */}
-        {(content.payment_proof_url || content.testimonial_video_url || content.testimonial_text) && participantData && (
-          <div className="border-t pt-4 space-y-4">
-            <h4 className="text-sm font-medium mb-2 flex items-center gap-2">
-              <Eye className="h-4 w-4" />
-              Предварительный просмотр
-            </h4>
-            
-            {/* Используем CompactCardLayout для точного отображения как на сайте */}
-            <div className="border rounded-lg overflow-hidden bg-white">
-              <CompactCardLayout
-                name={`${(participantData.application_data as any)?.firstName || (participantData.application_data as any)?.first_name || ''} ${(participantData.application_data as any)?.lastName || (participantData.application_data as any)?.last_name || ''}`}
-                age={(participantData.application_data as any)?.age || 0}
-                weight={(participantData.application_data as any)?.weight || (participantData.application_data as any)?.weight_kg || 0}
-                height={(participantData.application_data as any)?.height || (participantData.application_data as any)?.height_cm || 0}
-                country={(participantData.application_data as any)?.country || ''}
-                city={(participantData.application_data as any)?.city || ''}
-                profileId={participantData.id}
-                faceImage={(participantData.application_data as any)?.facePhotoUrl || (participantData.application_data as any)?.photo1_url || ''}
-                fullBodyImage={(participantData.application_data as any)?.fullBodyPhotoUrl || (participantData.application_data as any)?.photo2_url || ''}
-                additionalPhotos={(participantData.application_data as any)?.additionalPhotos || []}
-                isVoted={true}
-                isEditing={false}
-                showThanks={false}
-                isExample={false}
-                isThisWeek={false}
-                isWinner={true}
-                rank={1}
-                userRating={0}
-                localAverageRating={0}
-                localTotalVotes={0}
-                hideCardActions={true}
-                cardData={{ likes: 0, comments: 0 }}
-                isLiked={[false, false]}
-                hasCommented={false}
-                isDisliked={false}
-                dislikesCount={0}
-                showDislike={false}
-                propUser={null}
-                winnerContent={content}
-                openModal={() => {}}
-                handleLike={() => {}}
-                handleComment={() => {}}
-                handleDislike={() => {}}
-                openShareModal={() => {}}
-                handleRate={() => {}}
-                setShowLoginModal={() => {}}
-                setUserRating={() => {}}
-                setIsEditing={() => {}}
-              />
-            </div>
-          </div>
-        )}
       </CardContent>
     </Card>
   );
