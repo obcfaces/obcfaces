@@ -23,7 +23,7 @@ import { MiniStars } from '@/components/mini-stars';
 import { 
   Calendar, FileText, UserCog, Eye, Edit, Check, X, Trash2, 
   RotateCcw, Copy, Facebook, Minus, AlertCircle, Trophy, ChevronDown, ChevronUp, Shield, Info,
-  Star, Heart, Loader2
+  Star, Heart, Loader2, Video
 } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
@@ -4508,94 +4508,26 @@ const Admin = () => {
                             </div>
                           </div>
                       
-                          {/* Column 3: Status History (40ch) - горизонтальное отображение для past */}
-                          <div className="w-[40ch] flex-shrink-0 p-2">
-                            <div className="text-xs h-32 overflow-y-auto">
-                              <div className="flex flex-wrap gap-2">
-                                 {/* Show all statuses horizontally, sorted by changed_at (newest first) */}
-                                 {participant.status_history && Object.keys(participant.status_history).length > 0 ? (
-                                   (() => {
-                                      // Valid admin_status values only
-                                      const validAdminStatuses = ['this week', 'next week', 'next week on site', 'past'];
-                                     
-                                     // Sort all status entries by changed_at (newest first) and filter only valid admin statuses
-                                     const sortedEntries = Object.entries(participant.status_history)
-                                       .filter(([status, info]) => validAdminStatuses.includes(status) && info && status) // Only valid admin statuses
-                                       .sort((a: any, b: any) => new Date(b[1]?.changed_at || 0).getTime() - new Date(a[1]?.changed_at || 0).getTime());
-                                     
-                                     // Group statuses by name to find previous occurrences
-                                     const statusOccurrences = new Map<string, any[]>();
-                                      sortedEntries.forEach(([status, info]) => {
-                                        if (info && status) { // Добавляем проверку на null
-                                          if (!statusOccurrences.has(status)) {
-                                            statusOccurrences.set(status, []);
-                                          }
-                                          statusOccurrences.get(status)!.push(info);
-                                        } // Закрываем проверку на null
-                                      });
-                                    
-                                     return sortedEntries.map(([status, info]: [string, any], index: number) => {
-                                       // Skip null or empty entries
-                                       if (!info || !status) return null;
-                                     
-                                       // Формат даты и времени когда статус был поставлен
-                                       const changedAt = info?.changed_at ? 
-                                         new Date(info.changed_at).toLocaleDateString('ru-RU', {
-                                           day: '2-digit',
-                                           month: 'short',
-                                           year: '2-digit',
-                                           hour: '2-digit',
-                                           minute: '2-digit'
-                                         }).replace(',', '') : 
-                                         '';
-
-                                        // Получить правильный интервал недели (понедельник-воскресенье)
-                                        const weekInterval = (() => {
-                                          if (info?.changed_at) {
-                                            const statusDate = new Date(info.changed_at);
-                                            return getStrictWeekInterval(statusDate, 'PH').formatted;
-                                          }
-                                          return participant.week_interval || '29/09-05/10/25'; // Fallback на участника
-                                        })();
-
-                                       // Информация об админе который поставил статус
-                                       const changedBy = info?.changed_by || info?.reviewed_by || '';
-                                       const adminInfo = changedBy ? `👤${changedBy.slice(0, 8)}` : '';
-
-                                       // Краткая причина изменения
-                                       const changeReason = info?.change_reason ? 
-                                         ` (${info.change_reason.slice(0, 20)}${info.change_reason.length > 20 ? '...' : ''})` : '';
-                                       
-                                       const isCurrentStatus = status === participant.admin_status;
-                                       
-                                        return (
-                                          <div key={index} className={`inline-flex flex-col p-2 rounded-lg text-xs border mr-2 mb-2 ${
-                                            isCurrentStatus ? 'bg-blue-50 border-blue-200 text-blue-800 font-medium' : 
-                                            'bg-gray-50 border-gray-200 text-gray-600'
-                                          }`} style={{minWidth: '120px'}}>
-                                            <div className="font-bold text-center mb-1">{status.toUpperCase()}</div>
-                                            <div className="text-xs text-center space-y-1">
-                                              <div>📅 {changedAt}</div>
-                                              <div>📊 {weekInterval}</div>
-                                              {adminInfo && <div>{adminInfo}</div>}
-                                            </div>
-                                          </div>
-                                      );
-                                     });
-                                   })()
-                                ) : (
-                                  // Fallback for when there's no status_history but we have current status
-                                  <div className="bg-yellow-100 p-1 rounded border text-xs font-medium text-gray-700 flex-shrink-0">
-                                    {participant.admin_status} - {(() => {
-                                      if (participant.week_interval) {
-                                        return participant.week_interval;
-                                      }
-                                      return 'нет интервала';
-                                    })()}
-                                  </div>
-                                )}
-                              </div>
-                            </div>
+                          {/* Column 3: Пустая колонка вместо Status History для Past */}
+                          <div className="w-[40ch] flex-shrink-0 p-2 flex items-center justify-center">
+                            {participant.final_rank === 1 && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-12 w-12 p-0 hover:bg-primary/10"
+                                onClick={() => {
+                                  setSelectedWinner({
+                                    participantId: participant.id,
+                                    userId: participant.user_id,
+                                    name: `${appData.first_name} ${appData.last_name}`
+                                  });
+                                  setShowWinnerContentModal(true);
+                                }}
+                                title="Управление видео и контентом победительницы"
+                              >
+                                <Video className="h-8 w-8 text-yellow-600" />
+                              </Button>
+                            )}
                           </div>
 
                            {/* Column 4: Voting stats and actions (20ch) */}
