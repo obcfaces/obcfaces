@@ -296,6 +296,7 @@ interface ProfileData {
     form_fill_time_seconds?: number;
     [key: string]: any;
   };
+  fingerprint_id?: string;
 }
 
 interface ContestApplication {
@@ -1692,12 +1693,27 @@ const Admin = () => {
         }
       }
 
+      // Fetch device fingerprints
+      const { data: fingerprintsData, error: fingerprintsError } = await supabase
+        .from('user_device_fingerprints')
+        .select('user_id, fingerprint_id')
+        .order('created_at', { ascending: false });
+
+      if (fingerprintsError) {
+        console.error('❌ Failed to fetch fingerprints:', fingerprintsError);
+      } else {
+        console.log('✅ Fingerprints fetched:', fingerprintsData?.length, 'records');
+      }
+
       const profilesWithAuth = (profilesData || []).map(profile => {
         const userAuthData = authData?.find(auth => auth.user_id === profile.id);
         // Get the most recent login log with an IP address for this user
         const userLoginLog = loginLogs
           ?.filter(log => log.user_id === profile.id && log.ip_address)
           ?.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())[0];
+        
+        // Get fingerprint for this user
+        const userFingerprint = fingerprintsData?.find(fp => fp.user_id === profile.id);
         
         const profileData = {
           ...profile,
@@ -1711,7 +1727,9 @@ const Admin = () => {
           user_agent: (userLoginLog?.user_agent as string) || null,
           // Get country and city from user_metadata (set during registration)
           country: (userAuthData as any)?.user_metadata?.country || profile.country || null,
-          city: (userAuthData as any)?.user_metadata?.city || profile.city || null
+          city: (userAuthData as any)?.user_metadata?.city || profile.city || null,
+          fingerprint_id: userFingerprint?.fingerprint_id || null,
+          raw_user_meta_data: (userAuthData as any)?.user_metadata || {}
         };
         
         // Log each profile's email for debugging
@@ -6693,30 +6711,40 @@ const Admin = () => {
                                         {profile.display_name || `${profile.first_name} ${profile.last_name}`}
                                       </span>
                                     </div>
-                                    {profile.ip_address && (
-                                      <div className={`text-xs ${profile.isDuplicateIP ? 'text-red-500 font-medium' : 'text-muted-foreground'}`}>
-                                        IP: <button
-                                          onClick={() => {
-                                            const newExpanded = new Set(expandedIPs);
-                                            if (expandedIPs.has(profile.ip_address)) {
-                                              newExpanded.delete(profile.ip_address);
-                                            } else {
-                                              newExpanded.add(profile.ip_address);
-                                            }
-                                            setExpandedIPs(newExpanded);
-                                          }}
-                                          className="hover:underline cursor-pointer"
-                                        >
-                                          {profile.ip_address} ({paginatedProfiles.filter(p => p.ip_address === profile.ip_address).length})
-                                        </button>
-                                        {profile.isDuplicateIP && ' ⚠️'}
-                                      </div>
-                                    )}
-                                    {(profile.country || profile.city) && (
-                                      <div className="text-xs text-muted-foreground">
-                                        📍 {profile.city ? `${profile.city}, ` : ''}{profile.country || 'Unknown Country'}
-                                      </div>
-                                    )}
+                                    {profile.ip_address && (() => {
+                                      const ipUserCount = paginatedProfiles.filter(p => p.ip_address === profile.ip_address).length;
+                                      let ipColor = 'text-muted-foreground';
+                                      if (ipUserCount >= 10) {
+                                        ipColor = 'text-red-500 font-medium';
+                                      } else if (ipUserCount >= 2 && ipUserCount <= 5) {
+                                        ipColor = 'text-blue-500 font-medium';
+                                      }
+                                      
+                                      return (
+                                        <div className={`text-xs ${ipColor}`}>
+                                          IP: <button
+                                            onClick={() => {
+                                              const newExpanded = new Set(expandedIPs);
+                                              if (expandedIPs.has(profile.ip_address)) {
+                                                newExpanded.delete(profile.ip_address);
+                                              } else {
+                                                newExpanded.add(profile.ip_address);
+                                              }
+                                              setExpandedIPs(newExpanded);
+                                            }}
+                                            className="hover:underline cursor-pointer"
+                                          >
+                                            {profile.ip_address}
+                                            {ipUserCount > 1 && ` (${ipUserCount})`}
+                                          </button>
+                                          {(profile.country || profile.city) && (
+                                            <span className="text-muted-foreground font-normal ml-1">
+                                              📍 {profile.city ? `${profile.city}, ` : ''}{profile.country || 'Unknown Country'}
+                                            </span>
+                                          )}
+                                        </div>
+                                      );
+                                    })()}
                                     {profile.user_agent && (() => {
                                       const { browser, device, os } = UAParser(profile.user_agent);
                                       
@@ -6741,6 +6769,11 @@ const Admin = () => {
                                     {!profile.email && (
                                       <div className="text-xs text-destructive">
                                         No email - User ID: {profile.id?.substring(0, 8)}
+                                      </div>
+                                    )}
+                                    {profile.fingerprint_id && (
+                                      <div className="text-xs text-muted-foreground">
+                                        Fingerprint: {profile.fingerprint_id.substring(0, 16)}...
                                       </div>
                                     )}
                                    </div>
