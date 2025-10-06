@@ -3175,11 +3175,14 @@ const Admin = () => {
               </div>
               
               {(() => {
-                // Фильтруем участников по admin_status и неделе
+                // Фильтруем участников ТОЛЬКО по admin_status
                 const filteredParticipants = preNextWeekParticipants.filter(p => {
+                  // Должен быть 'pre next week' статус
+                  if (p.admin_status !== 'pre next week') return false;
+                  
+                  // Дополнительный фильтр по статусу из dropdown (если есть)
                   const statusMatch = preStatusFilter === 'all' || p.admin_status === preStatusFilter;
-                  const weekMatch = preNextWeekFilter === 'all' || p.week_interval === preNextWeekFilter;
-                  return statusMatch && weekMatch;
+                  return statusMatch;
                 });
                 
                 if (filteredParticipants.length === 0) {
@@ -3581,17 +3584,14 @@ const Admin = () => {
               </div>
               
               {(() => {
-                // Фильтруем участников по admin_status и неделе
+                // Фильтруем участников ТОЛЬКО по admin_status (next week или next week on site)
                 const filteredParticipants = nextWeekParticipants.filter(p => {
+                  // Должен быть 'next week' или 'next week on site' статус
+                  if (p.admin_status !== 'next week' && p.admin_status !== 'next week on site') return false;
+                  
+                  // Дополнительный фильтр по статусу из dropdown (если есть)
                   const statusMatch = nextStatusFilter === 'all' || p.admin_status === nextStatusFilter;
-                  let weekMatch = true;
-                  if (nextWeekFilter === 'all') {
-                    weekMatch = true;
-                  } else {
-                    // Фильтруем по week_interval
-                    weekMatch = p.week_interval === nextWeekFilter;
-                  }
-                  return statusMatch && weekMatch;
+                  return statusMatch;
                 });
                 
                 // Дедупликация: оставляем карточку с максимальным количеством лайков для каждого user_id
