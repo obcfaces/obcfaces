@@ -4246,18 +4246,34 @@ const Admin = () => {
                       size="sm"
                       onClick={() => {
                         // Find winner from current filtered participants by interval
+                        console.log('🔍 Button clicked - Current filter:', pastWeekIntervalFilter);
+                        console.log('📊 filteredPastByInterval length:', filteredPastByInterval.length);
+                        console.log('📋 All participants in filter:', filteredPastByInterval.map(p => {
+                          const appData = p.application_data || {};
+                          return {
+                            name: `${appData.first_name} ${appData.last_name}`,
+                            participantId: p.id,
+                            interval: p.week_interval,
+                            rank: p.final_rank
+                          };
+                        }));
+                        
                         const winner = filteredPastByInterval.find(p => p.final_rank === 1);
-                        console.log('Looking for winner in interval:', pastWeekIntervalFilter);
-                        console.log('Filtered participants:', filteredPastByInterval.length);
-                        console.log('Found winner:', winner);
+                        console.log('🏆 Found winner:', winner ? {
+                          participantId: winner.id,
+                          name: `${winner.application_data?.first_name} ${winner.application_data?.last_name}`,
+                          interval: winner.week_interval
+                        } : 'NO WINNER');
                         
                         if (winner) {
                           const appData = winner.application_data || {};
-                          setSelectedWinner({
+                          const winnerData = {
                             participantId: winner.id,
                             userId: winner.user_id,
                             name: `${appData.first_name} ${appData.last_name}`
-                          });
+                          };
+                          console.log('✅ Setting selectedWinner to:', winnerData);
+                          setSelectedWinner(winnerData);
                           setShowWinnerContentModal(true);
                         } else {
                           toast({
@@ -7809,7 +7825,14 @@ const Admin = () => {
       <Dialog 
         key={selectedWinner?.participantId || 'no-winner'}
         open={showWinnerContentModal} 
-        onOpenChange={setShowWinnerContentModal}
+        onOpenChange={(open) => {
+          setShowWinnerContentModal(open);
+          if (!open) {
+            // Reset selected winner when closing modal
+            console.log('🔴 Closing modal, resetting selectedWinner');
+            setSelectedWinner(null);
+          }
+        }}
       >
         <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
