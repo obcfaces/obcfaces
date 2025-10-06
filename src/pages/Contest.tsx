@@ -19,12 +19,21 @@ const Contest = () => {
   // Helper function to get current Monday in Philippine time
   const getCurrentMonday = () => {
     const now = new Date();
+    // Get current date in Philippine timezone
     const philippineTime = new Date(now.toLocaleString("en-US", {timeZone: "Asia/Manila"}));
-    const currentDayOfWeek = philippineTime.getDay();
+    const currentDayOfWeek = philippineTime.getDay(); // 0=Sunday, 1=Monday, ..., 6=Saturday
+    
+    // If today is Monday (1), daysToSubtract should be 0
+    // If today is Sunday (0), daysToSubtract should be 6
     const daysToSubtract = currentDayOfWeek === 0 ? 6 : currentDayOfWeek - 1;
+    
     const currentMonday = new Date(philippineTime);
     currentMonday.setDate(philippineTime.getDate() - daysToSubtract);
     currentMonday.setHours(0, 0, 0, 0);
+    
+    console.log('🗓️ Today:', philippineTime.toLocaleDateString('en-US'), 'Day:', currentDayOfWeek);
+    console.log('🗓️ Current Monday:', currentMonday.toLocaleDateString('en-US'));
+    
     return currentMonday;
   };
   
