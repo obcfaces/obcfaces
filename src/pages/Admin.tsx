@@ -4449,24 +4449,26 @@ const Admin = () => {
                   return (
                     <Card key={participant.id} className="overflow-hidden relative mx-0 rounded-lg h-[149px]">
                       <CardContent className="p-0">
-                        {/* Edit button in bottom left corner */}
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => {
-                            setEditingParticipantData({
-                              id: participant.id,
-                              user_id: participant.user_id,
-                              application_data: appData,
-                              status: participant.admin_status
-                            });
-                            setShowParticipationModal(true);
-                          }}
-                          className="absolute bottom-0 left-0 z-20 p-1 m-0 rounded-none rounded-tr-md border-0 border-t border-r bg-background/90 hover:bg-background"
-                          title="Edit Application"
-                        >
-                          <Edit className="w-4 h-4" />
-                        </Button>
+                        {/* Edit button in bottom left corner - hide for past participants */}
+                        {participant.admin_status !== 'past' && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => {
+                              setEditingParticipantData({
+                                id: participant.id,
+                                user_id: participant.user_id,
+                                application_data: appData,
+                                status: participant.admin_status
+                              });
+                              setShowParticipationModal(true);
+                            }}
+                            className="absolute bottom-0 left-0 z-20 p-1 m-0 rounded-none rounded-tr-md border-0 border-t border-r bg-background/90 hover:bg-background"
+                            title="Edit Application"
+                          >
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                        )}
 
                         {/* Desktop layout */}
                         <div className="hidden md:flex md:overflow-visible">
