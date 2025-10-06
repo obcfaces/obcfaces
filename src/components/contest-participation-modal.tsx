@@ -88,13 +88,12 @@ export const ContestParticipationModal = ({
       console.log('Processing application data:', applicationData);
       
       // Handle birthdate from multiple possible sources
-      let birthdate = null;
       let birthDay = "";
       let birthMonth = "";
       let birthYear = "";
       
       if (applicationData.birthdate) {
-        birthdate = new Date(applicationData.birthdate);
+        const birthdate = new Date(applicationData.birthdate);
         birthDay = birthdate.getDate().toString();
         birthMonth = (birthdate.getMonth() + 1).toString();
         birthYear = birthdate.getFullYear().toString();
@@ -102,6 +101,12 @@ export const ContestParticipationModal = ({
         birthDay = applicationData.birth_day?.toString() || "";
         birthMonth = applicationData.birth_month?.toString() || "";
         birthYear = applicationData.birth_year?.toString() || "";
+      } else if (applicationData.age) {
+        // Calculate birth year from age
+        const currentYear = new Date().getFullYear();
+        birthYear = (currentYear - applicationData.age).toString();
+        birthDay = "1";
+        birthMonth = "1";
       }
       
       console.log('Parsed birthdate:', { birthDay, birthMonth, birthYear });
