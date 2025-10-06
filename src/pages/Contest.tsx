@@ -187,6 +187,8 @@ const Contest = () => {
             const adjustedWeeksAgo = item.weeksAgo + 1;
             const weekLabel = adjustedWeeksAgo === 1 ? '1 WEEK AGO' : `${adjustedWeeksAgo} WEEKS AGO`;
             
+            console.log(`🔧 Creating section: ${weekLabel}, interval: ${item.interval}, weekOffset: -${adjustedWeeksAgo}`);
+            
             // Format interval for display: "06/10-12/10/25" -> "06 Oct - 12 Oct 2025"
             const formatInterval = (interval: string): string => {
               try {
@@ -213,7 +215,12 @@ const Contest = () => {
             };
             
             const formattedInterval = formatInterval(item.interval);
-            console.log('Will use subtitle:', formattedInterval);
+            console.log('📅 Section details:', {
+              title: weekLabel,
+              subtitle: formattedInterval,
+              weekInterval: item.interval,
+              weekOffset: -adjustedWeeksAgo
+            });
             
             return (
               <ContestSection
