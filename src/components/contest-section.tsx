@@ -650,21 +650,31 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
 
   // Load participants based on title
   useEffect(() => {
-    console.log('ContestSection loadParticipants useEffect triggered for:', title);
+    console.log('ContestSection loadParticipants useEffect triggered for:', title, 'weekInterval:', weekInterval);
     const loadParticipants = async () => {
-      console.log('Starting loadParticipants for:', title);
+      console.log('Starting loadParticipants for:', title, 'with weekInterval:', weekInterval);
       setIsLoading(true);
+      
+      // Reload participants data when weekInterval changes
+      let participantsData: any[] = realContestants;
+      
+      if (title.includes("WEEK") && title.includes("AGO") && weekInterval) {
+        console.log(`Reloading participants for ${title} with interval ${weekInterval}`);
+        participantsData = await loadPastWeekParticipantsByInterval(weekInterval);
+        console.log(`Reloaded ${title} participants:`, participantsData.length);
+        setRealContestants(participantsData);
+        setAdminParticipants(participantsData);
+      }
       
       // Load user ratings if user is authenticated
       let userRatingsMap: Record<string, number> = {};
-      if (user?.id && realContestants.length > 0) {
+      if (user?.id && participantsData.length > 0) {
         console.log('Loading user ratings for authenticated user:', user.id);
-        userRatingsMap = await loadUserRatingsForParticipants(realContestants, user.id);
+        userRatingsMap = await loadUserRatingsForParticipants(participantsData, user.id);
       }
       
-      // For THIS WEEK section, admin participants are already loaded in the first useEffect
-      // Use realContestants data instead of empty array
-      const contestantsData = await getContestantsSync(realContestants, userRatingsMap);
+      // Use the newly loaded participants data
+      const contestantsData = await getContestantsSync(participantsData, userRatingsMap);
       setContestants(contestantsData || []);
       setIsLoading(false);
     };
@@ -691,7 +701,7 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
     return () => {
       supabase.removeChannel(channel);
     };
-   }, [title, user, isAdmin, adminParticipants.length, realContestants.length]);
+   }, [title, weekInterval, user, isAdmin, adminParticipants.length, realContestants.length]);
 
   const handleRate = async (contestantId: number, rating: number) => {
     setVotes(prev => ({ ...prev, [contestantId]: rating }));
