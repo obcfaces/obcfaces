@@ -111,8 +111,10 @@ export function CompactCardLayout({
   );
 
   return (
-    <>
-      <div className="relative">
+    <div className="flex flex-col">
+      {/* First Row - Main Card */}
+      <div className="flex h-36 sm:h-40 md:h-44 gap-px relative">
+        <div className="relative">
         <img 
           src={faceImage} 
           alt={`${name} face`}
@@ -355,13 +357,15 @@ export function CompactCardLayout({
                    <span className="hidden sm:inline">Share</span>
                  </button>
               </div>
-             )}
-           </div>
-         )}
-       </div>
-      {/* Winner Content - shown only for winners in compact mode */}
+            )}
+          </div>
+        )}
+      </div>
+      </div>
+      
+      {/* Second Row - Winner Content */}
       {hasWinnerContent && (
-        <div className="col-span-3 border-t mt-2">
+        <div className="border-t">
           {/* Winner Content Row */}
           <div className="flex">
             {/* Payment proof photo - same width as face photo */}
@@ -411,6 +415,6 @@ export function CompactCardLayout({
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 }
