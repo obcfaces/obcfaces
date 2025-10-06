@@ -381,7 +381,11 @@ export function CompactCardLayout({
                   src={winnerContent.payment_proof_url} 
                   alt="Payment proof" 
                   className="w-full h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
-                  onClick={() => window.open(winnerContent.payment_proof_url, '_blank')}
+                  onClick={() => {
+                    // Calculate index: face(0) + full(1) + additional photos + payment proof
+                    const paymentProofIndex = 2 + additionalPhotos.length;
+                    openModal(paymentProofIndex);
+                  }}
                 />
               ) : (
                 <div className="w-full h-full bg-gray-100 flex items-center justify-center text-xs text-gray-400">
@@ -393,12 +397,25 @@ export function CompactCardLayout({
             {/* Testimonial video - same width as full body photo */}
             <div className="relative w-24 sm:w-28 md:w-32">
               {winnerContent.testimonial_video_url ? (
-                <video 
-                  src={winnerContent.testimonial_video_url}
-                  className="w-full h-full object-cover cursor-pointer"
-                  controls
-                  playsInline
-                />
+                <div 
+                  className="w-full h-full relative cursor-pointer hover:opacity-90 transition-opacity"
+                  onClick={() => {
+                    // Calculate index: face(0) + full(1) + additional photos + payment proof(1) + video
+                    const videoIndex = 2 + additionalPhotos.length + (winnerContent.payment_proof_url ? 1 : 0);
+                    openModal(videoIndex);
+                  }}
+                >
+                  <video 
+                    src={winnerContent.testimonial_video_url}
+                    className="w-full h-full object-cover"
+                    playsInline
+                  />
+                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                    <div className="bg-black/50 rounded-full p-3">
+                      <Eye className="w-6 h-6 text-white" />
+                    </div>
+                  </div>
+                </div>
               ) : (
                 <div className="w-full h-full bg-gray-100 flex items-center justify-center text-xs text-gray-400">
                   Видео
