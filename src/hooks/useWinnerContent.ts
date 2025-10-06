@@ -33,9 +33,9 @@ export const useWinnerContent = (participantId?: string, userId?: string) => {
           query = query.eq('user_id', userId);
         }
 
-        const { data, error } = await query.single();
+        const { data, error } = await query.maybeSingle();
 
-        if (error && error.code !== 'PGRST116') { // PGRST116 is "not found"
+        if (error) {
           throw error;
         }
 
