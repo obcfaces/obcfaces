@@ -42,8 +42,11 @@ export function WinnerContentManager({
   const videoInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
+    console.log('🔄 WinnerContentManager useEffect triggered:', { participantId, userId });
     if (participantId || userId) {
       fetchWinnerContent();
+    } else {
+      console.log('⚠️ No participantId or userId provided');
     }
   }, [participantId, userId]);
 
