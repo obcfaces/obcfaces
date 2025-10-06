@@ -6659,13 +6659,23 @@ const Admin = () => {
                                     const formFillTime = profile.raw_user_meta_data?.form_fill_time_seconds;
                                     const fastFormFill = formFillTime !== undefined && formFillTime !== null && formFillTime < 5;
                                     
-                                    const isMaybeSuspicious = emailNotWhitelisted || wasAutoConfirmed || fastFormFill;
+                                    // Check for duplicate fingerprints
+                                    let hasDuplicateFingerprint = false;
+                                    if (profile.fingerprint_id) {
+                                      const sameFingerprint = profiles.filter(p => 
+                                        p.fingerprint_id === profile.fingerprint_id && p.id !== profile.id
+                                      );
+                                      hasDuplicateFingerprint = sameFingerprint.length > 0;
+                                    }
+                                    
+                                    const isMaybeSuspicious = emailNotWhitelisted || wasAutoConfirmed || fastFormFill || hasDuplicateFingerprint;
                                     
                                     if (isMaybeSuspicious) {
                                       const reasons = [];
                                       if (emailNotWhitelisted) reasons.push("Email domain not whitelisted");
                                       if (wasAutoConfirmed) reasons.push("Email auto-confirmed in <1 sec");
-                                      if (fastFormFill) reasons.push("Form filled in <5 sec");
+                                      if (fastFormFill) reasons.push(`Form filled in ${formFillTime}s (< 5 sec)`);
+                                      if (hasDuplicateFingerprint) reasons.push("Duplicate device fingerprint detected");
                                       
                                       return (
                                         <Tooltip>
@@ -6674,11 +6684,14 @@ const Admin = () => {
                                               Maybe
                                             </Badge>
                                           </TooltipTrigger>
-                                          <TooltipContent>
+                                          <TooltipContent className="max-w-xs">
                                             <div className="text-sm">
-                                              <div className="font-medium mb-1">Reasons:</div>
+                                              <div className="font-semibold mb-2 text-orange-700">Suspicious indicators:</div>
                                               {reasons.map((reason, idx) => (
-                                                <div key={idx} className="text-xs">• {reason}</div>
+                                                <div key={idx} className="text-xs mb-1 flex items-start gap-1">
+                                                  <span className="text-orange-500">•</span>
+                                                  <span>{reason}</span>
+                                                </div>
                                               ))}
                                             </div>
                                           </TooltipContent>
