@@ -6412,7 +6412,16 @@ const Admin = () => {
                               const formFillTime = p.raw_user_meta_data?.form_fill_time_seconds;
                               const fastFormFill = formFillTime !== undefined && formFillTime !== null && formFillTime < 5;
                               
-                              return emailNotWhitelisted || wasAutoConfirmed || fastFormFill;
+                              // Check for duplicate fingerprints
+                              let hasDuplicateFingerprint = false;
+                              if (p.fingerprint_id) {
+                                const sameFingerprint = profiles.filter(prof => 
+                                  prof.fingerprint_id === p.fingerprint_id && prof.id !== p.id
+                                );
+                                hasDuplicateFingerprint = sameFingerprint.length > 0;
+                              }
+                              
+                              return emailNotWhitelisted || wasAutoConfirmed || fastFormFill || hasDuplicateFingerprint;
                             }).length;
                             return count > 0 ? ` (${count})` : '';
                           })()}
@@ -6450,7 +6459,16 @@ const Admin = () => {
                           const formFillTime = profile.raw_user_meta_data?.form_fill_time_seconds;
                           const fastFormFill = formFillTime !== undefined && formFillTime !== null && formFillTime < 5;
                           
-                          if (!(emailNotWhitelisted || wasAutoConfirmed || fastFormFill)) return false;
+                          // Check for duplicate fingerprints
+                          let hasDuplicateFingerprint = false;
+                          if (profile.fingerprint_id) {
+                            const sameFingerprint = profiles.filter(p => 
+                              p.fingerprint_id === profile.fingerprint_id && p.id !== profile.id
+                            );
+                            hasDuplicateFingerprint = sameFingerprint.length > 0;
+                          }
+                          
+                          if (!(emailNotWhitelisted || wasAutoConfirmed || fastFormFill || hasDuplicateFingerprint)) return false;
                         }
                       }
                       
@@ -6478,7 +6496,16 @@ const Admin = () => {
                         const formFillTime = profile.raw_user_meta_data?.form_fill_time_seconds;
                         const fastFormFill = formFillTime !== undefined && formFillTime !== null && formFillTime < 5;
                         
-                        if (!(emailNotWhitelisted || wasAutoConfirmed || fastFormFill)) return false;
+                        // Check for duplicate fingerprints
+                        let hasDuplicateFingerprint = false;
+                        if (profile.fingerprint_id) {
+                          const sameFingerprint = profiles.filter(p => 
+                            p.fingerprint_id === profile.fingerprint_id && p.id !== profile.id
+                          );
+                          hasDuplicateFingerprint = sameFingerprint.length > 0;
+                        }
+                        
+                        if (!(emailNotWhitelisted || wasAutoConfirmed || fastFormFill || hasDuplicateFingerprint)) return false;
                       }
 
                       // Фильтр ролей
