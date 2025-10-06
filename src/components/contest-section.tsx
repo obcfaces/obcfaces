@@ -899,8 +899,8 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
       }
     }
 
-    // For "2 WEEKS AGO", "3 WEEKS AGO", and "4 WEEKS AGO" sections, show participants for all users
-    if (["2 WEEKS AGO", "3 WEEKS AGO", "4 WEEKS AGO"].includes(title)) {
+    // For any "X WEEKS AGO" sections, show participants for all users
+    if (title.includes("WEEK") && title.includes("AGO")) {
       console.log(`Processing ${title} section for all users`);
       
       // If there are participants, process them
@@ -966,8 +966,8 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
       }
     }
     
-    // Use real contestants from weekly contests if available for other weeks and NEXT WEEK
-    if (["NEXT WEEK", "1 WEEK AGO", "2 WEEKS AGO", "3 WEEKS AGO", "4 WEEKS AGO"].includes(title) && actualParticipants.length > 0) {
+    // Use real contestants from weekly contests if available for NEXT WEEK and any past weeks
+    if ((title === "NEXT WEEK" || (title.includes("WEEK") && title.includes("AGO"))) && actualParticipants.length > 0) {
       console.log(`Using real contestants for ${title}:`, actualParticipants.length);
       const contestantsWithRatings = await Promise.all(
         actualParticipants.map(async (contestant) => {

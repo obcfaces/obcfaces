@@ -39,6 +39,43 @@ const Index = () => {
   const [viewMode, setViewMode] = useState<'compact' | 'full'>("compact");
   const [activeSection, setActiveSection] = useState("Contest");
   const [isAdmin, setIsAdmin] = useState(false);
+  const [pastWeekIntervals, setPastWeekIntervals] = useState<Array<{interval: string, weeksAgo: number}>>([]);
+
+  // Helper to get current Monday
+  const getCurrentMonday = () => {
+    const now = new Date();
+    const philippineTime = new Date(now.toLocaleString("en-US", {timeZone: "Asia/Manila"}));
+    const currentDayOfWeek = philippineTime.getDay();
+    const daysToSubtract = currentDayOfWeek === 0 ? 6 : currentDayOfWeek - 1;
+    const currentMonday = new Date(philippineTime);
+    currentMonday.setDate(philippineTime.getDate() - daysToSubtract);
+    currentMonday.setHours(0, 0, 0, 0);
+    return currentMonday;
+  };
+
+  // Helper to parse week_interval to Monday date
+  const parseIntervalToMonday = (interval: string): Date | null => {
+    try {
+      const parts = interval.split('-');
+      if (parts.length !== 2) return null;
+      
+      const startParts = parts[0].split('/');
+      if (startParts.length !== 2) return null;
+      
+      const endParts = parts[1].split('/');
+      if (endParts.length !== 3) return null;
+      
+      const day = parseInt(startParts[0]);
+      const month = parseInt(startParts[1]) - 1;
+      const year = parseInt(endParts[2]);
+      const fullYear = year < 50 ? 2000 + year : 1900 + year;
+      
+      return new Date(fullYear, month, day, 0, 0, 0, 0);
+    } catch (error) {
+      console.error('Error parsing interval:', interval, error);
+      return null;
+    }
+  };
 
   // Check if user is admin
   useEffect(() => {
@@ -58,7 +95,47 @@ const Index = () => {
       }
     };
     
+    const loadPastWeekIntervals = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('weekly_contest_participants')
+          .select('week_interval')
+          .eq('admin_status', 'past')
+          .eq('is_active', true)
+          .is('deleted_at', null);
+        
+        if (error) {
+          console.error('Error loading past week intervals:', error);
+          return;
+        }
+        
+        const uniqueIntervals = Array.from(new Set(data?.map(p => p.week_interval).filter(Boolean) as string[]));
+        const currentMonday = getCurrentMonday();
+        
+        const intervalsMap = new Map<string, {interval: string, weeksAgo: number}>();
+        
+        uniqueIntervals.forEach(interval => {
+          const intervalMonday = parseIntervalToMonday(interval);
+          if (!intervalMonday) return;
+          
+          const diffTime = currentMonday.getTime() - intervalMonday.getTime();
+          const diffDays = Math.floor(diffTime / (24 * 60 * 60 * 1000));
+          const weeksAgo = Math.floor(diffDays / 7);
+          
+          intervalsMap.set(interval, { interval, weeksAgo });
+        });
+        
+        const intervalsWithWeeks = Array.from(intervalsMap.values())
+          .sort((a, b) => a.weeksAgo - b.weeksAgo);
+        
+        setPastWeekIntervals(intervalsWithWeeks);
+      } catch (error) {
+        console.error('Error loading past week intervals:', error);
+      }
+    };
+    
     checkAdminStatus();
+    loadPastWeekIntervals();
   }, []);
   
   // Инициализация category из localStorage или "" по умолчанию
@@ -117,49 +194,50 @@ const Index = () => {
           />
           </section>
 
-          <ContestSection
-            title="1 WEEK AGO"
-            titleSuffix="(Closed)"
-            subtitle="06 Oct - 12 Oct 2025"
-            centerSubtitle
-            showWinner={true}
-            viewMode={viewMode}
-            weekOffset={-1}
-            weekInterval="06/10-12/10/25"
-          />
 
-          <ContestSection
-            title="2 WEEKS AGO"
-            titleSuffix="(Closed)"
-            subtitle="29 Sep - 05 Oct 2025"
-            centerSubtitle
-            showWinner={true}
-            viewMode={viewMode}
-            weekOffset={-2}
-            weekInterval="29/09-05/10/25"
-          />
+          {/* Dynamically generate sections for all past weeks */}
+          {pastWeekIntervals.map((item) => {
+            const adjustedWeeksAgo = item.weeksAgo + 1;
+            const weekLabel = adjustedWeeksAgo === 1 ? '1 WEEK AGO' : `${adjustedWeeksAgo} WEEKS AGO`;
+            
+            const formatInterval = (interval: string): string => {
+              try {
+                const parts = interval.split('-');
+                if (parts.length !== 2) return interval;
+                
+                const startParts = parts[0].split('/');
+                const endParts = parts[1].split('/');
+                
+                if (startParts.length !== 2 || endParts.length !== 3) return interval;
+                
+                const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                const startDay = startParts[0];
+                const startMonth = months[parseInt(startParts[1]) - 1];
+                const endDay = endParts[0];
+                const endMonth = months[parseInt(endParts[1]) - 1];
+                const year = `20${endParts[2]}`;
+                
+                return `${startDay} ${startMonth} - ${endDay} ${endMonth} ${year}`;
+              } catch (error) {
+                return interval;
+              }
+            };
+            
+            return (
+              <ContestSection
+                key={item.interval}
+                title={weekLabel}
+                titleSuffix="(Closed)"
+                subtitle={formatInterval(item.interval)}
+                centerSubtitle
+                showWinner={true}
+                viewMode={viewMode}
+                weekOffset={-adjustedWeeksAgo}
+                weekInterval={item.interval}
+              />
+            );
+          })}
 
-          <ContestSection
-            title="3 WEEKS AGO"
-            titleSuffix="(Closed)"
-            subtitle="22 Sep - 28 Sep 2025"
-            centerSubtitle
-            showWinner={true}
-            viewMode={viewMode}
-            weekOffset={-3}
-            weekInterval="22/09-28/09/25"
-          />
-
-          <ContestSection
-            title="4 WEEKS AGO"
-            titleSuffix="(Closed)"
-            subtitle="15 Sep - 21 Sep 2025"
-            centerSubtitle
-            showWinner={true}
-            viewMode={viewMode}
-            weekOffset={-4}
-            weekInterval="15/09-21/09/25"
-          />
 
         </>
       )}
