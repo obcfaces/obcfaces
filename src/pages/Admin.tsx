@@ -964,14 +964,38 @@ const Admin = () => {
 
   // Memoized filtered past participants by week interval
   const filteredPastByInterval = useMemo(() => {
+    console.log('🔍 Filtering past participants by interval:', pastWeekIntervalFilter);
+    console.log('📋 Total past participants:', pastWeekParticipants.length);
+    
     if (pastWeekIntervalFilter === 'all') {
+      console.log('✅ Showing all participants');
       return pastWeekParticipants;
     }
     
-    return pastWeekParticipants.filter(participant => {
+    const filtered = pastWeekParticipants.filter(participant => {
       const participantInterval = participant.week_interval || getParticipantWeekInterval(participant);
-      return participantInterval === pastWeekIntervalFilter;
+      const matches = participantInterval === pastWeekIntervalFilter;
+      
+      if (matches) {
+        const appData = participant.application_data || {};
+        console.log(`✓ Matched participant: ${appData.first_name} ${appData.last_name}, interval: ${participantInterval}, rank: ${participant.final_rank}`);
+      }
+      
+      return matches;
     });
+    
+    console.log('📊 Filtered count:', filtered.length);
+    const winners = filtered.filter(p => p.final_rank === 1);
+    console.log('🏆 Winners in filtered list:', winners.map(w => {
+      const appData = w.application_data || {};
+      return {
+        name: `${appData.first_name} ${appData.last_name}`,
+        participantId: w.id,
+        interval: w.week_interval
+      };
+    }));
+    
+    return filtered;
   }, [pastWeekParticipants, pastWeekIntervalFilter]);
 
   // Helper function to get participant display info with winner indication
