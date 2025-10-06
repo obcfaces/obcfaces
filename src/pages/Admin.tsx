@@ -558,6 +558,14 @@ const Admin = () => {
         }
       }
       console.log('🟢 Final update data:', updateData);
+      console.log('🟢 DETAILED update data:', {
+        admin_status: updateData.admin_status,
+        week_interval: updateData.week_interval,
+        rejection_reason_types: updateData.rejection_reason_types,
+        rejection_reason_types_type: typeof updateData.rejection_reason_types,
+        rejection_reason: updateData.rejection_reason,
+        rejection_reason_type: typeof updateData.rejection_reason
+      });
 
       // Update participant with new status and history
       const { error: updateError } = await supabase
