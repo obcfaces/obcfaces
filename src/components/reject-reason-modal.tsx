@@ -156,9 +156,9 @@ export const RejectReasonModal = ({
           </Button>
           <Button 
             variant="destructive" 
-            onClick={() => {
+            onClick={async () => {
               console.log('🔵 BUTTON CLICKED! selectedReasons:', selectedReasons, 'notes:', notes);
-              handleConfirm();
+              await handleConfirm();
             }} 
             disabled={(selectedReasons.length === 0 && !notes.trim()) || isLoading}
           >
