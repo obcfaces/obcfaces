@@ -98,15 +98,9 @@ const Contest = () => {
           return;
         }
         
-        console.log('Raw data from DB (count):', data?.length);
-        
         const uniqueIntervals = Array.from(new Set(data?.map(p => p.week_interval).filter(Boolean) as string[]));
         
-        console.log('🔍 Unique intervals found:', uniqueIntervals);
-        console.log('🔍 Contains 15/09-21/09/25?', uniqueIntervals.includes('15/09-21/09/25'));
-        
         const currentMonday = getCurrentMonday();
-        console.log('📅 Current Monday (Philippine time):', currentMonday.toLocaleDateString('en-US'));
         
         const intervalsWithWeeks = uniqueIntervals
           .map(interval => {
@@ -115,22 +109,30 @@ const Contest = () => {
               return null;
             }
             
-            // Calculate weeks difference
             const diffTime = currentMonday.getTime() - intervalMonday.getTime();
             const diffDays = Math.floor(diffTime / (24 * 60 * 60 * 1000));
             const weeksAgo = Math.floor(diffDays / 7);
-            
-            console.log(`✅ ${interval}: ${weeksAgo} weeks ago (${diffDays} days)`);
             
             return {
               interval,
               weeksAgo
             };
           })
-          .filter(item => item !== null)
-          .sort((a, b) => a!.weeksAgo - b!.weeksAgo) as Array<{interval: string, weeksAgo: number}>;
+          .filter(item => item !== null) as Array<{interval: string, weeksAgo: number}>;
         
-        console.log('✅ Final intervals to display:', intervalsWithWeeks);
+        // Принудительно добавляем 4 WEEKS AGO если его нет
+        const has4WeeksAgo = intervalsWithWeeks.some(item => item.interval === '15/09-21/09/25');
+        if (!has4WeeksAgo) {
+          intervalsWithWeeks.push({
+            interval: '15/09-21/09/25',
+            weeksAgo: 3 // будет отображаться как 4 WEEKS AGO (weeksAgo + 1)
+          });
+        }
+        
+        // Сортируем по weeksAgo
+        intervalsWithWeeks.sort((a, b) => a.weeksAgo - b.weeksAgo);
+        
+        console.log('✅ Final intervals:', intervalsWithWeeks);
         
         setPastWeekIntervals(intervalsWithWeeks);
       } catch (error) {
@@ -233,19 +235,6 @@ const Contest = () => {
               />
             );
           })}
-          
-          {/* HARDCODED 4 WEEKS AGO SECTION - 15/09-21/09/25 */}
-          <ContestSection
-            key="15/09-21/09/25"
-            title="4 WEEKS AGO"
-            subtitle="15 Sep - 21 Sep 2025"
-            description="See the winners from 4 weeks ago"
-            isActive={false}
-            showWinner={true}
-            viewMode={viewMode}
-            weekOffset={-4}
-            weekInterval="15/09-21/09/25"
-          />
           
           {/* HARDCODED 4 WEEKS AGO SECTION - 15/09-21/09/25 */}
           <ContestSection
