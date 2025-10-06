@@ -102,20 +102,36 @@ const Contest = () => {
         const intervalsWithWeeks = uniqueIntervals
           .map(interval => {
             const intervalMonday = parseIntervalToMonday(interval);
-            if (!intervalMonday) return null;
+            if (!intervalMonday) {
+              console.log(`Failed to parse interval: ${interval}`);
+              return null;
+            }
             
+            // Calculate weeks difference
             const diffTime = currentMonday.getTime() - intervalMonday.getTime();
-            const diffWeeks = Math.floor(diffTime / (7 * 24 * 60 * 60 * 1000));
-            const weeksAgo = diffWeeks + 1;
+            const diffDays = Math.floor(diffTime / (24 * 60 * 60 * 1000));
+            const weeksAgo = Math.floor(diffDays / 7);
             
-            console.log(`Interval ${interval}: Monday=${intervalMonday.toLocaleDateString()}, DiffWeeks=${diffWeeks}, WeeksAgo=${weeksAgo}`);
+            console.log(`Interval ${interval}:`, {
+              intervalMonday: intervalMonday.toLocaleDateString(),
+              currentMonday: currentMonday.toLocaleDateString(),
+              diffDays,
+              weeksAgo
+            });
             
             return {
               interval,
               weeksAgo
             };
           })
-          .filter(item => item !== null && item.weeksAgo > 0)
+          .filter(item => {
+            if (item === null) return false;
+            if (item.weeksAgo <= 0) {
+              console.log(`Filtering out interval ${item.interval} - weeksAgo=${item.weeksAgo}`);
+              return false;
+            }
+            return true;
+          })
           .sort((a, b) => a!.weeksAgo - b!.weeksAgo) as Array<{interval: string, weeksAgo: number}>;
         
         console.log('Final intervals with weeks:', intervalsWithWeeks);
