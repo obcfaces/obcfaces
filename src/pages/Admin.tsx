@@ -1915,6 +1915,78 @@ const Admin = () => {
         });
       }
 
+      // CRITICAL: Also fetch ALL participants with 'this week' status
+      const { data: thisWeekData, error: thisWeekError } = await supabase
+        .from('weekly_contest_participants')
+        .select(`
+          id,
+          contest_id,
+          user_id,
+          admin_status,
+          week_interval,
+          status_history,
+          final_rank,
+          total_votes,
+          average_rating,
+          is_active,
+          created_at,
+          submitted_at,
+          deleted_at,
+          application_data
+        `)
+        .eq('admin_status', 'this week')
+        .is('deleted_at', null);
+
+      if (thisWeekError) {
+        console.error('Error loading this week participants:', thisWeekError);
+      } else if (thisWeekData) {
+        console.log(`Loaded ${thisWeekData.length} participants with 'this week' status`);
+        
+        // Transform this week participants to match RPC format
+        const transformedThisWeek = thisWeekData.map((item: any) => {
+          const appData = item.application_data || {};
+          return {
+            participant_id: item.id,
+            contest_id: item.contest_id,
+            user_id: item.user_id,
+            first_name: appData.first_name || '',
+            last_name: appData.last_name || '',
+            age: appData.age || null,
+            country: appData.country || '',
+            state: appData.state || '',
+            city: appData.city || '',
+            height_cm: appData.height_cm || null,
+            weight_kg: appData.weight_kg || null,
+            gender: appData.gender || '',
+            marital_status: appData.marital_status || '',
+            has_children: appData.has_children || false,
+            photo_1_url: appData.photo1_url || appData.photo_1_url || '',
+            photo_2_url: appData.photo2_url || appData.photo_2_url || '',
+            avatar_url: appData.avatar_url || '',
+            final_rank: item.final_rank,
+            total_votes: item.total_votes || 0,
+            average_rating: item.average_rating || '0',
+            status_assigned_date: item.created_at,
+            contest_start_date: item.created_at,
+            created_at: item.created_at,
+            submitted_at: item.submitted_at,
+            deleted_at: item.deleted_at,
+            is_active: item.is_active,
+            admin_status: item.admin_status,
+            status_history: item.status_history || {},
+            week_interval: item.week_interval
+          };
+        });
+        
+        // Merge with existing participants, avoiding duplicates
+        const existingIds = new Set(allParticipants.map(p => p.participant_id));
+        transformedThisWeek.forEach(p => {
+          if (!existingIds.has(p.participant_id)) {
+            allParticipants.push(p);
+          }
+        });
+      }
+
       // CRITICAL: Also fetch ALL pending and rejected participants
       const { data: newApplicationsData, error: newError } = await supabase
         .from('weekly_contest_participants')
