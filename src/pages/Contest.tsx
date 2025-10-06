@@ -125,16 +125,15 @@ const Contest = () => {
               weeksAgo
             };
           })
-          .filter(item => {
-            if (item === null) return false;
-            // Show all intervals with past status, regardless of weeksAgo calculation
-            // This handles cases where admin manually sets intervals for past weeks
-            console.log(`✓ Keeping interval ${item.interval} - weeksAgo=${item.weeksAgo}`);
-            return true;
-          })
+          .filter(item => item !== null)
           .sort((a, b) => a!.weeksAgo - b!.weeksAgo) as Array<{interval: string, weeksAgo: number}>;
         
-        console.log('Final intervals to display:', intervalsWithWeeks);
+        console.log('✅ Final intervals to display:', intervalsWithWeeks);
+        console.log('✅ Total intervals:', intervalsWithWeeks.length);
+        intervalsWithWeeks.forEach((item, index) => {
+          console.log(`  ${index + 1}. ${item.interval} (weeksAgo: ${item.weeksAgo})`);
+        });
+        
         setPastWeekIntervals(intervalsWithWeeks);
       } catch (error) {
         console.error('Error loading past week intervals:', error);
