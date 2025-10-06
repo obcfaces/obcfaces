@@ -5830,7 +5830,7 @@ const Admin = () => {
                                     value={participant.admin_status || 'pending'}
                                     onValueChange={(value) => {
                                       // If changing to rejected status, open reject modal
-                                      if (value === 'rejected') {
+                                      if (value === 'rejected' && participant.admin_status !== 'rejected') {
                                         setApplicationToReject({
                                           id: participant.id,
                                           name: `${appData.first_name} ${appData.last_name}`
@@ -5873,6 +5873,25 @@ const Admin = () => {
                                          <SelectItem value="past">Past</SelectItem>
                                        </SelectContent>
                                   </Select>
+                                  
+                                  {/* Edit rejection reason button - only show for rejected items */}
+                                  {participant.admin_status === 'rejected' && (
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      className="h-6 w-6 p-0"
+                                      onClick={() => {
+                                        setApplicationToReject({
+                                          id: participant.id,
+                                          name: `${appData.first_name} ${appData.last_name}`
+                                        });
+                                        setRejectModalOpen(true);
+                                      }}
+                                      title="Edit rejection reason"
+                                    >
+                                      <Edit className="h-3.5 w-3.5" />
+                                    </Button>
+                                  )}
                                   
                                   <div 
                                     className="text-xs text-muted-foreground cursor-pointer hover:text-foreground"
