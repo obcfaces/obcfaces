@@ -828,14 +828,11 @@ export const ContestParticipationModal = ({
       if (!editMode) {
         setSubmissionSuccess(true); // This will show the contact form
       } else {
-        // In edit mode, close modal and redirect to profile
+        // In edit mode, just close modal without redirect
         setIsOpen(false);
         
-        // Get current user session to redirect to their profile
-        const { data: { session } } = await supabase.auth.getSession();
-        if (session?.user) {
-          navigate(`/u/${session.user.id}?tab=participation`);
-        }
+        // Trigger a refresh event for the admin panel
+        window.dispatchEvent(new CustomEvent('participant-updated'));
       }
     } catch (error: any) {
       console.error('Submission error:', error);
