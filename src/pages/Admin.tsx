@@ -5880,23 +5880,6 @@ const Admin = () => {
                                   </div>
                                   
                                   <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="h-6 w-6 p-0"
-                                    onClick={() => {
-                                      setEditingParticipantData({
-                                        id: participant.id,
-                                        user_id: participant.user_id,
-                                        application_data: appData,
-                                        status: participant.admin_status
-                                      });
-                                      setShowParticipationModal(true);
-                                    }}
-                                  >
-                                    <Edit className="h-3.5 w-3.5" />
-                                  </Button>
-                                  
-                                  <Button
                                     size="sm"
                                     variant="ghost"
                                     className="h-6 w-6 p-0 text-destructive hover:text-destructive hover:bg-destructive/10"
