@@ -434,11 +434,13 @@ export function WinnerContentManager({
 
         {/* Preview section */}
         {(content.payment_proof_url || content.testimonial_video_url || content.testimonial_text) && (
-          <div className="border-t pt-4">
+          <div className="border-t pt-4 space-y-4">
             <h4 className="text-sm font-medium mb-2 flex items-center gap-2">
               <Eye className="h-4 w-4" />
               Предварительный просмотр
             </h4>
+            
+            {/* Compact view (second row on site) */}
             <div className="flex gap-2 h-32">
               {content.payment_proof_url && (
                 <img 
@@ -456,8 +458,13 @@ export function WinnerContentManager({
                 />
               )}
               {content.testimonial_text && (
-                <div className="flex-1 p-2 bg-gray-50 rounded text-xs overflow-auto">
-                  <p className="italic">{content.testimonial_text}</p>
+                <div className="flex-1 p-2 bg-gray-50 rounded text-xs overflow-auto flex flex-col">
+                  <p className="italic mb-2">{content.testimonial_text}</p>
+                  {participantName && (
+                    <p className="text-xs text-gray-600 font-bold italic self-end uppercase mt-auto">
+                      {participantName}
+                    </p>
+                  )}
                 </div>
               )}
             </div>
