@@ -585,7 +585,7 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
 
   // Get user session once for the entire section and listen for changes
   useEffect(() => {
-    console.log('ContestSection useEffect triggered for:', title);
+    console.log(`🚀 ContestSection useEffect triggered for: ${title}, weekInterval: ${weekInterval || 'none'}`);
     const getCurrentUser = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       const currentUser = session?.user ?? null;
@@ -616,6 +616,8 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
         console.log(`🔍 Loading participants for ${title} with interval ${weekInterval}`);
         participantsData = await loadPastWeekParticipantsByInterval(weekInterval);
         console.log(`✅ Loaded ${title} participants:`, participantsData.length);
+      } else {
+        console.warn(`⚠️ No loading logic matched for section: ${title}, weekInterval: ${weekInterval}`);
       }
       
       // Load user ratings BEFORE setting participants
