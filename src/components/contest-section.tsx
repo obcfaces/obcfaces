@@ -661,12 +661,21 @@ export function ContestSection({ title, subtitle, description, isActive, showWin
       // Reload participants data when weekInterval changes
       let participantsData: any[] = realContestants;
       
+      console.log(`📊 Checking condition for ${title}:`, {
+        includesWEEK: title.includes("WEEK"),
+        includesAGO: title.includes("AGO"),
+        hasWeekInterval: !!weekInterval,
+        weekInterval
+      });
+      
       if (title.includes("WEEK") && title.includes("AGO") && weekInterval) {
-        console.log(`Reloading participants for ${title} with interval ${weekInterval}`);
+        console.log(`✅ Reloading participants for ${title} with interval ${weekInterval}`);
         participantsData = await loadPastWeekParticipantsByInterval(weekInterval);
-        console.log(`Reloaded ${title} participants:`, participantsData.length);
+        console.log(`✅ Reloaded ${title} participants:`, participantsData.length);
         setRealContestants(participantsData);
         setAdminParticipants(participantsData);
+      } else {
+        console.log(`⚠️ Condition NOT met for ${title} - using existing realContestants`);
       }
       
       // Load user ratings if user is authenticated
