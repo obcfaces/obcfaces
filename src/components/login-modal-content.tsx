@@ -29,6 +29,11 @@ const LoginModalContent = ({ onClose, defaultMode = "login", onAuthSuccess }: Lo
     setAuthError("");
     setForgotEmailSent(false);
     setRegistrationSuccess(false);
+    
+    // Start timing when switching to signup mode
+    if (defaultMode === "signup") {
+      setFormStartTime(Date.now());
+    }
   }, [defaultMode]);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -47,6 +52,7 @@ const LoginModalContent = ({ onClose, defaultMode = "login", onAuthSuccess }: Lo
   const [passwordError, setPasswordError] = useState<string>("");
   const [forgotEmailSent, setForgotEmailSent] = useState(false);
   const [registrationSuccess, setRegistrationSuccess] = useState(false);
+  const [formStartTime, setFormStartTime] = useState<number | null>(null);
   
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -176,6 +182,9 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
         toast({ description: "Login successful" });
         onAuthSuccess?.(); // Call auth success callback
       } else {
+        // Calculate form fill time
+        const formFillTime = formStartTime ? Math.floor((Date.now() - formStartTime) / 1000) : null;
+        
         const redirectUrl = window.location.href; // Confirm email back to current page
         const { data, error } = await supabase.auth.signUp({
           email,
@@ -187,6 +196,7 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
               country: country || null,
               state: stateName || null,
               city: city || null,
+              form_fill_time_seconds: formFillTime
             },
           },
         });
