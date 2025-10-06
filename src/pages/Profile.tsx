@@ -1512,10 +1512,20 @@ const Profile = () => {
                                   variant="outline"
                                   size="sm"
                                   className="mt-3"
-                                  onClick={() => setShowRejectReasonModal(true)}
+                                  onClick={() => {
+                                    // Open edit modal with existing application data
+                                    setEditModalData({
+                                      id: participationItems[0].candidateData.id,
+                                      admin_status: participationItems[0].candidateData.admin_status,
+                                      rejection_reason_types: participationItems[0].candidateData.rejection_reason_types,
+                                      rejection_reason: participationItems[0].candidateData.rejection_reason,
+                                      ...participationItems[0].candidateData.application_data
+                                    });
+                                    setIsEditModalOpen(true);
+                                  }}
                                 >
                                   <Edit className="h-4 w-4 mr-2" />
-                                  Edit Rejection Reason
+                                  Edit Application
                                 </Button>
                               )}
                             </div>
