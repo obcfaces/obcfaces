@@ -120,31 +120,45 @@ const Index = () => {
           <ContestSection
             title="1 WEEK AGO"
             titleSuffix="(Closed)"
-            subtitle={getWeekRange(-1)}
+            subtitle="06 Oct - 12 Oct 2025"
             centerSubtitle
             showWinner={true}
             viewMode={viewMode}
-            weekOffset={1}
+            weekOffset={-1}
+            weekInterval="06/10-12/10/25"
           />
 
           <ContestSection
             title="2 WEEKS AGO"
             titleSuffix="(Closed)"
-            subtitle={getWeekRange(-2)}
+            subtitle="29 Sep - 05 Oct 2025"
             centerSubtitle
             showWinner={true}
             viewMode={viewMode}
-            weekOffset={2}
+            weekOffset={-2}
+            weekInterval="29/09-05/10/25"
           />
 
           <ContestSection
             title="3 WEEKS AGO"
             titleSuffix="(Closed)"
-            subtitle={getWeekRange(-3)}
+            subtitle="22 Sep - 28 Sep 2025"
             centerSubtitle
             showWinner={true}
             viewMode={viewMode}
-            weekOffset={3}
+            weekOffset={-3}
+            weekInterval="22/09-28/09/25"
+          />
+
+          <ContestSection
+            title="4 WEEKS AGO"
+            titleSuffix="(Closed)"
+            subtitle="15 Sep - 21 Sep 2025"
+            centerSubtitle
+            showWinner={true}
+            viewMode={viewMode}
+            weekOffset={-4}
+            weekInterval="15/09-21/09/25"
           />
 
         </>
