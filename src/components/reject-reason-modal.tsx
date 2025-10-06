@@ -156,7 +156,10 @@ export const RejectReasonModal = ({
           </Button>
           <Button 
             variant="destructive" 
-            onClick={handleConfirm} 
+            onClick={() => {
+              console.log('🔵 BUTTON CLICKED! selectedReasons:', selectedReasons, 'notes:', notes);
+              handleConfirm();
+            }} 
             disabled={(selectedReasons.length === 0 && !notes.trim()) || isLoading}
           >
             {isLoading ? "Rejecting..." : "Reject Application"}
