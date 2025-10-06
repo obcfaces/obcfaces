@@ -5984,13 +5984,15 @@ const Admin = () => {
                                       value={participant.admin_status || 'pending'}
                                       onValueChange={(value) => {
                                         // If changing to rejected status, open reject modal
-                                        if (value === 'rejected') {
-                                          setApplicationToReject({
-                                            id: participant.id,
-                                            name: `${appData.first_name} ${appData.last_name}`
-                                          });
-                                          setRejectModalOpen(true);
-                                        } else {
+                                      if (value === 'rejected') {
+                                        console.log('🟠 NEW1 TAB: Opening reject modal for participant:', participant.id, `${appData.first_name} ${appData.last_name}`);
+                                        setApplicationToReject({
+                                          id: participant.id,
+                                          name: `${appData.first_name} ${appData.last_name}`
+                                        });
+                                        setRejectModalOpen(true);
+                                        console.log('🟠 NEW1 TAB: setRejectModalOpen(true) called');
+                                      } else {
                                           const updateStatus = async () => {
                                             const result = await updateParticipantStatusWithHistory(
                                               participant.id,
