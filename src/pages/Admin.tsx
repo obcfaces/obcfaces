@@ -6678,24 +6678,26 @@ const Admin = () => {
                                       if (hasDuplicateFingerprint) reasons.push("Duplicate device fingerprint detected");
                                       
                                       return (
-                                        <Tooltip>
-                                          <TooltipTrigger asChild>
-                                            <Badge variant="outline" className="text-xs rounded-none bg-orange-100 text-orange-700 border-orange-300 cursor-help">
-                                              Maybe
-                                            </Badge>
-                                          </TooltipTrigger>
-                                          <TooltipContent className="max-w-xs">
-                                            <div className="text-sm">
-                                              <div className="font-semibold mb-2 text-orange-700">Suspicious indicators:</div>
-                                              {reasons.map((reason, idx) => (
-                                                <div key={idx} className="text-xs mb-1 flex items-start gap-1">
-                                                  <span className="text-orange-500">•</span>
-                                                  <span>{reason}</span>
-                                                </div>
-                                              ))}
-                                            </div>
-                                          </TooltipContent>
-                                        </Tooltip>
+                                        <TooltipProvider>
+                                          <Tooltip>
+                                            <TooltipTrigger asChild>
+                                              <Badge variant="outline" className="text-xs rounded-none bg-orange-100 text-orange-700 border-orange-300 cursor-help">
+                                                Maybe
+                                              </Badge>
+                                            </TooltipTrigger>
+                                            <TooltipContent className="max-w-xs">
+                                              <div className="text-sm">
+                                                <div className="font-semibold mb-2 text-orange-700">Suspicious indicators:</div>
+                                                {reasons.map((reason, idx) => (
+                                                  <div key={idx} className="text-xs mb-1 flex items-start gap-1">
+                                                    <span className="text-orange-500">•</span>
+                                                    <span>{reason}</span>
+                                                  </div>
+                                                ))}
+                                              </div>
+                                            </TooltipContent>
+                                          </Tooltip>
+                                        </TooltipProvider>
                                       );
                                     }
                                   }
