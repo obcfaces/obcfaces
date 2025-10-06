@@ -110,15 +110,8 @@ export function CompactCardLayout({
     winnerContent.testimonial_text
   );
 
-  // Wrapper for winner cards
-  const CardWrapper = ({ children }: { children: React.ReactNode }) => {
-    if (hasWinnerContent) {
-      return <div className="flex flex-col">{children}</div>;
-    }
-    return <>{children}</>;
-  };
-
-  const mainCard = (
+  // First row content (used for both regular cards and winner cards)
+  const firstRow = (
     <>
       <div className="relative">
         <img 
@@ -369,13 +362,17 @@ export function CompactCardLayout({
     </>
   );
 
-  return (
-    <CardWrapper>
-      {mainCard}
-      {/* Winner Content - shown only for winners in compact mode */}
-      {hasWinnerContent && (
+  // Render for winner cards with two rows
+  if (hasWinnerContent) {
+    return (
+      <div className="flex flex-col">
+        {/* First Row - same as regular card */}
+        <div className="flex h-36 sm:h-40 md:h-44 gap-px relative">
+          {firstRow}
+        </div>
+        
+        {/* Second Row - Winner Content */}
         <div className="border-t">
-          {/* Winner Content Row - same structure as main card */}
           <div className="flex h-36 sm:h-40 md:h-44 gap-px relative">
             {/* Payment proof photo - same width as face photo */}
             <div className="relative w-24 sm:w-28 md:w-32">
@@ -423,7 +420,14 @@ export function CompactCardLayout({
             </div>
           </div>
         </div>
-      )}
-    </CardWrapper>
+      </div>
+    );
+  }
+
+  // Render for regular cards (single row)
+  return (
+    <>
+      {firstRow}
+    </>
   );
 }
