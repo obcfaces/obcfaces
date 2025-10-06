@@ -181,22 +181,21 @@ const Contest = () => {
             weekOffset={0}
           />
           
-          {/* Dynamically generate sections for all past weeks */}
-          {pastWeekIntervals.map((item) => {
+          {/* Dynamically generate sections for all past weeks EXCEPT 15/09-21/09/25 */}
+          {pastWeekIntervals
+            .filter(item => item.interval !== '15/09-21/09/25') // Исключаем 15/09-21/09/25
+            .map((item) => {
             // Add +1 to weeksAgo because THIS WEEK takes the current week slot
             const adjustedWeeksAgo = item.weeksAgo + 1;
             const weekLabel = adjustedWeeksAgo === 1 ? '1 WEEK AGO' : `${adjustedWeeksAgo} WEEKS AGO`;
             
-            console.log(`🔧 Creating section: ${weekLabel}, interval: ${item.interval}, weekOffset: -${adjustedWeeksAgo}`);
-            
-            // Format interval for display: "06/10-12/10/25" -> "06 Oct - 12 Oct 2025"
             const formatInterval = (interval: string): string => {
               try {
                 const parts = interval.split('-');
                 if (parts.length !== 2) return interval;
                 
-                const startParts = parts[0].split('/'); // ["06", "10"]
-                const endParts = parts[1].split('/');   // ["12", "10", "25"]
+                const startParts = parts[0].split('/');
+                const endParts = parts[1].split('/');
                 
                 if (startParts.length !== 2 || endParts.length !== 3) return interval;
                 
@@ -215,12 +214,6 @@ const Contest = () => {
             };
             
             const formattedInterval = formatInterval(item.interval);
-            console.log('📅 Section details:', {
-              title: weekLabel,
-              subtitle: formattedInterval,
-              weekInterval: item.interval,
-              weekOffset: -adjustedWeeksAgo
-            });
             
             return (
               <ContestSection
@@ -236,6 +229,19 @@ const Contest = () => {
               />
             );
           })}
+          
+          {/* HARDCODED 4 WEEKS AGO SECTION - 15/09-21/09/25 - ВСЕГДА ПОКАЗЫВАЕТСЯ */}
+          <ContestSection
+            key="hardcoded-4-weeks-ago"
+            title="4 WEEKS AGO"
+            subtitle="15 Sep - 21 Sep 2025"
+            description="See the winners from 4 weeks ago"
+            isActive={false}
+            showWinner={true}
+            viewMode={viewMode}
+            weekOffset={-4}
+            weekInterval="15/09-21/09/25"
+          />
           
           {/* HARDCODED 4 WEEKS AGO SECTION - 15/09-21/09/25 */}
           <ContestSection
