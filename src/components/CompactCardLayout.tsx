@@ -111,8 +111,10 @@ export function CompactCardLayout({
   );
 
   return (
-    <>
-      <div className="relative">
+    <div className="flex flex-col">
+      {/* First Row - Main Card */}
+      <div className="flex h-36 sm:h-40 md:h-44 gap-px relative">
+        <div className="relative">
         <img 
           src={faceImage} 
           alt={`${name} face`}
@@ -356,13 +358,14 @@ export function CompactCardLayout({
                  </button>
               </div>
             )}
-          </div>
-        )}
+           </div>
+         )}
+       </div>
       </div>
       
-      {/* Winner Content Row - Second Row for Winners */}
+      {/* Second Row - Winner Content */}
       {hasWinnerContent && (
-        <div className="col-span-3 border-t">
+        <div className="border-t">
           {/* Winner Content Header */}
           <div className="px-4 py-2 bg-gray-50 border-b">
             <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
@@ -420,6 +423,6 @@ export function CompactCardLayout({
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 }
