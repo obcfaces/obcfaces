@@ -49,11 +49,12 @@ serve(async (req) => {
       throw thisWeekError
     }
 
+    console.log(`Found ${thisWeekParticipants?.length || 0} participants in "this week"`)
+
     for (const participant of thisWeekParticipants || []) {
       // Сохраняем интервал, который был записан когда карточка была "this week"
       const pastInterval = participant.week_interval
 
-      // Parse existing status_history
       let statusHistory: any = {}
       try {
         statusHistory = typeof participant.status_history === 'string' 
@@ -64,11 +65,11 @@ serve(async (req) => {
         statusHistory = {}
       }
 
-      // Add automatic transition to history
+      // Add automatic transition to history WITH week_interval
       statusHistory['past'] = {
         changed_at: new Date().toISOString(),
         changed_by: null,
-        change_reason: 'Automatic weekly transition (weekly-status-transition function)',
+        change_reason: 'Automatic weekly transition',
         week_interval: pastInterval,
         timestamp: new Date().toISOString()
       }
@@ -77,7 +78,7 @@ serve(async (req) => {
         .from('weekly_contest_participants')
         .update({
           admin_status: 'past',
-          week_interval: pastInterval, // Keep the same interval
+          week_interval: pastInterval,
           status_history: statusHistory
         })
         .eq('id', participant.id)
@@ -86,14 +87,14 @@ serve(async (req) => {
         console.error(`Error updating participant ${participant.id}:`, updateError)
       } else {
         transitions.thisWeekToPast++
-        console.log(`Moved participant ${participant.id} from "this week" to "past" with interval ${pastInterval}`)
+        console.log(`✅ Moved participant ${participant.id}: "this week" → "past" (${pastInterval})`)
       }
     }
 
-    // 2. Переводим "next week on site" → "this week" с новым интервалом текущей недели
+    // 2. Переводим "next week on site" → "this week" с новым интервалом
     const { data: nextWeekOnSiteParticipants, error: nextWeekOnSiteError } = await supabase
       .from('weekly_contest_participants')
-      .select('id, status_history')
+      .select('id, week_interval, status_history')
       .eq('admin_status', 'next week on site')
       .eq('is_active', true)
 
@@ -102,8 +103,9 @@ serve(async (req) => {
       throw nextWeekOnSiteError
     }
 
+    console.log(`Found ${nextWeekOnSiteParticipants?.length || 0} participants in "next week on site"`)
+
     for (const participant of nextWeekOnSiteParticipants || []) {
-      // Parse existing status_history
       let statusHistory: any = {}
       try {
         statusHistory = typeof participant.status_history === 'string' 
@@ -114,11 +116,11 @@ serve(async (req) => {
         statusHistory = {}
       }
 
-      // Add automatic transition to history
+      // Add automatic transition to history WITH week_interval
       statusHistory['this week'] = {
         changed_at: new Date().toISOString(),
         changed_by: null,
-        change_reason: 'Automatic weekly transition (weekly-status-transition function)',
+        change_reason: 'Automatic weekly transition',
         week_interval: weekInterval,
         timestamp: new Date().toISOString()
       }
@@ -127,7 +129,7 @@ serve(async (req) => {
         .from('weekly_contest_participants')
         .update({
           admin_status: 'this week',
-          week_interval: weekInterval, // New current week interval
+          week_interval: weekInterval,
           status_history: statusHistory
         })
         .eq('id', participant.id)
@@ -136,7 +138,58 @@ serve(async (req) => {
         console.error(`Error updating participant ${participant.id}:`, updateError)
       } else {
         transitions.nextWeekOnSiteToThisWeek++
-        console.log(`Moved participant ${participant.id} from "next week on site" to "this week" with interval ${weekInterval}`)
+        console.log(`✅ Moved participant ${participant.id}: "next week on site" → "this week" (${weekInterval})`)
+      }
+    }
+
+    // 3. Переводим "next week" → "next week on site" с ТЕКУЩИМ интервалом
+    const { data: nextWeekParticipants, error: nextWeekError } = await supabase
+      .from('weekly_contest_participants')
+      .select('id, week_interval, status_history')
+      .eq('admin_status', 'next week')
+      .eq('is_active', true)
+
+    if (nextWeekError) {
+      console.error('Error fetching next week participants:', nextWeekError)
+      throw nextWeekError
+    }
+
+    console.log(`Found ${nextWeekParticipants?.length || 0} participants in "next week"`)
+
+    for (const participant of nextWeekParticipants || []) {
+      let statusHistory: any = {}
+      try {
+        statusHistory = typeof participant.status_history === 'string' 
+          ? JSON.parse(participant.status_history) 
+          : (participant.status_history || {})
+      } catch (e) {
+        console.error('Error parsing status_history:', e)
+        statusHistory = {}
+      }
+
+      // Add automatic transition to history WITH week_interval
+      statusHistory['next week on site'] = {
+        changed_at: new Date().toISOString(),
+        changed_by: null,
+        change_reason: 'Automatic weekly transition',
+        week_interval: weekInterval,
+        timestamp: new Date().toISOString()
+      }
+
+      const { error: updateError } = await supabase
+        .from('weekly_contest_participants')
+        .update({
+          admin_status: 'next week on site',
+          week_interval: weekInterval,
+          status_history: statusHistory
+        })
+        .eq('id', participant.id)
+
+      if (updateError) {
+        console.error(`Error updating participant ${participant.id}:`, updateError)
+      } else {
+        transitions.nextWeekToNextWeekOnSite++
+        console.log(`✅ Moved participant ${participant.id}: "next week" → "next week on site" (${weekInterval})`)
       }
     }
 
@@ -243,9 +296,10 @@ serve(async (req) => {
     const summary = {
       success: true,
       weekInterval,
+      nextWeekInterval,
       transitions,
       message: `Weekly transition completed for week ${weekInterval}`,
-      totalTransitions: transitions.thisWeekToPast + transitions.nextWeekOnSiteToThisWeek + transitions.preNextWeekToNextWeek
+      totalTransitions: transitions.thisWeekToPast + transitions.nextWeekOnSiteToThisWeek + transitions.nextWeekToNextWeekOnSite + transitions.preNextWeekToNextWeek
     }
 
     console.log('Weekly transition summary:', summary)
