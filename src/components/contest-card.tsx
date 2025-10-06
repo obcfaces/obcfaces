@@ -845,6 +845,7 @@ export function ContestantCard({
                 dislikesCount={dislikesCount}
                 showDislike={showDislike}
                 propUser={propUser}
+                winnerContent={winnerContent}
                 openModal={openModal}
                 handleLike={handleLike}
                 handleComment={markAsCommented}
