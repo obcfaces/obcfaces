@@ -409,7 +409,7 @@ export function CompactCardLayout({
             {/* Testimonial text - takes remaining space like content area with scroll */}
             <div className="flex-1 p-1 sm:p-2 md:p-3 bg-white overflow-auto">
               {winnerContent.testimonial_text ? (
-                <div className="text-sm italic text-gray-700">
+                <div className="text-xs italic text-gray-700 text-justify">
                   {winnerContent.testimonial_text}
                 </div>
               ) : (
