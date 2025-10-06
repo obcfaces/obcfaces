@@ -492,9 +492,13 @@ export function ContestantCard({
   };
 
   const allPhotos = isWinner && winnerContent
-    ? [faceImage, fullBodyImage, ...additionalPhotos, 
-       resolveAsset(winnerContent.payment_proof_url), 
-       resolveAsset(winnerContent.testimonial_video_url)]
+    ? [
+        faceImage, 
+        fullBodyImage, 
+        ...additionalPhotos, 
+        ...(winnerContent.payment_proof_url ? [resolveAsset(winnerContent.payment_proof_url)] : []),
+        ...(winnerContent.testimonial_video_url ? [resolveAsset(winnerContent.testimonial_video_url)] : [])
+      ]
     : [faceImage, fullBodyImage, ...additionalPhotos];
 
   const openModal = (photoIndex: number) => {
