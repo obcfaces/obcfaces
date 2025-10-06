@@ -127,10 +127,8 @@ const Contest = () => {
           })
           .filter(item => {
             if (item === null) return false;
-            if (item.weeksAgo <= 0) {
-              console.log(`⚠️ Filtering out interval ${item.interval} - weeksAgo=${item.weeksAgo} (not in the past)`);
-              return false;
-            }
+            // Show all intervals with past status, regardless of weeksAgo calculation
+            // This handles cases where admin manually sets intervals for past weeks
             console.log(`✓ Keeping interval ${item.interval} - weeksAgo=${item.weeksAgo}`);
             return true;
           })
