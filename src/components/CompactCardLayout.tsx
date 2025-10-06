@@ -366,14 +366,6 @@ export function CompactCardLayout({
       {/* Second Row - Winner Content */}
       {hasWinnerContent && (
         <div className="border-t">
-          {/* Winner Content Header */}
-          <div className="px-4 py-2 bg-gray-50 border-b">
-            <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
-              <Eye className="w-4 h-4" />
-              <span>Контент победительницы</span>
-            </div>
-          </div>
-          
           {/* Winner Content Row */}
           <div className="flex">
             {/* Payment proof photo - same width as face photo */}
