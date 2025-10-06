@@ -221,7 +221,7 @@ export const ContestSuccessModal = ({
 
           <div className="text-center">
             <Button onClick={handleInviteFriends} className="w-full">
-              🔥 Invite Friends
+              I get it
             </Button>
           </div>
         </div>
