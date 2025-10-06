@@ -246,6 +246,19 @@ const Contest = () => {
             weekOffset={-4}
             weekInterval="15/09-21/09/25"
           />
+          
+          {/* HARDCODED 4 WEEKS AGO SECTION - 15/09-21/09/25 */}
+          <ContestSection
+            key="15/09-21/09/25"
+            title="4 WEEKS AGO"
+            subtitle="15 Sep - 21 Sep 2025"
+            description="See the winners from 4 weeks ago"
+            isActive={false}
+            showWinner={true}
+            viewMode={viewMode}
+            weekOffset={-4}
+            weekInterval="15/09-21/09/25"
+          />
         </div>
       </main>
     </>
