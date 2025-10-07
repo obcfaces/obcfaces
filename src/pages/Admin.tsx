@@ -1901,20 +1901,23 @@ const Admin = () => {
     
     if (regStatusFilter === '2+weeks' && profiles.length > 0 && activeTab === 'registrations') {
       console.log('🔄 2+ Weeks filter activated, fetching activity for all users...');
-      let fetchedCount = 0;
-      let skippedCount = 0;
+      setIsLoadingWeeksFilter(true);
       
-      profiles.forEach(profile => {
-        if (!loadingActivity.has(profile.id) && !userActivityStats[profile.id]) {
+      const fetchPromises = profiles
+        .filter(profile => !loadingActivity.has(profile.id) && !userActivityStats[profile.id])
+        .map(profile => {
           console.log(`📊 Fetching activity for user: ${profile.id}`);
-          fetchUserActivity(profile.id);
-          fetchedCount++;
-        } else {
-          skippedCount++;
-        }
-      });
+          return fetchUserActivity(profile.id);
+        });
       
-      console.log(`✅ Fetched: ${fetchedCount}, Skipped: ${skippedCount}, Total: ${profiles.length}`);
+      console.log(`🔄 Starting ${fetchPromises.length} fetches...`);
+      
+      Promise.all(fetchPromises).finally(() => {
+        console.log(`✅ All activity data loaded for 2+ weeks filter`);
+        setIsLoadingWeeksFilter(false);
+      });
+    } else {
+      setIsLoadingWeeksFilter(false);
     }
   }, [regStatusFilter, profiles.length, activeTab]);
 
