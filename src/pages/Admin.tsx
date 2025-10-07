@@ -6612,6 +6612,7 @@ const Admin = () => {
                     const filteredProfiles = profiles.filter(profile => {
                       // Фильтр "2+ Weeks" - users who voted in 2 or more different weeks
                       // ВАЖНО: Применяется ПЕРВЫМ, чтобы работать независимо от других фильтров
+                      // ИСПОЛЬЗУЕМ ДАТУ ГОЛОСОВАНИЯ для определения недели, т.к. week_interval в БД обновляется!
                       if (regStatusFilter === '2+weeks') {
                         const userActivity = userActivityStats[profile.id];
                         
@@ -6625,37 +6626,58 @@ const Admin = () => {
                           totalRatings: userActivity.ratings.length
                         });
                         
-                        // Collect all unique week_intervals from ratings (regardless of participant's current status)
+                        // Определяем неделю по ДАТЕ голосования (created_at), а не по week_interval
+                        // week_interval в БД обновляется, когда участник переходит на следующую неделю
                         const weekIntervalsSet = new Set<string>();
                         
                         userActivity.ratings.forEach((rating: any) => {
+                          const votedDate = new Date(rating.created_at);
+                          
+                          // Определяем неделю голосования по дате
+                          // Формат: DD/MM-DD/MM/YY
+                          const getWeekInterval = (date: Date) => {
+                            // Получаем день недели (0 = Sunday, 6 = Saturday)
+                            const dayOfWeek = date.getDay();
+                            // Вычисляем понедельник этой недели
+                            const monday = new Date(date);
+                            monday.setDate(date.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
+                            monday.setHours(0, 0, 0, 0);
+                            
+                            // Вычисляем воскресенье этой недели
+                            const sunday = new Date(monday);
+                            sunday.setDate(monday.getDate() + 6);
+                            
+                            // Форматируем в DD/MM-DD/MM/YY
+                            const formatDate = (d: Date) => {
+                              const day = String(d.getDate()).padStart(2, '0');
+                              const month = String(d.getMonth() + 1).padStart(2, '0');
+                              return `${day}/${month}`;
+                            };
+                            
+                            const year = String(monday.getFullYear()).slice(-2);
+                            return `${formatDate(monday)}-${formatDate(sunday)}/${year}`;
+                          };
+                          
+                          const weekInterval = getWeekInterval(votedDate);
+                          weekIntervalsSet.add(weekInterval);
+                          
                           console.log(`  📌 Rating:`, {
                             contestant: rating.contestant_name,
-                            participantId: rating.participant_id,
-                            weekInterval: rating.week_interval,
-                            adminStatus: rating.admin_status,
-                            votedAt: rating.created_at
+                            votedAt: rating.created_at,
+                            calculatedWeek: weekInterval
                           });
-                          
-                          // Include ALL ratings that have a week_interval (не фильтруем по статусу)
-                          if (rating.week_interval) {
-                            weekIntervalsSet.add(rating.week_interval);
-                            console.log(`     ✅ Added interval: ${rating.week_interval} (status: ${rating.admin_status}) - total unique: ${weekIntervalsSet.size}`);
-                          } else {
-                            console.log(`     ⚠️ No week_interval for this rating`);
-                          }
                         });
                         
                         const uniqueIntervals = Array.from(weekIntervalsSet);
-                        console.log(`📊 User ${profile.display_name || profile.email?.split('@')[0]} (${profile.email}): Found ${uniqueIntervals.length} unique intervals:`, uniqueIntervals);
+                        console.log(`📊 User ${profile.display_name || profile.email?.split('@')[0]} (${profile.email}): Found ${uniqueIntervals.length} unique weeks:`, uniqueIntervals);
                         
                         // Show only users who voted in 2 or more different weeks
                         if (uniqueIntervals.length < 2) {
-                          console.log(`❌ User ${profile.display_name || profile.email?.split('@')[0]} (${profile.email}) filtered out: only ${uniqueIntervals.length} interval(s)`);
+                          console.log(`❌ User ${profile.display_name || profile.email?.split('@')[0]} (${profile.email}) filtered out: only ${uniqueIntervals.length} week(s)`);
                           return false;
                         }
                         
-                        console.log(`✅ User ${profile.display_name || profile.email?.split('@')[0]} (${profile.email}) PASSED: ${uniqueIntervals.length} different intervals`);
+                        console.log(`✅ User ${profile.display_name || profile.email?.split('@')[0]} (${profile.email}) PASSED: ${uniqueIntervals.length} different weeks`);
                         
                         // Если фильтр "2+ Weeks" активен, остальные фильтры НЕ применяются
                         return true;
