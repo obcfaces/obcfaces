@@ -484,6 +484,18 @@ const Admin = () => {
   const regItemsPerPage = 20;
   const fetchedStatsRef = useRef<Set<string>>(new Set());
   const [expandedMaybeFingerprints, setExpandedMaybeFingerprints] = useState<Set<string>>(new Set());
+  
+  // Multi-approach states for 2+ weeks filter
+  const [multiApproachFilter, setMultiApproachFilter] = useState<string | null>(null);
+  const [approachResults, setApproachResults] = useState<{
+    approach1?: ProfileData[];
+    approach2?: ProfileData[];
+    approach3?: ProfileData[];
+    approach4?: ProfileData[];
+    approach5?: ProfileData[];
+  }>({});
+  const [loadingApproach, setLoadingApproach] = useState<string | null>(null);
+  
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -1790,6 +1802,148 @@ const Admin = () => {
       console.log('✅ Voting stats loaded:', Object.keys(statsMap).length, 'users');
     } catch (error) {
       console.error('Error fetching user voting stats:', error);
+    }
+  };
+
+  // APPROACH 1: Client-side filter using userVotingStats (current approach)
+  const fetchApproach1 = async () => {
+    console.log('🔵 APPROACH 1: Client-side filter with userVotingStats');
+    setLoadingApproach('approach1');
+    
+    const result = profiles.filter(profile => {
+      const votingStats = userVotingStats[profile.id];
+      if (!votingStats) return false;
+      return (votingStats.unique_weeks_count || 0) >= 2;
+    });
+    
+    console.log('✅ Approach 1 result:', result.length, 'users');
+    setApproachResults(prev => ({ ...prev, approach1: result }));
+    setLoadingApproach(null);
+    setMultiApproachFilter('approach1');
+  };
+
+  // APPROACH 2: Direct database query with JOIN
+  const fetchApproach2 = async () => {
+    console.log('🟢 APPROACH 2: Direct DB query with JOIN');
+    setLoadingApproach('approach2');
+    
+    try {
+      // Query profiles that have 2+ unique week intervals in user_voting_stats
+      const { data: votingData, error } = await supabase
+        .from('user_voting_stats')
+        .select('user_id, unique_weeks_count, voting_week_intervals')
+        .gte('unique_weeks_count', 2);
+      
+      if (error) throw error;
+      
+      // Get user IDs with 2+ weeks
+      const userIds = (votingData || []).map(v => v.user_id);
+      
+      // Filter profiles to only those user IDs
+      const result = profiles.filter(p => userIds.includes(p.id));
+      
+      console.log('✅ Approach 2 result:', result.length, 'users');
+      setApproachResults(prev => ({ ...prev, approach2: result }));
+      setLoadingApproach(null);
+      setMultiApproachFilter('approach2');
+    } catch (error) {
+      console.error('❌ Approach 2 error:', error);
+      setLoadingApproach(null);
+    }
+  };
+
+  // APPROACH 3: Count distinct week_intervals from contestant_ratings
+  const fetchApproach3 = async () => {
+    console.log('🟡 APPROACH 3: Count from contestant_ratings table');
+    setLoadingApproach('approach3');
+    
+    try {
+      // Get all ratings with week_interval
+      const { data: ratingsData, error } = await supabase
+        .from('contestant_ratings')
+        .select('user_id, week_interval');
+      
+      if (error) throw error;
+      
+      // Group by user_id and count unique week_intervals
+      const userWeekCounts: Record<string, Set<string>> = {};
+      (ratingsData || []).forEach(rating => {
+        if (!rating.user_id || !rating.week_interval) return;
+        if (!userWeekCounts[rating.user_id]) {
+          userWeekCounts[rating.user_id] = new Set();
+        }
+        userWeekCounts[rating.user_id].add(rating.week_interval);
+      });
+      
+      // Filter to users with 2+ unique weeks
+      const userIds = Object.keys(userWeekCounts).filter(
+        userId => userWeekCounts[userId].size >= 2
+      );
+      
+      const result = profiles.filter(p => userIds.includes(p.id));
+      
+      console.log('✅ Approach 3 result:', result.length, 'users');
+      setApproachResults(prev => ({ ...prev, approach3: result }));
+      setLoadingApproach(null);
+      setMultiApproachFilter('approach3');
+    } catch (error) {
+      console.error('❌ Approach 3 error:', error);
+      setLoadingApproach(null);
+    }
+  };
+
+  // APPROACH 4: Show detailed voting intervals for each user
+  const fetchApproach4 = async () => {
+    console.log('🟣 APPROACH 4: Display voting_week_intervals array');
+    setLoadingApproach('approach4');
+    
+    const result = profiles.filter(profile => {
+      const votingStats = userVotingStats[profile.id];
+      if (!votingStats) return false;
+      const intervals = votingStats.voting_week_intervals || [];
+      return intervals.length >= 2;
+    });
+    
+    console.log('✅ Approach 4 result:', result.length, 'users');
+    setApproachResults(prev => ({ ...prev, approach4: result }));
+    setLoadingApproach(null);
+    setMultiApproachFilter('approach4');
+  };
+
+  // APPROACH 5: Aggregated approach - group by user and show stats
+  const fetchApproach5 = async () => {
+    console.log('🔴 APPROACH 5: Aggregated stats approach');
+    setLoadingApproach('approach5');
+    
+    try {
+      // Get all user_voting_stats with 2+ weeks
+      const { data, error } = await supabase
+        .from('user_voting_stats')
+        .select('*')
+        .gte('unique_weeks_count', 2)
+        .order('unique_weeks_count', { ascending: false });
+      
+      if (error) throw error;
+      
+      // Create enriched profiles with voting stats
+      const userIdsWithStats = (data || []).map(d => d.user_id);
+      const result = profiles
+        .filter(p => userIdsWithStats.includes(p.id))
+        .map(p => {
+          const stats = data?.find(d => d.user_id === p.id);
+          return {
+            ...p,
+            votingStatsEnriched: stats
+          };
+        });
+      
+      console.log('✅ Approach 5 result:', result.length, 'users');
+      setApproachResults(prev => ({ ...prev, approach5: result }));
+      setLoadingApproach(null);
+      setMultiApproachFilter('approach5');
+    } catch (error) {
+      console.error('❌ Approach 5 error:', error);
+      setLoadingApproach(null);
     }
   };
 
@@ -6664,6 +6818,7 @@ const Admin = () => {
                               setRoleFilter('all');
                               setSelectedRegistrationDay(null);
                               setSearchQuery('');
+                              setMultiApproachFilter(null);
                             }
                           }}
                           className="gap-2"
@@ -6677,6 +6832,84 @@ const Admin = () => {
                             return count > 0 ? ` (${count})` : '';
                           })()}
                         </Button>
+                      </div>
+
+                      {/* Multi-Approach 2+ Weeks Buttons */}
+                      <div className="mt-4 p-4 border rounded-lg bg-muted/30">
+                        <h3 className="text-sm font-semibold mb-3 text-muted-foreground">2+ Weeks - Different Approaches</h3>
+                        <div className="flex flex-wrap gap-2">
+                          <Button
+                            variant={multiApproachFilter === 'approach1' ? 'default' : 'outline'}
+                            size="sm"
+                            onClick={fetchApproach1}
+                            disabled={loadingApproach !== null}
+                            className="gap-2"
+                          >
+                            {loadingApproach === 'approach1' ? '⏳' : '🔵'} A1: Client Filter
+                            {approachResults.approach1 && ` (${approachResults.approach1.length})`}
+                          </Button>
+
+                          <Button
+                            variant={multiApproachFilter === 'approach2' ? 'default' : 'outline'}
+                            size="sm"
+                            onClick={fetchApproach2}
+                            disabled={loadingApproach !== null}
+                            className="gap-2"
+                          >
+                            {loadingApproach === 'approach2' ? '⏳' : '🟢'} A2: DB Join
+                            {approachResults.approach2 && ` (${approachResults.approach2.length})`}
+                          </Button>
+
+                          <Button
+                            variant={multiApproachFilter === 'approach3' ? 'default' : 'outline'}
+                            size="sm"
+                            onClick={fetchApproach3}
+                            disabled={loadingApproach !== null}
+                            className="gap-2"
+                          >
+                            {loadingApproach === 'approach3' ? '⏳' : '🟡'} A3: Count Ratings
+                            {approachResults.approach3 && ` (${approachResults.approach3.length})`}
+                          </Button>
+
+                          <Button
+                            variant={multiApproachFilter === 'approach4' ? 'default' : 'outline'}
+                            size="sm"
+                            onClick={fetchApproach4}
+                            disabled={loadingApproach !== null}
+                            className="gap-2"
+                          >
+                            {loadingApproach === 'approach4' ? '⏳' : '🟣'} A4: Intervals Array
+                            {approachResults.approach4 && ` (${approachResults.approach4.length})`}
+                          </Button>
+
+                          <Button
+                            variant={multiApproachFilter === 'approach5' ? 'default' : 'outline'}
+                            size="sm"
+                            onClick={fetchApproach5}
+                            disabled={loadingApproach !== null}
+                            className="gap-2"
+                          >
+                            {loadingApproach === 'approach5' ? '⏳' : '🔴'} A5: Aggregated
+                            {approachResults.approach5 && ` (${approachResults.approach5.length})`}
+                          </Button>
+
+                          {multiApproachFilter && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => {
+                                setMultiApproachFilter(null);
+                                setApproachResults({});
+                              }}
+                              className="gap-2"
+                            >
+                              ❌ Clear
+                            </Button>
+                          )}
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-2">
+                          Каждая кнопка использует свой подход для вывода пользователей с 2+ интервалами голосований
+                        </p>
                       </div>
                     </div>
 
@@ -6693,7 +6926,33 @@ const Admin = () => {
                     });
                     
                     const filteredProfiles = (() => {
-                      console.log('🚀 STARTING FILTER - regStatusFilter:', regStatusFilter, 'profiles:', profiles.length);
+                      console.log('🚀 STARTING FILTER - regStatusFilter:', regStatusFilter, 'multiApproachFilter:', multiApproachFilter, 'profiles:', profiles.length);
+                      
+                      // Multi-approach filter takes precedence
+                      if (multiApproachFilter && approachResults[multiApproachFilter as keyof typeof approachResults]) {
+                        console.log(`✅ Using ${multiApproachFilter} results:`, approachResults[multiApproachFilter as keyof typeof approachResults]!.length);
+                        const result = approachResults[multiApproachFilter as keyof typeof approachResults]!;
+                        
+                        // Apply search filter if present
+                        if (searchQuery.trim()) {
+                          return result.filter(profile => {
+                            const query = searchQuery.toLowerCase();
+                            const fullName = `${profile.first_name || ''} ${profile.last_name || ''}`.toLowerCase();
+                            const displayName = (profile.display_name || '').toLowerCase();
+                            const email = ((profile as any).email || '').toLowerCase();
+                            const ip = ((profile as any).ip_address || '').toLowerCase();
+                            const fingerprintId = ((profile as any).fingerprint_id || '').toLowerCase();
+                            
+                            return fullName.includes(query) || 
+                                   displayName.includes(query) ||
+                                   email.includes(query) ||
+                                   ip.includes(query) ||
+                                   fingerprintId.includes(query);
+                          });
+                        }
+                        
+                        return result;
+                      }
                       
                       // Фильтр "2+ Weeks" (2 w) - EXCLUSIVE filter
                       if (regStatusFilter === '2+weeks') {
