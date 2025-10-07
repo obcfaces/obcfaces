@@ -161,6 +161,7 @@ export type Database = {
           rating: number
           updated_at: string
           user_id: string
+          week_interval: string | null
         }
         Insert: {
           contestant_name: string
@@ -170,6 +171,7 @@ export type Database = {
           rating: number
           updated_at?: string
           user_id: string
+          week_interval?: string | null
         }
         Update: {
           contestant_name?: string
@@ -179,6 +181,7 @@ export type Database = {
           rating?: number
           updated_at?: string
           user_id?: string
+          week_interval?: string | null
         }
         Relationships: [
           {
