@@ -6672,30 +6672,32 @@ const Admin = () => {
                         const userWeeks = new Set();
                         const userActivity = userActivityStats[profile.id];
                         
-                        console.log(`🔍 Checking user ${profile.display_name} (${profile.id}):`, {
+                        console.log(`🔍 Checking user ${profile.display_name || profile.email?.split('@')[0]} (${profile.id}):`, {
                           hasActivity: !!userActivity,
                           hasRatings: !!userActivity?.ratings,
-                          ratingsCount: userActivity?.ratings?.length || 0
+                          ratingsCount: userActivity?.ratings?.length || 0,
+                          registrationDate: profile.created_at
                         });
                         
                         // Only count ratings, not likes
                         if (userActivity?.ratings) {
-                          userActivity.ratings.forEach((rating: any) => {
+                          console.log(`📋 All ratings for ${profile.display_name || profile.email?.split('@')[0]}:`);
+                          userActivity.ratings.forEach((rating: any, idx: number) => {
+                            console.log(`  ${idx + 1}. Participant: ${rating.participant?.display_name || 'Unknown'}, Week: ${rating.week_interval || 'NO WEEK'}, Created: ${rating.created_at}`);
                             if (rating.week_interval) {
                               userWeeks.add(rating.week_interval);
-                              console.log(`  ➕ Added week: ${rating.week_interval}`);
                             }
                           });
                         }
                         
                         const weeksList = Array.from(userWeeks);
-                        console.log(`📊 User ${profile.display_name}: ${userWeeks.size} unique weeks:`, weeksList);
+                        console.log(`📊 User ${profile.display_name || profile.email?.split('@')[0]}: ${userWeeks.size} unique weeks:`, weeksList);
                         
                         if (userWeeks.size < 2) {
-                          console.log(`❌ User ${profile.display_name} filtered out: only ${userWeeks.size} week(s)`);
+                          console.log(`❌ User ${profile.display_name || profile.email?.split('@')[0]} filtered out: only ${userWeeks.size} week(s)`);
                           return false;
                         }
-                        console.log(`✅ User ${profile.display_name} passed filter with ${userWeeks.size} weeks`);
+                        console.log(`✅ User ${profile.display_name || profile.email?.split('@')[0]} passed filter with ${userWeeks.size} weeks`);
                       }
 
                       // Фильтр поиска
