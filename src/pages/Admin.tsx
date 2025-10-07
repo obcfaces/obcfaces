@@ -6430,6 +6430,32 @@ const Admin = () => {
                             return count > 0 ? ` (${count})` : '';
                           })()}
                         </Button>
+                        <Button
+                          variant={regStatusFilter === '2+weeks' ? 'default' : 'outline'}
+                          size="sm"
+                          onClick={() => setRegStatusFilter(regStatusFilter === '2+weeks' ? 'all' : '2+weeks')}
+                        >
+                          2+ Weeks
+                          {(() => {
+                            const count = profiles.filter(p => {
+                              const userWeeks = new Set();
+                              // Count weeks where user voted or liked
+                              const userActivity = userActivityData[p.id];
+                              if (userActivity?.ratings) {
+                                userActivity.ratings.forEach((rating: any) => {
+                                  if (rating.week_interval) userWeeks.add(rating.week_interval);
+                                });
+                              }
+                              if (userActivity?.likes) {
+                                userActivity.likes.forEach((like: any) => {
+                                  if (like.week_interval) userWeeks.add(like.week_interval);
+                                });
+                              }
+                              return userWeeks.size >= 2;
+                            }).length;
+                            return count > 0 ? ` (${count})` : '';
+                          })()}
+                        </Button>
                       </div>
                     </div>
 
@@ -6527,6 +6553,23 @@ const Admin = () => {
                           const isSuspicious = profileRoles.some(ur => ur.role === 'suspicious');
                           if (!isSuspicious) return false;
                         }
+                      }
+
+                      // Фильтр "2+ Weeks" - users who voted/liked in 2+ different weeks
+                      if (regStatusFilter === '2+weeks') {
+                        const userWeeks = new Set();
+                        const userActivity = userActivityData[profile.id];
+                        if (userActivity?.ratings) {
+                          userActivity.ratings.forEach((rating: any) => {
+                            if (rating.week_interval) userWeeks.add(rating.week_interval);
+                          });
+                        }
+                        if (userActivity?.likes) {
+                          userActivity.likes.forEach((like: any) => {
+                            if (like.week_interval) userWeeks.add(like.week_interval);
+                          });
+                        }
+                        if (userWeeks.size < 2) return false;
                       }
 
                       // Фильтр поиска
@@ -6794,87 +6837,85 @@ const Admin = () => {
                               </div>
                           
                               <div className="flex items-center justify-between mt-6">
-                                <div className="flex items-center gap-3">
-                                  <Avatar>
-                                    <AvatarImage src={profile.avatar_url || ''} />
-                                    <AvatarFallback>
-                                      {profile.display_name?.charAt(0) || profile.first_name?.charAt(0) || 'U'}
-                                    </AvatarFallback>
-                                  </Avatar>
-                                  <div>
-                                    <div className="flex items-center gap-2">
-                                      <span className="font-medium">
-                                        {profile.display_name || `${profile.first_name} ${profile.last_name}`}
-                                      </span>
-                                    </div>
-                                    {profile.ip_address && (() => {
-                                      const ipUserCount = paginatedProfiles.filter(p => p.ip_address === profile.ip_address).length;
-                                      let ipColor = 'text-muted-foreground';
-                                      if (ipUserCount >= 10) {
-                                        ipColor = 'text-red-500 font-medium';
-                                      } else if (ipUserCount >= 2 && ipUserCount <= 5) {
-                                        ipColor = 'text-blue-500 font-medium';
-                                      }
-                                      
-                                      return (
-                                        <div className={`text-xs ${ipColor}`}>
-                                          IP: <button
-                                            onClick={() => {
-                                              const newExpanded = new Set(expandedIPs);
-                                              if (expandedIPs.has(profile.ip_address)) {
-                                                newExpanded.delete(profile.ip_address);
-                                              } else {
-                                                newExpanded.add(profile.ip_address);
-                                              }
-                                              setExpandedIPs(newExpanded);
-                                            }}
-                                            className="hover:underline cursor-pointer"
-                                          >
-                                            {profile.ip_address}
-                                            {ipUserCount > 1 && ` (${ipUserCount})`}
-                                          </button>
-                                          {(profile.country || profile.city) && (
-                                            <span className="text-muted-foreground font-normal ml-1">
-                                              📍 {profile.city ? `${profile.city}, ` : ''}{profile.country || 'Unknown Country'}
-                                            </span>
-                                          )}
-                                        </div>
-                                      );
-                                    })()}
-                                    {profile.user_agent && (() => {
-                                      const { browser, device, os } = UAParser(profile.user_agent);
-                                      
-                                      return (
-                                        <div className="text-xs text-muted-foreground">
-                                          {device.type || 'Desktop'} | {os.name || 'Unknown OS'} {os.version || ''} | {browser.name || 'Unknown'}
-                                        </div>
-                                      );
-                                    })()}
-                                    {profile.email && (
-                                      <div className="text-xs text-muted-foreground flex items-center gap-1">
-                                        <span>{profile.email}</span>
-                                        <Copy 
-                                          className="h-3 w-3 cursor-pointer hover:text-foreground" 
+                                <div className="w-full">
+                                  <div className="flex items-center gap-2 mb-1">
+                                    <Avatar className="h-6 w-6 flex-shrink-0">
+                                      <AvatarImage src={profile.avatar_url || ''} />
+                                      <AvatarFallback className="text-xs">
+                                        {profile.display_name?.charAt(0) || profile.first_name?.charAt(0) || 'U'}
+                                      </AvatarFallback>
+                                    </Avatar>
+                                    <span className="font-medium">
+                                      {profile.display_name || `${profile.first_name} ${profile.last_name}`}
+                                    </span>
+                                  </div>
+                                  {profile.ip_address && (() => {
+                                    const ipUserCount = paginatedProfiles.filter(p => p.ip_address === profile.ip_address).length;
+                                    let ipColor = 'text-muted-foreground';
+                                    if (ipUserCount >= 10) {
+                                      ipColor = 'text-red-500 font-medium';
+                                    } else if (ipUserCount >= 2 && ipUserCount <= 5) {
+                                      ipColor = 'text-blue-500 font-medium';
+                                    }
+                                    
+                                    return (
+                                      <div className={`text-xs ${ipColor}`}>
+                                        IP: <button
                                           onClick={() => {
-                                            navigator.clipboard.writeText(profile.email || '');
-                                            toast({ title: "Copied", description: "Email copied to clipboard" });
+                                            const newExpanded = new Set(expandedIPs);
+                                            if (expandedIPs.has(profile.ip_address)) {
+                                              newExpanded.delete(profile.ip_address);
+                                            } else {
+                                              newExpanded.add(profile.ip_address);
+                                            }
+                                            setExpandedIPs(newExpanded);
                                           }}
-                                        />
+                                          className="hover:underline cursor-pointer"
+                                        >
+                                          {profile.ip_address}
+                                          {ipUserCount > 1 && ` (${ipUserCount})`}
+                                        </button>
+                                        {(profile.country || profile.city) && (
+                                          <span className="text-muted-foreground font-normal ml-1">
+                                            📍 {profile.city ? `${profile.city}, ` : ''}{profile.country || 'Unknown Country'}
+                                          </span>
+                                        )}
                                       </div>
-                                    )}
-                                    {!profile.email && (
-                                      <div className="text-xs text-destructive">
-                                        No email - User ID: {profile.id?.substring(0, 8)}
-                                      </div>
-                                    )}
-                                    {profile.fingerprint_id && (
+                                    );
+                                  })()}
+                                  {profile.user_agent && (() => {
+                                    const { browser, device, os } = UAParser(profile.user_agent);
+                                    
+                                    return (
                                       <div className="text-xs text-muted-foreground">
-                                        Fingerprint: {profile.fingerprint_id.substring(0, 16)}...
+                                        {device.type || 'Desktop'} | {os.name || 'Unknown OS'} {os.version || ''} | {browser.name || 'Unknown'}
                                       </div>
-                                    )}
-                                   </div>
-                                 </div>
-                               </div>
+                                    );
+                                  })()}
+                                  {profile.email && (
+                                    <div className="text-xs text-muted-foreground flex items-center gap-1">
+                                      <span>{profile.email}</span>
+                                      <Copy 
+                                        className="h-3 w-3 cursor-pointer hover:text-foreground" 
+                                        onClick={() => {
+                                          navigator.clipboard.writeText(profile.email || '');
+                                          toast({ title: "Copied", description: "Email copied to clipboard" });
+                                        }}
+                                      />
+                                    </div>
+                                  )}
+                                  {!profile.email && (
+                                    <div className="text-xs text-destructive">
+                                      No email - User ID: {profile.id?.substring(0, 8)}
+                                    </div>
+                                  )}
+                                  {profile.fingerprint_id && (
+                                    <div className="text-xs text-muted-foreground">
+                                      Fingerprint: {profile.fingerprint_id.substring(0, 16)}...
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
 
                                {/* User Activity Icons */}
                                <div className="absolute bottom-2 right-2 flex gap-2">
