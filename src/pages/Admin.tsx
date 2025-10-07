@@ -7200,19 +7200,22 @@ const Admin = () => {
                                               Ratings ({userActivityStats[profile.id].ratingsCount})
                                             </h4>
                                             <div className="space-y-4 max-h-60 overflow-y-auto">
-                                              {/* Group ratings by week_interval */}
+                                              {/* Group ratings by vote_week_interval (computed from voting date) */}
                                               {Object.entries(
                                                 userActivityStats[profile.id].ratings.reduce((acc: any, rating: any) => {
-                                                  const week = rating.week_interval || 'No week';
+                                                  const week = rating.vote_week_interval || 'No week';
                                                   if (!acc[week]) acc[week] = [];
                                                   acc[week].push(rating);
                                                   return acc;
                                                 }, {})
-                                              ).map(([weekInterval, weekRatings]: [string, any]) => (
+                                              )
+                                              // Sort by week interval (newest first)
+                                              .sort(([a], [b]) => b.localeCompare(a))
+                                              .map(([weekInterval, weekRatings]: [string, any]) => (
                                                 <div key={weekInterval} className="space-y-2">
                                                   {/* Week header */}
                                                   <div className="text-xs font-semibold text-primary px-2 py-1 bg-primary/10 rounded">
-                                                    {weekInterval}
+                                                    Week: {weekInterval} ({weekRatings.length} votes)
                                                   </div>
                                                   
                                                   {/* Participants in this week */}
