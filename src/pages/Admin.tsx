@@ -1140,6 +1140,8 @@ const Admin = () => {
           .map(like => like.participant_id)
           .filter(id => id != null);
         
+        console.log(`📋 Processing ${likesData.length} likes, ${participantIds.length} with participant_id`);
+        
         if (participantIds.length > 0) {
           // Get profiles
           const { data: profilesData } = await supabase
@@ -1147,11 +1149,15 @@ const Admin = () => {
             .select('id, display_name, first_name, last_name, avatar_url, photo_1_url, photo_2_url')
             .in('id', participantIds);
           
-          // Get participant week intervals from weekly_contest_participants
-          const { data: participantsData } = await supabase
+          // Get participant week intervals from weekly_contest_participants table
+          const { data: participantsData, error: participantsError } = await supabase
             .from('weekly_contest_participants')
-            .select('id, week_interval')
+            .select('id, week_interval, user_id')
             .in('id', participantIds);
+          
+          if (participantsError) {
+            console.error('❌ Error fetching participants data:', participantsError);
+          }
           
           const profilesMap = new Map(
             (profilesData || []).map(p => [p.id, p])
@@ -1161,16 +1167,21 @@ const Admin = () => {
             (participantsData || []).map(p => [p.id, p.week_interval])
           );
           
-          console.log('📅 Participant week intervals for likes:', Array.from(participantsMap.entries()));
+          console.log('📅 Participant week intervals for likes:', Array.from(participantsMap.entries()).slice(0, 5));
           
           // Use participant's week_interval from the table
           likesWithProfiles = likesData.map(like => {
+            const weekInterval = like.participant_id ? participantsMap.get(like.participant_id) : null;
+            const profile = like.participant_id ? profilesMap.get(like.participant_id) : null;
+            
             return {
               ...like,
-              profiles: like.participant_id ? profilesMap.get(like.participant_id) : null,
-              week_interval: like.participant_id ? participantsMap.get(like.participant_id) : null
+              profiles: profile,
+              week_interval: weekInterval
             };
           }).filter(like => like.profiles && like.week_interval);
+          
+          console.log(`✅ Likes with week_interval: ${likesWithProfiles.length} of ${likesData.length}`);
         }
       }
 
@@ -1201,6 +1212,8 @@ const Admin = () => {
           .map(rating => rating.participant_id)
           .filter(id => id != null);
         
+        console.log(`📋 Processing ${ratingsData.length} ratings, ${contestantIds.length} with participant_id`);
+        
         if (contestantIds.length > 0) {
           // Get profiles
           const { data: profilesData } = await supabase
@@ -1208,11 +1221,15 @@ const Admin = () => {
             .select('id, display_name, first_name, last_name, avatar_url, photo_1_url, photo_2_url')
             .in('id', contestantIds);
           
-          // Get participant week intervals from weekly_contest_participants
-          const { data: participantsData } = await supabase
+          // Get participant week intervals from weekly_contest_participants table
+          const { data: participantsData, error: participantsError } = await supabase
             .from('weekly_contest_participants')
-            .select('id, week_interval')
+            .select('id, week_interval, user_id')
             .in('id', contestantIds);
+          
+          if (participantsError) {
+            console.error('❌ Error fetching participants data for ratings:', participantsError);
+          }
           
           const profilesMap = new Map(
             (profilesData || []).map(p => [p.id, p])
@@ -1222,16 +1239,21 @@ const Admin = () => {
             (participantsData || []).map(p => [p.id, p.week_interval])
           );
           
-          console.log('📅 Participant week intervals for ratings:', Array.from(participantsMap.entries()));
+          console.log('📅 Participant week intervals for ratings:', Array.from(participantsMap.entries()).slice(0, 5));
           
           // Use participant's week_interval from the table
           ratingsWithProfiles = ratingsData.map(rating => {
+            const weekInterval = rating.participant_id ? participantsMap.get(rating.participant_id) : null;
+            const profile = rating.participant_id ? profilesMap.get(rating.participant_id) : null;
+            
             return {
               ...rating,
-              profiles: rating.participant_id ? profilesMap.get(rating.participant_id) : null,
-              week_interval: rating.participant_id ? participantsMap.get(rating.participant_id) : null
+              profiles: profile,
+              week_interval: weekInterval
             };
           }).filter(rating => rating.profiles && rating.week_interval);
+          
+          console.log(`✅ Ratings with week_interval: ${ratingsWithProfiles.length} of ${ratingsData.length}`);
         }
       }
 
