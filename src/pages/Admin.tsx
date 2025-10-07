@@ -819,6 +819,14 @@ const Admin = () => {
     };
   }, [isAdmin, activeTab]);
 
+  // Re-fetch profiles when switching to 'regular' role filter
+  useEffect(() => {
+    if (roleFilter === 'regular' && activeTab === 'registrations') {
+      console.log('🔵 roleFilter changed to regular, reloading profiles...');
+      fetchProfiles();
+    }
+  }, [roleFilter]);
+
   // Recalculate application stats when contestApplications change
   useEffect(() => {
     if (contestApplications.length > 0) {
@@ -1651,12 +1659,41 @@ const Admin = () => {
 
   const fetchProfiles = async () => {
     try {
-      const { data: profilesData, error: profilesError } = await supabase
-        .from('profiles')
-        .select('*')
-        .order('created_at', { ascending: false });
+      // Check if we need to load regular users specifically
+      const needsRegularUsers = roleFilter === 'regular';
+      
+      let profilesData;
+      if (needsRegularUsers) {
+        // Get user IDs with 'regular' role
+        const { data: regularRoles } = await supabase
+          .from('user_roles')
+          .select('user_id')
+          .eq('role', 'regular');
+        
+        const regularUserIds = regularRoles?.map(r => r.user_id) || [];
+        console.log('🔵 Loading regular users specifically:', regularUserIds.length);
+        
+        // Fetch only those profiles
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .in('id', regularUserIds)
+          .order('created_at', { ascending: false });
+        
+        profilesData = data;
+        if (error) throw error;
+      } else {
+        // Normal fetch - last 1000 profiles
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .order('created_at', { ascending: false });
+        
+        profilesData = data;
+        if (error) throw error;
+      }
 
-      if (profilesError) {
+      if (!profilesData) {
         toast({
           title: "Error",
           description: "Failed to fetch profiles",
