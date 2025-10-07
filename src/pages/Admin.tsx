@@ -6464,7 +6464,7 @@ const Admin = () => {
                             const count = profiles.filter(p => {
                               const userWeeks = new Set();
                               // Count weeks where user voted or liked
-                              const userActivity = userActivityData[p.id];
+                              const userActivity = userActivityStats[p.id];
                               if (userActivity?.ratings) {
                                 userActivity.ratings.forEach((rating: any) => {
                                   if (rating.week_interval) userWeeks.add(rating.week_interval);
@@ -6582,7 +6582,7 @@ const Admin = () => {
                       // Фильтр "2+ Weeks" - users who voted/liked in 2+ different weeks
                       if (regStatusFilter === '2+weeks') {
                         const userWeeks = new Set();
-                        const userActivity = userActivityData[profile.id];
+                        const userActivity = userActivityStats[profile.id];
                         if (userActivity?.ratings) {
                           userActivity.ratings.forEach((rating: any) => {
                             if (rating.week_interval) userWeeks.add(rating.week_interval);
