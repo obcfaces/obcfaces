@@ -6679,6 +6679,17 @@ const Admin = () => {
                       if (roleFilter === 'regular') {
                         const regularUsers = userRoles.filter(r => r.role === 'regular');
                         console.log('📋 Regular users in userRoles:', regularUsers.length, regularUsers.slice(0, 5));
+                        
+                        // Check overlap: how many regular users exist in profiles?
+                        const regularUserIds = regularUsers.map(r => r.user_id);
+                        const profileIds = profiles.map(p => p.id);
+                        const overlap = regularUserIds.filter(id => profileIds.includes(id));
+                        console.log('🔍 OVERLAP CHECK:', {
+                          regularUserIdsCount: regularUserIds.length,
+                          profileIdsCount: profileIds.length,
+                          overlapCount: overlap.length,
+                          overlapIds: overlap.slice(0, 5)
+                        });
                       }
                       
                       return profiles.filter(profile => {
