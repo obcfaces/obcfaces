@@ -6570,7 +6570,10 @@ const Admin = () => {
                             <DropdownMenuItem onClick={() => setRoleFilter('moderator')}>
                               Moderator
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => setRoleFilter('regular')}>
+                            <DropdownMenuItem onClick={() => {
+                              setRoleFilter('regular');
+                              setSuspiciousEmailFilter('all'); // Сбросить Maybe Suspicious фильтр
+                            }}>
                               Regular
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => setRoleFilter('admin')}>
