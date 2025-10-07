@@ -6613,25 +6613,25 @@ const Admin = () => {
                         <Button
                           variant={regStatusFilter === '2+weeks' ? 'default' : 'outline'}
                           size="sm"
-                          onClick={() => {
+                          onClick={async () => {
                             const newFilter = regStatusFilter === '2+weeks' ? 'all' : '2+weeks';
                             console.log('🔘🔘🔘 CLICKING 2W BUTTON, new filter:', newFilter);
-                            console.log('🔘 Current state:', {
-                              regStatusFilter,
-                              profilesCount: profiles.length,
-                              userActivityStatsCount: Object.keys(userActivityStats).length
-                            });
-                            setRegStatusFilter(newFilter);
                             
-                            // ВАЖНО: Сбросить другие фильтры когда активируется "2+ Weeks"
                             if (newFilter === '2+weeks') {
-                              console.log('🔘 Resetting other filters...');
+                              setIsLoadingWeeksFilter(true);
+                              console.log('🔄 Reloading voting stats for 2w filter...');
+                              await fetchUserVotingStats();
+                              setIsLoadingWeeksFilter(false);
+                              
+                              // Reset other filters
                               setSuspiciousEmailFilter('all');
                               setVerificationFilter('all');
                               setRoleFilter('all');
                               setSelectedRegistrationDay(null);
                               setSearchQuery('');
                             }
+                            
+                            setRegStatusFilter(newFilter);
                           }}
                           disabled={isLoadingWeeksFilter}
                           className="gap-2"
@@ -6640,10 +6640,11 @@ const Admin = () => {
                           2 w
                           {(() => {
                             if (isLoadingWeeksFilter) return ' (loading...)';
-                            // Use userVotingStats for fast counting
-                            const count = profiles.filter(p => 
-                              userVotingStats[p.id]?.unique_weeks_count >= 2
+                            // Count from userVotingStats
+                            const count = Object.values(userVotingStats).filter(
+                              (stats: any) => (stats?.unique_weeks_count || 0) >= 2
                             ).length;
+                            console.log('📊 2w count:', count, 'total voting stats:', Object.keys(userVotingStats).length);
                             return count > 0 ? ` (${count})` : '';
                           })()}
                         </Button>
@@ -6698,16 +6699,18 @@ const Admin = () => {
                         const votingStats = userVotingStats[profile.id];
                         
                         if (!votingStats) {
-                          console.log(`❌ No voting stats for ${profile.display_name || profile.email?.split('@')[0]}`);
+                          console.log(`❌ No voting stats for ${profile.display_name || profile.email?.split('@')[0]} (ID: ${profile.id})`);
                           return false;
                         }
                         
-                        if (votingStats.unique_weeks_count < 2) {
-                          console.log(`❌ FILTERED OUT: ${profile.display_name || profile.email?.split('@')[0]} - only ${votingStats.unique_weeks_count} week(s)`);
+                        const uniqueWeeks = votingStats.unique_weeks_count || 0;
+                        
+                        if (uniqueWeeks < 2) {
+                          console.log(`❌ FILTERED OUT: ${profile.display_name || profile.email?.split('@')[0]} - only ${uniqueWeeks} week(s), intervals: ${JSON.stringify(votingStats.voting_week_intervals || [])}`);
                           return false;
                         }
                         
-                        console.log(`✅ PASSED: ${profile.display_name || profile.email?.split('@')[0]} - ${votingStats.unique_weeks_count} different weeks!`);
+                        console.log(`✅ PASSED: ${profile.display_name || profile.email?.split('@')[0]} - ${uniqueWeeks} different weeks! Intervals: ${JSON.stringify(votingStats.voting_week_intervals || [])}`);
                         return true;
                       }
                       
