@@ -6672,7 +6672,7 @@ const Admin = () => {
                                       hasDuplicateFingerprint = sameFingerprint.length > 0;
                                     }
                                     
-                                    const isMaybeSuspicious = emailNotWhitelisted || wasAutoConfirmed || fastFormFill || hasDuplicateFingerprint;
+                                    const isMaybeSuspicious = wasAutoConfirmed || fastFormFill || hasDuplicateFingerprint;
                                     
                                     if (isMaybeSuspicious) {
                                       const reasonCodes = [];
