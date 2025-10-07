@@ -6570,6 +6570,15 @@ const Admin = () => {
                             const newFilter = regStatusFilter === '2+weeks' ? 'all' : '2+weeks';
                             console.log('🔘 Clicking 2+ Weeks button, new filter:', newFilter);
                             setRegStatusFilter(newFilter);
+                            
+                            // ВАЖНО: Сбросить другие фильтры когда активируется "2+ Weeks"
+                            if (newFilter === '2+weeks') {
+                              setSuspiciousEmailFilter('all');
+                              setVerificationFilter('all');
+                              setRoleFilter('all');
+                              setSelectedRegistrationDay(null);
+                              setSearchQuery('');
+                            }
                           }}
                           disabled={isLoadingWeeksFilter}
                           className="gap-2"
