@@ -7110,39 +7110,60 @@ const Admin = () => {
                                    ) : (
                                      <>
                                        {/* Ratings given */}
-                                       {userActivityStats[profile.id]?.ratings && userActivityStats[profile.id].ratings.length > 0 && (
-                                         <div>
-                                           <h4 className="text-sm font-semibold mb-2 flex items-center gap-1">
-                                             <Star className="h-4 w-4 text-yellow-500" />
-                                             Ratings ({userActivityStats[profile.id].ratingsCount})
-                                           </h4>
-                                           <div className="space-y-2 max-h-60 overflow-y-auto">
-                                             {userActivityStats[profile.id].ratings.map((rating: any) => (
-                                               <div key={rating.id} className="flex items-center gap-2 text-xs p-2 bg-muted rounded">
-                                                 <div className="relative h-16 w-16 flex-shrink-0">
-                                                   <img 
-                                                     src={rating.profiles?.photo_1_url || rating.profiles?.avatar_url || ''} 
-                                                     alt={rating.profiles?.display_name || rating.contestant_name}
-                                                     className="h-full w-full object-cover rounded"
-                                                   />
-                                                 </div>
-                                                 <div className="flex-1">
-                                                   <div className="font-medium">
-                                                     {rating.profiles?.display_name || rating.contestant_name}
-                                                   </div>
-                                                   <div className="flex items-center gap-1 mt-1">
-                                                     <MiniStars rating={rating.rating} />
-                                                     <span className="text-muted-foreground font-semibold">({rating.rating})</span>
-                                                   </div>
-                                                   <div className="text-muted-foreground text-xs mt-1">
-                                                     {new Date(rating.created_at).toLocaleDateString('en-GB')}
-                                                   </div>
-                                                 </div>
-                                               </div>
-                                             ))}
-                                           </div>
-                                         </div>
-                                       )}
+                                        {userActivityStats[profile.id]?.ratings && userActivityStats[profile.id].ratings.length > 0 && (
+                                          <div>
+                                            <h4 className="text-sm font-semibold mb-2 flex items-center gap-1">
+                                              <Star className="h-4 w-4 text-yellow-500" />
+                                              Ratings ({userActivityStats[profile.id].ratingsCount})
+                                            </h4>
+                                            <div className="space-y-4 max-h-60 overflow-y-auto">
+                                              {/* Group ratings by week_interval */}
+                                              {Object.entries(
+                                                userActivityStats[profile.id].ratings.reduce((acc: any, rating: any) => {
+                                                  const week = rating.week_interval || 'No week';
+                                                  if (!acc[week]) acc[week] = [];
+                                                  acc[week].push(rating);
+                                                  return acc;
+                                                }, {})
+                                              ).map(([weekInterval, weekRatings]: [string, any]) => (
+                                                <div key={weekInterval} className="space-y-2">
+                                                  {/* Week header */}
+                                                  <div className="text-xs font-semibold text-primary px-2 py-1 bg-primary/10 rounded">
+                                                    {weekInterval}
+                                                  </div>
+                                                  
+                                                  {/* Participants in this week */}
+                                                  {weekRatings.map((rating: any) => (
+                                                    <div key={rating.id} className="flex items-center gap-2 text-xs p-2 bg-muted rounded">
+                                                      <div className="relative h-16 w-16 flex-shrink-0">
+                                                        <img 
+                                                          src={rating.participant?.photo_1_url || rating.participant?.avatar_url || ''} 
+                                                          alt={rating.participant?.display_name || rating.contestant_name}
+                                                          className="h-full w-full object-cover rounded"
+                                                        />
+                                                      </div>
+                                                      <div className="flex-1">
+                                                        <div className="font-medium">
+                                                          {rating.participant?.display_name || rating.contestant_name}
+                                                        </div>
+                                                        {/* Stars, rating and date in one line */}
+                                                        <div className="flex items-center gap-2 mt-1">
+                                                          <div className="flex items-center gap-1">
+                                                            <MiniStars rating={rating.rating} className="scale-125" />
+                                                            <span className="font-bold text-base">{rating.rating}</span>
+                                                          </div>
+                                                          <span className="text-muted-foreground text-xs">
+                                                            {new Date(rating.created_at).toLocaleDateString('en-GB')}
+                                                          </span>
+                                                        </div>
+                                                      </div>
+                                                    </div>
+                                                  ))}
+                                                </div>
+                                              ))}
+                                            </div>
+                                          </div>
+                                        )}
 
                                        {/* Likes given */}
                                        {userActivityStats[profile.id]?.likes && userActivityStats[profile.id].likes.length > 0 && (
