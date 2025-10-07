@@ -6715,7 +6715,8 @@ const Admin = () => {
                         <span className="text-sm text-muted-foreground">
                           Пользователи которые голосовали в 2+ интервалах недель
                         </span>
-
+                      </div>
+                    </div>
 
                 {(() => {
                     console.log('🔍 Starting profile filtering in REGISTRATIONS TAB:', {
@@ -7669,7 +7670,7 @@ const Admin = () => {
                     </div>
                   );
                 })()}
-                </>
+                  </>
                 )}
               </TabsContent>
 
