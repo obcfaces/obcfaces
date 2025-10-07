@@ -6693,8 +6693,7 @@ const Admin = () => {
                     });
                     
                     const filteredProfiles = profiles.filter(profile => {
-                      // Фильтр "2+ Weeks" (2 w) - users who voted in 2+ different week intervals
-                      // Uses user_voting_stats table for fast lookup
+                      // Фильтр "2+ Weeks" (2 w) - EXCLUSIVE filter (ignores other filters)
                       if (regStatusFilter === '2+weeks') {
                         const votingStats = userVotingStats[profile.id];
                         
@@ -6711,12 +6710,45 @@ const Admin = () => {
                         }
                         
                         console.log(`✅ PASSED: ${profile.display_name || profile.email?.split('@')[0]} - ${uniqueWeeks} different weeks! Intervals: ${JSON.stringify(votingStats.voting_week_intervals || [])}`);
-                        return true;
+                        
+                        // Apply search filter if present
+                        if (searchQuery.trim()) {
+                          const query = searchQuery.toLowerCase();
+                          const fullName = `${profile.first_name || ''} ${profile.last_name || ''}`.toLowerCase();
+                          const displayName = (profile.display_name || '').toLowerCase();
+                          const email = (profile.email || '').toLowerCase();
+                          const ip = (profile.ip_address || '').toLowerCase();
+                          
+                          return fullName.includes(query) || 
+                                 displayName.includes(query) || 
+                                 email.includes(query) || 
+                                 ip.includes(query);
+                        }
+                        
+                        return true; // EXCLUSIVE - skip all other filters
                       }
                       
-                      // Фильтр "Regular" - users with regular role
+                      // Фильтр "Regular" - EXCLUSIVE filter
                       if (regStatusFilter === 'regular') {
-                        return userRoles.some(r => r.user_id === profile.id && r.role === 'regular');
+                        const hasRegularRole = userRoles.some(r => r.user_id === profile.id && r.role === 'regular');
+                        
+                        if (!hasRegularRole) return false;
+                        
+                        // Apply search filter if present
+                        if (searchQuery.trim()) {
+                          const query = searchQuery.toLowerCase();
+                          const fullName = `${profile.first_name || ''} ${profile.last_name || ''}`.toLowerCase();
+                          const displayName = (profile.display_name || '').toLowerCase();
+                          const email = (profile.email || '').toLowerCase();
+                          const ip = (profile.ip_address || '').toLowerCase();
+                          
+                          return fullName.includes(query) || 
+                                 displayName.includes(query) || 
+                                 email.includes(query) || 
+                                 ip.includes(query);
+                        }
+                        
+                        return true; // EXCLUSIVE - skip all other filters
                       }
                       
                       // Фильтр по дню регистрации
