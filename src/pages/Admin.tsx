@@ -6640,14 +6640,14 @@ const Admin = () => {
                             console.log(`  📌 Rating ${index + 1}:`, {
                               contestant: rating.contestant_name,
                               participantId: rating.participant_id,
-                              weekInterval: rating.week_interval,
+                              voteWeekInterval: rating.vote_week_interval,
                               votedAt: rating.created_at
                             });
                           }
                           
-                          // Добавляем week_interval участника (если есть)
-                          if (rating.week_interval) {
-                            weekIntervalsSet.add(rating.week_interval);
+                          // Добавляем vote_week_interval (вычислено по дате голосования)
+                          if (rating.vote_week_interval) {
+                            weekIntervalsSet.add(rating.vote_week_interval);
                           }
                         });
                         
