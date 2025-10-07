@@ -1147,24 +1147,36 @@ const Admin = () => {
             .select('id, display_name, first_name, last_name, avatar_url, photo_1_url, photo_2_url')
             .in('id', participantIds);
           
-          // Get week intervals from weekly_contest_participants
+          // Get ALL week intervals for these participants (can have multiple records per user)
           const { data: participantsData } = await supabase
             .from('weekly_contest_participants')
             .select('user_id, week_interval')
-            .in('user_id', participantIds);
+            .in('user_id', participantIds)
+            .not('week_interval', 'is', null);
+          
+          console.log('📅 Participants data for likes:', participantsData);
           
           const profilesMap = new Map(
             (profilesData || []).map(p => [p.id, p])
           );
           
-          const intervalsMap = new Map(
-            (participantsData || []).map(p => [p.user_id, p.week_interval])
-          );
+          // Create map of user_id to all their week_intervals
+          const intervalsMap = new Map();
+          (participantsData || []).forEach(p => {
+            if (!intervalsMap.has(p.user_id)) {
+              intervalsMap.set(p.user_id, []);
+            }
+            if (p.week_interval) {
+              intervalsMap.get(p.user_id).push(p.week_interval);
+            }
+          });
           
           likesWithProfiles = likesData.map(like => ({
             ...like,
             profiles: like.participant_id ? profilesMap.get(like.participant_id) : null,
-            week_interval: like.participant_id ? intervalsMap.get(like.participant_id) : null
+            week_interval: like.participant_id && intervalsMap.has(like.participant_id) 
+              ? intervalsMap.get(like.participant_id)[0] // Take first interval for this participant
+              : null
           })).filter(like => like.profiles);
         }
       }
@@ -1228,9 +1240,19 @@ const Admin = () => {
       const finalLikes = likesWithProfiles;
       const finalRatings = ratingsWithProfiles || [];
 
+      // Collect all unique week intervals
+      const allWeekIntervals = new Set();
+      finalLikes.forEach(like => {
+        if (like.week_interval) allWeekIntervals.add(like.week_interval);
+      });
+      finalRatings.forEach(rating => {
+        if (rating.week_interval) allWeekIntervals.add(rating.week_interval);
+      });
+
       console.log('📊 Final stats for user', userId, ':', {
         likesCount: finalLikes.length,
-        ratingsCount: finalRatings.length
+        ratingsCount: finalRatings.length,
+        uniqueWeeks: Array.from(allWeekIntervals)
       });
 
       setUserActivityStats(prev => ({
