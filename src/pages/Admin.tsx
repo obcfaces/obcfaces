@@ -450,6 +450,12 @@ const Admin = () => {
   const [pastStatusFilter, setPastStatusFilter] = useState<string>('all');
   const [regStatusFilter, setRegStatusFilter] = useState<string>('all');
   const [winStatusFilter, setWinStatusFilter] = useState<string>('all');
+  const [userVotingStats, setUserVotingStats] = useState<Record<string, {
+    is_regular_voter: boolean;
+    voting_week_intervals: string[];
+    unique_weeks_count: number;
+    total_votes_count: number;
+  }>>({});
   const [dailyStats, setDailyStats] = useState<Array<{ day_name: string; vote_count: number; like_count: number }>>([]);
   const [dailyApplicationStats, setDailyApplicationStats] = useState<Array<{ day_name: string; day_date?: string; total_applications: number; approved_applications: number; day_of_week?: number; sort_order?: number }>>([]);
   const [dailyRegistrationStats, setDailyRegistrationStats] = useState<Array<{ day_name: string; registration_count: number; suspicious_count: number; day_of_week: number; sort_order: number }>>([]);
@@ -645,7 +651,8 @@ const Admin = () => {
               fetchProfiles(),
               fetchUserRoles(),
               fetchUsersWhoVoted(),
-              fetchDailyRegistrationStats()
+              fetchDailyRegistrationStats(),
+              fetchUserVotingStats()
             ]);
             break;
 
@@ -800,6 +807,7 @@ const Admin = () => {
         console.log('Auto-refreshing profiles...');
         fetchProfiles();
         fetchUsersWhoVoted();
+        fetchUserVotingStats();
       }, 30000); // Refresh every 30 seconds
     }
     
@@ -1760,6 +1768,28 @@ const Admin = () => {
       setEmailDomainStats(data || []);
     } catch (error) {
       console.error('Error fetching email domain stats:', error);
+    }
+  };
+
+  // Fetch user voting statistics
+  const fetchUserVotingStats = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('user_voting_stats')
+        .select('user_id, is_regular_voter, voting_week_intervals, unique_weeks_count, total_votes_count');
+      
+      if (error) throw error;
+      
+      // Convert to map for easy lookup
+      const statsMap: Record<string, any> = {};
+      (data || []).forEach(stat => {
+        statsMap[stat.user_id] = stat;
+      });
+      
+      setUserVotingStats(statsMap);
+      console.log('✅ Voting stats loaded:', Object.keys(statsMap).length, 'users');
+    } catch (error) {
+      console.error('Error fetching user voting stats:', error);
     }
   };
 
@@ -6610,19 +6640,39 @@ const Admin = () => {
                           2 w
                           {(() => {
                             if (isLoadingWeeksFilter) return ' (loading...)';
-                            const count = profiles.filter(p => {
-                              const userWeeks = new Set();
-                              // Count weeks where user VOTED (ratings only, not likes)
-                              const userActivity = userActivityStats[p.id];
-                              
-                              if (userActivity?.ratings) {
-                                userActivity.ratings.forEach((rating: any) => {
-                                  if (rating.week_interval) userWeeks.add(rating.week_interval);
-                                });
-                              }
-                              
-                              return userWeeks.size >= 2;
-                            }).length;
+                            // Use userVotingStats for fast counting
+                            const count = profiles.filter(p => 
+                              userVotingStats[p.id]?.unique_weeks_count >= 2
+                            ).length;
+                            return count > 0 ? ` (${count})` : '';
+                          })()}
+                        </Button>
+
+                        {/* Regular Voters Filter Button */}
+                        <Button
+                          variant={regStatusFilter === 'regular' ? 'default' : 'outline'}
+                          size="sm"
+                          onClick={() => {
+                            const newFilter = regStatusFilter === 'regular' ? 'all' : 'regular';
+                            setRegStatusFilter(newFilter);
+                            
+                            // Reset other filters when Regular is activated
+                            if (newFilter === 'regular') {
+                              setSuspiciousEmailFilter('all');
+                              setVerificationFilter('all');
+                              setRoleFilter('all');
+                              setSelectedRegistrationDay(null);
+                              setSearchQuery('');
+                            }
+                          }}
+                          className="gap-2"
+                        >
+                          Regular
+                          {(() => {
+                            // Count users marked as regular voters
+                            const count = profiles.filter(p => 
+                              userVotingStats[p.id]?.is_regular_voter === true
+                            ).length;
                             return count > 0 ? ` (${count})` : '';
                           })()}
                         </Button>
@@ -6642,67 +6692,29 @@ const Admin = () => {
                     });
                     
                     const filteredProfiles = profiles.filter(profile => {
-                      // Фильтр "2+ Weeks" - users who voted for participants from 2+ different weeks
-                      // ВАЖНО: Применяется ПЕРВЫМ, чтобы работать независимо от других фильтров
+                      // Фильтр "2+ Weeks" (2 w) - users who voted in 2+ different week intervals
+                      // Uses user_voting_stats table for fast lookup
                       if (regStatusFilter === '2+weeks') {
-                        console.log(`🔎 2+ WEEKS FILTER ACTIVATED for ${profile.display_name || profile.email?.split('@')[0]} (email: ${profile.email})`);
+                        const votingStats = userVotingStats[profile.id];
                         
-                        const userActivity = userActivityStats[profile.id];
-                        
-                        console.log(`  📊 User activity data:`, {
-                          hasActivity: !!userActivity,
-                          ratingsCount: userActivity?.ratings?.length || 0,
-                          likesCount: userActivity?.likes?.length || 0
-                        });
-                        
-                        if (!userActivity) {
-                          console.log(`❌ No userActivity for ${profile.display_name || profile.email?.split('@')[0]}`);
+                        if (!votingStats) {
+                          console.log(`❌ No voting stats for ${profile.display_name || profile.email?.split('@')[0]}`);
                           return false;
                         }
                         
-                        if (!userActivity?.ratings || userActivity.ratings.length === 0) {
-                          console.log(`❌ User ${profile.display_name || profile.email?.split('@')[0]} (${profile.email}) - no ratings found`);
+                        if (votingStats.unique_weeks_count < 2) {
+                          console.log(`❌ FILTERED OUT: ${profile.display_name || profile.email?.split('@')[0]} - only ${votingStats.unique_weeks_count} week(s)`);
                           return false;
                         }
                         
-                        console.log(`🔍 Checking user ${profile.display_name || profile.email?.split('@')[0]} (${profile.email}):`, {
-                          userId: profile.id,
-                          totalRatings: userActivity.ratings.length,
-                          sampleRatings: userActivity.ratings.slice(0, 3)
-                        });
-                        
-                        // Собираем уникальные week_interval из всех участников за которых голосовал пользователь
-                        const weekIntervalsSet = new Set<string>();
-                        
-                        userActivity.ratings.forEach((rating: any, index: number) => {
-                          if (index < 5) { // Логируем только первые 5 для краткости
-                            console.log(`  📌 Rating ${index + 1}:`, {
-                              contestant: rating.contestant_name,
-                              participantId: rating.participant_id,
-                              voteWeekInterval: rating.vote_week_interval,
-                              votedAt: rating.created_at
-                            });
-                          }
-                          
-                          // Добавляем vote_week_interval (вычислено по дате голосования)
-                          if (rating.vote_week_interval) {
-                            weekIntervalsSet.add(rating.vote_week_interval);
-                          }
-                        });
-                        
-                        const uniqueIntervals = Array.from(weekIntervalsSet);
-                        console.log(`📊 User ${profile.display_name || profile.email?.split('@')[0]} (${profile.email}): Found ${uniqueIntervals.length} unique week intervals:`, uniqueIntervals);
-                        
-                        // Показываем только пользователей, которые голосовали за участников из 2+ разных недель
-                        if (uniqueIntervals.length < 2) {
-                          console.log(`❌ FILTERED OUT: ${profile.display_name || profile.email?.split('@')[0]} - only ${uniqueIntervals.length} week(s)`);
-                          return false;
-                        }
-                        
-                        console.log(`✅✅✅ PASSED: ${profile.display_name || profile.email?.split('@')[0]} - ${uniqueIntervals.length} different weeks!`);
-                        
-                        // Если фильтр "2+ Weeks" активен, остальные фильтры НЕ применяются
+                        console.log(`✅ PASSED: ${profile.display_name || profile.email?.split('@')[0]} - ${votingStats.unique_weeks_count} different weeks!`);
                         return true;
+                      }
+                      
+                      // Фильтр "Regular" - users marked as regular voters
+                      if (regStatusFilter === 'regular') {
+                        const votingStats = userVotingStats[profile.id];
+                        return votingStats?.is_regular_voter === true;
                       }
                       
                       // Фильтр по дню регистрации
@@ -6911,19 +6923,35 @@ const Admin = () => {
                                         Suspicious
                                       </Badge>
                                     );
-                                  } else if (currentRole === 'moderator') {
-                                    return (
-                                      <Badge className="text-xs rounded-none bg-yellow-500 text-white hover:bg-yellow-600">
-                                        Moderator
-                                      </Badge>
-                                    );
-                                  } else if (currentRole === 'admin') {
-                                    return (
-                                      <Badge className="text-xs rounded-none bg-blue-500 text-white hover:bg-blue-600">
-                                        Admin
-                                      </Badge>
-                                    );
-                                  } else {
+                                   } else if (currentRole === 'admin') {
+                                     return (
+                                       <>
+                                         <Badge className="text-xs rounded-none bg-blue-500 text-white hover:bg-blue-600">
+                                           Admin
+                                         </Badge>
+                                         {/* Show Regular badge if user is a regular voter */}
+                                         {userVotingStats[profile.id]?.is_regular_voter && (
+                                           <Badge className="text-xs rounded-none bg-green-500 text-white hover:bg-green-600 ml-1">
+                                             Regular ({userVotingStats[profile.id].unique_weeks_count}w)
+                                           </Badge>
+                                         )}
+                                       </>
+                                     );
+                                   } else if (currentRole === 'moderator') {
+                                     return (
+                                       <>
+                                         <Badge className="text-xs rounded-none bg-yellow-500 text-white hover:bg-yellow-600">
+                                           Moderator
+                                         </Badge>
+                                         {/* Show Regular badge if user is a regular voter */}
+                                         {userVotingStats[profile.id]?.is_regular_voter && (
+                                           <Badge className="text-xs rounded-none bg-green-500 text-white hover:bg-green-600 ml-1">
+                                             Regular ({userVotingStats[profile.id].unique_weeks_count}w)
+                                           </Badge>
+                                         )}
+                                       </>
+                                     );
+                                   } else {
                                     // Check if user is "maybe suspicious" (but not marked as suspicious)
                                     const emailNotWhitelisted = profile.email ? !isEmailDomainWhitelisted(profile.email) : false;
                                     const wasAutoConfirmed = profile.created_at && profile.email_confirmed_at && 
@@ -6943,16 +6971,17 @@ const Admin = () => {
                                     
                                     const isMaybeSuspicious = wasAutoConfirmed || fastFormFill || hasDuplicateFingerprint;
                                     
-                                    if (isMaybeSuspicious) {
+                                     if (isMaybeSuspicious) {
                                       const reasonCodes = [];
                                       if (wasAutoConfirmed) reasonCodes.push("<1");
                                       if (fastFormFill) reasonCodes.push("<3");
                                       if (hasDuplicateFingerprint) reasonCodes.push(`FP ${sameFingerprint.length + 1}`);
                                       
                                       return (
-                                        <Badge 
-                                          variant="outline" 
-                                          className="text-xs rounded-none bg-orange-100 text-orange-700 border-orange-300 flex items-center gap-1 cursor-pointer hover:bg-orange-200"
+                                        <>
+                                          <Badge 
+                                            variant="outline" 
+                                            className="text-xs rounded-none bg-orange-100 text-orange-700 border-orange-300 flex items-center gap-1 cursor-pointer hover:bg-orange-200"
                                           onClick={() => {
                                             if (hasDuplicateFingerprint && profile.fingerprint_id) {
                                               const newExpanded = new Set(expandedMaybeFingerprints);
@@ -6969,14 +6998,30 @@ const Admin = () => {
                                             <span className="text-[10px] font-semibold">
                                               {reasonCodes.join(" ")}
                                             </span>
+                                           )}
+                                           Maybe
+                                         </Badge>
+                                         {/* Show Regular badge if user is a regular voter */}
+                                         {userVotingStats[profile.id]?.is_regular_voter && (
+                                           <Badge className="text-xs rounded-none bg-green-500 text-white hover:bg-green-600 ml-1">
+                                             Regular ({userVotingStats[profile.id].unique_weeks_count}w)
+                                           </Badge>
                                           )}
-                                          Maybe
-                                        </Badge>
+                                        </>
                                       );
                                     }
-                                  }
-                                  // Don't show 'Usual' badge
-                                  return null;
+                                     
+                                     // Show Regular badge for usual users if they are regular voters
+                                     if (userVotingStats[profile.id]?.is_regular_voter) {
+                                       return (
+                                         <Badge className="text-xs rounded-none bg-green-500 text-white hover:bg-green-600">
+                                           Regular ({userVotingStats[profile.id].unique_weeks_count}w)
+                                         </Badge>
+                                       );
+                                     }
+                                   }
+                                   
+                                   return null;
                                 })()}
                                 
                                 {/* Only show Verify button if not verified */}
