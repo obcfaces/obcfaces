@@ -358,6 +358,7 @@ const Admin = () => {
   const [user, setUser] = useState<any>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [profilesLoading, setProfilesLoading] = useState(false);
   const [tabLoading, setTabLoading] = useState<Record<string, boolean>>({});
   const [tabDataLoaded, setTabDataLoaded] = useState<Record<string, boolean>>({});
   const [activeTab, setActiveTab] = useState('applications');
@@ -1691,6 +1692,8 @@ const Admin = () => {
 
   const fetchProfiles = async () => {
     try {
+      setProfilesLoading(true); // Add loading state
+      
       // Check if we need to load regular users specifically
       const needsRegularUsers = roleFilter === 'regular';
       
@@ -1784,6 +1787,20 @@ const Admin = () => {
 
       const profilesWithAuth = (profilesData || []).map(profile => {
         const userAuthData = authData?.find(auth => auth.user_id === profile.id);
+        
+        // Debug logging for missing emails
+        const hasAuthData = !!userAuthData;
+        const authDataEmail = userAuthData?.email;
+        if (!authDataEmail) {
+          console.warn(`⚠️ No email for user ${profile.id?.substring(0, 8)}:`, {
+            hasAuthData,
+            authDataEmail: {
+              _type: typeof authDataEmail,
+              value: String(authDataEmail)
+            }
+          });
+        }
+        
         // Get the most recent login log with an IP address for this user
         const userLoginLog = loginLogs
           ?.filter(log => log.user_id === profile.id && log.ip_address)
@@ -1796,7 +1813,7 @@ const Admin = () => {
           ...profile,
           auth_provider: userAuthData?.auth_provider || 'unknown',
           // Email is stored in auth.users only, not in profiles table (security)
-          email: userAuthData?.email || null,
+          email: authDataEmail || null,
           facebook_data: userAuthData?.facebook_data || null,
           last_sign_in_at: userAuthData?.last_sign_in_at || null,
           email_confirmed_at: userAuthData?.email_confirmed_at || null,
@@ -1827,6 +1844,8 @@ const Admin = () => {
       setProfiles(profilesWithAuth);
     } catch (error) {
       console.error('Error in fetchProfiles:', error);
+    } finally {
+      setProfilesLoading(false);
     }
   };
 
@@ -6928,6 +6947,13 @@ const Admin = () => {
                           )}
                         </div>
 
+                        {/* Loading state */}
+                        {profilesLoading ? (
+                          <div className="flex flex-col items-center justify-center py-8 space-y-4">
+                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                            <p className="text-sm text-muted-foreground">Loading profiles...</p>
+                          </div>
+                        ) : (
                         <div className="grid gap-4">
                           {paginatedProfiles.map(profile => {
                             const lastActivity = userActivityData[profile.id]?.lastActivity;
@@ -7346,15 +7372,21 @@ const Admin = () => {
                                               )
                                               // Sort by week interval (newest first)
                                               .sort(([a], [b]) => b.localeCompare(a))
-                                              .map(([weekInterval, weekRatings]: [string, any]) => (
+                                              .map(([weekInterval, weekRatings]: [string, any]) => {
+                                                // Sort ratings within each interval by rating (highest first)
+                                                const sortedWeekRatings = [...weekRatings].sort((a: any, b: any) => {
+                                                  return (b.rating || 0) - (a.rating || 0);
+                                                });
+                                                
+                                                return (
                                                 <div key={weekInterval} className="space-y-2">
                                                   {/* Week header */}
                                                   <div className="text-xs font-semibold text-primary px-2 py-1 bg-primary/10 rounded">
-                                                    Week: {weekInterval} ({weekRatings.length} votes)
+                                                    Week: {weekInterval} ({sortedWeekRatings.length} votes)
                                                   </div>
                                                   
-                                                  {/* Participants in this week */}
-                                                  {weekRatings.map((rating: any) => (
+                                                  {/* Participants in this week - sorted by rating */}
+                                                  {sortedWeekRatings.map((rating: any) => (
                                                     <div key={rating.id} className="flex items-center gap-2 text-xs p-2 bg-muted rounded">
                                                       <div className="relative h-16 w-16 flex-shrink-0">
                                                         <img 
@@ -7381,7 +7413,8 @@ const Admin = () => {
                                                     </div>
                                                   ))}
                                                 </div>
-                                              ))}
+                                                );
+                                              })}
                                             </div>
                                           </div>
                                         )}
@@ -7601,9 +7634,10 @@ const Admin = () => {
                       );
                     })}
                     </div>
+                    )}
 
                       {/* Pagination */}
-                      {totalRegPages > 1 && (
+                      {!profilesLoading && totalRegPages > 1 && (
                         <Pagination className="mt-6">
                           <PaginationContent>
                             <PaginationItem>
