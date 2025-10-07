@@ -6663,35 +6663,6 @@ const Admin = () => {
                         return result;
                       }
                       
-                      // Фильтр "Regular" - EXCLUSIVE filter
-                      if (regStatusFilter === 'regular') {
-                        console.log('🔍 Applying regular filter');
-                        
-                        const result = profiles.filter(profile => {
-                          const hasRegularRole = userRoles.some(r => r.user_id === profile.id && r.role === 'regular');
-                          
-                          if (!hasRegularRole) return false;
-                          
-                          // Apply search filter if present
-                          if (searchQuery.trim()) {
-                            const query = searchQuery.toLowerCase();
-                            const fullName = `${profile.first_name || ''} ${profile.last_name || ''}`.toLowerCase();
-                            const displayName = (profile.display_name || '').toLowerCase();
-                            const ip = (profile.ip_address || '').toLowerCase();
-                            const fingerprintId = (profile.fingerprint_id || '').toLowerCase();
-                            
-                            return fullName.includes(query) || 
-                                   displayName.includes(query) || 
-                                   ip.includes(query) ||
-                                   fingerprintId.includes(query);
-                          }
-                          
-                          return true;
-                        });
-                        
-                        console.log('✅ Regular filter result:', result.length, 'users');
-                        return result;
-                      }
                       
                       // Default filtering for other cases
                       return profiles.filter(profile => {
@@ -6773,6 +6744,11 @@ const Admin = () => {
                       if (roleFilter !== 'all') {
                         const profileRoles = userRoles.filter(ur => ur.user_id === profile.id);
                         
+                        // Debug logging for regular filter
+                        if (roleFilter === 'regular' && profileRoles.length > 0) {
+                          console.log('🔍 REGULAR FILTER - Profile:', profile.first_name, profile.last_name, 'Roles:', profileRoles.map(r => r.role));
+                        }
+                        
                         if (roleFilter === 'admin') {
                           const isAdmin = profileRoles.some(ur => ur.role === 'admin');
                           if (!isAdmin) return false;
@@ -6784,6 +6760,7 @@ const Admin = () => {
                           if (profileRoles.length > 0) return false;
                         } else if (roleFilter === 'regular') {
                           const isRegular = profileRoles.some(ur => ur.role === 'regular');
+                          console.log('🔍 REGULAR CHECK - Profile:', profile.first_name, 'has regular role:', isRegular, 'profileRoles:', profileRoles.length);
                           if (!isRegular) return false;
                         } else if (roleFilter === 'suspicious') {
                           const isSuspicious = profileRoles.some(ur => ur.role === 'suspicious');
