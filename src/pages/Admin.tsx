@@ -1781,26 +1781,44 @@ const Admin = () => {
         .from('contestant_ratings')
         .select('user_id');
   
-  // Auto-load user activity when "2 w" filter is activated
+  // Auto-load user activity when "2 w" filter is activated AND profiles are loaded
   useEffect(() => {
-    if (regStatusFilter === '2+weeks' && profiles.length > 0 && activeTab === 'registrations') {
-      console.log('🔄 Auto-loading user activity for 2+ weeks filter...');
-      setIsLoadingWeeksFilter(true);
+    // Только если фильтр активен, есть профили и мы на вкладке registrations
+    if (regStatusFilter === '2+weeks' && profiles.length > 0 && activeTab === 'registrations' && !isLoadingWeeksFilter) {
+      const alreadyLoadedCount = Object.keys(userActivityStats).length;
+      const needToLoad = profiles.length - alreadyLoadedCount;
       
-      // Load activity for all profiles
-      const loadAllActivity = async () => {
-        for (const profile of profiles) {
-          if (!userActivityStats[profile.id]) {
-            await fetchUserActivity(profile.id);
+      console.log('🔄 Auto-loading user activity for 2+ weeks filter...', {
+        profilesCount: profiles.length,
+        alreadyLoaded: alreadyLoadedCount,
+        needToLoad: needToLoad
+      });
+      
+      if (needToLoad > 0) {
+        setIsLoadingWeeksFilter(true);
+        
+        // Load activity for all profiles that don't have data yet
+        const loadAllActivity = async () => {
+          let loadedCount = 0;
+          for (const profile of profiles) {
+            if (!userActivityStats[profile.id]) {
+              await fetchUserActivity(profile.id);
+              loadedCount++;
+              if (loadedCount % 50 === 0) {
+                console.log(`⏳ Loaded ${loadedCount}/${needToLoad} user activities...`);
+              }
+            }
           }
-        }
-        setIsLoadingWeeksFilter(false);
-        console.log('✅ Finished loading activity for all users');
-      };
-      
-      loadAllActivity();
+          setIsLoadingWeeksFilter(false);
+          console.log(`✅ Finished loading activity for ${loadedCount} users out of ${profiles.length} total`);
+        };
+        
+        loadAllActivity();
+      } else {
+        console.log('✅ All user activities already loaded');
+      }
     }
-  }, [regStatusFilter, profiles.length, activeTab]);
+  }, [regStatusFilter, profiles, activeTab]);
 
       if (error) {
         console.error('Error fetching users who voted:', error);
