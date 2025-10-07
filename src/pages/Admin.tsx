@@ -6613,7 +6613,14 @@ const Admin = () => {
                       // Фильтр "2+ Weeks" - users who voted for participants from 2+ different weeks
                       // ВАЖНО: Применяется ПЕРВЫМ, чтобы работать независимо от других фильтров
                       if (regStatusFilter === '2+weeks') {
+                        console.log(`🔎 2+ WEEKS FILTER ACTIVATED for ${profile.display_name || profile.email?.split('@')[0]}`);
+                        
                         const userActivity = userActivityStats[profile.id];
+                        
+                        if (!userActivity) {
+                          console.log(`❌ No userActivity for ${profile.display_name || profile.email?.split('@')[0]}`);
+                          return false;
+                        }
                         
                         if (!userActivity?.ratings || userActivity.ratings.length === 0) {
                           console.log(`❌ User ${profile.display_name || profile.email?.split('@')[0]} (${profile.email}) - no ratings found`);
@@ -6622,26 +6629,26 @@ const Admin = () => {
                         
                         console.log(`🔍 Checking user ${profile.display_name || profile.email?.split('@')[0]} (${profile.email}):`, {
                           userId: profile.id,
-                          totalRatings: userActivity.ratings.length
+                          totalRatings: userActivity.ratings.length,
+                          sampleRatings: userActivity.ratings.slice(0, 3)
                         });
                         
                         // Собираем уникальные week_interval из всех участников за которых голосовал пользователь
                         const weekIntervalsSet = new Set<string>();
                         
-                        userActivity.ratings.forEach((rating: any) => {
-                          console.log(`  📌 Rating:`, {
-                            contestant: rating.contestant_name,
-                            participantId: rating.participant_id,
-                            weekInterval: rating.week_interval,
-                            votedAt: rating.created_at
-                          });
+                        userActivity.ratings.forEach((rating: any, index: number) => {
+                          if (index < 5) { // Логируем только первые 5 для краткости
+                            console.log(`  📌 Rating ${index + 1}:`, {
+                              contestant: rating.contestant_name,
+                              participantId: rating.participant_id,
+                              weekInterval: rating.week_interval,
+                              votedAt: rating.created_at
+                            });
+                          }
                           
                           // Добавляем week_interval участника (если есть)
                           if (rating.week_interval) {
                             weekIntervalsSet.add(rating.week_interval);
-                            console.log(`     ✅ Added interval: ${rating.week_interval} - total unique: ${weekIntervalsSet.size}`);
-                          } else {
-                            console.log(`     ⚠️ No week_interval for this rating`);
                           }
                         });
                         
@@ -6650,11 +6657,11 @@ const Admin = () => {
                         
                         // Показываем только пользователей, которые голосовали за участников из 2+ разных недель
                         if (uniqueIntervals.length < 2) {
-                          console.log(`❌ User ${profile.display_name || profile.email?.split('@')[0]} (${profile.email}) filtered out: only ${uniqueIntervals.length} week(s)`);
+                          console.log(`❌ FILTERED OUT: ${profile.display_name || profile.email?.split('@')[0]} - only ${uniqueIntervals.length} week(s)`);
                           return false;
                         }
                         
-                        console.log(`✅ User ${profile.display_name || profile.email?.split('@')[0]} (${profile.email}) PASSED: ${uniqueIntervals.length} different weeks`);
+                        console.log(`✅✅✅ PASSED: ${profile.display_name || profile.email?.split('@')[0]} - ${uniqueIntervals.length} different weeks!`);
                         
                         // Если фильтр "2+ Weeks" активен, остальные фильтры НЕ применяются
                         return true;
