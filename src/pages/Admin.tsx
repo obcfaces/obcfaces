@@ -6698,10 +6698,11 @@ const Admin = () => {
                           if (profileRoles.length > 0) return false;
                         } else if (roleFilter === 'regular') {
                           const isRegular = profileRoles.some(ur => ur.role === 'regular');
-                          if (isRegular) {
-                            console.log('✅ FOUND REGULAR USER:', profile.first_name, profile.last_name, 'id:', profile.id);
+                          if (!isRegular) {
+                            console.log('❌ Profile REJECTED - no regular role:', profile.first_name, profile.id);
+                            return false;
                           }
-                          if (!isRegular) return false;
+                          console.log('✅ Profile PASSED regular filter:', profile.first_name, profile.id);
                         } else if (roleFilter === 'suspicious') {
                           const isSuspicious = profileRoles.some(ur => ur.role === 'suspicious');
                           if (!isSuspicious) return false;
@@ -6748,9 +6749,15 @@ const Admin = () => {
                       
                       // Фильтр верификации
                       if (verificationFilter === 'verified') {
-                        if (!profile.email_confirmed_at) return false;
+                        if (!profile.email_confirmed_at) {
+                          if (roleFilter === 'regular') console.log('❌ Regular user REJECTED by verification filter (not verified):', profile.first_name);
+                          return false;
+                        }
                       } else if (verificationFilter === 'unverified') {
-                        if (profile.email_confirmed_at) return false;
+                        if (profile.email_confirmed_at) {
+                          if (roleFilter === 'regular') console.log('❌ Regular user REJECTED by verification filter (is verified):', profile.first_name);
+                          return false;
+                        }
                       }
                       
                       // Фильтр "Maybe Suspicious" - НЕ применять если выбран фильтр Regular!
@@ -6789,10 +6796,20 @@ const Admin = () => {
                         const fingerprintId = (profile.fingerprint_id || '').toLowerCase();
                         const ip = (profile.ip_address || '').toLowerCase();
                         
-                        return fullName.includes(query) || 
+                        const matchesSearch = fullName.includes(query) || 
                                displayName.includes(query) || 
                                fingerprintId.includes(query) || 
                                ip.includes(query);
+                        
+                        if (!matchesSearch && roleFilter === 'regular') {
+                          console.log('❌ Regular user REJECTED by search filter:', profile.first_name);
+                        }
+                        
+                        return matchesSearch;
+                      }
+                      
+                      if (roleFilter === 'regular') {
+                        console.log('✅ Regular user PASSED ALL FILTERS:', profile.first_name, profile.id);
                       }
                        
                        return true;
