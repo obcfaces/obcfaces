@@ -6693,7 +6693,7 @@ const Admin = () => {
                         }
                       }
 
-                      // Фильтр "2+ Weeks" - users who voted for cards that CURRENTLY have "this week" or "past" status with DIFFERENT week_intervals
+                      // Фильтр "2+ Weeks" - users who voted in 2 or more different weeks
                       if (regStatusFilter === '2+weeks') {
                         const userActivity = userActivityStats[profile.id];
                         
@@ -6707,8 +6707,7 @@ const Admin = () => {
                           totalRatings: userActivity.ratings.length
                         });
                         
-                        // Собираем все уникальные интервалы из рейтингов пользователя
-                        // используя week_interval, который уже загружен вместе с ratings
+                        // Collect all unique week_intervals from ratings (regardless of participant's current status)
                         const weekIntervalsSet = new Set<string>();
                         
                         userActivity.ratings.forEach((rating: any) => {
@@ -6720,18 +6719,19 @@ const Admin = () => {
                             votedAt: rating.created_at
                           });
                           
-                          // Используем week_interval напрямую из rating (он загружается из weekly_contest_participants)
-                          // и проверяем статус (this week или past)
-                          if (rating.week_interval && (rating.admin_status === 'this week' || rating.admin_status === 'past')) {
+                          // Include ALL ratings that have a week_interval (не фильтруем по статусу)
+                          if (rating.week_interval) {
                             weekIntervalsSet.add(rating.week_interval);
                             console.log(`     ✅ Added interval: ${rating.week_interval} (status: ${rating.admin_status}) - total unique: ${weekIntervalsSet.size}`);
+                          } else {
+                            console.log(`     ⚠️ No week_interval for this rating`);
                           }
                         });
                         
                         const uniqueIntervals = Array.from(weekIntervalsSet);
                         console.log(`📊 User ${profile.display_name || profile.email?.split('@')[0]} (${profile.email}): Found ${uniqueIntervals.length} unique intervals:`, uniqueIntervals);
                         
-                        // Если меньше 2 разных интервалов - не показываем
+                        // Show only users who voted in 2 or more different weeks
                         if (uniqueIntervals.length < 2) {
                           console.log(`❌ User ${profile.display_name || profile.email?.split('@')[0]} (${profile.email}) filtered out: only ${uniqueIntervals.length} interval(s)`);
                           return false;
