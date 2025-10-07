@@ -6700,8 +6700,15 @@ const Admin = () => {
                         console.log('🔍 Applying 2+weeks filter, userVotingStats keys:', Object.keys(userVotingStats).length);
                         console.log('🔍 First 3 userVotingStats keys:', Object.keys(userVotingStats).slice(0, 3));
                         console.log('🔍 First 3 profile IDs:', profiles.slice(0, 3).map(p => p.id));
+                        console.log('🔍 First 3 profile user_id fields:', profiles.slice(0, 3).map(p => ({
+                          id: p.id,
+                          user_id_field: (p as any).user_id,
+                          email: (p as any).email,
+                          email_confirmed_at: (p as any).email_confirmed_at
+                        })));
                         
                         const result = profiles.filter((profile, index) => {
+                          // profile.id IS the auth user ID, so we use it directly
                           const votingStats = userVotingStats[profile.id];
                           
                           if (index < 3) {
@@ -6709,7 +6716,11 @@ const Admin = () => {
                               id: profile.id,
                               name: `${profile.first_name} ${profile.last_name}`,
                               hasStats: !!votingStats,
-                              stats: votingStats
+                              stats: votingStats ? {
+                                unique_weeks: votingStats.unique_weeks_count,
+                                total_votes: votingStats.total_votes_count,
+                                intervals: votingStats.voting_week_intervals
+                              } : undefined
                             });
                           }
                           
@@ -6728,11 +6739,13 @@ const Admin = () => {
                             const query = searchQuery.toLowerCase();
                             const fullName = `${profile.first_name || ''} ${profile.last_name || ''}`.toLowerCase();
                             const displayName = (profile.display_name || '').toLowerCase();
-                            const ip = (profile.ip_address || '').toLowerCase();
-                            const fingerprintId = (profile.fingerprint_id || '').toLowerCase();
+                            const email = ((profile as any).email || '').toLowerCase();
+                            const ip = ((profile as any).ip_address || '').toLowerCase();
+                            const fingerprintId = ((profile as any).fingerprint_id || '').toLowerCase();
                             
                             return fullName.includes(query) || 
-                                   displayName.includes(query) || 
+                                   displayName.includes(query) ||
+                                   email.includes(query) ||
                                    ip.includes(query) ||
                                    fingerprintId.includes(query);
                           }
