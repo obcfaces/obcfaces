@@ -6549,11 +6549,14 @@ const Admin = () => {
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button variant="outline" size="sm" className="min-w-[140px] justify-between">
-                              {roleFilter === 'all' ? 'All Roles' :
-                               roleFilter === 'suspicious' ? 'Suspicious' :
-                               roleFilter === 'usual' ? 'Usual' :
-                               roleFilter === 'moderator' ? 'Moderator' :
-                               roleFilter === 'regular' ? 'Regular' : 'Admin'}
+                              {(() => {
+                                console.log('🎨 Rendering button with roleFilter:', roleFilter);
+                                return roleFilter === 'all' ? 'All Roles' :
+                                 roleFilter === 'suspicious' ? 'Suspicious' :
+                                 roleFilter === 'usual' ? 'Usual' :
+                                 roleFilter === 'moderator' ? 'Moderator' :
+                                 roleFilter === 'regular' ? 'Regular' : 'Admin';
+                              })()}
                               <ChevronDown className="ml-2 h-4 w-4" />
                             </Button>
                           </DropdownMenuTrigger>
@@ -6571,8 +6574,10 @@ const Admin = () => {
                               Moderator
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => {
+                              console.log('🔵 Setting roleFilter to regular');
                               setRoleFilter('regular');
                               setSuspiciousEmailFilter('all'); // Сбросить Maybe Suspicious фильтр
+                              console.log('🔵 roleFilter should now be: regular');
                             }}>
                               Regular
                             </DropdownMenuItem>
