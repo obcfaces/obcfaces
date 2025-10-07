@@ -1219,7 +1219,7 @@ const Admin = () => {
           // Get participant week intervals from weekly_contest_participants table
           const { data: participantsData, error: participantsError } = await supabase
             .from('weekly_contest_participants')
-            .select('id, week_interval, user_id')
+            .select('id, week_interval, user_id, admin_status')
             .in('id', participantIds);
           
           if (participantsError) {
@@ -1242,7 +1242,11 @@ const Admin = () => {
           );
           
           const participantsMap = new Map(
-            (participantsData || []).map(p => [p.id, { week_interval: p.week_interval, user_id: p.user_id }])
+            (participantsData || []).map(p => [p.id, { 
+              week_interval: p.week_interval, 
+              user_id: p.user_id,
+              admin_status: p.admin_status 
+            }])
           );
           
           console.log('📅 Participant week intervals for ratings:', Array.from(participantsMap.entries()).slice(0, 5));
@@ -1254,8 +1258,9 @@ const Admin = () => {
             
             return {
               ...rating,
-              profiles: profile,
-              week_interval: participantData?.week_interval
+              participant: profile,
+              week_interval: participantData?.week_interval,
+              admin_status: participantData?.admin_status
             };
           }).filter(rating => rating.week_interval); // Keep ratings with week_interval even if no profile
           
@@ -6667,7 +6672,7 @@ const Admin = () => {
                         }
                       }
 
-                      // Фильтр "2+ Weeks" - users who VOTED (ratings only, not likes) in 2+ different weeks
+                      // Фильтр "2+ Weeks" - users who VOTED for participants with status "this week" or "past" across 2+ different weeks
                       if (regStatusFilter === '2+weeks') {
                         const userWeeks = new Set();
                         const userActivity = userActivityStats[profile.id];
@@ -6679,22 +6684,28 @@ const Admin = () => {
                           registrationDate: profile.created_at
                         });
                         
-                        // Only count ratings, not likes
+                        // Only count ratings for participants with status "this week" or "past"
                         if (userActivity?.ratings) {
                           console.log(`📋 All ratings for ${profile.display_name || profile.email?.split('@')[0]}:`);
                           userActivity.ratings.forEach((rating: any, idx: number) => {
-                            console.log(`  ${idx + 1}. Participant: ${rating.participant?.display_name || 'Unknown'}, Week: ${rating.week_interval || 'NO WEEK'}, Created: ${rating.created_at}`);
-                            if (rating.week_interval) {
+                            const status = rating.admin_status || 'unknown';
+                            const isValidStatus = status === 'this week' || status === 'past';
+                            
+                            console.log(`  ${idx + 1}. Participant: ${rating.participant?.display_name || 'Unknown'}, Status: ${status}, Week: ${rating.week_interval || 'NO WEEK'}, Valid: ${isValidStatus ? '✅' : '❌'}`);
+                            
+                            // Only count if status is "this week" or "past"
+                            if (rating.week_interval && isValidStatus) {
                               userWeeks.add(rating.week_interval);
+                              console.log(`     ➕ Week ${rating.week_interval} added`);
                             }
                           });
                         }
                         
                         const weeksList = Array.from(userWeeks);
-                        console.log(`📊 User ${profile.display_name || profile.email?.split('@')[0]}: ${userWeeks.size} unique weeks:`, weeksList);
+                        console.log(`📊 User ${profile.display_name || profile.email?.split('@')[0]}: ${userWeeks.size} unique weeks (from valid statuses):`, weeksList);
                         
                         if (userWeeks.size < 2) {
-                          console.log(`❌ User ${profile.display_name || profile.email?.split('@')[0]} filtered out: only ${userWeeks.size} week(s)`);
+                          console.log(`❌ User ${profile.display_name || profile.email?.split('@')[0]} filtered out: only ${userWeeks.size} valid week(s)`);
                           return false;
                         }
                         console.log(`✅ User ${profile.display_name || profile.email?.split('@')[0]} passed filter with ${userWeeks.size} weeks`);
