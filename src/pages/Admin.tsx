@@ -6672,9 +6672,8 @@ const Admin = () => {
                         }
                       }
 
-                      // Фильтр "2+ Weeks" - users who VOTED for participants with status "this week" or "past" across 2+ different weeks
+                      // Фильтр "2+ Weeks" - users who voted for at least 2 participants with status "this week" or "past" from different weeks
                       if (regStatusFilter === '2+weeks') {
-                        const userWeeks = new Set();
                         const userActivity = userActivityStats[profile.id];
                         
                         console.log(`🔍 Checking user ${profile.display_name || profile.email?.split('@')[0]} (${profile.id}):`, {
@@ -6684,31 +6683,35 @@ const Admin = () => {
                           registrationDate: profile.created_at
                         });
                         
-                        // Only count ratings for participants with status "this week" or "past"
-                        if (userActivity?.ratings) {
-                          console.log(`📋 All ratings for ${profile.display_name || profile.email?.split('@')[0]}:`);
-                          userActivity.ratings.forEach((rating: any, idx: number) => {
-                            const status = rating.admin_status || 'unknown';
-                            const isValidStatus = status === 'this week' || status === 'past';
-                            
-                            console.log(`  ${idx + 1}. Participant: ${rating.participant?.display_name || 'Unknown'}, Status: ${status}, Week: ${rating.week_interval || 'NO WEEK'}, Valid: ${isValidStatus ? '✅' : '❌'}`);
-                            
-                            // Only count if status is "this week" or "past"
-                            if (rating.week_interval && isValidStatus) {
-                              userWeeks.add(rating.week_interval);
-                              console.log(`     ➕ Week ${rating.week_interval} added`);
-                            }
-                          });
-                        }
+                        // Filter ratings: only count participants with status "this week" or "past"
+                        const validRatings = (userActivity?.ratings || []).filter((rating: any) => {
+                          const status = rating.admin_status;
+                          return status === 'this week' || status === 'past';
+                        });
                         
-                        const weeksList = Array.from(userWeeks);
-                        console.log(`📊 User ${profile.display_name || profile.email?.split('@')[0]}: ${userWeeks.size} unique weeks (from valid statuses):`, weeksList);
+                        console.log(`📋 Valid ratings (this week/past) for ${profile.display_name || profile.email?.split('@')[0]}: ${validRatings.length} of ${userActivity?.ratings?.length || 0}`);
                         
-                        if (userWeeks.size < 2) {
-                          console.log(`❌ User ${profile.display_name || profile.email?.split('@')[0]} filtered out: only ${userWeeks.size} valid week(s)`);
+                        // Count unique week intervals from valid ratings
+                        const weekIntervals = new Set<string>();
+                        validRatings.forEach((rating: any, idx: number) => {
+                          console.log(`  ${idx + 1}. Participant: ${rating.participant?.display_name || 'Unknown'}, Status: ${rating.admin_status}, Week: ${rating.week_interval || 'NO WEEK'}`);
+                          
+                          if (rating.week_interval) {
+                            weekIntervals.add(rating.week_interval);
+                            console.log(`     ➕ Week ${rating.week_interval} added`);
+                          }
+                        });
+                        
+                        const uniqueWeeks = Array.from(weekIntervals);
+                        console.log(`📊 User ${profile.display_name || profile.email?.split('@')[0]}: ${validRatings.length} valid ratings across ${uniqueWeeks.length} unique weeks:`, uniqueWeeks);
+                        
+                        // Must have voted for participants from at least 2 different weeks (with valid statuses)
+                        if (uniqueWeeks.length < 2) {
+                          console.log(`❌ User ${profile.display_name || profile.email?.split('@')[0]} filtered out: only ${uniqueWeeks.length} week(s) with valid statuses`);
                           return false;
                         }
-                        console.log(`✅ User ${profile.display_name || profile.email?.split('@')[0]} passed filter with ${userWeeks.size} weeks`);
+                        
+                        console.log(`✅ User ${profile.display_name || profile.email?.split('@')[0]} passed: ${validRatings.length} ratings across ${uniqueWeeks.length} weeks`);
                       }
 
                       // Фильтр поиска
