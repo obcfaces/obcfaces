@@ -466,6 +466,7 @@ const Admin = () => {
   // User activity stats for Reg tab
   const [userActivityStats, setUserActivityStats] = useState<Record<string, { likesCount: number; ratingsCount: number; likes: any[]; ratings: any[] }>>({});
   const [loadingActivity, setLoadingActivity] = useState<Set<string>>(new Set());
+  const [isLoadingWeeksFilter, setIsLoadingWeeksFilter] = useState(false);
   const [emailDomainStats, setEmailDomainStats] = useState<Array<{ domain: string; user_count: number }>>([]);
   const [emailDomainVotingStats, setEmailDomainVotingStats] = useState<Array<{ domain: string; user_count: number; total_votes: number; total_likes: number; avg_rating: number }>>([]);
   const [expandedActivity, setExpandedActivity] = useState<Set<string>>(new Set());
@@ -6536,9 +6537,13 @@ const Admin = () => {
                             console.log('🔘 Clicking 2+ Weeks button, new filter:', newFilter);
                             setRegStatusFilter(newFilter);
                           }}
+                          disabled={isLoadingWeeksFilter}
+                          className="gap-2"
                         >
+                          {isLoadingWeeksFilter && <Loader2 className="h-4 w-4 animate-spin" />}
                           2+ Weeks
                           {(() => {
+                            if (isLoadingWeeksFilter) return ' (loading...)';
                             const count = profiles.filter(p => {
                               const userWeeks = new Set();
                               // Count weeks where user VOTED (ratings only, not likes)
@@ -6659,16 +6664,30 @@ const Admin = () => {
                         const userWeeks = new Set();
                         const userActivity = userActivityStats[profile.id];
                         
+                        console.log(`🔍 Checking user ${profile.display_name} (${profile.id}):`, {
+                          hasActivity: !!userActivity,
+                          hasRatings: !!userActivity?.ratings,
+                          ratingsCount: userActivity?.ratings?.length || 0
+                        });
+                        
                         // Only count ratings, not likes
                         if (userActivity?.ratings) {
                           userActivity.ratings.forEach((rating: any) => {
-                            if (rating.week_interval) userWeeks.add(rating.week_interval);
+                            if (rating.week_interval) {
+                              userWeeks.add(rating.week_interval);
+                              console.log(`  ➕ Added week: ${rating.week_interval}`);
+                            }
                           });
                         }
                         
-                        console.log(`🔍 User ${profile.display_name} (${profile.id}): ${userWeeks.size} unique weeks:`, Array.from(userWeeks));
+                        const weeksList = Array.from(userWeeks);
+                        console.log(`📊 User ${profile.display_name}: ${userWeeks.size} unique weeks:`, weeksList);
                         
-                        if (userWeeks.size < 2) return false;
+                        if (userWeeks.size < 2) {
+                          console.log(`❌ User ${profile.display_name} filtered out: only ${userWeeks.size} week(s)`);
+                          return false;
+                        }
+                        console.log(`✅ User ${profile.display_name} passed filter with ${userWeeks.size} weeks`);
                       }
 
                       // Фильтр поиска
