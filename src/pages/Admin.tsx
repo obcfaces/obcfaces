@@ -6675,6 +6675,31 @@ const Admin = () => {
                       
                       return profiles.filter(profile => {
                       
+                      // Фильтр ролей - ДОЛЖЕН БЫТЬ ПЕРВЫМ!
+                      if (roleFilter !== 'all') {
+                        const profileRoles = userRoles.filter(ur => ur.user_id === profile.id);
+                        
+                        if (roleFilter === 'admin') {
+                          const isAdmin = profileRoles.some(ur => ur.role === 'admin');
+                          if (!isAdmin) return false;
+                        } else if (roleFilter === 'moderator') {
+                          const isModerator = profileRoles.some(ur => ur.role === 'moderator');
+                          if (!isModerator) return false;
+                        } else if (roleFilter === 'usual') {
+                          // Usual = нет ролей вообще
+                          if (profileRoles.length > 0) return false;
+                        } else if (roleFilter === 'regular') {
+                          const isRegular = profileRoles.some(ur => ur.role === 'regular');
+                          if (isRegular) {
+                            console.log('✅ FOUND REGULAR USER:', profile.first_name, profile.last_name, 'id:', profile.id);
+                          }
+                          if (!isRegular) return false;
+                        } else if (roleFilter === 'suspicious') {
+                          const isSuspicious = profileRoles.some(ur => ur.role === 'suspicious');
+                          if (!isSuspicious) return false;
+                        }
+                      }
+                      
                       // Фильтр по дню регистрации
                       if (selectedRegistrationDay) {
                         if (!profile.created_at) return false;
@@ -6746,31 +6771,6 @@ const Admin = () => {
                         }
                         
                         if (!(wasAutoConfirmed || fastFormFill || hasDuplicateFingerprint)) return false;
-                      }
-
-                      // Фильтр ролей
-                      if (roleFilter !== 'all') {
-                        const profileRoles = userRoles.filter(ur => ur.user_id === profile.id);
-                        
-                        if (roleFilter === 'admin') {
-                          const isAdmin = profileRoles.some(ur => ur.role === 'admin');
-                          if (!isAdmin) return false;
-                        } else if (roleFilter === 'moderator') {
-                          const isModerator = profileRoles.some(ur => ur.role === 'moderator');
-                          if (!isModerator) return false;
-                        } else if (roleFilter === 'usual') {
-                          // Usual = нет ролей вообще
-                          if (profileRoles.length > 0) return false;
-                        } else if (roleFilter === 'regular') {
-                          const isRegular = profileRoles.some(ur => ur.role === 'regular');
-                          if (isRegular) {
-                            console.log('✅ FOUND REGULAR USER:', profile.first_name, profile.last_name, 'id:', profile.id);
-                          }
-                          if (!isRegular) return false;
-                        } else if (roleFilter === 'suspicious') {
-                          const isSuspicious = profileRoles.some(ur => ur.role === 'suspicious');
-                          if (!isSuspicious) return false;
-                        }
                       }
 
                       // Фильтр поиска
