@@ -2782,10 +2782,15 @@ const Admin = () => {
                           size="sm"
                           variant="outline"
                           onClick={() => {
-                            setEditingParticipantData({
+                            console.log('🔵 THIS WEEK Edit button clicked!');
+                            console.log('Full participant data:', participant);
+                            console.log('Application data (appData):', appData);
+                            const editData = {
                               ...participant,
                               application_data: appData,
-                            });
+                            };
+                            console.log('Data being sent to modal:', editData);
+                            setEditingParticipantData(editData);
                             setShowParticipationModal(true);
                           }}
                           className="absolute bottom-0 left-0 z-20 p-1 m-0 rounded-none rounded-tr-md border-0 border-t border-r bg-background/90 hover:bg-background"
