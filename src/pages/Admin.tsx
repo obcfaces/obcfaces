@@ -1808,12 +1808,21 @@ const Admin = () => {
   // APPROACH 1: Client-side filter using userVotingStats (current approach)
   const fetchApproach1 = async () => {
     console.log('🔵 APPROACH 1: Client-side filter with userVotingStats');
+    console.log('🔵 profiles.length:', profiles.length);
+    console.log('🔵 userVotingStats keys:', Object.keys(userVotingStats).length);
+    console.log('🔵 First 3 userVotingStats:', Object.entries(userVotingStats).slice(0, 3));
+    
     setLoadingApproach('approach1');
     
     const result = profiles.filter(profile => {
       const votingStats = userVotingStats[profile.id];
-      if (!votingStats) return false;
-      return (votingStats.unique_weeks_count || 0) >= 2;
+      const uniqueWeeks = votingStats?.unique_weeks_count || 0;
+      
+      if (uniqueWeeks >= 2) {
+        console.log('🔵 Found user with 2+ weeks:', profile.first_name, profile.last_name, 'weeks:', uniqueWeeks);
+      }
+      
+      return uniqueWeeks >= 2;
     });
     
     console.log('✅ Approach 1 result:', result.length, 'users');
@@ -1828,16 +1837,25 @@ const Admin = () => {
     setLoadingApproach('approach2');
     
     try {
+      console.log('🟢 Querying user_voting_stats...');
+      
       // Query profiles that have 2+ unique week intervals in user_voting_stats
       const { data: votingData, error } = await supabase
         .from('user_voting_stats')
         .select('user_id, unique_weeks_count, voting_week_intervals')
         .gte('unique_weeks_count', 2);
       
-      if (error) throw error;
+      if (error) {
+        console.error('🟢 Database error:', error);
+        throw error;
+      }
+      
+      console.log('🟢 votingData returned:', votingData?.length, 'records');
+      console.log('🟢 First 3 records:', votingData?.slice(0, 3));
       
       // Get user IDs with 2+ weeks
       const userIds = (votingData || []).map(v => v.user_id);
+      console.log('🟢 User IDs with 2+ weeks:', userIds.length);
       
       // Filter profiles to only those user IDs
       const result = profiles.filter(p => userIds.includes(p.id));
@@ -1848,6 +1866,11 @@ const Admin = () => {
       setMultiApproachFilter('approach2');
     } catch (error) {
       console.error('❌ Approach 2 error:', error);
+      toast({
+        title: "Ошибка",
+        description: `Approach 2 failed: ${error}`,
+        variant: "destructive"
+      });
       setLoadingApproach(null);
     }
   };
@@ -1858,12 +1881,19 @@ const Admin = () => {
     setLoadingApproach('approach3');
     
     try {
+      console.log('🟡 Querying contestant_ratings...');
+      
       // Get all ratings with week_interval
       const { data: ratingsData, error } = await supabase
         .from('contestant_ratings')
         .select('user_id, week_interval');
       
-      if (error) throw error;
+      if (error) {
+        console.error('🟡 Database error:', error);
+        throw error;
+      }
+      
+      console.log('🟡 ratingsData returned:', ratingsData?.length, 'records');
       
       // Group by user_id and count unique week_intervals
       const userWeekCounts: Record<string, Set<string>> = {};
@@ -1875,10 +1905,17 @@ const Admin = () => {
         userWeekCounts[rating.user_id].add(rating.week_interval);
       });
       
+      console.log('🟡 Total users who voted:', Object.keys(userWeekCounts).length);
+      
       // Filter to users with 2+ unique weeks
-      const userIds = Object.keys(userWeekCounts).filter(
-        userId => userWeekCounts[userId].size >= 2
+      const usersWith2PlusWeeks = Object.entries(userWeekCounts).filter(
+        ([userId, weeks]) => weeks.size >= 2
       );
+      
+      console.log('🟡 Users with 2+ weeks:', usersWith2PlusWeeks.length);
+      console.log('🟡 First 3:', usersWith2PlusWeeks.slice(0, 3).map(([id, weeks]) => ({ id: id.substring(0, 8), weeks: weeks.size })));
+      
+      const userIds = usersWith2PlusWeeks.map(([userId]) => userId);
       
       const result = profiles.filter(p => userIds.includes(p.id));
       
@@ -1888,6 +1925,11 @@ const Admin = () => {
       setMultiApproachFilter('approach3');
     } catch (error) {
       console.error('❌ Approach 3 error:', error);
+      toast({
+        title: "Ошибка",
+        description: `Approach 3 failed: ${error}`,
+        variant: "destructive"
+      });
       setLoadingApproach(null);
     }
   };
@@ -1895,6 +1937,8 @@ const Admin = () => {
   // APPROACH 4: Show detailed voting intervals for each user
   const fetchApproach4 = async () => {
     console.log('🟣 APPROACH 4: Display voting_week_intervals array');
+    console.log('🟣 userVotingStats keys:', Object.keys(userVotingStats).length);
+    
     setLoadingApproach('approach4');
     
     const result = profiles.filter(profile => {
@@ -1905,6 +1949,11 @@ const Admin = () => {
     });
     
     console.log('✅ Approach 4 result:', result.length, 'users');
+    console.log('🟣 First 3 results:', result.slice(0, 3).map(p => ({
+      name: `${p.first_name} ${p.last_name}`,
+      intervals: userVotingStats[p.id]?.voting_week_intervals
+    })));
+    
     setApproachResults(prev => ({ ...prev, approach4: result }));
     setLoadingApproach(null);
     setMultiApproachFilter('approach4');
@@ -1916,6 +1965,8 @@ const Admin = () => {
     setLoadingApproach('approach5');
     
     try {
+      console.log('🔴 Querying user_voting_stats with aggregation...');
+      
       // Get all user_voting_stats with 2+ weeks
       const { data, error } = await supabase
         .from('user_voting_stats')
@@ -1923,10 +1974,18 @@ const Admin = () => {
         .gte('unique_weeks_count', 2)
         .order('unique_weeks_count', { ascending: false });
       
-      if (error) throw error;
+      if (error) {
+        console.error('🔴 Database error:', error);
+        throw error;
+      }
+      
+      console.log('🔴 Query returned:', data?.length, 'records');
+      console.log('🔴 First 3 records:', data?.slice(0, 3));
       
       // Create enriched profiles with voting stats
       const userIdsWithStats = (data || []).map(d => d.user_id);
+      console.log('🔴 User IDs:', userIdsWithStats.length);
+      
       const result = profiles
         .filter(p => userIdsWithStats.includes(p.id))
         .map(p => {
@@ -1943,6 +2002,11 @@ const Admin = () => {
       setMultiApproachFilter('approach5');
     } catch (error) {
       console.error('❌ Approach 5 error:', error);
+      toast({
+        title: "Ошибка",
+        description: `Approach 5 failed: ${error}`,
+        variant: "destructive"
+      });
       setLoadingApproach(null);
     }
   };
