@@ -6687,28 +6687,38 @@ const Admin = () => {
                         <Button
                           variant={regStatusFilter === '2+weeks' ? 'default' : 'outline'}
                           size="lg"
-                          onClick={() => {
+                          onClick={async () => {
                             const newFilter = regStatusFilter === '2+weeks' ? 'all' : '2+weeks';
-                            setRegStatusFilter(newFilter);
+                            console.log('🔘 CLICKING W BUTTON, new filter:', newFilter);
                             
-                            // Reset other filters when W is activated
                             if (newFilter === '2+weeks') {
+                              setIsLoadingWeeksFilter(true);
+                              console.log('🔄 Loading voting stats for W filter...');
+                              await fetchUserVotingStats();
+                              setIsLoadingWeeksFilter(false);
+                              
+                              // Reset other filters
                               setSuspiciousEmailFilter('all');
                               setVerificationFilter('all');
                               setRoleFilter('all');
                               setSelectedRegistrationDay(null);
                               setSearchQuery('');
                             }
+                            
+                            setRegStatusFilter(newFilter);
                           }}
+                          disabled={isLoadingWeeksFilter}
                           className="gap-2 font-bold text-base"
                         >
+                          {isLoadingWeeksFilter && <Loader2 className="h-4 w-4 animate-spin" />}
                           W
                           {(() => {
-                            // Count users with 2+ unique weeks
-                            const count = profiles.filter(p => {
-                              const votingStats = userVotingStats[p.id];
-                              return votingStats && (votingStats.unique_weeks_count || 0) >= 2;
-                            }).length;
+                            if (isLoadingWeeksFilter) return ' (loading...)';
+                            // Count from userVotingStats (same as "2 w" button)
+                            const count = Object.values(userVotingStats).filter(
+                              (stats: any) => (stats?.unique_weeks_count || 0) >= 2
+                            ).length;
+                            console.log('📊 W count:', count, 'total voting stats:', Object.keys(userVotingStats).length);
                             return count > 0 ? ` (${count})` : ' (0)';
                           })()}
                         </Button>
