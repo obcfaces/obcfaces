@@ -6698,9 +6698,20 @@ const Admin = () => {
                       // Фильтр "2+ Weeks" (2 w) - EXCLUSIVE filter
                       if (regStatusFilter === '2+weeks') {
                         console.log('🔍 Applying 2+weeks filter, userVotingStats keys:', Object.keys(userVotingStats).length);
+                        console.log('🔍 First 3 userVotingStats keys:', Object.keys(userVotingStats).slice(0, 3));
+                        console.log('🔍 First 3 profile IDs:', profiles.slice(0, 3).map(p => p.id));
                         
-                        const result = profiles.filter(profile => {
+                        const result = profiles.filter((profile, index) => {
                           const votingStats = userVotingStats[profile.id];
+                          
+                          if (index < 3) {
+                            console.log(`🔍 Profile ${index}:`, {
+                              id: profile.id,
+                              name: `${profile.first_name} ${profile.last_name}`,
+                              hasStats: !!votingStats,
+                              stats: votingStats
+                            });
+                          }
                           
                           if (!votingStats) {
                             return false;
