@@ -143,7 +143,21 @@ export const ContestParticipationModal = ({
           .maybeSingle()
           .then(({ data: profile, error }) => {
             if (profile && !error) {
-              console.log('Loaded profile data:', profile);
+              console.log('🟢 MODAL: Loaded profile data:', profile);
+              
+              // Parse birthdate from profile if not already parsed from application_data
+              let profileBirthDay = birthDay;
+              let profileBirthMonth = birthMonth;
+              let profileBirthYear = birthYear;
+              
+              if (!birthDay && !birthMonth && !birthYear && profile.birthdate) {
+                console.log('🟢 MODAL: Using birthdate from profile:', profile.birthdate);
+                const profileBirthdate = new Date(profile.birthdate);
+                profileBirthDay = profileBirthdate.getDate().toString();
+                profileBirthMonth = (profileBirthdate.getMonth() + 1).toString();
+                profileBirthYear = profileBirthdate.getFullYear().toString();
+              }
+              
               // Update form data with profile information if not already in application_data
               setFormData(prev => ({
                 ...prev,
@@ -152,6 +166,9 @@ export const ContestParticipationModal = ({
                 has_children: applicationData.has_children !== undefined ? applicationData.has_children : (profile.has_children || undefined),
                 state: applicationData.state || profile.state || "",
                 stateCode: applicationData.state || profile.state || "",
+                birth_day: profileBirthDay,
+                birth_month: profileBirthMonth,
+                birth_year: profileBirthYear,
               }));
             }
           });
