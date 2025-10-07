@@ -6677,46 +6677,46 @@ const Admin = () => {
                         const userActivity = userActivityStats[profile.id];
                         
                         if (!userActivity?.ratings || userActivity.ratings.length === 0) {
-                          console.log(`❌ User ${profile.display_name || profile.email?.split('@')[0]} - no ratings found`);
+                          console.log(`❌ User ${profile.display_name || profile.email?.split('@')[0]} (${profile.email}) - no ratings found`);
                           return false;
                         }
                         
-                        console.log(`🔍 Checking user ${profile.display_name || profile.email?.split('@')[0]} (${profile.id}):`, {
+                        console.log(`🔍 Checking user ${profile.display_name || profile.email?.split('@')[0]} (${profile.email}):`, {
+                          userId: profile.id,
                           totalRatings: userActivity.ratings.length
                         });
                         
-                        // Собираем все интервалы карточек по которым голосовал пользователь
-                        // и которые СЕЙЧАС имеют статус "this week" или "past"
+                        // Собираем все уникальные интервалы из рейтингов пользователя
+                        // используя week_interval, который уже загружен вместе с ratings
                         const weekIntervalsSet = new Set<string>();
                         
                         userActivity.ratings.forEach((rating: any) => {
-                          // Находим карточку в текущем списке участников
-                          const participant = weeklyParticipants.find(p => p.id === rating.participant_id);
+                          console.log(`  📌 Rating:`, {
+                            contestant: rating.contestant_name,
+                            participantId: rating.participant_id,
+                            weekInterval: rating.week_interval,
+                            adminStatus: rating.admin_status,
+                            votedAt: rating.created_at
+                          });
                           
-                          if (participant) {
-                            const currentStatus = participant.admin_status;
-                            const currentInterval = participant.week_interval;
-                            
-                            console.log(`  📌 Card: ${participant.application_data?.firstName || 'Unknown'}, Current Status: ${currentStatus}, Current Interval: ${currentInterval || 'NONE'}`);
-                            
-                            // Проверяем текущий статус
-                            if ((currentStatus === 'this week' || currentStatus === 'past') && currentInterval) {
-                              weekIntervalsSet.add(currentInterval);
-                              console.log(`     ✅ Added interval: ${currentInterval} (total unique: ${weekIntervalsSet.size})`);
-                            }
+                          // Используем week_interval напрямую из rating (он загружается из weekly_contest_participants)
+                          // и проверяем статус (this week или past)
+                          if (rating.week_interval && (rating.admin_status === 'this week' || rating.admin_status === 'past')) {
+                            weekIntervalsSet.add(rating.week_interval);
+                            console.log(`     ✅ Added interval: ${rating.week_interval} (status: ${rating.admin_status}) - total unique: ${weekIntervalsSet.size}`);
                           }
                         });
                         
                         const uniqueIntervals = Array.from(weekIntervalsSet);
-                        console.log(`📊 User ${profile.display_name || profile.email?.split('@')[0]}: Found ${uniqueIntervals.length} unique intervals:`, uniqueIntervals);
+                        console.log(`📊 User ${profile.display_name || profile.email?.split('@')[0]} (${profile.email}): Found ${uniqueIntervals.length} unique intervals:`, uniqueIntervals);
                         
                         // Если меньше 2 разных интервалов - не показываем
                         if (uniqueIntervals.length < 2) {
-                          console.log(`❌ User ${profile.display_name || profile.email?.split('@')[0]} filtered out: only ${uniqueIntervals.length} interval(s)`);
+                          console.log(`❌ User ${profile.display_name || profile.email?.split('@')[0]} (${profile.email}) filtered out: only ${uniqueIntervals.length} interval(s)`);
                           return false;
                         }
                         
-                        console.log(`✅ User ${profile.display_name || profile.email?.split('@')[0]} PASSED: ${uniqueIntervals.length} different intervals`);
+                        console.log(`✅ User ${profile.display_name || profile.email?.split('@')[0]} (${profile.email}) PASSED: ${uniqueIntervals.length} different intervals`);
                       }
 
                       // Фильтр поиска
