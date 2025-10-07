@@ -1260,11 +1260,8 @@ const Admin = () => {
       const finalLikes = likesWithProfiles;
       const finalRatings = ratingsWithProfiles || [];
 
-      // Collect all unique week intervals
+      // Collect all unique week intervals from RATINGS ONLY (not likes)
       const allWeekIntervals = new Set();
-      finalLikes.forEach(like => {
-        if (like.week_interval) allWeekIntervals.add(like.week_interval);
-      });
       finalRatings.forEach(rating => {
         if (rating.week_interval) allWeekIntervals.add(rating.week_interval);
       });
@@ -6544,18 +6541,15 @@ const Admin = () => {
                           {(() => {
                             const count = profiles.filter(p => {
                               const userWeeks = new Set();
-                              // Count weeks where user voted or liked
+                              // Count weeks where user VOTED (ratings only, not likes)
                               const userActivity = userActivityStats[p.id];
+                              
                               if (userActivity?.ratings) {
                                 userActivity.ratings.forEach((rating: any) => {
                                   if (rating.week_interval) userWeeks.add(rating.week_interval);
                                 });
                               }
-                              if (userActivity?.likes) {
-                                userActivity.likes.forEach((like: any) => {
-                                  if (like.week_interval) userWeeks.add(like.week_interval);
-                                });
-                              }
+                              
                               return userWeeks.size >= 2;
                             }).length;
                             return count > 0 ? ` (${count})` : '';
@@ -6660,20 +6654,20 @@ const Admin = () => {
                         }
                       }
 
-                      // Фильтр "2+ Weeks" - users who voted/liked in 2+ different weeks
+                      // Фильтр "2+ Weeks" - users who VOTED (ratings only, not likes) in 2+ different weeks
                       if (regStatusFilter === '2+weeks') {
                         const userWeeks = new Set();
                         const userActivity = userActivityStats[profile.id];
+                        
+                        // Only count ratings, not likes
                         if (userActivity?.ratings) {
                           userActivity.ratings.forEach((rating: any) => {
                             if (rating.week_interval) userWeeks.add(rating.week_interval);
                           });
                         }
-                        if (userActivity?.likes) {
-                          userActivity.likes.forEach((like: any) => {
-                            if (like.week_interval) userWeeks.add(like.week_interval);
-                          });
-                        }
+                        
+                        console.log(`🔍 User ${profile.display_name} (${profile.id}): ${userWeeks.size} unique weeks:`, Array.from(userWeeks));
+                        
                         if (userWeeks.size < 2) return false;
                       }
 
