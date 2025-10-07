@@ -1224,8 +1224,40 @@ const Admin = () => {
         console.log('✅ Ratings fetched:', ratingsData?.length || 0);
       }
 
+      // Fetch participant profiles for ratings
+      let ratingsWithParticipants = [];
+      if (ratingsData && ratingsData.length > 0) {
+        const participantIds = ratingsData
+          .map(rating => rating.participant_id)
+          .filter(id => id != null);
+        
+        console.log(`📋 Processing ${ratingsData.length} ratings, ${participantIds.length} with participant_id`);
+        
+        if (participantIds.length > 0) {
+          // Fetch profiles for participants
+          const { data: participantProfiles } = await supabase
+            .from('profiles')
+            .select('id, display_name, first_name, last_name, avatar_url, photo_1_url, photo_2_url')
+            .in('id', participantIds);
+          
+          const profilesMap = new Map(
+            (participantProfiles || []).map(p => [p.id, p])
+          );
+          
+          ratingsWithParticipants = ratingsData.map(rating => ({
+            ...rating,
+            participant: rating.participant_id ? profilesMap.get(rating.participant_id) : null
+          }));
+        } else {
+          ratingsWithParticipants = ratingsData.map(rating => ({
+            ...rating,
+            participant: null
+          }));
+        }
+      }
+
       // Для рейтингов вычисляем week_interval по ДАТЕ ГОЛОСОВАНИЯ (created_at)
-      const finalRatings = (ratingsData || []).map(rating => {
+      const finalRatings = (ratingsWithParticipants || []).map(rating => {
         if (!rating.created_at) return { ...rating, vote_week_interval: null };
         
         // Определяем понедельник недели для даты голосования
