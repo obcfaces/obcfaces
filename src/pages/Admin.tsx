@@ -1780,6 +1780,27 @@ const Admin = () => {
       const { data, error } = await supabase
         .from('contestant_ratings')
         .select('user_id');
+  
+  // Auto-load user activity when "2 w" filter is activated
+  useEffect(() => {
+    if (regStatusFilter === '2+weeks' && profiles.length > 0 && activeTab === 'registrations') {
+      console.log('🔄 Auto-loading user activity for 2+ weeks filter...');
+      setIsLoadingWeeksFilter(true);
+      
+      // Load activity for all profiles
+      const loadAllActivity = async () => {
+        for (const profile of profiles) {
+          if (!userActivityStats[profile.id]) {
+            await fetchUserActivity(profile.id);
+          }
+        }
+        setIsLoadingWeeksFilter(false);
+        console.log('✅ Finished loading activity for all users');
+      };
+      
+      loadAllActivity();
+    }
+  }, [regStatusFilter, profiles.length, activeTab]);
 
       if (error) {
         console.error('Error fetching users who voted:', error);
