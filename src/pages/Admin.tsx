@@ -1841,6 +1841,18 @@ const Admin = () => {
     return () => clearTimeout(timer);
   }, [activeTab, profiles.length, regPaginationPage, roleFilter, searchQuery, verificationFilter, loading]);
 
+  // Auto-fetch activity data when 2+ weeks filter is activated
+  useEffect(() => {
+    if (regStatusFilter === '2+weeks' && profiles.length > 0 && activeTab === 'registrations') {
+      console.log('🔄 2+ Weeks filter activated, fetching activity for all users...');
+      profiles.forEach(profile => {
+        if (!loadingActivity.has(profile.id) && !userActivityStats[profile.id]) {
+          fetchUserActivity(profile.id);
+        }
+      });
+    }
+  }, [regStatusFilter, profiles.length, activeTab]);
+
   const fetchContestApplications = async () => {
     console.log('Fetching contest applications...');
     // Query unified table ONLY for NEW application statuses (pending, rejected)
