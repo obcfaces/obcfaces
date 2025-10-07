@@ -6665,6 +6665,14 @@ const Admin = () => {
                       
                       
                       // Default filtering for other cases
+                      console.log('🔍 Starting filtration - roleFilter:', roleFilter, 'userRoles.length:', userRoles.length);
+                      
+                      // Log regular users in userRoles
+                      if (roleFilter === 'regular') {
+                        const regularUsers = userRoles.filter(r => r.role === 'regular');
+                        console.log('📋 Regular users in userRoles:', regularUsers.length, regularUsers.slice(0, 5));
+                      }
+                      
                       return profiles.filter(profile => {
                       
                       // Фильтр по дню регистрации
@@ -6744,11 +6752,6 @@ const Admin = () => {
                       if (roleFilter !== 'all') {
                         const profileRoles = userRoles.filter(ur => ur.user_id === profile.id);
                         
-                        // Debug logging for regular filter
-                        if (roleFilter === 'regular' && profileRoles.length > 0) {
-                          console.log('🔍 REGULAR FILTER - Profile:', profile.first_name, profile.last_name, 'Roles:', profileRoles.map(r => r.role));
-                        }
-                        
                         if (roleFilter === 'admin') {
                           const isAdmin = profileRoles.some(ur => ur.role === 'admin');
                           if (!isAdmin) return false;
@@ -6760,7 +6763,9 @@ const Admin = () => {
                           if (profileRoles.length > 0) return false;
                         } else if (roleFilter === 'regular') {
                           const isRegular = profileRoles.some(ur => ur.role === 'regular');
-                          console.log('🔍 REGULAR CHECK - Profile:', profile.first_name, 'has regular role:', isRegular, 'profileRoles:', profileRoles.length);
+                          if (isRegular) {
+                            console.log('✅ FOUND REGULAR USER:', profile.first_name, profile.last_name, 'id:', profile.id);
+                          }
                           if (!isRegular) return false;
                         } else if (roleFilter === 'suspicious') {
                           const isSuspicious = profileRoles.some(ur => ur.role === 'suspicious');
