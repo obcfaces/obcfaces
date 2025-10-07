@@ -1133,7 +1133,7 @@ const Admin = () => {
         console.log('✅ Likes fetched:', likesData?.length || 0);
       }
 
-      // Fetch profile data and week_interval for liked participants
+      // Fetch profile data for liked participants
       let likesWithProfiles = [];
       if (likesData && likesData.length > 0) {
         const participantIds = likesData
@@ -1147,37 +1147,34 @@ const Admin = () => {
             .select('id, display_name, first_name, last_name, avatar_url, photo_1_url, photo_2_url')
             .in('id', participantIds);
           
-          // Get ALL week intervals for these participants (can have multiple records per user)
-          const { data: participantsData } = await supabase
-            .from('weekly_contest_participants')
-            .select('user_id, week_interval')
-            .in('user_id', participantIds)
-            .not('week_interval', 'is', null);
-          
-          console.log('📅 Participants data for likes:', participantsData);
-          
           const profilesMap = new Map(
             (profilesData || []).map(p => [p.id, p])
           );
           
-          // Create map of user_id to all their week_intervals
-          const intervalsMap = new Map();
-          (participantsData || []).forEach(p => {
-            if (!intervalsMap.has(p.user_id)) {
-              intervalsMap.set(p.user_id, []);
-            }
-            if (p.week_interval) {
-              intervalsMap.get(p.user_id).push(p.week_interval);
-            }
-          });
-          
-          likesWithProfiles = likesData.map(like => ({
-            ...like,
-            profiles: like.participant_id ? profilesMap.get(like.participant_id) : null,
-            week_interval: like.participant_id && intervalsMap.has(like.participant_id) 
-              ? intervalsMap.get(like.participant_id)[0] // Take first interval for this participant
-              : null
-          })).filter(like => like.profiles);
+          // Calculate week interval from created_at date
+          likesWithProfiles = likesData.map(like => {
+            const likeDate = new Date(like.created_at);
+            const dayOfWeek = likeDate.getUTCDay();
+            const monday = new Date(likeDate);
+            monday.setUTCDate(likeDate.getUTCDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
+            const sunday = new Date(monday);
+            sunday.setUTCDate(monday.getUTCDate() + 6);
+            
+            const formatDate = (d: Date) => {
+              const day = String(d.getUTCDate()).padStart(2, '0');
+              const month = String(d.getUTCMonth() + 1).padStart(2, '0');
+              const year = String(d.getUTCFullYear()).slice(-2);
+              return `${day}/${month}/${year}`;
+            };
+            
+            const weekInterval = `${formatDate(monday).slice(0, 5)}-${formatDate(sunday)}`;
+            
+            return {
+              ...like,
+              profiles: like.participant_id ? profilesMap.get(like.participant_id) : null,
+              week_interval: weekInterval
+            };
+          }).filter(like => like.profiles);
         }
       }
 
@@ -1215,25 +1212,34 @@ const Admin = () => {
             .select('id, display_name, first_name, last_name, avatar_url, photo_1_url, photo_2_url')
             .in('id', contestantIds);
           
-          // Get week intervals from weekly_contest_participants
-          const { data: participantsData } = await supabase
-            .from('weekly_contest_participants')
-            .select('user_id, week_interval')
-            .in('user_id', contestantIds);
-          
           const profilesMap = new Map(
             (profilesData || []).map(p => [p.id, p])
           );
           
-          const intervalsMap = new Map(
-            (participantsData || []).map(p => [p.user_id, p.week_interval])
-          );
-          
-          ratingsWithProfiles = ratingsData.map(rating => ({
-            ...rating,
-            profiles: rating.participant_id ? profilesMap.get(rating.participant_id) : null,
-            week_interval: rating.participant_id ? intervalsMap.get(rating.participant_id) : null
-          }));
+          // Calculate week interval from created_at date
+          ratingsWithProfiles = ratingsData.map(rating => {
+            const ratingDate = new Date(rating.created_at);
+            const dayOfWeek = ratingDate.getUTCDay();
+            const monday = new Date(ratingDate);
+            monday.setUTCDate(ratingDate.getUTCDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
+            const sunday = new Date(monday);
+            sunday.setUTCDate(monday.getUTCDate() + 6);
+            
+            const formatDate = (d: Date) => {
+              const day = String(d.getUTCDate()).padStart(2, '0');
+              const month = String(d.getUTCMonth() + 1).padStart(2, '0');
+              const year = String(d.getUTCFullYear()).slice(-2);
+              return `${day}/${month}`;
+            };
+            
+            const weekInterval = `${formatDate(monday)}-${formatDate(sunday)}/${String(sunday.getUTCFullYear()).slice(-2)}`;
+            
+            return {
+              ...rating,
+              profiles: rating.participant_id ? profilesMap.get(rating.participant_id) : null,
+              week_interval: weekInterval
+            };
+          });
         }
       }
 
