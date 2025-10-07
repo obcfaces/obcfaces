@@ -77,15 +77,16 @@ export const ContestParticipationModal = ({
   const loadCachedFormData = () => {
     // If in edit mode, prioritize existing data
     if (editMode && existingData) {
-      console.log('Loading existing data for edit mode:', existingData);
+      console.log('🟢 MODAL: Loading existing data for edit mode:', existingData);
       let applicationData = existingData;
       
       // If existingData has application_data, use it
       if (existingData.application_data) {
+        console.log('🟢 MODAL: Found application_data field, merging...');
         applicationData = { ...existingData, ...existingData.application_data };
       }
       
-      console.log('Processing application data:', applicationData);
+      console.log('🟢 MODAL: Processing application data:', applicationData);
       
       // Handle birthdate from multiple possible sources
       let birthDay = "";
@@ -93,15 +94,22 @@ export const ContestParticipationModal = ({
       let birthYear = "";
       
       if (applicationData.birthdate) {
+        console.log('🟢 MODAL: Found birthdate field:', applicationData.birthdate);
         const birthdate = new Date(applicationData.birthdate);
         birthDay = birthdate.getDate().toString();
         birthMonth = (birthdate.getMonth() + 1).toString();
         birthYear = birthdate.getFullYear().toString();
       } else if (applicationData.birth_year && applicationData.birth_month && applicationData.birth_day) {
+        console.log('🟢 MODAL: Found birth_year/month/day fields:', {
+          birth_year: applicationData.birth_year,
+          birth_month: applicationData.birth_month,
+          birth_day: applicationData.birth_day
+        });
         birthDay = applicationData.birth_day?.toString() || "";
         birthMonth = applicationData.birth_month?.toString() || "";
         birthYear = applicationData.birth_year?.toString() || "";
       } else if (applicationData.age) {
+        console.log('🟢 MODAL: Found only age field:', applicationData.age);
         // Calculate birth year from age
         const currentYear = new Date().getFullYear();
         birthYear = (currentYear - applicationData.age).toString();
@@ -109,7 +117,7 @@ export const ContestParticipationModal = ({
         birthMonth = "1";
       }
       
-      console.log('Parsed birthdate:', { birthDay, birthMonth, birthYear });
+      console.log('🟢 MODAL: Parsed birthdate:', { birthDay, birthMonth, birthYear });
 
       // Load existing contact data for the contact form
       if (applicationData.phone || applicationData.facebook_url) {
