@@ -1901,6 +1901,7 @@ const Admin = () => {
       regStatusFilter,
       profilesCount: profiles.length,
       activeTab,
+      userActivityStatsLoaded: Object.keys(userActivityStats).length,
       shouldFetch: regStatusFilter === '2+weeks' && profiles.length > 0 && activeTab === 'registrations'
     });
     
@@ -1908,23 +1909,43 @@ const Admin = () => {
       console.log('🔄 2+ Weeks filter activated, fetching activity for all users...');
       setIsLoadingWeeksFilter(true);
       
-      const fetchPromises = profiles
-        .filter(profile => !loadingActivity.has(profile.id) && !userActivityStats[profile.id])
-        .map(profile => {
-          console.log(`📊 Fetching activity for user: ${profile.id}`);
-          return fetchUserActivity(profile.id);
-        });
-      
-      console.log(`🔄 Starting ${fetchPromises.length} fetches...`);
-      
-      Promise.all(fetchPromises).finally(() => {
-        console.log(`✅ All activity data loaded for 2+ weeks filter`);
-        setIsLoadingWeeksFilter(false);
+      // Get profiles that need data fetched
+      const profilesToFetch = profiles.filter(profile => {
+        const hasStats = userActivityStats[profile.id];
+        const isLoading = loadingActivity.has(profile.id);
+        
+        if (!hasStats && !isLoading) {
+          console.log(`📊 Need to fetch for user: ${profile.id} (${profile.email})`);
+          return true;
+        }
+        
+        if (hasStats) {
+          console.log(`⏭️ Already have stats for: ${profile.id} (${profile.email})`);
+        }
+        if (isLoading) {
+          console.log(`⏳ Already loading for: ${profile.id} (${profile.email})`);
+        }
+        
+        return false;
       });
+      
+      console.log(`🔄 Starting ${profilesToFetch.length} fetches out of ${profiles.length} total profiles...`);
+      
+      if (profilesToFetch.length > 0) {
+        const fetchPromises = profilesToFetch.map(profile => fetchUserActivity(profile.id));
+        
+        Promise.all(fetchPromises).finally(() => {
+          console.log(`✅ All activity data loaded for 2+ weeks filter`);
+          setIsLoadingWeeksFilter(false);
+        });
+      } else {
+        console.log(`✅ All data already loaded`);
+        setIsLoadingWeeksFilter(false);
+      }
     } else {
       setIsLoadingWeeksFilter(false);
     }
-  }, [regStatusFilter, profiles.length, activeTab]);
+  }, [regStatusFilter, profiles.length, activeTab, Object.keys(userActivityStats).length]);
 
   const fetchContestApplications = async () => {
     console.log('Fetching contest applications...');
