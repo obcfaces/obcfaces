@@ -907,6 +907,45 @@ export type Database = {
         }
         Relationships: []
       }
+      user_voting_stats: {
+        Row: {
+          created_at: string
+          first_vote_at: string | null
+          id: string
+          is_regular_voter: boolean
+          last_vote_at: string | null
+          total_votes_count: number
+          unique_weeks_count: number
+          updated_at: string
+          user_id: string
+          voting_week_intervals: string[]
+        }
+        Insert: {
+          created_at?: string
+          first_vote_at?: string | null
+          id?: string
+          is_regular_voter?: boolean
+          last_vote_at?: string | null
+          total_votes_count?: number
+          unique_weeks_count?: number
+          updated_at?: string
+          user_id: string
+          voting_week_intervals?: string[]
+        }
+        Update: {
+          created_at?: string
+          first_vote_at?: string | null
+          id?: string
+          is_regular_voter?: boolean
+          last_vote_at?: string | null
+          total_votes_count?: number
+          unique_weeks_count?: number
+          updated_at?: string
+          user_id?: string
+          voting_week_intervals?: string[]
+        }
+        Relationships: []
+      }
       weekly_contest_participants: {
         Row: {
           admin_status: Database["public"]["Enums"]["participant_admin_status"]
