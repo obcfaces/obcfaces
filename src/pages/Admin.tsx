@@ -6772,14 +6772,16 @@ const Admin = () => {
                       // Фильтр ролей
                       if (roleFilter !== 'all') {
                         const profileRoles = userRoles.filter(ur => ur.user_id === profile.id);
-                        const userRole = userRoleMap[profile.id] || 'usual';
                         
                         if (roleFilter === 'admin') {
-                          if (userRole !== 'admin') return false;
+                          const isAdmin = profileRoles.some(ur => ur.role === 'admin');
+                          if (!isAdmin) return false;
                         } else if (roleFilter === 'moderator') {
-                          if (userRole !== 'moderator') return false;
+                          const isModerator = profileRoles.some(ur => ur.role === 'moderator');
+                          if (!isModerator) return false;
                         } else if (roleFilter === 'usual') {
-                          if (userRole !== 'usual' && userRole) return false;
+                          // Usual = нет ролей вообще
+                          if (profileRoles.length > 0) return false;
                         } else if (roleFilter === 'regular') {
                           const isRegular = profileRoles.some(ur => ur.role === 'regular');
                           if (!isRegular) return false;
