@@ -6609,13 +6609,27 @@ const Admin = () => {
 
 
                 {(() => {
+                    console.log('🔍 Starting profile filtering:', {
+                      regStatusFilter,
+                      profilesCount: profiles.length,
+                      userActivityStatsKeys: Object.keys(userActivityStats).length,
+                      sampleUserActivity: Object.keys(userActivityStats).length > 0 ? 
+                        userActivityStats[Object.keys(userActivityStats)[0]] : null
+                    });
+                    
                     const filteredProfiles = profiles.filter(profile => {
                       // Фильтр "2+ Weeks" - users who voted for participants from 2+ different weeks
                       // ВАЖНО: Применяется ПЕРВЫМ, чтобы работать независимо от других фильтров
                       if (regStatusFilter === '2+weeks') {
-                        console.log(`🔎 2+ WEEKS FILTER ACTIVATED for ${profile.display_name || profile.email?.split('@')[0]}`);
+                        console.log(`🔎 2+ WEEKS FILTER ACTIVATED for ${profile.display_name || profile.email?.split('@')[0]} (email: ${profile.email})`);
                         
                         const userActivity = userActivityStats[profile.id];
+                        
+                        console.log(`  📊 User activity data:`, {
+                          hasActivity: !!userActivity,
+                          ratingsCount: userActivity?.ratings?.length || 0,
+                          likesCount: userActivity?.likes?.length || 0
+                        });
                         
                         if (!userActivity) {
                           console.log(`❌ No userActivity for ${profile.display_name || profile.email?.split('@')[0]}`);
