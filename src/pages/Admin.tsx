@@ -6398,7 +6398,7 @@ const Admin = () => {
                         <Button
                           variant={suspiciousEmailFilter === 'maybe-suspicious' ? 'destructive' : 'outline'}
                           size="sm"
-                          onClick={() => setSuspiciousEmailFilter('maybe-suspicious')}
+                          onClick={() => setSuspiciousEmailFilter(suspiciousEmailFilter === 'maybe-suspicious' ? 'all' : 'maybe-suspicious')}
                         >
                           Maybe Suspicious
                           {(() => {
