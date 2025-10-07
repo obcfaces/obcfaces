@@ -2783,10 +2783,8 @@ const Admin = () => {
                           variant="outline"
                           onClick={() => {
                             setEditingParticipantData({
-                              id: participant.id,
-                              user_id: participant.user_id,
+                              ...participant,
                               application_data: appData,
-                              status: participant.admin_status
                             });
                             setShowParticipationModal(true);
                           }}
