@@ -6568,11 +6568,17 @@ const Admin = () => {
                           size="sm"
                           onClick={() => {
                             const newFilter = regStatusFilter === '2+weeks' ? 'all' : '2+weeks';
-                            console.log('🔘 Clicking 2+ Weeks button, new filter:', newFilter);
+                            console.log('🔘🔘🔘 CLICKING 2W BUTTON, new filter:', newFilter);
+                            console.log('🔘 Current state:', {
+                              regStatusFilter,
+                              profilesCount: profiles.length,
+                              userActivityStatsCount: Object.keys(userActivityStats).length
+                            });
                             setRegStatusFilter(newFilter);
                             
                             // ВАЖНО: Сбросить другие фильтры когда активируется "2+ Weeks"
                             if (newFilter === '2+weeks') {
+                              console.log('🔘 Resetting other filters...');
                               setSuspiciousEmailFilter('all');
                               setVerificationFilter('all');
                               setRoleFilter('all');
@@ -6584,7 +6590,7 @@ const Admin = () => {
                           className="gap-2"
                         >
                           {isLoadingWeeksFilter && <Loader2 className="h-4 w-4 animate-spin" />}
-                          2+ Weeks
+                          2 w
                           {(() => {
                             if (isLoadingWeeksFilter) return ' (loading...)';
                             const count = profiles.filter(p => {
