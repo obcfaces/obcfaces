@@ -2865,6 +2865,9 @@ const Admin = () => {
                 <TabsTrigger value="registrations" className="text-xs">
                   Reg
                 </TabsTrigger>
+                <TabsTrigger value="2weeks" className="text-xs">
+                  2+W
+                </TabsTrigger>
                 <TabsTrigger value="stat" className="text-xs">
                   Stat
                 </TabsTrigger>
@@ -2896,6 +2899,9 @@ const Admin = () => {
               </TabsTrigger>
               <TabsTrigger value="registrations">
                 Reg
+              </TabsTrigger>
+              <TabsTrigger value="2weeks">
+                2+ Недель
               </TabsTrigger>
               <TabsTrigger value="stat">
                 Stat
@@ -6441,6 +6447,153 @@ const Admin = () => {
                 );
               })()}
             </TabsContent>
+
+              {/* 2+ WEEKS TAB - NEW DEDICATED TAB */}
+              <TabsContent value="2weeks" className="space-y-4">
+                <div className="space-y-6">
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-2xl font-bold">
+                      Пользователи с 2+ интервалами голосования ({
+                        Object.values(userVotingStats).filter(
+                          (stats: any) => (stats?.unique_weeks_count || 0) >= 2
+                        ).length
+                      })
+                    </h2>
+                    <Button
+                      onClick={async () => {
+                        setIsLoadingWeeksFilter(true);
+                        await fetchUserVotingStats();
+                        setIsLoadingWeeksFilter(false);
+                        toast({ title: 'Данные обновлены' });
+                      }}
+                      disabled={isLoadingWeeksFilter}
+                    >
+                      {isLoadingWeeksFilter && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+                      Обновить
+                    </Button>
+                  </div>
+
+                  {isLoadingWeeksFilter ? (
+                    <div className="flex justify-center py-12">
+                      <Loader2 className="h-8 w-8 animate-spin" />
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {(() => {
+                        // Get users with 2+ voting weeks
+                        const votersWithMultipleWeeks = Object.entries(userVotingStats)
+                          .filter(([_, stats]: [string, any]) => (stats?.unique_weeks_count || 0) >= 2)
+                          .map(([userId, stats]: [string, any]) => ({
+                            userId,
+                            stats,
+                            profile: profiles.find(p => p.id === userId)
+                          }))
+                          .filter(item => item.profile)
+                          .sort((a, b) => (b.stats?.unique_weeks_count || 0) - (a.stats?.unique_weeks_count || 0));
+
+                        console.log('🎯 2+ Weeks Tab: Found', votersWithMultipleWeeks.length, 'users');
+
+                        if (votersWithMultipleWeeks.length === 0) {
+                          return (
+                            <div className="text-center py-12 text-muted-foreground">
+                              Нет пользователей с 2+ интервалами голосования
+                            </div>
+                          );
+                        }
+
+                        return (
+                          <div className="space-y-3">
+                            {votersWithMultipleWeeks.map(({ userId, stats, profile }) => {
+                              if (!profile) return null;
+
+                              return (
+                                <div
+                                  key={userId}
+                                  className="p-4 border rounded-lg bg-card hover:bg-accent/50 transition-colors"
+                                >
+                                  <div className="flex items-start justify-between gap-4">
+                                    <div className="flex items-start gap-4 flex-1">
+                                      {/* Avatar */}
+                                      <img
+                                        src={profile.avatar_url || '/placeholder.svg'}
+                                        alt={profile.display_name || 'User'}
+                                        className="w-16 h-16 rounded-full object-cover"
+                                      />
+
+                                      {/* User Info */}
+                                      <div className="flex-1 space-y-2">
+                                        <div>
+                                          <h3 className="font-semibold text-lg">
+                                            {profile.display_name || `${profile.first_name} ${profile.last_name}`}
+                                          </h3>
+                                          <p className="text-sm text-muted-foreground">
+                                            {(profile as any).email || 'Нет email'}
+                                          </p>
+                                        </div>
+
+                                        {/* Voting Stats */}
+                                        <div className="flex gap-4 text-sm">
+                                          <div className="flex items-center gap-2">
+                                            <Badge variant="default" className="font-bold">
+                                              {stats.unique_weeks_count} недель
+                                            </Badge>
+                                            <span className="text-muted-foreground">
+                                              {stats.total_votes_count} голосов
+                                            </span>
+                                          </div>
+                                        </div>
+
+                                        {/* Week Intervals */}
+                                        {stats.voting_week_intervals && stats.voting_week_intervals.length > 0 && (
+                                          <div className="flex flex-wrap gap-1">
+                                            {stats.voting_week_intervals.map((interval: string, idx: number) => (
+                                              <Badge key={idx} variant="outline" className="text-xs">
+                                                {interval}
+                                              </Badge>
+                                            ))}
+                                          </div>
+                                        )}
+
+                                        {/* Dates */}
+                                        <div className="text-xs text-muted-foreground">
+                                          Первый голос: {stats.first_vote_at ? new Date(stats.first_vote_at).toLocaleDateString('ru-RU') : 'N/A'} | 
+                                          Последний: {stats.last_vote_at ? new Date(stats.last_vote_at).toLocaleDateString('ru-RU') : 'N/A'}
+                                        </div>
+
+                                        {/* Device Info */}
+                                        <div className="text-xs text-muted-foreground space-y-1">
+                                          <div>
+                                            IP: {(profile as any).ip_address || 'N/A'} | 
+                                            Fingerprint: {(profile as any).fingerprint_id?.substring(0, 8) || 'N/A'}
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </div>
+
+                                    {/* Actions */}
+                                    <div className="flex flex-col gap-2">
+                                      <Button
+                                        size="sm"
+                                        variant="outline"
+                                        onClick={() => {
+                                          setActiveTab('registrations');
+                                          setSearchQuery((profile as any).email || profile.display_name || '');
+                                        }}
+                                      >
+                                        Открыть в Reg
+                                      </Button>
+                                    </div>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        );
+                      })()}
+                    </div>
+                  )}
+                </div>
+              </TabsContent>
 
               <TabsContent value="registrations" className="space-y-4">
                 {tabLoading.registrations ? (
