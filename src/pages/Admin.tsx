@@ -6552,7 +6552,8 @@ const Admin = () => {
                               {roleFilter === 'all' ? 'All Roles' :
                                roleFilter === 'suspicious' ? 'Suspicious' :
                                roleFilter === 'usual' ? 'Usual' :
-                               roleFilter === 'moderator' ? 'Moderator' : 'Admin'}
+                               roleFilter === 'moderator' ? 'Moderator' :
+                               roleFilter === 'regular' ? 'Regular' : 'Admin'}
                               <ChevronDown className="ml-2 h-4 w-4" />
                             </Button>
                           </DropdownMenuTrigger>
@@ -6568,6 +6569,9 @@ const Admin = () => {
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => setRoleFilter('moderator')}>
                               Moderator
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => setRoleFilter('regular')}>
+                              Regular
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => setRoleFilter('admin')}>
                               Admin
@@ -6611,122 +6615,9 @@ const Admin = () => {
                             return count > 0 ? ` (${count})` : '';
                           })()}
                         </Button>
-                        <Button
-                          variant={regStatusFilter === '2+weeks' ? 'default' : 'outline'}
-                          size="sm"
-                          onClick={async () => {
-                            const newFilter = regStatusFilter === '2+weeks' ? 'all' : '2+weeks';
-                            console.log('🔘🔘🔘 CLICKING 2W BUTTON, new filter:', newFilter);
-                            
-                            if (newFilter === '2+weeks') {
-                              setIsLoadingWeeksFilter(true);
-                              console.log('🔄 Reloading voting stats for 2w filter...');
-                              await fetchUserVotingStats();
-                              setIsLoadingWeeksFilter(false);
-                              
-                              // Reset other filters
-                              setSuspiciousEmailFilter('all');
-                              setVerificationFilter('all');
-                              setRoleFilter('all');
-                              setSelectedRegistrationDay(null);
-                              setSearchQuery('');
-                            }
-                            
-                            setRegStatusFilter(newFilter);
-                          }}
-                          disabled={isLoadingWeeksFilter}
-                          className="gap-2"
-                        >
-                          {isLoadingWeeksFilter && <Loader2 className="h-4 w-4 animate-spin" />}
-                          2 w
-                          {(() => {
-                            if (isLoadingWeeksFilter) return ' (loading...)';
-                            // Count from userVotingStats
-                            const count = Object.values(userVotingStats).filter(
-                              (stats: any) => (stats?.unique_weeks_count || 0) >= 2
-                            ).length;
-                            console.log('📊 2w count:', count, 'total voting stats:', Object.keys(userVotingStats).length);
-                            return count > 0 ? ` (${count})` : '';
-                          })()}
-                        </Button>
-
-                      {/* Regular Voters Filter Button */}
-                        <Button
-                          variant={regStatusFilter === 'regular' ? 'default' : 'outline'}
-                          size="sm"
-                          onClick={() => {
-                            const newFilter = regStatusFilter === 'regular' ? 'all' : 'regular';
-                            setRegStatusFilter(newFilter);
-                            
-                            // Reset other filters when Regular is activated
-                            if (newFilter === 'regular') {
-                              setSuspiciousEmailFilter('all');
-                              setVerificationFilter('all');
-                              setRoleFilter('all');
-                              setSelectedRegistrationDay(null);
-                              setSearchQuery('');
-                            }
-                          }}
-                          className="gap-2"
-                        >
-                          Regular
-                          {(() => {
-                            // Count users with regular role
-                            const count = profiles.filter(p => 
-                              userRoles.some(r => r.user_id === p.id && r.role === 'regular')
-                            ).length;
-                            return count > 0 ? ` (${count})` : '';
-                          })()}
-                        </Button>
                       </div>
                     </div>
 
-                    {/* NEW W BUTTON - 2+ Weeks Voters - PLACED ABOVE OTHER FILTERS */}
-                    <div className="mb-4 p-4 border-2 border-primary/30 rounded-lg bg-primary/5">
-                      <div className="flex items-center gap-3">
-                        <Button
-                          variant={regStatusFilter === '2+weeks' ? 'default' : 'outline'}
-                          size="lg"
-                          onClick={async () => {
-                            const newFilter = regStatusFilter === '2+weeks' ? 'all' : '2+weeks';
-                            console.log('🔘 CLICKING W BUTTON, new filter:', newFilter);
-                            
-                            if (newFilter === '2+weeks') {
-                              setIsLoadingWeeksFilter(true);
-                              console.log('🔄 Loading voting stats for W filter...');
-                              await fetchUserVotingStats();
-                              setIsLoadingWeeksFilter(false);
-                              
-                              // Reset other filters
-                              setSuspiciousEmailFilter('all');
-                              setVerificationFilter('all');
-                              setRoleFilter('all');
-                              setSelectedRegistrationDay(null);
-                              setSearchQuery('');
-                            }
-                            
-                            setRegStatusFilter(newFilter);
-                          }}
-                          disabled={isLoadingWeeksFilter}
-                          className="gap-2 font-bold text-base"
-                        >
-                          {isLoadingWeeksFilter && <Loader2 className="h-4 w-4 animate-spin" />}
-                          W
-                          {(() => {
-                            if (isLoadingWeeksFilter) return ' (loading...)';
-                            // Count from userVotingStats (same as "2 w" button)
-                            const count = Object.values(userVotingStats).filter(
-                              (stats: any) => (stats?.unique_weeks_count || 0) >= 2
-                            ).length;
-                            console.log('📊 W count:', count, 'total voting stats:', Object.keys(userVotingStats).length);
-                            return count > 0 ? ` (${count})` : ' (0)';
-                          })()}
-                        </Button>
-                        <span className="text-sm text-muted-foreground">
-                          Пользователи которые голосовали в 2+ интервалах недель
-                        </span>
-                      </div>
-                    </div>
 
                 {(() => {
                     console.log('🔍 Starting profile filtering in REGISTRATIONS TAB:', {
@@ -6889,6 +6780,9 @@ const Admin = () => {
                           if (userRole !== 'moderator') return false;
                         } else if (roleFilter === 'usual') {
                           if (userRole !== 'usual' && userRole) return false;
+                        } else if (roleFilter === 'regular') {
+                          const isRegular = profileRoles.some(ur => ur.role === 'regular');
+                          if (!isRegular) return false;
                         } else if (roleFilter === 'suspicious') {
                           const isSuspicious = profileRoles.some(ur => ur.role === 'suspicious');
                           if (!isSuspicious) return false;
