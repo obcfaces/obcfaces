@@ -1885,13 +1885,29 @@ const Admin = () => {
 
   // Auto-fetch activity data when 2+ weeks filter is activated
   useEffect(() => {
+    console.log('🔍 2+ Weeks filter check:', {
+      regStatusFilter,
+      profilesCount: profiles.length,
+      activeTab,
+      shouldFetch: regStatusFilter === '2+weeks' && profiles.length > 0 && activeTab === 'registrations'
+    });
+    
     if (regStatusFilter === '2+weeks' && profiles.length > 0 && activeTab === 'registrations') {
       console.log('🔄 2+ Weeks filter activated, fetching activity for all users...');
+      let fetchedCount = 0;
+      let skippedCount = 0;
+      
       profiles.forEach(profile => {
         if (!loadingActivity.has(profile.id) && !userActivityStats[profile.id]) {
+          console.log(`📊 Fetching activity for user: ${profile.id}`);
           fetchUserActivity(profile.id);
+          fetchedCount++;
+        } else {
+          skippedCount++;
         }
       });
+      
+      console.log(`✅ Fetched: ${fetchedCount}, Skipped: ${skippedCount}, Total: ${profiles.length}`);
     }
   }, [regStatusFilter, profiles.length, activeTab]);
 
