@@ -6745,8 +6745,8 @@ const Admin = () => {
                         if (profile.email_confirmed_at) return false;
                       }
                       
-                      // Фильтр "Maybe Suspicious"
-                      if (suspiciousEmailFilter === 'maybe-suspicious') {
+                      // Фильтр "Maybe Suspicious" - НЕ применять если выбран фильтр Regular!
+                      if (suspiciousEmailFilter === 'maybe-suspicious' && roleFilter !== 'regular') {
                         // Exclude users with 'suspicious' role
                         const hasSuspiciousRole = userRoles.some(role => 
                           role.user_id === profile.id && role.role === 'suspicious'
