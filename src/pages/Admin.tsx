@@ -6609,12 +6609,13 @@ const Admin = () => {
 
 
                 {(() => {
-                    console.log('🔍 Starting profile filtering:', {
+                    console.log('🔍 Starting profile filtering in REGISTRATIONS TAB:', {
+                      activeTab,
                       regStatusFilter,
                       profilesCount: profiles.length,
                       userActivityStatsKeys: Object.keys(userActivityStats).length,
-                      sampleUserActivity: Object.keys(userActivityStats).length > 0 ? 
-                        userActivityStats[Object.keys(userActivityStats)[0]] : null
+                      firstProfileId: profiles[0]?.id,
+                      hasActivityForFirst: profiles[0] ? !!userActivityStats[profiles[0].id] : false
                     });
                     
                     const filteredProfiles = profiles.filter(profile => {
