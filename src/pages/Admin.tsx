@@ -1133,7 +1133,7 @@ const Admin = () => {
         console.log('✅ Likes fetched:', likesData?.length || 0);
       }
 
-      // Fetch profile data for liked participants separately
+      // Fetch profile data and week_interval for liked participants
       let likesWithProfiles = [];
       if (likesData && likesData.length > 0) {
         const participantIds = likesData
@@ -1141,18 +1141,30 @@ const Admin = () => {
           .filter(id => id != null);
         
         if (participantIds.length > 0) {
+          // Get profiles
           const { data: profilesData } = await supabase
             .from('profiles')
             .select('id, display_name, first_name, last_name, avatar_url, photo_1_url, photo_2_url')
             .in('id', participantIds);
           
+          // Get week intervals from weekly_contest_participants
+          const { data: participantsData } = await supabase
+            .from('weekly_contest_participants')
+            .select('user_id, week_interval')
+            .in('user_id', participantIds);
+          
           const profilesMap = new Map(
             (profilesData || []).map(p => [p.id, p])
           );
           
+          const intervalsMap = new Map(
+            (participantsData || []).map(p => [p.user_id, p.week_interval])
+          );
+          
           likesWithProfiles = likesData.map(like => ({
             ...like,
-            profiles: like.participant_id ? profilesMap.get(like.participant_id) : null
+            profiles: like.participant_id ? profilesMap.get(like.participant_id) : null,
+            week_interval: like.participant_id ? intervalsMap.get(like.participant_id) : null
           })).filter(like => like.profiles);
         }
       }
@@ -1177,7 +1189,7 @@ const Admin = () => {
         console.log('✅ Ratings fetched:', ratingsData?.length || 0);
       }
 
-      // Fetch profile data for rated contestants separately
+      // Fetch profile data and week_interval for rated contestants
       let ratingsWithProfiles = [];
       if (ratingsData && ratingsData.length > 0) {
         const contestantIds = ratingsData
@@ -1185,18 +1197,30 @@ const Admin = () => {
           .filter(id => id != null);
         
         if (contestantIds.length > 0) {
+          // Get profiles
           const { data: profilesData } = await supabase
             .from('profiles')
             .select('id, display_name, first_name, last_name, avatar_url, photo_1_url, photo_2_url')
             .in('id', contestantIds);
           
+          // Get week intervals from weekly_contest_participants
+          const { data: participantsData } = await supabase
+            .from('weekly_contest_participants')
+            .select('user_id, week_interval')
+            .in('user_id', contestantIds);
+          
           const profilesMap = new Map(
             (profilesData || []).map(p => [p.id, p])
           );
           
+          const intervalsMap = new Map(
+            (participantsData || []).map(p => [p.user_id, p.week_interval])
+          );
+          
           ratingsWithProfiles = ratingsData.map(rating => ({
             ...rating,
-            profiles: rating.participant_id ? profilesMap.get(rating.participant_id) : null
+            profiles: rating.participant_id ? profilesMap.get(rating.participant_id) : null,
+            week_interval: rating.participant_id ? intervalsMap.get(rating.participant_id) : null
           }));
         }
       }
