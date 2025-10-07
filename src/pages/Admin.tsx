@@ -1207,61 +1207,48 @@ const Admin = () => {
         console.log('✅ Ratings fetched:', ratingsData?.length || 0);
       }
 
-      // Для рейтингов получаем week_interval из weekly_contest_participants (ТЕКУЩИЙ статус)
-      let ratingsWithProfiles = [];
-      if (ratingsData && ratingsData.length > 0) {
-        console.log(`✅ Ratings fetched: ${ratingsData.length}`);
+      // Для рейтингов вычисляем week_interval по ДАТЕ ГОЛОСОВАНИЯ (created_at)
+      const finalRatings = (ratingsData || []).map(rating => {
+        if (!rating.created_at) return { ...rating, vote_week_interval: null };
         
-        const participantIds = ratingsData
-          .map(rating => rating.participant_id)
-          .filter(id => id != null);
+        // Определяем понедельник недели для даты голосования
+        const voteDate = new Date(rating.created_at);
+        const dayOfWeek = voteDate.getDay();
+        const monday = new Date(voteDate);
         
-        if (participantIds.length > 0) {
-          // Получаем ТЕКУЩИЙ week_interval из weekly_contest_participants
-          const { data: participantsData } = await supabase
-            .from('weekly_contest_participants')
-            .select('id, user_id, week_interval')
-            .in('id', participantIds);
-          
-          const userIds = (participantsData || []).map(p => p.user_id).filter(Boolean);
-          
-          const { data: profilesData } = await supabase
-            .from('profiles')
-            .select('id, display_name, first_name, last_name, avatar_url')
-            .in('id', userIds);
-          
-          const profilesMap = new Map(
-            (profilesData || []).map(p => [p.id, p])
-          );
-          
-          const participantsMap = new Map(
-            (participantsData || []).map(p => [p.id, { userId: p.user_id, week_interval: p.week_interval }])
-          );
-          
-          ratingsWithProfiles = ratingsData.map(rating => {
-            const participantInfo = rating.participant_id ? participantsMap.get(rating.participant_id) : null;
-            const profile = participantInfo?.userId ? profilesMap.get(participantInfo.userId) : null;
-            
-            return {
-              ...rating,
-              participant: profile,
-              week_interval: participantInfo?.week_interval // ТЕКУЩИЙ week_interval участника
-            };
-          });
-          
-          console.log('✅ Ratings with CURRENT week_intervals:', ratingsWithProfiles.filter(r => r.week_interval).length);
+        // Adjust to Monday (0 = Sunday, 1 = Monday, ..., 6 = Saturday)
+        if (dayOfWeek === 0) {
+          monday.setDate(monday.getDate() - 6); // Sunday -> previous Monday
         } else {
-          ratingsWithProfiles = ratingsData;
+          monday.setDate(monday.getDate() - (dayOfWeek - 1)); // Go back to Monday
         }
-      }
+        
+        const sunday = new Date(monday);
+        sunday.setDate(sunday.getDate() + 6);
+        
+        // Format as DD/MM-DD/MM/YY
+        const formatDate = (d: Date) => {
+          const day = String(d.getDate()).padStart(2, '0');
+          const month = String(d.getMonth() + 1).padStart(2, '0');
+          return `${day}/${month}`;
+        };
+        
+        const formatYear = (d: Date) => String(d.getFullYear()).slice(-2);
+        
+        const vote_week_interval = `${formatDate(monday)}-${formatDate(sunday)}/${formatYear(sunday)}`;
+        
+        return {
+          ...rating,
+          vote_week_interval
+        };
+      });
 
       const finalLikes = likesWithProfiles;
-      const finalRatings = ratingsWithProfiles || [];
 
-      // Collect all unique week intervals from RATINGS ONLY (not likes) - ТЕКУЩИЕ статусы
-      const allWeekIntervals = new Set();
+      // Collect all unique week intervals from RATINGS based on VOTING DATE
+      const allWeekIntervals = new Set<string>();
       finalRatings.forEach(rating => {
-        if (rating.week_interval) allWeekIntervals.add(rating.week_interval);
+        if (rating.vote_week_interval) allWeekIntervals.add(rating.vote_week_interval);
       });
 
       const uniqueWeeksArray = Array.from(allWeekIntervals);
@@ -1271,6 +1258,10 @@ const Admin = () => {
         uniqueWeeks: uniqueWeeksArray.length,
         weekIntervals: uniqueWeeksArray
       });
+      console.log('📅 Vote weeks for this user:', finalRatings.map(r => ({ 
+        voted_at: r.created_at, 
+        week: r.vote_week_interval 
+      })));
 
       setUserActivityStats(prev => ({
         ...prev,
