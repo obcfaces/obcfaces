@@ -1133,7 +1133,7 @@ const Admin = () => {
         console.log('✅ Likes fetched:', likesData?.length || 0);
       }
 
-      // Fetch profile data for liked participants
+      // Fetch profile data for liked participants WITH their week intervals
       let likesWithProfiles = [];
       if (likesData && likesData.length > 0) {
         const participantIds = likesData
@@ -1147,34 +1147,30 @@ const Admin = () => {
             .select('id, display_name, first_name, last_name, avatar_url, photo_1_url, photo_2_url')
             .in('id', participantIds);
           
+          // Get participant week intervals from weekly_contest_participants
+          const { data: participantsData } = await supabase
+            .from('weekly_contest_participants')
+            .select('id, week_interval')
+            .in('id', participantIds);
+          
           const profilesMap = new Map(
             (profilesData || []).map(p => [p.id, p])
           );
           
-          // Calculate week interval from created_at date
+          const participantsMap = new Map(
+            (participantsData || []).map(p => [p.id, p.week_interval])
+          );
+          
+          console.log('📅 Participant week intervals for likes:', Array.from(participantsMap.entries()));
+          
+          // Use participant's week_interval from the table
           likesWithProfiles = likesData.map(like => {
-            const likeDate = new Date(like.created_at);
-            const dayOfWeek = likeDate.getUTCDay();
-            const monday = new Date(likeDate);
-            monday.setUTCDate(likeDate.getUTCDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
-            const sunday = new Date(monday);
-            sunday.setUTCDate(monday.getUTCDate() + 6);
-            
-            const formatDate = (d: Date) => {
-              const day = String(d.getUTCDate()).padStart(2, '0');
-              const month = String(d.getUTCMonth() + 1).padStart(2, '0');
-              const year = String(d.getUTCFullYear()).slice(-2);
-              return `${day}/${month}/${year}`;
-            };
-            
-            const weekInterval = `${formatDate(monday).slice(0, 5)}-${formatDate(sunday)}`;
-            
             return {
               ...like,
               profiles: like.participant_id ? profilesMap.get(like.participant_id) : null,
-              week_interval: weekInterval
+              week_interval: like.participant_id ? participantsMap.get(like.participant_id) : null
             };
-          }).filter(like => like.profiles);
+          }).filter(like => like.profiles && like.week_interval);
         }
       }
 
@@ -1212,34 +1208,30 @@ const Admin = () => {
             .select('id, display_name, first_name, last_name, avatar_url, photo_1_url, photo_2_url')
             .in('id', contestantIds);
           
+          // Get participant week intervals from weekly_contest_participants
+          const { data: participantsData } = await supabase
+            .from('weekly_contest_participants')
+            .select('id, week_interval')
+            .in('id', contestantIds);
+          
           const profilesMap = new Map(
             (profilesData || []).map(p => [p.id, p])
           );
           
-          // Calculate week interval from created_at date
+          const participantsMap = new Map(
+            (participantsData || []).map(p => [p.id, p.week_interval])
+          );
+          
+          console.log('📅 Participant week intervals for ratings:', Array.from(participantsMap.entries()));
+          
+          // Use participant's week_interval from the table
           ratingsWithProfiles = ratingsData.map(rating => {
-            const ratingDate = new Date(rating.created_at);
-            const dayOfWeek = ratingDate.getUTCDay();
-            const monday = new Date(ratingDate);
-            monday.setUTCDate(ratingDate.getUTCDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
-            const sunday = new Date(monday);
-            sunday.setUTCDate(monday.getUTCDate() + 6);
-            
-            const formatDate = (d: Date) => {
-              const day = String(d.getUTCDate()).padStart(2, '0');
-              const month = String(d.getUTCMonth() + 1).padStart(2, '0');
-              const year = String(d.getUTCFullYear()).slice(-2);
-              return `${day}/${month}`;
-            };
-            
-            const weekInterval = `${formatDate(monday)}-${formatDate(sunday)}/${String(sunday.getUTCFullYear()).slice(-2)}`;
-            
             return {
               ...rating,
               profiles: rating.participant_id ? profilesMap.get(rating.participant_id) : null,
-              week_interval: weekInterval
+              week_interval: rating.participant_id ? participantsMap.get(rating.participant_id) : null
             };
-          });
+          }).filter(rating => rating.profiles && rating.week_interval);
         }
       }
 
