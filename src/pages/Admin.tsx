@@ -6849,6 +6849,23 @@ const Admin = () => {
                                       {profile.display_name || `${profile.first_name} ${profile.last_name}`}
                                     </span>
                                   </div>
+                                  {profile.email && (
+                                    <div className="text-xs text-foreground/80 flex items-center gap-1">
+                                      <span>{profile.email}</span>
+                                      <Copy 
+                                        className="h-3 w-3 cursor-pointer hover:text-foreground" 
+                                        onClick={() => {
+                                          navigator.clipboard.writeText(profile.email || '');
+                                          toast({ title: "Copied", description: "Email copied to clipboard" });
+                                        }}
+                                      />
+                                    </div>
+                                  )}
+                                  {!profile.email && (
+                                    <div className="text-xs text-destructive">
+                                      No email - User ID: {profile.id?.substring(0, 8)}
+                                    </div>
+                                  )}
                                   {profile.ip_address && (() => {
                                     const ipUserCount = paginatedProfiles.filter(p => p.ip_address === profile.ip_address).length;
                                     let ipColor = 'text-muted-foreground';
@@ -6889,31 +6906,14 @@ const Admin = () => {
                                     return (
                                       <div className="text-xs text-muted-foreground">
                                         {device.type || 'Desktop'} | {os.name || 'Unknown OS'} {os.version || ''} | {browser.name || 'Unknown'}
+                                        {profile.fingerprint_id && (
+                                          <span className="ml-2">
+                                            | fp {profile.fingerprint_id.substring(0, 5)}
+                                          </span>
+                                        )}
                                       </div>
                                     );
                                   })()}
-                                  {profile.email && (
-                                    <div className="text-xs text-muted-foreground flex items-center gap-1">
-                                      <span>{profile.email}</span>
-                                      <Copy 
-                                        className="h-3 w-3 cursor-pointer hover:text-foreground" 
-                                        onClick={() => {
-                                          navigator.clipboard.writeText(profile.email || '');
-                                          toast({ title: "Copied", description: "Email copied to clipboard" });
-                                        }}
-                                      />
-                                    </div>
-                                  )}
-                                  {!profile.email && (
-                                    <div className="text-xs text-destructive">
-                                      No email - User ID: {profile.id?.substring(0, 8)}
-                                    </div>
-                                  )}
-                                  {profile.fingerprint_id && (
-                                    <div className="text-xs text-muted-foreground">
-                                      Fingerprint: {profile.fingerprint_id.substring(0, 16)}...
-                                    </div>
-                                  )}
                                 </div>
                               </div>
 
