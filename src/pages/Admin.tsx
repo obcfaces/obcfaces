@@ -6665,8 +6665,9 @@ const Admin = () => {
                                     
                                     // Check for duplicate fingerprints
                                     let hasDuplicateFingerprint = false;
+                                    let sameFingerprint = [];
                                     if (profile.fingerprint_id) {
-                                      const sameFingerprint = profiles.filter(p => 
+                                      sameFingerprint = profiles.filter(p => 
                                         p.fingerprint_id === profile.fingerprint_id && p.id !== profile.id
                                       );
                                       hasDuplicateFingerprint = sameFingerprint.length > 0;
@@ -6678,7 +6679,7 @@ const Admin = () => {
                                       const reasonCodes = [];
                                       if (wasAutoConfirmed) reasonCodes.push("<1");
                                       if (fastFormFill) reasonCodes.push("<3");
-                                      if (hasDuplicateFingerprint) reasonCodes.push("FP");
+                                      if (hasDuplicateFingerprint) reasonCodes.push(`FP ${sameFingerprint.length + 1}`);
                                       
                                       return (
                                         <Badge 
