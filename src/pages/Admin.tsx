@@ -6648,7 +6648,7 @@ const Admin = () => {
                           })()}
                         </Button>
 
-                        {/* Regular Voters Filter Button */}
+                      {/* Regular Voters Filter Button */}
                         <Button
                           variant={regStatusFilter === 'regular' ? 'default' : 'outline'}
                           size="sm"
@@ -6669,9 +6669,9 @@ const Admin = () => {
                         >
                           Regular
                           {(() => {
-                            // Count users marked as regular voters
+                            // Count users with regular role
                             const count = profiles.filter(p => 
-                              userVotingStats[p.id]?.is_regular_voter === true
+                              userRoles.some(r => r.user_id === p.id && r.role === 'regular')
                             ).length;
                             return count > 0 ? ` (${count})` : '';
                           })()}
@@ -6711,10 +6711,9 @@ const Admin = () => {
                         return true;
                       }
                       
-                      // Фильтр "Regular" - users marked as regular voters
+                      // Фильтр "Regular" - users with regular role
                       if (regStatusFilter === 'regular') {
-                        const votingStats = userVotingStats[profile.id];
-                        return votingStats?.is_regular_voter === true;
+                        return userRoles.some(r => r.user_id === profile.id && r.role === 'regular');
                       }
                       
                       // Фильтр по дню регистрации
@@ -6924,34 +6923,43 @@ const Admin = () => {
                                       </Badge>
                                     );
                                    } else if (currentRole === 'admin') {
+                                     const hasRegular = userRoles.some(r => r.user_id === profile.id && r.role === 'regular');
                                      return (
                                        <>
                                          <Badge className="text-xs rounded-none bg-blue-500 text-white hover:bg-blue-600">
                                            Admin
                                          </Badge>
-                                         {/* Show Regular badge if user is a regular voter */}
-                                         {userVotingStats[profile.id]?.is_regular_voter && (
+                                         {hasRegular && (
                                            <Badge className="text-xs rounded-none bg-green-500 text-white hover:bg-green-600 ml-1">
-                                             Regular ({userVotingStats[profile.id].unique_weeks_count}w)
+                                             Regular ({userVotingStats[profile.id]?.unique_weeks_count || 0}w)
                                            </Badge>
                                          )}
                                        </>
                                      );
                                    } else if (currentRole === 'moderator') {
+                                     const hasRegular = userRoles.some(r => r.user_id === profile.id && r.role === 'regular');
                                      return (
                                        <>
                                          <Badge className="text-xs rounded-none bg-yellow-500 text-white hover:bg-yellow-600">
                                            Moderator
                                          </Badge>
-                                         {/* Show Regular badge if user is a regular voter */}
-                                         {userVotingStats[profile.id]?.is_regular_voter && (
+                                         {hasRegular && (
                                            <Badge className="text-xs rounded-none bg-green-500 text-white hover:bg-green-600 ml-1">
-                                             Regular ({userVotingStats[profile.id].unique_weeks_count}w)
+                                             Regular ({userVotingStats[profile.id]?.unique_weeks_count || 0}w)
                                            </Badge>
                                          )}
                                        </>
                                      );
                                    } else {
+                                     // Check if user has regular role
+                                     const hasRegular = userRoles.some(r => r.user_id === profile.id && r.role === 'regular');
+                                     if (hasRegular) {
+                                       return (
+                                         <Badge className="text-xs rounded-none bg-green-500 text-white hover:bg-green-600">
+                                           Regular ({userVotingStats[profile.id]?.unique_weeks_count || 0}w)
+                                         </Badge>
+                                       );
+                                     }
                                     // Check if user is "maybe suspicious" (but not marked as suspicious)
                                     const emailNotWhitelisted = profile.email ? !isEmailDomainWhitelisted(profile.email) : false;
                                     const wasAutoConfirmed = profile.created_at && profile.email_confirmed_at && 
@@ -7002,9 +7010,9 @@ const Admin = () => {
                                            Maybe
                                          </Badge>
                                          {/* Show Regular badge if user is a regular voter */}
-                                         {userVotingStats[profile.id]?.is_regular_voter && (
+                                         {userRoles.some(r => r.user_id === profile.id && r.role === 'regular') && (
                                            <Badge className="text-xs rounded-none bg-green-500 text-white hover:bg-green-600 ml-1">
-                                             Regular ({userVotingStats[profile.id].unique_weeks_count}w)
+                                             Regular ({userVotingStats[profile.id]?.unique_weeks_count || 0}w)
                                            </Badge>
                                           )}
                                         </>
@@ -7071,6 +7079,15 @@ const Admin = () => {
                                       className="cursor-pointer"
                                     >
                                       {(userRoleMap[profile.id] || 'usual') === 'usual' ? '✓ ' : ''}Mark as Usual
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem
+                                      onClick={() => {
+                                        const userName = profile.display_name || `${profile.first_name} ${profile.last_name}`;
+                                        handleRoleChange(profile.id, userName, 'regular');
+                                      }}
+                                      className="cursor-pointer"
+                                    >
+                                      {userRoles.some(r => r.user_id === profile.id && r.role === 'regular') ? '✓ ' : ''}Mark as Regular
                                     </DropdownMenuItem>
                                     <DropdownMenuItem
                                       onClick={() => {
