@@ -6674,33 +6674,20 @@ const Admin = () => {
                                     const isMaybeSuspicious = emailNotWhitelisted || wasAutoConfirmed || fastFormFill || hasDuplicateFingerprint;
                                     
                                     if (isMaybeSuspicious) {
-                                      const reasons = [];
-                                      if (emailNotWhitelisted) reasons.push("Email domain not whitelisted");
-                                      if (wasAutoConfirmed) reasons.push("Email auto-confirmed in <1 sec");
-                                      if (fastFormFill) reasons.push(`Form filled in ${formFillTime}s (< 5 sec)`);
-                                      if (hasDuplicateFingerprint) reasons.push("Duplicate device fingerprint detected");
+                                      const reasonCodes = [];
+                                      if (wasAutoConfirmed) reasonCodes.push("<1");
+                                      if (hasDuplicateFingerprint) reasonCodes.push("FP");
+                                      if (fastFormFill) reasonCodes.push("<5");
                                       
                                       return (
-                                        <TooltipProvider>
-                                          <Tooltip>
-                                            <TooltipTrigger asChild>
-                                              <Badge variant="outline" className="text-xs rounded-none bg-orange-100 text-orange-700 border-orange-300 cursor-help">
-                                                Maybe
-                                              </Badge>
-                                            </TooltipTrigger>
-                                            <TooltipContent className="max-w-xs">
-                                              <div className="text-sm">
-                                                <div className="font-semibold mb-2 text-orange-700">Suspicious indicators:</div>
-                                                {reasons.map((reason, idx) => (
-                                                  <div key={idx} className="text-xs mb-1 flex items-start gap-1">
-                                                    <span className="text-orange-500">•</span>
-                                                    <span>{reason}</span>
-                                                  </div>
-                                                ))}
-                                              </div>
-                                            </TooltipContent>
-                                          </Tooltip>
-                                        </TooltipProvider>
+                                        <Badge variant="outline" className="text-xs rounded-none bg-orange-100 text-orange-700 border-orange-300 flex items-center gap-1">
+                                          {reasonCodes.length > 0 && (
+                                            <span className="text-[10px] font-semibold">
+                                              {reasonCodes.join(" ")}
+                                            </span>
+                                          )}
+                                          Maybe
+                                        </Badge>
                                       );
                                     }
                                   }
