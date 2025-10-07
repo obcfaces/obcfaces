@@ -1209,50 +1209,55 @@ const Admin = () => {
       // Fetch profile data and week_interval for rated contestants
       let ratingsWithProfiles = [];
       if (ratingsData && ratingsData.length > 0) {
-        const contestantIds = ratingsData
+        const participantIds = ratingsData
           .map(rating => rating.participant_id)
           .filter(id => id != null);
         
-        console.log(`📋 Processing ${ratingsData.length} ratings, ${contestantIds.length} with participant_id`);
+        console.log(`📋 Processing ${ratingsData.length} ratings, ${participantIds.length} with participant_id`);
         
-        if (contestantIds.length > 0) {
-          // Get profiles
-          const { data: profilesData } = await supabase
-            .from('profiles')
-            .select('id, display_name, first_name, last_name, avatar_url, photo_1_url, photo_2_url')
-            .in('id', contestantIds);
-          
+        if (participantIds.length > 0) {
           // Get participant week intervals from weekly_contest_participants table
           const { data: participantsData, error: participantsError } = await supabase
             .from('weekly_contest_participants')
             .select('id, week_interval, user_id')
-            .in('id', contestantIds);
+            .in('id', participantIds);
           
           if (participantsError) {
             console.error('❌ Error fetching participants data for ratings:', participantsError);
+          } else {
+            console.log('✅ Fetched participants data:', participantsData?.length);
           }
+          
+          // Get user IDs from participants to fetch profiles
+          const userIds = (participantsData || []).map(p => p.user_id).filter(Boolean);
+          
+          // Get profiles by user_id
+          const { data: profilesData } = await supabase
+            .from('profiles')
+            .select('id, display_name, first_name, last_name, avatar_url, photo_1_url, photo_2_url')
+            .in('id', userIds);
           
           const profilesMap = new Map(
             (profilesData || []).map(p => [p.id, p])
           );
           
           const participantsMap = new Map(
-            (participantsData || []).map(p => [p.id, p.week_interval])
+            (participantsData || []).map(p => [p.id, { week_interval: p.week_interval, user_id: p.user_id }])
           );
           
           console.log('📅 Participant week intervals for ratings:', Array.from(participantsMap.entries()).slice(0, 5));
           
           // Use participant's week_interval from the table
           ratingsWithProfiles = ratingsData.map(rating => {
-            const weekInterval = rating.participant_id ? participantsMap.get(rating.participant_id) : null;
-            const profile = rating.participant_id ? profilesMap.get(rating.participant_id) : null;
+            const participantData = rating.participant_id ? participantsMap.get(rating.participant_id) : null;
+            const profile = participantData?.user_id ? profilesMap.get(participantData.user_id) : null;
             
             return {
               ...rating,
               profiles: profile,
-              week_interval: weekInterval
+              week_interval: participantData?.week_interval
             };
-          }).filter(rating => rating.profiles && rating.week_interval);
+          }).filter(rating => rating.week_interval); // Keep ratings with week_interval even if no profile
           
           console.log(`✅ Ratings with week_interval: ${ratingsWithProfiles.length} of ${ratingsData.length}`);
         }
