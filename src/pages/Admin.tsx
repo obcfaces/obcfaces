@@ -6692,64 +6692,79 @@ const Admin = () => {
                       hasActivityForFirst: profiles[0] ? !!userActivityStats[profiles[0].id] : false
                     });
                     
-                    const filteredProfiles = profiles.filter(profile => {
-                      // Фильтр "2+ Weeks" (2 w) - EXCLUSIVE filter (ignores other filters)
+                    const filteredProfiles = (() => {
+                      console.log('🚀 STARTING FILTER - regStatusFilter:', regStatusFilter, 'profiles:', profiles.length);
+                      
+                      // Фильтр "2+ Weeks" (2 w) - EXCLUSIVE filter
                       if (regStatusFilter === '2+weeks') {
-                        const votingStats = userVotingStats[profile.id];
+                        console.log('🔍 Applying 2+weeks filter, userVotingStats keys:', Object.keys(userVotingStats).length);
                         
-                        if (!votingStats) {
-                          console.log(`❌ No voting stats for ${profile.display_name || profile.email?.split('@')[0]} (ID: ${profile.id})`);
-                          return false;
-                        }
-                        
-                        const uniqueWeeks = votingStats.unique_weeks_count || 0;
-                        
-                        if (uniqueWeeks < 2) {
-                          console.log(`❌ FILTERED OUT: ${profile.display_name || profile.email?.split('@')[0]} - only ${uniqueWeeks} week(s), intervals: ${JSON.stringify(votingStats.voting_week_intervals || [])}`);
-                          return false;
-                        }
-                        
-                        console.log(`✅ PASSED: ${profile.display_name || profile.email?.split('@')[0]} - ${uniqueWeeks} different weeks! Intervals: ${JSON.stringify(votingStats.voting_week_intervals || [])}`);
-                        
-                        // Apply search filter if present
-                        if (searchQuery.trim()) {
-                          const query = searchQuery.toLowerCase();
-                          const fullName = `${profile.first_name || ''} ${profile.last_name || ''}`.toLowerCase();
-                          const displayName = (profile.display_name || '').toLowerCase();
-                          const email = (profile.email || '').toLowerCase();
-                          const ip = (profile.ip_address || '').toLowerCase();
+                        const result = profiles.filter(profile => {
+                          const votingStats = userVotingStats[profile.id];
                           
-                          return fullName.includes(query) || 
-                                 displayName.includes(query) || 
-                                 email.includes(query) || 
-                                 ip.includes(query);
-                        }
+                          if (!votingStats) {
+                            return false;
+                          }
+                          
+                          const uniqueWeeks = votingStats.unique_weeks_count || 0;
+                          
+                          if (uniqueWeeks < 2) {
+                            return false;
+                          }
+                          
+                          // Apply search filter if present
+                          if (searchQuery.trim()) {
+                            const query = searchQuery.toLowerCase();
+                            const fullName = `${profile.first_name || ''} ${profile.last_name || ''}`.toLowerCase();
+                            const displayName = (profile.display_name || '').toLowerCase();
+                            const ip = (profile.ip_address || '').toLowerCase();
+                            const fingerprintId = (profile.fingerprint_id || '').toLowerCase();
+                            
+                            return fullName.includes(query) || 
+                                   displayName.includes(query) || 
+                                   ip.includes(query) ||
+                                   fingerprintId.includes(query);
+                          }
+                          
+                          return true;
+                        });
                         
-                        return true; // EXCLUSIVE - skip all other filters
+                        console.log('✅ 2+weeks filter result:', result.length, 'users');
+                        return result;
                       }
                       
                       // Фильтр "Regular" - EXCLUSIVE filter
                       if (regStatusFilter === 'regular') {
-                        const hasRegularRole = userRoles.some(r => r.user_id === profile.id && r.role === 'regular');
+                        console.log('🔍 Applying regular filter');
                         
-                        if (!hasRegularRole) return false;
-                        
-                        // Apply search filter if present
-                        if (searchQuery.trim()) {
-                          const query = searchQuery.toLowerCase();
-                          const fullName = `${profile.first_name || ''} ${profile.last_name || ''}`.toLowerCase();
-                          const displayName = (profile.display_name || '').toLowerCase();
-                          const email = (profile.email || '').toLowerCase();
-                          const ip = (profile.ip_address || '').toLowerCase();
+                        const result = profiles.filter(profile => {
+                          const hasRegularRole = userRoles.some(r => r.user_id === profile.id && r.role === 'regular');
                           
-                          return fullName.includes(query) || 
-                                 displayName.includes(query) || 
-                                 email.includes(query) || 
-                                 ip.includes(query);
-                        }
+                          if (!hasRegularRole) return false;
+                          
+                          // Apply search filter if present
+                          if (searchQuery.trim()) {
+                            const query = searchQuery.toLowerCase();
+                            const fullName = `${profile.first_name || ''} ${profile.last_name || ''}`.toLowerCase();
+                            const displayName = (profile.display_name || '').toLowerCase();
+                            const ip = (profile.ip_address || '').toLowerCase();
+                            const fingerprintId = (profile.fingerprint_id || '').toLowerCase();
+                            
+                            return fullName.includes(query) || 
+                                   displayName.includes(query) || 
+                                   ip.includes(query) ||
+                                   fingerprintId.includes(query);
+                          }
+                          
+                          return true;
+                        });
                         
-                        return true; // EXCLUSIVE - skip all other filters
+                        console.log('✅ Regular filter result:', result.length, 'users');
+                        return result;
                       }
+                      
+                      // Default filtering for other cases
+                      return profiles.filter(profile => {
                       
                       // Фильтр по дню регистрации
                       if (selectedRegistrationDay) {
@@ -6857,8 +6872,11 @@ const Admin = () => {
                                ip.includes(query);
                       }
                        
-                      return true;
-                    });
+                       return true;
+                      });
+                    })();
+
+                    console.log('🎯 FINAL filteredProfiles length:', filteredProfiles.length);
 
                     const totalRegPages = Math.ceil(filteredProfiles.length / regItemsPerPage);
                     const startIdx = (regPaginationPage - 1) * regItemsPerPage;
