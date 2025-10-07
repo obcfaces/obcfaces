@@ -6672,51 +6672,51 @@ const Admin = () => {
                         }
                       }
 
-                      // Фильтр "2+ Weeks" - users who voted for participants that NOW have "this week" or "past" status with different week_intervals
+                      // Фильтр "2+ Weeks" - users who voted for cards that CURRENTLY have "this week" or "past" status with DIFFERENT week_intervals
                       if (regStatusFilter === '2+weeks') {
                         const userActivity = userActivityStats[profile.id];
                         
-                        console.log(`🔍 Checking user ${profile.display_name || profile.email?.split('@')[0]} (${profile.id}):`, {
-                          hasActivity: !!userActivity,
-                          hasRatings: !!userActivity?.ratings,
-                          ratingsCount: userActivity?.ratings?.length || 0,
-                          registrationDate: profile.created_at
-                        });
-                        
-                        // Get all participant IDs this user has voted for
-                        const votedParticipantIds = new Set((userActivity?.ratings || []).map((r: any) => r.participant_id).filter(Boolean));
-                        
-                        // Find these participants in current participants list and check their CURRENT status and week_interval
-                        const participantsWithCurrentStatus = weeklyParticipants
-                          .filter(p => votedParticipantIds.has(p.id))
-                          .filter(p => {
-                            const status = p.admin_status;
-                            return status === 'this week' || status === 'past';
-                          });
-                        
-                        console.log(`📋 Valid participants (this week/past) for ${profile.display_name || profile.email?.split('@')[0]}: ${participantsWithCurrentStatus.length}`);
-                        
-                        // Count unique week intervals from these participants
-                        const weekIntervals = new Set<string>();
-                        participantsWithCurrentStatus.forEach((participant, idx) => {
-                          console.log(`  ${idx + 1}. Participant: ${participant.application_data?.firstName || 'Unknown'}, Status: ${participant.admin_status}, Week: ${participant.week_interval || 'NO WEEK'}`);
-                          
-                          if (participant.week_interval) {
-                            weekIntervals.add(participant.week_interval);
-                            console.log(`     ➕ Week ${participant.week_interval} added`);
-                          }
-                        });
-                        
-                        const uniqueWeeks = Array.from(weekIntervals);
-                        console.log(`📊 User ${profile.display_name || profile.email?.split('@')[0]}: ${participantsWithCurrentStatus.length} valid participants across ${uniqueWeeks.length} unique weeks:`, uniqueWeeks);
-                        
-                        // Must have voted for participants from at least 2 different weeks (based on current status)
-                        if (uniqueWeeks.length < 2) {
-                          console.log(`❌ User ${profile.display_name || profile.email?.split('@')[0]} filtered out: only ${uniqueWeeks.length} week(s) with valid statuses`);
+                        if (!userActivity?.ratings || userActivity.ratings.length === 0) {
+                          console.log(`❌ User ${profile.display_name || profile.email?.split('@')[0]} - no ratings found`);
                           return false;
                         }
                         
-                        console.log(`✅ User ${profile.display_name || profile.email?.split('@')[0]} passed: ${participantsWithCurrentStatus.length} participants across ${uniqueWeeks.length} weeks`);
+                        console.log(`🔍 Checking user ${profile.display_name || profile.email?.split('@')[0]} (${profile.id}):`, {
+                          totalRatings: userActivity.ratings.length
+                        });
+                        
+                        // Собираем все интервалы карточек по которым голосовал пользователь
+                        // и которые СЕЙЧАС имеют статус "this week" или "past"
+                        const weekIntervalsSet = new Set<string>();
+                        
+                        userActivity.ratings.forEach((rating: any) => {
+                          // Находим карточку в текущем списке участников
+                          const participant = weeklyParticipants.find(p => p.id === rating.participant_id);
+                          
+                          if (participant) {
+                            const currentStatus = participant.admin_status;
+                            const currentInterval = participant.week_interval;
+                            
+                            console.log(`  📌 Card: ${participant.application_data?.firstName || 'Unknown'}, Current Status: ${currentStatus}, Current Interval: ${currentInterval || 'NONE'}`);
+                            
+                            // Проверяем текущий статус
+                            if ((currentStatus === 'this week' || currentStatus === 'past') && currentInterval) {
+                              weekIntervalsSet.add(currentInterval);
+                              console.log(`     ✅ Added interval: ${currentInterval} (total unique: ${weekIntervalsSet.size})`);
+                            }
+                          }
+                        });
+                        
+                        const uniqueIntervals = Array.from(weekIntervalsSet);
+                        console.log(`📊 User ${profile.display_name || profile.email?.split('@')[0]}: Found ${uniqueIntervals.length} unique intervals:`, uniqueIntervals);
+                        
+                        // Если меньше 2 разных интервалов - не показываем
+                        if (uniqueIntervals.length < 2) {
+                          console.log(`❌ User ${profile.display_name || profile.email?.split('@')[0]} filtered out: only ${uniqueIntervals.length} interval(s)`);
+                          return false;
+                        }
+                        
+                        console.log(`✅ User ${profile.display_name || profile.email?.split('@')[0]} PASSED: ${uniqueIntervals.length} different intervals`);
                       }
 
                       // Фильтр поиска
