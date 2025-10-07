@@ -476,6 +476,7 @@ const Admin = () => {
   const [regPaginationPage, setRegPaginationPage] = useState(1);
   const regItemsPerPage = 20;
   const fetchedStatsRef = useRef<Set<string>>(new Set());
+  const [expandedMaybeFingerprints, setExpandedMaybeFingerprints] = useState<Set<string>>(new Set());
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -6680,7 +6681,21 @@ const Admin = () => {
                                       if (hasDuplicateFingerprint) reasonCodes.push("FP");
                                       
                                       return (
-                                        <Badge variant="outline" className="text-xs rounded-none bg-orange-100 text-orange-700 border-orange-300 flex items-center gap-1">
+                                        <Badge 
+                                          variant="outline" 
+                                          className="text-xs rounded-none bg-orange-100 text-orange-700 border-orange-300 flex items-center gap-1 cursor-pointer hover:bg-orange-200"
+                                          onClick={() => {
+                                            if (hasDuplicateFingerprint && profile.fingerprint_id) {
+                                              const newExpanded = new Set(expandedMaybeFingerprints);
+                                              if (expandedMaybeFingerprints.has(profile.id)) {
+                                                newExpanded.delete(profile.id);
+                                              } else {
+                                                newExpanded.add(profile.id);
+                                              }
+                                              setExpandedMaybeFingerprints(newExpanded);
+                                            }
+                                          }}
+                                        >
                                           {reasonCodes.length > 0 && (
                                             <span className="text-[10px] font-semibold">
                                               {reasonCodes.join(" ")}
@@ -6989,6 +7004,59 @@ const Admin = () => {
                                  </div>
                                )}
                           </Card>
+                          
+                          {/* Fingerprint Cards - Show all users with same fingerprint when Maybe badge is clicked */}
+                          {profile.fingerprint_id && expandedMaybeFingerprints.has(profile.id) && (() => {
+                            const sameFingerprint = paginatedProfiles.filter(p => 
+                              p.fingerprint_id === profile.fingerprint_id && p.id !== profile.id
+                            );
+                            
+                            return sameFingerprint.length > 0 ? (
+                              <div className="w-full p-4 bg-orange-50 rounded-lg border border-orange-200 mb-4">
+                                <h4 className="text-sm font-medium mb-3 text-orange-900">
+                                  Пользователи с таким же Fingerprint ({profile.fingerprint_id.substring(0, 16)}...):
+                                </h4>
+                                <div className="space-y-2">
+                                  {sameFingerprint.map(fpProfile => (
+                                    <div key={`fp-${fpProfile.id}`} className="p-3 bg-background rounded border">
+                                      <div className="flex items-start gap-3">
+                                        <Avatar className="h-10 w-10">
+                                          <AvatarImage src={fpProfile.avatar_url || ''} />
+                                          <AvatarFallback>
+                                            {fpProfile.first_name?.[0]}{fpProfile.last_name?.[0]}
+                                          </AvatarFallback>
+                                        </Avatar>
+                                        <div className="flex-1 min-w-0">
+                                          <div className="font-medium truncate">
+                                            {fpProfile.display_name || `${fpProfile.first_name} ${fpProfile.last_name}`}
+                                          </div>
+                                          <div className="text-xs text-muted-foreground truncate">
+                                            {fpProfile.email}
+                                          </div>
+                                          <div className="text-xs text-muted-foreground mt-1">
+                                            IP: {fpProfile.ip_address || 'N/A'}
+                                          </div>
+                                          <div className="text-xs text-muted-foreground mt-1">
+                                            Зарегистрирован: {new Date(fpProfile.created_at).toLocaleString('ru-RU')}
+                                          </div>
+                                          {fpProfile.user_agent && (() => {
+                                            const parser = new UAParser(fpProfile.user_agent);
+                                            const result = parser.getResult();
+                                            return (
+                                              <div className="text-xs text-muted-foreground mt-1">
+                                                {result.os.name && `${result.os.name} ${result.os.version || ''}`}
+                                                {result.browser.name && ` | ${result.browser.name}`}
+                                              </div>
+                                            );
+                                          })()}
+                                        </div>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            ) : null;
+                          })()}
                           
                           {/* IP Address Cards - Show all users with same IP when expanded */}
                           {profile.ip_address && expandedIPs.has(profile.ip_address) && (
