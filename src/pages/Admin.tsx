@@ -1269,10 +1269,12 @@ const Admin = () => {
         if (rating.week_interval) allWeekIntervals.add(rating.week_interval);
       });
 
+      const uniqueWeeksArray = Array.from(allWeekIntervals);
       console.log('📊 Final stats for user', userId, ':', {
         likesCount: finalLikes.length,
         ratingsCount: finalRatings.length,
-        uniqueWeeks: Array.from(allWeekIntervals)
+        uniqueWeeks: uniqueWeeksArray.length,
+        weekIntervals: uniqueWeeksArray
       });
 
       setUserActivityStats(prev => ({
@@ -1281,7 +1283,9 @@ const Admin = () => {
           likesCount: finalLikes.length,
           ratingsCount: finalRatings.length,
           likes: finalLikes,
-          ratings: finalRatings
+          ratings: finalRatings,
+          uniqueWeeks: uniqueWeeksArray.length,
+          weekIntervals: uniqueWeeksArray
         }
       }));
     } catch (error) {
