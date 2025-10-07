@@ -6682,74 +6682,246 @@ const Admin = () => {
 
 
 
-{(() => {
-                    console.log('🔍 FILTRATION START - Tab:', activeTab, 'Filter:', regStatusFilter, 'Total profiles:', profiles.length);
+                {(() => {
+                    console.log('🔍 Starting profile filtering in REGISTRATIONS TAB:', {
+                      activeTab,
+                      regStatusFilter,
+                      profilesCount: profiles.length,
+                      userActivityStatsKeys: Object.keys(userActivityStats).length,
+                      firstProfileId: profiles[0]?.id,
+                      hasActivityForFirst: profiles[0] ? !!userActivityStats[profiles[0].id] : false
+                    });
                     
-                    // ===========================================
-                    // EXCLUSIVE FILTER: "2+ Weeks" (2 w)
-                    // ===========================================
-                    if (regStatusFilter === '2+weeks') {
-                      console.log('📊 2W FILTER ACTIVATED');
-                      console.log('  - userVotingStats loaded:', Object.keys(userVotingStats).length, 'records');
-                      console.log('  - searchQuery:', searchQuery);
+                    const filteredProfiles = (() => {
+                      console.log('🚀 STARTING FILTER - regStatusFilter:', regStatusFilter, 'profiles:', profiles.length);
                       
-                      const filtered = profiles.filter(profile => {
-                        const votingStats = userVotingStats[profile.id];
+                      // Фильтр "2+ Weeks" (2 w) - EXCLUSIVE filter
+                      if (regStatusFilter === '2+weeks') {
+                        console.log('🔍 Applying 2+weeks filter, userVotingStats keys:', Object.keys(userVotingStats).length);
                         
-                        // Must have voting stats
-                        if (!votingStats) return false;
-                        
-                        // Must have voted in 2+ different weeks
-                        const uniqueWeeks = votingStats.unique_weeks_count || 0;
-                        if (uniqueWeeks < 2) return false;
-                        
-                        // Apply search if present
-                        if (searchQuery.trim()) {
-                          const query = searchQuery.toLowerCase();
-                          const fullName = `${profile.first_name || ''} ${profile.last_name || ''}`.toLowerCase();
-                          const displayName = (profile.display_name || '').toLowerCase();
-                          const ip = (profile.ip_address || '').toLowerCase();
-                          const fingerprintId = (profile.fingerprint_id || '').toLowerCase();
+                        const result = profiles.filter(profile => {
+                          const votingStats = userVotingStats[profile.id];
                           
-                          const matches = fullName.includes(query) || 
-                                         displayName.includes(query) || 
-                                         ip.includes(query) ||
-                                         fingerprintId.includes(query);
+                          if (!votingStats) {
+                            return false;
+                          }
                           
-                          if (!matches) return false;
+                          const uniqueWeeks = votingStats.unique_weeks_count || 0;
+                          
+                          if (uniqueWeeks < 2) {
+                            return false;
+                          }
+                          
+                          // Apply search filter if present
+                          if (searchQuery.trim()) {
+                            const query = searchQuery.toLowerCase();
+                            const fullName = `${profile.first_name || ''} ${profile.last_name || ''}`.toLowerCase();
+                            const displayName = (profile.display_name || '').toLowerCase();
+                            const ip = (profile.ip_address || '').toLowerCase();
+                            const fingerprintId = (profile.fingerprint_id || '').toLowerCase();
+                            
+                            return fullName.includes(query) || 
+                                   displayName.includes(query) || 
+                                   ip.includes(query) ||
+                                   fingerprintId.includes(query);
+                          }
+                          
+                          return true;
+                        });
+                        
+                        console.log('✅ 2+weeks filter result:', result.length, 'users');
+                        return result;
+                      }
+                      
+                      // Фильтр "Regular" - EXCLUSIVE filter
+                      if (regStatusFilter === 'regular') {
+                        console.log('🔍 Applying regular filter');
+                        
+                        const result = profiles.filter(profile => {
+                          const hasRegularRole = userRoles.some(r => r.user_id === profile.id && r.role === 'regular');
+                          
+                          if (!hasRegularRole) return false;
+                          
+                          // Apply search filter if present
+                          if (searchQuery.trim()) {
+                            const query = searchQuery.toLowerCase();
+                            const fullName = `${profile.first_name || ''} ${profile.last_name || ''}`.toLowerCase();
+                            const displayName = (profile.display_name || '').toLowerCase();
+                            const ip = (profile.ip_address || '').toLowerCase();
+                            const fingerprintId = (profile.fingerprint_id || '').toLowerCase();
+                            
+                            return fullName.includes(query) || 
+                                   displayName.includes(query) || 
+                                   ip.includes(query) ||
+                                   fingerprintId.includes(query);
+                          }
+                          
+                          return true;
+                        });
+                        
+                        console.log('✅ Regular filter result:', result.length, 'users');
+                        return result;
+                      }
+                      
+                      // Default filtering for other cases
+                      return profiles.filter(profile => {
+                      
+                      // Фильтр по дню регистрации
+                      if (selectedRegistrationDay) {
+                        if (!profile.created_at) return false;
+                        
+                        // Convert created_at to Asia/Manila timezone and get day name
+                        const userDate = new Date(profile.created_at);
+                        const manilaDate = new Date(userDate.toLocaleString("en-US", { timeZone: "Asia/Manila" }));
+                        const dayName = manilaDate.toLocaleDateString('en-US', { weekday: 'short', timeZone: 'Asia/Manila' });
+                        
+                        if (dayName !== selectedRegistrationDay.dayName) return false;
+                        
+                        // Если нужно показать только подозрительных
+                        if (selectedRegistrationDay.showSuspicious) {
+                          // Exclude users with 'suspicious' role
+                          const hasSuspiciousRole = userRoles.some(role => 
+                            role.user_id === profile.id && role.role === 'suspicious'
+                          );
+                          if (hasSuspiciousRole) return false;
+                          
+                          // Check criteria for suspicious users
+                          const emailNotWhitelisted = profile.email ? !isEmailDomainWhitelisted(profile.email) : false;
+                          const wasAutoConfirmed = profile.created_at && profile.email_confirmed_at && 
+                            Math.abs(new Date(profile.email_confirmed_at).getTime() - new Date(profile.created_at).getTime()) < 1000;
+                          const formFillTime = profile.raw_user_meta_data?.form_fill_time_seconds;
+                          const fastFormFill = formFillTime !== undefined && formFillTime !== null && formFillTime < 5;
+                          
+                          // Check for duplicate fingerprints
+                          let hasDuplicateFingerprint = false;
+                          if (profile.fingerprint_id) {
+                            const sameFingerprint = profiles.filter(p => 
+                              p.fingerprint_id === profile.fingerprint_id && p.id !== profile.id
+                            );
+                            hasDuplicateFingerprint = sameFingerprint.length > 0;
+                          }
+                          
+                          if (!(emailNotWhitelisted || wasAutoConfirmed || fastFormFill || hasDuplicateFingerprint)) return false;
+                        }
+                      }
+                      
+                      // Фильтр верификации
+                      if (verificationFilter === 'verified') {
+                        if (!profile.email_confirmed_at) return false;
+                      } else if (verificationFilter === 'unverified') {
+                        if (profile.email_confirmed_at) return false;
+                      }
+                      
+                      // Фильтр "Maybe Suspicious"
+                      if (suspiciousEmailFilter === 'maybe-suspicious') {
+                        // Exclude users with 'suspicious' role
+                        const hasSuspiciousRole = userRoles.some(role => 
+                          role.user_id === profile.id && role.role === 'suspicious'
+                        );
+                        if (hasSuspiciousRole) return false;
+                        
+                        // Check criteria
+                        const emailNotWhitelisted = profile.email ? !isEmailDomainWhitelisted(profile.email) : false;
+                        const wasAutoConfirmed = profile.created_at && profile.email_confirmed_at && 
+                          Math.abs(new Date(profile.email_confirmed_at).getTime() - new Date(profile.created_at).getTime()) < 1000;
+                        
+                        // Check form fill time (< 5 seconds)
+                        const formFillTime = profile.raw_user_meta_data?.form_fill_time_seconds;
+                        const fastFormFill = formFillTime !== undefined && formFillTime !== null && formFillTime < 5;
+                        
+                        // Check for duplicate fingerprints
+                        let hasDuplicateFingerprint = false;
+                        if (profile.fingerprint_id) {
+                          const sameFingerprint = profiles.filter(p => 
+                            p.fingerprint_id === profile.fingerprint_id && p.id !== profile.id
+                          );
+                          hasDuplicateFingerprint = sameFingerprint.length > 0;
                         }
                         
-                        return true;
-                      });
-                      
-                      console.log('✅ 2W FILTER RESULT:', filtered.length, 'users matched');
-                      
-                      const totalRegPages = Math.ceil(filtered.length / regItemsPerPage);
-                      const startIdx = (regPaginationPage - 1) * regItemsPerPage;
-                      const endIdx = startIdx + regItemsPerPage;
-                      const paginatedProfiles = filtered.slice(startIdx, endIdx);
-                      
-                      return (
-                        <div className="space-y-4">
-                          <div className="text-sm text-muted-foreground">
-                            Showing {paginatedProfiles.length} of {filtered.length} {filtered.length === 1 ? 'result' : 'results'} 
-                            {filtered.length > regItemsPerPage && ` (page ${regPaginationPage} of ${totalRegPages})`}
-                          </div>
-                          
-                          <div className="grid gap-4">
-                            {paginatedProfiles.map(profile => {
-                              const lastActivity = userActivityData[profile.id]?.lastActivity;
-                              const now = new Date();
-                              const activityDate = lastActivity ? new Date(lastActivity) : null;
-                              const daysDiff = activityDate ? Math.floor((now.getTime() - activityDate.getTime()) / (1000 * 60 * 60 * 24)) : null;
-                              
-                              let activityColor = 'bg-red-100 text-red-700';
-                              if (daysDiff !== null) {
-                                if (daysDiff < 2) activityColor = 'bg-green-100 text-green-700';
-                                else if (daysDiff < 7) activityColor = 'bg-yellow-100 text-yellow-700';
-                              }
+                        if (!(emailNotWhitelisted || wasAutoConfirmed || fastFormFill || hasDuplicateFingerprint)) return false;
+                      }
 
-                              return (
+                      // Фильтр ролей
+                      if (roleFilter !== 'all') {
+                        const profileRoles = userRoles.filter(ur => ur.user_id === profile.id);
+                        const userRole = userRoleMap[profile.id] || 'usual';
+                        
+                        if (roleFilter === 'admin') {
+                          if (userRole !== 'admin') return false;
+                        } else if (roleFilter === 'moderator') {
+                          if (userRole !== 'moderator') return false;
+                        } else if (roleFilter === 'usual') {
+                          if (userRole !== 'usual' && userRole) return false;
+                        } else if (roleFilter === 'suspicious') {
+                          const isSuspicious = profileRoles.some(ur => ur.role === 'suspicious');
+                          if (!isSuspicious) return false;
+                        }
+                      }
+
+                      // Фильтр поиска
+                      if (searchQuery.trim()) {
+                        const query = searchQuery.toLowerCase();
+                        const fullName = `${profile.first_name || ''} ${profile.last_name || ''}`.toLowerCase();
+                        const displayName = (profile.display_name || '').toLowerCase();
+                        const email = (profile.email || '').toLowerCase();
+                        const ip = (profile.ip_address || '').toLowerCase();
+                        
+                        return fullName.includes(query) || 
+                               displayName.includes(query) || 
+                               email.includes(query) || 
+                               ip.includes(query);
+                      }
+                       
+                       return true;
+                      });
+                    })();
+
+                    console.log('🎯 FINAL filteredProfiles length:', filteredProfiles.length);
+
+                    const totalRegPages = Math.ceil(filteredProfiles.length / regItemsPerPage);
+                    const startIdx = (regPaginationPage - 1) * regItemsPerPage;
+                    const endIdx = startIdx + regItemsPerPage;
+                    const paginatedProfiles = filteredProfiles.slice(startIdx, endIdx);
+
+                     return (
+                      <div className="space-y-4">
+                        {/* Results count */}
+                        <div className="text-sm text-muted-foreground">
+                          Showing {paginatedProfiles.length} of {filteredProfiles.length} {filteredProfiles.length === 1 ? 'result' : 'results'} 
+                          {filteredProfiles.length > regItemsPerPage && ` (page ${regPaginationPage} of ${totalRegPages})`}
+                          {selectedRegistrationDay && (
+                            <span className="ml-2 text-xs font-medium text-primary">
+                              (registered on {selectedRegistrationDay.dayName}
+                              {selectedRegistrationDay.showSuspicious && ' - suspicious only'})
+                              <button
+                                onClick={() => setSelectedRegistrationDay(null)}
+                                className="ml-1 text-destructive hover:underline"
+                              >
+                                ✕
+                              </button>
+                            </span>
+                          )}
+                          {suspiciousEmailFilter === 'maybe-suspicious' && (
+                            <span className="ml-2 text-xs text-destructive font-medium">
+                              (not whitelisted email OR auto-confirmed &lt;1 sec OR duplicate fingerprint OR fast form fill &lt;5 sec, excluding "suspicious" role)
+                            </span>
+                          )}
+                        </div>
+
+                        <div className="grid gap-4">
+                          {paginatedProfiles.map(profile => {
+                            const lastActivity = userActivityData[profile.id]?.lastActivity;
+                            const now = new Date();
+                            const activityDate = lastActivity ? new Date(lastActivity) : null;
+                            const daysDiff = activityDate ? Math.floor((now.getTime() - activityDate.getTime()) / (1000 * 60 * 60 * 24)) : null;
+                            
+                            let activityColor = 'bg-red-100 text-red-700';
+                            if (daysDiff !== null) {
+                              if (daysDiff < 2) activityColor = 'bg-green-100 text-green-700';
+                              else if (daysDiff < 7) activityColor = 'bg-yellow-100 text-yellow-700';
+                            }
+
+                            return (
                               <React.Fragment key={profile.id}>
                                 <Card className="p-3 relative overflow-hidden">
                               {/* Registration date badge in top left corner */}
@@ -7470,11 +7642,7 @@ const Admin = () => {
                       )}
                     </div>
                   );
-                }
-                
-                // TODO: Add handlers for other filters (regular, all, etc.)
-                return null;
-              })()}
+                })()}
                 </>
                 )}
               </TabsContent>
