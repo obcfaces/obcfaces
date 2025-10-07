@@ -2753,7 +2753,10 @@ const Admin = () => {
             <WeeklyTransitionButton />
           </div>
 
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+          <Tabs value={activeTab} onValueChange={(tab) => {
+            console.log('📑 Tab changed to:', tab);
+            setActiveTab(tab);
+          }} className="space-y-6">
             {/* Mobile layout: Single row with all tabs */}
             <div className="md:hidden">
               <TabsList className="grid grid-cols-8 w-full">
@@ -6527,7 +6530,11 @@ const Admin = () => {
                         <Button
                           variant={regStatusFilter === '2+weeks' ? 'default' : 'outline'}
                           size="sm"
-                          onClick={() => setRegStatusFilter(regStatusFilter === '2+weeks' ? 'all' : '2+weeks')}
+                          onClick={() => {
+                            const newFilter = regStatusFilter === '2+weeks' ? 'all' : '2+weeks';
+                            console.log('🔘 Clicking 2+ Weeks button, new filter:', newFilter);
+                            setRegStatusFilter(newFilter);
+                          }}
                         >
                           2+ Weeks
                           {(() => {
