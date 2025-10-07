@@ -6786,7 +6786,6 @@ const Admin = () => {
                           if (hasSuspiciousRole) return false;
                           
                           // Check criteria for suspicious users
-                          const emailNotWhitelisted = profile.email ? !isEmailDomainWhitelisted(profile.email) : false;
                           const wasAutoConfirmed = profile.created_at && profile.email_confirmed_at && 
                             Math.abs(new Date(profile.email_confirmed_at).getTime() - new Date(profile.created_at).getTime()) < 1000;
                           const formFillTime = profile.raw_user_meta_data?.form_fill_time_seconds;
@@ -6801,7 +6800,7 @@ const Admin = () => {
                             hasDuplicateFingerprint = sameFingerprint.length > 0;
                           }
                           
-                          if (!(emailNotWhitelisted || wasAutoConfirmed || fastFormFill || hasDuplicateFingerprint)) return false;
+                          if (!(wasAutoConfirmed || fastFormFill || hasDuplicateFingerprint)) return false;
                         }
                       }
                       
@@ -6821,7 +6820,6 @@ const Admin = () => {
                         if (hasSuspiciousRole) return false;
                         
                         // Check criteria
-                        const emailNotWhitelisted = profile.email ? !isEmailDomainWhitelisted(profile.email) : false;
                         const wasAutoConfirmed = profile.created_at && profile.email_confirmed_at && 
                           Math.abs(new Date(profile.email_confirmed_at).getTime() - new Date(profile.created_at).getTime()) < 1000;
                         
@@ -6838,7 +6836,7 @@ const Admin = () => {
                           hasDuplicateFingerprint = sameFingerprint.length > 0;
                         }
                         
-                        if (!(emailNotWhitelisted || wasAutoConfirmed || fastFormFill || hasDuplicateFingerprint)) return false;
+                        if (!(wasAutoConfirmed || fastFormFill || hasDuplicateFingerprint)) return false;
                       }
 
                       // Фильтр ролей
@@ -6863,12 +6861,12 @@ const Admin = () => {
                         const query = searchQuery.toLowerCase();
                         const fullName = `${profile.first_name || ''} ${profile.last_name || ''}`.toLowerCase();
                         const displayName = (profile.display_name || '').toLowerCase();
-                        const email = (profile.email || '').toLowerCase();
+                        const fingerprintId = (profile.fingerprint_id || '').toLowerCase();
                         const ip = (profile.ip_address || '').toLowerCase();
                         
                         return fullName.includes(query) || 
                                displayName.includes(query) || 
-                               email.includes(query) || 
+                               fingerprintId.includes(query) || 
                                ip.includes(query);
                       }
                        
