@@ -6676,8 +6676,8 @@ const Admin = () => {
                                     if (isMaybeSuspicious) {
                                       const reasonCodes = [];
                                       if (wasAutoConfirmed) reasonCodes.push("<1");
+                                      if (fastFormFill) reasonCodes.push("<3");
                                       if (hasDuplicateFingerprint) reasonCodes.push("FP");
-                                      if (fastFormFill) reasonCodes.push("<5");
                                       
                                       return (
                                         <Badge variant="outline" className="text-xs rounded-none bg-orange-100 text-orange-700 border-orange-300 flex items-center gap-1">
