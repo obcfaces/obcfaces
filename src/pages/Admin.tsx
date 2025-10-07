@@ -1207,20 +1207,20 @@ const Admin = () => {
         console.log('✅ Ratings fetched:', ratingsData?.length || 0);
       }
 
-      // Для рейтингов теперь week_interval приходит напрямую из таблицы contestant_ratings
+      // Для рейтингов получаем week_interval из weekly_contest_participants (ТЕКУЩИЙ статус)
       let ratingsWithProfiles = [];
       if (ratingsData && ratingsData.length > 0) {
-        console.log(`✅ Ratings fetched with week_intervals: ${ratingsData.length}`);
+        console.log(`✅ Ratings fetched: ${ratingsData.length}`);
         
-        // Можем добавить профили участников, если нужно
         const participantIds = ratingsData
           .map(rating => rating.participant_id)
           .filter(id => id != null);
         
         if (participantIds.length > 0) {
+          // Получаем ТЕКУЩИЙ week_interval из weekly_contest_participants
           const { data: participantsData } = await supabase
             .from('weekly_contest_participants')
-            .select('id, user_id')
+            .select('id, user_id, week_interval')
             .in('id', participantIds);
           
           const userIds = (participantsData || []).map(p => p.user_id).filter(Boolean);
@@ -1235,18 +1235,21 @@ const Admin = () => {
           );
           
           const participantsMap = new Map(
-            (participantsData || []).map(p => [p.id, p.user_id])
+            (participantsData || []).map(p => [p.id, { userId: p.user_id, week_interval: p.week_interval }])
           );
           
           ratingsWithProfiles = ratingsData.map(rating => {
-            const userId = rating.participant_id ? participantsMap.get(rating.participant_id) : null;
-            const profile = userId ? profilesMap.get(userId) : null;
+            const participantInfo = rating.participant_id ? participantsMap.get(rating.participant_id) : null;
+            const profile = participantInfo?.userId ? profilesMap.get(participantInfo.userId) : null;
             
             return {
               ...rating,
-              participant: profile
+              participant: profile,
+              week_interval: participantInfo?.week_interval // ТЕКУЩИЙ week_interval участника
             };
           });
+          
+          console.log('✅ Ratings with CURRENT week_intervals:', ratingsWithProfiles.filter(r => r.week_interval).length);
         } else {
           ratingsWithProfiles = ratingsData;
         }
@@ -1255,7 +1258,7 @@ const Admin = () => {
       const finalLikes = likesWithProfiles;
       const finalRatings = ratingsWithProfiles || [];
 
-      // Collect all unique week intervals from RATINGS ONLY (not likes)
+      // Collect all unique week intervals from RATINGS ONLY (not likes) - ТЕКУЩИЕ статусы
       const allWeekIntervals = new Set();
       finalRatings.forEach(rating => {
         if (rating.week_interval) allWeekIntervals.add(rating.week_interval);
