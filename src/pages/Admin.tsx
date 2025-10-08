@@ -1346,6 +1346,17 @@ const Admin = () => {
         return next;
       });
     } else {
+      // Check if user has verified email before allowing to expand
+      const user = profiles.find(p => p.id === userId);
+      if (!user?.email_confirmed_at) {
+        toast({
+          title: "Email Not Verified",
+          description: "This user must verify their email before their activity can be viewed",
+          variant: "destructive"
+        });
+        return;
+      }
+      
       setExpandedActivity(prev => new Set(prev).add(userId));
       // Fetch data if not already loaded
       if (!userActivityStats[userId]) {
@@ -7247,7 +7258,12 @@ const Admin = () => {
                                       />
                                     </div>
                                   )}
-                                  {!profile.email && (
+                                  {!profile.email && profile.auth_provider && (
+                                    <div className="text-xs text-muted-foreground">
+                                      {profile.auth_provider === 'facebook' ? 'Facebook Login' : 'Social Login'} - ID: {profile.id?.substring(0, 8)}
+                                    </div>
+                                  )}
+                                  {!profile.email && !profile.auth_provider && (
                                     <div className="text-xs text-destructive">
                                       No email - User ID: {profile.id?.substring(0, 8)}
                                     </div>
