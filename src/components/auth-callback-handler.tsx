@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
+import { saveDeviceFingerprint } from "@/utils/fingerprint";
 
 // Handles Supabase email confirmation / magic-link callbacks globally
 const AuthCallbackHandler = () => {
@@ -55,6 +56,16 @@ const AuthCallbackHandler = () => {
         handledRef.current = href;
         
         console.log('Auth callback successful:', data);
+
+        // Save device fingerprint for OAuth users
+        if (data.session?.user) {
+          try {
+            await saveDeviceFingerprint(data.session.user.id);
+            console.log('Device fingerprint saved for OAuth user');
+          } catch (fpError) {
+            console.error('Error saving fingerprint for OAuth user:', fpError);
+          }
+        }
 
         // Clean URL from auth params
         const url = new URL(window.location.href);
