@@ -1723,11 +1723,13 @@ const Admin = () => {
         if (error) throw error;
       } else {
         // Normal fetch - ALL profiles (no limit to ensure search works for all users)
+        console.log('🔵 Fetching ALL profiles from database...');
         const { data, error } = await supabase
           .from('profiles')
           .select('*')
           .order('created_at', { ascending: false });
         
+        console.log('✅ Fetched profiles from DB:', data?.length || 0);
         profilesData = data;
         if (error) throw error;
       }
@@ -1880,6 +1882,7 @@ const Admin = () => {
       console.log('📧 Profiles with email:', profilesWithAuth.filter(p => p.email).length);
       console.log('⚠️ Profiles without email:', profilesWithAuth.filter(p => !p.email).length);
 
+      console.log('✅ Setting profiles state with', profilesWithAuth.length, 'profiles');
       setProfiles(profilesWithAuth);
     } catch (error) {
       console.error('Error in fetchProfiles:', error);
