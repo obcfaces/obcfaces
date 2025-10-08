@@ -1239,21 +1239,31 @@ const Admin = () => {
         console.log('Participant IDs to fetch:', participantIds);
         
         if (participantIds.length > 0) {
-          // Fetch profiles for participants
+          // Fetch from weekly_contest_participants table
           const { data: participantProfiles, error: profilesError } = await supabase
-            .from('profiles')
-            .select('id, display_name, first_name, last_name, avatar_url, photo_1_url, photo_2_url')
+            .from('weekly_contest_participants')
+            .select('id, application_data, user_id')
             .in('id', participantIds);
           
           if (profilesError) {
-            console.error('❌ Error fetching participant profiles:', profilesError);
+            console.error('❌ Error fetching participant data:', profilesError);
           }
           
-          console.log('Fetched participant profiles:', participantProfiles?.length || 0);
-          console.log('Profiles data:', participantProfiles);
+          console.log('Fetched participant data:', participantProfiles?.length || 0);
+          console.log('Participants data:', participantProfiles);
           
           const profilesMap = new Map(
-            (participantProfiles || []).map(p => [p.id, p])
+            (participantProfiles || []).map(p => {
+              const appData = p.application_data as any;
+              return [p.id, {
+                photo_1_url: appData?.photo1_url || appData?.photo_1_url,
+                photo_2_url: appData?.photo2_url || appData?.photo_2_url,
+                avatar_url: appData?.avatar_url,
+                display_name: appData?.first_name && appData?.last_name 
+                  ? `${appData.first_name} ${appData.last_name}`
+                  : null
+              }];
+            })
           );
           
           ratingsWithParticipants = ratingsData.map(rating => {
@@ -1261,7 +1271,8 @@ const Admin = () => {
             console.log(`Mapping rating for ${rating.contestant_name}:`, {
               participant_id: rating.participant_id,
               found_participant: !!participant,
-              participant_data: participant
+              photo_1_url: participant?.photo_1_url,
+              photo_2_url: participant?.photo_2_url
             });
             return {
               ...rating,
