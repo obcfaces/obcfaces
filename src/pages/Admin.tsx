@@ -1231,17 +1231,16 @@ const Admin = () => {
       // Fetch participant profiles for ratings
       let ratingsWithParticipants = [];
       if (ratingsData && ratingsData.length > 0) {
+        const profilesMap = new Map();
+        
+        // Fetch profiles by participant_id
         const participantIds = ratingsData
           .map(rating => rating.participant_id)
           .filter(id => id != null);
         
         console.log(`📋 Processing ${ratingsData.length} ratings, ${participantIds.length} with participant_id`);
         
-        // Fetch both profiles and weekly_contest_participants data
-        const profilesMap = new Map();
-        
         if (participantIds.length > 0) {
-          // Fetch profiles for participants
           const { data: participantProfiles } = await supabase
             .from('profiles')
             .select('id, display_name, first_name, last_name, avatar_url, photo_1_url, photo_2_url')
@@ -1250,9 +1249,15 @@ const Admin = () => {
           (participantProfiles || []).forEach(p => profilesMap.set(p.id, p));
         }
         
-        // Also try to fetch from weekly_contest_participants for those without participant_id
-        const ratingsWithoutParticipantId = ratingsData.filter(r => !r.participant_id);
-        if (ratingsWithoutParticipantId.length > 0) {
+        // For ratings without participant_id, try to find by contestant_name
+        const namesWithoutId = ratingsData
+          .filter(r => !r.participant_id && r.contestant_name)
+          .map(r => r.contestant_name);
+        
+        if (namesWithoutId.length > 0) {
+          console.log(`🔍 Searching profiles by names: ${namesWithoutId.length} names`);
+          
+          // Try to fetch from weekly_contest_participants by matching names
           const { data: wcpData } = await supabase
             .from('weekly_contest_participants')
             .select('user_id, application_data');
@@ -1260,29 +1265,53 @@ const Admin = () => {
           if (wcpData) {
             wcpData.forEach(wcp => {
               if (wcp.user_id && wcp.application_data) {
-                const existingProfile = profilesMap.get(wcp.user_id);
                 const appData = wcp.application_data as any;
-                if (!existingProfile && appData) {
-                  profilesMap.set(wcp.user_id, {
-                    id: wcp.user_id,
-                    display_name: appData.display_name || 
-                                 `${appData.first_name || ''} ${appData.last_name || ''}`.trim(),
-                    first_name: appData.first_name,
-                    last_name: appData.last_name,
-                    avatar_url: appData.avatar_url,
-                    photo_1_url: appData.photo1_url || appData.photo_1_url,
-                    photo_2_url: appData.photo2_url || appData.photo_2_url
-                  });
+                if (appData) {
+                  const fullName = `${appData.first_name || ''} ${appData.last_name || ''}`.trim();
+                  const displayName = appData.display_name;
+                  
+                  // Match by name
+                  const matchingRating = ratingsData.find(r => 
+                    r.contestant_name === fullName || r.contestant_name === displayName
+                  );
+                  
+                  if (matchingRating && !profilesMap.has(wcp.user_id)) {
+                    profilesMap.set(wcp.user_id, {
+                      id: wcp.user_id,
+                      display_name: displayName || fullName,
+                      first_name: appData.first_name,
+                      last_name: appData.last_name,
+                      avatar_url: appData.avatar_url,
+                      photo_1_url: appData.photo1_url || appData.photo_1_url,
+                      photo_2_url: appData.photo2_url || appData.photo_2_url,
+                      _matched_name: matchingRating.contestant_name
+                    });
+                  }
                 }
               }
             });
           }
         }
         
-        ratingsWithParticipants = ratingsData.map(rating => ({
-          ...rating,
-          participant: rating.participant_id ? profilesMap.get(rating.participant_id) : null
-        }));
+        ratingsWithParticipants = ratingsData.map(rating => {
+          let participant = null;
+          
+          if (rating.participant_id) {
+            participant = profilesMap.get(rating.participant_id);
+          } else if (rating.contestant_name) {
+            // Try to find by matched name
+            participant = Array.from(profilesMap.values()).find(
+              (p: any) => p._matched_name === rating.contestant_name
+            );
+          }
+          
+          return {
+            ...rating,
+            participant
+          };
+        });
+        
+        console.log(`✅ Ratings with participants: ${ratingsWithParticipants.filter(r => r.participant).length} of ${ratingsData.length}`);
       }
 
       // Для рейтингов вычисляем week_interval по ДАТЕ ГОЛОСОВАНИЯ (created_at)
