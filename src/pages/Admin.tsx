@@ -1237,6 +1237,9 @@ const Admin = () => {
         
         console.log(`📋 Processing ${ratingsData.length} ratings, ${participantIds.length} with participant_id`);
         
+        // Fetch both profiles and weekly_contest_participants data
+        const profilesMap = new Map();
+        
         if (participantIds.length > 0) {
           // Fetch profiles for participants
           const { data: participantProfiles } = await supabase
@@ -1244,20 +1247,42 @@ const Admin = () => {
             .select('id, display_name, first_name, last_name, avatar_url, photo_1_url, photo_2_url')
             .in('id', participantIds);
           
-          const profilesMap = new Map(
-            (participantProfiles || []).map(p => [p.id, p])
-          );
-          
-          ratingsWithParticipants = ratingsData.map(rating => ({
-            ...rating,
-            participant: rating.participant_id ? profilesMap.get(rating.participant_id) : null
-          }));
-        } else {
-          ratingsWithParticipants = ratingsData.map(rating => ({
-            ...rating,
-            participant: null
-          }));
+          (participantProfiles || []).forEach(p => profilesMap.set(p.id, p));
         }
+        
+        // Also try to fetch from weekly_contest_participants for those without participant_id
+        const ratingsWithoutParticipantId = ratingsData.filter(r => !r.participant_id);
+        if (ratingsWithoutParticipantId.length > 0) {
+          const { data: wcpData } = await supabase
+            .from('weekly_contest_participants')
+            .select('user_id, application_data');
+          
+          if (wcpData) {
+            wcpData.forEach(wcp => {
+              if (wcp.user_id && wcp.application_data) {
+                const existingProfile = profilesMap.get(wcp.user_id);
+                const appData = wcp.application_data as any;
+                if (!existingProfile && appData) {
+                  profilesMap.set(wcp.user_id, {
+                    id: wcp.user_id,
+                    display_name: appData.display_name || 
+                                 `${appData.first_name || ''} ${appData.last_name || ''}`.trim(),
+                    first_name: appData.first_name,
+                    last_name: appData.last_name,
+                    avatar_url: appData.avatar_url,
+                    photo_1_url: appData.photo1_url || appData.photo_1_url,
+                    photo_2_url: appData.photo2_url || appData.photo_2_url
+                  });
+                }
+              }
+            });
+          }
+        }
+        
+        ratingsWithParticipants = ratingsData.map(rating => ({
+          ...rating,
+          participant: rating.participant_id ? profilesMap.get(rating.participant_id) : null
+        }));
       }
 
       // Для рейтингов вычисляем week_interval по ДАТЕ ГОЛОСОВАНИЯ (created_at)
