@@ -1684,6 +1684,19 @@ export type Database = {
           user_metadata: Json
         }[]
       }
+      get_user_auth_data_admin_paginated: {
+        Args: { page_number?: number; page_size?: number }
+        Returns: {
+          auth_provider: string
+          created_at: string
+          email: string
+          email_confirmed_at: string
+          facebook_data: Json
+          last_sign_in_at: string
+          user_id: string
+          user_metadata: Json
+        }[]
+      }
       get_user_comments_count: {
         Args: { target_user_id: string }
         Returns: number

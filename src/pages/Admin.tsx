@@ -1775,7 +1775,7 @@ const Admin = () => {
         return;
       }
 
-      // Fetch ALL auth data with pagination (like profiles)
+      // Fetch ALL auth data with pagination using new paginated function
       console.log('📧 Fetching ALL auth data using pagination...');
       let allAuthData: any[] = [];
       let authPage = 0;
@@ -1784,7 +1784,10 @@ const Admin = () => {
 
       while (hasMoreAuth) {
         const { data: authBatch, error: authError } = await supabase
-          .rpc('get_user_auth_data_admin');
+          .rpc('get_user_auth_data_admin_paginated', {
+            page_number: authPage,
+            page_size: authPageSize
+          });
         
         if (authError) {
           console.error(`❌ Error fetching auth page ${authPage + 1}:`, authError);
