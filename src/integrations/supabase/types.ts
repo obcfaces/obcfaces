@@ -1628,6 +1628,19 @@ export type Database = {
           total_votes: number
         }[]
       }
+      get_registration_stats_by_type: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          fri: number
+          mon: number
+          sat: number
+          stat_type: string
+          sun: number
+          thu: number
+          tue: number
+          wed: number
+        }[]
+      }
       get_safe_contest_participant_profile: {
         Args: { participant_id_param: string }
         Returns: {

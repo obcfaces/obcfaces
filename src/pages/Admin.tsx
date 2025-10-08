@@ -464,6 +464,16 @@ const Admin = () => {
   const [dailyStats, setDailyStats] = useState<Array<{ day_name: string; vote_count: number; like_count: number }>>([]);
   const [dailyApplicationStats, setDailyApplicationStats] = useState<Array<{ day_name: string; day_date?: string; total_applications: number; approved_applications: number; day_of_week?: number; sort_order?: number }>>([]);
   const [dailyRegistrationStats, setDailyRegistrationStats] = useState<Array<{ day_name: string; registration_count: number; suspicious_count: number; day_of_week: number; sort_order: number }>>([]);
+  const [registrationStatsByType, setRegistrationStatsByType] = useState<Array<{ 
+    stat_type: string; 
+    mon: number; 
+    tue: number; 
+    wed: number; 
+    thu: number; 
+    fri: number; 
+    sat: number; 
+    sun: number; 
+  }>>([]);
   const [nextWeekDailyStats, setNextWeekDailyStats] = useState<Array<{ day_name: string; like_count: number; dislike_count: number; total_votes: number }>>([]);
   const [nextWeekVotesStats, setNextWeekVotesStats] = useState<Record<string, { like_count: number; dislike_count: number }>>({});
   const [selectedDay, setSelectedDay] = useState<{ day: number; type: 'new' | 'approved' } | null>(null);
@@ -1464,6 +1474,15 @@ const Admin = () => {
       
       // Data already contains all needed fields including suspicious_count
       setDailyRegistrationStats(data || []);
+
+      // Fetch new stats by type
+      const { data: statsByType, error: statsByTypeError } = await supabase.rpc('get_registration_stats_by_type');
+      if (statsByTypeError) {
+        console.error('Error fetching registration stats by type:', statsByTypeError);
+      } else {
+        console.log('📊 Registration stats by type fetched:', statsByType);
+        setRegistrationStatsByType(statsByType || []);
+      }
     } catch (error) {
       console.error('Error in fetchDailyRegistrationStats:', error);
     }
@@ -6633,54 +6652,44 @@ const Admin = () => {
                   </div>
                 ) : (
                   <>
-                    {/* Weekly Registration Stats Dashboard */}
+                    {/* Weekly Registration Stats Dashboard - New Format */}
                     <div className="mb-6">
                       <div className="mb-4 p-4 bg-muted rounded-lg">
-                        <div className="text-xs text-muted-foreground mb-3">
-                          total registrations: {dailyRegistrationStats.reduce((sum, stat) => sum + (stat.registration_count || 0), 0)} - {dailyRegistrationStats.reduce((sum, stat) => sum + (stat.registration_count || 0), 0) - profiles.filter(p => p.email_confirmed_at).length}
-                        </div>
-                        <div className="grid grid-cols-7 gap-0 w-full">
-                          {dailyRegistrationStats.map((stat, index) => (
-                            <div 
-                              key={index} 
-                              className={`text-center p-2 bg-background ${
-                                index < dailyRegistrationStats.length - 1 ? 'border-r border-border' : ''
-                              }`}
-                            >
-                              <div className="font-medium text-xs mb-1">{stat.day_name}</div>
-                              <div className="flex items-center justify-center gap-0.5">
-                                <button
-                                  onClick={() => setSelectedRegistrationDay(
-                                    selectedRegistrationDay?.dayName === stat.day_name && !selectedRegistrationDay?.showSuspicious
-                                      ? null 
-                                      : { dayName: stat.day_name, showSuspicious: false }
-                                  )}
-                                  className={`text-base font-semibold hover:text-primary transition-colors ${
-                                    selectedRegistrationDay?.dayName === stat.day_name && !selectedRegistrationDay?.showSuspicious
-                                      ? 'text-primary underline'
-                                      : ''
+                        <div className="overflow-x-auto">
+                          <table className="w-full text-xs">
+                            <thead>
+                              <tr className="border-b border-border">
+                                <th className="text-left p-2 font-medium">Тип</th>
+                                <th className="text-center p-2 font-medium">Mon</th>
+                                <th className="text-center p-2 font-medium">Tue</th>
+                                <th className="text-center p-2 font-medium">Wed</th>
+                                <th className="text-center p-2 font-medium">Thu</th>
+                                <th className="text-center p-2 font-medium">Fri</th>
+                                <th className="text-center p-2 font-medium">Sat</th>
+                                <th className="text-center p-2 font-medium">Sun</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {registrationStatsByType.map((row, idx) => (
+                                <tr 
+                                  key={idx} 
+                                  className={`border-b border-border/50 ${
+                                    row.stat_type === 'Всего' ? 'font-semibold bg-background' :
+                                    row.stat_type === 'Suspicious' ? 'text-destructive' : ''
                                   }`}
                                 >
-                                  {stat.registration_count}
-                                </button>
-                                <span className="text-muted-foreground">-</span>
-                                <button
-                                  onClick={() => setSelectedRegistrationDay(
-                                    selectedRegistrationDay?.dayName === stat.day_name && selectedRegistrationDay?.showSuspicious
-                                      ? null
-                                      : { dayName: stat.day_name, showSuspicious: true }
-                                  )}
-                                  className={`text-xs text-destructive hover:underline transition-all ${
-                                    selectedRegistrationDay?.dayName === stat.day_name && selectedRegistrationDay?.showSuspicious
-                                      ? 'font-bold underline'
-                                      : ''
-                                  }`}
-                                >
-                                  {stat.suspicious_count || 0}
-                                </button>
-                              </div>
-                            </div>
-                          ))}
+                                  <td className="p-2">{row.stat_type}</td>
+                                  <td className="text-center p-2">{row.mon}</td>
+                                  <td className="text-center p-2">{row.tue}</td>
+                                  <td className="text-center p-2">{row.wed}</td>
+                                  <td className="text-center p-2">{row.thu}</td>
+                                  <td className="text-center p-2">{row.fri}</td>
+                                  <td className="text-center p-2">{row.sat}</td>
+                                  <td className="text-center p-2">{row.sun}</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
                         </div>
                       </div>
                     </div>
