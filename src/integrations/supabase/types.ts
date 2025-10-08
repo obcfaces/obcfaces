@@ -618,6 +618,7 @@ export type Database = {
           country: string | null
           created_at: string
           display_name: string | null
+          email_verified: boolean | null
           first_name: string | null
           gender: string | null
           has_children: boolean | null
@@ -626,6 +627,7 @@ export type Database = {
           is_approved: boolean | null
           is_contest_participant: boolean | null
           last_name: string | null
+          locale: string | null
           marital_status: string | null
           moderated_at: string | null
           moderated_by: string | null
@@ -634,6 +636,7 @@ export type Database = {
           photo_1_url: string | null
           photo_2_url: string | null
           privacy_level: string | null
+          provider_data: Json | null
           state: string | null
           updated_at: string
           weight_kg: number | null
@@ -647,6 +650,7 @@ export type Database = {
           country?: string | null
           created_at?: string
           display_name?: string | null
+          email_verified?: boolean | null
           first_name?: string | null
           gender?: string | null
           has_children?: boolean | null
@@ -655,6 +659,7 @@ export type Database = {
           is_approved?: boolean | null
           is_contest_participant?: boolean | null
           last_name?: string | null
+          locale?: string | null
           marital_status?: string | null
           moderated_at?: string | null
           moderated_by?: string | null
@@ -663,6 +668,7 @@ export type Database = {
           photo_1_url?: string | null
           photo_2_url?: string | null
           privacy_level?: string | null
+          provider_data?: Json | null
           state?: string | null
           updated_at?: string
           weight_kg?: number | null
@@ -676,6 +682,7 @@ export type Database = {
           country?: string | null
           created_at?: string
           display_name?: string | null
+          email_verified?: boolean | null
           first_name?: string | null
           gender?: string | null
           has_children?: boolean | null
@@ -684,6 +691,7 @@ export type Database = {
           is_approved?: boolean | null
           is_contest_participant?: boolean | null
           last_name?: string | null
+          locale?: string | null
           marital_status?: string | null
           moderated_at?: string | null
           moderated_by?: string | null
@@ -692,6 +700,7 @@ export type Database = {
           photo_1_url?: string | null
           photo_2_url?: string | null
           privacy_level?: string | null
+          provider_data?: Json | null
           state?: string | null
           updated_at?: string
           weight_kg?: number | null
