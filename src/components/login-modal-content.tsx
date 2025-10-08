@@ -603,7 +603,7 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
                       redirectTo: `${window.location.origin}/`,
                       queryParams: {
                         access_type: 'offline',
-                        prompt: 'consent',
+                        prompt: 'select_account',
                       }
                     }
                   });
