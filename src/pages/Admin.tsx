@@ -6901,11 +6901,17 @@ const Admin = () => {
                         const hasSuspiciousRole = userRoles.some(role => 
                           role.user_id === profile.id && role.role === 'suspicious'
                         );
-                        if (hasSuspiciousRole) return false;
+                        if (hasSuspiciousRole) {
+                          console.log('❌ REJECTED by Maybe Suspicious (has suspicious role):', profile.first_name, profile.id?.substring(0, 8));
+                          return false;
+                        }
                         
                         // Exclude OAuth users (Google/Facebook) - they auto-authorize
                         const isOAuthUser = profile.auth_provider === 'google' || profile.auth_provider === 'facebook';
-                        if (isOAuthUser) return false;
+                        if (isOAuthUser) {
+                          console.log('❌ REJECTED by Maybe Suspicious (OAuth user):', profile.first_name, profile.auth_provider, profile.id?.substring(0, 8));
+                          return false;
+                        }
                         
                         // Check criteria
                         const wasAutoConfirmed = profile.created_at && profile.email_confirmed_at && 
@@ -6924,7 +6930,10 @@ const Admin = () => {
                           hasDuplicateFingerprint = sameFingerprint.length > 0;
                         }
                         
-                        if (!(wasAutoConfirmed || fastFormFill || hasDuplicateFingerprint)) return false;
+                        if (!(wasAutoConfirmed || fastFormFill || hasDuplicateFingerprint)) {
+                          console.log('❌ REJECTED by Maybe Suspicious (no suspicious criteria):', profile.first_name, profile.id?.substring(0, 8));
+                          return false;
+                        }
                       }
 
                       // Фильтр поиска
