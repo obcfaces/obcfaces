@@ -6943,8 +6943,10 @@ const Admin = () => {
                               const isOAuthUser = p.auth_provider === 'google' || p.auth_provider === 'facebook';
                               if (isOAuthUser) return false;
                               
-                              // Check criteria (removed wasAutoConfirmed - was a registration bug)
+                              // Check criteria
                               const emailNotWhitelisted = p.email ? !isEmailDomainWhitelisted(p.email) : false;
+                              const wasAutoConfirmed = p.created_at && p.email_confirmed_at && 
+                                Math.abs(new Date(p.email_confirmed_at).getTime() - new Date(p.created_at).getTime()) < 1000;
                               const formFillTime = p.raw_user_meta_data?.form_fill_time_seconds;
                               const fastFormFill = formFillTime !== undefined && formFillTime !== null && formFillTime < 5;
                               
@@ -6957,7 +6959,7 @@ const Admin = () => {
                                 hasDuplicateFingerprint = sameFingerprint.length > 0;
                               }
                               
-                              return emailNotWhitelisted || fastFormFill || hasDuplicateFingerprint;
+                              return emailNotWhitelisted || wasAutoConfirmed || fastFormFill || hasDuplicateFingerprint;
                             }).length;
                             return count > 0 ? ` (${count})` : '';
                           })()}
@@ -7078,7 +7080,8 @@ const Admin = () => {
                             const domain = email ? email.split('@')[1]?.toLowerCase() : null;
                             const emailNotWhitelisted = domain && !whitelistedDomains.includes(domain);
                             
-                            // Removed wasAutoConfirmed - was a registration bug
+                            const wasAutoConfirmed = profile.created_at && profile.email_confirmed_at && 
+                              Math.abs(new Date(profile.email_confirmed_at).getTime() - new Date(profile.created_at).getTime()) < 1000;
                             
                             const formFillTime = profile.raw_user_meta_data?.form_fill_time_seconds;
                             const fastFormFill = formFillTime !== undefined && formFillTime !== null && formFillTime < 5;
@@ -7091,7 +7094,7 @@ const Admin = () => {
                               hasDuplicateFingerprint = sameFingerprint.length > 0;
                             }
                             
-                            return emailNotWhitelisted || fastFormFill || hasDuplicateFingerprint;
+                            return emailNotWhitelisted || wasAutoConfirmed || fastFormFill || hasDuplicateFingerprint;
                           }
                           
                           return false;
@@ -7172,7 +7175,8 @@ const Admin = () => {
                             return false;
                           }
                           
-                          // Removed wasAutoConfirmed - was a registration bug
+                          const wasAutoConfirmed = profile.created_at && profile.email_confirmed_at && 
+                            Math.abs(new Date(profile.email_confirmed_at).getTime() - new Date(profile.created_at).getTime()) < 1000;
                           
                           const formFillTime = profile.raw_user_meta_data?.form_fill_time_seconds;
                           const fastFormFill = formFillTime !== undefined && formFillTime !== null && formFillTime < 5;
@@ -7185,7 +7189,7 @@ const Admin = () => {
                             hasDuplicateFingerprint = sameFingerprint.length > 0;
                           }
                           
-                          if (!(fastFormFill || hasDuplicateFingerprint)) {
+                          if (!(wasAutoConfirmed || fastFormFill || hasDuplicateFingerprint)) {
                             if (roleFilter === 'regular') console.log('❌ Regular user REJECTED by maybe-suspicious (no criteria):', profile.first_name);
                             return false;
                           }
@@ -7222,7 +7226,9 @@ const Admin = () => {
                             return false;
                           }
                           
-                          // Check criteria (removed wasAutoConfirmed - was a registration bug)
+                          // Check criteria
+                          const wasAutoConfirmed = profile.created_at && profile.email_confirmed_at && 
+                            Math.abs(new Date(profile.email_confirmed_at).getTime() - new Date(profile.created_at).getTime()) < 1000;
                           
                           // Check form fill time (< 5 seconds)
                           const formFillTime = profile.raw_user_meta_data?.form_fill_time_seconds;
@@ -7237,7 +7243,7 @@ const Admin = () => {
                             hasDuplicateFingerprint = sameFingerprint.length > 0;
                           }
                           
-                          if (!(fastFormFill || hasDuplicateFingerprint)) {
+                          if (!(wasAutoConfirmed || fastFormFill || hasDuplicateFingerprint)) {
                             console.log('❌ REJECTED by Maybe Suspicious (no suspicious criteria):', profile.first_name, profile.id?.substring(0, 8));
                             return false;
                           }
@@ -7400,7 +7406,8 @@ const Admin = () => {
                                     const isOAuthUser = profile.auth_provider === 'google' || profile.auth_provider === 'facebook';
                                     
                                     const emailNotWhitelisted = profile.email ? !isEmailDomainWhitelisted(profile.email) : false;
-                                    // Removed wasAutoConfirmed - was a registration bug
+                                    const wasAutoConfirmed = profile.created_at && profile.email_confirmed_at && 
+                                      Math.abs(new Date(profile.email_confirmed_at).getTime() - new Date(profile.created_at).getTime()) < 1000;
                                     const formFillTime = profile.raw_user_meta_data?.form_fill_time_seconds;
                                     const fastFormFill = formFillTime !== undefined && formFillTime !== null && formFillTime < 5;
                                     
@@ -7414,11 +7421,11 @@ const Admin = () => {
                                       hasDuplicateFingerprint = sameFingerprint.length > 0;
                                     }
                                     
-                                    const isMaybeSuspicious = !isOAuthUser && (fastFormFill || hasDuplicateFingerprint);
+                                    const isMaybeSuspicious = !isOAuthUser && (wasAutoConfirmed || fastFormFill || hasDuplicateFingerprint);
                                     
                                      if (isMaybeSuspicious) {
                                       const reasonCodes = [];
-                                      // Removed wasAutoConfirmed badge
+                                      if (wasAutoConfirmed) reasonCodes.push("<1");
                                       if (fastFormFill) reasonCodes.push("<3");
                                       if (hasDuplicateFingerprint) reasonCodes.push(`FP ${sameFingerprint.length + 1}`);
                                       
