@@ -18,7 +18,6 @@ import { getCitiesForLocation } from '@/lib/location-utils';
 import testContestantFace from "@/assets/example-face-photo.jpg";
 import testContestantFull from "@/assets/example-full-photo.jpg";
 import { ContestSuccessModal } from "@/components/contest-success-modal";
-import { SimplifiedRegistrationModal } from "@/components/simplified-registration-modal";
 
 interface ContestParticipationModalProps {
   children?: React.ReactNode;
@@ -48,8 +47,6 @@ export const ContestParticipationModal = ({
   const [currentApplicationId, setCurrentApplicationId] = useState<string | null>(null);
   const [authError, setAuthError] = useState<string>("");
   const [showSuccessModal, setShowSuccessModal] = useState(false);
-  const [showRegistrationModal, setShowRegistrationModal] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const { toast } = useToast();
 
   // Contact form state
@@ -643,16 +640,17 @@ export const ContestParticipationModal = ({
       const { data: { session } } = await supabase.auth.getSession();
       console.log('Auth session check', { hasSession: !!session?.user });
       
-      // For unauthenticated users, save application without user_id
-      const isAuthenticated = !!session?.user;
+      if (!session?.user) {
+        throw new Error('You must be logged in to submit an application');
+      }
 
-      // Check if user already has an active participant record (only for authenticated new applications)
-      if (!editMode && isAuthenticated) {
+      // Check if user already has an active participant record (only for new applications)
+      if (!editMode) {
         console.log('Checking for existing participant record');
         const { data: existingParticipant, error: checkError } = await supabase
           .from('weekly_contest_participants')
           .select('id, admin_status')
-          .eq('user_id', session!.user.id)
+          .eq('user_id', session.user.id)
           .eq('is_active', true)
           .is('deleted_at', null)
           .not('admin_status', 'in', '("rejected")')
@@ -761,34 +759,24 @@ export const ContestParticipationModal = ({
 
         // Insert new application and get the returned data
         console.log('Inserting new application to database with contest_id:', activeContest.id);
-        const insertPayload: any = {
-          contest_id: activeContest.id,
-          application_data: applicationData,
-          admin_status: 'pending' as any,
-          submitted_at: new Date().toISOString()
-        };
-        
-        // Only add user_id if authenticated
-        if (isAuthenticated) {
-          insertPayload.user_id = session!.user.id;
-        }
-        
         const { data: insertedData, error } = await supabase
           .from('weekly_contest_participants')
-          .insert(insertPayload)
+          .insert({
+            user_id: session.user.id,
+            contest_id: activeContest.id,
+            application_data: applicationData,
+            admin_status: 'pending' as any,
+            submitted_at: new Date().toISOString()
+          } as any)
           .select('id')
           .single();
         
         console.log('Database insert result', { insertedData, error });
         dbError = error;
         
-        // Store the application ID for later use
+        // Store the application ID for later use in contact form
         if (insertedData) {
           setCurrentApplicationId(insertedData.id);
-          // Store in localStorage for unauthenticated users
-          if (!isAuthenticated) {
-            localStorage.setItem('pending_application_id', insertedData.id);
-          }
         }
       }
 
@@ -797,49 +785,47 @@ export const ContestParticipationModal = ({
         throw new Error(`Database error: ${dbError.message}`);
       }
 
-      console.log('Application saved successfully');
+      console.log('Application saved successfully, updating profile');
 
-      // Update user profile only for authenticated users
-      if (isAuthenticated) {
-        const birthDate = `${formData.birth_year}-${formData.birth_month.padStart(2, '0')}-${formData.birth_day.padStart(2, '0')}`;
-        const age = new Date().getFullYear() - parseInt(formData.birth_year);
-        
-        const profileUpdateData = {
-          is_contest_participant: true,
-          participant_type: 'candidate',
-          first_name: formData.first_name,
-          last_name: formData.last_name,
-          gender: formData.gender,
-          height_cm: parseInt(formData.height_cm),
-          weight_kg: parseFloat(formData.weight_kg),
-          marital_status: formData.marital_status,
-          has_children: formData.has_children,
-          photo_1_url: photo1Url,
-          photo_2_url: photo2Url,
-          birthdate: birthDate,
-          age: age,
-          country: countries.find(c => c.value === formData.countryCode)?.label || formData.countryCode,
-          state: formData.stateCode,
-          city: formData.city
-        };
+      // Update user profile to mark as contest participant and add all form data
+      const birthDate = `${formData.birth_year}-${formData.birth_month.padStart(2, '0')}-${formData.birth_day.padStart(2, '0')}`;
+      const age = new Date().getFullYear() - parseInt(formData.birth_year);
+      
+      const profileUpdateData = {
+        is_contest_participant: true,
+        participant_type: 'candidate',
+        first_name: formData.first_name,
+        last_name: formData.last_name,
+        gender: formData.gender,
+        height_cm: parseInt(formData.height_cm),
+        weight_kg: parseFloat(formData.weight_kg),
+        marital_status: formData.marital_status,
+        has_children: formData.has_children,
+        photo_1_url: photo1Url,
+        photo_2_url: photo2Url,
+        birthdate: birthDate,
+        age: age,
+        country: countries.find(c => c.value === formData.countryCode)?.label || formData.countryCode,
+        state: formData.stateCode,
+        city: formData.city
+      };
 
-        const userIdToUpdate = (editMode && existingData) ? existingData.user_id : session!.user.id;
-        
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .update(profileUpdateData)
-          .eq('id', userIdToUpdate);
+      const userIdToUpdate = (editMode && existingData) ? existingData.user_id : session.user.id;
+      
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .update(profileUpdateData)
+        .eq('id', userIdToUpdate);
 
-        if (profileError) {
-          console.warn('Failed to update profile:', profileError);
-        } else {
-          console.log('Successfully updated profile for user:', userIdToUpdate);
-        }
+      if (profileError) {
+        console.warn('Failed to update profile:', profileError);
+      } else {
+        console.log('Successfully updated profile for user:', userIdToUpdate);
       }
 
-      // Update weekly contest participant data if user is already in current week's contest (authenticated only)
-      if (editMode && existingData && isAuthenticated) {
-        const userIdToUpdate = existingData.user_id || session!.user.id;
+      // Update weekly contest participant data if user is already in current week's contest
+      if (editMode && existingData) {
+        const userIdToUpdate = existingData.user_id || session.user.id;
         const { error: participantUpdateError } = await supabase
           .from('weekly_contest_participants')
           .update({
@@ -854,22 +840,6 @@ export const ContestParticipationModal = ({
         }
       }
 
-      // For unauthenticated users, show simplified registration
-      if (!isAuthenticated) {
-        toast({
-          title: "Application saved!",
-          description: "Please complete registration to finish your application."
-        });
-        
-        // Clear form cache
-        clearFormCache();
-        
-        // Set flag to show registration modal
-        setSubmissionSuccess(true);
-        return;
-      }
-
-      // For authenticated users
       toast({
         title: "Success!",
         description: editMode ? "Your application has been updated successfully." : "Your contest application has been submitted successfully."
@@ -918,28 +888,11 @@ export const ContestParticipationModal = ({
     }
   };
 
-  // Check auth status
-  useEffect(() => {
-    const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      setIsAuthenticated(!!session?.user);
-    };
-    
-    checkAuth();
-    
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
-      setIsAuthenticated(!!session?.user);
-    });
-    
-    return () => subscription.unsubscribe();
-  }, []);
-
   // Reset form when modal opens
   useEffect(() => {
     if (isOpen) {
       setSubmitted(false);
       setInvalidFields(new Set());
-      setShowRegistrationModal(false);
       
       const initializeForm = async () => {
         let formDataToLoad;
@@ -1966,57 +1919,6 @@ export const ContestParticipationModal = ({
           description="Help me win by voting for me in this beauty contest. Your vote counts!"
         />
       )}
-      
-      {/* Simplified Registration Modal for unauthenticated users */}
-      <SimplifiedRegistrationModal
-        isOpen={submissionSuccess && !isAuthenticated}
-        onOpenChange={(open) => {
-          if (!open) {
-            setSubmissionSuccess(false);
-            setIsOpen(false);
-          }
-        }}
-        firstName={formData.first_name}
-        lastName={formData.last_name}
-        country={countries.find(c => c.value === formData.countryCode)?.label || formData.countryCode}
-        onSuccess={async (userId, email, password) => {
-          // Link the application to the new user
-          const applicationId = localStorage.getItem('pending_application_id');
-          if (applicationId) {
-            await supabase
-              .from('weekly_contest_participants')
-              .update({ user_id: userId })
-              .eq('id', applicationId);
-            
-            localStorage.removeItem('pending_application_id');
-          }
-          
-          // Update profile with application data
-          const birthDate = `${formData.birth_year}-${formData.birth_month.padStart(2, '0')}-${formData.birth_day.padStart(2, '0')}`;
-          const age = new Date().getFullYear() - parseInt(formData.birth_year);
-          
-          await supabase
-            .from('profiles')
-            .update({
-              is_contest_participant: true,
-              participant_type: 'candidate',
-              gender: formData.gender,
-              height_cm: parseInt(formData.height_cm),
-              weight_kg: parseFloat(formData.weight_kg),
-              marital_status: formData.marital_status,
-              has_children: formData.has_children,
-              birthdate: birthDate,
-              age: age,
-              state: formData.stateCode,
-              city: formData.city
-            })
-            .eq('id', userId);
-          
-          // Show success modal or navigate to next step
-          setShowSuccessModal(true);
-          setSubmissionSuccess(false);
-        }}
-      />
     </Dialog>
   );
 };
