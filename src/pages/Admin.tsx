@@ -804,25 +804,7 @@ const Admin = () => {
     };
     */
 
-  // Auto-refresh profiles every 30 seconds when on registrations tab
-  useEffect(() => {
-    let intervalId: NodeJS.Timeout;
-    
-    if (isAdmin && activeTab === 'registrations') {
-      intervalId = setInterval(() => {
-        console.log('Auto-refreshing profiles...');
-        fetchProfiles();
-        fetchUsersWhoVoted();
-        fetchUserVotingStats();
-      }, 30000); // Refresh every 30 seconds
-    }
-    
-    return () => {
-      if (intervalId) {
-        clearInterval(intervalId);
-      }
-    };
-  }, [isAdmin, activeTab]);
+  // Removed auto-refresh to prevent constant reloading
 
   // Re-fetch profiles when switching to 'regular' role filter
   useEffect(() => {
