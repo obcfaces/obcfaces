@@ -2043,6 +2043,7 @@ export type Database = {
         | "suspicious"
         | "usual"
         | "regular"
+        | "cleared"
       participant_admin_status:
         | "pending"
         | "rejected"
@@ -2197,6 +2198,7 @@ export const Constants = {
         "suspicious",
         "usual",
         "regular",
+        "cleared",
       ],
       participant_admin_status: [
         "pending",

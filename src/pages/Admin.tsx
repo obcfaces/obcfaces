@@ -6950,13 +6950,13 @@ const Admin = () => {
                               const formFillTime = p.raw_user_meta_data?.form_fill_time_seconds;
                               const fastFormFill = formFillTime !== undefined && formFillTime !== null && formFillTime < 5;
                               
-                              // Check for duplicate fingerprints
+                              // Check for duplicate fingerprints (require at least 5 duplicates)
                               let hasDuplicateFingerprint = false;
                               if (p.fingerprint_id) {
                                 const sameFingerprint = profiles.filter(prof => 
                                   prof.fingerprint_id === p.fingerprint_id && prof.id !== p.id
                                 );
-                                hasDuplicateFingerprint = sameFingerprint.length > 0;
+                                hasDuplicateFingerprint = sameFingerprint.length >= 4; // Changed from > 0 to >= 4 (5 total users with same FP)
                               }
                               
                               return emailNotWhitelisted || wasAutoConfirmed || fastFormFill || hasDuplicateFingerprint;
@@ -7091,7 +7091,7 @@ const Admin = () => {
                               const sameFingerprint = profiles.filter(p => 
                                 p.fingerprint_id === profile.fingerprint_id && p.id !== profile.id
                               );
-                              hasDuplicateFingerprint = sameFingerprint.length > 0;
+                              hasDuplicateFingerprint = sameFingerprint.length >= 4; // Changed from > 0 to >= 4 (5 total users with same FP)
                             }
                             
                             return emailNotWhitelisted || wasAutoConfirmed || fastFormFill || hasDuplicateFingerprint;
@@ -7186,7 +7186,7 @@ const Admin = () => {
                             const sameFingerprint = profiles.filter(p => 
                               p.fingerprint_id === profile.fingerprint_id && p.id !== profile.id
                             );
-                            hasDuplicateFingerprint = sameFingerprint.length > 0;
+                            hasDuplicateFingerprint = sameFingerprint.length >= 4; // Changed from > 0 to >= 4 (5 total users with same FP)
                           }
                           
                           if (!(wasAutoConfirmed || fastFormFill || hasDuplicateFingerprint)) {
@@ -7219,6 +7219,15 @@ const Admin = () => {
                             return false;
                           }
                           
+                          // Exclude users with 'cleared' role (manually cleared from Maybe Suspicious)
+                          const hasClearedRole = userRoles.some(role => 
+                            role.user_id === profile.id && role.role === 'cleared'
+                          );
+                          if (hasClearedRole) {
+                            console.log('❌ REJECTED by Maybe Suspicious (has cleared role):', profile.first_name, profile.id?.substring(0, 8));
+                            return false;
+                          }
+                          
                           // Exclude OAuth users (Google/Facebook) - they auto-authorize
                           const isOAuthUser = profile.auth_provider === 'google' || profile.auth_provider === 'facebook';
                           if (isOAuthUser) {
@@ -7234,13 +7243,13 @@ const Admin = () => {
                           const formFillTime = profile.raw_user_meta_data?.form_fill_time_seconds;
                           const fastFormFill = formFillTime !== undefined && formFillTime !== null && formFillTime < 5;
                           
-                          // Check for duplicate fingerprints
+                          // Check for duplicate fingerprints (require at least 5 duplicates)
                           let hasDuplicateFingerprint = false;
                           if (profile.fingerprint_id) {
                             const sameFingerprint = profiles.filter(p => 
                               p.fingerprint_id === profile.fingerprint_id && p.id !== profile.id
                             );
-                            hasDuplicateFingerprint = sameFingerprint.length > 0;
+                            hasDuplicateFingerprint = sameFingerprint.length >= 4; // Changed from > 0 to >= 4 (5 total users with same FP)
                           }
                           
                           if (!(wasAutoConfirmed || fastFormFill || hasDuplicateFingerprint)) {
@@ -7284,7 +7293,7 @@ const Admin = () => {
                           )}
                           {suspiciousEmailFilter === 'maybe-suspicious' && (
                             <span className="ml-2 text-xs text-destructive font-medium">
-                              (not whitelisted email OR auto-confirmed &lt;1 sec OR duplicate fingerprint OR fast form fill &lt;5 sec, excluding "suspicious" role)
+                              (auto-confirmed &lt;1 sec OR duplicate fingerprint (5+ users) OR fast form fill &lt;5 sec, excluding "suspicious" and "cleared" roles)
                             </span>
                           )}
                         </div>
@@ -7411,17 +7420,20 @@ const Admin = () => {
                                     const formFillTime = profile.raw_user_meta_data?.form_fill_time_seconds;
                                     const fastFormFill = formFillTime !== undefined && formFillTime !== null && formFillTime < 5;
                                     
-                                    // Check for duplicate fingerprints
+                                    // Check for duplicate fingerprints (require at least 5 duplicates)
                                     let hasDuplicateFingerprint = false;
                                     let sameFingerprint = [];
                                     if (profile.fingerprint_id) {
                                       sameFingerprint = profiles.filter(p => 
                                         p.fingerprint_id === profile.fingerprint_id && p.id !== profile.id
                                       );
-                                      hasDuplicateFingerprint = sameFingerprint.length > 0;
+                                      hasDuplicateFingerprint = sameFingerprint.length >= 4; // Changed from > 0 to >= 4 (5 total users with same FP)
                                     }
                                     
-                                    const isMaybeSuspicious = !isOAuthUser && (wasAutoConfirmed || fastFormFill || hasDuplicateFingerprint);
+                                    // Check if user has been cleared from Maybe Suspicious
+                                    const hasClearedRole = userRoles.some(r => r.user_id === profile.id && r.role === 'cleared');
+                                    
+                                    const isMaybeSuspicious = !isOAuthUser && !hasClearedRole && (wasAutoConfirmed || fastFormFill || hasDuplicateFingerprint);
                                     
                                      if (isMaybeSuspicious) {
                                       const reasonCodes = [];
@@ -7523,6 +7535,22 @@ const Admin = () => {
                                       className="cursor-pointer"
                                     >
                                       {(userRoleMap[profile.id] || 'usual') === 'usual' ? '✓ ' : ''}Mark as Usual
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem
+                                      onClick={() => {
+                                        const userName = profile.display_name || `${profile.first_name} ${profile.last_name}`;
+                                        const hasCleared = userRoles.some(r => r.user_id === profile.id && r.role === 'cleared');
+                                        if (hasCleared) {
+                                          // Remove cleared role
+                                          handleRoleChange(profile.id, userName, 'usual');
+                                        } else {
+                                          // Add cleared role
+                                          handleRoleChange(profile.id, userName, 'cleared');
+                                        }
+                                      }}
+                                      className="cursor-pointer"
+                                    >
+                                      {userRoles.some(r => r.user_id === profile.id && r.role === 'cleared') ? '✓ ' : ''}Clear "Maybe Suspicious"
                                     </DropdownMenuItem>
                                     <DropdownMenuItem
                                       onClick={() => {
@@ -7682,11 +7710,20 @@ const Admin = () => {
                                     return (
                                       <div className="text-xs text-muted-foreground">
                                         {device.type || 'Desktop'} | {os.name || 'Unknown OS'} {os.version || ''} | {browser.name || 'Unknown'}
-                                        {profile.fingerprint_id && (
-                                          <span className="ml-2">
-                                            | fp {profile.fingerprint_id.substring(0, 5)}
-                                          </span>
-                                        )}
+                                        {profile.fingerprint_id && (() => {
+                                          const duplicateCount = profiles.filter(p => 
+                                            p.fingerprint_id === profile.fingerprint_id && p.id !== profile.id
+                                          ).length;
+                                          const isBlue = duplicateCount >= 2;
+                                          const showCount = duplicateCount >= 2;
+                                          
+                                          return (
+                                            <span className={`ml-2 ${isBlue ? 'text-blue-600 dark:text-blue-400 font-semibold' : ''}`}>
+                                              | fp {profile.fingerprint_id.substring(0, 5)}
+                                              {showCount && ` (${duplicateCount + 1})`}
+                                            </span>
+                                          );
+                                        })()}
                                       </div>
                                     );
                                   })() : null}
