@@ -1195,7 +1195,7 @@ export const ContestParticipationModal = ({
                     setIsLoading(true);
                     setAuthError("");
                     
-                    const { error } = await supabase.auth.signInWithOAuth({
+                      const { error } = await supabase.auth.signInWithOAuth({
                       provider: 'facebook',
                       options: {
                         redirectTo: `${window.location.origin}/`,
@@ -1206,10 +1206,18 @@ export const ContestParticipationModal = ({
                     });
                     
                     if (error) {
-                      setAuthError(error.message);
+                      // Check for common Facebook OAuth errors
+                      if (error.message.includes('email') || error.message.includes('Email')) {
+                        setAuthError('Your Facebook account does not provide an email address. Please use a different login method or add an email to your Facebook account.');
+                      } else if (error.message.includes('access_denied')) {
+                        setAuthError('Facebook login was cancelled. Please try again.');
+                      } else {
+                        setAuthError(error.message || 'Facebook authentication failed. Please try again.');
+                      }
                     }
-                  } catch (error) {
-                    setAuthError('Facebook authentication failed');
+                  } catch (error: any) {
+                    console.error('Facebook auth error:', error);
+                    setAuthError('Facebook authentication failed. Please try again or use a different login method.');
                   } finally {
                     setIsLoading(false);
                   }
