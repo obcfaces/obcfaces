@@ -1346,17 +1346,6 @@ const Admin = () => {
         return next;
       });
     } else {
-      // Check if user has verified email before allowing to expand
-      const user = profiles.find(p => p.id === userId);
-      if (!user?.email_confirmed_at) {
-        toast({
-          title: "Email Not Verified",
-          description: "This user must verify their email before their activity can be viewed",
-          variant: "destructive"
-        });
-        return;
-      }
-      
       setExpandedActivity(prev => new Set(prev).add(userId));
       // Fetch data if not already loaded
       if (!userActivityStats[userId]) {
