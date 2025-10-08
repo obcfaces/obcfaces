@@ -7559,7 +7559,7 @@ const Admin = () => {
                                 <h4 className="text-sm font-medium mb-3 text-orange-900">
                                   Пользователи с таким же Fingerprint ({profile.fingerprint_id.substring(0, 16)}...):
                                 </h4>
-                                <div className="space-y-2">
+                                <div className="space-y-4">
                                   {sameFingerprint.map(fpProfile => (
                                     <div key={`fp-${fpProfile.id}`} className="p-3 bg-background rounded border">
                                       <div className="flex items-start gap-3">
@@ -7592,6 +7592,157 @@ const Admin = () => {
                                               </div>
                                             );
                                           })()}
+                                          
+                                          {/* Activity stats for fingerprint duplicate users */}
+                                          <div className="flex gap-2 mt-2">
+                                            <button
+                                              className="flex items-center gap-1 bg-background/90 px-2 py-1 rounded hover:bg-muted shadow-sm border transition-colors text-xs"
+                                              onClick={(e) => {
+                                                e.preventDefault();
+                                                e.stopPropagation();
+                                                toggleUserActivity(fpProfile.id);
+                                              }}
+                                            >
+                                              <Star className="h-3 w-3 text-yellow-500" />
+                                              {loadingActivity.has(fpProfile.id) ? (
+                                                <Loader2 className="h-3 w-3 animate-spin" />
+                                              ) : (
+                                                <span className="font-medium">
+                                                  {userActivityStats[fpProfile.id]?.ratingsCount ?? 0}
+                                                </span>
+                                              )}
+                                            </button>
+                                            
+                                            <button
+                                              className="flex items-center gap-1 bg-background/90 px-2 py-1 rounded hover:bg-muted shadow-sm border transition-colors text-xs"
+                                              onClick={(e) => {
+                                                e.preventDefault();
+                                                e.stopPropagation();
+                                                toggleUserActivity(fpProfile.id);
+                                              }}
+                                            >
+                                              <Heart className="h-3 w-3 text-red-500" />
+                                              {loadingActivity.has(fpProfile.id) ? (
+                                                <Loader2 className="h-3 w-3 animate-spin" />
+                                              ) : (
+                                                <span className="font-medium">
+                                                  {userActivityStats[fpProfile.id]?.likesCount ?? 0}
+                                                </span>
+                                              )}
+                                            </button>
+                                          </div>
+                                          
+                                          {/* Expanded activity for fingerprint duplicate users */}
+                                          {expandedActivity.has(fpProfile.id) && (
+                                            <div className="mt-3 pt-3 border-t space-y-3">
+                                              {loadingActivity.has(fpProfile.id) ? (
+                                                <div className="flex justify-center py-4">
+                                                  <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                                                </div>
+                                              ) : (
+                                                <>
+                                                  {/* Ratings */}
+                                                  {userActivityStats[fpProfile.id]?.ratings && userActivityStats[fpProfile.id].ratings.length > 0 && (
+                                                    <div>
+                                                      <h5 className="text-xs font-semibold mb-2 flex items-center gap-1">
+                                                        <Star className="h-3 w-3 text-yellow-500" />
+                                                        Ratings ({userActivityStats[fpProfile.id].ratingsCount})
+                                                      </h5>
+                                                      <div className="space-y-3 max-h-48 overflow-y-auto">
+                                                        {Object.entries(
+                                                          userActivityStats[fpProfile.id].ratings.reduce((acc: any, rating: any) => {
+                                                            const week = rating.vote_week_interval || 'No week';
+                                                            if (!acc[week]) acc[week] = [];
+                                                            acc[week].push(rating);
+                                                            return acc;
+                                                          }, {})
+                                                        )
+                                                        .sort(([a], [b]) => b.localeCompare(a))
+                                                        .map(([weekInterval, weekRatings]: [string, any]) => {
+                                                          const sortedWeekRatings = [...weekRatings].sort((a: any, b: any) => {
+                                                            return (b.rating || 0) - (a.rating || 0);
+                                                          });
+                                                          
+                                                          return (
+                                                            <div key={weekInterval} className="space-y-2">
+                                                              <div className="text-xs font-semibold text-primary px-2 py-0.5 bg-primary/10 rounded">
+                                                                Week: {weekInterval} ({sortedWeekRatings.length} votes)
+                                                              </div>
+                                                              
+                                                              {sortedWeekRatings.map((rating: any) => (
+                                                                <div key={rating.id} className="flex items-center gap-2 text-xs p-2 bg-muted/50 rounded">
+                                                                  <div className="relative h-12 w-12 flex-shrink-0">
+                                                                    <img 
+                                                                      src={rating.participant?.photo_1_url || rating.participant?.avatar_url || ''} 
+                                                                      alt={rating.participant?.display_name || rating.contestant_name}
+                                                                      className="h-full w-full object-cover rounded"
+                                                                    />
+                                                                  </div>
+                                                                  <div className="flex-1">
+                                                                    <div className="font-medium text-xs">
+                                                                      {rating.participant?.display_name || rating.contestant_name}
+                                                                    </div>
+                                                                    <div className="flex items-center gap-2 mt-0.5">
+                                                                      <div className="flex items-center gap-1">
+                                                                        <MiniStars rating={rating.rating} className="scale-110" />
+                                                                        <span className="font-bold text-sm">{rating.rating}</span>
+                                                                      </div>
+                                                                      <span className="text-muted-foreground text-xs">
+                                                                        {new Date(rating.created_at).toLocaleDateString('en-GB')}
+                                                                      </span>
+                                                                    </div>
+                                                                  </div>
+                                                                </div>
+                                                              ))}
+                                                            </div>
+                                                          );
+                                                        })}
+                                                      </div>
+                                                    </div>
+                                                  )}
+                                                  
+                                                  {/* Likes */}
+                                                  {userActivityStats[fpProfile.id]?.likes && userActivityStats[fpProfile.id].likes.length > 0 && (
+                                                    <div>
+                                                      <h5 className="text-xs font-semibold mb-2 flex items-center gap-1">
+                                                        <Heart className="h-3 w-3 text-red-500" />
+                                                        Likes ({userActivityStats[fpProfile.id].likesCount})
+                                                      </h5>
+                                                      <div className="space-y-2 max-h-48 overflow-y-auto">
+                                                        {userActivityStats[fpProfile.id].likes.map((like: any) => (
+                                                          <div key={like.id} className="flex items-center gap-2 text-xs p-2 bg-muted/50 rounded">
+                                                            <div className="relative h-12 w-12 flex-shrink-0">
+                                                              <img 
+                                                                src={like.profiles?.photo_1_url || like.profiles?.avatar_url || ''} 
+                                                                alt={like.profiles?.display_name}
+                                                                className="h-full w-full object-cover rounded"
+                                                              />
+                                                            </div>
+                                                            <div className="flex-1">
+                                                              <div className="font-medium text-xs">
+                                                                {like.profiles?.display_name || 
+                                                                 `${like.profiles?.first_name || ''} ${like.profiles?.last_name || ''}`.trim()}
+                                                              </div>
+                                                              <div className="text-muted-foreground text-xs mt-0.5">
+                                                                {new Date(like.created_at).toLocaleDateString('en-GB')}
+                                                              </div>
+                                                            </div>
+                                                          </div>
+                                                        ))}
+                                                      </div>
+                                                    </div>
+                                                  )}
+                                                  
+                                                  {(!userActivityStats[fpProfile.id]?.ratings || userActivityStats[fpProfile.id].ratings.length === 0) &&
+                                                   (!userActivityStats[fpProfile.id]?.likes || userActivityStats[fpProfile.id].likes.length === 0) && (
+                                                    <div className="text-center text-muted-foreground py-3 text-xs">
+                                                      No activity yet
+                                                    </div>
+                                                  )}
+                                                </>
+                                              )}
+                                            </div>
+                                          )}
                                         </div>
                                       </div>
                                     </div>
