@@ -7005,16 +7005,17 @@ const Admin = () => {
                         const fingerprintId = (profile.fingerprint_id || '').toLowerCase();
                         const ip = (profile.ip_address || '').toLowerCase();
                         
-                        // DEBUG: Log each profile being checked
-                        if (query === 'uspeh') {
-                          console.log('🔍 SEARCH DEBUG for query "uspeh":', {
+                        // DEBUG: Log uspehico specifically
+                        if (profile.id === '6fae574d-a607-445f-aeb1-8174f8391b5b') {
+                          console.log('🎯 SEARCH CHECK for uspehico user:', {
+                            searchQuery: query,
                             profileId: profile.id?.substring(0, 8),
                             firstName: profile.first_name,
                             lastName: profile.last_name,
                             email: email,
-                            hasEmail: !!(profile as any).email,
-                            fullName: fullName,
-                            displayName: displayName
+                            hasEmail: !!email,
+                            emailIncludes: email.includes(query),
+                            fullNameIncludes: fullName.includes(query)
                           });
                         }
                         
@@ -7026,6 +7027,18 @@ const Admin = () => {
                         
                         if (!matchesSearch && roleFilter === 'regular') {
                           console.log('❌ Regular user REJECTED by search filter:', profile.first_name);
+                        }
+                        
+                        // DEBUG: If uspehico doesn't match, log why
+                        if (profile.id === '6fae574d-a607-445f-aeb1-8174f8391b5b' && !matchesSearch) {
+                          console.log('❌ uspehico user REJECTED by search:', {
+                            query,
+                            email,
+                            fullName,
+                            displayName,
+                            fingerprintId,
+                            ip
+                          });
                         }
                         
                         return matchesSearch;
