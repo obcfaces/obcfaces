@@ -1913,6 +1913,15 @@ const Admin = () => {
       console.log('📊 Total profiles with auth data:', profilesWithAuth.length);
       console.log('📧 Profiles with email:', profilesWithAuth.filter(p => p.email).length);
       console.log('⚠️ Profiles without email:', profilesWithAuth.filter(p => !p.email).length);
+      
+      // CRITICAL DEBUG: Check if uspehico user is in the final array
+      const uspehUser = profilesWithAuth.find(p => p.email?.toLowerCase().includes('uspeh'));
+      console.log('🎯 USPEHICO USER IN FINAL PROFILES:', uspehUser ? {
+        id: uspehUser.id?.substring(0, 8),
+        firstName: uspehUser.first_name,
+        lastName: uspehUser.last_name,
+        email: uspehUser.email
+      } : '❌ NOT FOUND IN PROFILES ARRAY');
 
       console.log('✅ Setting profiles state with', profilesWithAuth.length, 'profiles');
       setProfiles(profilesWithAuth);
