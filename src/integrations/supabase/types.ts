@@ -1237,6 +1237,41 @@ export type Database = {
         Args: { contest_date?: string }
         Returns: string
       }
+      get_all_profiles_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          age: number
+          avatar_url: string
+          bio: string
+          birthdate: string
+          city: string
+          country: string
+          created_at: string
+          display_name: string
+          email_verified: boolean
+          first_name: string
+          gender: string
+          has_children: boolean
+          height_cm: number
+          id: string
+          is_approved: boolean
+          is_contest_participant: boolean
+          last_name: string
+          locale: string
+          marital_status: string
+          moderated_at: string
+          moderated_by: string
+          moderation_notes: string
+          participant_type: string
+          photo_1_url: string
+          photo_2_url: string
+          privacy_level: string
+          provider_data: Json
+          state: string
+          updated_at: string
+          weight_kg: number
+        }[]
+      }
       get_card_section_stats: {
         Args: Record<PropertyKey, never>
         Returns: {

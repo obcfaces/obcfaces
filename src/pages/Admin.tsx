@@ -1722,15 +1722,12 @@ const Admin = () => {
         profilesData = data;
         if (error) throw error;
       } else {
-        // Normal fetch - ALL profiles (explicitly set high limit to bypass PostgREST default 1000 limit)
-        console.log('🔵 Fetching ALL profiles from database...');
+        // Normal fetch - ALL profiles using RPC to bypass PostgREST limits
+        console.log('🔵 Fetching ALL profiles from database using RPC...');
         const { data, error } = await supabase
-          .from('profiles')
-          .select('*')
-          .order('created_at', { ascending: false })
-          .limit(10000); // Explicitly set limit to bypass default 1000
+          .rpc('get_all_profiles_admin');
         
-        console.log('✅ Fetched profiles from DB:', data?.length || 0);
+        console.log('✅ Fetched profiles from DB via RPC:', data?.length || 0);
         profilesData = data;
         if (error) throw error;
       }
