@@ -478,6 +478,10 @@ const Admin = () => {
   const [nextWeekVotesStats, setNextWeekVotesStats] = useState<Record<string, { like_count: number; dislike_count: number }>>({});
   const [selectedDay, setSelectedDay] = useState<{ day: number; type: 'new' | 'approved' } | null>(null);
   const [selectedRegistrationDay, setSelectedRegistrationDay] = useState<{ dayName: string; showSuspicious: boolean } | null>(null);
+  const [selectedRegistrationFilter, setSelectedRegistrationFilter] = useState<{ 
+    type: 'all' | 'email_verified' | 'unverified' | 'gmail' | 'facebook' | 'suspicious'; 
+    day?: 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun';
+  } | null>(null);
   const [nextWeekApplicationsCount, setNextWeekApplicationsCount] = useState<number>(0);
   const [cardSectionStats, setCardSectionStats] = useState<{ newApplications: number; movedToNextWeek: number; new_applications_count: number; moved_to_next_week_count: number }>({ newApplications: 0, movedToNextWeek: 0, new_applications_count: 0, moved_to_next_week_count: 0 });
   const [showAllCards, setShowAllCards] = useState(false);
@@ -6670,27 +6674,89 @@ const Admin = () => {
                               </tr>
                             </thead>
                             <tbody>
-                              {registrationStatsByType.map((row, idx) => (
-                                <tr 
-                                  key={idx} 
-                                  className={`border-b border-border/50 ${
-                                    row.stat_type === 'Всего' ? 'font-semibold bg-background' :
-                                    row.stat_type === 'Suspicious' ? 'text-destructive' : ''
-                                  }`}
-                                >
-                                  <td className="p-2">{row.stat_type}</td>
-                                  <td className="text-center p-2">{row.mon}</td>
-                                  <td className="text-center p-2">{row.tue}</td>
-                                  <td className="text-center p-2">{row.wed}</td>
-                                  <td className="text-center p-2">{row.thu}</td>
-                                  <td className="text-center p-2">{row.fri}</td>
-                                  <td className="text-center p-2">{row.sat}</td>
-                                  <td className="text-center p-2">{row.sun}</td>
-                                </tr>
-                              ))}
+                              {registrationStatsByType.map((row, idx) => {
+                                const getTypeKey = (statType: string): 'all' | 'email_verified' | 'unverified' | 'gmail' | 'facebook' | 'suspicious' => {
+                                  if (statType === 'Всего') return 'all';
+                                  if (statType === 'Почта ✓') return 'email_verified';
+                                  if (statType === 'Unverif') return 'unverified';
+                                  if (statType === 'Gmail') return 'gmail';
+                                  if (statType === 'Facebook') return 'facebook';
+                                  if (statType === 'Suspicious') return 'suspicious';
+                                  return 'all';
+                                };
+
+                                const typeKey = getTypeKey(row.stat_type);
+                                
+                                return (
+                                  <tr 
+                                    key={idx} 
+                                    className={`border-b border-border/50 ${
+                                      row.stat_type === 'Всего' ? 'font-semibold bg-background' :
+                                      row.stat_type === 'Suspicious' ? 'text-destructive' : ''
+                                    }`}
+                                  >
+                                    <td 
+                                      className={`p-2 cursor-pointer hover:bg-accent transition-colors ${
+                                        selectedRegistrationFilter?.type === typeKey && !selectedRegistrationFilter?.day 
+                                          ? 'bg-primary/20 font-bold' 
+                                          : ''
+                                      }`}
+                                      onClick={() => {
+                                        if (selectedRegistrationFilter?.type === typeKey && !selectedRegistrationFilter?.day) {
+                                          setSelectedRegistrationFilter(null);
+                                        } else {
+                                          setSelectedRegistrationFilter({ type: typeKey });
+                                        }
+                                      }}
+                                    >
+                                      {row.stat_type}
+                                    </td>
+                                    {(['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'] as const).map((day) => (
+                                      <td 
+                                        key={day}
+                                        className={`text-center p-2 cursor-pointer hover:bg-accent transition-colors ${
+                                          selectedRegistrationFilter?.type === typeKey && selectedRegistrationFilter?.day === day
+                                            ? 'bg-primary/20 font-bold'
+                                            : ''
+                                        }`}
+                                        onClick={() => {
+                                          if (selectedRegistrationFilter?.type === typeKey && selectedRegistrationFilter?.day === day) {
+                                            setSelectedRegistrationFilter(null);
+                                          } else {
+                                            setSelectedRegistrationFilter({ type: typeKey, day });
+                                          }
+                                        }}
+                                      >
+                                        {row[day]}
+                                      </td>
+                                    ))}
+                                  </tr>
+                                );
+                              })}
                             </tbody>
                           </table>
                         </div>
+                        {selectedRegistrationFilter && (
+                          <div className="mt-3 text-xs text-primary flex items-center gap-2">
+                            <span>
+                              Фильтр: {
+                                selectedRegistrationFilter.type === 'all' ? 'Все' :
+                                selectedRegistrationFilter.type === 'email_verified' ? 'Почта ✓' :
+                                selectedRegistrationFilter.type === 'unverified' ? 'Unverified' :
+                                selectedRegistrationFilter.type === 'gmail' ? 'Gmail' :
+                                selectedRegistrationFilter.type === 'facebook' ? 'Facebook' :
+                                'Suspicious'
+                              }
+                              {selectedRegistrationFilter.day && ` - ${selectedRegistrationFilter.day.toUpperCase()}`}
+                            </span>
+                            <button
+                              onClick={() => setSelectedRegistrationFilter(null)}
+                              className="text-destructive hover:underline font-medium"
+                            >
+                              ✕ Сбросить
+                            </button>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </>
@@ -6877,6 +6943,84 @@ const Admin = () => {
                       // Start filtering
                       return profiles.filter(profile => {
                         console.log('🔍 Starting filtration - roleFilter:', roleFilter, 'userRoles.length:', userRoles.length);
+                        
+                        // ==================== НОВЫЙ ФИЛЬТР ПО ТАБЛИЦЕ РЕГИСТРАЦИЙ ====================
+                        if (selectedRegistrationFilter) {
+                          const profileCreatedAt = new Date(profile.created_at);
+                          const dayOfWeek = profileCreatedAt.getDay(); // 0 = Sunday, 1 = Monday, ...
+                          
+                          // Map day of week to our day keys
+                          const dayMap: { [key: number]: 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun' } = {
+                            1: 'mon',
+                            2: 'tue',
+                            3: 'wed',
+                            4: 'thu',
+                            5: 'fri',
+                            6: 'sat',
+                            0: 'sun'
+                          };
+                          
+                          const profileDay = dayMap[dayOfWeek];
+                          
+                          // Check day filter
+                          if (selectedRegistrationFilter.day && profileDay !== selectedRegistrationFilter.day) {
+                            return false;
+                          }
+                          
+                          // Check type filter
+                          const filterType = selectedRegistrationFilter.type;
+                          
+                          if (filterType === 'all') {
+                            // Show all users for this day
+                            return true;
+                          } else if (filterType === 'email_verified') {
+                            // Email provider with confirmed email
+                            return profile.auth_provider === 'email' && profile.email_confirmed_at !== null;
+                          } else if (filterType === 'unverified') {
+                            // No email confirmation
+                            return profile.email_confirmed_at === null;
+                          } else if (filterType === 'gmail') {
+                            // Gmail OAuth
+                            return profile.auth_provider === 'google' || 
+                                   (profile.raw_user_meta_data as any)?.iss?.includes('google');
+                          } else if (filterType === 'facebook') {
+                            // Facebook OAuth
+                            return profile.auth_provider === 'facebook';
+                          } else if (filterType === 'suspicious') {
+                            // Suspicious users (excluding those with suspicious role, only non-OAuth)
+                            const hasSuspiciousRole = userRoles.some(role => 
+                              role.user_id === profile.id && role.role === 'suspicious'
+                            );
+                            if (hasSuspiciousRole) return false;
+                            
+                            const isOAuthUser = profile.auth_provider === 'google' || profile.auth_provider === 'facebook';
+                            if (isOAuthUser) return false;
+                            
+                            // Check suspicious criteria
+                            const whitelistedDomains = ['gmail.com', 'yahoo.com', 'outlook.com', 'hotmail.com', 'icloud.com', 'protonmail.com', 'aol.com', 'mail.com', 'zoho.com', 'yandex.ru', 'yandex.com'];
+                            const email = (profile as any).email;
+                            const domain = email ? email.split('@')[1]?.toLowerCase() : null;
+                            const emailNotWhitelisted = domain && !whitelistedDomains.includes(domain);
+                            
+                            const wasAutoConfirmed = profile.created_at && profile.email_confirmed_at && 
+                              Math.abs(new Date(profile.email_confirmed_at).getTime() - new Date(profile.created_at).getTime()) < 1000;
+                            
+                            const formFillTime = profile.raw_user_meta_data?.form_fill_time_seconds;
+                            const fastFormFill = formFillTime !== undefined && formFillTime !== null && formFillTime < 5;
+                            
+                            let hasDuplicateFingerprint = false;
+                            if (profile.fingerprint_id) {
+                              const sameFingerprint = profiles.filter(p => 
+                                p.fingerprint_id === profile.fingerprint_id && p.id !== profile.id
+                              );
+                              hasDuplicateFingerprint = sameFingerprint.length > 0;
+                            }
+                            
+                            return emailNotWhitelisted || wasAutoConfirmed || fastFormFill || hasDuplicateFingerprint;
+                          }
+                          
+                          return false;
+                        }
                         
                         // ==================== ФИЛЬТР РОЛИ ====================
                         const userRole = userRoleMap[profile.id] || 'usual';
