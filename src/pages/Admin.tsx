@@ -1722,14 +1722,38 @@ const Admin = () => {
         profilesData = data;
         if (error) throw error;
       } else {
-        // Normal fetch - ALL profiles using RPC to bypass PostgREST limits
-        console.log('🔵 Fetching ALL profiles from database using RPC...');
-        const { data, error } = await supabase
-          .rpc('get_all_profiles_admin');
+        // Fetch ALL profiles using pagination to bypass PostgREST 1000 row limit
+        console.log('🔵 Fetching ALL profiles from database using pagination...');
+        let allProfiles: any[] = [];
+        let page = 0;
+        const pageSize = 1000;
+        let hasMore = true;
+
+        while (hasMore) {
+          const { data, error } = await supabase
+            .from('profiles')
+            .select('*')
+            .order('created_at', { ascending: false })
+            .range(page * pageSize, (page + 1) * pageSize - 1);
+          
+          if (error) throw error;
+          
+          if (data && data.length > 0) {
+            allProfiles = [...allProfiles, ...data];
+            console.log(`📄 Loaded page ${page + 1}: ${data.length} profiles (total: ${allProfiles.length})`);
+            
+            // Check if we got a full page - if not, we're done
+            if (data.length < pageSize) {
+              hasMore = false;
+            }
+            page++;
+          } else {
+            hasMore = false;
+          }
+        }
         
-        console.log('✅ Fetched profiles from DB via RPC:', data?.length || 0);
-        profilesData = data;
-        if (error) throw error;
+        console.log('✅ Fetched ALL profiles from DB via pagination:', allProfiles.length);
+        profilesData = allProfiles;
       }
 
       if (!profilesData) {
