@@ -1775,44 +1775,53 @@ const Admin = () => {
         return;
       }
 
-      const { data: authData, error: authError } = await supabase
-        .rpc('get_user_auth_data_admin');
+      // Fetch ALL auth data with pagination (like profiles)
+      console.log('📧 Fetching ALL auth data using pagination...');
+      let allAuthData: any[] = [];
+      let authPage = 0;
+      const authPageSize = 1000;
+      let hasMoreAuth = true;
 
-      if (authError) {
-        console.error('❌ Failed to fetch auth data:', authError);
-      } else {
-        console.log('✅ Auth data fetched:', authData?.length, 'records');
+      while (hasMoreAuth) {
+        const { data: authBatch, error: authError } = await supabase
+          .rpc('get_user_auth_data_admin');
         
-        // CRITICAL DEBUG: Check if uspehico user is in auth data
-        const uspehAuthUser = authData?.find(a => a.email?.toLowerCase().includes('uspeh'));
-        console.log('🎯 USPEHICO USER IN AUTH DATA:', uspehAuthUser ? {
-          user_id: uspehAuthUser.user_id?.substring(0, 8),
-          email: uspehAuthUser.email,
-          auth_provider: uspehAuthUser.auth_provider
-        } : '❌ NOT FOUND IN AUTH DATA');
-        
-        // Log ALL records with no email to debug
-        const noEmailRecords = authData?.filter(a => !a.email) || [];
-        if (noEmailRecords.length > 0) {
-          console.error('🚨 FOUND AUTH RECORDS WITH NO EMAIL:', noEmailRecords.length);
-          noEmailRecords.forEach(record => {
-            console.error('  ❌ No email:', {
-              user_id: record.user_id,
-              provider: record.auth_provider,
-              hasEmail: !!record.email,
-              emailValue: record.email
-            });
-          });
-        }
-        // Log first record to verify structure
-        if (authData && authData.length > 0) {
-          console.log('📧 Sample auth data:', {
-            user_id: authData[0].user_id,
-            email: authData[0].email,
-            auth_provider: authData[0].auth_provider
-          });
+        if (authError) {
+          console.error(`❌ Error fetching auth page ${authPage + 1}:`, authError);
+          hasMoreAuth = false;
+        } else if (authBatch && authBatch.length > 0) {
+          allAuthData = [...allAuthData, ...authBatch];
+          console.log(`📧 Loaded auth page ${authPage + 1}: ${authBatch.length} records (total: ${allAuthData.length})`);
+          
+          if (authBatch.length < authPageSize) {
+            hasMoreAuth = false;
+          } else {
+            authPage++;
+          }
+        } else {
+          hasMoreAuth = false;
         }
       }
+
+      console.log('✅ Fetched ALL auth data via pagination:', allAuthData.length);
+
+      // CRITICAL DEBUG: Check if uspehico user is in auth data
+      const uspehAuthUser = allAuthData?.find(a => a.email?.toLowerCase().includes('uspeh'));
+      console.log('🎯 USPEHICO USER IN AUTH DATA:', uspehAuthUser ? {
+        user_id: uspehAuthUser.user_id?.substring(0, 8),
+        email: uspehAuthUser.email,
+        auth_provider: uspehAuthUser.auth_provider
+      } : '❌ NOT FOUND IN AUTH DATA');
+      
+      if (allAuthData && allAuthData.length > 0) {
+        console.log('📧 Sample auth data:', {
+          user_id: allAuthData[0].user_id,
+          email: allAuthData[0].email,
+          auth_provider: allAuthData[0].auth_provider
+        });
+      }
+      
+      const authData = allAuthData;
 
       // Fetch login logs for IP addresses and user agents
       const { data: loginLogs, error: loginError } = await supabase
