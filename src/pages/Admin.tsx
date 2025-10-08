@@ -1722,12 +1722,13 @@ const Admin = () => {
         profilesData = data;
         if (error) throw error;
       } else {
-        // Normal fetch - ALL profiles (no limit to ensure search works for all users)
+        // Normal fetch - ALL profiles (explicitly set high limit to bypass PostgREST default 1000 limit)
         console.log('🔵 Fetching ALL profiles from database...');
         const { data, error } = await supabase
           .from('profiles')
           .select('*')
-          .order('created_at', { ascending: false });
+          .order('created_at', { ascending: false })
+          .limit(10000); // Explicitly set limit to bypass default 1000
         
         console.log('✅ Fetched profiles from DB:', data?.length || 0);
         profilesData = data;
