@@ -57,13 +57,55 @@ const AuthCallbackHandler = () => {
         
         console.log('Auth callback successful:', data);
 
-        // Save device fingerprint for OAuth users
+        // Save device fingerprint and log login for OAuth users
         if (data.session?.user) {
           try {
+            // Get full fingerprint data
+            const { getDeviceFingerprint } = await import('@/utils/fingerprint');
+            const fullFingerprintData = await getDeviceFingerprint();
+            
+            // Save fingerprint to database
             await saveDeviceFingerprint(data.session.user.id);
             console.log('Device fingerprint saved for OAuth user');
+            
+            // Get IP address
+            const ipResponse = await fetch('https://api.ipify.org?format=json');
+            const ipData = await ipResponse.json();
+            
+            // Determine login method from provider
+            const provider = data.session.user.app_metadata?.provider || 'oauth';
+            
+            // Log the OAuth login with full fingerprint data
+            await supabase.functions.invoke('auth-login-tracker', {
+              body: {
+                userId: data.session.user.id,
+                loginMethod: provider,
+                ipAddress: ipData.ip,
+                userAgent: navigator.userAgent,
+                fingerprintId: fullFingerprintData.fingerprint_id,
+                fingerprintData: {
+                  screen_resolution: fullFingerprintData.screen_resolution,
+                  timezone: fullFingerprintData.timezone,
+                  timezone_offset: fullFingerprintData.timezone_offset,
+                  language: fullFingerprintData.language,
+                  languages: fullFingerprintData.languages,
+                  platform: fullFingerprintData.platform,
+                  canvas_fingerprint: fullFingerprintData.canvas_fingerprint,
+                  webgl_vendor: fullFingerprintData.webgl_vendor,
+                  webgl_renderer: fullFingerprintData.webgl_renderer,
+                  touch_support: fullFingerprintData.touch_support,
+                  hardware_concurrency: fullFingerprintData.hardware_concurrency,
+                  device_memory: fullFingerprintData.device_memory,
+                  cookies_enabled: fullFingerprintData.cookies_enabled,
+                  do_not_track: fullFingerprintData.do_not_track,
+                  screen_color_depth: fullFingerprintData.screen_color_depth
+                }
+              }
+            });
+            
+            console.log('OAuth login logged successfully');
           } catch (fpError) {
-            console.error('Error saving fingerprint for OAuth user:', fpError);
+            console.error('Error saving fingerprint/logging OAuth login:', fpError);
           }
         }
 
