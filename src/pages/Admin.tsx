@@ -1753,6 +1753,16 @@ const Admin = () => {
         }
         
         console.log('✅ Fetched ALL profiles from DB via pagination:', allProfiles.length);
+        
+        // CRITICAL DEBUG: Check if uspehico user profile is in profiles data
+        const uspehProfile = allProfiles.find(p => p.id === '6fae574d-a607-445f-aeb1-8174f8391b5b');
+        console.log('🎯 USPEHICO PROFILE IN PROFILES DATA:', uspehProfile ? {
+          id: uspehProfile.id?.substring(0, 8),
+          firstName: uspehProfile.first_name,
+          lastName: uspehProfile.last_name,
+          createdAt: uspehProfile.created_at
+        } : '❌ NOT FOUND IN PROFILES DATA FROM DB');
+        
         profilesData = allProfiles;
       }
 
@@ -1772,6 +1782,15 @@ const Admin = () => {
         console.error('❌ Failed to fetch auth data:', authError);
       } else {
         console.log('✅ Auth data fetched:', authData?.length, 'records');
+        
+        // CRITICAL DEBUG: Check if uspehico user is in auth data
+        const uspehAuthUser = authData?.find(a => a.email?.toLowerCase().includes('uspeh'));
+        console.log('🎯 USPEHICO USER IN AUTH DATA:', uspehAuthUser ? {
+          user_id: uspehAuthUser.user_id?.substring(0, 8),
+          email: uspehAuthUser.email,
+          auth_provider: uspehAuthUser.auth_provider
+        } : '❌ NOT FOUND IN AUTH DATA');
+        
         // Log ALL records with no email to debug
         const noEmailRecords = authData?.filter(a => !a.email) || [];
         if (noEmailRecords.length > 0) {
