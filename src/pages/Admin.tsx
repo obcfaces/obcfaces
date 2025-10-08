@@ -6754,8 +6754,22 @@ const Admin = () => {
                       profilesCount: profiles.length,
                       userActivityStatsKeys: Object.keys(userActivityStats).length,
                       firstProfileId: profiles[0]?.id,
-                      hasActivityForFirst: profiles[0] ? !!userActivityStats[profiles[0].id] : false
+                      hasActivityForFirst: profiles[0] ? !!userActivityStats[profiles[0].id] : false,
+                      searchQuery: searchQuery.trim()
                     });
+                    
+                    // DEBUG: Check if user with email "uspehico@gmail.com" is in profiles
+                    if (searchQuery.trim().toLowerCase().includes('uspeh')) {
+                      const foundProfile = profiles.find(p => ((p as any).email || '').toLowerCase().includes('uspeh'));
+                      console.log('🔍 SEARCH DEBUG - Looking for "uspeh":', {
+                        totalProfiles: profiles.length,
+                        foundProfile: foundProfile ? {
+                          id: foundProfile.id?.substring(0, 8),
+                          firstName: foundProfile.first_name,
+                          email: (foundProfile as any).email
+                        } : 'NOT FOUND'
+                      });
+                    }
                     
                     const filteredProfiles = (() => {
                       console.log('🚀 FILTER START - regStatusFilter:', regStatusFilter, 'profiles:', profiles.length);
@@ -6944,6 +6958,19 @@ const Admin = () => {
                         const email = ((profile as any).email || '').toLowerCase();
                         const fingerprintId = (profile.fingerprint_id || '').toLowerCase();
                         const ip = (profile.ip_address || '').toLowerCase();
+                        
+                        // DEBUG: Log each profile being checked
+                        if (query === 'uspeh') {
+                          console.log('🔍 SEARCH DEBUG for query "uspeh":', {
+                            profileId: profile.id?.substring(0, 8),
+                            firstName: profile.first_name,
+                            lastName: profile.last_name,
+                            email: email,
+                            hasEmail: !!(profile as any).email,
+                            fullName: fullName,
+                            displayName: displayName
+                          });
+                        }
                         
                         const matchesSearch = fullName.includes(query) || 
                                displayName.includes(query) || 
