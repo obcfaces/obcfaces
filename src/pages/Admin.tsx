@@ -1828,6 +1828,17 @@ const Admin = () => {
           });
         }
         
+        // DEBUG: Specifically check for the user we're looking for
+        if (profile.id === '6fae574d-a607-445f-aeb1-8174f8391b5b') {
+          console.log('🎯 FOUND TARGET USER in profiles:', {
+            profileId: profile.id,
+            firstName: profile.first_name,
+            hasAuthData: !!userAuthData,
+            authDataEmail: authDataEmail,
+            fullAuthData: userAuthData
+          });
+        }
+        
         // Get the most recent login log with an IP address for this user
         const userLoginLog = loginLogs
           ?.filter(log => log.user_id === profile.id && log.ip_address)
