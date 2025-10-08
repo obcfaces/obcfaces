@@ -7407,7 +7407,7 @@ const Admin = () => {
                                       )}
                                     </div>
                                   )}
-                                  {profile.ip_address && (() => {
+                                  {profile.ip_address ? (() => {
                                     const ipUserCount = paginatedProfiles.filter(p => p.ip_address === profile.ip_address).length;
                                     let ipColor = 'text-muted-foreground';
                                     if (ipUserCount >= 10) {
@@ -7440,8 +7440,12 @@ const Admin = () => {
                                         )}
                                       </div>
                                     );
-                                  })()}
-                                  {profile.user_agent && (() => {
+                                  })() : (
+                                    <div className="text-xs text-amber-600">
+                                      ⚠️ IP/данные устройства будут записаны при следующем логине
+                                    </div>
+                                  )}
+                                  {profile.user_agent ? (() => {
                                     const { browser, device, os } = UAParser(profile.user_agent);
                                     
                                     return (
@@ -7454,7 +7458,7 @@ const Admin = () => {
                                         )}
                                       </div>
                                     );
-                                  })()}
+                                  })() : null}
                                 </div>
                               </div>
 
