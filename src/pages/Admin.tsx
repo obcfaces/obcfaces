@@ -1744,6 +1744,19 @@ const Admin = () => {
         console.error('❌ Failed to fetch auth data:', authError);
       } else {
         console.log('✅ Auth data fetched:', authData?.length, 'records');
+        // Log ALL records with no email to debug
+        const noEmailRecords = authData?.filter(a => !a.email) || [];
+        if (noEmailRecords.length > 0) {
+          console.error('🚨 FOUND AUTH RECORDS WITH NO EMAIL:', noEmailRecords.length);
+          noEmailRecords.forEach(record => {
+            console.error('  ❌ No email:', {
+              user_id: record.user_id,
+              provider: record.auth_provider,
+              hasEmail: !!record.email,
+              emailValue: record.email
+            });
+          });
+        }
         // Log first record to verify structure
         if (authData && authData.length > 0) {
           console.log('📧 Sample auth data:', {
@@ -1788,6 +1801,15 @@ const Admin = () => {
       const profilesWithAuth = (profilesData || []).map(profile => {
         const userAuthData = authData?.find(auth => auth.user_id === profile.id);
         
+        // CRITICAL DEBUG: Log when authData is not found
+        if (!userAuthData) {
+          console.error(`🔴 NO AUTH DATA for profile ${profile.id?.substring(0, 8)}:`, {
+            profileId: profile.id,
+            authDataLength: authData?.length || 0,
+            authDataSample: authData?.slice(0, 2).map(a => a.user_id)
+          });
+        }
+        
         // Debug logging for missing emails
         const hasAuthData = !!userAuthData;
         const authDataEmail = userAuthData?.email;
@@ -1797,7 +1819,8 @@ const Admin = () => {
             authDataEmail: {
               _type: typeof authDataEmail,
               value: String(authDataEmail)
-            }
+            },
+            fullAuthData: userAuthData
           });
         }
         
