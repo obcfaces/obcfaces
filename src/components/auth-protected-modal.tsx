@@ -37,8 +37,16 @@ export const AuthProtectedModal = ({ children }: AuthProtectedModalProps) => {
   const handleTriggerClick = async () => {
     console.log('Participation button clicked, session:', session?.user?.email_confirmed_at);
     
-    if (session?.user?.email_confirmed_at) {
-      // User is authenticated, check their application status
+    if (!session?.user?.email_confirmed_at) {
+      // User is NOT authenticated - open participation modal directly
+      console.log('Opening participation modal for unauthenticated user');
+      setEditMode(false);
+      setExistingParticipant(null);
+      setIsParticipationOpen(true);
+      return;
+    }
+    
+    // User is authenticated, check their application status
       console.log('Checking application status for user:', session.user.id);
       
       // Check if user has ANY participant record (including deleted)
@@ -106,11 +114,6 @@ export const AuthProtectedModal = ({ children }: AuthProtectedModalProps) => {
         setExistingParticipant(activeParticipant);
         setIsParticipationOpen(true);
       }
-    } else {
-      // User is not authenticated, open login modal
-      console.log('Opening login modal for unauthenticated user');
-      setIsLoginOpen(true);
-    }
   };
 
   return (

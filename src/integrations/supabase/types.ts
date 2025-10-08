@@ -974,7 +974,7 @@ export type Database = {
           status_history: Json | null
           submitted_at: string | null
           total_votes: number | null
-          user_id: string
+          user_id: string | null
           week_interval: string | null
         }
         Insert: {
@@ -995,7 +995,7 @@ export type Database = {
           status_history?: Json | null
           submitted_at?: string | null
           total_votes?: number | null
-          user_id: string
+          user_id?: string | null
           week_interval?: string | null
         }
         Update: {
@@ -1016,7 +1016,7 @@ export type Database = {
           status_history?: Json | null
           submitted_at?: string | null
           total_votes?: number | null
-          user_id?: string
+          user_id?: string | null
           week_interval?: string | null
         }
         Relationships: [
