@@ -6804,128 +6804,180 @@ const Admin = () => {
                       searchQuery: searchQuery.trim()
                     });
                     
-                    // DEBUG: Check if user with email "uspehico@gmail.com" is in profiles
-                    if (searchQuery.trim().toLowerCase().includes('uspeh')) {
-                      const foundProfile = profiles.find(p => ((p as any).email || '').toLowerCase().includes('uspeh'));
-                      console.log('🔍 SEARCH DEBUG - Looking for "uspeh":', {
-                        totalProfiles: profiles.length,
-                        foundProfile: foundProfile ? {
-                          id: foundProfile.id?.substring(0, 8),
-                          firstName: foundProfile.first_name,
-                          email: (foundProfile as any).email
-                        } : 'NOT FOUND'
-                      });
-                    }
-                    
+                    // CRITICAL: If there's a search query, ONLY apply search filter - ignore all other filters!
                     const filteredProfiles = (() => {
+                      if (searchQuery.trim()) {
+                        const query = searchQuery.toLowerCase();
+                        console.log('🔍 SEARCH MODE ACTIVE - Ignoring all other filters, searching for:', query);
+                        
+                        const searchResults = profiles.filter(profile => {
+                          const fullName = `${profile.first_name || ''} ${profile.last_name || ''}`.toLowerCase();
+                          const displayName = (profile.display_name || '').toLowerCase();
+                          const email = ((profile as any).email || '').toLowerCase();
+                          const fingerprintId = (profile.fingerprint_id || '').toLowerCase();
+                          const ip = (profile.ip_address || '').toLowerCase();
+                          
+                          // DEBUG for uspeh specifically
+                          if (email.includes('usp')) {
+                            console.log('🔍 Found user with "usp" in email:', {
+                              email,
+                              firstName: profile.first_name,
+                              lastName: profile.last_name,
+                              id: profile.id?.substring(0, 8)
+                            });
+                          }
+                          
+                          const matches = fullName.includes(query) || 
+                                 displayName.includes(query) || 
+                                 email.includes(query) ||
+                                 fingerprintId.includes(query) || 
+                                 ip.includes(query);
+                          
+                          return matches;
+                        });
+                        
+                        console.log('✅ SEARCH RESULTS:', searchResults.length, 'users found');
+                        return searchResults;
+                      }
+                      
+                      // Apply other filters ONLY if no search query
                       console.log('🚀 FILTER START - regStatusFilter:', regStatusFilter, 'profiles:', profiles.length);
                       
-                      // Фильтр "W" (2+ Weeks) - EXCLUSIVE filter
-                      if (regStatusFilter === '2+weeks') {
-                        console.log('🔍 W filter: userVotingStats keys:', Object.keys(userVotingStats).length);
+                      // Start filtering
+                      return profiles.filter(profile => {
+                        console.log('🔍 Starting filtration - roleFilter:', roleFilter, 'userRoles.length:', userRoles.length);
                         
-                        const result = profiles.filter(profile => {
+                        // ==================== ФИЛЬТР РОЛИ ====================
+                        const userRole = userRoleMap[profile.id] || 'usual';
+                        
+                        if (roleFilter === 'admin') {
+                          return userRole === 'admin';
+                        } else if (roleFilter === 'usual') {
+                          return userRole === 'usual' || !userRole;
+                        }
+
+                        // Фильтр статуса регистрации
+                        if (regStatusFilter === 'suspicious') {
+                          const isSuspicious = userRoles.some(role => 
+                            role.user_id === profile.id && role.role === 'suspicious'
+                          );
+                          
+                          if (!isSuspicious) {
+                            if (roleFilter === 'regular') console.log('❌ Regular user REJECTED by suspicious filter:', profile.first_name);
+                            return false;
+                          }
+                        } else if (regStatusFilter === '2+weeks') {
                           const votingStats = userVotingStats[profile.id];
-                          if (!votingStats) return false;
+                          console.log('⏱️ Checking 2+ weeks for user:', profile.first_name, votingStats);
+                          
+                          if (!votingStats) {
+                            console.log('❌ No voting stats for user:', profile.first_name);
+                            return false;
+                          }
                           
                           const uniqueWeeks = votingStats.unique_weeks_count || 0;
                           return uniqueWeeks >= 2;
-                        });
-                        
-                        console.log('✅ W filter result:', result.length, 'users found');
-                        
-                        // Apply search if present
-                        if (searchQuery.trim()) {
-                          return result.filter(profile => {
-                            const query = searchQuery.toLowerCase();
-                            const fullName = `${profile.first_name || ''} ${profile.last_name || ''}`.toLowerCase();
-                            const displayName = (profile.display_name || '').toLowerCase();
-                            const email = ((profile as any).email || '').toLowerCase();
-                            
-                            return fullName.includes(query) || 
-                                   displayName.includes(query) ||
-                                   email.includes(query);
-                          });
                         }
                         
-                        return result;
-                      }
-                      
-                      
-                      // Default filtering for other cases
-                      console.log('🔍 Starting filtration - roleFilter:', roleFilter, 'userRoles.length:', userRoles.length);
-                      
-                      // Log regular users in userRoles
-                      if (roleFilter === 'regular') {
-                        const regularUsers = userRoles.filter(r => r.role === 'regular');
-                        console.log('📋 Regular users in userRoles:', regularUsers.length, regularUsers.slice(0, 5));
-                        
-                        // Check overlap: how many regular users exist in profiles?
-                        const regularUserIds = regularUsers.map(r => r.user_id);
-                        const profileIds = profiles.map(p => p.id);
-                        const overlap = regularUserIds.filter(id => profileIds.includes(id));
-                        console.log('🔍 OVERLAP CHECK:', {
-                          regularUserIdsCount: regularUserIds.length,
-                          profileIdsCount: profileIds.length,
-                          overlapCount: overlap.length,
-                          overlapIds: overlap.slice(0, 5)
-                        });
-                      }
-                      
-                      return profiles.filter(profile => {
-                      
-                      // Фильтр ролей - ДОЛЖЕН БЫТЬ ПЕРВЫМ!
-                      if (roleFilter !== 'all') {
-                        const profileRoles = userRoles.filter(ur => ur.user_id === profile.id);
-                        
-                        if (roleFilter === 'admin') {
-                          const isAdmin = profileRoles.some(ur => ur.role === 'admin');
-                          if (!isAdmin) return false;
-                        } else if (roleFilter === 'moderator') {
-                          const isModerator = profileRoles.some(ur => ur.role === 'moderator');
-                          if (!isModerator) return false;
-                        } else if (roleFilter === 'usual') {
-                          // Usual = нет ролей вообще
-                          if (profileRoles.length > 0) return false;
-                        } else if (roleFilter === 'regular') {
-                          const isRegular = profileRoles.some(ur => ur.role === 'regular');
-                          if (!isRegular) {
-                            console.log('❌ Profile REJECTED - no regular role:', profile.first_name, profile.id);
+                        // Email domain filter
+                        if (suspiciousEmailFilter === 'non-whitelist') {
+                          const email = (profile as any).email;
+                          if (!email) return false;
+                          
+                          const domain = email.split('@')[1]?.toLowerCase();
+                          if (!domain) return false;
+                          
+                          const whitelistedDomains = ['gmail.com', 'yahoo.com', 'outlook.com', 'hotmail.com', 'icloud.com', 'protonmail.com', 'aol.com', 'mail.com', 'zoho.com', 'yandex.ru', 'yandex.com'];
+                          const isWhitelisted = whitelistedDomains.includes(domain);
+                          
+                          if (isWhitelisted) {
+                            if (roleFilter === 'regular') console.log('❌ Regular user REJECTED by email domain filter (whitelisted):', profile.first_name, domain);
                             return false;
                           }
-                          console.log('✅ Profile PASSED regular filter:', profile.first_name, profile.id);
-                        } else if (roleFilter === 'suspicious') {
-                          const isSuspicious = profileRoles.some(ur => ur.role === 'suspicious');
-                          if (!isSuspicious) return false;
                         }
-                      }
-                      
-                      // Фильтр по дню регистрации
-                      if (selectedRegistrationDay) {
-                        if (!profile.created_at) return false;
                         
-                        // Convert created_at to Asia/Manila timezone and get day name
-                        const userDate = new Date(profile.created_at);
-                        const manilaDate = new Date(userDate.toLocaleString("en-US", { timeZone: "Asia/Manila" }));
-                        const dayName = manilaDate.toLocaleDateString('en-US', { weekday: 'short', timeZone: 'Asia/Manila' });
+                        // Suspicious filter for role
+                        if (regStatusFilter === 'suspicious-role') {
+                          const roleEntry = userRoles.find(r => r.user_id === profile.id);
+                          
+                          if (!roleEntry || roleEntry.role !== 'suspicious') {
+                            if (roleFilter === 'regular') console.log('❌ Regular user REJECTED by suspicious-role filter:', profile.first_name);
+                            return false;
+                          }
+                        }
                         
-                        if (dayName !== selectedRegistrationDay.dayName) return false;
+                        // Maybe suspicious filter
+                        if (suspiciousEmailFilter === 'maybe-suspicious-old') {
+                          const hasSuspiciousRole = userRoles.some(role => 
+                            role.user_id === profile.id && role.role === 'suspicious'
+                          );
+                          if (hasSuspiciousRole) {
+                            if (roleFilter === 'regular') console.log('❌ Regular user REJECTED by maybe-suspicious (has role):', profile.first_name);
+                            return false;
+                          }
+                          
+                          const isOAuthUser = profile.auth_provider === 'google' || profile.auth_provider === 'facebook';
+                          if (isOAuthUser) {
+                            if (roleFilter === 'regular') console.log('❌ Regular user REJECTED by maybe-suspicious (OAuth):', profile.first_name);
+                            return false;
+                          }
+                          
+                          const wasAutoConfirmed = profile.created_at && profile.email_confirmed_at && 
+                            Math.abs(new Date(profile.email_confirmed_at).getTime() - new Date(profile.created_at).getTime()) < 1000;
+                          
+                          const formFillTime = profile.raw_user_meta_data?.form_fill_time_seconds;
+                          const fastFormFill = formFillTime !== undefined && formFillTime !== null && formFillTime < 5;
+                          
+                          let hasDuplicateFingerprint = false;
+                          if (profile.fingerprint_id) {
+                            const sameFingerprint = profiles.filter(p => 
+                              p.fingerprint_id === profile.fingerprint_id && p.id !== profile.id
+                            );
+                            hasDuplicateFingerprint = sameFingerprint.length > 0;
+                          }
+                          
+                          if (!(wasAutoConfirmed || fastFormFill || hasDuplicateFingerprint)) {
+                            if (roleFilter === 'regular') console.log('❌ Regular user REJECTED by maybe-suspicious (no criteria):', profile.first_name);
+                            return false;
+                          }
+                        }
                         
-                        // Если нужно показать только подозрительных
-                        if (selectedRegistrationDay.showSuspicious) {
+                        // Фильтр верификации
+                        if (verificationFilter === 'verified') {
+                          if (!profile.email_confirmed_at) {
+                            if (roleFilter === 'regular') console.log('❌ Regular user REJECTED by verification filter (not verified):', profile.first_name);
+                            return false;
+                          }
+                        } else if (verificationFilter === 'unverified') {
+                          if (profile.email_confirmed_at) {
+                            if (roleFilter === 'regular') console.log('❌ Regular user REJECTED by verification filter (is verified):', profile.first_name);
+                            return false;
+                          }
+                        }
+                        
+                        // Фильтр "Maybe Suspicious" - НЕ применять если выбран фильтр Regular!
+                        if (suspiciousEmailFilter === 'maybe-suspicious' && roleFilter !== 'regular') {
                           // Exclude users with 'suspicious' role
                           const hasSuspiciousRole = userRoles.some(role => 
                             role.user_id === profile.id && role.role === 'suspicious'
                           );
-                          if (hasSuspiciousRole) return false;
+                          if (hasSuspiciousRole) {
+                            console.log('❌ REJECTED by Maybe Suspicious (has suspicious role):', profile.first_name, profile.id?.substring(0, 8));
+                            return false;
+                          }
                           
                           // Exclude OAuth users (Google/Facebook) - they auto-authorize
                           const isOAuthUser = profile.auth_provider === 'google' || profile.auth_provider === 'facebook';
-                          if (isOAuthUser) return false;
+                          if (isOAuthUser) {
+                            console.log('❌ REJECTED by Maybe Suspicious (OAuth user):', profile.first_name, profile.auth_provider, profile.id?.substring(0, 8));
+                            return false;
+                          }
                           
-                          // Check criteria for suspicious users
+                          // Check criteria
                           const wasAutoConfirmed = profile.created_at && profile.email_confirmed_at && 
                             Math.abs(new Date(profile.email_confirmed_at).getTime() - new Date(profile.created_at).getTime()) < 1000;
+                          
+                          // Check form fill time (< 5 seconds)
                           const formFillTime = profile.raw_user_meta_data?.form_fill_time_seconds;
                           const fastFormFill = formFillTime !== undefined && formFillTime !== null && formFillTime < 5;
                           
@@ -6938,117 +6990,17 @@ const Admin = () => {
                             hasDuplicateFingerprint = sameFingerprint.length > 0;
                           }
                           
-                          if (!(wasAutoConfirmed || fastFormFill || hasDuplicateFingerprint)) return false;
-                        }
-                      }
-                      
-                      // Фильтр верификации
-                      if (verificationFilter === 'verified') {
-                        if (!profile.email_confirmed_at) {
-                          if (roleFilter === 'regular') console.log('❌ Regular user REJECTED by verification filter (not verified):', profile.first_name);
-                          return false;
-                        }
-                      } else if (verificationFilter === 'unverified') {
-                        if (profile.email_confirmed_at) {
-                          if (roleFilter === 'regular') console.log('❌ Regular user REJECTED by verification filter (is verified):', profile.first_name);
-                          return false;
-                        }
-                      }
-                      
-                      // Фильтр "Maybe Suspicious" - НЕ применять если выбран фильтр Regular!
-                      if (suspiciousEmailFilter === 'maybe-suspicious' && roleFilter !== 'regular') {
-                        // Exclude users with 'suspicious' role
-                        const hasSuspiciousRole = userRoles.some(role => 
-                          role.user_id === profile.id && role.role === 'suspicious'
-                        );
-                        if (hasSuspiciousRole) {
-                          console.log('❌ REJECTED by Maybe Suspicious (has suspicious role):', profile.first_name, profile.id?.substring(0, 8));
-                          return false;
+                          if (!(wasAutoConfirmed || fastFormFill || hasDuplicateFingerprint)) {
+                            console.log('❌ REJECTED by Maybe Suspicious (no suspicious criteria):', profile.first_name, profile.id?.substring(0, 8));
+                            return false;
+                          }
                         }
                         
-                        // Exclude OAuth users (Google/Facebook) - they auto-authorize
-                        const isOAuthUser = profile.auth_provider === 'google' || profile.auth_provider === 'facebook';
-                        if (isOAuthUser) {
-                          console.log('❌ REJECTED by Maybe Suspicious (OAuth user):', profile.first_name, profile.auth_provider, profile.id?.substring(0, 8));
-                          return false;
+                        if (roleFilter === 'regular') {
+                          console.log('✅ Regular user PASSED ALL FILTERS:', profile.first_name, profile.id);
                         }
-                        
-                        // Check criteria
-                        const wasAutoConfirmed = profile.created_at && profile.email_confirmed_at && 
-                          Math.abs(new Date(profile.email_confirmed_at).getTime() - new Date(profile.created_at).getTime()) < 1000;
-                        
-                        // Check form fill time (< 5 seconds)
-                        const formFillTime = profile.raw_user_meta_data?.form_fill_time_seconds;
-                        const fastFormFill = formFillTime !== undefined && formFillTime !== null && formFillTime < 5;
-                        
-                        // Check for duplicate fingerprints
-                        let hasDuplicateFingerprint = false;
-                        if (profile.fingerprint_id) {
-                          const sameFingerprint = profiles.filter(p => 
-                            p.fingerprint_id === profile.fingerprint_id && p.id !== profile.id
-                          );
-                          hasDuplicateFingerprint = sameFingerprint.length > 0;
-                        }
-                        
-                        if (!(wasAutoConfirmed || fastFormFill || hasDuplicateFingerprint)) {
-                          console.log('❌ REJECTED by Maybe Suspicious (no suspicious criteria):', profile.first_name, profile.id?.substring(0, 8));
-                          return false;
-                        }
-                      }
-
-                      // Фильтр поиска
-                      if (searchQuery.trim()) {
-                        const query = searchQuery.toLowerCase();
-                        const fullName = `${profile.first_name || ''} ${profile.last_name || ''}`.toLowerCase();
-                        const displayName = (profile.display_name || '').toLowerCase();
-                        const email = ((profile as any).email || '').toLowerCase();
-                        const fingerprintId = (profile.fingerprint_id || '').toLowerCase();
-                        const ip = (profile.ip_address || '').toLowerCase();
-                        
-                        // DEBUG: Log uspehico specifically
-                        if (profile.id === '6fae574d-a607-445f-aeb1-8174f8391b5b') {
-                          console.log('🎯 SEARCH CHECK for uspehico user:', {
-                            searchQuery: query,
-                            profileId: profile.id?.substring(0, 8),
-                            firstName: profile.first_name,
-                            lastName: profile.last_name,
-                            email: email,
-                            hasEmail: !!email,
-                            emailIncludes: email.includes(query),
-                            fullNameIncludes: fullName.includes(query)
-                          });
-                        }
-                        
-                        const matchesSearch = fullName.includes(query) || 
-                               displayName.includes(query) || 
-                               email.includes(query) ||
-                               fingerprintId.includes(query) || 
-                               ip.includes(query);
-                        
-                        if (!matchesSearch && roleFilter === 'regular') {
-                          console.log('❌ Regular user REJECTED by search filter:', profile.first_name);
-                        }
-                        
-                        // DEBUG: If uspehico doesn't match, log why
-                        if (profile.id === '6fae574d-a607-445f-aeb1-8174f8391b5b' && !matchesSearch) {
-                          console.log('❌ uspehico user REJECTED by search:', {
-                            query,
-                            email,
-                            fullName,
-                            displayName,
-                            fingerprintId,
-                            ip
-                          });
-                        }
-                        
-                        return matchesSearch;
-                      }
-                      
-                      if (roleFilter === 'regular') {
-                        console.log('✅ Regular user PASSED ALL FILTERS:', profile.first_name, profile.id);
-                      }
-                       
-                       return true;
+                         
+                         return true;
                       });
                     })();
 
