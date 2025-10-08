@@ -504,6 +504,7 @@ const Admin = () => {
   const regItemsPerPage = 20;
   const fetchedStatsRef = useRef<Set<string>>(new Set());
   const [expandedMaybeFingerprints, setExpandedMaybeFingerprints] = useState<Set<string>>(new Set());
+  const [expandedFingerprints, setExpandedFingerprints] = useState<Set<string>>(new Set());
   
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -7708,7 +7709,7 @@ const Admin = () => {
                                     const { browser, device, os } = UAParser(profile.user_agent);
                                     
                                     return (
-                                      <div className="text-xs text-muted-foreground">
+                                       <div className="text-xs text-muted-foreground">
                                         {device.type || 'Desktop'} | {os.name || 'Unknown OS'} {os.version || ''} | {browser.name || 'Unknown'}
                                         {profile.fingerprint_id && (() => {
                                           const duplicateCount = profiles.filter(p => 
@@ -7716,11 +7717,31 @@ const Admin = () => {
                                           ).length;
                                           const isBlue = duplicateCount >= 2;
                                           const showCount = duplicateCount >= 2;
+                                          const isClickable = duplicateCount >= 1;
                                           
                                           return (
                                             <span className={`ml-2 ${isBlue ? 'text-blue-600 dark:text-blue-400 font-semibold' : ''}`}>
-                                              | fp {profile.fingerprint_id.substring(0, 5)}
-                                              {showCount && ` (${duplicateCount + 1})`}
+                                              | {isClickable ? (
+                                                <button
+                                                  onClick={(e) => {
+                                                    e.preventDefault();
+                                                    e.stopPropagation();
+                                                    const newExpanded = new Set(expandedFingerprints);
+                                                    if (expandedFingerprints.has(profile.fingerprint_id)) {
+                                                      newExpanded.delete(profile.fingerprint_id);
+                                                    } else {
+                                                      newExpanded.add(profile.fingerprint_id);
+                                                    }
+                                                    setExpandedFingerprints(newExpanded);
+                                                  }}
+                                                  className="hover:underline cursor-pointer"
+                                                >
+                                                  fp {profile.fingerprint_id.substring(0, 5)}
+                                                  {showCount && ` (${duplicateCount + 1})`}
+                                                </button>
+                                              ) : (
+                                                <>fp {profile.fingerprint_id.substring(0, 5)}</>
+                                              )}
                                             </span>
                                           );
                                         })()}
@@ -7891,15 +7912,15 @@ const Admin = () => {
                                )}
                           </Card>
                           
-                          {/* Fingerprint Cards - Show all users with same fingerprint when Maybe badge is clicked */}
-                          {profile.fingerprint_id && expandedMaybeFingerprints.has(profile.id) && (() => {
+                          {/* Fingerprint Cards - Show all users with same fingerprint when fp is clicked */}
+                          {profile.fingerprint_id && expandedFingerprints.has(profile.fingerprint_id) && (() => {
                             const sameFingerprint = paginatedProfiles.filter(p => 
                               p.fingerprint_id === profile.fingerprint_id && p.id !== profile.id
                             );
                             
                             return sameFingerprint.length > 0 ? (
-                              <div className="w-full p-4 bg-orange-50 rounded-lg border border-orange-200 mb-4">
-                                <h4 className="text-sm font-medium mb-3 text-orange-900">
+                              <div className="w-full p-4 bg-blue-50 dark:bg-blue-950/30 rounded-lg border border-blue-200 dark:border-blue-800 mb-4">
+                                <h4 className="text-sm font-medium mb-3 text-blue-900 dark:text-blue-100">
                                   Пользователи с таким же Fingerprint ({profile.fingerprint_id.substring(0, 16)}...):
                                 </h4>
                                 <div className="space-y-4">
