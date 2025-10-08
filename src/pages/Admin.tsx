@@ -7099,7 +7099,10 @@ const Admin = () => {
                                          </Badge>
                                        );
                                      }
-                                    // Check if user is "maybe suspicious" (but not marked as suspicious)
+                                     // Check if user is "maybe suspicious" (but not marked as suspicious)
+                                    // Exclude OAuth users (Google/Facebook) - they auto-authorize
+                                    const isOAuthUser = profile.auth_provider === 'google' || profile.auth_provider === 'facebook';
+                                    
                                     const emailNotWhitelisted = profile.email ? !isEmailDomainWhitelisted(profile.email) : false;
                                     const wasAutoConfirmed = profile.created_at && profile.email_confirmed_at && 
                                       Math.abs(new Date(profile.email_confirmed_at).getTime() - new Date(profile.created_at).getTime()) < 1000;
@@ -7116,7 +7119,7 @@ const Admin = () => {
                                       hasDuplicateFingerprint = sameFingerprint.length > 0;
                                     }
                                     
-                                    const isMaybeSuspicious = wasAutoConfirmed || fastFormFill || hasDuplicateFingerprint;
+                                    const isMaybeSuspicious = !isOAuthUser && (wasAutoConfirmed || fastFormFill || hasDuplicateFingerprint);
                                     
                                      if (isMaybeSuspicious) {
                                       const reasonCodes = [];
