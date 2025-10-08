@@ -17,7 +17,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
+import { Pagination, PaginationContent, PaginationEllipsis, PaginationFirst, PaginationItem, PaginationLast, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 import { useToast } from '@/hooks/use-toast';
 import { MiniStars } from '@/components/mini-stars';
 import { 
@@ -1835,6 +1835,16 @@ const Admin = () => {
             profileId: profile.id,
             authDataLength: authData?.length || 0,
             authDataSample: authData?.slice(0, 2).map(a => a.user_id)
+          });
+        }
+        
+        // DEBUG for uspeh email specifically
+        if (userAuthData?.email && userAuthData.email.toLowerCase().includes('uspeh')) {
+          console.log('🔍 FOUND uspeh user in profilesWithAuth:', {
+            profileId: profile.id?.substring(0, 8),
+            email: userAuthData.email,
+            firstName: profile.first_name,
+            lastName: profile.last_name
           });
         }
         
@@ -7950,6 +7960,17 @@ const Admin = () => {
                         <Pagination className="mt-6">
                           <PaginationContent>
                             <PaginationItem>
+                              <PaginationFirst 
+                                href="#"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  setRegPaginationPage(1);
+                                }}
+                                aria-disabled={regPaginationPage === 1}
+                                className={regPaginationPage === 1 ? 'pointer-events-none opacity-50' : ''}
+                              />
+                            </PaginationItem>
+                            <PaginationItem>
                               <PaginationPrevious 
                                 href="#"
                                 onClick={(e) => {
@@ -7995,6 +8016,17 @@ const Admin = () => {
                                 onClick={(e) => {
                                   e.preventDefault();
                                   setRegPaginationPage(prev => Math.min(prev + 1, totalRegPages));
+                                }}
+                                aria-disabled={regPaginationPage === totalRegPages}
+                                className={regPaginationPage === totalRegPages ? 'pointer-events-none opacity-50' : ''}
+                              />
+                            </PaginationItem>
+                            <PaginationItem>
+                              <PaginationLast 
+                                href="#"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  setRegPaginationPage(totalRegPages);
                                 }}
                                 aria-disabled={regPaginationPage === totalRegPages}
                                 className={regPaginationPage === totalRegPages ? 'pointer-events-none opacity-50' : ''}
