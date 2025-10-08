@@ -641,10 +641,8 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
                     provider: 'facebook',
                     options: {
                       redirectTo: `${window.location.origin}/`,
-                      scopes: 'email',
                       queryParams: {
-                        access_type: 'offline',
-                        prompt: 'consent',
+                        auth_type: 'rerequest'
                       }
                     }
                   });
