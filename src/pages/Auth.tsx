@@ -53,8 +53,19 @@ const Auth = () => {
     }
   }, [searchParams]);
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (session?.user) {
+        // Check if user has email - critical for OAuth users
+        if (!session.user.email) {
+          toast({
+            title: "Email Required",
+            description: "Your social account doesn't provide an email. Please contact support.",
+            variant: "destructive"
+          });
+          await supabase.auth.signOut();
+          return;
+        }
+        
         // Check if there's a saved redirect path (for admin users)
         const redirectPath = sessionStorage.getItem('redirectPath');
         if (redirectPath) {
@@ -66,8 +77,19 @@ const Auth = () => {
       }
     });
 
-    supabase.auth.getSession().then(({ data }) => {
+    supabase.auth.getSession().then(async ({ data }) => {
       if (data.session?.user) {
+        // Check if user has email
+        if (!data.session.user.email) {
+          toast({
+            title: "Email Required", 
+            description: "Your social account doesn't provide an email. Please contact support.",
+            variant: "destructive"
+          });
+          await supabase.auth.signOut();
+          return;
+        }
+        
         // Check if there's a saved redirect path (for admin users)
         const redirectPath = sessionStorage.getItem('redirectPath');
         if (redirectPath) {

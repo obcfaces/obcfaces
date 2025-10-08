@@ -1199,6 +1199,11 @@ export const ContestParticipationModal = ({
                       provider: 'facebook',
                       options: {
                         redirectTo: `${window.location.origin}/`,
+                        scopes: 'email',
+                        queryParams: {
+                          access_type: 'offline',
+                          prompt: 'consent',
+                        }
                       }
                     });
                     
