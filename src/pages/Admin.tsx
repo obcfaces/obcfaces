@@ -6932,11 +6932,13 @@ const Admin = () => {
                         const query = searchQuery.toLowerCase();
                         const fullName = `${profile.first_name || ''} ${profile.last_name || ''}`.toLowerCase();
                         const displayName = (profile.display_name || '').toLowerCase();
+                        const email = ((profile as any).email || '').toLowerCase();
                         const fingerprintId = (profile.fingerprint_id || '').toLowerCase();
                         const ip = (profile.ip_address || '').toLowerCase();
                         
                         const matchesSearch = fullName.includes(query) || 
                                displayName.includes(query) || 
+                               email.includes(query) ||
                                fingerprintId.includes(query) || 
                                ip.includes(query);
                         
