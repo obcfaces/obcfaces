@@ -7247,14 +7247,9 @@ const Admin = () => {
                                       />
                                     </div>
                                   )}
-                                  {!profile.email && profile.auth_provider && (
-                                    <div className="text-xs text-muted-foreground">
-                                      {profile.auth_provider === 'facebook' ? 'Facebook Login' : 'Social Login'} - ID: {profile.id?.substring(0, 8)}
-                                    </div>
-                                  )}
-                                  {!profile.email && !profile.auth_provider && (
-                                    <div className="text-xs text-destructive">
-                                      No email - User ID: {profile.id?.substring(0, 8)}
+                                  {!profile.email && (
+                                    <div className="text-xs text-destructive font-medium">
+                                      ⚠️ NO EMAIL - {profile.auth_provider === 'facebook' ? 'Facebook' : profile.auth_provider || 'Unknown'} - ID: {profile.id?.substring(0, 8)}
                                     </div>
                                   )}
                                   {profile.ip_address && (() => {
