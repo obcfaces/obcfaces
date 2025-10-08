@@ -354,6 +354,16 @@ export function ContestantCard({
       return;
     }
 
+    // Check if user's email is verified
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user?.email_confirmed_at) {
+      toast({ 
+        description: "Please verify your email before voting",
+        variant: "destructive"
+      });
+      return;
+    }
+
     // Prevent rating example cards
     if (profileId === "00000000-0000-0000-0000-000000000000" || name === "Example Card") {
       toast({ description: "Cannot rate example cards" });
