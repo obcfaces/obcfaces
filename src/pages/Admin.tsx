@@ -374,6 +374,7 @@ const Admin = () => {
   const [showDeletedApplications, setShowDeletedApplications] = useState(false);
   const [weeklyContests, setWeeklyContests] = useState<WeeklyContest[]>([]);
   const [weeklyParticipants, setWeeklyParticipants] = useState<WeeklyContestParticipant[]>([]);
+  const [partialSubmissions, setPartialSubmissions] = useState<any[]>([]);
   const [selectedContest, setSelectedContest] = useState<string | null>(null);
   const [selectedWeekOffset, setSelectedWeekOffset] = useState<string | null>('all');
   const [photoModalOpen, setPhotoModalOpen] = useState(false);
@@ -662,6 +663,7 @@ const Admin = () => {
               fetchContestApplications(),
               fetchWeeklyContests(),
               fetchWeeklyParticipants(),
+              fetchPartialSubmissions(),
               fetchDailyApplicationStats()
             ]);
             break;
@@ -2273,6 +2275,25 @@ const Admin = () => {
     }
 
     setWeeklyContests(data || []);
+  };
+
+  const fetchPartialSubmissions = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('partial_contest_submissions')
+        .select('*')
+        .eq('submitted', false)
+        .order('updated_at', { ascending: false });
+      
+      if (error) {
+        console.error('Error fetching partial submissions:', error);
+        return;
+      }
+      
+      setPartialSubmissions(data || []);
+    } catch (error) {
+      console.error('Error in fetchPartialSubmissions:', error);
+    }
   };
 
   const fetchWeeklyParticipants = async () => {
@@ -6057,6 +6078,7 @@ const Admin = () => {
                       <SelectItem value="all">All</SelectItem>
                       <SelectItem value="pending">Pending</SelectItem>
                       <SelectItem value="rejected">Rejected</SelectItem>
+                      <SelectItem value="trying">Trying</SelectItem>
                     </SelectContent>
                   </Select>
                   
@@ -6080,6 +6102,62 @@ const Admin = () => {
               </div>
 
               {(() => {
+                // Show partial submissions if "Trying" filter is selected
+                if (registrationsStatusFilter === 'trying') {
+                  const filteredPartialSubmissions = partialSubmissions.filter(ps => {
+                    if (countryFilter !== 'all') {
+                      const country = ps.form_data?.country;
+                      if (country !== countryFilter) return false;
+                    }
+                    return true;
+                  });
+
+                  if (filteredPartialSubmissions.length === 0) {
+                    return (
+                      <div className="text-center py-8 text-muted-foreground">
+                        No partial submissions found
+                      </div>
+                    );
+                  }
+
+                  return (
+                    <div className="space-y-4">
+                      {filteredPartialSubmissions.map((submission) => {
+                        const formData = submission.form_data || {};
+                        return (
+                          <Card key={submission.id}>
+                            <CardContent className="p-4">
+                              <div className="flex items-start justify-between">
+                                <div>
+                                  <p className="font-medium">
+                                    {formData.first_name} {formData.last_name}
+                                  </p>
+                                  <div className="text-sm text-muted-foreground space-y-1 mt-2">
+                                    <div>Country: {formData.country || 'N/A'}</div>
+                                    <div>City: {formData.city || 'N/A'}</div>
+                                    <div>Gender: {formData.gender || 'N/A'}</div>
+                                    <div>Age: {formData.birth_year ? new Date().getFullYear() - parseInt(formData.birth_year) : 'N/A'}</div>
+                                    <div>Height: {formData.height_cm || 'N/A'} cm</div>
+                                    <div>Weight: {formData.weight_kg || 'N/A'} kg</div>
+                                    <div>Photos uploaded: {formData.photo1_uploaded ? '✓' : '✗'} / {formData.photo2_uploaded ? '✓' : '✗'}</div>
+                                    <div>Last field: {submission.last_updated_field || 'N/A'}</div>
+                                    <div className="text-xs">
+                                      Last updated: {new Date(submission.updated_at).toLocaleString()}
+                                    </div>
+                                  </div>
+                                </div>
+                                <Badge variant="outline">
+                                  Trying
+                                </Badge>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        );
+                      })}
+                    </div>
+                  );
+                }
+
                 // Фильтруем только НЕ удалённые карточки с pending и rejected
                 const filteredByStatus = weeklyParticipants.filter(p => {
                   // Только НЕ удалённые

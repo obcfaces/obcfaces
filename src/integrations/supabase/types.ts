@@ -431,6 +431,39 @@ export type Database = {
         }
         Relationships: []
       }
+      partial_contest_submissions: {
+        Row: {
+          created_at: string
+          form_data: Json
+          id: string
+          last_updated_field: string | null
+          session_id: string | null
+          submitted: boolean
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          form_data?: Json
+          id?: string
+          last_updated_field?: string | null
+          session_id?: string | null
+          submitted?: boolean
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          form_data?: Json
+          id?: string
+          last_updated_field?: string | null
+          session_id?: string | null
+          submitted?: boolean
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       participant_data_access_log: {
         Row: {
           access_type: string
@@ -974,7 +1007,7 @@ export type Database = {
           status_history: Json | null
           submitted_at: string | null
           total_votes: number | null
-          user_id: string
+          user_id: string | null
           week_interval: string | null
         }
         Insert: {
@@ -995,7 +1028,7 @@ export type Database = {
           status_history?: Json | null
           submitted_at?: string | null
           total_votes?: number | null
-          user_id: string
+          user_id?: string | null
           week_interval?: string | null
         }
         Update: {
@@ -1016,7 +1049,7 @@ export type Database = {
           status_history?: Json | null
           submitted_at?: string | null
           total_votes?: number | null
-          user_id?: string
+          user_id?: string | null
           week_interval?: string | null
         }
         Relationships: [

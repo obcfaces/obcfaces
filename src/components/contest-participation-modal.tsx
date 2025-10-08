@@ -72,6 +72,19 @@ export const ContestParticipationModal = ({
 
   // Cache key for localStorage
   const FORM_CACHE_KEY = 'contest_form_cache';
+  
+  // Session ID for tracking anonymous users
+  const [sessionId] = useState(() => {
+    let sid = localStorage.getItem('partial_form_session_id');
+    if (!sid) {
+      sid = crypto.randomUUID();
+      localStorage.setItem('partial_form_session_id', sid);
+    }
+    return sid;
+  });
+  
+  // Partial submission tracking
+  const [partialSubmissionId, setPartialSubmissionId] = useState<string | null>(null);
 
   // Load cached form data or existing data for edit mode
   const loadCachedFormData = () => {
@@ -327,6 +340,57 @@ export const ContestParticipationModal = ({
     }
     return baseClasses;
   };
+
+  // Auto-save partial form data to database
+  const savePartialSubmission = async (fieldName?: string) => {
+    try {
+      const { data: { session: authSession } } = await supabase.auth.getSession();
+      
+      const submissionData = {
+        user_id: authSession?.user?.id || null,
+        session_id: !authSession?.user?.id ? sessionId : null,
+        form_data: {
+          ...formData,
+          photo1_uploaded: !!photo1File,
+          photo2_uploaded: !!photo2File,
+        },
+        last_updated_field: fieldName || null,
+        submitted: false
+      };
+
+      if (partialSubmissionId) {
+        // Update existing partial submission
+        await supabase
+          .from('partial_contest_submissions')
+          .update(submissionData)
+          .eq('id', partialSubmissionId);
+      } else {
+        // Create new partial submission
+        const { data, error } = await supabase
+          .from('partial_contest_submissions')
+          .insert(submissionData)
+          .select()
+          .single();
+        
+        if (data && !error) {
+          setPartialSubmissionId(data.id);
+        }
+      }
+    } catch (error) {
+      console.warn('Failed to save partial submission:', error);
+    }
+  };
+
+  // Debounced auto-save
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (isOpen && !submitted) {
+        savePartialSubmission();
+      }
+    }, 2000); // Save after 2 seconds of inactivity
+
+    return () => clearTimeout(timer);
+  }, [formData, photo1File, photo2File, isOpen]);
 
   // Photo cache handling
   const savePhotoToCache = (photoNumber: number, file: File) => {
