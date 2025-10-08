@@ -1722,7 +1722,7 @@ const Admin = () => {
         profilesData = data;
         if (error) throw error;
       } else {
-        // Normal fetch - last 1000 profiles
+        // Normal fetch - ALL profiles (no limit to ensure search works for all users)
         const { data, error } = await supabase
           .from('profiles')
           .select('*')
