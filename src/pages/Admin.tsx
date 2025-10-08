@@ -7888,32 +7888,54 @@ const Admin = () => {
                                                   </div>
                                                   
                                                   {/* Participants in this week - sorted by rating */}
-                                                  {sortedWeekRatings.map((rating: any) => (
-                                                    <div key={rating.id} className="flex items-center gap-2 text-xs p-2 bg-muted rounded">
-                                                      <div className="relative h-16 w-16 flex-shrink-0">
-                                                        <img 
-                                                          src={rating.participant?.photo_1_url || rating.participant?.avatar_url || ''} 
-                                                          alt={rating.participant?.display_name || rating.contestant_name}
-                                                          className="h-full w-full object-cover rounded"
-                                                        />
-                                                      </div>
-                                                      <div className="flex-1">
-                                                        <div className="font-medium">
-                                                          {rating.participant?.display_name || rating.contestant_name}
+                                                  {sortedWeekRatings.map((rating: any) => {
+                                                    // Debug: log photo URL
+                                                    console.log('Rating photo debug:', {
+                                                      contestant_name: rating.contestant_name,
+                                                      participant_id: rating.participant_id,
+                                                      has_participant: !!rating.participant,
+                                                      photo_1_url: rating.participant?.photo_1_url,
+                                                      avatar_url: rating.participant?.avatar_url,
+                                                      full_participant: rating.participant
+                                                    });
+                                                    
+                                                    return (
+                                                      <div key={rating.id} className="flex items-center gap-2 text-xs p-2 bg-muted rounded">
+                                                        <div className="relative h-16 w-16 flex-shrink-0 bg-muted-foreground/10 rounded overflow-hidden">
+                                                          {(rating.participant?.photo_1_url || rating.participant?.avatar_url) ? (
+                                                            <img 
+                                                              src={rating.participant.photo_1_url || rating.participant.avatar_url} 
+                                                              alt={rating.participant?.display_name || rating.contestant_name}
+                                                              className="h-full w-full object-cover"
+                                                              onError={(e) => {
+                                                                console.error('Image failed to load:', rating.participant?.photo_1_url || rating.participant?.avatar_url);
+                                                                e.currentTarget.style.display = 'none';
+                                                              }}
+                                                            />
+                                                          ) : (
+                                                            <div className="h-full w-full flex items-center justify-center text-muted-foreground text-xs">
+                                                              No photo
+                                                            </div>
+                                                          )}
                                                         </div>
-                                                        {/* Stars, rating and date in one line */}
-                                                        <div className="flex items-center gap-2 mt-1">
-                                                          <div className="flex items-center gap-1">
-                                                            <MiniStars rating={rating.rating} className="scale-125" />
-                                                            <span className="font-bold text-base">{rating.rating}</span>
+                                                        <div className="flex-1">
+                                                          <div className="font-medium">
+                                                            {rating.participant?.display_name || rating.contestant_name}
                                                           </div>
-                                                          <span className="text-muted-foreground text-xs">
-                                                            {new Date(rating.created_at).toLocaleDateString('en-GB')}
-                                                          </span>
+                                                          {/* Stars, rating and date in one line */}
+                                                          <div className="flex items-center gap-2 mt-1">
+                                                            <div className="flex items-center gap-1">
+                                                              <MiniStars rating={rating.rating} className="scale-125" />
+                                                              <span className="font-bold text-base">{rating.rating}</span>
+                                                            </div>
+                                                            <span className="text-muted-foreground text-xs">
+                                                              {new Date(rating.created_at).toLocaleDateString('en-GB')}
+                                                            </span>
+                                                          </div>
                                                         </div>
                                                       </div>
-                                                    </div>
-                                                  ))}
+                                                    );
+                                                  })}
                                                 </div>
                                                 );
                                               })}
