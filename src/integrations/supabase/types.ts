@@ -1891,6 +1891,10 @@ export type Database = {
         Args: { user_id_param: string }
         Returns: boolean
       }
+      is_email_confirmed: {
+        Args: { user_id: string }
+        Returns: boolean
+      }
       is_following: {
         Args: { target_user_id: string }
         Returns: boolean
