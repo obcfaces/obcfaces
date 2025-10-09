@@ -9001,39 +9001,180 @@ const Admin = () => {
             </TabsContent>
 
             <TabsContent value="new-next-week">
-              <div className="p-4 border-2 border-blue-200 rounded-lg bg-blue-50/50">
-                <p className="text-sm text-blue-600 mb-4">📅 Next Week Tab - Component ready for integration</p>
-              </div>
+              <AdminNextWeekTab
+                participants={nextWeekParticipants}
+                onViewPhotos={openPhotoModal}
+                onViewVoters={(participantName) => {
+                  setSelectedParticipantForNextWeekVoters(participantName);
+                  setNextWeekVotersModalOpen(true);
+                }}
+                onStatusChange={async (participant, newStatus) => {
+                  const appData = participant.application_data || {};
+                  const participantName = `${appData.first_name} ${appData.last_name}`;
+                  const result = await updateParticipantStatusWithHistory(
+                    participant.id,
+                    newStatus as ParticipantStatus,
+                    participantName
+                  );
+                  if (result.success) {
+                    toast({
+                      title: "Success",
+                      description: "Status updated successfully",
+                    });
+                    fetchNextWeekParticipants();
+                  } else {
+                    toast({
+                      title: "Error",
+                      description: "Failed to update status",
+                      variant: "destructive",
+                    });
+                  }
+                }}
+                onEdit={(participant) => {
+                  setEditingParticipantData({
+                    id: participant.id,
+                    user_id: participant.user_id,
+                    application_data: participant.application_data,
+                    status: participant.admin_status
+                  });
+                  setShowParticipationModal(true);
+                }}
+              />
             </TabsContent>
 
             <TabsContent value="new-weekly">
-              <div className="p-4 border-2 border-blue-200 rounded-lg bg-blue-50/50">
-                <p className="text-sm text-blue-600 mb-4">📊 Weekly Tab - Component ready for integration</p>
-              </div>
+              <AdminWeeklyTab
+                participants={weeklyParticipants.filter(p => adminStatusFilter === 'all' || p.admin_status === adminStatusFilter)}
+                statusFilter={adminStatusFilter}
+                countryFilter={countryFilter}
+                genderFilter={genderFilter}
+                onStatusFilterChange={setAdminStatusFilter}
+                onCountryFilterChange={setCountryFilter}
+                onGenderFilterChange={setGenderFilter}
+                onViewPhotos={openPhotoModal}
+                onEdit={(participant) => {
+                  setEditingParticipantData({
+                    id: participant.id,
+                    user_id: participant.user_id,
+                    application_data: participant.application_data,
+                    status: participant.admin_status
+                  });
+                  setShowParticipationModal(true);
+                }}
+                onStatusChange={async (participant, newStatus) => {
+                  const appData = participant.application_data || {};
+                  const participantName = `${appData.first_name} ${appData.last_name}`;
+                  const result = await updateParticipantStatusWithHistory(
+                    participant.id,
+                    newStatus as ParticipantStatus,
+                    participantName
+                  );
+                  if (result.success) {
+                    toast({
+                      title: "Success",
+                      description: "Status updated successfully",
+                    });
+                    fetchWeeklyParticipants();
+                  } else {
+                    toast({
+                      title: "Error",
+                      description: "Failed to update status",
+                      variant: "destructive",
+                    });
+                  }
+                }}
+                onViewVoters={(participant) => {
+                  setSelectedParticipantForVoters(participant);
+                  setVotersModalOpen(true);
+                }}
+              />
             </TabsContent>
 
             <TabsContent value="new-past">
-              <div className="p-4 border-2 border-blue-200 rounded-lg bg-blue-50/50">
-                <p className="text-sm text-blue-600 mb-4">🕐 Past Weeks Tab - Component ready for integration</p>
-              </div>
+              <AdminPastWeekTab
+                participants={weeklyParticipants.filter(p => pastStatusFilter === 'all' || p.admin_status === pastStatusFilter)}
+                weekFilters={getDynamicPastWeekFilters}
+                selectedWeekFilter={pastWeekFilter}
+                onWeekFilterChange={setPastWeekFilter}
+                onViewPhotos={openPhotoModal}
+                onEdit={(participant) => {
+                  setEditingParticipantData({
+                    id: participant.id,
+                    user_id: participant.user_id,
+                    application_data: participant.application_data,
+                    status: participant.admin_status
+                  });
+                  setShowParticipationModal(true);
+                }}
+                onStatusChange={async (participant, newStatus) => {
+                  const appData = participant.application_data || {};
+                  const participantName = `${appData.first_name} ${appData.last_name}`;
+                  const result = await updateParticipantStatusWithHistory(
+                    participant.id,
+                    newStatus as ParticipantStatus,
+                    participantName
+                  );
+                  if (result.success) {
+                    toast({
+                      title: "Success",
+                      description: "Status updated successfully",
+                    });
+                    fetchWeeklyParticipants();
+                  } else {
+                    toast({
+                      title: "Error",
+                      description: "Failed to update status",
+                      variant: "destructive",
+                    });
+                  }
+                }}
+                onViewVoters={(participant) => {
+                  setSelectedParticipantForVoters(participant);
+                  setVotersModalOpen(true);
+                }}
+              />
             </TabsContent>
 
             <TabsContent value="new-all">
-              <div className="p-4 border-2 border-blue-200 rounded-lg bg-blue-50/50">
-                <p className="text-sm text-blue-600 mb-4">👥 All Participants Tab - Component ready for integration</p>
-              </div>
+              <AdminAllParticipantsTab />
             </TabsContent>
 
             <TabsContent value="new-registrations">
-              <div className="p-4 border-2 border-blue-200 rounded-lg bg-blue-50/50">
-                <p className="text-sm text-blue-600 mb-4">📋 Registrations Tab - Component ready for integration</p>
-              </div>
+              <AdminRegistrationsTab
+                profiles={profiles}
+                statusFilter={registrationsStatusFilter}
+                onStatusFilterChange={setRegistrationsStatusFilter}
+                onApprove={async (profile) => {
+                  const { error } = await supabase
+                    .from('profiles')
+                    .update({ is_approved: true, moderated_at: new Date().toISOString(), moderated_by: user.id })
+                    .eq('id', profile.id);
+                  if (!error) {
+                    toast({
+                      title: "Success",
+                      description: "Profile approved",
+                    });
+                    fetchProfiles();
+                  }
+                }}
+                onReject={async (profile) => {
+                  const { error } = await supabase
+                    .from('profiles')
+                    .update({ is_approved: false, moderated_at: new Date().toISOString(), moderated_by: user.id })
+                    .eq('id', profile.id);
+                  if (!error) {
+                    toast({
+                      title: "Success",
+                      description: "Profile rejected",
+                    });
+                    fetchProfiles();
+                  }
+                }}
+              />
             </TabsContent>
 
             <TabsContent value="new-statistics">
-              <div className="p-4 border-2 border-blue-200 rounded-lg bg-blue-50/50">
-                <p className="text-sm text-blue-600 mb-4">📈 Statistics Tab - Component ready for integration</p>
-              </div>
+              <AdminStatisticsTab />
             </TabsContent>
 
             </Tabs>
