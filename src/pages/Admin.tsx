@@ -6776,13 +6776,90 @@ const Admin = () => {
                             <thead>
                               <tr className="border-b border-border">
                                 <th className="text-left p-2 font-medium">Тип</th>
-                                <th className="text-center p-2 font-medium">Mon</th>
-                                <th className="text-center p-2 font-medium">Tue</th>
-                                <th className="text-center p-2 font-medium">Wed</th>
-                                <th className="text-center p-2 font-medium">Thu</th>
-                                <th className="text-center p-2 font-medium">Fri</th>
-                                <th className="text-center p-2 font-medium">Sat</th>
-                                <th className="text-center p-2 font-medium">Sun</th>
+                                <th className="text-center p-2 font-medium">
+                                  Mon
+                                  <div className="text-[10px] text-muted-foreground font-normal">
+                                    {(() => {
+                                      const monday = new Date();
+                                      const day = monday.getDay();
+                                      const diff = monday.getDate() - day + (day === 0 ? -6 : 1);
+                                      monday.setDate(diff);
+                                      return `${String(monday.getDate()).padStart(2, '0')}/${String(monday.getMonth() + 1).padStart(2, '0')}`;
+                                    })()}
+                                  </div>
+                                </th>
+                                <th className="text-center p-2 font-medium">
+                                  Tue
+                                  <div className="text-[10px] text-muted-foreground font-normal">
+                                    {(() => {
+                                      const tuesday = new Date();
+                                      const day = tuesday.getDay();
+                                      const diff = tuesday.getDate() - day + (day === 0 ? -5 : 2);
+                                      tuesday.setDate(diff);
+                                      return `${String(tuesday.getDate()).padStart(2, '0')}/${String(tuesday.getMonth() + 1).padStart(2, '0')}`;
+                                    })()}
+                                  </div>
+                                </th>
+                                <th className="text-center p-2 font-medium">
+                                  Wed
+                                  <div className="text-[10px] text-muted-foreground font-normal">
+                                    {(() => {
+                                      const wednesday = new Date();
+                                      const day = wednesday.getDay();
+                                      const diff = wednesday.getDate() - day + (day === 0 ? -4 : 3);
+                                      wednesday.setDate(diff);
+                                      return `${String(wednesday.getDate()).padStart(2, '0')}/${String(wednesday.getMonth() + 1).padStart(2, '0')}`;
+                                    })()}
+                                  </div>
+                                </th>
+                                <th className="text-center p-2 font-medium">
+                                  Thu
+                                  <div className="text-[10px] text-muted-foreground font-normal">
+                                    {(() => {
+                                      const thursday = new Date();
+                                      const day = thursday.getDay();
+                                      const diff = thursday.getDate() - day + (day === 0 ? -3 : 4);
+                                      thursday.setDate(diff);
+                                      return `${String(thursday.getDate()).padStart(2, '0')}/${String(thursday.getMonth() + 1).padStart(2, '0')}`;
+                                    })()}
+                                  </div>
+                                </th>
+                                <th className="text-center p-2 font-medium">
+                                  Fri
+                                  <div className="text-[10px] text-muted-foreground font-normal">
+                                    {(() => {
+                                      const friday = new Date();
+                                      const day = friday.getDay();
+                                      const diff = friday.getDate() - day + (day === 0 ? -2 : 5);
+                                      friday.setDate(diff);
+                                      return `${String(friday.getDate()).padStart(2, '0')}/${String(friday.getMonth() + 1).padStart(2, '0')}`;
+                                    })()}
+                                  </div>
+                                </th>
+                                <th className="text-center p-2 font-medium">
+                                  Sat
+                                  <div className="text-[10px] text-muted-foreground font-normal">
+                                    {(() => {
+                                      const saturday = new Date();
+                                      const day = saturday.getDay();
+                                      const diff = saturday.getDate() - day + (day === 0 ? -1 : 6);
+                                      saturday.setDate(diff);
+                                      return `${String(saturday.getDate()).padStart(2, '0')}/${String(saturday.getMonth() + 1).padStart(2, '0')}`;
+                                    })()}
+                                  </div>
+                                </th>
+                                <th className="text-center p-2 font-medium">
+                                  Sun
+                                  <div className="text-[10px] text-muted-foreground font-normal">
+                                    {(() => {
+                                      const sunday = new Date();
+                                      const day = sunday.getDay();
+                                      const diff = sunday.getDate() - day + (day === 0 ? 0 : 7);
+                                      sunday.setDate(diff);
+                                      return `${String(sunday.getDate()).padStart(2, '0')}/${String(sunday.getMonth() + 1).padStart(2, '0')}`;
+                                    })()}
+                                  </div>
+                                </th>
                               </tr>
                             </thead>
                             <tbody>
@@ -7147,11 +7224,24 @@ const Admin = () => {
                             const fastFormFill = formFillTime !== undefined && formFillTime !== null && formFillTime < 5;
                             
                             let hasDuplicateFingerprint = false;
-                            if (profile.fingerprint_id) {
-                              const sameFingerprint = profiles.filter(p => 
-                                p.fingerprint_id === profile.fingerprint_id && p.id !== profile.id
-                              );
+                            // Check both profile.fingerprint_id and raw_user_meta_data.fingerprint_id
+                            const fpId = profile.fingerprint_id || (profile.raw_user_meta_data as any)?.fingerprint_id;
+                            if (fpId) {
+                              const sameFingerprint = profiles.filter(p => {
+                                const pFpId = p.fingerprint_id || (p.raw_user_meta_data as any)?.fingerprint_id;
+                                return pFpId === fpId && p.id !== profile.id;
+                              });
                               hasDuplicateFingerprint = sameFingerprint.length >= 4; // 5+ users total with same FP
+                              
+                              // Debug log for Maybe Suspicious criteria
+                              if (hasDuplicateFingerprint) {
+                                console.log('🔍 Maybe Suspicious - Duplicate fingerprint found:', {
+                                  userId: profile.id,
+                                  email: profile.email,
+                                  fpId: fpId,
+                                  duplicateCount: sameFingerprint.length + 1
+                                });
+                              }
                             }
                             
                             return wasAutoConfirmed || fastFormFill || hasDuplicateFingerprint;
