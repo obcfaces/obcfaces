@@ -8955,6 +8955,23 @@ const Admin = () => {
                     });
                   }
                 }}
+                onEdit={(participant) => {
+                  setEditingParticipantData({
+                    id: participant.id,
+                    user_id: participant.user_id,
+                    application_data: participant.application_data,
+                    status: participant.admin_status
+                  });
+                  setShowParticipationModal(true);
+                }}
+                onStatusHistory={(participantId, participantName, statusHistory) => {
+                  setSelectedStatusHistory({
+                    participantId,
+                    participantName,
+                    statusHistory
+                  });
+                  setStatusHistoryModalOpen(true);
+                }}
               />
             </TabsContent>
 
