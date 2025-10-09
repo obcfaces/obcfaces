@@ -6,6 +6,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Country, State } from 'country-state-city';
 
 import { Input } from "@/components/ui/input";
+import { EmailInputWithSuggestions } from "@/components/ui/email-input-with-suggestions";
 import { Button } from "@/components/ui/button";
 import SearchableSelect from "@/components/ui/searchable-select";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -429,7 +430,7 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
               </button>
             </div>
           )}
-          <Input id="auth-email" type="email" placeholder="Email" className="placeholder:italic placeholder:text-muted-foreground" value={email} onChange={(e) => setEmail(e.target.value)} required />
+          <EmailInputWithSuggestions id="auth-email" placeholder="Email" className="placeholder:italic placeholder:text-muted-foreground" value={email} onChange={(e) => setEmail(e.target.value)} required />
         </div>
         {mode !== "forgot" && (
           <div className="space-y-2">
