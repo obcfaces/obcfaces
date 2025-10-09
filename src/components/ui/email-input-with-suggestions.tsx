@@ -84,8 +84,8 @@ export const EmailInputWithSuggestions = React.forwardRef<HTMLInputElement, Emai
         />
         {showSuggestions && suggestions.length > 0 && (
           <div
-            className="absolute left-0 right-0 mt-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md shadow-xl max-h-60 overflow-auto"
-            style={{ zIndex: 99999, top: '100%' }}
+            className="absolute left-0 right-0 mt-1 bg-background border border-border rounded-md shadow-xl max-h-60 overflow-auto"
+            style={{ zIndex: 999999, top: '100%' }}
           >
             <ul className="py-1">
               {suggestions.map((suggestion, index) => {
@@ -98,10 +98,10 @@ export const EmailInputWithSuggestions = React.forwardRef<HTMLInputElement, Emai
                     <button
                       type="button"
                       onClick={() => handleSuggestionClick(suggestion)}
-                      className="w-full text-left px-4 py-2.5 hover:bg-blue-50 dark:hover:bg-gray-700 transition-colors cursor-pointer text-sm"
+                      className="w-full text-left px-4 py-2.5 hover:bg-accent transition-colors cursor-pointer text-sm"
                     >
-                      <span className="text-gray-900 dark:text-gray-100">{localPart}</span>
-                      <span className="text-blue-600 dark:text-blue-400 font-medium">{domain}</span>
+                      <span className="text-foreground">{localPart}</span>
+                      <span className="text-primary font-medium">{domain}</span>
                     </button>
                   </li>
                 )
