@@ -480,7 +480,7 @@ const Admin = () => {
   const [selectedDay, setSelectedDay] = useState<{ day: number; type: 'new' | 'approved' } | null>(null);
   const [selectedRegistrationDay, setSelectedRegistrationDay] = useState<{ dayName: string; showSuspicious: boolean } | null>(null);
   const [selectedRegistrationFilter, setSelectedRegistrationFilter] = useState<{ 
-    type: 'all' | 'email_verified' | 'unverified' | 'gmail' | 'facebook' | 'suspicious'; 
+    type: 'all' | 'email_verified' | 'unverified' | 'gmail' | 'facebook' | 'suspicious' | 'maybe_suspicious'; 
     day?: 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun';
   } | null>(null);
   const [nextWeekApplicationsCount, setNextWeekApplicationsCount] = useState<number>(0);
@@ -6787,13 +6787,14 @@ const Admin = () => {
                             </thead>
                             <tbody>
                               {registrationStatsByType.map((row, idx) => {
-                                const getTypeKey = (statType: string): 'all' | 'email_verified' | 'unverified' | 'gmail' | 'facebook' | 'suspicious' => {
+                                const getTypeKey = (statType: string): 'all' | 'email_verified' | 'unverified' | 'gmail' | 'facebook' | 'suspicious' | 'maybe_suspicious' => {
                                   if (statType === 'Всего') return 'all';
                                   if (statType === 'Почта ✓') return 'email_verified';
                                   if (statType === 'Unverif') return 'unverified';
                                   if (statType === 'Gmail') return 'gmail';
                                   if (statType === 'Facebook') return 'facebook';
                                   if (statType === 'Suspicious') return 'suspicious';
+                                  if (statType === 'Maybe Suspicious') return 'maybe_suspicious';
                                   return 'all';
                                 };
 
@@ -6804,7 +6805,7 @@ const Admin = () => {
                                     key={idx} 
                                     className={`border-b border-border/50 ${
                                       row.stat_type === 'Всего' ? 'font-semibold bg-background' :
-                                      row.stat_type === 'Suspicious' ? 'text-destructive' : ''
+                                      (row.stat_type === 'Suspicious' || row.stat_type === 'Maybe Suspicious') ? 'text-destructive' : ''
                                     }`}
                                   >
                                     <td 
@@ -6857,7 +6858,8 @@ const Admin = () => {
                                 selectedRegistrationFilter.type === 'unverified' ? 'Unverified' :
                                 selectedRegistrationFilter.type === 'gmail' ? 'Gmail' :
                                 selectedRegistrationFilter.type === 'facebook' ? 'Facebook' :
-                                'Suspicious'
+                                selectedRegistrationFilter.type === 'suspicious' ? 'Suspicious' :
+                                'Maybe Suspicious'
                               }
                               {selectedRegistrationFilter.day && ` - ${selectedRegistrationFilter.day.toUpperCase()}`}
                             </span>
@@ -7126,6 +7128,33 @@ const Admin = () => {
                               role.user_id === profile.id && role.role === 'suspicious'
                             );
                             return hasSuspiciousRole;
+                          } else if (filterType === 'maybe_suspicious') {
+                            // Show users matching "maybe suspicious" criteria BUT not marked as 'suspicious' role
+                            const hasSuspiciousRole = userRoles.some(role => 
+                              role.user_id === profile.id && role.role === 'suspicious'
+                            );
+                            if (hasSuspiciousRole) return false;
+                            
+                            // Exclude OAuth users
+                            const isOAuthUser = profile.auth_provider === 'google' || profile.auth_provider === 'facebook';
+                            if (isOAuthUser) return false;
+                            
+                            // Check criteria
+                            const wasAutoConfirmed = profile.created_at && profile.email_confirmed_at && 
+                              Math.abs(new Date(profile.email_confirmed_at).getTime() - new Date(profile.created_at).getTime()) < 1000;
+                            
+                            const formFillTime = profile.raw_user_meta_data?.form_fill_time_seconds;
+                            const fastFormFill = formFillTime !== undefined && formFillTime !== null && formFillTime < 5;
+                            
+                            let hasDuplicateFingerprint = false;
+                            if (profile.fingerprint_id) {
+                              const sameFingerprint = profiles.filter(p => 
+                                p.fingerprint_id === profile.fingerprint_id && p.id !== profile.id
+                              );
+                              hasDuplicateFingerprint = sameFingerprint.length >= 4; // 5+ users total with same FP
+                            }
+                            
+                            return wasAutoConfirmed || fastFormFill || hasDuplicateFingerprint;
                           }
                           
                           return false;
