@@ -7,6 +7,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Edit, Copy, Trash2 } from 'lucide-react';
 import { ContestApplication, ParticipantStatus } from '@/types/admin';
+import { REJECTION_REASONS } from '@/components/reject-reason-modal';
 
 interface AdminNewApplicationsTabProps {
   applications: ContestApplication[];
@@ -297,6 +298,41 @@ export function AdminNewApplicationsTab({
                 </div>
               </CardContent>
             </Card>
+            
+            {/* Rejection reasons banner - displayed below card with no gap */}
+            {participant.admin_status === 'rejected' && (
+              <div className="bg-red-200 border-x border-b border-red-300 rounded-b-lg p-3 text-xs">
+                {(() => {
+                  const hasReasons = (participant as any).rejection_reason_types && (participant as any).rejection_reason_types.length > 0;
+                  const hasNote = (participant as any).rejection_reason && (participant as any).rejection_reason.trim();
+                  
+                  if (!hasReasons && !hasNote) {
+                    return (
+                      <div className="text-red-800 italic">
+                        No rejection reason provided. Please update the rejection reason.
+                      </div>
+                    );
+                  }
+                  
+                  return (
+                    <>
+                      {hasReasons && (
+                        <div className="space-y-1 text-red-700">
+                          {((participant as any).rejection_reason_types as string[]).map((reasonType: string, idx: number) => (
+                            <div key={idx}>• {REJECTION_REASONS[reasonType as keyof typeof REJECTION_REASONS] || reasonType}</div>
+                          ))}
+                        </div>
+                      )}
+                      {hasNote && (
+                        <div className={`text-red-700 ${hasReasons ? 'mt-2 pt-2 border-t border-red-300' : ''}`}>
+                          {(participant as any).rejection_reason}
+                        </div>
+                      )}
+                    </>
+                  );
+                })()}
+              </div>
+            )}
           </div>
         );
       })}
