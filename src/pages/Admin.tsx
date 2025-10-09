@@ -7121,36 +7121,11 @@ const Admin = () => {
                             // Facebook OAuth
                             return profile.auth_provider === 'facebook';
                           } else if (filterType === 'suspicious') {
-                            // Suspicious users (excluding those with suspicious role, only non-OAuth)
+                            // Only show users explicitly marked with 'suspicious' role
                             const hasSuspiciousRole = userRoles.some(role => 
                               role.user_id === profile.id && role.role === 'suspicious'
                             );
-                            if (hasSuspiciousRole) return false;
-                            
-                            const isOAuthUser = profile.auth_provider === 'google' || profile.auth_provider === 'facebook';
-                            if (isOAuthUser) return false;
-                            
-                            // Check suspicious criteria
-                            const whitelistedDomains = ['gmail.com', 'yahoo.com', 'outlook.com', 'hotmail.com', 'icloud.com', 'protonmail.com', 'aol.com', 'mail.com', 'zoho.com', 'yandex.ru', 'yandex.com'];
-                            const email = (profile as any).email;
-                            const domain = email ? email.split('@')[1]?.toLowerCase() : null;
-                            const emailNotWhitelisted = domain && !whitelistedDomains.includes(domain);
-                            
-                            const wasAutoConfirmed = profile.created_at && profile.email_confirmed_at && 
-                              Math.abs(new Date(profile.email_confirmed_at).getTime() - new Date(profile.created_at).getTime()) < 1000;
-                            
-                            const formFillTime = profile.raw_user_meta_data?.form_fill_time_seconds;
-                            const fastFormFill = formFillTime !== undefined && formFillTime !== null && formFillTime < 5;
-                            
-                            let hasDuplicateFingerprint = false;
-                            if (profile.fingerprint_id) {
-                              const sameFingerprint = profiles.filter(p => 
-                                p.fingerprint_id === profile.fingerprint_id && p.id !== profile.id
-                              );
-                              hasDuplicateFingerprint = sameFingerprint.length >= 4; // Changed from > 0 to >= 4 (5 total users with same FP)
-                            }
-                            
-                            return emailNotWhitelisted || wasAutoConfirmed || fastFormFill || hasDuplicateFingerprint;
+                            return hasSuspiciousRole;
                           }
                           
                           return false;
