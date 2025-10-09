@@ -668,6 +668,8 @@ const Admin = () => {
         switch (activeTab) {
           case 'applications':
           case 'new':
+          case 'new1':
+          case 'new-applications':
             await Promise.allSettled([
               fetchContestApplications(),
               fetchWeeklyContests(),
@@ -700,6 +702,7 @@ const Admin = () => {
             break;
 
           case 'weekly':
+          case 'new-weekly':
             await Promise.allSettled([
               fetchWeeklyParticipants(),
               fetchCardSectionStats(),
@@ -710,6 +713,7 @@ const Admin = () => {
             break;
 
           case 'nextweek':
+          case 'new-next-week':
             await Promise.allSettled([
               fetchNextWeekParticipants(),
               fetchNextWeekDailyStats(),
@@ -718,11 +722,32 @@ const Admin = () => {
             break;
 
           case 'prenextweek':
+          case 'new-pre-next':
             await fetchPreNextWeekParticipants();
             break;
 
           case 'pastweek':
           case 'past':
+          case 'new-past':
+            await fetchWeeklyParticipants();
+            break;
+
+          case 'all':
+          case 'new-all':
+            await fetchWeeklyParticipants();
+            break;
+
+          case 'new-registrations':
+            await Promise.allSettled([
+              fetchProfiles(),
+              fetchUserRoles(),
+              fetchUsersWhoVoted(),
+              fetchDailyRegistrationStats(),
+              fetchUserVotingStats()
+            ]);
+            break;
+
+          case 'winnercontent':
             await fetchWeeklyParticipants();
             break;
 
