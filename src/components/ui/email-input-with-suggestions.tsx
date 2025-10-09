@@ -40,8 +40,12 @@ export const EmailInputWithSuggestions = React.forwardRef<HTMLInputElement, Emai
           ? EMAIL_DOMAINS.filter(domain => domain.startsWith(domainPart))
           : EMAIL_DOMAINS
 
-        setSuggestions(filteredDomains.map(domain => `${localPart}@${domain}`))
-        setShowDropdown(filteredDomains.length > 0)
+        const newSuggestions = filteredDomains.map(domain => `${localPart}@${domain}`)
+        setSuggestions(newSuggestions)
+        
+        // Скрыть dropdown если выбран полный email
+        const isFullEmailSelected = newSuggestions.some(s => s === emailValue)
+        setShowDropdown(newSuggestions.length > 0 && !isFullEmailSelected)
       } else {
         setSuggestions([])
         setShowDropdown(false)
@@ -99,10 +103,10 @@ export const EmailInputWithSuggestions = React.forwardRef<HTMLInputElement, Emai
                 <div
                   key={index}
                   onClick={() => handleSuggestionClick(suggestion)}
-                  className="px-4 py-3 hover:bg-gray-100 cursor-pointer text-base leading-relaxed"
+                  className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm"
                 >
                   <span className="text-gray-900">{localPart}</span>
-                  <span className="text-primary font-medium">{domain}</span>
+                  <span className="text-primary">{domain}</span>
                 </div>
               )
             })}
