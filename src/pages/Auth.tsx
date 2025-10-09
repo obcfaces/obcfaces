@@ -67,33 +67,6 @@ const Auth = () => {
           return;
         }
         
-        // Save device fingerprint and log login for OAuth users
-        if (event === 'SIGNED_IN' && session.user.app_metadata?.provider) {
-          try {
-            const { getDeviceFingerprint, saveDeviceFingerprint } = await import('@/utils/fingerprint');
-            const fullFingerprintData = await getDeviceFingerprint();
-            const fingerprintId = await saveDeviceFingerprint(session.user.id);
-            
-            const ipResponse = await fetch('https://api.ipify.org?format=json');
-            const ipData = await ipResponse.json();
-            
-            const provider = session.user.app_metadata?.provider || 'oauth';
-            
-            await supabase.functions.invoke('auth-login-tracker', {
-              body: {
-                userId: session.user.id,
-                loginMethod: provider,
-                ipAddress: ipData.ip,
-                userAgent: navigator.userAgent,
-                fingerprintId: fingerprintId,
-                fingerprintData: fullFingerprintData
-              }
-            });
-          } catch (fpError) {
-            console.error('Error saving fingerprint for OAuth user:', fpError);
-          }
-        }
-        
         // Check if there's a saved redirect path (for admin users)
         const redirectPath = sessionStorage.getItem('redirectPath');
         if (redirectPath) {
