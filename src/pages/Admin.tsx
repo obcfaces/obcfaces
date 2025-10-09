@@ -9144,6 +9144,18 @@ const Admin = () => {
                 profiles={profiles}
                 statusFilter={registrationsStatusFilter}
                 onStatusFilterChange={setRegistrationsStatusFilter}
+                userRoleMap={userRoleMap}
+                userRoles={userRoles}
+                userVotingStats={userVotingStats}
+                expandedMaybeFingerprints={expandedMaybeFingerprints}
+                setExpandedMaybeFingerprints={setExpandedMaybeFingerprints}
+                verifyingUsers={verifyingUsers}
+                handleEmailVerification={handleEmailVerification}
+                handleRoleChange={handleRoleChange}
+                expandedUserActivity={expandedUserActivity}
+                setExpandedUserActivity={setExpandedUserActivity}
+                userActivityData={userActivityData}
+                isEmailDomainWhitelisted={isEmailDomainWhitelisted}
                 onApprove={async (profile) => {
                   const { error } = await supabase
                     .from('profiles')
