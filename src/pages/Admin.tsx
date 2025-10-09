@@ -7058,8 +7058,12 @@ const Admin = () => {
                         
                         // ==================== НОВЫЙ ФИЛЬТР ПО ТАБЛИЦЕ РЕГИСТРАЦИЙ ====================
                         if (selectedRegistrationFilter) {
-                          const profileCreatedAt = new Date(profile.created_at);
-                          const dayOfWeek = profileCreatedAt.getDay(); // 0 = Sunday, 1 = Monday, ...
+                          // IMPORTANT: Use Manila timezone to match the stats table calculation
+                          const manilaTimeStr = new Date(profile.created_at).toLocaleString('en-US', { 
+                            timeZone: 'Asia/Manila' 
+                          });
+                          const profileCreatedAtManila = new Date(manilaTimeStr);
+                          const dayOfWeek = profileCreatedAtManila.getDay(); // 0 = Sunday, 1 = Monday, ...
                           
                           // Map day of week to our day keys
                           const dayMap: { [key: number]: 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun' } = {
