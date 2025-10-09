@@ -40,6 +40,14 @@ import { WinnerContentManager } from '@/components/admin/WinnerContentManager';
 import { ParticipantStatusHistory } from '@/components/admin/ParticipantStatusHistory';
 import { ParticipantStatusHistoryModal } from '@/components/admin/ParticipantStatusHistoryModal';
 import { isEmailDomainWhitelisted } from '@/utils/email-whitelist';
+import { AdminNewApplicationsTab } from '@/components/admin/tabs/AdminNewApplicationsTab';
+import { AdminPreNextWeekTab } from '@/components/admin/tabs/AdminPreNextWeekTab';
+import { AdminNextWeekTab } from '@/components/admin/tabs/AdminNextWeekTab';
+import { AdminWeeklyTab } from '@/components/admin/tabs/AdminWeeklyTab';
+import { AdminPastWeekTab } from '@/components/admin/tabs/AdminPastWeekTab';
+import { AdminAllParticipantsTab } from '@/components/admin/tabs/AdminAllParticipantsTab';
+import { AdminRegistrationsTab } from '@/components/admin/tabs/AdminRegistrationsTab';
+import { AdminStatisticsTab } from '@/components/admin/tabs/AdminStatisticsTab';
 
 // Unified status type for participants - only real statuses from DB
 type ParticipantStatus = 'pending' | 'rejected' | 'pre next week' | 'this week' | 'next week' | 'next week on site' | 'past';
@@ -8847,15 +8855,126 @@ const Admin = () => {
 
             {/* New Refactored Tab Contents */}
             <TabsContent value="new-applications">
-              <div className="p-4 border-2 border-blue-200 rounded-lg bg-blue-50/50">
-                <p className="text-sm text-blue-600 mb-4">📝 New Applications Tab - Component ready for integration</p>
-              </div>
+              <AdminNewApplicationsTab
+                applications={contestApplications}
+                deletedApplications={deletedApplications}
+                showDeleted={showDeletedApplications}
+                profiles={profiles}
+                statusFilter={registrationsStatusFilter}
+                countryFilter={countryFilter}
+                onShowDeletedChange={setShowDeletedApplications}
+                onStatusFilterChange={setRegistrationsStatusFilter}
+                onCountryFilterChange={setCountryFilter}
+                onViewPhotos={openPhotoModal}
+                onEdit={(participant) => {
+                  setEditingParticipantData({
+                    ...participant,
+                    application_data: participant.application_data,
+                  });
+                  setShowParticipationModal(true);
+                }}
+                onApprove={async (participant) => {
+                  const appData = participant.application_data || {};
+                  const participantName = `${appData.first_name} ${appData.last_name}`;
+                  const result = await updateParticipantStatusWithHistory(
+                    participant.id,
+                    'pre next week',
+                    participantName
+                  );
+                  if (result.success) {
+                    toast({
+                      title: "Success",
+                      description: "Application approved and moved to Pre Next Week",
+                    });
+                    fetchContestApplications();
+                  }
+                }}
+                onReject={(participant) => {
+                  const appData = participant.application_data || {};
+                  setApplicationToReject({
+                    id: participant.id,
+                    name: `${appData.first_name} ${appData.last_name}`
+                  });
+                  setRejectModalOpen(true);
+                }}
+                onDelete={async (participantId, name) => {
+                  const { error } = await supabase
+                    .from('weekly_contest_participants')
+                    .update({ deleted_at: new Date().toISOString() })
+                    .eq('id', participantId);
+                  if (!error) {
+                    toast({
+                      title: "Deleted",
+                      description: `${name} has been deleted`
+                    });
+                    fetchContestApplications();
+                    const deleted = await fetchDeletedApplications();
+                    setDeletedApplications(deleted);
+                  }
+                }}
+                onRestore={async (participantId, name) => {
+                  const { error } = await supabase
+                    .from('weekly_contest_participants')
+                    .update({ deleted_at: null })
+                    .eq('id', participantId);
+                  if (!error) {
+                    toast({
+                      title: "Restored",
+                      description: `${name} has been restored`
+                    });
+                    fetchContestApplications();
+                    const deleted = await fetchDeletedApplications();
+                    setDeletedApplications(deleted);
+                  }
+                }}
+                expandedMobileItems={expandedMobileItems}
+                onToggleMobileExpand={(id) => {
+                  const newExpanded = new Set(expandedMobileItems);
+                  if (expandedMobileItems.has(id)) {
+                    newExpanded.delete(id);
+                  } else {
+                    newExpanded.add(id);
+                  }
+                  setExpandedMobileItems(newExpanded);
+                }}
+              />
             </TabsContent>
 
             <TabsContent value="new-pre-next">
-              <div className="p-4 border-2 border-blue-200 rounded-lg bg-blue-50/50">
-                <p className="text-sm text-blue-600 mb-4">⏳ Pre Next Week Tab - Component ready for integration</p>
-              </div>
+              <AdminPreNextWeekTab
+                participants={preNextWeekParticipants}
+                profiles={profiles}
+                onViewPhotos={openPhotoModal}
+                onStatusChange={async (participant, newStatus) => {
+                  const appData = participant.application_data || {};
+                  const participantName = `${appData.first_name} ${appData.last_name}`;
+                  const result = await updateParticipantStatusWithHistory(
+                    participant.id,
+                    newStatus as ParticipantStatus,
+                    participantName
+                  );
+                  if (result.success) {
+                    toast({
+                      title: "Success",
+                      description: "Status updated successfully",
+                    });
+                    fetchPreNextWeekParticipants();
+                  } else {
+                    toast({
+                      title: "Error",
+                      description: "Failed to update status",
+                      variant: "destructive",
+                    });
+                  }
+                }}
+                onEdit={(participant) => {
+                  setEditingParticipantData({
+                    ...participant,
+                    application_data: participant.application_data,
+                  });
+                  setShowParticipationModal(true);
+                }}
+              />
             </TabsContent>
 
             <TabsContent value="new-next-week">
