@@ -3103,6 +3103,7 @@ const Admin = () => {
             console.log('📑 Tab changed to:', tab);
             setActiveTab(tab);
           }} className="space-y-6">
+            {/* First Row: Current Tabs */}
             {/* Mobile layout: Single row with all tabs */}
             <div className="md:hidden">
               <TabsList className="grid grid-cols-8 w-full">
@@ -3166,6 +3167,70 @@ const Admin = () => {
                 Win
               </TabsTrigger>
             </TabsList>
+
+            {/* Second Row: New Refactored Tabs */}
+            <div className="border-t pt-4 mt-4">
+              <div className="mb-3 text-sm font-semibold text-muted-foreground">
+                🔧 New Structure (Testing)
+              </div>
+              {/* Mobile layout for new tabs */}
+              <div className="md:hidden">
+                <TabsList className="grid grid-cols-8 w-full">
+                  <TabsTrigger value="new-applications" className="text-xs bg-blue-100">
+                    New
+                  </TabsTrigger>
+                  <TabsTrigger value="new-pre-next" className="text-xs bg-blue-100">
+                    Pre
+                  </TabsTrigger>
+                  <TabsTrigger value="new-next-week" className="text-xs bg-blue-100">
+                    Next
+                  </TabsTrigger>
+                  <TabsTrigger value="new-weekly" className="text-xs bg-blue-100">
+                    This
+                  </TabsTrigger>
+                  <TabsTrigger value="new-past" className="text-xs bg-blue-100">
+                    Past
+                  </TabsTrigger>
+                  <TabsTrigger value="new-all" className="text-xs bg-blue-100">
+                    All
+                  </TabsTrigger>
+                  <TabsTrigger value="new-registrations" className="text-xs bg-blue-100">
+                    Reg
+                  </TabsTrigger>
+                  <TabsTrigger value="new-statistics" className="text-xs bg-blue-100">
+                    Stat
+                  </TabsTrigger>
+                </TabsList>
+              </div>
+              
+              {/* Desktop layout for new tabs */}
+              <TabsList className="hidden md:flex bg-blue-50">
+                <TabsTrigger value="new-applications" className="bg-blue-100">
+                  New Applications
+                </TabsTrigger>
+                <TabsTrigger value="new-pre-next" className="bg-blue-100">
+                  Pre Next Week
+                </TabsTrigger>
+                <TabsTrigger value="new-next-week" className="bg-blue-100">
+                  Next Week
+                </TabsTrigger>
+                <TabsTrigger value="new-weekly" className="bg-blue-100">
+                  Weekly
+                </TabsTrigger>
+                <TabsTrigger value="new-past" className="bg-blue-100">
+                  Past Weeks
+                </TabsTrigger>
+                <TabsTrigger value="new-all" className="bg-blue-100">
+                  All Participants
+                </TabsTrigger>
+                <TabsTrigger value="new-registrations" className="bg-blue-100">
+                  Registrations
+                </TabsTrigger>
+                <TabsTrigger value="new-statistics" className="bg-blue-100">
+                  Statistics
+                </TabsTrigger>
+              </TabsList>
+            </div>
 
             <TabsContent value="weekly" className="space-y-4">
               <div className="mb-6">
@@ -8779,6 +8844,55 @@ const Admin = () => {
                   )}
                 </div>
               </TabsContent>
+
+            {/* New Refactored Tab Contents */}
+            <TabsContent value="new-applications">
+              <div className="p-4 border-2 border-blue-200 rounded-lg bg-blue-50/50">
+                <p className="text-sm text-blue-600 mb-4">📝 New Applications Tab - Component ready for integration</p>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="new-pre-next">
+              <div className="p-4 border-2 border-blue-200 rounded-lg bg-blue-50/50">
+                <p className="text-sm text-blue-600 mb-4">⏳ Pre Next Week Tab - Component ready for integration</p>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="new-next-week">
+              <div className="p-4 border-2 border-blue-200 rounded-lg bg-blue-50/50">
+                <p className="text-sm text-blue-600 mb-4">📅 Next Week Tab - Component ready for integration</p>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="new-weekly">
+              <div className="p-4 border-2 border-blue-200 rounded-lg bg-blue-50/50">
+                <p className="text-sm text-blue-600 mb-4">📊 Weekly Tab - Component ready for integration</p>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="new-past">
+              <div className="p-4 border-2 border-blue-200 rounded-lg bg-blue-50/50">
+                <p className="text-sm text-blue-600 mb-4">🕐 Past Weeks Tab - Component ready for integration</p>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="new-all">
+              <div className="p-4 border-2 border-blue-200 rounded-lg bg-blue-50/50">
+                <p className="text-sm text-blue-600 mb-4">👥 All Participants Tab - Component ready for integration</p>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="new-registrations">
+              <div className="p-4 border-2 border-blue-200 rounded-lg bg-blue-50/50">
+                <p className="text-sm text-blue-600 mb-4">📋 Registrations Tab - Component ready for integration</p>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="new-statistics">
+              <div className="p-4 border-2 border-blue-200 rounded-lg bg-blue-50/50">
+                <p className="text-sm text-blue-600 mb-4">📈 Statistics Tab - Component ready for integration</p>
+              </div>
+            </TabsContent>
 
             </Tabs>
           </div>
