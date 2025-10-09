@@ -1,15 +1,17 @@
 import React from 'react';
-import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Edit, Heart, Star } from 'lucide-react';
 import { WeeklyContestParticipant } from '@/types/admin';
-import { Heart, Star } from 'lucide-react';
 
 interface AdminNextWeekTabProps {
   participants: WeeklyContestParticipant[];
   onViewPhotos: (images: string[], index: number, name: string) => void;
   onViewVoters: (participantName: string) => void;
-  onStatusChange: (participant: WeeklyContestParticipant, newStatus: string) => void;
+  onStatusChange: (participant: WeeklyContestParticipant, newStatus: string) => Promise<void>;
+  onEdit: (participant: any) => void;
 }
 
 export function AdminNextWeekTab({
@@ -17,77 +19,201 @@ export function AdminNextWeekTab({
   onViewPhotos,
   onViewVoters,
   onStatusChange,
+  onEdit,
 }: AdminNextWeekTabProps) {
+  const getStatusBackgroundColor = (status: string) => {
+    switch (status) {
+      case 'pre next week':
+        return 'bg-purple-100 dark:bg-purple-900';
+      case 'next week':
+        return 'bg-[hsl(var(--status-next-week))]';
+      case 'next week on site':
+        return 'bg-[hsl(var(--status-next-week-on-site))]';
+      case 'this week':
+        return 'bg-[hsl(var(--status-this-week))]';
+      case 'past':
+        return 'bg-[hsl(var(--status-past))]';
+      default:
+        return '';
+    }
+  };
+
   return (
     <div className="space-y-4">
       <h2 className="text-2xl font-bold">Next Week</h2>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {participants.map((participant) => {
-          const data = participant.application_data || {};
-          const firstName = data.first_name || '';
-          const lastName = data.last_name || '';
-          const fullName = `${firstName} ${lastName}`.trim();
+      {participants.map((participant) => {
+        const appData = participant.application_data || {};
+        const firstName = appData.first_name || '';
+        const lastName = appData.last_name || '';
+        const photo1 = appData.photo_1_url || appData.photo1_url || '';
+        const photo2 = appData.photo_2_url || appData.photo2_url || '';
+        const participantName = `${firstName} ${lastName}`;
 
-          return (
-            <Card key={participant.id}>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle>{fullName}</CardTitle>
-                  <Badge variant="secondary">{participant.admin_status}</Badge>
+        return (
+          <Card key={participant.id} className="overflow-hidden relative h-[149px]">
+            <CardContent className="p-0">
+              {/* Edit button in bottom left corner */}
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => onEdit(participant)}
+                className="absolute bottom-0 left-0 z-20 p-1 m-0 rounded-none rounded-tr-md border-0 border-t border-r bg-background/90 hover:bg-background"
+                title="Edit Application"
+              >
+                <Edit className="w-4 h-4" />
+              </Button>
+
+              {/* Desktop layout */}
+              <div className="hidden md:flex">
+                {/* Photos section - 2 columns */}
+                <div className="flex gap-px w-[25ch] flex-shrink-0">
+                  {photo1 && (
+                    <div className="w-1/2">
+                      <img 
+                        src={photo1} 
+                        alt="Portrait" 
+                        className="w-full h-[149px] object-contain cursor-pointer hover:opacity-90 transition-opacity"
+                        onClick={() => onViewPhotos([photo1, photo2].filter(Boolean), 0, participantName)}
+                      />
+                    </div>
+                  )}
+                  {photo2 && (
+                    <div className="w-1/2 relative">
+                      <img 
+                        src={photo2} 
+                        alt="Full length" 
+                        className="w-full h-[149px] object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                        onClick={() => onViewPhotos([photo1, photo2].filter(Boolean), 1, participantName)}
+                      />
+                      {/* User avatar positioned in top right corner */}
+                      <div className="absolute top-2 right-2">
+                        <Avatar className="h-6 w-6 flex-shrink-0 border-2 border-white shadow-sm">
+                          <AvatarImage src={photo1 || ''} />
+                          <AvatarFallback className="text-xs">
+                            {firstName?.charAt(0) || 'U'}
+                          </AvatarFallback>
+                        </Avatar>
+                      </div>
+                    </div>
+                  )}
                 </div>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <p className="text-sm text-muted-foreground">
-                  {data.age} • {data.city}, {data.country}
-                </p>
 
-                <div className="flex items-center gap-4 text-sm">
-                  <div className="flex items-center gap-1">
-                    <Heart className="h-4 w-4 text-red-500" />
-                    <span>Likes: 0</span>
+                {/* Main info section */}
+                <div className="w-[50ch] flex-shrink-0 flex-1 min-w-0 p-4">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-xs font-semibold whitespace-nowrap">
+                      {new Date().getFullYear() - (appData.birth_year || new Date().getFullYear() - 25)} {firstName} {lastName}
+                    </span>
                   </div>
-                  <div className="flex items-center gap-1">
-                    <Star className="h-4 w-4 text-yellow-500" />
-                    <span>Votes: 0</span>
+
+                  <div className="text-xs text-muted-foreground mb-1">
+                    {appData.city} {appData.state} {appData.country}
+                  </div>
+
+                  {/* Rating and Votes Display */}
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="flex items-center gap-1">
+                      <Star className="h-3 w-3 text-yellow-500 fill-yellow-500" />
+                      <span className="text-xs font-semibold">
+                        {Number(participant.average_rating || 0).toFixed(1)}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1 cursor-pointer" onClick={() => onViewVoters(participantName)}>
+                      <Heart className="h-3 w-3 text-pink-500 fill-pink-500" />
+                      <span className="text-xs font-semibold">
+                        {participant.total_votes || 0}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 mt-2">
+                    <Select 
+                      value={participant.admin_status || 'next week'} 
+                      onValueChange={async (value) => {
+                        await onStatusChange(participant, value);
+                      }}
+                    >
+                      <SelectTrigger className={`w-24 h-7 text-xs ${getStatusBackgroundColor(participant.admin_status || 'next week')}`}>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="z-[9999] bg-popover border shadow-lg">
+                        <SelectItem value="pending">Pending</SelectItem>
+                        <SelectItem value="rejected">Rejected</SelectItem>
+                        <SelectItem value="pre next week">Pre Next Week</SelectItem>
+                        <SelectItem value="this week">This Week</SelectItem>
+                        <SelectItem value="next week">Next Week</SelectItem>
+                        <SelectItem value="next week on site">Next Week On Site</SelectItem>
+                        <SelectItem value="past">Past</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
+              </div>
 
-                <div className="space-y-2">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="w-full"
-                    onClick={() => onViewPhotos(
-                      [data.photo_1_url, data.photo_2_url],
-                      0,
-                      fullName
+              {/* Mobile layout */}
+              <div className="md:hidden flex flex-col h-full">
+                <div className="flex-1 p-3 flex gap-3">
+                  <div className="flex flex-col gap-1 w-20 flex-shrink-0">
+                    {photo1 && (
+                      <img 
+                        src={photo1} 
+                        alt="Portrait" 
+                        className="w-full h-16 object-cover rounded cursor-pointer"
+                        onClick={() => onViewPhotos([photo1, photo2].filter(Boolean), 0, participantName)}
+                      />
                     )}
-                  >
-                    View Photos
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="w-full"
-                    onClick={() => onViewVoters(fullName)}
-                  >
-                    View Voters
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="default"
-                    className="w-full"
-                    onClick={() => onStatusChange(participant, 'next week on site')}
-                  >
-                    Move to Next Week On Site
-                  </Button>
+                    {photo2 && (
+                      <img 
+                        src={photo2} 
+                        alt="Full length" 
+                        className="w-full h-16 object-cover rounded cursor-pointer"
+                        onClick={() => onViewPhotos([photo1, photo2].filter(Boolean), 1, participantName)}
+                      />
+                    )}
+                  </div>
+                  
+                  <div className="flex-1 min-w-0 flex flex-col justify-between">
+                    <div>
+                      <h3 className="font-semibold text-sm truncate mb-1">
+                        {firstName} {lastName}
+                      </h3>
+                      <div className="text-xs text-muted-foreground space-y-0.5">
+                        <div>{appData.city || 'Unknown'}, {appData.country || 'Unknown'}</div>
+                        <div className="flex items-center gap-2">
+                          <span>⭐ {Number(participant.average_rating || 0).toFixed(1)}</span>
+                          <span>❤️ {participant.total_votes || 0}</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between pt-1">
+                      <Select 
+                        value={participant.admin_status || 'next week'} 
+                        onValueChange={async (value) => {
+                          await onStatusChange(participant, value);
+                        }}
+                      >
+                        <SelectTrigger className={`w-24 h-7 text-xs ${getStatusBackgroundColor(participant.admin_status || 'next week')}`}>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent className="z-[9999] bg-popover border shadow-lg">
+                          <SelectItem value="pending">Pending</SelectItem>
+                          <SelectItem value="rejected">Rejected</SelectItem>
+                          <SelectItem value="pre next week">Pre Next Week</SelectItem>
+                          <SelectItem value="this week">This Week</SelectItem>
+                          <SelectItem value="next week">Next Week</SelectItem>
+                          <SelectItem value="next week on site">Next Week On Site</SelectItem>
+                          <SelectItem value="past">Past</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
                 </div>
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
+              </div>
+            </CardContent>
+          </Card>
+        );
+      })}
 
       {participants.length === 0 && (
         <div className="text-center py-12 text-muted-foreground">
