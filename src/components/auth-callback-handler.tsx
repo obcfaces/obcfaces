@@ -60,12 +60,11 @@ const AuthCallbackHandler = () => {
         // Save device fingerprint and log login for OAuth users
         if (data.session?.user) {
           try {
-            // Get full fingerprint data
-            const { getDeviceFingerprint } = await import('@/utils/fingerprint');
+            // Get full fingerprint data and save it
+            const { getDeviceFingerprint, saveDeviceFingerprint } = await import('@/utils/fingerprint');
             const fullFingerprintData = await getDeviceFingerprint();
+            const fingerprintId = await saveDeviceFingerprint(data.session.user.id);
             
-            // Save fingerprint to database
-            await saveDeviceFingerprint(data.session.user.id);
             console.log('Device fingerprint saved for OAuth user');
             
             // Get IP address
@@ -82,7 +81,7 @@ const AuthCallbackHandler = () => {
                 loginMethod: provider,
                 ipAddress: ipData.ip,
                 userAgent: navigator.userAgent,
-                fingerprintId: fullFingerprintData.fingerprint_id,
+                fingerprintId: fingerprintId,
                 fingerprintData: {
                   screen_resolution: fullFingerprintData.screen_resolution,
                   timezone: fullFingerprintData.timezone,
