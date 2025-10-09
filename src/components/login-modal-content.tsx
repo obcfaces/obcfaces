@@ -166,31 +166,6 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
           throw new Error("Login failed");
         }
         
-        // Log successful login with fingerprint
-        if (data.user) {
-          try {
-            const { getDeviceFingerprint, saveDeviceFingerprint } = await import('@/utils/fingerprint');
-            const fingerprintData = await getDeviceFingerprint();
-            const fingerprintId = await saveDeviceFingerprint(data.user.id);
-            
-            const ipResponse = await fetch('https://api.ipify.org?format=json');
-            const ipData = await ipResponse.json();
-            
-            await supabase.functions.invoke('auth-login-tracker', {
-              body: {
-                userId: data.user.id,
-                loginMethod: 'email',
-                ipAddress: ipData.ip,
-                userAgent: navigator.userAgent,
-                fingerprintId: fingerprintId,
-                fingerprintData: fingerprintData
-              }
-            });
-          } catch (logError) {
-            console.error('Error logging login:', logError);
-          }
-        }
-        
         toast({ description: "Login successful" });
         onAuthSuccess?.(); // Call auth success callback
       } else {
@@ -216,23 +191,11 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
         // Log signup with IP, user agent and fingerprint
         if (data?.user) {
           try {
-            const { getDeviceFingerprint, saveDeviceFingerprint } = await import('@/utils/fingerprint');
-            const fingerprintData = await getDeviceFingerprint();
-            const fingerprintId = await saveDeviceFingerprint(data.user.id);
-            
             const ipResponse = await fetch('https://api.ipify.org?format=json');
             const ipData = await ipResponse.json();
             
-            await supabase.functions.invoke('auth-login-tracker', {
-              body: {
-                userId: data.user.id,
-                loginMethod: 'email',
-                ipAddress: ipData.ip,
-                userAgent: navigator.userAgent,
-                fingerprintId: fingerprintId,
-                fingerprintData: fingerprintData
-              }
-            });
+            // Note: Full fingerprint will be logged by useDeviceFingerprint hook in App.tsx
+            console.log('User registered:', data.user.id, 'IP:', ipData.ip);
           } catch (logError) {
             console.error('Error logging signup:', logError);
           }
