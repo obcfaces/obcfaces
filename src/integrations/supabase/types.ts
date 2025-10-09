@@ -62,6 +62,36 @@ export type Database = {
         }
         Relationships: []
       }
+      backup_metadata: {
+        Row: {
+          backup_id: string
+          created_at: string
+          id: string
+          retention_days: number
+          tables: string[]
+          timestamp: string
+          total_records: number
+        }
+        Insert: {
+          backup_id: string
+          created_at?: string
+          id?: string
+          retention_days?: number
+          tables: string[]
+          timestamp?: string
+          total_records?: number
+        }
+        Update: {
+          backup_id?: string
+          created_at?: string
+          id?: string
+          retention_days?: number
+          tables?: string[]
+          timestamp?: string
+          total_records?: number
+        }
+        Relationships: []
+      }
       contest_application_history: {
         Row: {
           application_data: Json | null
