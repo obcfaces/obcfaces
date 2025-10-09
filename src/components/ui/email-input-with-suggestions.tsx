@@ -1,4 +1,5 @@
 import * as React from "react"
+import { createPortal } from "react-dom"
 import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
 
@@ -26,10 +27,24 @@ export const EmailInputWithSuggestions = React.forwardRef<HTMLInputElement, Emai
     const [showSuggestions, setShowSuggestions] = React.useState(false)
     const [suggestions, setSuggestions] = React.useState<string[]>([])
     const [selectedIndex, setSelectedIndex] = React.useState(-1)
+    const [dropdownPosition, setDropdownPosition] = React.useState({ top: 0, left: 0, width: 0 })
     const inputRef = React.useRef<HTMLInputElement>(null)
     const dropdownRef = React.useRef<HTMLDivElement>(null)
+    const containerRef = React.useRef<HTMLDivElement>(null)
 
     React.useImperativeHandle(ref, () => inputRef.current!)
+
+    // Update dropdown position
+    const updateDropdownPosition = React.useCallback(() => {
+      if (containerRef.current) {
+        const rect = containerRef.current.getBoundingClientRect()
+        setDropdownPosition({
+          top: rect.bottom + window.scrollY,
+          left: rect.left + window.scrollX,
+          width: rect.width
+        })
+      }
+    }, [])
 
     React.useEffect(() => {
       const emailValue = value || ""
@@ -50,12 +65,33 @@ export const EmailInputWithSuggestions = React.forwardRef<HTMLInputElement, Emai
         setSuggestions(newSuggestions)
         setShowSuggestions(newSuggestions.length > 0)
         setSelectedIndex(-1)
+        
+        // Update position when showing suggestions
+        if (newSuggestions.length > 0) {
+          updateDropdownPosition()
+        }
       } else {
         setShowSuggestions(false)
         setSuggestions([])
         setSelectedIndex(-1)
       }
-    }, [value])
+    }, [value, updateDropdownPosition])
+
+    // Update position on scroll/resize
+    React.useEffect(() => {
+      if (showSuggestions) {
+        const handleScroll = () => updateDropdownPosition()
+        const handleResize = () => updateDropdownPosition()
+        
+        window.addEventListener('scroll', handleScroll, true)
+        window.addEventListener('resize', handleResize)
+        
+        return () => {
+          window.removeEventListener('scroll', handleScroll, true)
+          window.removeEventListener('resize', handleResize)
+        }
+      }
+    }, [showSuggestions, updateDropdownPosition])
 
     // Close dropdown when clicking outside
     React.useEffect(() => {
@@ -63,7 +99,7 @@ export const EmailInputWithSuggestions = React.forwardRef<HTMLInputElement, Emai
         if (
           dropdownRef.current &&
           !dropdownRef.current.contains(event.target as Node) &&
-          !inputRef.current?.contains(event.target as Node)
+          !containerRef.current?.contains(event.target as Node)
         ) {
           setShowSuggestions(false)
         }
@@ -104,8 +140,47 @@ export const EmailInputWithSuggestions = React.forwardRef<HTMLInputElement, Emai
       }
     }
 
+    const dropdownContent = showSuggestions && suggestions.length > 0 && (
+      <div
+        ref={dropdownRef}
+        style={{
+          position: 'fixed',
+          top: `${dropdownPosition.top}px`,
+          left: `${dropdownPosition.left}px`,
+          width: `${dropdownPosition.width}px`,
+          zIndex: 99999
+        }}
+        className="mt-1 bg-popover border border-border rounded-md shadow-lg max-h-60 overflow-auto"
+      >
+        <ul className="py-1">
+          {suggestions.map((suggestion, index) => {
+            const atIndex = suggestion.indexOf("@")
+            const localPart = suggestion.substring(0, atIndex)
+            const domain = suggestion.substring(atIndex)
+
+            return (
+              <li key={index}>
+                <button
+                  type="button"
+                  onClick={() => handleSuggestionClick(suggestion)}
+                  className={cn(
+                    "w-full text-left px-4 py-2.5 hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground outline-none transition-colors cursor-pointer",
+                    index === selectedIndex && "bg-accent text-accent-foreground"
+                  )}
+                  onMouseEnter={() => setSelectedIndex(index)}
+                >
+                  <span className="text-foreground">{localPart}</span>
+                  <span className="text-primary font-medium">{domain}</span>
+                </button>
+              </li>
+            )
+          })}
+        </ul>
+      </div>
+    )
+
     return (
-      <div className="relative w-full">
+      <div ref={containerRef} className="relative w-full">
         <Input
           ref={inputRef}
           type="email"
@@ -115,37 +190,7 @@ export const EmailInputWithSuggestions = React.forwardRef<HTMLInputElement, Emai
           className={className}
           {...props}
         />
-        {showSuggestions && suggestions.length > 0 && (
-          <div
-            ref={dropdownRef}
-            className="absolute z-[9999] w-full mt-1 bg-popover border border-border rounded-md shadow-lg max-h-60 overflow-auto"
-          >
-            <ul className="py-1">
-              {suggestions.map((suggestion, index) => {
-                const atIndex = suggestion.indexOf("@")
-                const localPart = suggestion.substring(0, atIndex)
-                const domain = suggestion.substring(atIndex)
-
-                return (
-                  <li key={index}>
-                    <button
-                      type="button"
-                      onClick={() => handleSuggestionClick(suggestion)}
-                      className={cn(
-                        "w-full text-left px-4 py-2.5 hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground outline-none transition-colors cursor-pointer",
-                        index === selectedIndex && "bg-accent text-accent-foreground"
-                      )}
-                      onMouseEnter={() => setSelectedIndex(index)}
-                    >
-                      <span className="text-foreground">{localPart}</span>
-                      <span className="text-primary font-medium">{domain}</span>
-                    </button>
-                  </li>
-                )
-              })}
-            </ul>
-          </div>
-        )}
+        {typeof document !== 'undefined' && createPortal(dropdownContent, document.body)}
       </div>
     )
   }
