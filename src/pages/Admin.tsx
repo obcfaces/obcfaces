@@ -8859,12 +8859,7 @@ const Admin = () => {
                 applications={contestApplications}
                 deletedApplications={deletedApplications}
                 showDeleted={showDeletedApplications}
-                profiles={profiles}
-                statusFilter={registrationsStatusFilter}
-                countryFilter={countryFilter}
-                onShowDeletedChange={setShowDeletedApplications}
-                onStatusFilterChange={setRegistrationsStatusFilter}
-                onCountryFilterChange={setCountryFilter}
+                onToggleDeleted={setShowDeletedApplications}
                 onViewPhotos={openPhotoModal}
                 onEdit={(participant) => {
                   setEditingParticipantData({
@@ -8897,11 +8892,13 @@ const Admin = () => {
                   });
                   setRejectModalOpen(true);
                 }}
-                onDelete={async (participantId, name) => {
+                onDelete={async (app) => {
+                  const appData = app.application_data || {};
+                  const name = `${appData.first_name} ${appData.last_name}`;
                   const { error } = await supabase
                     .from('weekly_contest_participants')
                     .update({ deleted_at: new Date().toISOString() })
-                    .eq('id', participantId);
+                    .eq('id', app.id);
                   if (!error) {
                     toast({
                       title: "Deleted",
@@ -8912,11 +8909,13 @@ const Admin = () => {
                     setDeletedApplications(deleted);
                   }
                 }}
-                onRestore={async (participantId, name) => {
+                onRestore={async (app) => {
+                  const appData = app.application_data || {};
+                  const name = `${appData.first_name} ${appData.last_name}`;
                   const { error } = await supabase
                     .from('weekly_contest_participants')
                     .update({ deleted_at: null })
-                    .eq('id', participantId);
+                    .eq('id', app.id);
                   if (!error) {
                     toast({
                       title: "Restored",
@@ -8927,23 +8926,12 @@ const Admin = () => {
                     setDeletedApplications(deleted);
                   }
                 }}
-                expandedMobileItems={expandedMobileItems}
-                onToggleMobileExpand={(id) => {
-                  const newExpanded = new Set(expandedMobileItems);
-                  if (expandedMobileItems.has(id)) {
-                    newExpanded.delete(id);
-                  } else {
-                    newExpanded.add(id);
-                  }
-                  setExpandedMobileItems(newExpanded);
-                }}
               />
             </TabsContent>
 
             <TabsContent value="new-pre-next">
               <AdminPreNextWeekTab
                 participants={preNextWeekParticipants}
-                profiles={profiles}
                 onViewPhotos={openPhotoModal}
                 onStatusChange={async (participant, newStatus) => {
                   const appData = participant.application_data || {};
@@ -8966,13 +8954,6 @@ const Admin = () => {
                       variant: "destructive",
                     });
                   }
-                }}
-                onEdit={(participant) => {
-                  setEditingParticipantData({
-                    ...participant,
-                    application_data: participant.application_data,
-                  });
-                  setShowParticipationModal(true);
                 }}
               />
             </TabsContent>
