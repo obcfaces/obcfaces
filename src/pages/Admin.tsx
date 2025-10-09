@@ -6967,7 +6967,7 @@ const Admin = () => {
                           Maybe Suspicious
                           {(() => {
                             const count = profiles.filter(p => {
-                              // Exclude users with 'suspicious' role (вручную помеченные)
+                              // Exclude users with 'suspicious' role
                               const hasSuspiciousRole = userRoles.some(role => 
                                 role.user_id === p.id && role.role === 'suspicious'
                               );
@@ -6990,24 +6990,11 @@ const Admin = () => {
                                 const sameFingerprint = profiles.filter(prof => 
                                   prof.fingerprint_id === p.fingerprint_id && prof.id !== p.id
                                 );
-                                hasDuplicateFingerprint = sameFingerprint.length >= 4; // 5+ total users with same FP
+                                hasDuplicateFingerprint = sameFingerprint.length >= 4; // Changed from > 0 to >= 4 (5 total users with same FP)
                               }
                               
                               return emailNotWhitelisted || wasAutoConfirmed || fastFormFill || hasDuplicateFingerprint;
                             }).length;
-                            return count > 0 ? ` (${count})` : '';
-                          })()}
-                        </Button>
-                        
-                        {/* Suspicious (Manually Marked) Filter Button */}
-                        <Button
-                          variant={suspiciousEmailFilter === 'suspicious-marked' ? 'destructive' : 'outline'}
-                          size="sm"
-                          onClick={() => setSuspiciousEmailFilter(suspiciousEmailFilter === 'suspicious-marked' ? 'all' : 'suspicious-marked')}
-                        >
-                          Suspicious
-                          {(() => {
-                            const count = userRoles.filter(role => role.role === 'suspicious').length;
                             return count > 0 ? ` (${count})` : '';
                           })()}
                         </Button>
@@ -7252,20 +7239,9 @@ const Admin = () => {
                           }
                         }
                         
-                        // Фильтр "Suspicious" (вручную помеченные)
-                        if (suspiciousEmailFilter === 'suspicious-marked') {
-                          const hasSuspiciousRole = userRoles.some(role => 
-                            role.user_id === profile.id && role.role === 'suspicious'
-                          );
-                          if (!hasSuspiciousRole) {
-                            return false;
-                          }
-                          return true;
-                        }
-                        
-                        // Фильтр "Maybe Suspicious" (автоматически определенные) - НЕ применять если выбран фильтр Regular!
+                        // Фильтр "Maybe Suspicious" - НЕ применять если выбран фильтр Regular!
                         if (suspiciousEmailFilter === 'maybe-suspicious' && roleFilter !== 'regular') {
-                          // Exclude users with 'suspicious' role (вручную помеченные)
+                          // Exclude users with 'suspicious' role
                           const hasSuspiciousRole = userRoles.some(role => 
                             role.user_id === profile.id && role.role === 'suspicious'
                           );
@@ -7304,7 +7280,7 @@ const Admin = () => {
                             const sameFingerprint = profiles.filter(p => 
                               p.fingerprint_id === profile.fingerprint_id && p.id !== profile.id
                             );
-                            hasDuplicateFingerprint = sameFingerprint.length >= 4; // 5+ total users with same FP
+                            hasDuplicateFingerprint = sameFingerprint.length >= 4; // Changed from > 0 to >= 4 (5 total users with same FP)
                           }
                           
                           if (!(wasAutoConfirmed || fastFormFill || hasDuplicateFingerprint)) {
