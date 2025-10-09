@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Input } from "@/components/ui/input";
+import { EmailInputWithSuggestions } from "@/components/ui/email-input-with-suggestions";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import SearchableSelect from "@/components/ui/searchable-select";
 import { Button } from "@/components/ui/button";
@@ -264,9 +265,8 @@ const Auth = () => {
           <form onSubmit={onSubmit} className="space-y-4">
             <div className="space-y-1">
               <label htmlFor="email" className="text-sm font-medium text-foreground">Email</label>
-              <Input 
+              <EmailInputWithSuggestions 
                 id="email" 
-                type="email" 
                 value={email} 
                 onChange={(e) => setEmail(e.target.value)} 
                 required 
