@@ -7063,6 +7063,24 @@ const Admin = () => {
                             timeZone: 'Asia/Manila' 
                           });
                           const profileCreatedAtManila = new Date(manilaTimeStr);
+                          
+                          // Get current week's Monday in Manila timezone
+                          const nowManila = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Manila' }));
+                          const currentDayOfWeek = nowManila.getDay();
+                          const daysFromMonday = currentDayOfWeek === 0 ? 6 : currentDayOfWeek - 1; // Sunday = 6 days from Monday
+                          const weekStartManila = new Date(nowManila);
+                          weekStartManila.setDate(nowManila.getDate() - daysFromMonday);
+                          weekStartManila.setHours(0, 0, 0, 0);
+                          
+                          const weekEndManila = new Date(weekStartManila);
+                          weekEndManila.setDate(weekStartManila.getDate() + 6);
+                          weekEndManila.setHours(23, 59, 59, 999);
+                          
+                          // CRITICAL: Only show registrations from current week
+                          if (profileCreatedAtManila < weekStartManila || profileCreatedAtManila > weekEndManila) {
+                            return false;
+                          }
+                          
                           const dayOfWeek = profileCreatedAtManila.getDay(); // 0 = Sunday, 1 = Monday, ...
                           
                           // Map day of week to our day keys
