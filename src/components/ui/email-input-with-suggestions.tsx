@@ -1,6 +1,5 @@
 import * as React from "react"
 import { Input } from "@/components/ui/input"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { cn } from "@/lib/utils"
 
 // Popular email domains - gmail.com is always first
@@ -24,9 +23,11 @@ interface EmailInputWithSuggestionsProps extends React.ComponentProps<"input"> {
 
 export const EmailInputWithSuggestions = React.forwardRef<HTMLInputElement, EmailInputWithSuggestionsProps>(
   ({ className, value, onChange, ...props }, ref) => {
-    const [open, setOpen] = React.useState(false)
+    const [showSuggestions, setShowSuggestions] = React.useState(false)
     const [suggestions, setSuggestions] = React.useState<string[]>([])
+    const [selectedIndex, setSelectedIndex] = React.useState(-1)
     const inputRef = React.useRef<HTMLInputElement>(null)
+    const dropdownRef = React.useRef<HTMLDivElement>(null)
 
     React.useImperativeHandle(ref, () => inputRef.current!)
 
@@ -37,49 +38,87 @@ export const EmailInputWithSuggestions = React.forwardRef<HTMLInputElement, Emai
       // Show suggestions only if @ is present and there's content before it
       if (atIndex > 0) {
         const localPart = emailValue.substring(0, atIndex)
-        const domainPart = emailValue.substring(atIndex + 1)
+        const domainPart = emailValue.substring(atIndex + 1).toLowerCase()
 
-        // Generate suggestions
-        const newSuggestions = EMAIL_DOMAINS
-          .filter(domain => !domainPart || domain.toLowerCase().startsWith(domainPart.toLowerCase()))
-          .map(domain => `${localPart}@${domain}`)
+        // Generate suggestions - filter only if user started typing after @
+        const filteredDomains = domainPart 
+          ? EMAIL_DOMAINS.filter(domain => domain.startsWith(domainPart))
+          : EMAIL_DOMAINS
+
+        const newSuggestions = filteredDomains.map(domain => `${localPart}@${domain}`)
 
         setSuggestions(newSuggestions)
-        setOpen(newSuggestions.length > 0)
+        setShowSuggestions(newSuggestions.length > 0)
+        setSelectedIndex(-1)
       } else {
-        setOpen(false)
+        setShowSuggestions(false)
         setSuggestions([])
+        setSelectedIndex(-1)
       }
     }, [value])
 
+    // Close dropdown when clicking outside
+    React.useEffect(() => {
+      const handleClickOutside = (event: MouseEvent) => {
+        if (
+          dropdownRef.current &&
+          !dropdownRef.current.contains(event.target as Node) &&
+          !inputRef.current?.contains(event.target as Node)
+        ) {
+          setShowSuggestions(false)
+        }
+      }
+
+      document.addEventListener("mousedown", handleClickOutside)
+      return () => document.removeEventListener("mousedown", handleClickOutside)
+    }, [])
+
     const handleSuggestionClick = (suggestion: string) => {
-      // Create a synthetic event to maintain compatibility
       const syntheticEvent = {
         target: { value: suggestion },
         currentTarget: { value: suggestion },
       } as React.ChangeEvent<HTMLInputElement>
 
       onChange(syntheticEvent)
-      setOpen(false)
+      setShowSuggestions(false)
+      setSelectedIndex(-1)
+    }
+
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+      if (!showSuggestions || suggestions.length === 0) return
+
+      if (e.key === "ArrowDown") {
+        e.preventDefault()
+        setSelectedIndex(prev => 
+          prev < suggestions.length - 1 ? prev + 1 : prev
+        )
+      } else if (e.key === "ArrowUp") {
+        e.preventDefault()
+        setSelectedIndex(prev => (prev > 0 ? prev - 1 : -1))
+      } else if (e.key === "Enter" && selectedIndex >= 0) {
+        e.preventDefault()
+        handleSuggestionClick(suggestions[selectedIndex])
+      } else if (e.key === "Escape") {
+        setShowSuggestions(false)
+        setSelectedIndex(-1)
+      }
     }
 
     return (
-      <Popover open={open} onOpenChange={setOpen}>
-        <PopoverTrigger asChild>
-          <Input
-            ref={inputRef}
-            type="email"
-            value={value}
-            onChange={onChange}
-            className={className}
-            {...props}
-          />
-        </PopoverTrigger>
-        {suggestions.length > 0 && (
-          <PopoverContent 
-            className="w-[var(--radix-popover-trigger-width)] p-0 bg-popover z-[100]" 
-            align="start"
-            onOpenAutoFocus={(e) => e.preventDefault()}
+      <div className="relative w-full">
+        <Input
+          ref={inputRef}
+          type="email"
+          value={value}
+          onChange={onChange}
+          onKeyDown={handleKeyDown}
+          className={className}
+          {...props}
+        />
+        {showSuggestions && suggestions.length > 0 && (
+          <div
+            ref={dropdownRef}
+            className="absolute z-50 w-full mt-1 bg-popover border border-border rounded-md shadow-lg max-h-60 overflow-auto"
           >
             <ul className="py-1">
               {suggestions.map((suggestion, index) => {
@@ -92,7 +131,11 @@ export const EmailInputWithSuggestions = React.forwardRef<HTMLInputElement, Emai
                     <button
                       type="button"
                       onClick={() => handleSuggestionClick(suggestion)}
-                      className="w-full text-left px-4 py-2.5 hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground outline-none transition-colors"
+                      className={cn(
+                        "w-full text-left px-4 py-2.5 hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground outline-none transition-colors cursor-pointer",
+                        index === selectedIndex && "bg-accent text-accent-foreground"
+                      )}
+                      onMouseEnter={() => setSelectedIndex(index)}
                     >
                       <span className="text-foreground">{localPart}</span>
                       <span className="text-primary font-medium">{domain}</span>
@@ -101,9 +144,9 @@ export const EmailInputWithSuggestions = React.forwardRef<HTMLInputElement, Emai
                 )
               })}
             </ul>
-          </PopoverContent>
+          </div>
         )}
-      </Popover>
+      </div>
     )
   }
 )
