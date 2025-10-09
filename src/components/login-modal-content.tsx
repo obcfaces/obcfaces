@@ -165,14 +165,25 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
           throw new Error("Login failed");
         }
         
-        // Log successful login
+        // Log successful login with fingerprint
         if (data.user) {
           try {
-            await supabase.from('user_login_logs').insert({
-              user_id: data.user.id,
-              login_method: 'email',
-              success: true,
-              user_agent: navigator.userAgent
+            const { getDeviceFingerprint, saveDeviceFingerprint } = await import('@/utils/fingerprint');
+            const fingerprintData = await getDeviceFingerprint();
+            const fingerprintId = await saveDeviceFingerprint(data.user.id);
+            
+            const ipResponse = await fetch('https://api.ipify.org?format=json');
+            const ipData = await ipResponse.json();
+            
+            await supabase.functions.invoke('auth-login-tracker', {
+              body: {
+                userId: data.user.id,
+                loginMethod: 'email',
+                ipAddress: ipData.ip,
+                userAgent: navigator.userAgent,
+                fingerprintId: fingerprintId,
+                fingerprintData: fingerprintData
+              }
             });
           } catch (logError) {
             console.error('Error logging login:', logError);
@@ -201,19 +212,25 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
           },
         });
         
-        // Log signup with IP and user agent
+        // Log signup with IP, user agent and fingerprint
         if (data?.user) {
           try {
-            const userAgent = navigator.userAgent;
+            const { getDeviceFingerprint, saveDeviceFingerprint } = await import('@/utils/fingerprint');
+            const fingerprintData = await getDeviceFingerprint();
+            const fingerprintId = await saveDeviceFingerprint(data.user.id);
+            
             const ipResponse = await fetch('https://api.ipify.org?format=json');
             const ipData = await ipResponse.json();
             
-            await supabase.from('user_login_logs').insert({
-              user_id: data.user.id,
-              login_method: 'email',
-              success: !error,
-              ip_address: ipData.ip,
-              user_agent: userAgent
+            await supabase.functions.invoke('auth-login-tracker', {
+              body: {
+                userId: data.user.id,
+                loginMethod: 'email',
+                ipAddress: ipData.ip,
+                userAgent: navigator.userAgent,
+                fingerprintId: fingerprintId,
+                fingerprintData: fingerprintData
+              }
             });
           } catch (logError) {
             console.error('Error logging signup:', logError);
@@ -268,17 +285,6 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
             );
           if (upsertErr) console.warn("Profile creation warning:", upsertErr.message);
           
-          // Log successful registration
-          try {
-            await supabase.from('user_login_logs').insert({
-              user_id: userId,
-              login_method: 'email',
-              success: true,
-              user_agent: navigator.userAgent
-            });
-          } catch (logError) {
-            console.error('Error logging registration:', logError);
-          }
         }
         
         if (data.session?.user) {
