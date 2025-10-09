@@ -118,7 +118,7 @@ export const EmailInputWithSuggestions = React.forwardRef<HTMLInputElement, Emai
         {showSuggestions && suggestions.length > 0 && (
           <div
             ref={dropdownRef}
-            className="absolute z-50 w-full mt-1 bg-popover border border-border rounded-md shadow-lg max-h-60 overflow-auto"
+            className="absolute z-[9999] w-full mt-1 bg-popover border border-border rounded-md shadow-lg max-h-60 overflow-auto"
           >
             <ul className="py-1">
               {suggestions.map((suggestion, index) => {
