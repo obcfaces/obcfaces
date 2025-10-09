@@ -65,11 +65,11 @@ export const useAdminProfiles = () => {
 
       const { data: fingerprints } = await supabase
         .from('user_device_fingerprints')
-        .select('user_id, ip_address, fingerprint_id');
+        .select('user_id, ip_address, fingerprint_id, platform, user_agent');
 
       const { data: loginLogs } = await supabase
         .from('user_login_logs')
-        .select('user_id, user_agent, ip_address')
+        .select('user_id, user_agent, ip_address, login_method')
         .order('created_at', { ascending: false });
 
       const ipCounts = new Map<string, number>();
@@ -87,10 +87,26 @@ export const useAdminProfiles = () => {
         const ipAddress = fingerprint?.ip_address || loginLog?.ip_address;
         const ipStr = ipAddress ? String(ipAddress) : null;
         
+        // Parse device info from user agent or platform
+        let deviceInfo = fingerprint?.platform || 'Unknown device';
+        if (loginLog?.user_agent) {
+          const ua = String(loginLog.user_agent);
+          if (ua.includes('Android')) {
+            const match = ua.match(/Android\s([\d.]+)/);
+            deviceInfo = match ? `Android ${match[1]}` : 'Android';
+          } else if (ua.includes('iPhone') || ua.includes('iPad')) {
+            deviceInfo = ua.includes('iPhone') ? 'iPhone' : 'iPad';
+          } else if (ua.includes('Windows')) {
+            deviceInfo = 'Windows';
+          } else if (ua.includes('Mac')) {
+            deviceInfo = 'Mac';
+          }
+        }
+        
         return {
           ...profile,
           email: auth?.email,
-          auth_provider: auth?.auth_provider || 'email',
+          auth_provider: loginLog?.login_method || auth?.auth_provider || 'email',
           facebook_data: auth?.facebook_data,
           last_sign_in_at: auth?.last_sign_in_at,
           email_confirmed_at: auth?.email_confirmed_at,
@@ -98,6 +114,7 @@ export const useAdminProfiles = () => {
           ip_address: ipStr,
           fingerprint_id: fingerprint?.fingerprint_id,
           user_agent: loginLog?.user_agent ? String(loginLog.user_agent) : undefined,
+          device_info: deviceInfo,
           isDuplicateIP: ipStr ? (ipCounts.get(ipStr) || 0) > 1 : false
         };
       }) || [];
