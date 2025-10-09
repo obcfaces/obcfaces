@@ -58,7 +58,10 @@ export const EmailInputWithSuggestions = React.forwardRef<HTMLInputElement, Emai
       }
     }, [value])
 
-    const handleSuggestionClick = (suggestion: string) => {
+    const handleSuggestionClick = (e: React.MouseEvent, suggestion: string) => {
+      e.preventDefault();
+      e.stopPropagation();
+      
       const syntheticEvent = {
         target: { value: suggestion },
         currentTarget: { value: suggestion },
@@ -103,7 +106,7 @@ export const EmailInputWithSuggestions = React.forwardRef<HTMLInputElement, Emai
                   <li key={index}>
                     <button
                       type="button"
-                      onClick={() => handleSuggestionClick(suggestion)}
+                      onMouseDown={(e) => handleSuggestionClick(e, suggestion)}
                       className="w-full text-left px-4 py-2.5 hover:bg-accent transition-colors cursor-pointer text-sm"
                     >
                       <span className="text-foreground">{localPart}</span>
