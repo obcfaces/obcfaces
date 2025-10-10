@@ -320,6 +320,15 @@ const ApplicationCardWithHistory = ({
                         >
                           {appData.facebook_url}
                         </a>
+                      ) : appData.cached_facebook_url ? (
+                        <a 
+                          href={appData.cached_facebook_url} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="text-orange-600 hover:text-orange-800 dark:text-orange-400 dark:hover:text-orange-300 underline break-all"
+                        >
+                          save {appData.cached_facebook_url}
+                        </a>
                       ) : (
                         <span className="text-muted-foreground/60">no fb</span>
                       )}
@@ -331,6 +340,11 @@ const ApplicationCardWithHistory = ({
                         <span>
                           {appData.phone.country_code && `+${Country.getCountryByCode(appData.phone.country_code)?.phonecode || ''} `}
                           {appData.phone.number}
+                        </span>
+                      ) : appData.cached_phone?.number ? (
+                        <span className="text-orange-600 dark:text-orange-400">
+                          save {appData.cached_phone.country_code && `+${Country.getCountryByCode(appData.cached_phone.country_code)?.phonecode || ''} `}
+                          {appData.cached_phone.number}
                         </span>
                       ) : (
                         <span className="text-muted-foreground/60">no tel</span>
@@ -460,6 +474,15 @@ const ApplicationCardWithHistory = ({
                           >
                             {appData.facebook_url}
                           </a>
+                        ) : appData.cached_facebook_url ? (
+                          <a 
+                            href={appData.cached_facebook_url} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="text-orange-600 hover:text-orange-800 dark:text-orange-400 dark:hover:text-orange-300 underline break-all"
+                          >
+                            save {appData.cached_facebook_url}
+                          </a>
                         ) : (
                           <span className="text-muted-foreground/60">no fb</span>
                         )}
@@ -471,6 +494,11 @@ const ApplicationCardWithHistory = ({
                           <span>
                             {appData.phone.country_code && `+${Country.getCountryByCode(appData.phone.country_code)?.phonecode || ''} `}
                             {appData.phone.number}
+                          </span>
+                        ) : appData.cached_phone?.number ? (
+                          <span className="text-orange-600 dark:text-orange-400">
+                            save {appData.cached_phone.country_code && `+${Country.getCountryByCode(appData.cached_phone.country_code)?.phonecode || ''} `}
+                            {appData.cached_phone.number}
                           </span>
                         ) : (
                           <span className="text-muted-foreground/60">no tel</span>

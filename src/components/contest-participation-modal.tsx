@@ -72,6 +72,7 @@ export const ContestParticipationModal = ({
 
   // Cache key for localStorage
   const FORM_CACHE_KEY = 'contest_form_cache';
+  const CONTACT_CACHE_KEY = 'contest_contact_cache';
   
   // Session ID for tracking anonymous users
   const [sessionId] = useState(() => {
@@ -346,6 +347,9 @@ export const ContestParticipationModal = ({
     try {
       const { data: { session: authSession } } = await supabase.auth.getSession();
       
+      // Get cached contact form
+      const cachedContact = loadContactFormFromCache();
+      
       const submissionData = {
         user_id: authSession?.user?.id || null,
         session_id: !authSession?.user?.id ? sessionId : null,
@@ -353,6 +357,14 @@ export const ContestParticipationModal = ({
           ...formData,
           photo1_uploaded: !!photo1File,
           photo2_uploaded: !!photo2File,
+          // Add cached contact data if it exists
+          ...(cachedContact?.facebookUrl && { cached_facebook_url: cachedContact.facebookUrl }),
+          ...(cachedContact?.contact && { 
+            cached_phone: {
+              number: cachedContact.contact,
+              country_code: cachedContact.countryCode || formData.countryCode
+            }
+          })
         },
         last_updated_field: fieldName || null,
         submitted: false
@@ -989,6 +1001,12 @@ export const ContestParticipationModal = ({
             // Fall back to cached data if no last application
             formDataToLoad = loadCachedFormData();
           }
+          
+          // Load cached contact form
+          const cachedContactForm = loadContactFormFromCache();
+          if (cachedContactForm) {
+            setContactForm(cachedContactForm);
+          }
         }
         
         setFormData(formDataToLoad);
@@ -1119,11 +1137,34 @@ export const ContestParticipationModal = ({
   const clearFormCache = () => {
     try {
       localStorage.removeItem(FORM_CACHE_KEY);
+      localStorage.removeItem(CONTACT_CACHE_KEY);
       localStorage.removeItem('contest_photo_1_cache');
       localStorage.removeItem('contest_photo_2_cache');
     } catch (error) {
       console.warn('Failed to clear form cache:', error);
     }
+  };
+  
+  // Save contact form to cache
+  const saveContactFormToCache = (contact: typeof contactForm) => {
+    try {
+      localStorage.setItem(CONTACT_CACHE_KEY, JSON.stringify(contact));
+    } catch (error) {
+      console.warn('Failed to save contact form to cache:', error);
+    }
+  };
+  
+  // Load contact form from cache
+  const loadContactFormFromCache = () => {
+    try {
+      const cached = localStorage.getItem(CONTACT_CACHE_KEY);
+      if (cached) {
+        return JSON.parse(cached);
+      }
+    } catch (error) {
+      console.warn('Failed to load contact form from cache:', error);
+    }
+    return null;
   };
 
   // Clear field from invalid set when user starts typing
@@ -1320,7 +1361,9 @@ export const ContestParticipationModal = ({
                   value={contactForm.facebookUrl || ''}
                   onChange={(e) => {
                     console.log('Facebook URL changed:', e.target.value);
-                    setContactForm({...contactForm, facebookUrl: e.target.value});
+                    const newContactForm = {...contactForm, facebookUrl: e.target.value};
+                    setContactForm(newContactForm);
+                    saveContactFormToCache(newContactForm);
                     // Remove validation error when user starts typing
                     if (invalidFields.has('facebookUrl')) {
                       setInvalidFields(prev => {
@@ -1342,7 +1385,11 @@ export const ContestParticipationModal = ({
                   <div className="w-24 border-r border-border">
                     <SearchableSelect
                       value={contactForm.countryCode || formData.countryCode}
-                      onValueChange={(value) => setContactForm({...contactForm, countryCode: value})}
+                      onValueChange={(value) => {
+                        const newContactForm = {...contactForm, countryCode: value};
+                        setContactForm(newContactForm);
+                        saveContactFormToCache(newContactForm);
+                      }}
                       options={Country.getAllCountries().map((country) => ({
                         value: country.isoCode,
                         label: `${country.flag} +${country.phonecode} ${country.name}`
@@ -1377,7 +1424,9 @@ export const ContestParticipationModal = ({
                         if (value.length >= 7) {
                           value = value.substring(0, 7) + ' ' + value.substring(7, 11);
                         }
-                        setContactForm({...contactForm, contact: value});
+                        const newContactForm = {...contactForm, contact: value};
+                        setContactForm(newContactForm);
+                        saveContactFormToCache(newContactForm);
                       }}
                       placeholder="123 456 7890"
                       className="text-sm border-0 focus-visible:ring-0 focus-visible:ring-offset-0 pl-3 rounded-l-none h-full"
