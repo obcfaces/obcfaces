@@ -127,8 +127,35 @@ export const RejectionReasonsManagerModal = ({
 
   const handleSave = () => {
     console.log('💾 Manager Modal: Saving reasons. Current state:', reasons);
+    
+    // Add new reason if it has text
+    let finalReasons = [...reasons];
+    if (newReason.text.trim()) {
+      console.log('💾 Adding new reason before save:', newReason.text);
+      const orderNum = newReason.sortOrder && newReason.sortOrder.trim() 
+        ? parseInt(newReason.sortOrder) 
+        : finalReasons.length + 1;
+      
+      const key = `custom_${Date.now()}`;
+      const newReasonObj: RejectionReason = {
+        key,
+        text: newReason.text,
+        sortOrder: orderNum,
+      };
+      
+      // Shift existing reasons if needed
+      finalReasons.forEach(reason => {
+        if (reason.sortOrder >= orderNum) {
+          reason.sortOrder += 1;
+        }
+      });
+      
+      finalReasons.push(newReasonObj);
+      finalReasons.sort((a, b) => a.sortOrder - b.sortOrder);
+    }
+    
     // Filter out empty reasons
-    const filteredReasons = reasons.filter(r => r.text.trim());
+    const filteredReasons = finalReasons.filter(r => r.text.trim());
     console.log('💾 Manager Modal: Filtered reasons:', filteredReasons);
     const updatedReasons: Record<string, string> = {};
     filteredReasons.forEach(reason => {
@@ -183,22 +210,8 @@ export const RejectionReasonsManagerModal = ({
               placeholder="Enter new rejection reason..."
               value={newReason.text}
               onChange={(e) => setNewReason({ ...newReason, text: e.target.value })}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  handleAddNewReason();
-                }
-              }}
               className="flex-1 h-8 text-sm"
             />
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleAddNewReason}
-              disabled={!newReason.text.trim()}
-              className="h-8 px-3 text-sm"
-            >
-              Add
-            </Button>
           </div>
         </div>
 
