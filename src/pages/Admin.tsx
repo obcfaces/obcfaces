@@ -1384,16 +1384,24 @@ const Admin = () => {
         week: r.vote_week_interval 
       })));
 
+      // Store in BOTH states for compatibility
+      const activityData = {
+        likesCount: finalLikes.length,
+        ratingsCount: finalRatings.length,
+        likes: finalLikes,
+        ratings: finalRatings,
+        uniqueWeeks: uniqueWeeksArray.length,
+        weekIntervals: uniqueWeeksArray
+      };
+      
       setUserActivityStats(prev => ({
         ...prev,
-        [userId]: {
-          likesCount: finalLikes.length,
-          ratingsCount: finalRatings.length,
-          likes: finalLikes,
-          ratings: finalRatings,
-          uniqueWeeks: uniqueWeeksArray.length,
-          weekIntervals: uniqueWeeksArray
-        }
+        [userId]: activityData
+      }));
+      
+      setUserActivityData(prev => ({
+        ...prev,
+        [userId]: activityData
       }));
     } catch (error) {
       console.error('❌ Error fetching user activity:', error);
