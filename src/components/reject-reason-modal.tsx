@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -31,6 +31,8 @@ export type RejectionReasonType =
   | 'suspicion_not_own_photos'
   | 'wrong_gender_contest';
 
+const STORAGE_KEY = 'rejection_reasons';
+
 const getDefaultRejectionReasons = () => ({
   first_photo_makeup: "First photo – No makeup allowed.",
   first_photo_id_style: "First photo – Must look like an ID photo: face straight to the camera, hands together in front.",
@@ -51,7 +53,27 @@ const getDefaultRejectionReasons = () => ({
   wrong_gender_contest: "You applied for a women's contest – we will open a men's contest soon."
 });
 
-let REJECTION_REASONS: Record<string, string> = getDefaultRejectionReasons();
+const loadRejectionReasons = (): Record<string, string> => {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) {
+      return JSON.parse(stored);
+    }
+  } catch (error) {
+    console.error('Failed to load rejection reasons:', error);
+  }
+  return getDefaultRejectionReasons();
+};
+
+const saveRejectionReasons = (reasons: Record<string, string>) => {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(reasons));
+  } catch (error) {
+    console.error('Failed to save rejection reasons:', error);
+  }
+};
+
+let REJECTION_REASONS: Record<string, string> = loadRejectionReasons();
 
 interface RejectReasonModalProps {
   isOpen: boolean;
@@ -69,7 +91,19 @@ export const RejectReasonModal = ({
   const [selectedReasons, setSelectedReasons] = useState<RejectionReasonType[]>([]);
   const [notes, setNotes] = useState("");
   const [isManageReasonsOpen, setIsManageReasonsOpen] = useState(false);
-  const [rejectionReasons, setRejectionReasons] = useState<Record<string, string>>(REJECTION_REASONS);
+  const [rejectionReasons, setRejectionReasons] = useState<Record<string, string>>(loadRejectionReasons());
+
+  // Update reasons when localStorage changes
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const updated = loadRejectionReasons();
+      setRejectionReasons(updated);
+      REJECTION_REASONS = updated;
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
 
   const handleReasonToggle = (reasonType: RejectionReasonType, checked: boolean) => {
     if (checked) {
@@ -80,8 +114,9 @@ export const RejectReasonModal = ({
   };
 
   const handleSaveReasons = (updatedReasons: Record<string, string>) => {
+    saveRejectionReasons(updatedReasons);
     REJECTION_REASONS = updatedReasons;
-    setRejectionReasons(updatedReasons);
+    setRejectionReasons({ ...updatedReasons });
   };
 
   const handleConfirm = async () => {
