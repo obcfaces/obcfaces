@@ -1,11 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Edit, Copy, Trash2 } from 'lucide-react';
+import { Edit, Copy, Trash2, ChevronDown, ChevronUp } from 'lucide-react';
 import { ContestApplication, ParticipantStatus } from '@/types/admin';
 import { REJECTION_REASONS } from '@/components/reject-reason-modal';
 import { LoadingSpinner } from '@/components/admin/LoadingSpinner';
@@ -37,6 +37,8 @@ export function AdminNewApplicationsTab({
   onRestore,
   loading = false,
 }: AdminNewApplicationsTabProps) {
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+  
   if (loading) {
     return <LoadingSpinner message="Loading applications..." />;
   }
@@ -146,12 +148,31 @@ export function AdminNewApplicationsTab({
                     </div>
                     
                     <div 
-                      className="text-xs text-muted-foreground mb-1 cursor-pointer hover:text-foreground transition-colors"
-                      onClick={() => onEdit(participant)}
-                      title="Click to view full application details"
+                      className="text-xs text-muted-foreground mb-1 cursor-pointer hover:text-foreground transition-colors flex items-center gap-1"
+                      onClick={() => setExpandedId(expandedId === participant.id ? null : participant.id)}
+                      title="Click to view full application data"
                     >
-                      {appData.city} {appData.state} {appData.country}
+                      <span>{appData.city} {appData.state} {appData.country}</span>
+                      {expandedId === participant.id ? (
+                        <ChevronUp className="h-3 w-3" />
+                      ) : (
+                        <ChevronDown className="h-3 w-3" />
+                      )}
                     </div>
+                    
+                    {/* Expandable application data */}
+                    {expandedId === participant.id && (
+                      <div className="text-xs text-muted-foreground space-y-0.5 mb-2 max-h-32 overflow-y-auto">
+                        {Object.entries(appData).map(([key, value]) => {
+                          if (key.includes('url') || key.includes('photo') || !value) return null;
+                          return (
+                            <div key={key} className="truncate">
+                              {String(value)}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
 
                     <div className="text-xs text-muted-foreground mb-1">
                       {appData.email && (
@@ -266,12 +287,31 @@ export function AdminNewApplicationsTab({
                           </span>
                         </div>
                         <div 
-                          className="text-[10px] text-muted-foreground cursor-pointer hover:text-foreground transition-colors"
-                          onClick={() => onEdit(participant)}
-                          title="Click to view full application details"
+                          className="text-[10px] text-muted-foreground cursor-pointer hover:text-foreground transition-colors flex items-center gap-1"
+                          onClick={() => setExpandedId(expandedId === participant.id ? null : participant.id)}
+                          title="Click to view full application data"
                         >
-                          {appData.city}, {appData.country}
+                          <span>{appData.city}, {appData.country}</span>
+                          {expandedId === participant.id ? (
+                            <ChevronUp className="h-2.5 w-2.5" />
+                          ) : (
+                            <ChevronDown className="h-2.5 w-2.5" />
+                          )}
                         </div>
+                        
+                        {/* Expandable application data */}
+                        {expandedId === participant.id && (
+                          <div className="text-[10px] text-muted-foreground space-y-0.5 mt-1 max-h-24 overflow-y-auto">
+                            {Object.entries(appData).map(([key, value]) => {
+                              if (key.includes('url') || key.includes('photo') || !value) return null;
+                              return (
+                                <div key={key} className="truncate">
+                                  {String(value)}
+                                </div>
+                              );
+                            })}
+                          </div>
+                        )}
                       </div>
 
                       <div className="flex items-center gap-1 mt-1">
