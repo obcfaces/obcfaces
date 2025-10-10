@@ -343,19 +343,6 @@ const ApplicationCardWithHistory = ({
                     <SelectItem value="past">Past</SelectItem>
                   </SelectContent>
                 </Select>
-                
-                {/* Edit rejection reason button - only show for rejected items */}
-                {participant.admin_status === 'rejected' && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-6 w-6 p-0"
-                    onClick={() => onReject(participant)}
-                    title="Edit rejection reason"
-                  >
-                    <Edit className="h-3.5 w-3.5" />
-                  </Button>
-                )}
               </div>
             </div>
           </div>
