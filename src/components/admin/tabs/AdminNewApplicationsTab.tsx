@@ -38,7 +38,7 @@ export function AdminNewApplicationsTab({
   loading = false,
 }: AdminNewApplicationsTabProps) {
   if (loading) {
-    return <LoadingSpinner message="Загрузка заявок..." />;
+    return <LoadingSpinner message="Loading applications..." />;
   }
 
   const displayApplications = showDeleted ? deletedApplications : applications;

@@ -35,7 +35,7 @@ export function AdminAllParticipantsTab({
   loading = false,
 }: AdminAllParticipantsTabProps) {
   if (loading) {
-    return <LoadingSpinner message="Загрузка всех участников..." />;
+    return <LoadingSpinner message="Loading all participants..." />;
   }
 
   const [statusFilter, setStatusFilter] = useState('all');

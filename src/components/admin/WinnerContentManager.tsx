@@ -249,7 +249,7 @@ export function WinnerContentManager({
     if (!file.type.startsWith('image/')) {
       toast({
         title: "Ошибка",
-        description: "Пожалуйста, выберите изображение",
+        description: "Please select an image",
         variant: "destructive"
       });
       return;
@@ -313,7 +313,7 @@ export function WinnerContentManager({
     if (!file.type.startsWith('video/')) {
       toast({
         title: "Ошибка",
-        description: "Пожалуйста, выберите видео",
+        description: "Please select a video",
         variant: "destructive"
       });
       return;
@@ -370,7 +370,7 @@ export function WinnerContentManager({
   };
 
   if (loading) {
-    return <div className="p-4">Загрузка...</div>;
+    return <div className="p-4">Loading...</div>;
   }
 
   if (!participantData) {
