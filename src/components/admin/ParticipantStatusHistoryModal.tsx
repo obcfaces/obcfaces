@@ -175,46 +175,58 @@ export const ParticipantStatusHistoryModal: React.FC<ParticipantStatusHistoryMod
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>История статусов - {participantName}</DialogTitle>
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto p-2 md:p-6">
+        <DialogHeader className="pb-1 md:pb-4">
+          <DialogTitle className="text-xs md:text-lg">Status History - {participantName}</DialogTitle>
         </DialogHeader>
         
         {loading ? (
-          <div className="text-center py-8 text-muted-foreground">
+          <div className="text-center py-4 md:py-8 text-muted-foreground text-xs md:text-sm">
             Loading...
           </div>
         ) : sortedEntries.length === 0 ? (
-          <div className="text-center py-8 text-muted-foreground">
-            История статусов отсутствует
+          <div className="text-center py-4 md:py-8 text-muted-foreground text-xs md:text-sm">
+            No status history available
           </div>
         ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Статус</TableHead>
-                <TableHead>Интервал</TableHead>
-                <TableHead>Дата изменения</TableHead>
-                <TableHead>Изменил</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {sortedEntries.map((entry, index) => (
-                <TableRow key={index}>
-                  <TableCell>
-                    <Badge variant={getStatusBadgeVariant(entry.status)}>
-                      {entry.status}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>{entry.week_interval || '—'}</TableCell>
-                  <TableCell>{formatDateTime(entry.changed_at)}</TableCell>
-                  <TableCell className="text-muted-foreground text-xs">
-                    {getChangedByDisplay(entry)}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+          <div className="overflow-x-auto -mx-2 md:mx-0">
+            <table className="w-full border-collapse text-[9px] md:text-sm">
+              <thead>
+                <tr className="border-b">
+                  <th className="text-left py-1 px-0.5 md:p-2 font-semibold">Status</th>
+                  <th className="text-left py-1 px-0.5 md:p-2 font-semibold">Interval</th>
+                  <th className="text-left py-1 px-0.5 md:p-2 font-semibold">Changed</th>
+                  <th className="text-left py-1 px-0.5 md:p-2 font-semibold">By</th>
+                </tr>
+              </thead>
+              <tbody>
+                {sortedEntries.map((entry, index) => (
+                  <tr 
+                    key={index}
+                    className="border-b last:border-b-0 hover:bg-muted/50"
+                  >
+                    <td className="py-1 px-0.5 md:p-2">
+                      <Badge 
+                        variant={getStatusBadgeVariant(entry.status)}
+                        className="text-[8px] md:text-xs px-1 md:px-2 py-0"
+                      >
+                        {entry.status}
+                      </Badge>
+                    </td>
+                    <td className="py-1 px-0.5 md:p-2 text-[8px] md:text-xs text-muted-foreground">
+                      {entry.week_interval || '—'}
+                    </td>
+                    <td className="py-1 px-0.5 md:p-2 text-[8px] md:text-xs whitespace-nowrap">
+                      {formatDateTime(entry.changed_at)}
+                    </td>
+                    <td className="py-1 px-0.5 md:p-2 text-[8px] md:text-xs text-muted-foreground">
+                      {getChangedByDisplay(entry)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </DialogContent>
     </Dialog>
