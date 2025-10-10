@@ -107,7 +107,15 @@ export function WinnerContentManager({
       console.log('🔍 Fetching participant data for:', participantId);
       const { data, error } = await supabase
         .from('weekly_contest_participants')
-        .select('id, user_id, application_data')
+        .select(`
+          id, 
+          user_id, 
+          application_data,
+          week_interval,
+          admin_status,
+          contest_id,
+          weekly_contests!inner(week_start_date, week_end_date)
+        `)
         .eq('id', participantId)
         .single();
       
@@ -116,7 +124,7 @@ export function WinnerContentManager({
       if (data) {
         console.log('✅ Participant data loaded:', JSON.stringify(data, null, 2));
         console.log('📋 Application data keys:', Object.keys(data.application_data || {}));
-        setParticipantData(data as ParticipantData);
+        setParticipantData(data as any);
       }
     } catch (error) {
       console.error('❌ Error fetching participant data:', error);
@@ -394,7 +402,16 @@ export function WinnerContentManager({
   }
 
   // Calculate week interval from participant data
-  const weekInterval = (participantData.application_data as any)?.week_interval || 'N/A';
+  const weekInterval = (participantData as any)?.week_interval || 
+    (() => {
+      const contestData = (participantData as any)?.weekly_contests;
+      if (contestData?.week_start_date && contestData?.week_end_date) {
+        const start = new Date(contestData.week_start_date);
+        const end = new Date(contestData.week_end_date);
+        return `${start.getDate()}/${start.getMonth() + 1}-${end.getDate()}/${end.getMonth() + 1}/${end.getFullYear().toString().slice(-2)}`;
+      }
+      return 'N/A';
+    })();
 
   return (
     <>
@@ -434,18 +451,12 @@ export function WinnerContentManager({
           </div>
         </CardHeader>
         <CardContent className="space-y-4 p-0 sm:p-6">
-          {/* Preview section */}
-          <div className="space-y-3 px-4 sm:px-0">
-            <h4 className="text-sm font-medium flex items-center gap-2">
-              <Eye className="h-4 w-4" />
-              Preview
-            </h4>
-            
-            {/* Winner card - full width on mobile without border */}
-            <div className="rounded-none sm:rounded-lg overflow-hidden bg-white w-full border-0 sm:border -mx-4 sm:mx-0">
+          {/* Winner card - full width on mobile with border */}
+          <div className="px-4 sm:px-0">
+            <div className="border rounded-lg overflow-hidden bg-white w-full">
               {/* First row - contestant card styled like on site */}
               <div className="flex h-36 sm:h-40 md:h-44 gap-px relative">
-                <div className="relative flex-1 max-w-[33.333%]">
+                <div className="relative w-24 sm:w-28 md:w-32">
                   <img 
                     src={(participantData.application_data as any)?.facePhotoUrl || (participantData.application_data as any)?.photo1_url || ''} 
                     alt="Face"
@@ -455,7 +466,7 @@ export function WinnerContentManager({
                     1
                   </div>
                 </div>
-                <div className="relative flex-1 max-w-[33.333%]">
+                <div className="relative w-24 sm:w-28 md:w-32">
                   <img 
                     src={(participantData.application_data as any)?.fullBodyPhotoUrl || (participantData.application_data as any)?.photo2_url || ''} 
                     alt="Full body"
@@ -483,7 +494,7 @@ export function WinnerContentManager({
               <div className="border-t">
                 <div className="flex h-36 sm:h-40 md:h-44 gap-px relative">
                   {/* Payment proof photo */}
-                  <div className="relative flex-1 max-w-[33.333%] group">
+                  <div className="relative w-24 sm:w-28 md:w-32 group">
                     {content.payment_proof_url ? (
                       <>
                         <img 
@@ -531,7 +542,7 @@ export function WinnerContentManager({
                   </div>
 
                   {/* Testimonial video */}
-                  <div className="relative flex-1 max-w-[33.333%] group">
+                  <div className="relative w-24 sm:w-28 md:w-32 group">
                     {content.testimonial_video_url ? (
                       <>
                         <video 
@@ -596,13 +607,6 @@ export function WinnerContentManager({
                   </div>
                 </div>
               </div>
-            </div>
-          </div>
-
-          {/* Upload inputs section - moved below with margin */}
-          <div className="space-y-4 px-4 sm:px-0 mt-6 pb-4 sm:pb-0">
-            <div className="text-sm text-muted-foreground">
-              Click on photo/video areas in the preview to upload or replace content.
             </div>
           </div>
         </CardContent>
