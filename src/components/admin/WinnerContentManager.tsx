@@ -5,9 +5,25 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { Upload, Save, Trash, Eye, Crown, Image as ImageIcon, Video, Play, X } from 'lucide-react';
+import { Upload, Save, Trash, Eye, Crown, Image as ImageIcon, Video, Play, X, MoreVertical } from 'lucide-react';
 import { CompactCardLayout } from '@/components/CompactCardLayout';
 import { getCountryDisplayName } from '@/lib/utils';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface WinnerContentManagerProps {
   participantId?: string;
@@ -57,6 +73,7 @@ export function WinnerContentManager({
   const [saving, setSaving] = useState(false);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [uploadingVideo, setUploadingVideo] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const photoInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
 
@@ -207,10 +224,6 @@ export function WinnerContentManager({
   const handleDelete = async () => {
     if (!content.id) return;
 
-    if (!confirm('Are you sure you want to delete winner content?')) {
-      return;
-    }
-
     try {
       const { error } = await supabase
         .from('winner_content')
@@ -231,6 +244,8 @@ export function WinnerContentManager({
         title: "Success",
         description: "Winner content deleted"
       });
+      
+      setShowDeleteDialog(false);
     } catch (error) {
       console.error('Error deleting winner content:', error);
       toast({
@@ -238,6 +253,7 @@ export function WinnerContentManager({
         description: "Failed to delete content",
         variant: "destructive"
       });
+      setShowDeleteDialog(false);
     }
   };
 
@@ -378,21 +394,38 @@ export function WinnerContentManager({
   }
 
   // Calculate week interval from participant data
-  const weekInterval = (participantData.application_data as any)?.week_interval || 'N/A';
+  const weekInterval = (participantData.application_data as any)?.week_interval || (participantData.application_data as any)?.admin_status || 'this week';
 
   return (
-    <div className="w-full">
-      <Card className="w-full">
+    <>
+      <Card className="w-full max-w-none">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Crown className="h-5 w-5 text-yellow-600" />
-            Winner Content - Week {weekInterval}
-            {participantName && <span className="text-sm font-normal">({participantName})</span>}
-          </CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-base sm:text-lg">
+              {weekInterval}
+            </CardTitle>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-8 w-8">
+                  <MoreVertical className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem 
+                  onClick={() => setShowDeleteDialog(true)}
+                  className="text-destructive focus:text-destructive"
+                  disabled={!content.id}
+                >
+                  <Trash className="h-4 w-4 mr-2" />
+                  Delete
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-4 p-0 sm:p-6">
           {/* Preview section */}
-          <div className="space-y-4">
+          <div className="space-y-4 p-4 sm:p-0">
             <h4 className="text-sm font-medium mb-2 flex items-center gap-2">
               <Eye className="h-4 w-4" />
               Preview
@@ -402,21 +435,21 @@ export function WinnerContentManager({
             <div className="border rounded-lg overflow-hidden bg-white w-full">
               {/* First row - contestant card styled like on site */}
               <div className="flex h-36 sm:h-40 md:h-44 gap-px relative">
-                <div className="relative">
+                <div className="relative flex-1 max-w-[33.333%]">
                   <img 
                     src={(participantData.application_data as any)?.facePhotoUrl || (participantData.application_data as any)?.photo1_url || ''} 
                     alt="Face"
-                    className="w-24 sm:w-28 md:w-32 h-full object-cover"
+                    className="w-full h-full object-cover"
                   />
                   <div className="absolute top-0 left-0 bg-black/70 text-white text-xs font-bold min-w-[20px] h-[20px] flex items-center justify-center">
                     1
                   </div>
                 </div>
-                <div className="relative">
+                <div className="relative flex-1 max-w-[33.333%]">
                   <img 
                     src={(participantData.application_data as any)?.fullBodyPhotoUrl || (participantData.application_data as any)?.photo2_url || ''} 
                     alt="Full body"
-                    className="w-24 sm:w-28 md:w-32 h-full object-cover"
+                    className="w-full h-full object-cover"
                   />
                 </div>
                 <div className="flex-1 p-1 sm:p-2 md:p-3 flex flex-col relative bg-white">
@@ -440,7 +473,7 @@ export function WinnerContentManager({
               <div className="border-t">
                 <div className="flex h-36 sm:h-40 md:h-44 gap-px relative">
                   {/* Payment proof photo */}
-                  <div className="relative w-24 sm:w-28 md:w-32 group">
+                  <div className="relative flex-1 max-w-[33.333%] group">
                     {content.payment_proof_url ? (
                       <>
                         <img 
@@ -488,7 +521,7 @@ export function WinnerContentManager({
                   </div>
 
                   {/* Testimonial video */}
-                  <div className="relative w-24 sm:w-28 md:w-32 group">
+                  <div className="relative flex-1 max-w-[33.333%] group">
                     {content.testimonial_video_url ? (
                       <>
                         <video 
@@ -556,7 +589,7 @@ export function WinnerContentManager({
             </div>
         </div>
 
-        <div className="flex gap-2 pt-4">
+        <div className="flex gap-2 pt-4 px-4 sm:px-0 pb-4 sm:pb-0">
           <Button 
             onClick={handleSave} 
             disabled={saving}
@@ -565,19 +598,30 @@ export function WinnerContentManager({
             <Save className="h-4 w-4 mr-2" />
             {saving ? 'Saving...' : 'Save'}
           </Button>
-          
-          {content.id && (
-            <Button 
-              onClick={handleDelete} 
-              variant="destructive"
-              size="sm"
-            >
-              <Trash className="h-4 w-4" />
-            </Button>
-          )}
         </div>
       </CardContent>
     </Card>
-    </div>
+
+    {/* Delete Confirmation Dialog */}
+    <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+          <AlertDialogDescription>
+            This will permanently delete the winner content for {participantName}. This action cannot be undone.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogAction 
+            onClick={handleDelete} 
+            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+          >
+            Delete
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+    </>
   );
 }
