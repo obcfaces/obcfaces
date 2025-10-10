@@ -185,7 +185,7 @@ const ApplicationCardWithHistory = ({
           {/* History badge - top right corner of second photo */}
           {historyCount > 0 && (
             <div
-              className="absolute top-0 left-[calc(25ch/2)] z-20 bg-primary text-primary-foreground rounded-full w-10 h-10 flex items-center justify-center text-sm font-bold cursor-pointer hover:bg-primary/90 shadow-lg transition-all border-2 border-background"
+              className="absolute top-0 right-[calc(50%-1px)] z-20 bg-primary text-primary-foreground rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold cursor-pointer hover:bg-primary/90 shadow-lg transition-all border-2 border-background"
               onClick={() => setIsHistoryExpanded(!isHistoryExpanded)}
               title={`${historyCount} edit${historyCount > 1 ? 's' : ''} - click to ${isHistoryExpanded ? 'hide' : 'show'}`}
             >
@@ -451,18 +451,6 @@ const ApplicationCardWithHistory = ({
                     </SelectContent>
                   </Select>
                   
-                  {/* Edit rejection reason button - only show for rejected items */}
-                  {participant.admin_status === 'rejected' && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-5 w-5 p-0"
-                      onClick={() => onReject(participant)}
-                      title="Edit rejection reason"
-                    >
-                      <Edit className="h-3 w-3" />
-                    </Button>
-                  )}
                 </div>
               </div>
             </div>
