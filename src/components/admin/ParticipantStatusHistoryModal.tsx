@@ -194,13 +194,13 @@ export const ParticipantStatusHistoryModal: React.FC<ParticipantStatusHistoryMod
           </div>
         ) : (
           <div className="overflow-x-auto -mx-2 md:mx-0">
-            <table className="w-full border-collapse text-xs md:text-sm">
+            <table className="w-full border-collapse text-sm md:text-base">
               <thead>
                 <tr className="border-b">
-                  <th className="text-left py-2 px-1 md:p-3 font-semibold">Status</th>
-                  <th className="text-left py-2 px-1 md:p-3 font-semibold">Interval</th>
-                  <th className="text-left py-2 px-1 md:p-3 font-semibold">Changed</th>
-                  <th className="text-left py-2 px-1 md:p-3 font-semibold">By</th>
+                  <th className="text-left py-2 px-1 md:p-3 font-semibold whitespace-nowrap">Status</th>
+                  <th className="text-left py-2 px-1 md:p-3 font-semibold whitespace-nowrap">Interval</th>
+                  <th className="text-left py-2 px-1 md:p-3 font-semibold whitespace-nowrap">Changed</th>
+                  <th className="text-left py-2 px-1 md:p-3 font-semibold whitespace-nowrap">By</th>
                 </tr>
               </thead>
               <tbody>
@@ -209,21 +209,21 @@ export const ParticipantStatusHistoryModal: React.FC<ParticipantStatusHistoryMod
                     key={index}
                     className="border-b last:border-b-0 hover:bg-muted/50"
                   >
-                    <td className="py-2 px-1 md:p-3">
+                    <td className="py-2 px-1 md:p-3 whitespace-nowrap">
                       <Badge 
                         variant={getStatusBadgeVariant(entry.status)}
-                        className="text-[10px] md:text-xs px-1.5 md:px-2 py-0.5"
+                        className="text-xs md:text-sm px-2 md:px-2.5 py-0.5"
                       >
                         {entry.status}
                       </Badge>
                     </td>
-                    <td className="py-2 px-1 md:p-3 text-[10px] md:text-xs text-muted-foreground">
+                    <td className="py-2 px-1 md:p-3 text-xs md:text-sm text-muted-foreground whitespace-nowrap">
                       {entry.week_interval || '—'}
                     </td>
-                    <td className="py-2 px-1 md:p-3 text-[10px] md:text-xs whitespace-nowrap">
+                    <td className="py-2 px-1 md:p-3 text-xs md:text-sm whitespace-nowrap">
                       {formatDateTime(entry.changed_at)}
                     </td>
-                    <td className="py-2 px-1 md:p-3 text-[10px] md:text-xs text-muted-foreground">
+                    <td className="py-2 px-1 md:p-3 text-xs md:text-sm text-muted-foreground whitespace-nowrap">
                       {getChangedByDisplay(entry)}
                     </td>
                   </tr>
