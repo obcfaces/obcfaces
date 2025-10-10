@@ -4,6 +4,7 @@ import { Badge } from './ui/badge';
 import { Button } from './ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { Edit, Check, Minus, X, Trash2, RotateCcw, Copy } from 'lucide-react';
+import { AdminPhotoModal } from './admin-photo-modal';
 
 interface Application {
   id: string;
@@ -50,6 +51,11 @@ export const ExpandableApplicationHistory: React.FC<ExpandableApplicationHistory
   getApplicationStatusBadge,
 }) => {
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
+  const [photoModalOpen, setPhotoModalOpen] = useState(false);
+  const [selectedPhotos, setSelectedPhotos] = useState<string[]>([]);
+  const [selectedPhotoIndex, setSelectedPhotoIndex] = useState(0);
+  const [selectedName, setSelectedName] = useState('');
+  
   if (!isExpanded) return null;
 
   const previousApplications = applications
@@ -89,7 +95,16 @@ export const ExpandableApplicationHistory: React.FC<ExpandableApplicationHistory
                 <div className="w-[25ch] md:w-[25ch] flex-shrink-0 p-0">
                   <div className="flex gap-px">
                     {appData.photo1_url && (
-                      <div className="w-full">
+                      <div 
+                        className="w-full cursor-pointer"
+                        onClick={() => {
+                          const photos = [appData.photo1_url, appData.photo2_url].filter(Boolean);
+                          setSelectedPhotos(photos);
+                          setSelectedPhotoIndex(0);
+                          setSelectedName(`${appData.first_name} ${appData.last_name}`);
+                          setPhotoModalOpen(true);
+                        }}
+                      >
                         <img 
                           src={appData.photo1_url} 
                           alt="Portrait" 
@@ -102,7 +117,14 @@ export const ExpandableApplicationHistory: React.FC<ExpandableApplicationHistory
                         <img 
                           src={appData.photo2_url} 
                           alt="Full length" 
-                          className="w-full h-36 object-cover"
+                          className="w-full h-36 object-cover cursor-pointer"
+                          onClick={() => {
+                            const photos = [appData.photo1_url, appData.photo2_url].filter(Boolean);
+                            setSelectedPhotos(photos);
+                            setSelectedPhotoIndex(1);
+                            setSelectedName(`${appData.first_name} ${appData.last_name}`);
+                            setPhotoModalOpen(true);
+                          }}
                         />
                         {/* User avatar positioned in top right corner for mobile */}
                         <div className="absolute top-2 right-2 md:hidden">
@@ -273,6 +295,14 @@ export const ExpandableApplicationHistory: React.FC<ExpandableApplicationHistory
           </Card>
         );
       })}
+      
+      <AdminPhotoModal
+        isOpen={photoModalOpen}
+        onClose={() => setPhotoModalOpen(false)}
+        photos={selectedPhotos}
+        currentIndex={selectedPhotoIndex}
+        contestantName={selectedName}
+      />
     </div>
   );
 };
