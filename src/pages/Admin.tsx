@@ -3724,39 +3724,23 @@ const Admin = () => {
               <AdminStatisticsTab />
             </TabsContent>
 
-            <TabsContent value="new-winner" className="space-y-4">
-              <div className="mb-6">
-                <h2 className="text-xl font-semibold">Winner Content Management</h2>
-                <p className="text-muted-foreground">Add and edit additional content for winner cards</p>
-              </div>
-
-              <div className="space-y-6">
-                {weeklyParticipants
-                  .filter(p => p.final_rank === 1) // Show only winners
-                  .map(participant => (
-                  <div key={participant.id} className="border rounded-lg p-4">
-                    <div className="mb-4">
-                      <h3 className="text-lg font-medium">
-                        {participant.profiles?.first_name} {participant.profiles?.last_name}
-                      </h3>
-                      <p className="text-sm text-muted-foreground">
-                        Winner of week {participant.contest_start_date && new Date(participant.contest_start_date).toLocaleDateString()}
-                      </p>
-                    </div>
-                    <WinnerContentManager 
-                      participantId={participant.id}
-                      userId={participant.user_id}
-                      participantName={`${participant.profiles?.first_name || ''} ${participant.profiles?.last_name || ''}`}
-                    />
-                  </div>
-                ))}
-                
-                {weeklyParticipants.filter(p => p.final_rank === 1).length === 0 && (
-                  <div className="text-center py-8 text-muted-foreground">
-                    No winners to display
-                  </div>
-                )}
-              </div>
+            <TabsContent value="new-winner" className="space-y-6">
+              {weeklyParticipants
+                .filter(p => p.final_rank === 1) // Show only winners
+                .map(participant => (
+                  <WinnerContentManager 
+                    key={participant.id}
+                    participantId={participant.id}
+                    userId={participant.user_id}
+                    participantName={`${participant.profiles?.first_name || ''} ${participant.profiles?.last_name || ''}`}
+                  />
+              ))}
+              
+              {weeklyParticipants.filter(p => p.final_rank === 1).length === 0 && (
+                <div className="text-center py-8 text-muted-foreground">
+                  No winners to display
+                </div>
+              )}
             </TabsContent>
 
             </Tabs>
