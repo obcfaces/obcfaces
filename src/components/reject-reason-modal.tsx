@@ -31,7 +31,7 @@ export type RejectionReasonType =
   | 'suspicion_not_own_photos'
   | 'wrong_gender_contest';
 
-let REJECTION_REASONS = {
+const getDefaultRejectionReasons = () => ({
   first_photo_makeup: "First photo – No makeup allowed.",
   first_photo_id_style: "First photo – Must look like an ID photo: face straight to the camera, hands together in front.",
   first_photo_blurry: "First photo – Photo is too blurry/low quality.",
@@ -49,7 +49,9 @@ let REJECTION_REASONS = {
   both_photos_quality: "Both photos – The quality is too low.",
   suspicion_not_own_photos: "Suspicion that the user is not using their own photos.",
   wrong_gender_contest: "You applied for a women's contest – we will open a men's contest soon."
-};
+});
+
+let REJECTION_REASONS: Record<string, string> = getDefaultRejectionReasons();
 
 interface RejectReasonModalProps {
   isOpen: boolean;
@@ -67,6 +69,7 @@ export const RejectReasonModal = ({
   const [selectedReasons, setSelectedReasons] = useState<RejectionReasonType[]>([]);
   const [notes, setNotes] = useState("");
   const [isManageReasonsOpen, setIsManageReasonsOpen] = useState(false);
+  const [rejectionReasons, setRejectionReasons] = useState<Record<string, string>>(REJECTION_REASONS);
 
   const handleReasonToggle = (reasonType: RejectionReasonType, checked: boolean) => {
     if (checked) {
@@ -77,7 +80,8 @@ export const RejectReasonModal = ({
   };
 
   const handleSaveReasons = (updatedReasons: Record<string, string>) => {
-    REJECTION_REASONS = updatedReasons as typeof REJECTION_REASONS;
+    REJECTION_REASONS = updatedReasons;
+    setRejectionReasons(updatedReasons);
   };
 
   const handleConfirm = async () => {
@@ -140,7 +144,7 @@ export const RejectReasonModal = ({
           <div>
             <Label>Rejection Reasons</Label>
             <div className="space-y-3 mt-2 max-h-60 overflow-y-auto">
-              {Object.entries(REJECTION_REASONS).map(([key, label]) => (
+              {Object.entries(rejectionReasons).map(([key, label]) => (
                 <div key={key} className="flex items-start space-x-3">
                   <Checkbox
                     id={key}
@@ -210,7 +214,7 @@ export const RejectReasonModal = ({
     <RejectionReasonsManagerModal
       isOpen={isManageReasonsOpen}
       onClose={() => setIsManageReasonsOpen(false)}
-      currentReasons={REJECTION_REASONS}
+      currentReasons={rejectionReasons}
       onSave={handleSaveReasons}
     />
     </>
