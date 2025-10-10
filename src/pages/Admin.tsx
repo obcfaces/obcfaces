@@ -9044,13 +9044,9 @@ const Admin = () => {
 
             <TabsContent value="new-weekly">
               <AdminWeeklyTab
-                participants={weeklyParticipants.filter(p => adminStatusFilter === 'all' || p.admin_status === adminStatusFilter)}
+                participants={weeklyParticipants}
                 statusFilter={adminStatusFilter}
-                countryFilter={countryFilter}
-                genderFilter={genderFilter}
                 onStatusFilterChange={setAdminStatusFilter}
-                onCountryFilterChange={setCountryFilter}
-                onGenderFilterChange={setGenderFilter}
                 onViewPhotos={openPhotoModal}
                 onEdit={(participant) => {
                   setEditingParticipantData({
@@ -9087,6 +9083,15 @@ const Admin = () => {
                   setSelectedParticipantForVoters(participant);
                   setVotersModalOpen(true);
                 }}
+                onViewStatusHistory={(participantId, participantName, statusHistory) => {
+                  setSelectedStatusHistory({
+                    participantId,
+                    participantName,
+                    statusHistory
+                  });
+                  setStatusHistoryModalOpen(true);
+                }}
+                profiles={profiles}
               />
             </TabsContent>
 

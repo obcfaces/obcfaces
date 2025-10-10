@@ -1,41 +1,70 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Edit, Heart, Star, Trophy } from 'lucide-react';
+import { Edit, Heart, Star, Trophy, Copy, Info } from 'lucide-react';
 import { WeeklyContestParticipant } from '@/types/admin';
+import { Label } from '@/components/ui/label';
 
 interface AdminWeeklyTabProps {
   participants: WeeklyContestParticipant[];
   statusFilter: string;
-  countryFilter: string;
-  genderFilter: string;
   onStatusFilterChange: (value: string) => void;
-  onCountryFilterChange: (value: string) => void;
-  onGenderFilterChange: (value: string) => void;
   onViewPhotos: (images: string[], index: number, name: string) => void;
   onEdit: (participant: WeeklyContestParticipant) => void;
   onStatusChange: (participant: WeeklyContestParticipant, newStatus: string) => Promise<void>;
   onViewVoters?: (participant: { id: string; name: string }) => void;
+  onViewStatusHistory?: (participantId: string, participantName: string, statusHistory: any) => void;
+  profiles?: any[];
 }
 
 export function AdminWeeklyTab({
   participants,
   statusFilter,
-  countryFilter,
-  genderFilter,
   onStatusFilterChange,
-  onCountryFilterChange,
-  onGenderFilterChange,
   onViewPhotos,
   onEdit,
   onStatusChange,
   onViewVoters,
+  onViewStatusHistory,
+  profiles = [],
 }: AdminWeeklyTabProps) {
-  const uniqueCountries = Array.from(
-    new Set(participants.map(p => p.application_data?.country).filter(Boolean))
-  );
+  // Filter participants - show ONLY 'this week' status
+  const filteredParticipants = useMemo(() => {
+    // First filter: only 'this week' status
+    const filteredByStatus = participants.filter(p => 
+      p.admin_status === 'this week' && 
+      (statusFilter === 'all' || p.admin_status === statusFilter)
+    );
+
+    // Remove duplicates based on user_id
+    const uniqueParticipants = filteredByStatus.filter((participant, index, arr) => 
+      arr.findIndex(p => p.user_id === participant.user_id) === index
+    );
+    
+    // Sort participants by rating
+    return uniqueParticipants.sort((a, b) => {
+      if (a.final_rank && !b.final_rank) return -1;
+      if (!a.final_rank && b.final_rank) return 1;
+      if (a.final_rank && b.final_rank) return a.final_rank - b.final_rank;
+      
+      const ratingA = Number(a.average_rating) || 0;
+      const ratingB = Number(b.average_rating) || 0;
+      if (ratingB !== ratingA) return ratingB - ratingA;
+      
+      const votesA = Number(a.total_votes) || 0;
+      const votesB = Number(b.total_votes) || 0;
+      return votesB - votesA;
+    });
+  }, [participants, statusFilter]);
+
+  // Calculate stats
+  const stats = useMemo(() => {
+    const totalVotes = filteredParticipants.reduce((sum, p) => sum + (p.total_votes || 0), 0);
+    // Note: likes calculation would need dailyStats data from parent
+    return { totalVotes };
+  }, [filteredParticipants]);
 
   const getStatusBackgroundColor = (status: string) => {
     switch (status) {
@@ -56,50 +85,49 @@ export function AdminWeeklyTab({
 
   return (
     <div className="space-y-4">
-      <h2 className="text-2xl font-bold">This Week</h2>
+      {/* Statistics */}
+      <div className="mb-4 p-3 bg-muted rounded-lg">
+        <div className="text-sm text-muted-foreground">
+          <div className="text-xs">
+            votes: {stats.totalVotes}, likes: 0
+          </div>
+        </div>
+      </div>
 
-      <div className="flex gap-2 flex-wrap">
+      {/* Admin Status Filter */}
+      <div className="mb-4">
+        <Label className="text-sm font-medium mb-2 block">Admin Status Filter:</Label>
         <Select value={statusFilter} onValueChange={onStatusFilterChange}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Filter by status" />
+          <SelectTrigger className="w-[200px]">
+            <SelectValue placeholder="Select admin status" />
           </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Statuses</SelectItem>
-            <SelectItem value="this week">This Week</SelectItem>
+          <SelectContent className="z-[9999] bg-popover border shadow-lg">
+            <SelectItem value="all">All</SelectItem>
+            <SelectItem value="pending">Pending</SelectItem>
+            <SelectItem value="rejected">Rejected</SelectItem>
+            <SelectItem value="pre next week">Pre Next Week</SelectItem>
             <SelectItem value="next week">Next Week</SelectItem>
             <SelectItem value="next week on site">Next Week On Site</SelectItem>
+            <SelectItem value="this week">This Week</SelectItem>
             <SelectItem value="past">Past</SelectItem>
-          </SelectContent>
-        </Select>
-
-        <Select value={countryFilter} onValueChange={onCountryFilterChange}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Filter by country" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Countries</SelectItem>
-            {uniqueCountries.map((country) => (
-              <SelectItem key={country} value={country}>
-                {country}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
-        <Select value={genderFilter} onValueChange={onGenderFilterChange}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Filter by gender" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Genders</SelectItem>
-            <SelectItem value="female">Female</SelectItem>
-            <SelectItem value="male">Male</SelectItem>
           </SelectContent>
         </Select>
       </div>
 
-      {participants.map((participant) => {
-        const appData = participant.application_data || {};
+      {filteredParticipants.length === 0 ? (
+        <div className="text-center py-8 text-muted-foreground">
+          <p className="text-lg">
+            {statusFilter === 'pending' 
+              ? 'No pending applications found' 
+              : statusFilter === 'rejected'
+              ? 'No rejected applications found'
+              : 'No weekly contest participants found'}
+          </p>
+        </div>
+      ) : (
+        filteredParticipants.map((participant) => {
+          const participantProfile = profiles.find(p => p.id === participant.user_id);
+          const appData = participant.application_data || {};
         const firstName = appData.first_name || '';
         const lastName = appData.last_name || '';
         const photo1 = appData.photo_1_url || appData.photo1_url || '';
@@ -271,12 +299,7 @@ export function AdminWeeklyTab({
             </CardContent>
           </Card>
         );
-      })}
-
-      {participants.length === 0 && (
-        <div className="text-center py-12 text-muted-foreground">
-          No participants found
-        </div>
+        })
       )}
     </div>
   );
