@@ -4774,7 +4774,7 @@ const Admin = () => {
                 
                 <div>
                   <h2 className="text-xl font-semibold">Past Week Participants</h2>
-                  <p className="text-muted-foreground">Участники из прошлых недель с правильными статусами</p>
+                  <p className="text-muted-foreground">Participants from past weeks with correct statuses</p>
                 </div>
                 
                 {/* Past week filter */}
@@ -4904,15 +4904,15 @@ const Admin = () => {
                     );
                   })()}
                   
-                  {/* Фильтр по интервалам недель */}
+                  {/* Filter by week intervals */}
                   <div className="border-t pt-4">
-                    <Label className="text-sm font-medium mb-2 block">Фильтр по интервалам недель:</Label>
+                    <Label className="text-sm font-medium mb-2 block">Filter by week intervals:</Label>
                     <Select value={pastWeekIntervalFilter} onValueChange={setPastWeekIntervalFilter}>
                       <SelectTrigger className="w-full max-w-md">
-                        <SelectValue placeholder="Выберите интервал недели" />
+                        <SelectValue placeholder="Select week interval" />
                       </SelectTrigger>
                       <SelectContent className="z-[9999] bg-popover border shadow-lg">
-                        <SelectItem value="all">Все интервалы</SelectItem>
+                        <SelectItem value="all">All intervals</SelectItem>
                         {getAvailableWeekIntervals().map((interval) => (
                           <SelectItem key={interval.value} value={interval.value}>
                             {interval.label}
@@ -8697,7 +8697,7 @@ const Admin = () => {
                               </div>
                             ))
                           ) : (
-                            <p className="text-sm text-muted-foreground">Загрузка данных...</p>
+                            <p className="text-sm text-muted-foreground">Loading data...</p>
                           )}
                         </div>
                       </div>
@@ -9255,6 +9255,8 @@ const Admin = () => {
                 expandedUserActivity={expandedUserActivity}
                 setExpandedUserActivity={setExpandedUserActivity}
                 userActivityData={userActivityStats}
+                fetchUserActivity={fetchUserActivity}
+                loadingActivity={loadingActivity}
                 isEmailDomainWhitelisted={isEmailDomainWhitelisted}
                 emailDomainStats={emailDomainStats}
                 loading={tabLoading['new-registrations'] || profilesLoading}
