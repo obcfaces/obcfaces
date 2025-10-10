@@ -113,13 +113,11 @@ export const ParticipantStatusHistoryModal: React.FC<ParticipantStatusHistoryMod
   const formatDateTime = (dateStr: string) => {
     try {
       const date = new Date(dateStr);
-      return date.toLocaleString('ru-RU', { 
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-        hour: '2-digit', 
-        minute: '2-digit'
-      });
+      const day = date.getDate();
+      const month = date.toLocaleString('en', { month: 'short' }).toLowerCase();
+      const hours = String(date.getHours()).padStart(2, '0');
+      const minutes = String(date.getMinutes()).padStart(2, '0');
+      return `${day} ${month} ${hours}:${minutes}`;
     } catch {
       return dateStr;
     }
@@ -147,22 +145,23 @@ export const ParticipantStatusHistoryModal: React.FC<ParticipantStatusHistoryMod
 
   const getChangedByDisplay = (entry: StatusHistoryEntry) => {
     if (entry.changed_by_email) {
-      return entry.changed_by_email;
+      // Show first 4 characters of email
+      return entry.changed_by_email.substring(0, 4);
     }
     
     if (entry.change_reason) {
       // If there's a change_reason, it might indicate an automatic change
       if (entry.change_reason.includes('function') || entry.change_reason.includes('automatic')) {
-        return `Автоматически (${entry.change_reason})`;
+        return 'System';
       }
-      return entry.change_reason;
+      return entry.change_reason.substring(0, 10);
     }
     
     if (entry.changed_by) {
-      return `User ID: ${entry.changed_by.substring(0, 8)}...`;
+      return entry.changed_by.substring(0, 4);
     }
     
-    return 'Unknown';
+    return 'System';
   };
 
   const sortedEntries = enrichedEntries.sort((a, b) => 
