@@ -472,7 +472,7 @@ const Admin = () => {
     total_votes_count: number;
   }>>({});
   const [dailyStats, setDailyStats] = useState<Array<{ day_name: string; vote_count: number; like_count: number }>>([]);
-  const [dailyApplicationStats, setDailyApplicationStats] = useState<Array<{ day_name: string; day_date?: string; total_applications: number; approved_applications: number; day_of_week?: number; sort_order?: number }>>([]);
+  const [dailyApplicationStats, setDailyApplicationStats] = useState<Array<{ day_name: string; day_date?: string; total_applications: number; approved_applications: number; status_changed_count?: number; day_of_week?: number; sort_order?: number }>>([]);
   const [dailyRegistrationStats, setDailyRegistrationStats] = useState<Array<{ day_name: string; registration_count: number; suspicious_count: number; day_of_week: number; sort_order: number }>>([]);
   const [registrationStatsByType, setRegistrationStatsByType] = useState<Array<{ 
     stat_type: string; 
@@ -487,6 +487,7 @@ const Admin = () => {
   const [nextWeekDailyStats, setNextWeekDailyStats] = useState<Array<{ day_name: string; like_count: number; dislike_count: number; total_votes: number }>>([]);
   const [nextWeekVotesStats, setNextWeekVotesStats] = useState<Record<string, { like_count: number; dislike_count: number }>>({});
   const [selectedDay, setSelectedDay] = useState<{ day: number; type: 'new' | 'approved' } | null>(null);
+  const [selectedNewAppDay, setSelectedNewAppDay] = useState<string | null>(null);
   const [selectedRegistrationDay, setSelectedRegistrationDay] = useState<{ dayName: string; showSuspicious: boolean } | null>(null);
   const [selectedRegistrationFilter, setSelectedRegistrationFilter] = useState<{ 
     type: 'all' | 'email_verified' | 'unverified' | 'gmail' | 'facebook' | 'suspicious' | 'maybe_suspicious'; 
@@ -1545,9 +1546,27 @@ const Admin = () => {
         return;
       }
 
+      // Get status change counts for each day
+      const statsWithChanges = await Promise.all((data || []).map(async (stat: any) => {
+        // Count applications that changed status from pending to something else on this day
+        const { count } = await supabase
+          .from('weekly_contest_participants')
+          .select('*', { count: 'exact', head: true })
+          .eq('is_active', true)
+          .is('deleted_at', null)
+          .in('admin_status', ['pre next week', 'next week', 'next week on site', 'this week', 'past'])
+          .gte('submitted_at', stat.day_date)
+          .lt('submitted_at', new Date(new Date(stat.day_date).getTime() + 24 * 60 * 60 * 1000).toISOString());
+        
+        return {
+          ...stat,
+          status_changed_count: count || 0
+        };
+      }));
+
       // Ensure proper ordering: Monday to Sunday
       const dayOrder = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-      const sortedData = (data || []).sort((a, b) => {
+      const sortedData = statsWithChanges.sort((a, b) => {
         return dayOrder.indexOf(a.day_name) - dayOrder.indexOf(b.day_name);
       });
 
@@ -3335,18 +3354,32 @@ const Admin = () => {
                   </div>
                   <div className="grid grid-cols-7 gap-1 text-xs">
                     {dailyApplicationStats.map((stat, index) => {
-                      // Format date as DD.MM
+                      // Format date as DD/MM
                       const dateStr = stat.day_date ? 
                         new Date(stat.day_date).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit' }) 
                         : '';
                       
+                      const isSelected = selectedNewAppDay === stat.day_date;
+                      
                       return (
-                        <div key={index} className="text-center p-1 bg-background rounded">
+                        <div 
+                          key={index} 
+                          className={`text-center p-1 rounded cursor-pointer transition-colors ${
+                            isSelected ? 'bg-primary text-primary-foreground' : 'bg-background hover:bg-muted'
+                          }`}
+                          onClick={() => setSelectedNewAppDay(isSelected ? null : stat.day_date || null)}
+                          title="Click to filter applications by this day"
+                        >
                           <div className="font-medium text-xs">{stat.day_name}</div>
                           <div className="text-[10px] text-muted-foreground mb-0.5">{dateStr}</div>
-                          <div className="text-xs text-muted-foreground">
+                          <div className="text-xs">
                             {stat.total_applications}
                           </div>
+                          {stat.status_changed_count !== undefined && stat.status_changed_count > 0 && (
+                            <div className="text-[10px] text-green-600 dark:text-green-400 font-semibold">
+                              {stat.status_changed_count}
+                            </div>
+                          )}
                         </div>
                       );
                     })}
@@ -3356,7 +3389,12 @@ const Admin = () => {
 
               <AdminNewApplicationsTab
                 loading={tabLoading['new-applications']}
-                applications={contestApplications}
+                applications={selectedNewAppDay ? contestApplications.filter(app => {
+                  if (!app.submitted_at) return false;
+                  const appDate = new Date(app.submitted_at).toISOString().split('T')[0];
+                  const filterDate = new Date(selectedNewAppDay).toISOString().split('T')[0];
+                  return appDate === filterDate;
+                }) : contestApplications}
                 deletedApplications={deletedApplications}
                 showDeleted={showDeletedApplications}
                 onToggleDeleted={setShowDeletedApplications}
