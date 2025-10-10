@@ -35,7 +35,7 @@ import { NextWeekVotersModal } from '@/components/next-week-voters-modal';
 import { ContestParticipationModal } from '@/components/contest-participation-modal';
 import { ApplicationEditHistory } from '@/components/ApplicationEditHistory';
 import { ExpandableApplicationHistory } from '@/components/ExpandableApplicationHistory';
-import { WeeklyTransitionButton } from '@/components/WeeklyTransitionButton';
+
 import { WinnerContentManager } from '@/components/admin/WinnerContentManager';
 import { ParticipantStatusHistory } from '@/components/admin/ParticipantStatusHistory';
 import { ParticipantStatusHistoryModal } from '@/components/admin/ParticipantStatusHistoryModal';
@@ -709,7 +709,8 @@ const Admin = () => {
               fetchCardSectionStats(),
               fetchNextWeekApplicationsCount(),
               fetchPreNextWeekParticipants(),
-              fetchNextWeekDailyStats()
+              fetchNextWeekDailyStats(),
+              fetchDailyStats()
             ]);
             break;
 
@@ -3188,9 +3189,8 @@ const Admin = () => {
 
       <div className="min-h-screen bg-gradient-to-br from-background to-muted/20 py-8 md:px-6">
         <div className="max-w-7xl md:mx-auto px-2 md:px-6">
-          <div className="mb-8 flex justify-between items-center">
+          <div className="mb-8">
             <h1 className="text-3xl font-bold mb-2">Admin Panel</h1>
-            <WeeklyTransitionButton />
           </div>
 
           <Tabs value={activeTab} onValueChange={(tab) => {
@@ -9133,6 +9133,7 @@ const Admin = () => {
                 statusFilter={adminStatusFilter}
                 onStatusFilterChange={setAdminStatusFilter}
                 onViewPhotos={openPhotoModal}
+                dailyStats={dailyStats}
                 onEdit={(participant) => {
                   setEditingParticipantData({
                     id: participant.id,

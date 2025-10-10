@@ -19,6 +19,12 @@ interface AdminWeeklyTabProps {
   onViewStatusHistory?: (participantId: string, participantName: string, statusHistory: any) => void;
   profiles?: any[];
   loading?: boolean;
+  dailyStats?: Array<{
+    day_name: string;
+    day_date?: string;
+    vote_count?: number;
+    like_count?: number;
+  }>;
 }
 
 export function AdminWeeklyTab({
@@ -32,6 +38,7 @@ export function AdminWeeklyTab({
   onViewStatusHistory,
   profiles = [],
   loading = false,
+  dailyStats = [],
 }: AdminWeeklyTabProps) {
   if (loading) {
     return <LoadingSpinner message="Loading this week participants..." />;
@@ -91,11 +98,29 @@ export function AdminWeeklyTab({
 
   return (
     <div className="space-y-4">
-      {/* Statistics */}
+      {/* Daily Statistics Table */}
       <div className="mb-4 p-3 bg-muted rounded-lg">
-        <div className="text-sm text-muted-foreground">
+        <div className="text-sm text-muted-foreground space-y-2">
           <div className="text-xs">
-            votes: {stats.totalVotes}, likes: 0
+            votes: {stats.totalVotes}, likes: {dailyStats.reduce((sum, stat) => sum + (stat.like_count || 0), 0)}
+          </div>
+          <div className="grid grid-cols-7 gap-1 text-xs">
+            {dailyStats.map((stat, index) => {
+              // Format date as DD.MM
+              const dateStr = stat.day_date ? 
+                new Date(stat.day_date).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit' }) 
+                : '';
+              
+              return (
+                <div key={index} className="text-center p-1 bg-background rounded">
+                  <div className="font-medium text-xs">{stat.day_name}</div>
+                  <div className="text-[10px] text-muted-foreground mb-0.5">{dateStr}</div>
+                  <div className="text-xs text-muted-foreground">
+                    {stat.vote_count || 0}-{stat.like_count || 0}
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>
