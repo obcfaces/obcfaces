@@ -91,7 +91,11 @@ export const RejectionReasonsManagerModal = ({
   const handleAddNewReason = () => {
     if (!newReason.text.trim()) return;
 
-    const orderNum = newReason.sortOrder ? parseInt(newReason.sortOrder) : reasons.length + 1;
+    // If no order specified, use last position + 1
+    const orderNum = newReason.sortOrder && newReason.sortOrder.trim() 
+      ? parseInt(newReason.sortOrder) 
+      : reasons.length + 1;
+    
     const key = `custom_${Date.now()}`;
 
     const newReasonObj: RejectionReason = {
@@ -127,6 +131,10 @@ export const RejectionReasonsManagerModal = ({
     });
     console.log('💾 Manager Modal: Calling onSave with:', updatedReasons);
     onSave(updatedReasons);
+    
+    // Trigger storage event manually for same-window update
+    window.dispatchEvent(new Event('storage'));
+    
     onClose();
   };
 
