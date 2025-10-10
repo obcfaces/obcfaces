@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
+import { saveDeviceFingerprint, getDeviceFingerprint } from '@/utils/fingerprint';
 
 // Handles Supabase email confirmation / magic-link callbacks globally
 const AuthCallbackHandler = () => {
@@ -55,6 +56,53 @@ const AuthCallbackHandler = () => {
         handledRef.current = href;
         
         console.log('Auth callback successful:', data);
+
+        // CRITICAL: Collect fingerprint data for OAuth users right after successful authentication
+        if (data.session?.user) {
+          try {
+            console.log('🔐 OAuth user authenticated, collecting fingerprint data...');
+            
+            // Save fingerprint
+            const fpId = await saveDeviceFingerprint(data.session.user.id);
+            
+            // Get full fingerprint data
+            const fullFingerprintData = await getDeviceFingerprint();
+            
+            // Get IP address
+            const ipResponse = await fetch('https://api.ipify.org?format=json');
+            const ipData = await ipResponse.json();
+            
+            // Determine login method (OAuth provider)
+            const loginMethod = data.session.user.app_metadata?.provider || 'email';
+            
+            console.log('📱 Saving OAuth fingerprint for user:', { 
+              userId: data.session.user.id, 
+              loginMethod, 
+              fpId,
+              ip: ipData.ip 
+            });
+            
+            // Call edge function to log full fingerprint data
+            const { error: fpError } = await supabase.functions.invoke('auth-login-tracker', {
+              body: {
+                userId: data.session.user.id,
+                loginMethod,
+                ipAddress: ipData.ip,
+                userAgent: navigator.userAgent,
+                fingerprintId: fpId,
+                fingerprintData: fullFingerprintData
+              }
+            });
+            
+            if (fpError) {
+              console.error('❌ Error calling auth-login-tracker:', fpError);
+            } else {
+              console.log('✅ Successfully logged OAuth fingerprint data');
+            }
+          } catch (fpError) {
+            console.error('❌ Error collecting OAuth fingerprint:', fpError);
+          }
+        }
 
         // Clean URL from auth params
         const url = new URL(window.location.href);
