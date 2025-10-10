@@ -229,12 +229,12 @@ const ApplicationCardWithHistory = ({
           </Button>
           
           {/* Desktop layout */}
-          <div className="hidden md:flex md:overflow-visible">
+          <div className="hidden md:flex md:overflow-visible h-[149px]">
             {/* Column 1: Photos - Fixed width */}
-            <div className="w-[300px] flex-shrink-0 p-0">
+            <div className="w-[300px] h-[149px] flex-shrink-0 p-0">
               <div className="flex gap-px h-[149px]">
                 {photo1 && (
-                  <div className="w-[150px] h-[149px] flex-shrink-0 relative">
+                  <div className="w-[150px] h-[149px] flex-shrink-0 relative overflow-hidden">
                     <img 
                       src={photo1}
                       alt="Portrait"
@@ -249,7 +249,7 @@ const ApplicationCardWithHistory = ({
                   </div>
                 )}
                 {photo2 && (
-                  <div className="w-[150px] h-[149px] flex-shrink-0 relative">
+                  <div className="w-[150px] h-[149px] flex-shrink-0 relative overflow-hidden">
                     <img 
                       src={photo2} 
                       alt="Full length"
@@ -270,7 +270,7 @@ const ApplicationCardWithHistory = ({
             </div>
 
             {/* Column 2: Information - Fixed width */}
-            <div className="w-[300px] flex-shrink-0 p-4">
+            <div className="w-[300px] h-[149px] flex-shrink-0 p-4 overflow-hidden">
               <div className="flex items-center gap-2 mb-1">
                 <Avatar className="h-6 w-6 flex-shrink-0">
                   <AvatarImage src={photo1 || ''} />
