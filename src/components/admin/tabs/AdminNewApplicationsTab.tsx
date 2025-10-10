@@ -228,77 +228,74 @@ const ApplicationCardWithHistory = ({
             <Edit className="w-4 h-4" />
           </Button>
           
-          {/* Desktop/Tablet layout */}
+          {/* Desktop/Tablet layout - same style as mobile */}
           <div className="hidden md:flex h-[149px]">
-            {/* Column 1: Photos - Fixed width */}
-            <div className="w-[200px] h-[149px] flex-shrink-0">
-              <div className="flex gap-px h-[149px]">
-                {photo1 && (
-                  <div className="w-[100px] h-[149px] flex-shrink-0 relative overflow-hidden">
-                    <img 
-                      src={photo1}
-                      alt="Portrait"
-                      className="w-full h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
-                      onClick={() => onViewPhotos([photo1, photo2].filter(Boolean), 0, `${firstName} ${lastName}`)}
-                    />
-                    {['this week', 'next week', 'next week on site', 'pre next week'].includes(participant.admin_status || '') && (
-                      <Badge variant="outline" className="absolute bottom-1 left-1 text-[10px] px-1 py-0 h-4 bg-green-500/90 text-white border-green-600 shadow-sm">
-                        on site
-                      </Badge>
-                    )}
+            {/* Photos section - Fixed width */}
+            <div className="flex gap-px w-[200px] flex-shrink-0 h-[149px]">
+              {photo1 && (
+                <div className="w-[100px] h-[149px] flex-shrink-0 relative overflow-hidden">
+                  <img 
+                    src={photo1} 
+                    alt="Portrait" 
+                    className="w-full h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                    onClick={() => onViewPhotos([photo1, photo2].filter(Boolean), 0, `${firstName} ${lastName}`)}
+                  />
+                  {['this week', 'next week', 'next week on site', 'pre next week'].includes(participant.admin_status || '') && (
+                    <Badge variant="outline" className="absolute bottom-1 left-1 text-[10px] px-1 py-0 h-4 bg-green-500/90 text-white border-green-600 shadow-sm">
+                      on site
+                    </Badge>
+                  )}
+                </div>
+              )}
+              {photo2 && (
+                <div className="w-[100px] h-[149px] flex-shrink-0 relative overflow-hidden">
+                  <img 
+                    src={photo2} 
+                    alt="Full length" 
+                    className="w-full h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                    onClick={() => onViewPhotos([photo1, photo2].filter(Boolean), 1, `${firstName} ${lastName}`)}
+                  />
+                </div>
+              )}
+              {!photo2 && (
+                <div className="w-[100px] h-[149px] flex-shrink-0 bg-muted flex items-center justify-center border border-border overflow-hidden">
+                  <div className="text-center text-muted-foreground">
+                    <p className="text-xs font-medium">No Photo 2</p>
                   </div>
-                )}
-                {photo2 && (
-                  <div className="w-[100px] h-[149px] flex-shrink-0 relative overflow-hidden">
-                    <img 
-                      src={photo2} 
-                      alt="Full length"
-                      className="w-full h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
-                      onClick={() => onViewPhotos([photo1, photo2].filter(Boolean), 1, `${firstName} ${lastName}`)}
-                    />
-                  </div>
-                )}
-                {!photo2 && (
-                  <div className="w-[100px] h-[149px] flex-shrink-0 bg-muted flex items-center justify-center border border-border overflow-hidden">
-                    <div className="text-center text-muted-foreground">
-                      <p className="text-xs font-medium">No Photo 2</p>
-                    </div>
-                  </div>
-                )}
-              </div>
+                </div>
+              )}
             </div>
 
-            {/* Column 2: Information */}
-            <div className="flex-1 h-[149px] p-4 overflow-hidden flex flex-col justify-between">
+            {/* Info section - same as mobile */}
+            <div className="flex-1 p-2 flex flex-col justify-between overflow-hidden">
               <div>
-                <div className="flex items-center gap-2 mb-1">
-                  <Avatar className="h-6 w-6 flex-shrink-0">
+                <div className="flex items-center gap-1 mb-0.5">
+                  <Avatar className="h-5 w-5 flex-shrink-0">
                     <AvatarImage src={photo1 || ''} />
-                    <AvatarFallback className="text-xs">
+                    <AvatarFallback className="text-[10px]">
                       {firstName?.charAt(0) || 'U'}
                     </AvatarFallback>
                   </Avatar>
-                  <span className="text-sm font-semibold whitespace-nowrap flex items-center gap-1">
+                  <span className="text-xs font-semibold">
                     {firstName} {lastName} {appData.birth_year ? new Date().getFullYear() - parseInt(appData.birth_year) : ''}
                   </span>
                 </div>
-                
                 <div 
-                  className="text-xs text-muted-foreground mb-1 cursor-pointer hover:text-foreground transition-colors flex items-center gap-1"
+                  className="text-[10px] text-muted-foreground cursor-pointer hover:text-foreground transition-colors flex items-center gap-1 mb-1"
                   onClick={() => setExpandedId(expandedId === participant.id ? null : participant.id)}
                   title="Click to view full application data"
                 >
-                  <span>{appData.city} {appData.state} {appData.country}</span>
+                  <span>{appData.city}, {appData.country}</span>
                   {expandedId === participant.id ? (
-                    <ChevronUp className="h-3 w-3" />
+                    <ChevronUp className="h-2.5 w-2.5" />
                   ) : (
-                    <ChevronDown className="h-3 w-3" />
+                    <ChevronDown className="h-2.5 w-2.5" />
                   )}
                 </div>
                 
                 {/* Expandable application data */}
                 {expandedId === participant.id && (
-                  <div className="text-sm text-muted-foreground mb-2 max-h-20 overflow-y-auto">
+                  <div className="text-xs text-muted-foreground mt-1 max-h-20 overflow-y-auto">
                     {Object.entries(appData).map(([key, value], index) => {
                       if (key.includes('url') || key.includes('photo') || !value) return null;
                       return (
@@ -311,25 +308,20 @@ const ApplicationCardWithHistory = ({
                   </div>
                 )}
 
-                <div className="text-xs text-muted-foreground mb-1">
-                  {appData.email && (
-                    <div className="flex items-center gap-1">
-                      <span 
-                        className="cursor-pointer truncate" 
-                        title={appData.email}
-                      >
-                        {appData.email.substring(0, 20)}...
-                      </span>
-                      <Copy 
-                        className="h-3 w-3 flex-shrink-0 cursor-pointer hover:text-foreground" 
-                        onClick={() => navigator.clipboard.writeText(appData.email || '')}
-                      />
-                    </div>
-                  )}
-                </div>
+                {appData.email && (
+                  <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
+                    <span className="cursor-pointer truncate" title={appData.email}>
+                      {appData.email.substring(0, 20)}...
+                    </span>
+                    <Copy 
+                      className="h-2.5 w-2.5 flex-shrink-0 cursor-pointer hover:text-foreground" 
+                      onClick={() => navigator.clipboard.writeText(appData.email || '')}
+                    />
+                  </div>
+                )}
               </div>
               
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 mt-2">
                 <Select 
                   value={participant.admin_status || 'pending'}
                   onValueChange={(value) => {
@@ -340,7 +332,7 @@ const ApplicationCardWithHistory = ({
                     }
                   }}
                 >
-                  <SelectTrigger className={`w-[120px] h-7 text-xs ${getStatusBackgroundColor(participant.admin_status || 'pending')}`}>
+                  <SelectTrigger className={`w-[110px] h-6 text-xs ${getStatusBackgroundColor(participant.admin_status || 'pending')}`}>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent className="z-[9999] bg-popover border shadow-lg">
