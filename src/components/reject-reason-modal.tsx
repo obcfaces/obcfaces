@@ -122,11 +122,11 @@ export const RejectReasonModal = ({
   };
 
   const handleSaveReasons = (updatedReasons: Record<string, string>) => {
+    console.log('💾 Saving updated reasons:', updatedReasons);
     saveRejectionReasons(updatedReasons);
     REJECTION_REASONS = updatedReasons;
     setRejectionReasons(updatedReasons);
-    // Trigger storage event manually for same window
-    window.dispatchEvent(new Event('storage'));
+    console.log('💾 Reasons saved and state updated');
   };
 
   const handleConfirm = async () => {

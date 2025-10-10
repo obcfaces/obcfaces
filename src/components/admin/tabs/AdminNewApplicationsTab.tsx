@@ -5,7 +5,8 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Edit, Copy, Trash2, ChevronDown, ChevronUp } from 'lucide-react';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Edit, Copy, Trash2, ChevronDown, ChevronUp, MoreVertical } from 'lucide-react';
 import { ContestApplication, ParticipantStatus } from '@/types/admin';
 import { REJECTION_REASONS } from '@/components/reject-reason-modal';
 import { LoadingSpinner } from '@/components/admin/LoadingSpinner';
@@ -156,9 +157,23 @@ const ApplicationCardWithHistory = ({
   const [isHistoryExpanded, setIsHistoryExpanded] = useState(false);
   const { history, loading } = useApplicationHistory(participant.id);
   
+  console.log('🔵 ApplicationCard History Debug:', {
+    participantId: participant.id,
+    participantName: `${firstName} ${lastName}`,
+    historyLength: history.length,
+    loading,
+    history: history.map(h => ({
+      id: h.id,
+      created_at: h.created_at,
+      status: h.status
+    }))
+  });
+  
   // Filter out the current version from history
   const historyItems = history.filter(h => h.id !== participant.id);
   const historyCount = historyItems.length;
+  
+  console.log('🔵 Filtered history count:', historyCount);
 
   return (
     <div className="space-y-0">
@@ -306,7 +321,7 @@ const ApplicationCardWithHistory = ({
                     }
                   }}
                 >
-                  <SelectTrigger className={`w-28 h-6 text-xs ${getStatusBackgroundColor(participant.admin_status || 'pending')}`}>
+                  <SelectTrigger className={`w-24 h-6 text-xs ${getStatusBackgroundColor(participant.admin_status || 'pending')}`}>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent className="z-[9999] bg-popover border shadow-lg">
@@ -337,14 +352,26 @@ const ApplicationCardWithHistory = ({
                   {`${((participant as any).average_rating || 0).toFixed(1)} (${(participant as any).total_votes || 0})`}
                 </div>
                 
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  className="h-6 w-6 p-0 text-destructive hover:text-destructive hover:bg-destructive/10"
-                  onClick={() => participant.deleted_at ? onRestore(participant) : onDelete(participant)}
-                >
-                  <Trash2 className="h-3.5 w-3.5" />
-                </Button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-6 w-6 p-0"
+                    >
+                      <MoreVertical className="h-3.5 w-3.5" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="z-[9999]">
+                    <DropdownMenuItem
+                      onClick={() => participant.deleted_at ? onRestore(participant) : onDelete(participant)}
+                      className="text-destructive focus:text-destructive"
+                    >
+                      <Trash2 className="h-3.5 w-3.5 mr-2" />
+                      {participant.deleted_at ? 'Restore' : 'Delete'}
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             </div>
           </div>
@@ -444,14 +471,26 @@ const ApplicationCardWithHistory = ({
                     </SelectContent>
                   </Select>
                   
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    className="h-5 w-5 p-0"
-                    onClick={() => participant.deleted_at ? onRestore(participant) : onDelete(participant)}
-                  >
-                    <Trash2 className="h-3 w-3" />
-                  </Button>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-5 w-5 p-0"
+                      >
+                        <MoreVertical className="h-3 w-3" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="z-[9999]">
+                      <DropdownMenuItem
+                        onClick={() => participant.deleted_at ? onRestore(participant) : onDelete(participant)}
+                        className="text-destructive focus:text-destructive"
+                      >
+                        <Trash2 className="h-3 w-3 mr-2" />
+                        {participant.deleted_at ? 'Restore' : 'Delete'}
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
               </div>
             </div>
