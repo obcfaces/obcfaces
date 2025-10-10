@@ -47,13 +47,18 @@ export const ParticipantStatusHistoryModal: React.FC<ParticipantStatusHistoryMod
     
     if (typeof history === 'object' && !Array.isArray(history)) {
       return Object.entries(history)
-        .filter(([status, data]: [string, any]) => data !== null && data !== undefined)
+        .filter(([status, data]: [string, any]) => {
+          // Filter out metadata fields that aren't status entries
+          if (status === 'changed_at' || status === 'changed_by' || status === 'change_reason') return false;
+          // Only keep entries that have objects with changed_at
+          return data !== null && data !== undefined && typeof data === 'object' && data.changed_at;
+        })
         .map(([status, data]: [string, any]) => ({
           status,
           changed_at: data.changed_at || data.timestamp || new Date().toISOString(),
-          changed_by: data.changed_by,
+          changed_by: data.changed_by || data.changed_via,
           changed_by_email: data.changed_by_email,
-          week_interval: data.week_interval || '',
+          week_interval: data.week_interval || `${data.week_start_date || ''}-${data.week_end_date || ''}` || '',
           change_reason: data.change_reason || data.reason
         }));
     }
