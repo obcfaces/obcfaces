@@ -358,10 +358,10 @@ export function AdminRegistrationsTab({
       />
 
       {/* Filters */}
-      <div className="flex gap-2 flex-wrap items-center">
+      <div className="flex gap-2 items-center overflow-x-auto">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="sm" className="min-w-[140px] justify-between">
+            <Button variant="outline" size="sm" className="whitespace-nowrap min-w-[120px] justify-between">
               {verificationFilter === 'all' ? 'All Users' : 
                verificationFilter === 'verified' ? 'Verified' : 'Unverified'}
               <ChevronDown className="ml-2 h-4 w-4" />
@@ -376,7 +376,7 @@ export function AdminRegistrationsTab({
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="sm" className="min-w-[140px] justify-between">
+            <Button variant="outline" size="sm" className="whitespace-nowrap min-w-[120px] justify-between">
               {roleFilter === 'all' ? 'All Roles' :
                roleFilter === 'suspicious' ? 'Suspicious' :
                roleFilter === 'usual' ? 'Usual' :
@@ -398,9 +398,10 @@ export function AdminRegistrationsTab({
         <Button
           variant={maybeSuspiciousActive ? 'destructive' : 'outline'}
           size="sm"
+          className="whitespace-nowrap"
           onClick={() => setMaybeSuspiciousActive(!maybeSuspiciousActive)}
         >
-          Suspicious {maybeSuspiciousCount > 0 ? `(${maybeSuspiciousCount})` : ''}
+          Maybe {maybeSuspiciousCount > 0 ? `(${maybeSuspiciousCount})` : ''}
         </Button>
       </div>
 
