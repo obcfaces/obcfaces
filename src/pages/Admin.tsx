@@ -2053,11 +2053,17 @@ const Admin = () => {
   // Fetch user voting statistics
   const fetchUserVotingStats = async () => {
     try {
+      console.log('🔄 Starting to fetch user voting stats...');
       const { data, error } = await supabase
         .from('user_voting_stats')
         .select('user_id, is_regular_voter, voting_week_intervals, unique_weeks_count, total_votes_count');
       
-      if (error) throw error;
+      if (error) {
+        console.error('❌ Error fetching user voting stats:', error);
+        throw error;
+      }
+      
+      console.log('📊 Raw voting stats data received:', data?.length || 0, 'records');
       
       // Convert to map for easy lookup
       const statsMap: Record<string, any> = {};
@@ -2066,9 +2072,10 @@ const Admin = () => {
       });
       
       setUserVotingStats(statsMap);
-      console.log('✅ Voting stats loaded:', Object.keys(statsMap).length, 'users');
+      console.log('✅ Voting stats loaded and set to state:', Object.keys(statsMap).length, 'users');
+      console.log('📊 Sample voting stat:', data && data.length > 0 ? data[0] : 'No data');
     } catch (error) {
-      console.error('Error fetching user voting stats:', error);
+      console.error('❌ Error in fetchUserVotingStats:', error);
     }
   };
 
@@ -2086,11 +2093,17 @@ const Admin = () => {
   // Fetch user activity data (likes given)
   const fetchUserActivityData = async () => {
     try {
+      console.log('🔄 Starting to fetch user activity data (likes)...');
       const { data, error } = await supabase
         .from('likes')
         .select('user_id');
       
-      if (error) throw error;
+      if (error) {
+        console.error('❌ Error fetching likes data:', error);
+        throw error;
+      }
+      
+      console.log('❤️ Raw likes data received:', data?.length || 0, 'records');
       
       // Count likes given by each user
       const likesMap: Record<string, any> = {};
@@ -2102,9 +2115,13 @@ const Admin = () => {
       });
       
       setUserActivityData(likesMap);
-      console.log('✅ User activity data loaded:', Object.keys(likesMap).length, 'users');
+      console.log('✅ User activity data loaded and set to state:', Object.keys(likesMap).length, 'users');
+      console.log('❤️ Sample activity data:', Object.keys(likesMap).length > 0 ? {
+        userId: Object.keys(likesMap)[0],
+        likes: likesMap[Object.keys(likesMap)[0]].likes_given
+      } : 'No data');
     } catch (error) {
-      console.error('Error fetching user activity data:', error);
+      console.error('❌ Error in fetchUserActivityData:', error);
     }
   };
 

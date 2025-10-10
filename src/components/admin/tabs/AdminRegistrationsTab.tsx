@@ -60,6 +60,21 @@ export function AdminRegistrationsTab({
   const itemsPerPage = 20;
   const [expandedFingerprint, setExpandedFingerprint] = useState<string | null>(null);
 
+  // Debug logging for data availability
+  console.log('📊 AdminRegistrationsTab data check:', {
+    profilesCount: profiles.length,
+    votingStatsKeys: Object.keys(userVotingStats).length,
+    activityDataKeys: Object.keys(userActivityData).length,
+    sampleVotingStat: Object.keys(userVotingStats).length > 0 ? {
+      userId: Object.keys(userVotingStats)[0],
+      stats: userVotingStats[Object.keys(userVotingStats)[0]]
+    } : 'No voting stats',
+    sampleActivityData: Object.keys(userActivityData).length > 0 ? {
+      userId: Object.keys(userActivityData)[0],
+      data: userActivityData[Object.keys(userActivityData)[0]]
+    } : 'No activity data'
+  });
+
   // Calculate weekly registration statistics
   const weeklyStats = useMemo(() => {
     const stats = {

@@ -99,6 +99,8 @@ const AuthCallbackHandler = () => {
             } else {
               console.log('✅ Successfully logged OAuth fingerprint data');
             }
+            
+            console.log('✅ Profile fingerprint data saved to login logs');
           } catch (fpError) {
             console.error('❌ Error collecting OAuth fingerprint:', fpError);
           }
