@@ -29,14 +29,14 @@ export const BackupTrigger = () => {
         retentionDays: 30
       });
 
-      setLastBackup(new Date().toLocaleString('ru-RU'));
-      toast.success('Бэкап успешно создан', {
+      setLastBackup(new Date().toLocaleString('en-US'));
+      toast.success('Backup created successfully', {
         description: `ID: ${backupId}`
       });
     } catch (error) {
       console.error('Backup failed:', error);
-      toast.error('Ошибка создания бэкапа', {
-        description: error instanceof Error ? error.message : 'Неизвестная ошибка'
+      toast.error('Backup creation failed', {
+        description: error instanceof Error ? error.message : 'Unknown error'
       });
     } finally {
       setIsCreating(false);
@@ -48,12 +48,12 @@ export const BackupTrigger = () => {
       <div className="flex-1">
         <h3 className="text-lg font-semibold flex items-center gap-2">
           <Database className="h-5 w-5" />
-          Создание бэкапа
+          Database Backup
         </h3>
         {lastBackup && (
           <p className="text-sm text-muted-foreground mt-1 flex items-center gap-2">
             <CheckCircle className="h-4 w-4 text-green-500" />
-            Последний бэкап: {lastBackup}
+            Last backup: {lastBackup}
           </p>
         )}
       </div>
@@ -65,12 +65,12 @@ export const BackupTrigger = () => {
         {isCreating ? (
           <>
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            Создание...
+            Creating...
           </>
         ) : (
           <>
             <Database className="mr-2 h-4 w-4" />
-            Создать бэкап
+            Create Backup
           </>
         )}
       </Button>
