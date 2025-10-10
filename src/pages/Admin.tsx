@@ -3197,137 +3197,124 @@ const Admin = () => {
             console.log('📑 Tab changed to:', tab);
             setActiveTab(tab);
           }} className="space-y-6">
-            {/* First Row: Current Tabs */}
-            {/* Mobile layout: Single row with all tabs */}
+            {/* First Row: New Refactored Tabs */}
+            <div className="mb-3 text-sm font-semibold text-muted-foreground">
+              🔧 New Structure (Testing)
+            </div>
+            
+            {/* Mobile layout for new tabs */}
             <div className="md:hidden">
-              <TabsList className="grid grid-cols-8 w-full">
-                <TabsTrigger value="new1" className="text-xs">
-                  New1
+              <TabsList className="grid grid-cols-9 w-full gap-1">
+                <TabsTrigger value="new-applications" className="text-[11px] px-1 bg-blue-100">
+                  New
                 </TabsTrigger>
-                <TabsTrigger value="prenextweek" className="text-xs">
+                <TabsTrigger value="new-pre-next" className="text-[11px] px-1 bg-blue-100">
                   Pre
                 </TabsTrigger>
-                <TabsTrigger value="nextweek" className="text-xs">
+                <TabsTrigger value="new-next-week" className="text-[11px] px-1 bg-blue-100">
                   Next
                 </TabsTrigger>
-                <TabsTrigger value="weekly" className="text-xs">
+                <TabsTrigger value="new-weekly" className="text-[11px] px-1 bg-blue-100">
                   This
                 </TabsTrigger>
-                <TabsTrigger value="pastweek" className="text-xs">
+                <TabsTrigger value="new-past" className="text-[11px] px-1 bg-blue-100">
                   Past
                 </TabsTrigger>
-                <TabsTrigger value="all" className="text-xs">
+                <TabsTrigger value="new-all" className="text-[11px] px-1 bg-blue-100">
                   All
                 </TabsTrigger>
-                <TabsTrigger value="registrations" className="text-xs">
+                <TabsTrigger value="new-registrations" className="text-[11px] px-1 bg-blue-100">
                   Reg
                 </TabsTrigger>
-                <TabsTrigger value="stat" className="text-xs">
+                <TabsTrigger value="new-statistics" className="text-[11px] px-1 bg-blue-100">
                   Stat
                 </TabsTrigger>
-                <TabsTrigger value="winnercontent" className="text-xs">
-                  Win
+                <TabsTrigger value="new-winner" className="text-[11px] px-1 bg-blue-100">
+                  W
                 </TabsTrigger>
               </TabsList>
             </div>
             
-            {/* Desktop layout - single row */}
-            <TabsList className="hidden md:flex">
-              <TabsTrigger value="new1">
+            {/* Desktop layout for new tabs */}
+            <TabsList className="hidden md:flex bg-blue-50 gap-1">
+              <TabsTrigger value="new-applications" className="bg-blue-100 px-4">
                 New1
               </TabsTrigger>
-              <TabsTrigger value="prenextweek">
+              <TabsTrigger value="new-pre-next" className="bg-blue-100 px-4">
                 Pre
               </TabsTrigger>
-              <TabsTrigger value="nextweek">
+              <TabsTrigger value="new-next-week" className="bg-blue-100 px-4">
                 Next
               </TabsTrigger>
-              <TabsTrigger value="weekly">
+              <TabsTrigger value="new-weekly" className="bg-blue-100 px-4">
                 This
               </TabsTrigger>
-              <TabsTrigger value="pastweek">
+              <TabsTrigger value="new-past" className="bg-blue-100 px-4">
                 Past
               </TabsTrigger>
-              <TabsTrigger value="all">
+              <TabsTrigger value="new-all" className="bg-blue-100 px-4">
                 All
               </TabsTrigger>
-              <TabsTrigger value="registrations">
+              <TabsTrigger value="new-registrations" className="bg-blue-100 px-4">
                 Reg
               </TabsTrigger>
-              <TabsTrigger value="stat">
+              <TabsTrigger value="new-statistics" className="bg-blue-100 px-4">
                 Stat
               </TabsTrigger>
-              <TabsTrigger value="winnercontent">
-                Win
+              <TabsTrigger value="new-winner" className="bg-blue-100 px-4">
+                W
               </TabsTrigger>
             </TabsList>
 
-            {/* Second Row: New Refactored Tabs */}
-            <div className="border-t pt-4 mt-4">
-              <div className="mb-3 text-sm font-semibold text-muted-foreground">
-                🔧 New Structure (Testing)
+            {/* Old Tabs - Don't Use */}
+            <div className="border-t pt-4 mt-6">
+              <div className="mb-3 text-sm font-bold text-red-600">
+                ⚠️ DON'T USE - Old Structure
               </div>
-              {/* Mobile layout for new tabs */}
+              
+              {/* Mobile layout: Single row with all tabs */}
               <div className="md:hidden">
-                <TabsList className="grid grid-cols-10 w-full gap-0.5">
-                  <TabsTrigger value="new-applications" className="text-[10px] px-0.5 bg-blue-100">
-                    New
+                <TabsList className="grid grid-cols-6 w-full opacity-50">
+                  <TabsTrigger value="new1" className="text-xs">
+                    New1
                   </TabsTrigger>
-                  <TabsTrigger value="new-pre-next" className="text-[10px] px-0.5 bg-blue-100">
-                    Pre
-                  </TabsTrigger>
-                  <TabsTrigger value="new-next-week" className="text-[10px] px-0.5 bg-blue-100">
-                    Next
-                  </TabsTrigger>
-                  <TabsTrigger value="new-weekly" className="text-[10px] px-0.5 bg-blue-100">
+                  <TabsTrigger value="weekly" className="text-xs">
                     This
                   </TabsTrigger>
-                  <TabsTrigger value="new-past" className="text-[10px] px-0.5 bg-blue-100">
+                  <TabsTrigger value="pastweek" className="text-xs">
                     Past
                   </TabsTrigger>
-                  <TabsTrigger value="new-all" className="text-[10px] px-0.5 bg-blue-100">
-                    All
-                  </TabsTrigger>
-                  <TabsTrigger value="new-registrations" className="text-[10px] px-0.5 bg-blue-100">
+                  <TabsTrigger value="registrations" className="text-xs">
                     Reg
                   </TabsTrigger>
-                  <TabsTrigger value="new-statistics" className="text-[10px] px-0.5 bg-blue-100">
+                  <TabsTrigger value="stat" className="text-xs">
                     Stat
                   </TabsTrigger>
-                  <TabsTrigger value="new-winner" className="text-[10px] px-0.5 bg-blue-100">
-                    W
+                  <TabsTrigger value="winnercontent" className="text-xs">
+                    Win
                   </TabsTrigger>
                 </TabsList>
               </div>
               
-              {/* Desktop layout for new tabs */}
-              <TabsList className="hidden md:flex bg-blue-50">
-                <TabsTrigger value="new-applications" className="bg-blue-100">
+              {/* Desktop layout - single row */}
+              <TabsList className="hidden md:flex opacity-50">
+                <TabsTrigger value="new1">
                   New1
                 </TabsTrigger>
-                <TabsTrigger value="new-pre-next" className="bg-blue-100">
-                  Pre
-                </TabsTrigger>
-                <TabsTrigger value="new-next-week" className="bg-blue-100">
-                  Next
-                </TabsTrigger>
-                <TabsTrigger value="new-weekly" className="bg-blue-100">
+                <TabsTrigger value="weekly">
                   This
                 </TabsTrigger>
-                <TabsTrigger value="new-past" className="bg-blue-100">
+                <TabsTrigger value="pastweek">
                   Past
                 </TabsTrigger>
-                <TabsTrigger value="new-all" className="bg-blue-100">
-                  All
-                </TabsTrigger>
-                <TabsTrigger value="new-registrations" className="bg-blue-100">
+                <TabsTrigger value="registrations">
                   Reg
                 </TabsTrigger>
-                <TabsTrigger value="new-statistics" className="bg-blue-100">
+                <TabsTrigger value="stat">
                   Stat
                 </TabsTrigger>
-                <TabsTrigger value="new-winner" className="bg-blue-100">
-                  W
+                <TabsTrigger value="winnercontent">
+                  Win
                 </TabsTrigger>
               </TabsList>
             </div>
