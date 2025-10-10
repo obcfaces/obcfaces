@@ -8925,6 +8925,7 @@ const Admin = () => {
             {/* New Refactored Tab Contents */}
             <TabsContent value="new-applications">
               <AdminNewApplicationsTab
+                loading={tabLoading['new-applications']}
                 applications={contestApplications}
                 deletedApplications={deletedApplications}
                 showDeleted={showDeletedApplications}
@@ -9000,6 +9001,7 @@ const Admin = () => {
 
             <TabsContent value="new-pre-next">
               <AdminPreNextWeekTab
+                loading={tabLoading['new-pre-next']}
                 participants={preNextWeekParticipants}
                 onViewPhotos={openPhotoModal}
                 onStatusChange={async (participant, newStatus) => {
@@ -9046,6 +9048,7 @@ const Admin = () => {
 
             <TabsContent value="new-next-week">
               <AdminNextWeekTab
+                loading={tabLoading['new-next-week']}
                 participants={nextWeekParticipants}
                 onViewPhotos={openPhotoModal}
                 onViewVoters={(participantName) => {
@@ -9088,6 +9091,7 @@ const Admin = () => {
 
             <TabsContent value="new-weekly">
               <AdminWeeklyTab
+                loading={tabLoading['new-weekly']}
                 participants={weeklyParticipants}
                 statusFilter={adminStatusFilter}
                 onStatusFilterChange={setAdminStatusFilter}
@@ -9141,6 +9145,7 @@ const Admin = () => {
 
             <TabsContent value="new-past">
               <AdminPastWeekTab
+                loading={tabLoading['new-past']}
                 participants={weeklyParticipants.filter(p => pastStatusFilter === 'all' || p.admin_status === pastStatusFilter)}
                 weekFilters={getDynamicPastWeekFilters}
                 selectedWeekFilter={pastWeekFilter}
@@ -9186,6 +9191,7 @@ const Admin = () => {
 
             <TabsContent value="new-all">
               <AdminAllParticipantsTab
+                loading={tabLoading['new-all']}
                 participants={weeklyParticipants}
                 profiles={profiles}
                 onViewPhotos={openPhotoModal}
@@ -9251,6 +9257,7 @@ const Admin = () => {
                 userActivityData={userActivityData}
                 isEmailDomainWhitelisted={isEmailDomainWhitelisted}
                 emailDomainStats={emailDomainStats}
+                loading={tabLoading['new-registrations'] || profilesLoading}
                 onApprove={async (profile) => {
                   const { error } = await supabase
                     .from('profiles')

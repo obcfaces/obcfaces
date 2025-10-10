@@ -6,6 +6,7 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Edit, Info } from 'lucide-react';
 import { WeeklyContestParticipant } from '@/types/admin';
+import { LoadingSpinner } from '@/components/admin/LoadingSpinner';
 
 interface AdminPreNextWeekTabProps {
   participants: WeeklyContestParticipant[];
@@ -13,6 +14,7 @@ interface AdminPreNextWeekTabProps {
   onStatusChange: (participant: WeeklyContestParticipant, newStatus: string) => Promise<void>;
   onEdit: (participant: any) => void;
   onStatusHistory: (participantId: string, participantName: string, statusHistory: any) => void;
+  loading?: boolean;
 }
 
 export function AdminPreNextWeekTab({
@@ -21,7 +23,11 @@ export function AdminPreNextWeekTab({
   onStatusChange,
   onEdit,
   onStatusHistory,
+  loading = false,
 }: AdminPreNextWeekTabProps) {
+  if (loading) {
+    return <LoadingSpinner message="Загрузка предварительного списка..." />;
+  }
   const getStatusBackgroundColor = (status: string) => {
     switch (status) {
       case 'pre next week':

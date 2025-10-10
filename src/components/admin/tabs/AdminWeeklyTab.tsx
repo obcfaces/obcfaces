@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Edit, Heart, Star, Trophy, Copy, Info } from 'lucide-react';
 import { WeeklyContestParticipant } from '@/types/admin';
 import { Label } from '@/components/ui/label';
+import { LoadingSpinner } from '@/components/admin/LoadingSpinner';
 
 interface AdminWeeklyTabProps {
   participants: WeeklyContestParticipant[];
@@ -17,6 +18,7 @@ interface AdminWeeklyTabProps {
   onViewVoters?: (participant: { id: string; name: string }) => void;
   onViewStatusHistory?: (participantId: string, participantName: string, statusHistory: any) => void;
   profiles?: any[];
+  loading?: boolean;
 }
 
 export function AdminWeeklyTab({
@@ -29,7 +31,11 @@ export function AdminWeeklyTab({
   onViewVoters,
   onViewStatusHistory,
   profiles = [],
+  loading = false,
 }: AdminWeeklyTabProps) {
+  if (loading) {
+    return <LoadingSpinner message="Загрузка участников текущей недели..." />;
+  }
   // Filter participants - show ONLY 'this week' status
   const filteredParticipants = useMemo(() => {
     // First filter: only 'this week' status
