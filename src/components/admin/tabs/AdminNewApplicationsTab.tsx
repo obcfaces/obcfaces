@@ -182,10 +182,10 @@ const ApplicationCardWithHistory = ({
             </Badge>
           )}
 
-          {/* History badge - top right corner of second photo */}
+          {/* History badge - above edit button */}
           {historyCount > 0 && (
             <div
-              className="absolute top-0 right-[calc(50%-1px)] z-20 bg-primary text-primary-foreground rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold cursor-pointer hover:bg-primary/90 shadow-lg transition-all border-2 border-background"
+              className="absolute bottom-8 left-0 z-20 bg-primary text-primary-foreground rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold cursor-pointer hover:bg-primary/90 shadow-lg transition-all border-2 border-background"
               onClick={() => setIsHistoryExpanded(!isHistoryExpanded)}
               title={`${historyCount} edit${historyCount > 1 ? 's' : ''} - click to ${isHistoryExpanded ? 'hide' : 'show'}`}
             >
@@ -230,15 +230,15 @@ const ApplicationCardWithHistory = ({
           
           {/* Desktop layout */}
           <div className="hidden md:flex md:overflow-visible">
-            {/* Column 1: Photos (25ch) */}
-            <div className="w-[25ch] flex-shrink-0 p-0">
-              <div className="flex gap-px">
+            {/* Column 1: Photos - Fixed width */}
+            <div className="w-[300px] flex-shrink-0 p-0">
+              <div className="flex gap-px h-[149px]">
                 {photo1 && (
-                  <div className="w-full relative">
+                  <div className="w-[150px] h-[149px] flex-shrink-0 relative">
                     <img 
                       src={photo1}
                       alt="Portrait"
-                      className="w-full h-[149px] object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                      className="w-full h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
                       onClick={() => onViewPhotos([photo1, photo2].filter(Boolean), 0, `${firstName} ${lastName}`)}
                     />
                     {['this week', 'next week', 'next week on site', 'pre next week'].includes(participant.admin_status || '') && (
@@ -249,17 +249,17 @@ const ApplicationCardWithHistory = ({
                   </div>
                 )}
                 {photo2 && (
-                  <div className="w-full relative">
+                  <div className="w-[150px] h-[149px] flex-shrink-0 relative">
                     <img 
                       src={photo2} 
                       alt="Full length"
-                      className="w-full h-[149px] object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                      className="w-full h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
                       onClick={() => onViewPhotos([photo1, photo2].filter(Boolean), 1, `${firstName} ${lastName}`)}
                     />
                   </div>
                 )}
                 {!photo2 && (
-                  <div className="w-full h-[149px] bg-muted flex items-center justify-center border border-border">
+                  <div className="w-[150px] h-[149px] flex-shrink-0 bg-muted flex items-center justify-center border border-border">
                     <div className="text-center text-muted-foreground">
                       <p className="text-sm font-medium">No Photo 2</p>
                       <p className="text-xs mt-1">Check application_data</p>
@@ -269,8 +269,8 @@ const ApplicationCardWithHistory = ({
               </div>
             </div>
 
-            {/* Column 2: Information (25ch) */}
-            <div className="w-[25ch] flex-shrink-0 p-4">
+            {/* Column 2: Information - Fixed width */}
+            <div className="w-[300px] flex-shrink-0 p-4">
               <div className="flex items-center gap-2 mb-1">
                 <Avatar className="h-6 w-6 flex-shrink-0">
                   <AvatarImage src={photo1 || ''} />
@@ -339,7 +339,7 @@ const ApplicationCardWithHistory = ({
                     }
                   }}
                 >
-                  <SelectTrigger className={`w-24 h-6 text-xs ${getStatusBackgroundColor(participant.admin_status || 'pending')}`}>
+                  <SelectTrigger className={`w-[100px] h-6 text-xs ${getStatusBackgroundColor(participant.admin_status || 'pending')}`}>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent className="z-[9999] bg-popover border shadow-lg">
@@ -359,24 +359,24 @@ const ApplicationCardWithHistory = ({
           {/* Mobile layout */}
           <div className="md:hidden">
             <div className="flex w-full">
-              {/* Photos section */}
-              <div className="flex gap-px w-[50vw] flex-shrink-0">
+              {/* Photos section - Fixed width */}
+              <div className="flex gap-px w-[200px] flex-shrink-0 h-[149px]">
                 {photo1 && (
-                  <div className="w-1/2">
+                  <div className="w-[100px] h-[149px] flex-shrink-0">
                     <img 
                       src={photo1} 
                       alt="Portrait" 
-                      className="w-full h-[149px] object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                      className="w-full h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
                       onClick={() => onViewPhotos([photo1, photo2].filter(Boolean), 0, `${firstName} ${lastName}`)}
                     />
                   </div>
                 )}
                 {photo2 && (
-                  <div className="w-1/2">
+                  <div className="w-[100px] h-[149px] flex-shrink-0">
                     <img 
                       src={photo2} 
                       alt="Full length" 
-                      className="w-full h-[149px] object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                      className="w-full h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
                       onClick={() => onViewPhotos([photo1, photo2].filter(Boolean), 1, `${firstName} ${lastName}`)}
                     />
                   </div>
@@ -437,7 +437,7 @@ const ApplicationCardWithHistory = ({
                       }
                     }}
                   >
-                    <SelectTrigger className={`text-[10px] h-5 ${getStatusBackgroundColor(participant.admin_status || 'pending')}`}>
+                    <SelectTrigger className={`w-[100px] text-[10px] h-5 ${getStatusBackgroundColor(participant.admin_status || 'pending')}`}>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent className="z-[9999]">
