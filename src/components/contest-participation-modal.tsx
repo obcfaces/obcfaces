@@ -802,15 +802,34 @@ export const ContestParticipationModal = ({
 
       if (editMode && existingData) {
         // Update existing application
+        // Get user's email
+        const { data: { user } } = await supabase.auth.getUser();
+        const userEmail = user?.email || '';
+        
         // Only change status to 'pending' if current status is 'rejected', otherwise keep current status
         const updateData: any = {
           application_data: applicationData,
           submitted_at: new Date().toISOString()
         };
         
-        // Only update status to pending if currently rejected
-        if (existingData.status === 'rejected' || (existingData as any).admin_status === 'rejected') {
+        // Check if status should be updated to pending
+        const shouldUpdateToPending = existingData.status === 'rejected' || (existingData as any).admin_status === 'rejected';
+        
+        if (shouldUpdateToPending) {
           updateData.admin_status = 'pending';
+          
+          // Update status history to record user edit
+          const currentHistory = (existingData as any).status_history || {};
+          updateData.status_history = {
+            ...currentHistory,
+            pending: {
+              changed_at: new Date().toISOString(),
+              changed_by: session.user.id,
+              changed_by_email: userEmail,
+              change_reason: 'User edited application after rejection',
+              week_interval: ''
+            }
+          };
         }
         
         const { error } = await supabase

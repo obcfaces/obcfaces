@@ -154,19 +154,23 @@ export const ParticipantStatusHistoryModal: React.FC<ParticipantStatusHistoryMod
       return entry.changed_by_email.substring(0, 4);
     }
     
+    // Check if this was a user edit (when user re-submits after rejection)
+    if (entry.change_reason && entry.change_reason.includes('User edited')) {
+      return 'user';
+    }
+    
     if (entry.change_reason) {
       // If there's a change_reason, it might indicate an automatic change
       if (entry.change_reason.includes('function') || entry.change_reason.includes('automatic')) {
-        return 'System';
+        return 'Syst';
       }
-      return entry.change_reason.substring(0, 10);
     }
     
     if (entry.changed_by) {
       return entry.changed_by.substring(0, 4);
     }
     
-    return 'System';
+    return 'Syst';
   };
 
   const sortedEntries = enrichedEntries.sort((a, b) => 
@@ -190,13 +194,13 @@ export const ParticipantStatusHistoryModal: React.FC<ParticipantStatusHistoryMod
           </div>
         ) : (
           <div className="overflow-x-auto -mx-2 md:mx-0">
-            <table className="w-full border-collapse text-[9px] md:text-sm">
+            <table className="w-full border-collapse text-xs md:text-sm">
               <thead>
                 <tr className="border-b">
-                  <th className="text-left py-1 px-0.5 md:p-2 font-semibold">Status</th>
-                  <th className="text-left py-1 px-0.5 md:p-2 font-semibold">Interval</th>
-                  <th className="text-left py-1 px-0.5 md:p-2 font-semibold">Changed</th>
-                  <th className="text-left py-1 px-0.5 md:p-2 font-semibold">By</th>
+                  <th className="text-left py-2 px-1 md:p-3 font-semibold">Status</th>
+                  <th className="text-left py-2 px-1 md:p-3 font-semibold">Interval</th>
+                  <th className="text-left py-2 px-1 md:p-3 font-semibold">Changed</th>
+                  <th className="text-left py-2 px-1 md:p-3 font-semibold">By</th>
                 </tr>
               </thead>
               <tbody>
@@ -205,21 +209,21 @@ export const ParticipantStatusHistoryModal: React.FC<ParticipantStatusHistoryMod
                     key={index}
                     className="border-b last:border-b-0 hover:bg-muted/50"
                   >
-                    <td className="py-1 px-0.5 md:p-2">
+                    <td className="py-2 px-1 md:p-3">
                       <Badge 
                         variant={getStatusBadgeVariant(entry.status)}
-                        className="text-[8px] md:text-xs px-1 md:px-2 py-0"
+                        className="text-[10px] md:text-xs px-1.5 md:px-2 py-0.5"
                       >
                         {entry.status}
                       </Badge>
                     </td>
-                    <td className="py-1 px-0.5 md:p-2 text-[8px] md:text-xs text-muted-foreground">
+                    <td className="py-2 px-1 md:p-3 text-[10px] md:text-xs text-muted-foreground">
                       {entry.week_interval || '—'}
                     </td>
-                    <td className="py-1 px-0.5 md:p-2 text-[8px] md:text-xs whitespace-nowrap">
+                    <td className="py-2 px-1 md:p-3 text-[10px] md:text-xs whitespace-nowrap">
                       {formatDateTime(entry.changed_at)}
                     </td>
-                    <td className="py-1 px-0.5 md:p-2 text-[8px] md:text-xs text-muted-foreground">
+                    <td className="py-2 px-1 md:p-3 text-[10px] md:text-xs text-muted-foreground">
                       {getChangedByDisplay(entry)}
                     </td>
                   </tr>
