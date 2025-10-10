@@ -346,7 +346,7 @@ export function AdminRegistrationsTab({
 
       {/* Search Input */}
       <Input
-        placeholder="Поиск по имени, email или IP..."
+        placeholder="Search by name, email or IP..."
         value={searchQuery}
         onChange={(e) => setSearchQuery(e.target.value)}
         className="max-w-md"
@@ -705,7 +705,7 @@ export function AdminRegistrationsTab({
                     </div>
                   ) : (
                     <div className="text-xs text-amber-600">
-                      ⚠️ IP/данные устройства будут записаны при следующем логине
+                      ⚠️ IP/device data will be recorded on next login
                     </div>
                   )}
                   
@@ -738,20 +738,46 @@ export function AdminRegistrationsTab({
                   {/* User Activity Icons (bottom right) */}
                   <div className="absolute bottom-2 right-2 flex gap-2">
                     {/* Stars */}
-                    <div className="flex items-center gap-1 bg-background/90 px-2 py-1 rounded hover:bg-background shadow-sm border transition-colors cursor-pointer">
+                    <button
+                      className="flex items-center gap-1 bg-background/90 px-2 py-1 rounded hover:bg-background shadow-sm border transition-colors cursor-pointer"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        const newExpanded = new Set(expandedUserActivity);
+                        if (expandedUserActivity.has(profile.id)) {
+                          newExpanded.delete(profile.id);
+                        } else {
+                          newExpanded.add(profile.id);
+                        }
+                        setExpandedUserActivity(newExpanded);
+                      }}
+                    >
                       <Star className="h-4 w-4 text-yellow-500" />
                       <span className="text-xs font-medium">
                         {userActivityData[profile.id]?.ratingsCount ?? 0}
                       </span>
-                    </div>
+                    </button>
                     
                     {/* Hearts */}
-                    <div className="flex items-center gap-1 bg-background/90 px-2 py-1 rounded hover:bg-background shadow-sm border transition-colors cursor-pointer">
+                    <button
+                      className="flex items-center gap-1 bg-background/90 px-2 py-1 rounded hover:bg-background shadow-sm border transition-colors cursor-pointer"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        const newExpanded = new Set(expandedUserActivity);
+                        if (expandedUserActivity.has(profile.id)) {
+                          newExpanded.delete(profile.id);
+                        } else {
+                          newExpanded.add(profile.id);
+                        }
+                        setExpandedUserActivity(newExpanded);
+                      }}
+                    >
                       <Heart className="h-4 w-4 text-red-500" />
                       <span className="text-xs font-medium">
                         {userActivityData[profile.id]?.likesCount ?? 0}
                       </span>
-                    </div>
+                    </button>
                   </div>
                 </div>
               </Card>
@@ -760,7 +786,7 @@ export function AdminRegistrationsTab({
               {isExpanded && profilesWithSameFingerprint.length > 0 && (
                 <Card className="p-4 bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-800">
                   <h4 className="text-sm font-medium mb-3 text-blue-900 dark:text-blue-100">
-                    Пользователи с таким же Fingerprint ({profile.fingerprint_id?.substring(0, 16)}...):
+                    Users with same Fingerprint ({profile.fingerprint_id?.substring(0, 16)}...):
                   </h4>
                   
                   <div className="space-y-4">
@@ -804,7 +830,7 @@ export function AdminRegistrationsTab({
                               )}
                               
                               <div className="text-xs text-muted-foreground mb-0.5">
-                                Зарегистрирован: {fpActivityDate.toLocaleString('en-GB', {
+                                Registered: {fpActivityDate.toLocaleString('en-GB', {
                                   timeZone: 'Asia/Manila',
                                   day: '2-digit',
                                   month: '2-digit',
