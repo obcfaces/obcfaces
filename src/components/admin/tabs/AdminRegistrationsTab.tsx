@@ -4,6 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ProfileData } from '@/types/admin';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
 interface AdminRegistrationsTabProps {
   profiles: ProfileData[];
@@ -23,6 +25,7 @@ interface AdminRegistrationsTabProps {
   setExpandedUserActivity: (value: Set<string>) => void;
   userActivityData: Record<string, any>;
   isEmailDomainWhitelisted: (email: string) => boolean;
+  emailDomainStats: any[];
 }
 
 export function AdminRegistrationsTab({
@@ -43,6 +46,7 @@ export function AdminRegistrationsTab({
   setExpandedUserActivity,
   userActivityData,
   isEmailDomainWhitelisted,
+  emailDomainStats,
 }: AdminRegistrationsTabProps) {
   const [expandedFingerprint, setExpandedFingerprint] = useState<string | null>(null);
 
@@ -78,9 +82,80 @@ export function AdminRegistrationsTab({
     }
   };
 
+  // Calculate registration statistics by email domain
+  const registrationStats = useMemo(() => {
+    const stats = new Map<string, { total: number; pending: number; approved: number; rejected: number }>();
+    
+    profiles.forEach(profile => {
+      if (profile.email) {
+        const domain = profile.email.split('@')[1]?.toLowerCase() || 'unknown';
+        const existing = stats.get(domain) || { total: 0, pending: 0, approved: 0, rejected: 0 };
+        
+        existing.total++;
+        if (profile.is_approved === null) existing.pending++;
+        else if (profile.is_approved === true) existing.approved++;
+        else if (profile.is_approved === false) existing.rejected++;
+        
+        stats.set(domain, existing);
+      }
+    });
+    
+    return Array.from(stats.entries())
+      .map(([domain, data]) => ({ domain, ...data }))
+      .sort((a, b) => b.total - a.total);
+  }, [profiles]);
+
   return (
-    <div className="space-y-4">
-      {filteredProfiles.map(profile => {
+    <div className="space-y-6">
+      {/* Statistics Table */}
+      <Card className="p-4">
+        <h3 className="text-lg font-semibold mb-4">Registration Statistics by Email Domain</h3>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Email Domain</TableHead>
+              <TableHead className="text-right">Total</TableHead>
+              <TableHead className="text-right">Pending</TableHead>
+              <TableHead className="text-right">Approved</TableHead>
+              <TableHead className="text-right">Rejected</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {registrationStats.slice(0, 10).map(stat => (
+              <TableRow key={stat.domain}>
+                <TableCell className="font-medium">{stat.domain}</TableCell>
+                <TableCell className="text-right">{stat.total}</TableCell>
+                <TableCell className="text-right">{stat.pending}</TableCell>
+                <TableCell className="text-right">{stat.approved}</TableCell>
+                <TableCell className="text-right">{stat.rejected}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </Card>
+
+      {/* Filters */}
+      <div className="flex gap-4 items-center">
+        <Select value={statusFilter} onValueChange={onStatusFilterChange}>
+          <SelectTrigger className="w-[200px]">
+            <SelectValue placeholder="Filter by status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Registrations</SelectItem>
+            <SelectItem value="pending">Pending</SelectItem>
+            <SelectItem value="approved">Approved</SelectItem>
+            <SelectItem value="rejected">Rejected</SelectItem>
+          </SelectContent>
+        </Select>
+        
+        <div className="text-sm text-muted-foreground">
+          Showing {filteredProfiles.length} of {profiles.length} registrations
+        </div>
+      </div>
+
+      {/* Registration Cards */}
+      <div className="space-y-4">
+        {filteredProfiles.map(profile => {
         const lastActivity = userActivityData[profile.id]?.lastActivity;
         const now = new Date();
         const activityDate = lastActivity ? new Date(lastActivity) : null;
@@ -458,11 +533,12 @@ export function AdminRegistrationsTab({
         );
       })}
 
-      {filteredProfiles.length === 0 && (
-        <div className="text-center py-12 text-muted-foreground">
-          No registrations found
-        </div>
-      )}
+        {filteredProfiles.length === 0 && (
+          <div className="text-center py-12 text-muted-foreground">
+            No registrations found
+          </div>
+        )}
+      </div>
     </div>
   );
 }
