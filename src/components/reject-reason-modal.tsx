@@ -3,14 +3,14 @@ import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Settings } from "lucide-react";
+import { RejectionReasonsManagerModal } from "./rejection-reasons-manager-modal";
 
 export type RejectionReasonType = 
   | 'first_photo_makeup'
@@ -31,7 +31,7 @@ export type RejectionReasonType =
   | 'suspicion_not_own_photos'
   | 'wrong_gender_contest';
 
-const REJECTION_REASONS = {
+let REJECTION_REASONS = {
   first_photo_makeup: "First photo – No makeup allowed.",
   first_photo_id_style: "First photo – Must look like an ID photo: face straight to the camera, hands together in front.",
   first_photo_blurry: "First photo – Photo is too blurry/low quality.",
@@ -66,6 +66,7 @@ export const RejectReasonModal = ({
 }: RejectReasonModalProps) => {
   const [selectedReasons, setSelectedReasons] = useState<RejectionReasonType[]>([]);
   const [notes, setNotes] = useState("");
+  const [isManageReasonsOpen, setIsManageReasonsOpen] = useState(false);
 
   const handleReasonToggle = (reasonType: RejectionReasonType, checked: boolean) => {
     if (checked) {
@@ -73,6 +74,10 @@ export const RejectReasonModal = ({
     } else {
       setSelectedReasons(prev => prev.filter(r => r !== reasonType));
     }
+  };
+
+  const handleSaveReasons = (updatedReasons: Record<string, string>) => {
+    REJECTION_REASONS = updatedReasons as typeof REJECTION_REASONS;
   };
 
   const handleConfirm = async () => {
@@ -113,14 +118,23 @@ export const RejectReasonModal = ({
   console.log('🟢 REJECT MODAL: Rendering, isOpen=', isOpen, 'selectedReasons=', selectedReasons, 'notes=', notes);
   
   return (
-    <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-lg">
-        <DialogHeader>
-          <DialogTitle>Rejection Reason</DialogTitle>
-          <DialogDescription>
-            Select one or more reasons for rejecting the application and add a comment if necessary.
-          </DialogDescription>
-        </DialogHeader>
+    <>
+      <Dialog open={isOpen} onOpenChange={handleClose}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center justify-between">
+              <span>Rejection Reason</span>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setIsManageReasonsOpen(true)}
+                className="h-8 gap-2"
+              >
+                <Settings className="h-4 w-4" />
+                Edit Reasons
+              </Button>
+            </DialogTitle>
+          </DialogHeader>
         
         <div className="space-y-4">
           <div>
@@ -163,7 +177,7 @@ export const RejectReasonModal = ({
           </div>
         </div>
 
-        <DialogFooter>
+        <div className="flex justify-end gap-2">
           <Button 
             variant="outline" 
             onClick={() => {
@@ -187,11 +201,19 @@ export const RejectReasonModal = ({
             }} 
             disabled={(selectedReasons.length === 0 && !notes.trim()) || isLoading}
           >
-            {isLoading ? "Rejecting..." : "Reject Application"}
+            {isLoading ? "Rejecting..." : "Reject"}
           </Button>
-        </DialogFooter>
+        </div>
       </DialogContent>
     </Dialog>
+
+    <RejectionReasonsManagerModal
+      isOpen={isManageReasonsOpen}
+      onClose={() => setIsManageReasonsOpen(false)}
+      currentReasons={REJECTION_REASONS}
+      onSave={handleSaveReasons}
+    />
+    </>
   );
 };
 
