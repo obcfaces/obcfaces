@@ -157,23 +157,8 @@ const ApplicationCardWithHistory = ({
   const [isHistoryExpanded, setIsHistoryExpanded] = useState(false);
   const { history, loading } = useApplicationHistory(participant.id);
   
-  console.log('🔴 History Debug:', {
-    participantId: participant.id,
-    participantName: `${firstName} ${lastName}`,
-    historyLength: history.length,
-    loading,
-    history: history.map(h => ({
-      id: h.id,
-      created_at: h.created_at,
-      status: h.status
-    }))
-  });
-  
-  // Filter out the current version from history
-  const historyItems = history.filter(h => h.id !== participant.id);
-  const historyCount = historyItems.length;
-  
-  console.log('🔴 History Count:', historyCount, 'History Items:', historyItems.length);
+  // All history records should be shown (they have different IDs from the participant)
+  const historyCount = history.length;
 
   return (
     <div className="space-y-0">
@@ -525,9 +510,9 @@ const ApplicationCardWithHistory = ({
       )}
 
       {/* History versions - shown when expanded */}
-      {isHistoryExpanded && historyItems.length > 0 && (
+      {isHistoryExpanded && history.length > 0 && (
         <div className="mt-2 space-y-2">
-          {historyItems.map((historyItem, idx) => (
+          {history.map((historyItem, idx) => (
             <Card key={historyItem.id} className="overflow-hidden bg-muted/30 relative rounded-lg h-[149px]">
               <CardContent className="p-0">
                 {/* Version badge and date/time */}
@@ -548,7 +533,7 @@ const ApplicationCardWithHistory = ({
                   variant="secondary" 
                   className="absolute top-1 right-1 z-20 text-[10px] px-1.5 py-0 h-4 shadow-sm"
                 >
-                  v{historyItems.length - idx}
+                  v{history.length - idx}
                 </Badge>
 
                 {/* Desktop layout */}
