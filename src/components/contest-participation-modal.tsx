@@ -1165,7 +1165,10 @@ export const ContestParticipationModal = ({
           {children}
         </DialogTrigger>
       )}
-      <DialogContent className="w-full sm:!w-[600px] sm:!max-w-[600px] !max-w-full !left-[50%] !top-[50%] !-translate-x-1/2 !-translate-y-1/2 max-h-[95vh] bg-background p-0 overflow-hidden sm:rounded-lg rounded-none">
+      <DialogContent 
+        className="w-full sm:!w-[600px] sm:!max-w-[600px] !max-w-full !left-[50%] !top-[50%] !-translate-x-1/2 !-translate-y-1/2 max-h-[95vh] bg-background p-0 overflow-hidden sm:rounded-lg rounded-none"
+        hideClose={submissionSuccess}
+      >
         <div className="px-6 sm:px-6 px-4 py-4 border-b">
           <DialogHeader>
             <DialogTitle>
