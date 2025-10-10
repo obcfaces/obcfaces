@@ -8933,7 +8933,34 @@ const Admin = () => {
               </TabsContent>
 
             {/* New Refactored Tab Contents */}
-            <TabsContent value="new-applications">
+            <TabsContent value="new-applications" className="space-y-4">
+              {/* Daily Statistics Table */}
+              <div className="mb-4 p-3 bg-muted rounded-lg">
+                <div className="text-sm text-muted-foreground space-y-2">
+                  <div className="text-xs">
+                    applications: {dailyApplicationStats.reduce((sum, stat) => sum + (stat.total_applications || 0), 0)}
+                  </div>
+                  <div className="grid grid-cols-7 gap-1 text-xs">
+                    {dailyApplicationStats.map((stat, index) => {
+                      // Format date as DD.MM
+                      const dateStr = stat.day_date ? 
+                        new Date(stat.day_date).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit' }) 
+                        : '';
+                      
+                      return (
+                        <div key={index} className="text-center p-1 bg-background rounded">
+                          <div className="font-medium text-xs">{stat.day_name}</div>
+                          <div className="text-[10px] text-muted-foreground mb-0.5">{dateStr}</div>
+                          <div className="text-xs text-muted-foreground">
+                            {stat.total_applications}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+
               <AdminNewApplicationsTab
                 loading={tabLoading['new-applications']}
                 applications={contestApplications}
