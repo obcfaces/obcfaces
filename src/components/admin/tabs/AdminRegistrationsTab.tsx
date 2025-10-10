@@ -448,7 +448,7 @@ export function AdminRegistrationsTab({
                     {fullName.toUpperCase()}
                   </div>
                   
-                  <div className="flex items-center gap-2 flex-wrap">
+                  <div className="flex items-center gap-2 flex-wrap mb-2">
                     <span className="text-sm text-foreground">{email}</span>
                     <Button
                       variant="ghost"
@@ -472,6 +472,14 @@ export function AdminRegistrationsTab({
                       <Badge variant="outline" className="text-xs px-1.5 py-0">F</Badge>
                     )}
                   </div>
+                  
+                  {/* Warning if no fingerprint/IP data */}
+                  {(!profile.fingerprint_id || !profile.ip_address) && (
+                    <div className="flex items-center gap-2 text-sm text-orange-500 mb-1">
+                      <span>⚠️</span>
+                      <span>IP/данные устройства будут записаны при следующем логине</span>
+                    </div>
+                  )}
                 </div>
                 
                 {/* Stats on the right */}
