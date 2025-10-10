@@ -803,6 +803,121 @@ export function AdminRegistrationsTab({
                 </div>
               </Card>
               
+              {/* Expanded user activity section */}
+              {expandedUserActivity.has(profile.id) && (
+                <Card className="p-4 bg-muted/50">
+                  {loadingActivity.has(profile.id) ? (
+                    <div className="flex justify-center py-4">
+                      <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                    </div>
+                  ) : (
+                    <>
+                      {/* Ratings */}
+                      {userActivityData[profile.id]?.ratings && userActivityData[profile.id].ratings.length > 0 && (
+                        <div className="mb-4">
+                          <h5 className="text-sm font-semibold mb-3 flex items-center gap-1">
+                            <Star className="h-4 w-4 text-yellow-500" />
+                            Ratings ({userActivityData[profile.id].ratingsCount})
+                          </h5>
+                          <div className="space-y-3 max-h-64 overflow-y-auto">
+                            {Object.entries(
+                              userActivityData[profile.id].ratings.reduce((acc: any, rating: any) => {
+                                const week = rating.vote_week_interval || 'No week';
+                                if (!acc[week]) acc[week] = [];
+                                acc[week].push(rating);
+                                return acc;
+                              }, {})
+                            )
+                            .sort(([a], [b]) => b.localeCompare(a))
+                            .map(([weekInterval, weekRatings]: [string, any]) => {
+                              const sortedWeekRatings = [...weekRatings].sort((a: any, b: any) => {
+                                return (b.rating || 0) - (a.rating || 0);
+                              });
+                              
+                              return (
+                                <div key={weekInterval} className="space-y-2">
+                                  <div className="text-xs font-semibold text-primary px-2 py-1 bg-primary/10 rounded">
+                                    Week: {weekInterval} ({sortedWeekRatings.length} votes)
+                                  </div>
+                                  
+                                  {sortedWeekRatings.map((rating: any) => (
+                                    <div key={rating.id} className="flex items-center gap-2 text-xs p-2 bg-background rounded border">
+                                      <div className="relative h-12 w-12 flex-shrink-0">
+                                        <img 
+                                          src={rating.participant?.photo_1_url || rating.participant?.avatar_url || ''} 
+                                          alt={rating.participant?.display_name || rating.contestant_name}
+                                          className="h-full w-full object-cover rounded"
+                                        />
+                                      </div>
+                                      <div className="flex-1">
+                                        <div className="font-medium text-xs">
+                                          {rating.participant?.display_name || rating.contestant_name}
+                                        </div>
+                                        <div className="flex items-center gap-2 mt-1">
+                                          <div className="flex items-center gap-1">
+                                            {[1,2,3,4,5].map(i => (
+                                              <Star key={i} className={`h-3 w-3 ${i <= rating.rating ? 'fill-yellow-500 text-yellow-500' : 'text-gray-300'}`} />
+                                            ))}
+                                            <span className="font-bold text-sm ml-1">{rating.rating}</span>
+                                          </div>
+                                          <span className="text-muted-foreground text-xs">
+                                            {new Date(rating.created_at).toLocaleDateString('en-GB')}
+                                          </span>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
+                      
+                      {/* Likes */}
+                      {userActivityData[profile.id]?.likes && userActivityData[profile.id].likes.length > 0 && (
+                        <div>
+                          <h5 className="text-sm font-semibold mb-3 flex items-center gap-1">
+                            <Heart className="h-4 w-4 text-red-500" />
+                            Likes ({userActivityData[profile.id].likesCount})
+                          </h5>
+                          <div className="space-y-2 max-h-64 overflow-y-auto">
+                            {userActivityData[profile.id].likes.map((like: any) => (
+                              <div key={like.id} className="flex items-center gap-2 text-xs p-2 bg-background rounded border">
+                                <div className="relative h-12 w-12 flex-shrink-0">
+                                  <img 
+                                    src={like.profiles?.photo_1_url || like.profiles?.avatar_url || ''} 
+                                    alt={like.profiles?.display_name}
+                                    className="h-full w-full object-cover rounded"
+                                  />
+                                </div>
+                                <div className="flex-1">
+                                  <div className="font-medium">
+                                    {like.profiles?.display_name || 
+                                     `${like.profiles?.first_name || ''} ${like.profiles?.last_name || ''}`.trim()}
+                                  </div>
+                                  <div className="text-muted-foreground text-xs mt-1">
+                                    {new Date(like.created_at).toLocaleDateString('en-GB')}
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* No activity message */}
+                      {(!userActivityData[profile.id]?.ratings || userActivityData[profile.id].ratings.length === 0) &&
+                       (!userActivityData[profile.id]?.likes || userActivityData[profile.id].likes.length === 0) && (
+                        <div className="text-center text-muted-foreground py-4">
+                          No activity yet
+                        </div>
+                      )}
+                    </>
+                  )}
+                </Card>
+              )}
+              
               {/* Expanded fingerprint section */}
               {isExpanded && profilesWithSameFingerprint.length > 0 && (
                 <Card className="p-4 bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-800">

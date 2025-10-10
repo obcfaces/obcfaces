@@ -9253,7 +9253,7 @@ const Admin = () => {
                 handleRoleChange={handleRoleChange}
                 expandedUserActivity={expandedUserActivity}
                 setExpandedUserActivity={setExpandedUserActivity}
-                userActivityData={userActivityStats}
+                userActivityData={userActivityData}
                 fetchUserActivity={fetchUserActivity}
                 loadingActivity={loadingActivity}
                 isEmailDomainWhitelisted={isEmailDomainWhitelisted}
