@@ -207,6 +207,30 @@ const ApplicationCardWithHistory = ({
             </div>
           )}
 
+          {/* Three dots menu - top right corner */}
+          <div className="absolute top-0 right-0 z-20">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 w-8 p-0 rounded-none rounded-bl-md hover:bg-background/90 bg-background/80"
+                >
+                  <MoreVertical className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="z-[9999]">
+                <DropdownMenuItem
+                  onClick={() => participant.deleted_at ? onRestore(participant) : onDelete(participant)}
+                  className="text-destructive focus:text-destructive"
+                >
+                  <Trash2 className="h-3.5 w-3.5 mr-2" />
+                  {participant.deleted_at ? 'Restore' : 'Delete'}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+
           {/* Edit button in bottom left corner */}
           <Button
             size="sm"
@@ -347,31 +371,6 @@ const ApplicationCardWithHistory = ({
                     <Edit className="h-3.5 w-3.5" />
                   </Button>
                 )}
-                
-                <div className="text-xs text-muted-foreground">
-                  {`${((participant as any).average_rating || 0).toFixed(1)} (${(participant as any).total_votes || 0})`}
-                </div>
-                
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-6 w-6 p-0"
-                    >
-                      <MoreVertical className="h-3.5 w-3.5" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="z-[9999]">
-                    <DropdownMenuItem
-                      onClick={() => participant.deleted_at ? onRestore(participant) : onDelete(participant)}
-                      className="text-destructive focus:text-destructive"
-                    >
-                      <Trash2 className="h-3.5 w-3.5 mr-2" />
-                      {participant.deleted_at ? 'Restore' : 'Delete'}
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
               </div>
             </div>
           </div>
@@ -471,26 +470,18 @@ const ApplicationCardWithHistory = ({
                     </SelectContent>
                   </Select>
                   
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-5 w-5 p-0"
-                      >
-                        <MoreVertical className="h-3 w-3" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="z-[9999]">
-                      <DropdownMenuItem
-                        onClick={() => participant.deleted_at ? onRestore(participant) : onDelete(participant)}
-                        className="text-destructive focus:text-destructive"
-                      >
-                        <Trash2 className="h-3 w-3 mr-2" />
-                        {participant.deleted_at ? 'Restore' : 'Delete'}
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                  {/* Edit rejection reason button - only show for rejected items */}
+                  {participant.admin_status === 'rejected' && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-5 w-5 p-0"
+                      onClick={() => onReject(participant)}
+                      title="Edit rejection reason"
+                    >
+                      <Edit className="h-3 w-3" />
+                    </Button>
+                  )}
                 </div>
               </div>
             </div>
