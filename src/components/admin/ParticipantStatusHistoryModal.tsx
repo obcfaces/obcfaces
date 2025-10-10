@@ -58,7 +58,7 @@ export const ParticipantStatusHistoryModal: React.FC<ParticipantStatusHistoryMod
           changed_at: data.changed_at || data.timestamp || new Date().toISOString(),
           changed_by: data.changed_by || data.changed_via,
           changed_by_email: data.changed_by_email,
-          week_interval: data.week_interval || `${data.week_start_date || ''}-${data.week_end_date || ''}` || '',
+          week_interval: data.week_interval || '',
           change_reason: data.change_reason || data.reason
         }));
     }
