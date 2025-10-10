@@ -9206,6 +9206,7 @@ const Admin = () => {
                 setExpandedUserActivity={setExpandedUserActivity}
                 userActivityData={userActivityData}
                 isEmailDomainWhitelisted={isEmailDomainWhitelisted}
+                emailDomainStats={emailDomainStats}
                 onApprove={async (profile) => {
                   const { error } = await supabase
                     .from('profiles')
