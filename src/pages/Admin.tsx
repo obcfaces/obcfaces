@@ -3239,28 +3239,28 @@ const Admin = () => {
               {/* Desktop layout for new tabs */}
               <TabsList className="hidden md:flex bg-blue-50">
                 <TabsTrigger value="new-applications" className="bg-blue-100">
-                  New Applications
+                  New1
                 </TabsTrigger>
                 <TabsTrigger value="new-pre-next" className="bg-blue-100">
-                  Pre Next Week
+                  Pre
                 </TabsTrigger>
                 <TabsTrigger value="new-next-week" className="bg-blue-100">
-                  Next Week
+                  Next
                 </TabsTrigger>
                 <TabsTrigger value="new-weekly" className="bg-blue-100">
-                  Weekly
+                  This
                 </TabsTrigger>
                 <TabsTrigger value="new-past" className="bg-blue-100">
-                  Past Weeks
+                  Past
                 </TabsTrigger>
                 <TabsTrigger value="new-all" className="bg-blue-100">
-                  All Participants
+                  All
                 </TabsTrigger>
                 <TabsTrigger value="new-registrations" className="bg-blue-100">
-                  Registrations
+                  Reg
                 </TabsTrigger>
                 <TabsTrigger value="new-statistics" className="bg-blue-100">
-                  Statistics
+                  Stat
                 </TabsTrigger>
               </TabsList>
             </div>
