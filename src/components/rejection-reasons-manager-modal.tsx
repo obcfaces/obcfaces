@@ -117,12 +117,15 @@ export const RejectionReasonsManagerModal = ({
   };
 
   const handleSave = () => {
+    console.log('💾 Manager Modal: Saving reasons. Current state:', reasons);
     // Filter out empty reasons
     const filteredReasons = reasons.filter(r => r.text.trim());
+    console.log('💾 Manager Modal: Filtered reasons:', filteredReasons);
     const updatedReasons: Record<string, string> = {};
     filteredReasons.forEach(reason => {
       updatedReasons[reason.key] = reason.text;
     });
+    console.log('💾 Manager Modal: Calling onSave with:', updatedReasons);
     onSave(updatedReasons);
     onClose();
   };
