@@ -6,12 +6,13 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { Edit, Copy, Trash2, ChevronDown, ChevronUp, MoreVertical } from 'lucide-react';
+import { Edit, Copy, Trash2, ChevronDown, ChevronUp, MoreVertical, History } from 'lucide-react';
 import { ContestApplication, ParticipantStatus } from '@/types/admin';
 import { REJECTION_REASONS } from '@/components/reject-reason-modal';
 import { LoadingSpinner } from '@/components/admin/LoadingSpinner';
 import { useApplicationHistory } from '@/hooks/useApplicationHistory';
 import { Country } from 'country-state-city';
+import { ParticipantStatusHistoryModal } from '@/components/admin/ParticipantStatusHistoryModal';
 
 interface AdminNewApplicationsTabProps {
   applications: ContestApplication[];
@@ -157,6 +158,7 @@ const ApplicationCardWithHistory = ({
   getStatusBackgroundColor,
 }: any) => {
   const [isHistoryExpanded, setIsHistoryExpanded] = useState(false);
+  const [showStatusHistoryModal, setShowStatusHistoryModal] = useState(false);
   const { history, loading } = useApplicationHistory(participant.id);
   
   // All history records should be shown (they have different IDs from the participant)
@@ -207,6 +209,12 @@ const ApplicationCardWithHistory = ({
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="z-[9999]">
+                <DropdownMenuItem
+                  onClick={() => setShowStatusHistoryModal(true)}
+                >
+                  <History className="h-3.5 w-3.5 mr-2" />
+                  History
+                </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={() => participant.deleted_at ? onRestore(participant) : onDelete(participant)}
                   className="text-destructive focus:text-destructive"
@@ -734,6 +742,14 @@ const ApplicationCardWithHistory = ({
           ))}
         </div>
       )}
+      
+      {/* Status History Modal */}
+      <ParticipantStatusHistoryModal
+        isOpen={showStatusHistoryModal}
+        onClose={() => setShowStatusHistoryModal(false)}
+        participantName={`${firstName} ${lastName}`}
+        statusHistory={participant.status_history}
+      />
     </div>
   );
 };
