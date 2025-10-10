@@ -456,7 +456,7 @@ export function WinnerContentManager({
             <div className="border rounded-none sm:rounded-lg overflow-hidden bg-white w-full">
               {/* First row - contestant card styled like on site */}
               <div className="flex h-36 sm:h-40 md:h-44 gap-px relative">
-                <div className="relative w-24 sm:w-28 md:w-32">
+                <div className="relative w-24 sm:w-28 md:w-32 shrink-0">
                   <img 
                     src={(participantData.application_data as any)?.facePhotoUrl || (participantData.application_data as any)?.photo1_url || ''} 
                     alt="Face"
@@ -466,7 +466,7 @@ export function WinnerContentManager({
                     1
                   </div>
                 </div>
-                <div className="relative w-24 sm:w-28 md:w-32">
+                <div className="relative w-24 sm:w-28 md:w-32 shrink-0">
                   <img 
                     src={(participantData.application_data as any)?.fullBodyPhotoUrl || (participantData.application_data as any)?.photo2_url || ''} 
                     alt="Full body"
@@ -494,7 +494,7 @@ export function WinnerContentManager({
               <div className="border-t">
                 <div className="flex h-36 sm:h-40 md:h-44 gap-px relative">
                   {/* Payment proof photo */}
-                  <div className="relative w-24 sm:w-28 md:w-32 group">
+                  <div className="relative w-24 sm:w-28 md:w-32 shrink-0 group">
                     {content.payment_proof_url ? (
                       <>
                         <img 
@@ -542,7 +542,7 @@ export function WinnerContentManager({
                   </div>
 
                   {/* Testimonial video */}
-                  <div className="relative w-24 sm:w-28 md:w-32 group">
+                  <div className="relative w-24 sm:w-28 md:w-32 shrink-0 group">
                     {content.testimonial_video_url ? (
                       <>
                         <video 
