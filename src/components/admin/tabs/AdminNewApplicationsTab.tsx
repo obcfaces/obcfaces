@@ -196,10 +196,10 @@ const ApplicationCardWithHistory = ({
             </Badge>
           )}
 
-          {/* History badge - on the right photo at the bottom right */}
-          {historyCount > 0 && photo2 && (
+          {/* History badge - top right corner of info area (under photos) */}
+          {historyCount > 0 && (
             <div
-              className="absolute top-[115px] right-2 z-20 bg-primary text-primary-foreground rounded-full w-10 h-10 flex items-center justify-center text-sm font-bold cursor-pointer hover:bg-primary/90 shadow-lg transition-all border-2 border-background"
+              className="absolute top-[149px] right-2 z-20 bg-primary text-primary-foreground rounded-full w-10 h-10 flex items-center justify-center text-sm font-bold cursor-pointer hover:bg-primary/90 shadow-lg transition-all border-2 border-background"
               onClick={() => setIsHistoryExpanded(!isHistoryExpanded)}
               title={`${historyCount} edit${historyCount > 1 ? 's' : ''} - click to ${isHistoryExpanded ? 'hide' : 'show'}`}
             >
@@ -556,19 +556,19 @@ const ApplicationCardWithHistory = ({
                   {/* Photos */}
                   <div className="w-[25ch] flex-shrink-0 p-0">
                     <div className="flex gap-px">
-                      {historyItem.application_data?.photo_1_url && (
+                      {historyItem.application_data?.photo1_url && (
                         <div className="w-full">
                           <img 
-                            src={historyItem.application_data.photo_1_url}
+                            src={historyItem.application_data.photo1_url}
                             alt="Portrait"
                             className="w-full h-[149px] object-cover"
                           />
                         </div>
                       )}
-                      {historyItem.application_data?.photo_2_url && (
+                      {historyItem.application_data?.photo2_url && (
                         <div className="w-full">
                           <img 
-                            src={historyItem.application_data.photo_2_url} 
+                            src={historyItem.application_data.photo2_url} 
                             alt="Full length"
                             className="w-full h-[149px] object-cover"
                           />
@@ -581,7 +581,7 @@ const ApplicationCardWithHistory = ({
                   <div className="w-[25ch] flex-shrink-0 p-4">
                     <div className="flex items-center gap-2 mb-1">
                       <Avatar className="h-6 w-6 flex-shrink-0">
-                        <AvatarImage src={historyItem.application_data?.photo_1_url || ''} />
+                        <AvatarImage src={historyItem.application_data?.photo1_url || ''} />
                         <AvatarFallback className="text-xs">
                           {historyItem.application_data?.first_name?.charAt(0) || 'U'}
                         </AvatarFallback>
@@ -616,19 +616,19 @@ const ApplicationCardWithHistory = ({
                 <div className="md:hidden">
                   <div className="flex w-full">
                     <div className="flex gap-px w-[50vw] flex-shrink-0">
-                      {historyItem.application_data?.photo_1_url && (
+                      {historyItem.application_data?.photo1_url && (
                         <div className="w-1/2">
                           <img 
-                            src={historyItem.application_data.photo_1_url} 
+                            src={historyItem.application_data.photo1_url} 
                             alt="Portrait" 
                             className="w-full h-[149px] object-cover"
                           />
                         </div>
                       )}
-                      {historyItem.application_data?.photo_2_url && (
+                      {historyItem.application_data?.photo2_url && (
                         <div className="w-1/2">
                           <img 
-                            src={historyItem.application_data.photo_2_url} 
+                            src={historyItem.application_data.photo2_url} 
                             alt="Full length" 
                             className="w-full h-[149px] object-cover"
                           />
@@ -639,7 +639,7 @@ const ApplicationCardWithHistory = ({
                     <div className="flex-1 p-2">
                       <div className="flex items-center gap-1 mb-0.5">
                         <Avatar className="h-5 w-5">
-                          <AvatarImage src={historyItem.application_data?.photo_1_url || ''} />
+                          <AvatarImage src={historyItem.application_data?.photo1_url || ''} />
                           <AvatarFallback className="text-[10px]">
                             {historyItem.application_data?.first_name?.charAt(0) || 'U'}
                           </AvatarFallback>
