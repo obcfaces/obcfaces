@@ -188,16 +188,43 @@ const ageOptions = useMemo(() => Array.from({ length: 47 }, (_, i) => 18 + i), [
           },
         });
         
-        // Log signup with IP, user agent and fingerprint
+        // CRITICAL: Immediately log signup with full fingerprint data
         if (data?.user) {
           try {
+            // Import fingerprint utilities
+            const { saveDeviceFingerprint, getDeviceFingerprint } = await import('@/utils/fingerprint');
+            
+            // Save fingerprint immediately
+            const fpId = await saveDeviceFingerprint(data.user.id);
+            
+            // Get full fingerprint data
+            const fullFingerprintData = await getDeviceFingerprint();
+            
+            // Get IP address
             const ipResponse = await fetch('https://api.ipify.org?format=json');
             const ipData = await ipResponse.json();
             
-            // Note: Full fingerprint will be logged by useDeviceFingerprint hook in App.tsx
-            console.log('User registered:', data.user.id, 'IP:', ipData.ip);
+            console.log('📱 New user registered, saving fingerprint immediately:', { 
+              userId: data.user.id, 
+              fpId,
+              ip: ipData.ip 
+            });
+            
+            // Call edge function to log full fingerprint data immediately
+            await supabase.functions.invoke('auth-login-tracker', {
+              body: {
+                userId: data.user.id,
+                loginMethod: 'email',
+                ipAddress: ipData.ip,
+                userAgent: navigator.userAgent,
+                fingerprintId: fpId,
+                fingerprintData: fullFingerprintData
+              }
+            });
+            
+            console.log('✅ Fingerprint data saved immediately for new user');
           } catch (logError) {
-            console.error('Error logging signup:', logError);
+            console.error('❌ Error logging signup fingerprint:', logError);
           }
         }
         
