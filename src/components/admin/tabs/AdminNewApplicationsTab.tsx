@@ -513,119 +513,130 @@ const ApplicationCardWithHistory = ({
                   v{history.length - idx}
                 </Badge>
 
-                {/* Desktop layout */}
-                <div className="hidden md:flex md:overflow-visible">
-                  {/* Photos - Fixed width */}
-                  <div className="w-[300px] flex-shrink-0 p-0">
-                    <div className="flex gap-px h-[149px]">
-                      {historyItem.application_data?.photo1_url && (
-                        <div className="w-[150px] h-[149px] flex-shrink-0 cursor-pointer">
-                          <img 
-                            src={historyItem.application_data.photo1_url}
-                            alt="Portrait"
-                            className="w-full h-full object-cover hover:opacity-90 transition-opacity"
-                            onClick={() => onViewPhotos([historyItem.application_data?.photo1_url, historyItem.application_data?.photo2_url].filter(Boolean), 0, `${historyItem.application_data?.first_name} ${historyItem.application_data?.last_name}`)}
-                          />
-                        </div>
-                      )}
-                      {historyItem.application_data?.photo2_url && (
-                        <div className="w-[150px] h-[149px] flex-shrink-0 cursor-pointer">
-                          <img 
-                            src={historyItem.application_data.photo2_url} 
-                            alt="Full length"
-                            className="w-full h-full object-cover hover:opacity-90 transition-opacity"
-                            onClick={() => onViewPhotos([historyItem.application_data?.photo1_url, historyItem.application_data?.photo2_url].filter(Boolean), 1, `${historyItem.application_data?.first_name} ${historyItem.application_data?.last_name}`)}
-                          />
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Information - Fixed width */}
-                  <div className="w-[300px] flex-shrink-0 p-4">
-                    <div className="flex items-center gap-2 mb-1">
-                      <Avatar className="h-6 w-6 flex-shrink-0">
-                        <AvatarImage src={historyItem.application_data?.photo1_url || ''} />
-                        <AvatarFallback className="text-xs">
-                          {historyItem.application_data?.first_name?.charAt(0) || 'U'}
-                        </AvatarFallback>
-                      </Avatar>
-                      <span className="text-sm font-semibold whitespace-nowrap">
-                        {historyItem.application_data?.first_name} {historyItem.application_data?.last_name}
-                      </span>
-                    </div>
-
-                    <div className="text-xs text-muted-foreground mb-1">
-                      {historyItem.application_data?.city}, {historyItem.application_data?.country}
-                    </div>
-
-                    <div className="text-xs text-muted-foreground mb-2">
-                      {new Date(historyItem.created_at).toLocaleDateString('ru-RU', { 
-                        day: '2-digit', 
-                        month: '2-digit',
-                        year: '2-digit'
-                      })} {new Date(historyItem.created_at).toLocaleTimeString('ru-RU', { 
-                        hour: '2-digit', 
-                        minute: '2-digit' 
-                      })}
-                    </div>
-
-                    <Badge variant={historyItem.status === 'rejected' ? 'destructive' : 'secondary'} className="text-xs">
-                      {historyItem.status}
-                    </Badge>
-                  </div>
-                </div>
-
-                {/* Mobile layout */}
-                <div className="md:hidden">
-                  <div className="flex w-full">
-                    {/* Photos - Fixed width */}
-                    <div className="w-[200px] flex-shrink-0 p-0">
-                      <div className="flex gap-px h-[149px]">
-                        {historyItem.application_data?.photo1_url && (
-                          <div className="w-[100px] h-[149px] flex-shrink-0 cursor-pointer">
-                            <img 
-                              src={historyItem.application_data.photo1_url} 
-                              alt="Portrait" 
-                              className="w-full h-full object-cover hover:opacity-90 transition-opacity"
-                              onClick={() => onViewPhotos([historyItem.application_data?.photo1_url, historyItem.application_data?.photo2_url].filter(Boolean), 0, `${historyItem.application_data?.first_name} ${historyItem.application_data?.last_name}`)}
-                            />
-                          </div>
-                        )}
-                        {historyItem.application_data?.photo2_url && (
-                          <div className="w-[100px] h-[149px] flex-shrink-0 cursor-pointer">
-                            <img 
-                              src={historyItem.application_data.photo2_url} 
-                              alt="Full length" 
-                              className="w-full h-full object-cover hover:opacity-90 transition-opacity"
-                              onClick={() => onViewPhotos([historyItem.application_data?.photo1_url, historyItem.application_data?.photo2_url].filter(Boolean), 1, `${historyItem.application_data?.first_name} ${historyItem.application_data?.last_name}`)}
-                            />
-                          </div>
-                        )}
+                {/* Desktop/Tablet layout - same style as mobile */}
+                <div className="hidden md:flex h-[149px]">
+                  {/* Photos section - Fixed width */}
+                  <div className="flex gap-px w-[200px] flex-shrink-0 h-[149px]">
+                    {historyItem.application_data?.photo1_url && (
+                      <div className="w-[100px] h-[149px] flex-shrink-0 relative overflow-hidden">
+                        <img 
+                          src={historyItem.application_data.photo1_url} 
+                          alt="Portrait" 
+                          className="w-full h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                          onClick={() => onViewPhotos([historyItem.application_data?.photo1_url, historyItem.application_data?.photo2_url].filter(Boolean), 0, `${historyItem.application_data?.first_name} ${historyItem.application_data?.last_name}`)}
+                        />
                       </div>
-                    </div>
+                    )}
+                    {historyItem.application_data?.photo2_url && (
+                      <div className="w-[100px] h-[149px] flex-shrink-0 relative overflow-hidden">
+                        <img 
+                          src={historyItem.application_data.photo2_url} 
+                          alt="Full length" 
+                          className="w-full h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                          onClick={() => onViewPhotos([historyItem.application_data?.photo1_url, historyItem.application_data?.photo2_url].filter(Boolean), 1, `${historyItem.application_data?.first_name} ${historyItem.application_data?.last_name}`)}
+                        />
+                      </div>
+                    )}
+                    {!historyItem.application_data?.photo2_url && (
+                      <div className="w-[100px] h-[149px] flex-shrink-0 bg-muted flex items-center justify-center border border-border overflow-hidden">
+                        <div className="text-center text-muted-foreground">
+                          <p className="text-xs font-medium">No Photo 2</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
 
-                    {/* Info section */}
-                    <div className="flex-1 p-2">
+                  {/* Info section - same as mobile */}
+                  <div className="flex-1 p-2 flex flex-col justify-between overflow-hidden">
+                    <div>
                       <div className="flex items-center gap-1 mb-0.5">
-                        <Avatar className="h-5 w-5">
+                        <Avatar className="h-5 w-5 flex-shrink-0">
                           <AvatarImage src={historyItem.application_data?.photo1_url || ''} />
                           <AvatarFallback className="text-[10px]">
                             {historyItem.application_data?.first_name?.charAt(0) || 'U'}
                           </AvatarFallback>
                         </Avatar>
                         <span className="text-xs font-semibold">
-                          {historyItem.application_data?.first_name} {historyItem.application_data?.last_name}
+                          {historyItem.application_data?.first_name} {historyItem.application_data?.last_name} {historyItem.application_data?.birth_year ? new Date().getFullYear() - parseInt(historyItem.application_data.birth_year) : ''}
                         </span>
                       </div>
-                      
-                      <div className="text-[10px] text-muted-foreground">
-                        {historyItem.application_data?.city}
+                      <div className="text-[10px] text-muted-foreground mb-1">
+                        {historyItem.application_data?.city}, {historyItem.application_data?.country}
                       </div>
 
-                      <Badge variant={historyItem.status === 'rejected' ? 'destructive' : 'secondary'} className="text-[8px] mt-1">
+                      {historyItem.application_data?.email && (
+                        <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
+                          <span className="cursor-pointer truncate" title={historyItem.application_data.email}>
+                            {historyItem.application_data.email.substring(0, 20)}...
+                          </span>
+                          <Copy 
+                            className="h-2.5 w-2.5 flex-shrink-0 cursor-pointer hover:text-foreground" 
+                            onClick={() => navigator.clipboard.writeText(historyItem.application_data?.email || '')}
+                          />
+                        </div>
+                      )}
+                    </div>
+                    
+                    <div className="flex items-center gap-2 mt-2">
+                      <Badge variant={historyItem.status === 'rejected' ? 'destructive' : 'secondary'} className="text-xs h-6">
                         {historyItem.status}
                       </Badge>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Mobile layout */}
+                <div className="md:hidden">
+                  <div className="flex w-full h-[149px]">
+                    {/* Photos section - Fixed width */}
+                    <div className="flex gap-px w-[200px] flex-shrink-0 h-[149px]">
+                      {historyItem.application_data?.photo1_url && (
+                        <div className="w-[100px] h-[149px] flex-shrink-0 overflow-hidden">
+                          <img 
+                            src={historyItem.application_data.photo1_url} 
+                            alt="Portrait" 
+                            className="w-full h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                            onClick={() => onViewPhotos([historyItem.application_data?.photo1_url, historyItem.application_data?.photo2_url].filter(Boolean), 0, `${historyItem.application_data?.first_name} ${historyItem.application_data?.last_name}`)}
+                          />
+                        </div>
+                      )}
+                      {historyItem.application_data?.photo2_url && (
+                        <div className="w-[100px] h-[149px] flex-shrink-0 overflow-hidden">
+                          <img 
+                            src={historyItem.application_data.photo2_url} 
+                            alt="Full length" 
+                            className="w-full h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                            onClick={() => onViewPhotos([historyItem.application_data?.photo1_url, historyItem.application_data?.photo2_url].filter(Boolean), 1, `${historyItem.application_data?.first_name} ${historyItem.application_data?.last_name}`)}
+                          />
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Info section */}
+                    <div className="flex-1 p-2 flex flex-col justify-between overflow-hidden">
+                      <div>
+                        <div className="flex items-center gap-1 mb-0.5">
+                          <Avatar className="h-5 w-5 flex-shrink-0">
+                            <AvatarImage src={historyItem.application_data?.photo1_url || ''} />
+                            <AvatarFallback className="text-[10px]">
+                              {historyItem.application_data?.first_name?.charAt(0) || 'U'}
+                            </AvatarFallback>
+                          </Avatar>
+                          <span className="text-xs font-semibold">
+                            {historyItem.application_data?.first_name} {historyItem.application_data?.last_name}
+                          </span>
+                        </div>
+                        
+                        <div className="text-[10px] text-muted-foreground">
+                          {historyItem.application_data?.city}, {historyItem.application_data?.country}
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2 mt-2">
+                        <Badge variant={historyItem.status === 'rejected' ? 'destructive' : 'secondary'} className="text-xs h-6">
+                          {historyItem.status}
+                        </Badge>
+                      </div>
                     </div>
                   </div>
                 </div>
