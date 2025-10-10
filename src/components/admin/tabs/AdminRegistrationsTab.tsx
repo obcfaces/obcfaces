@@ -400,7 +400,7 @@ export function AdminRegistrationsTab({
           size="sm"
           onClick={() => setMaybeSuspiciousActive(!maybeSuspiciousActive)}
         >
-          Maybe Suspicious {maybeSuspiciousCount > 0 ? `(${maybeSuspiciousCount})` : ''}
+          Suspicious {maybeSuspiciousCount > 0 ? `(${maybeSuspiciousCount})` : ''}
         </Button>
       </div>
 
