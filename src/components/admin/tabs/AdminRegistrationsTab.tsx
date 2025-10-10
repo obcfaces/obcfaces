@@ -384,129 +384,105 @@ export function AdminRegistrationsTab({
           const fullName = profile.display_name || 
             `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 
             'Unknown';
-
+          
+          const manilaTime = new Date(profile.created_at).toLocaleString('ru-RU', {
+            timeZone: 'Asia/Manila',
+            day: 'numeric',
+            month: 'short',
+            hour: '2-digit',
+            minute: '2-digit',
+          });
+          
+          const email = (profile as any).email || '';
+          const initials = fullName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+          
+          const userRole = userRoleMap[profile.id] || 'usual';
+          const votingStats = userVotingStats[profile.id];
+          
           return (
-            <Card key={profile.id} className="p-4 relative">
-              {/* Registration date */}
-              <div className="absolute top-2 left-2 text-xs text-muted-foreground">
-                {new Date(profile.created_at).toLocaleDateString('ru-RU', { 
-                  day: 'numeric', 
-                  month: 'short' 
-                })}{' '}
-                {new Date(profile.created_at).toLocaleTimeString('en-GB', { 
-                  hour: '2-digit', 
-                  minute: '2-digit',
-                  hour12: false
-                })}
+            <Card key={profile.id} className="p-4 relative hover:shadow-md transition-shadow">
+              {/* Date/time in top-left */}
+              <div className="absolute top-4 left-4 text-sm text-muted-foreground">
+                {manilaTime}
               </div>
-
-              {/* Three dots menu */}
-              <div className="absolute top-2 right-2">
+              
+              {/* Three-dot menu in top-right */}
+              <div className="absolute top-4 right-4">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
-                      <span className="text-lg leading-none">⋮</span>
+                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                      <span className="text-lg">⋮</span>
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="z-[9999] bg-popover border shadow-lg">
+                  <DropdownMenuContent align="end" className="w-[160px] bg-background z-50">
                     <DropdownMenuItem onClick={() => {
-                      const currentRole = userRoleMap[profile.id] || 'usual';
-                      handleRoleChange(profile.id, fullName, currentRole === 'suspicious' ? 'usual' : 'suspicious');
+                      const ipCount = profiles.filter(p => p.ip_address === profile.ip_address).length;
+                      const fingerprintCount = profile.fingerprint_id ? 
+                        fingerprintCounts.get(profile.fingerprint_id) || 0 : 0;
+                      
+                      alert(`IP: ${profile.ip_address || 'N/A'} (${ipCount} users)\nFingerprint: ${profile.fingerprint_id?.substring(0, 8) || 'N/A'} (${fingerprintCount} users)\nDevice Info: ${profile.device_info || 'N/A'}`);
                     }}>
-                      {(userRoleMap[profile.id] || 'usual') === 'suspicious' ? 'Mark as Usual' : 'Mark as Suspicious'}
+                      View Details
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => {
+                      handleRoleChange(profile.id, fullName, userRole === 'suspicious' ? 'usual' : 'suspicious');
+                    }}>
+                      {userRole === 'suspicious' ? 'Mark as Usual' : 'Mark Suspicious'}
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
-
-              {/* User info */}
-              <div className="mt-8 flex items-start gap-3">
+              
+              {/* Main content */}
+              <div className="flex items-start gap-4 mt-8">
                 {/* Avatar */}
-                <div className="flex-shrink-0 w-10 h-10 rounded-full bg-muted flex items-center justify-center text-lg font-semibold">
-                  {fullName.charAt(0).toUpperCase()}
+                <div className="flex-shrink-0">
+                  <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center text-lg font-medium">
+                    {initials}
+                  </div>
                 </div>
-
+                
+                {/* User info */}
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold text-base">{fullName}</h3>
+                  <div className="font-semibold text-base mb-1">
+                    {fullName.toUpperCase()}
+                  </div>
                   
-                  <div className="text-sm space-y-1 mt-1">
-                    <div className="flex items-center gap-2">
-                      <span>{(profile as any).email || 'No email'}</span>
-                      {(profile as any).email && (
-                        <button
-                          onClick={() => navigator.clipboard.writeText((profile as any).email)}
-                          className="text-xs opacity-50 hover:opacity-100"
-                        >
-                          📋
-                        </button>
-                      )}
-                      {profile.auth_provider === 'google' && <span className="text-blue-500">G</span>}
-                      {profile.auth_provider === 'google' && <span className="text-blue-500">G</span>}
-                    </div>
-
-                    {profile.ip_address && (
-                      <div className="text-blue-600">
-                        IP: {profile.ip_address}
-                        {(() => {
-                          const duplicateCount = profiles.filter(p => p.ip_address === profile.ip_address && p.id !== profile.id).length;
-                          return duplicateCount > 0 ? ` (${duplicateCount + 1})` : '';
-                        })()}
-                      </div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-sm text-foreground">{email}</span>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-6 w-6 p-0"
+                      onClick={() => {
+                        navigator.clipboard.writeText(email);
+                      }}
+                    >
+                      <span className="text-muted-foreground">📋</span>
+                    </Button>
+                    
+                    {/* Provider badges */}
+                    {profile.auth_provider === 'google' && (
+                      <>
+                        <Badge variant="outline" className="text-xs px-1.5 py-0">G</Badge>
+                        <Badge variant="outline" className="text-xs px-1.5 py-0">G</Badge>
+                      </>
                     )}
-
-                    {profile.fingerprint_id && (
-                      <div>
-                        <button
-                          onClick={() => toggleFingerprintExpand(profile.fingerprint_id!, profile.id)}
-                          className="text-sm hover:underline text-left"
-                        >
-                          <span className={fingerprintCounts.get(profile.fingerprint_id)! > 1 ? 'text-blue-600 font-medium' : ''}>
-                            {profile.user_agent?.includes('Mac') ? 'Desktop' : 'mobile'} | {profile.user_agent?.includes('Mac') ? 'macOS' : 'Unknown'} | {profile.user_agent?.includes('Safari') ? 'Safari' : 'Unknown'} | fp {profile.fingerprint_id.substring(0, 8)}
-                            {fingerprintCounts.get(profile.fingerprint_id)! > 1 && (
-                              <span> ({fingerprintCounts.get(profile.fingerprint_id)})</span>
-                            )}
-                          </span>
-                        </button>
-
-                        {expandedFingerprint === `${profile.fingerprint_id}-${profile.id}` && 
-                         fingerprintCounts.get(profile.fingerprint_id)! > 1 && (
-                          <div className="ml-4 pl-3 border-l-2 border-blue-200 space-y-2 mt-2">
-                            {getProfilesWithFingerprint(profile.fingerprint_id!)
-                              .filter(p => p.id !== profile.id)
-                              .map(matchedProfile => {
-                                const matchedName = matchedProfile.display_name || 
-                                  `${matchedProfile.first_name || ''} ${matchedProfile.last_name || ''}`.trim() || 
-                                  'Unknown';
-                                return (
-                                  <div key={matchedProfile.id} className="text-xs text-muted-foreground">
-                                    <p className="font-medium text-blue-600">{matchedName}</p>
-                                    <p>{(matchedProfile as any).email}</p>
-                                    <p>{matchedProfile.ip_address}</p>
-                                  </div>
-                                );
-                              })}
-                          </div>
-                        )}
-                      </div>
-                    )}
-
-                    {profile.city && profile.country && (
-                      <div className="text-muted-foreground">
-                        , {profile.city}, {profile.country}
-                      </div>
+                    {profile.auth_provider === 'facebook' && (
+                      <Badge variant="outline" className="text-xs px-1.5 py-0">F</Badge>
                     )}
                   </div>
                 </div>
-
-                {/* Stats */}
-                <div className="flex gap-3 items-center">
-                  <div className="flex items-center gap-1">
-                    <Star className="w-4 h-4" />
-                    <span className="text-sm">0</span>
+                
+                {/* Stats on the right */}
+                <div className="flex items-center gap-3 flex-shrink-0">
+                  <div className="flex items-center gap-1 text-muted-foreground">
+                    <Star className="h-4 w-4" />
+                    <span className="text-sm">{votingStats?.given_stars || 0}</span>
                   </div>
-                  <div className="flex items-center gap-1">
-                    <Heart className="w-4 h-4" />
-                    <span className="text-sm">0</span>
+                  <div className="flex items-center gap-1 text-muted-foreground">
+                    <Heart className="h-4 w-4" />
+                    <span className="text-sm">{votingStats?.given_hearts || 0}</span>
                   </div>
                 </div>
               </div>
