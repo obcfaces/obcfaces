@@ -394,45 +394,55 @@ export function WinnerContentManager({
   }
 
   // Calculate week interval from participant data
-  const weekInterval = (participantData.application_data as any)?.week_interval || (participantData.application_data as any)?.admin_status || 'this week';
+  const weekInterval = (participantData.application_data as any)?.week_interval || 'N/A';
 
   return (
     <>
-      <Card className="w-full max-w-none">
-        <CardHeader>
-          <div className="flex items-center justify-between">
+      <Card className="w-full max-w-none border-0 sm:border">
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between gap-4">
             <CardTitle className="text-base sm:text-lg">
               {weekInterval}
             </CardTitle>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8">
-                  <MoreVertical className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem 
-                  onClick={() => setShowDeleteDialog(true)}
-                  className="text-destructive focus:text-destructive"
-                  disabled={!content.id}
-                >
-                  <Trash className="h-4 w-4 mr-2" />
-                  Delete
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <div className="flex items-center gap-2">
+              <Button 
+                onClick={handleSave} 
+                disabled={saving}
+                size="sm"
+              >
+                <Save className="h-4 w-4 mr-2" />
+                {saving ? 'Saving...' : 'Save'}
+              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-8 w-8">
+                    <MoreVertical className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem 
+                    onClick={() => setShowDeleteDialog(true)}
+                    className="text-destructive focus:text-destructive"
+                    disabled={!content.id}
+                  >
+                    <Trash className="h-4 w-4 mr-2" />
+                    Delete
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           </div>
         </CardHeader>
         <CardContent className="space-y-4 p-0 sm:p-6">
           {/* Preview section */}
-          <div className="space-y-4 p-4 sm:p-0">
-            <h4 className="text-sm font-medium mb-2 flex items-center gap-2">
+          <div className="space-y-3 px-4 sm:px-0">
+            <h4 className="text-sm font-medium flex items-center gap-2">
               <Eye className="h-4 w-4" />
               Preview
             </h4>
             
-            {/* Winner card - full width on mobile */}
-            <div className="border rounded-lg overflow-hidden bg-white w-full">
+            {/* Winner card - full width on mobile without border */}
+            <div className="rounded-none sm:rounded-lg overflow-hidden bg-white w-full border-0 sm:border -mx-4 sm:mx-0">
               {/* First row - contestant card styled like on site */}
               <div className="flex h-36 sm:h-40 md:h-44 gap-px relative">
                 <div className="relative flex-1 max-w-[33.333%]">
@@ -587,20 +597,16 @@ export function WinnerContentManager({
                 </div>
               </div>
             </div>
-        </div>
+          </div>
 
-        <div className="flex gap-2 pt-4 px-4 sm:px-0 pb-4 sm:pb-0">
-          <Button 
-            onClick={handleSave} 
-            disabled={saving}
-            className="flex-1"
-          >
-            <Save className="h-4 w-4 mr-2" />
-            {saving ? 'Saving...' : 'Save'}
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
+          {/* Upload inputs section - moved below with margin */}
+          <div className="space-y-4 px-4 sm:px-0 mt-6 pb-4 sm:pb-0">
+            <div className="text-sm text-muted-foreground">
+              Click on photo/video areas in the preview to upload or replace content.
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
     {/* Delete Confirmation Dialog */}
     <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
