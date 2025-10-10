@@ -9254,7 +9254,7 @@ const Admin = () => {
                 handleRoleChange={handleRoleChange}
                 expandedUserActivity={expandedUserActivity}
                 setExpandedUserActivity={setExpandedUserActivity}
-                userActivityData={userActivityData}
+                userActivityData={userActivityStats}
                 isEmailDomainWhitelisted={isEmailDomainWhitelisted}
                 emailDomainStats={emailDomainStats}
                 loading={tabLoading['new-registrations'] || profilesLoading}
