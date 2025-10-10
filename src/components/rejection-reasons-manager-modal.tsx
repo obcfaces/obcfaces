@@ -136,13 +136,13 @@ export const RejectionReasonsManagerModal = ({
 
         <div className="space-y-2 overflow-y-auto max-h-[50vh] pr-2">
           {reasons.map((reason, index) => (
-            <div key={reason.key} className="flex items-center gap-2">
+            <div key={reason.key} className="flex items-center gap-2 px-2 sm:px-0">
               <Input
                 type="number"
                 min="1"
                 value={reason.sortOrder}
                 onChange={(e) => handleSortOrderChange(index, e.target.value)}
-                className="w-14 h-8 text-sm [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                className="w-10 sm:w-14 h-8 text-sm [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
               />
               <Input
                 value={reason.text}
@@ -154,14 +154,14 @@ export const RejectionReasonsManagerModal = ({
           ))}
 
           {/* New reason row */}
-          <div className="flex items-center gap-2 pt-2 border-t">
+          <div className="flex items-center gap-2 pt-2 border-t px-2 sm:px-0">
             <Input
               type="number"
               min="1"
               placeholder={String(reasons.length + 1)}
               value={newReason.sortOrder}
               onChange={(e) => setNewReason({ ...newReason, sortOrder: e.target.value })}
-              className="w-14 h-8 text-sm [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+              className="w-10 sm:w-14 h-8 text-sm [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
             />
             <Input
               placeholder="Enter new rejection reason..."
