@@ -304,7 +304,7 @@ const ApplicationCardWithHistory = ({
                 
                 {/* Expandable application data */}
                 {expandedId === participant.id && (
-                  <div className="text-xs text-muted-foreground mt-1 max-h-20 overflow-y-auto space-y-1">
+                  <div className="text-xs text-muted-foreground mt-1 max-h-32 md:max-h-40 overflow-y-auto overflow-x-hidden space-y-1 pr-1">
                     <div>
                       {Object.entries(appData).map(([key, value], index) => {
                         if (key.includes('url') || key.includes('photo') || key === 'phone' || !value) return null;
@@ -458,7 +458,7 @@ const ApplicationCardWithHistory = ({
                   
                   {/* Expandable application data */}
                   {expandedId === participant.id && (
-                    <div className="text-xs text-muted-foreground mt-1 max-h-24 overflow-y-auto space-y-1">
+                    <div className="text-xs text-muted-foreground mt-1 max-h-32 md:max-h-40 overflow-y-auto overflow-x-hidden space-y-1 pr-1">
                       <div>
                         {Object.entries(appData).map(([key, value], index) => {
                           if (key.includes('url') || key.includes('photo') || key === 'phone' || !value) return null;
