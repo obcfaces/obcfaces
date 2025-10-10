@@ -162,13 +162,14 @@ export function AdminNewApplicationsTab({
                     
                     {/* Expandable application data */}
                     {expandedId === participant.id && (
-                      <div className="text-xs text-muted-foreground space-y-0.5 mb-2 max-h-32 overflow-y-auto">
-                        {Object.entries(appData).map(([key, value]) => {
+                      <div className="text-sm text-muted-foreground mb-2 max-h-32 overflow-y-auto">
+                        {Object.entries(appData).map(([key, value], index) => {
                           if (key.includes('url') || key.includes('photo') || !value) return null;
                           return (
-                            <div key={key} className="truncate">
+                            <span key={key}>
                               {String(value)}
-                            </div>
+                              {index < Object.entries(appData).filter(([k, v]) => !k.includes('url') && !k.includes('photo') && v).length - 1 ? ', ' : ''}
+                            </span>
                           );
                         })}
                       </div>
@@ -301,13 +302,14 @@ export function AdminNewApplicationsTab({
                         
                         {/* Expandable application data */}
                         {expandedId === participant.id && (
-                          <div className="text-[10px] text-muted-foreground space-y-0.5 mt-1 max-h-24 overflow-y-auto">
-                            {Object.entries(appData).map(([key, value]) => {
+                          <div className="text-xs text-muted-foreground mt-1 max-h-24 overflow-y-auto">
+                            {Object.entries(appData).map(([key, value], index) => {
                               if (key.includes('url') || key.includes('photo') || !value) return null;
                               return (
-                                <div key={key} className="truncate">
+                                <span key={key}>
                                   {String(value)}
-                                </div>
+                                  {index < Object.entries(appData).filter(([k, v]) => !k.includes('url') && !k.includes('photo') && v).length - 1 ? ', ' : ''}
+                                </span>
                               );
                             })}
                           </div>
