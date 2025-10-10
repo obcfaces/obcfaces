@@ -157,9 +157,23 @@ const ApplicationCardWithHistory = ({
   const [isHistoryExpanded, setIsHistoryExpanded] = useState(false);
   const { history, loading } = useApplicationHistory(participant.id);
   
+  console.log('🔴 History Debug:', {
+    participantId: participant.id,
+    participantName: `${firstName} ${lastName}`,
+    historyLength: history.length,
+    loading,
+    history: history.map(h => ({
+      id: h.id,
+      created_at: h.created_at,
+      status: h.status
+    }))
+  });
+  
   // Filter out the current version from history
   const historyItems = history.filter(h => h.id !== participant.id);
   const historyCount = historyItems.length;
+  
+  console.log('🔴 History Count:', historyCount, 'History Items:', historyItems.length);
 
   return (
     <div className="space-y-0">
