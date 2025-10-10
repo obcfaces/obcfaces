@@ -178,7 +178,7 @@ export const ParticipantStatusHistoryModal: React.FC<ParticipantStatusHistoryMod
         
         {loading ? (
           <div className="text-center py-8 text-muted-foreground">
-            Загрузка...
+            Loading...
           </div>
         ) : sortedEntries.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">

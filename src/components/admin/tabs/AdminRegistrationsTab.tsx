@@ -303,7 +303,7 @@ export function AdminRegistrationsTab({
 
   // Show loading state
   if (loading) {
-    return <LoadingSpinner message="Загрузка пользователей..." />;
+    return <LoadingSpinner message="Loading users..." />;
   }
 
   return (
@@ -314,7 +314,7 @@ export function AdminRegistrationsTab({
           <table className="w-full text-xs">
             <thead>
               <tr className="border-b border-border">
-                <th className="text-left p-2 font-medium">Тип</th>
+                <th className="text-left p-2 font-medium">Type</th>
                 {(['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] as const).map((dayName, idx) => (
                   <th key={dayName} className="text-center p-2 font-medium">
                     {dayName}

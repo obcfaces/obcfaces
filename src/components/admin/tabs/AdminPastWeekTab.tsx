@@ -63,7 +63,7 @@ export function AdminPastWeekTab({
   loading = false,
 }: AdminPastWeekTabProps) {
   if (loading) {
-    return <LoadingSpinner message="Загрузка прошедших недель..." />;
+    return <LoadingSpinner message="Loading past weeks..." />;
   }
 
   const [expandedDesktopItems, setExpandedDesktopItems] = useState<Set<string>>(new Set());

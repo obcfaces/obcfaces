@@ -34,7 +34,7 @@ export function AdminWeeklyTab({
   loading = false,
 }: AdminWeeklyTabProps) {
   if (loading) {
-    return <LoadingSpinner message="Загрузка участников текущей недели..." />;
+    return <LoadingSpinner message="Loading this week participants..." />;
   }
   // Filter participants - show ONLY 'this week' status
   const filteredParticipants = useMemo(() => {

@@ -25,7 +25,7 @@ export function AdminNextWeekTab({
   loading = false,
 }: AdminNextWeekTabProps) {
   if (loading) {
-    return <LoadingSpinner message="Загрузка участников следующей недели..." />;
+    return <LoadingSpinner message="Loading next week participants..." />;
   }
   const getStatusBackgroundColor = (status: string) => {
     switch (status) {

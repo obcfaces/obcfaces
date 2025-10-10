@@ -26,7 +26,7 @@ export function AdminPreNextWeekTab({
   loading = false,
 }: AdminPreNextWeekTabProps) {
   if (loading) {
-    return <LoadingSpinner message="Загрузка предварительного списка..." />;
+    return <LoadingSpinner message="Loading pre next week list..." />;
   }
   const getStatusBackgroundColor = (status: string) => {
     switch (status) {
