@@ -2,10 +2,11 @@ import React, { useState, useMemo } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
 import { ProfileData } from '@/types/admin';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { ChevronDown, Star, Heart } from 'lucide-react';
+import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 
 interface AdminRegistrationsTabProps {
   profiles: ProfileData[];
@@ -48,15 +49,208 @@ export function AdminRegistrationsTab({
   isEmailDomainWhitelisted,
   emailDomainStats,
 }: AdminRegistrationsTabProps) {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [verificationFilter, setVerificationFilter] = useState('all');
+  const [roleFilter, setRoleFilter] = useState('all');
+  const [maybeSuspiciousActive, setMaybeSuspiciousActive] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 20;
   const [expandedFingerprint, setExpandedFingerprint] = useState<string | null>(null);
 
-  const filteredProfiles = profiles.filter(profile => {
-    if (statusFilter === 'all') return true;
-    if (statusFilter === 'pending') return profile.is_approved === null;
-    if (statusFilter === 'approved') return profile.is_approved === true;
-    if (statusFilter === 'rejected') return profile.is_approved === false;
-    return true;
-  });
+  // Calculate weekly registration statistics
+  const weeklyStats = useMemo(() => {
+    const stats = {
+      all: { mon: 0, tue: 0, wed: 0, thu: 0, fri: 0, sat: 0, sun: 0 },
+      email_verified: { mon: 0, tue: 0, wed: 0, thu: 0, fri: 0, sat: 0, sun: 0 },
+      unverified: { mon: 0, tue: 0, wed: 0, thu: 0, fri: 0, sat: 0, sun: 0 },
+      gmail: { mon: 0, tue: 0, wed: 0, thu: 0, fri: 0, sat: 0, sun: 0 },
+      facebook: { mon: 0, tue: 0, wed: 0, thu: 0, fri: 0, sat: 0, sun: 0 },
+      maybe_suspicious: { mon: 0, tue: 0, wed: 0, thu: 0, fri: 0, sat: 0, sun: 0 },
+      suspicious: { mon: 0, tue: 0, wed: 0, thu: 0, fri: 0, sat: 0, sun: 0 },
+    };
+
+    // Get current week's Monday in Manila timezone
+    const nowManila = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Manila' }));
+    const currentDayOfWeek = nowManila.getDay();
+    const daysFromMonday = currentDayOfWeek === 0 ? 6 : currentDayOfWeek - 1;
+    const weekStartManila = new Date(nowManila);
+    weekStartManila.setDate(nowManila.getDate() - daysFromMonday);
+    weekStartManila.setHours(0, 0, 0, 0);
+    
+    const weekEndManila = new Date(weekStartManila);
+    weekEndManila.setDate(weekStartManila.getDate() + 6);
+    weekEndManila.setHours(23, 59, 59, 999);
+
+    profiles.forEach(profile => {
+      const manilaTimeStr = new Date(profile.created_at).toLocaleString('en-US', { 
+        timeZone: 'Asia/Manila' 
+      });
+      const profileCreatedAtManila = new Date(manilaTimeStr);
+
+      // Only count registrations from current week
+      if (profileCreatedAtManila < weekStartManila || profileCreatedAtManila > weekEndManila) {
+        return;
+      }
+
+      const dayOfWeek = profileCreatedAtManila.getDay();
+      const dayMap: { [key: number]: keyof typeof stats.all } = {
+        1: 'mon', 2: 'tue', 3: 'wed', 4: 'thu', 5: 'fri', 6: 'sat', 0: 'sun'
+      };
+      const day = dayMap[dayOfWeek];
+
+      stats.all[day]++;
+
+      if (profile.auth_provider === 'email' && profile.email_confirmed_at) {
+        stats.email_verified[day]++;
+      }
+      if (!profile.email_confirmed_at) {
+        stats.unverified[day]++;
+      }
+      if (profile.auth_provider === 'google') {
+        stats.gmail[day]++;
+      }
+      if (profile.auth_provider === 'facebook') {
+        stats.facebook[day]++;
+      }
+
+      const isSuspicious = userRoles.some(r => r.user_id === profile.id && r.role === 'suspicious');
+      if (isSuspicious) {
+        stats.suspicious[day]++;
+      } else {
+        const isOAuth = profile.auth_provider === 'google' || profile.auth_provider === 'facebook';
+        if (!isOAuth) {
+          const wasAutoConfirmed = profile.created_at && profile.email_confirmed_at && 
+            Math.abs(new Date(profile.email_confirmed_at).getTime() - new Date(profile.created_at).getTime()) < 1000;
+          const formFillTime = profile.raw_user_meta_data?.form_fill_time_seconds;
+          const fastFormFill = formFillTime !== undefined && formFillTime !== null && formFillTime < 5;
+          let hasDuplicateFingerprint = false;
+          if (profile.fingerprint_id) {
+            const sameFingerprint = profiles.filter(p => 
+              p.fingerprint_id === profile.fingerprint_id && p.id !== profile.id
+            );
+            hasDuplicateFingerprint = sameFingerprint.length >= 4;
+          }
+          if (wasAutoConfirmed || fastFormFill || hasDuplicateFingerprint) {
+            stats.maybe_suspicious[day]++;
+          }
+        }
+      }
+    });
+
+    return stats;
+  }, [profiles, userRoles]);
+
+  // Get current week dates for table headers
+  const weekDates = useMemo(() => {
+    const nowManila = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Manila' }));
+    const currentDayOfWeek = nowManila.getDay();
+    const daysFromMonday = currentDayOfWeek === 0 ? 6 : currentDayOfWeek - 1;
+    const monday = new Date(nowManila);
+    monday.setDate(nowManila.getDate() - daysFromMonday);
+
+    return {
+      mon: `${String(monday.getDate()).padStart(2, '0')}/${String(monday.getMonth() + 1).padStart(2, '0')}`,
+      tue: (() => { const d = new Date(monday); d.setDate(monday.getDate() + 1); return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`; })(),
+      wed: (() => { const d = new Date(monday); d.setDate(monday.getDate() + 2); return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`; })(),
+      thu: (() => { const d = new Date(monday); d.setDate(monday.getDate() + 3); return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`; })(),
+      fri: (() => { const d = new Date(monday); d.setDate(monday.getDate() + 4); return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`; })(),
+      sat: (() => { const d = new Date(monday); d.setDate(monday.getDate() + 5); return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`; })(),
+      sun: (() => { const d = new Date(monday); d.setDate(monday.getDate() + 6); return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`; })(),
+    };
+  }, []);
+
+  // Filter profiles
+  const filteredProfiles = useMemo(() => {
+    return profiles.filter(profile => {
+      // Search query
+      if (searchQuery.trim()) {
+        const query = searchQuery.toLowerCase();
+        const fullName = `${profile.first_name || ''} ${profile.last_name || ''}`.toLowerCase();
+        const displayName = (profile.display_name || '').toLowerCase();
+        const email = ((profile as any).email || '').toLowerCase();
+        const ip = (profile.ip_address || '').toLowerCase();
+        
+        if (!(fullName.includes(query) || displayName.includes(query) || email.includes(query) || ip.includes(query))) {
+          return false;
+        }
+      }
+
+      // Verification filter
+      if (verificationFilter === 'verified' && !profile.email_confirmed_at) return false;
+      if (verificationFilter === 'unverified' && profile.email_confirmed_at) return false;
+
+      // Role filter
+      const userRole = userRoleMap[profile.id] || 'usual';
+      if (roleFilter === 'admin' && userRole !== 'admin') return false;
+      if (roleFilter === 'usual' && userRole !== 'usual' && userRole) return false;
+      if (roleFilter === 'suspicious' && userRole !== 'suspicious') return false;
+      if (roleFilter === 'moderator' && userRole !== 'moderator') return false;
+      if (roleFilter === 'regular') {
+        const hasRegular = userRoles.some(r => r.user_id === profile.id && r.role === 'regular');
+        if (!hasRegular) return false;
+      }
+
+      // Maybe Suspicious filter
+      if (maybeSuspiciousActive) {
+        const hasSuspiciousRole = userRoles.some(r => r.user_id === profile.id && r.role === 'suspicious');
+        if (hasSuspiciousRole) return false;
+
+        const hasClearedRole = userRoles.some(r => r.user_id === profile.id && r.role === 'cleared');
+        if (hasClearedRole) return false;
+
+        const isOAuth = profile.auth_provider === 'google' || profile.auth_provider === 'facebook';
+        if (isOAuth) return false;
+
+        const wasAutoConfirmed = profile.created_at && profile.email_confirmed_at && 
+          Math.abs(new Date(profile.email_confirmed_at).getTime() - new Date(profile.created_at).getTime()) < 1000;
+        const formFillTime = profile.raw_user_meta_data?.form_fill_time_seconds;
+        const fastFormFill = formFillTime !== undefined && formFillTime !== null && formFillTime < 5;
+        let hasDuplicateFingerprint = false;
+        if (profile.fingerprint_id) {
+          const sameFingerprint = profiles.filter(p => 
+            p.fingerprint_id === profile.fingerprint_id && p.id !== profile.id
+          );
+          hasDuplicateFingerprint = sameFingerprint.length >= 4;
+        }
+
+        if (!(wasAutoConfirmed || fastFormFill || hasDuplicateFingerprint)) return false;
+      }
+
+      return true;
+    });
+  }, [profiles, searchQuery, verificationFilter, roleFilter, maybeSuspiciousActive, userRoleMap, userRoles]);
+
+  // Pagination
+  const paginatedProfiles = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    return filteredProfiles.slice(startIndex, startIndex + itemsPerPage);
+  }, [filteredProfiles, currentPage]);
+
+  const totalPages = Math.ceil(filteredProfiles.length / itemsPerPage);
+
+  const maybeSuspiciousCount = useMemo(() => {
+    return profiles.filter(p => {
+      const hasSuspiciousRole = userRoles.some(r => r.user_id === p.id && r.role === 'suspicious');
+      if (hasSuspiciousRole) return false;
+      
+      const isOAuth = p.auth_provider === 'google' || p.auth_provider === 'facebook';
+      if (isOAuth) return false;
+      
+      const wasAutoConfirmed = p.created_at && p.email_confirmed_at && 
+        Math.abs(new Date(p.email_confirmed_at).getTime() - new Date(p.created_at).getTime()) < 1000;
+      const formFillTime = p.raw_user_meta_data?.form_fill_time_seconds;
+      const fastFormFill = formFillTime !== undefined && formFillTime !== null && formFillTime < 5;
+      let hasDuplicateFingerprint = false;
+      if (p.fingerprint_id) {
+        const sameFingerprint = profiles.filter(prof => 
+          prof.fingerprint_id === p.fingerprint_id && prof.id !== p.id
+        );
+        hasDuplicateFingerprint = sameFingerprint.length >= 4;
+      }
+      
+      return wasAutoConfirmed || fastFormFill || hasDuplicateFingerprint;
+    }).length;
+  }, [profiles, userRoles]);
 
   // Calculate fingerprint counts
   const fingerprintCounts = useMemo(() => {
@@ -69,7 +263,6 @@ export function AdminRegistrationsTab({
     return counts;
   }, [profiles]);
 
-  // Get profiles with same fingerprint
   const getProfilesWithFingerprint = (fingerprintId: string) => {
     return profiles.filter(p => p.fingerprint_id === fingerprintId);
   };
@@ -82,463 +275,310 @@ export function AdminRegistrationsTab({
     }
   };
 
-  // Calculate registration statistics by email domain
-  const registrationStats = useMemo(() => {
-    const stats = new Map<string, { total: number; pending: number; approved: number; rejected: number }>();
-    
-    profiles.forEach(profile => {
-      if (profile.email) {
-        const domain = profile.email.split('@')[1]?.toLowerCase() || 'unknown';
-        const existing = stats.get(domain) || { total: 0, pending: 0, approved: 0, rejected: 0 };
-        
-        existing.total++;
-        if (profile.is_approved === null) existing.pending++;
-        else if (profile.is_approved === true) existing.approved++;
-        else if (profile.is_approved === false) existing.rejected++;
-        
-        stats.set(domain, existing);
-      }
-    });
-    
-    return Array.from(stats.entries())
-      .map(([domain, data]) => ({ domain, ...data }))
-      .sort((a, b) => b.total - a.total);
-  }, [profiles]);
-
   return (
-    <div className="space-y-6">
-      {/* Statistics Table */}
-      <Card className="p-4">
-        <h3 className="text-lg font-semibold mb-4">Registration Statistics by Email Domain</h3>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Email Domain</TableHead>
-              <TableHead className="text-right">Total</TableHead>
-              <TableHead className="text-right">Pending</TableHead>
-              <TableHead className="text-right">Approved</TableHead>
-              <TableHead className="text-right">Rejected</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {registrationStats.slice(0, 10).map(stat => (
-              <TableRow key={stat.domain}>
-                <TableCell className="font-medium">{stat.domain}</TableCell>
-                <TableCell className="text-right">{stat.total}</TableCell>
-                <TableCell className="text-right">{stat.pending}</TableCell>
-                <TableCell className="text-right">{stat.approved}</TableCell>
-                <TableCell className="text-right">{stat.rejected}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </Card>
-
-      {/* Filters */}
-      <div className="flex gap-4 items-center">
-        <Select value={statusFilter} onValueChange={onStatusFilterChange}>
-          <SelectTrigger className="w-[200px]">
-            <SelectValue placeholder="Filter by status" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Registrations</SelectItem>
-            <SelectItem value="pending">Pending</SelectItem>
-            <SelectItem value="approved">Approved</SelectItem>
-            <SelectItem value="rejected">Rejected</SelectItem>
-          </SelectContent>
-        </Select>
-        
-        <div className="text-sm text-muted-foreground">
-          Showing {filteredProfiles.length} of {profiles.length} registrations
+    <div className="space-y-4">
+      {/* Weekly Statistics Table */}
+      <div className="mb-6 p-4 bg-muted rounded-lg">
+        <div className="overflow-x-auto">
+          <table className="w-full text-xs">
+            <thead>
+              <tr className="border-b border-border">
+                <th className="text-left p-2 font-medium">Тип</th>
+                {(['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] as const).map((dayName, idx) => (
+                  <th key={dayName} className="text-center p-2 font-medium">
+                    {dayName}
+                    <div className="text-[10px] text-muted-foreground font-normal">
+                      {weekDates[(['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'] as const)[idx]]}
+                    </div>
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {[
+                { label: 'Всего', key: 'all', className: '' },
+                { label: 'Почта ✓', key: 'email_verified', className: '' },
+                { label: 'Unverif', key: 'unverified', className: '' },
+                { label: 'Gmail', key: 'gmail', className: '' },
+                { label: 'Facebook', key: 'facebook', className: '' },
+                { label: 'Maybe Suspicious', key: 'maybe_suspicious', className: 'text-red-500' },
+                { label: 'Suspicious', key: 'suspicious', className: 'text-red-500' },
+              ].map(row => (
+                <tr key={row.key} className="border-b border-border/50">
+                  <td className={`text-left p-2 ${row.className}`}>{row.label}</td>
+                  {(['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'] as const).map(day => (
+                    <td key={day} className={`text-center p-2 ${row.className}`}>
+                      {weeklyStats[row.key as keyof typeof weeklyStats][day]}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
 
-      {/* Registration Cards */}
+      {/* Search Input */}
+      <Input
+        placeholder="Поиск по имени, email или IP..."
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.target.value)}
+        className="max-w-md"
+      />
+
+      {/* Filters */}
+      <div className="flex gap-2 flex-wrap items-center">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" size="sm" className="min-w-[140px] justify-between">
+              {verificationFilter === 'all' ? 'All Users' : 
+               verificationFilter === 'verified' ? 'Verified' : 'Unverified'}
+              <ChevronDown className="ml-2 h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="w-[140px] bg-background z-50">
+            <DropdownMenuItem onClick={() => setVerificationFilter('all')}>All Users</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setVerificationFilter('verified')}>Verified</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setVerificationFilter('unverified')}>Unverified</DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" size="sm" className="min-w-[140px] justify-between">
+              {roleFilter === 'all' ? 'All Roles' :
+               roleFilter === 'suspicious' ? 'Suspicious' :
+               roleFilter === 'usual' ? 'Usual' :
+               roleFilter === 'moderator' ? 'Moderator' :
+               roleFilter === 'regular' ? 'Regular' : 'Admin'}
+              <ChevronDown className="ml-2 h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="w-[140px] bg-background z-50">
+            <DropdownMenuItem onClick={() => setRoleFilter('all')}>All Roles</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setRoleFilter('suspicious')}>Suspicious</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setRoleFilter('usual')}>Usual</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setRoleFilter('moderator')}>Moderator</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setRoleFilter('regular')}>Regular</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setRoleFilter('admin')}>Admin</DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+
+        <Button
+          variant={maybeSuspiciousActive ? 'destructive' : 'outline'}
+          size="sm"
+          onClick={() => setMaybeSuspiciousActive(!maybeSuspiciousActive)}
+        >
+          Maybe Suspicious {maybeSuspiciousCount > 0 ? `(${maybeSuspiciousCount})` : ''}
+        </Button>
+      </div>
+
+      {/* Results count */}
+      <div className="text-sm text-muted-foreground">
+        Showing {paginatedProfiles.length} of {filteredProfiles.length} results (page {currentPage} of {totalPages || 1})
+      </div>
+
+      {/* User Cards */}
       <div className="space-y-4">
-        {filteredProfiles.map(profile => {
-        const lastActivity = userActivityData[profile.id]?.lastActivity;
-        const now = new Date();
-        const activityDate = lastActivity ? new Date(lastActivity) : null;
-        const daysDiff = activityDate ? Math.floor((now.getTime() - activityDate.getTime()) / (1000 * 60 * 60 * 24)) : null;
-        
-        let activityColor = 'bg-red-100 text-red-700';
-        if (daysDiff !== null) {
-          if (daysDiff < 2) activityColor = 'bg-green-100 text-green-700';
-          else if (daysDiff < 7) activityColor = 'bg-yellow-100 text-yellow-700';
-        }
+        {paginatedProfiles.map(profile => {
+          const fullName = profile.display_name || 
+            `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 
+            'Unknown';
 
-        const fullName = profile.display_name || 
-          `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 
-          'Unknown';
-
-        return (
-          <React.Fragment key={profile.id}>
-            <Card className="p-3 relative overflow-hidden">
-              {/* Registration date badge */}
-              <Badge 
-                variant="outline" 
-                className="absolute top-0 left-0 text-xs bg-background/50 backdrop-blur-sm font-normal rounded-none rounded-br-md"
-              >
-                {new Date(profile.created_at).toLocaleDateString('en-GB', { 
+          return (
+            <Card key={profile.id} className="p-4 relative">
+              {/* Registration date */}
+              <div className="absolute top-2 left-2 text-xs text-muted-foreground">
+                {new Date(profile.created_at).toLocaleDateString('ru-RU', { 
                   day: 'numeric', 
                   month: 'short' 
-                })}
-                {' '}
+                })}{' '}
                 {new Date(profile.created_at).toLocaleTimeString('en-GB', { 
                   hour: '2-digit', 
                   minute: '2-digit',
                   hour12: false
                 })}
-              </Badge>
-              
-              {/* Last activity badge */}
-              {activityDate && (
-                <Badge 
-                  variant="outline" 
-                  className={`absolute top-0 left-28 text-xs font-normal rounded-none rounded-br-md cursor-pointer ${activityColor}`}
-                  onClick={() => {
-                    const newExpanded = new Set(expandedUserActivity);
-                    if (expandedUserActivity.has(profile.id)) {
-                      newExpanded.delete(profile.id);
-                    } else {
-                      newExpanded.add(profile.id);
-                    }
-                    setExpandedUserActivity(newExpanded);
-                  }}
-                >
-                  {activityDate.toLocaleDateString('en-GB', { 
-                    day: 'numeric', 
-                    month: 'short' 
-                  })}
-                </Badge>
-              )}
-          
-              {/* Controls menu in top right */}
-              <div className="absolute top-0 right-0 flex items-center gap-1">
-                {/* Role badge */}
-                {(() => {
-                  const currentRole = userRoleMap[profile.id] || 'usual';
-                  
-                  if (currentRole === 'suspicious') {
-                    return (
-                      <Badge variant="destructive" className="text-xs rounded-none bg-red-500 text-white hover:bg-red-600">
-                        Suspicious
-                      </Badge>
-                    );
-                  } else if (currentRole === 'admin') {
-                    const hasRegular = userRoles.some(r => r.user_id === profile.id && r.role === 'regular');
-                    return (
-                      <>
-                        <Badge className="text-xs rounded-none bg-blue-500 text-white hover:bg-blue-600">
-                          Admin
-                        </Badge>
-                        {hasRegular && (
-                          <Badge className="text-xs rounded-none bg-green-500 text-white hover:bg-green-600 ml-1">
-                            Regular ({userVotingStats[profile.id]?.unique_weeks_count || 0}w)
-                          </Badge>
-                        )}
-                      </>
-                    );
-                  } else if (currentRole === 'moderator') {
-                    const hasRegular = userRoles.some(r => r.user_id === profile.id && r.role === 'regular');
-                    return (
-                      <>
-                        <Badge className="text-xs rounded-none bg-yellow-500 text-white hover:bg-yellow-600">
-                          Moderator
-                        </Badge>
-                        {hasRegular && (
-                          <Badge className="text-xs rounded-none bg-green-500 text-white hover:bg-green-600 ml-1">
-                            Regular ({userVotingStats[profile.id]?.unique_weeks_count || 0}w)
-                          </Badge>
-                        )}
-                      </>
-                    );
-                  } else {
-                    const hasRegular = userRoles.some(r => r.user_id === profile.id && r.role === 'regular');
-                    if (hasRegular) {
-                      return (
-                        <Badge className="text-xs rounded-none bg-green-500 text-white hover:bg-green-600">
-                          Regular ({userVotingStats[profile.id]?.unique_weeks_count || 0}w)
-                        </Badge>
-                      );
-                    }
-                    
-                    const isOAuthUser = profile.auth_provider === 'google' || profile.auth_provider === 'facebook';
-                    const emailNotWhitelisted = profile.email ? !isEmailDomainWhitelisted(profile.email) : false;
-                    const wasAutoConfirmed = profile.created_at && profile.email_confirmed_at && 
-                      Math.abs(new Date(profile.email_confirmed_at).getTime() - new Date(profile.created_at).getTime()) < 1000;
-                    const formFillTime = profile.raw_user_meta_data?.form_fill_time_seconds;
-                    const fastFormFill = formFillTime !== undefined && formFillTime !== null && formFillTime < 5;
-                    
-                    let hasDuplicateFingerprint = false;
-                    let sameFingerprint = [];
-                    if (profile.fingerprint_id) {
-                      sameFingerprint = profiles.filter(p => 
-                        p.fingerprint_id === profile.fingerprint_id && p.id !== profile.id
-                      );
-                      hasDuplicateFingerprint = sameFingerprint.length >= 4;
-                    }
-                    
-                    const hasClearedRole = userRoles.some(r => r.user_id === profile.id && r.role === 'cleared');
-                    const isMaybeSuspicious = !isOAuthUser && !hasClearedRole && (wasAutoConfirmed || fastFormFill || hasDuplicateFingerprint);
-                    
-                    if (isMaybeSuspicious) {
-                      const reasonCodes = [];
-                      if (wasAutoConfirmed) reasonCodes.push("<1");
-                      if (fastFormFill) reasonCodes.push(`<${formFillTime}`);
-                      if (hasDuplicateFingerprint) reasonCodes.push(`FP ${sameFingerprint.length + 1}`);
-                      
-                      return (
-                        <Badge 
-                          variant="outline" 
-                          className="text-xs rounded-none bg-orange-100 text-orange-700 border-orange-300 flex items-center gap-1 cursor-pointer hover:bg-orange-200"
-                          onClick={() => {
-                            if (hasDuplicateFingerprint && profile.fingerprint_id) {
-                              const newExpanded = new Set(expandedMaybeFingerprints);
-                              if (expandedMaybeFingerprints.has(profile.id)) {
-                                newExpanded.delete(profile.id);
-                              } else {
-                                newExpanded.add(profile.id);
-                              }
-                              setExpandedMaybeFingerprints(newExpanded);
-                            }
-                          }}
-                        >
-                          {reasonCodes.length > 0 && (
-                            <span className="text-[10px] font-semibold">
-                              {reasonCodes.join(" ")}
-                            </span>
-                          )}
-                          Maybe
-                        </Badge>
-                      );
-                    }
-                    
-                    if (userVotingStats[profile.id]?.is_regular_voter) {
-                      return (
-                        <Badge className="text-xs rounded-none bg-green-500 text-white hover:bg-green-600">
-                          Regular ({userVotingStats[profile.id].unique_weeks_count}w)
-                        </Badge>
-                      );
-                    }
-                  }
-                  
-                  return null;
-                })()}
-                
-                {/* Verify button */}
-                {!profile.email_confirmed_at && (
-                  <Button
-                    size="sm"
-                    variant="destructive"
-                    onClick={() => {
-                      if (confirm(`Are you sure you want to verify email for ${fullName}?`)) {
-                        handleEmailVerification(profile.id);
-                      }
-                    }}
-                    disabled={verifyingUsers.has(profile.id)}
-                    className="h-6 px-2 text-xs rounded-none rounded-bl-md bg-red-100 text-red-700 hover:bg-red-200"
-                  >
-                    {verifyingUsers.has(profile.id) ? 'Verifying...' : 'Verify'}
-                  </Button>
-                )}
-                
-                {/* Three dots menu for role */}
+              </div>
+
+              {/* Three dots menu */}
+              <div className="absolute top-2 right-2">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="sm" className="h-6 w-6 p-0 rounded-none rounded-bl-md">
+                    <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
                       <span className="text-lg leading-none">⋮</span>
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="z-[9999] bg-popover border shadow-lg">
-                    <DropdownMenuItem
-                      onClick={() => {
-                        const currentRole = userRoleMap[profile.id] || 'usual';
-                        if (currentRole === 'suspicious') {
-                          handleRoleChange(profile.id, fullName, 'usual');
-                        } else {
-                          handleRoleChange(profile.id, fullName, 'suspicious');
-                        }
-                      }}
-                    >
+                    <DropdownMenuItem onClick={() => {
+                      const currentRole = userRoleMap[profile.id] || 'usual';
+                      handleRoleChange(profile.id, fullName, currentRole === 'suspicious' ? 'usual' : 'suspicious');
+                    }}>
                       {(userRoleMap[profile.id] || 'usual') === 'suspicious' ? 'Mark as Usual' : 'Mark as Suspicious'}
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={() => {
-                        const hasRegular = userRoles.some(r => r.user_id === profile.id && r.role === 'regular');
-                        if (hasRegular) {
-                          handleRoleChange(profile.id, fullName, 'remove-regular');
-                        } else {
-                          handleRoleChange(profile.id, fullName, 'regular');
-                        }
-                      }}
-                    >
-                      {userRoles.some(r => r.user_id === profile.id && r.role === 'regular') ? 'Remove Regular' : 'Mark as Regular'}
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={() => {
-                        const hasClearedRole = userRoles.some(r => r.user_id === profile.id && r.role === 'cleared');
-                        if (hasClearedRole) {
-                          handleRoleChange(profile.id, fullName, 'remove-cleared');
-                        } else {
-                          handleRoleChange(profile.id, fullName, 'cleared');
-                        }
-                      }}
-                    >
-                      {userRoles.some(r => r.user_id === profile.id && r.role === 'cleared') ? 'Remove Cleared' : 'Mark as Cleared'}
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
 
-              {/* Profile content */}
-              <div className="mt-6 space-y-2">
-                <h3 className="font-semibold text-lg">{fullName}</h3>
-                
-                <div className="text-sm space-y-1 text-muted-foreground">
-                  <p className="flex items-center gap-1">
-                    {profile.email || 'No email'}
-                    {profile.email && (
-                      <button
-                        onClick={() => navigator.clipboard.writeText(profile.email!)}
-                        className="opacity-0 hover:opacity-100 transition-opacity"
-                      >
-                        📋
-                      </button>
-                    )}
-                  </p>
+              {/* User info */}
+              <div className="mt-8 flex items-start gap-3">
+                {/* Avatar */}
+                <div className="flex-shrink-0 w-10 h-10 rounded-full bg-muted flex items-center justify-center text-lg font-semibold">
+                  {fullName.charAt(0).toUpperCase()}
+                </div>
+
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-semibold text-base">{fullName}</h3>
                   
-                  {profile.ip_address && (
-                    <p className={profile.isDuplicateIP ? 'text-blue-600 font-medium' : ''}>
-                      IP: {profile.ip_address}
-                      {profile.isDuplicateIP && ' (duplicate)'}
-                    </p>
-                  )}
-
-                  {profile.fingerprint_id && (
-                    <div className="space-y-2">
-                      <button
-                        onClick={() => toggleFingerprintExpand(profile.fingerprint_id!, profile.id)}
-                        className="flex items-center gap-1 text-sm hover:underline text-left"
-                      >
-                        <span className={fingerprintCounts.get(profile.fingerprint_id)! > 1 ? 'text-blue-600 font-medium' : ''}>
-                          {profile.auth_provider === 'facebook' ? 'Facebook' : 'mobile'} | {profile.device_info || 'Unknown device'} | fp {profile.fingerprint_id.substring(0, 8)}
-                          {fingerprintCounts.get(profile.fingerprint_id)! > 1 && (
-                            <span className="ml-1">({fingerprintCounts.get(profile.fingerprint_id)})</span>
-                          )}
-                        </span>
-                      </button>
-
-                      {expandedFingerprint === `${profile.fingerprint_id}-${profile.id}` && 
-                       fingerprintCounts.get(profile.fingerprint_id)! > 1 && (
-                        <div className="ml-4 pl-3 border-l-2 border-blue-200 space-y-2">
-                          {getProfilesWithFingerprint(profile.fingerprint_id!)
-                            .filter(p => p.id !== profile.id)
-                            .map(matchedProfile => {
-                              const matchedName = matchedProfile.display_name || 
-                                `${matchedProfile.first_name || ''} ${matchedProfile.last_name || ''}`.trim() || 
-                                'Unknown';
-                              return (
-                                <div key={matchedProfile.id} className="text-xs text-muted-foreground">
-                                  <p className="font-medium text-blue-600">{matchedName}</p>
-                                  <p>{matchedProfile.email}</p>
-                                  <p>{matchedProfile.ip_address}</p>
-                                  <p className="text-[10px]">
-                                    {new Date(matchedProfile.last_sign_in_at || matchedProfile.created_at).toLocaleString()}
-                                  </p>
-                                </div>
-                              );
-                            })}
-                        </div>
+                  <div className="text-sm space-y-1 mt-1">
+                    <div className="flex items-center gap-2">
+                      <span>{(profile as any).email || 'No email'}</span>
+                      {(profile as any).email && (
+                        <button
+                          onClick={() => navigator.clipboard.writeText((profile as any).email)}
+                          className="text-xs opacity-50 hover:opacity-100"
+                        >
+                          📋
+                        </button>
                       )}
+                      {profile.auth_provider === 'google' && <span className="text-blue-500">G</span>}
+                      {profile.auth_provider === 'google' && <span className="text-blue-500">G</span>}
                     </div>
-                  )}
 
-                  <p>{profile.age} • {profile.gender}</p>
-                  <p>{profile.city}, {profile.country}</p>
-                  
-                  {profile.last_sign_in_at && (
-                    <p className="text-xs">
-                      Last login: {new Date(profile.last_sign_in_at).toLocaleString()}
-                    </p>
-                  )}
-                </div>
+                    {profile.ip_address && (
+                      <div className="text-blue-600">
+                        IP: {profile.ip_address}
+                        {(() => {
+                          const duplicateCount = profiles.filter(p => p.ip_address === profile.ip_address && p.id !== profile.id).length;
+                          return duplicateCount > 0 ? ` (${duplicateCount + 1})` : '';
+                        })()}
+                      </div>
+                    )}
 
-                {/* Approval buttons */}
-                {profile.is_approved === null && (
-                  <div className="flex gap-2 pt-2">
-                    <Button
-                      size="sm"
-                      variant="default"
-                      className="flex-1"
-                      onClick={() => onApprove(profile)}
-                    >
-                      Approve
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="destructive"
-                      className="flex-1"
-                      onClick={() => onReject(profile)}
-                    >
-                      Reject
-                    </Button>
-                  </div>
-                )}
+                    {profile.fingerprint_id && (
+                      <div>
+                        <button
+                          onClick={() => toggleFingerprintExpand(profile.fingerprint_id!, profile.id)}
+                          className="text-sm hover:underline text-left"
+                        >
+                          <span className={fingerprintCounts.get(profile.fingerprint_id)! > 1 ? 'text-blue-600 font-medium' : ''}>
+                            {profile.user_agent?.includes('Mac') ? 'Desktop' : 'mobile'} | {profile.user_agent?.includes('Mac') ? 'macOS' : 'Unknown'} | {profile.user_agent?.includes('Safari') ? 'Safari' : 'Unknown'} | fp {profile.fingerprint_id.substring(0, 8)}
+                            {fingerprintCounts.get(profile.fingerprint_id)! > 1 && (
+                              <span> ({fingerprintCounts.get(profile.fingerprint_id)})</span>
+                            )}
+                          </span>
+                        </button>
 
-                {profile.is_approved === true && (
-                  <Badge variant="default">Approved</Badge>
-                )}
-                {profile.is_approved === false && (
-                  <Badge variant="destructive">Rejected</Badge>
-                )}
-              </div>
-
-              {/* Expanded user activity */}
-              {expandedUserActivity.has(profile.id) && userActivityData[profile.id] && (
-                <div className="mt-3 pt-3 border-t text-xs text-muted-foreground space-y-1">
-                  <p><strong>Total votes:</strong> {userActivityData[profile.id].totalVotes || 0}</p>
-                  <p><strong>Unique weeks:</strong> {userActivityData[profile.id].uniqueWeeks || 0}</p>
-                  <p><strong>Last activity:</strong> {userActivityData[profile.id].lastActivity ? new Date(userActivityData[profile.id].lastActivity).toLocaleString() : 'Never'}</p>
-                </div>
-              )}
-
-              {/* Expanded maybe suspicious fingerprints */}
-              {expandedMaybeFingerprints.has(profile.id) && profile.fingerprint_id && (
-                <div className="mt-3 pt-3 border-t">
-                  <p className="text-xs font-semibold mb-2">Users with same fingerprint:</p>
-                  <div className="space-y-2">
-                    {getProfilesWithFingerprint(profile.fingerprint_id)
-                      .filter(p => p.id !== profile.id)
-                      .map(matchedProfile => {
-                        const matchedName = matchedProfile.display_name || 
-                          `${matchedProfile.first_name || ''} ${matchedProfile.last_name || ''}`.trim() || 
-                          'Unknown';
-                        return (
-                          <div key={matchedProfile.id} className="text-xs p-2 bg-orange-50 rounded border border-orange-200">
-                            <p className="font-medium">{matchedName}</p>
-                            <p className="text-muted-foreground">{matchedProfile.email}</p>
-                            <p className="text-muted-foreground">IP: {matchedProfile.ip_address}</p>
-                            <p className="text-[10px] text-muted-foreground">
-                              {new Date(matchedProfile.last_sign_in_at || matchedProfile.created_at).toLocaleString()}
-                            </p>
+                        {expandedFingerprint === `${profile.fingerprint_id}-${profile.id}` && 
+                         fingerprintCounts.get(profile.fingerprint_id)! > 1 && (
+                          <div className="ml-4 pl-3 border-l-2 border-blue-200 space-y-2 mt-2">
+                            {getProfilesWithFingerprint(profile.fingerprint_id!)
+                              .filter(p => p.id !== profile.id)
+                              .map(matchedProfile => {
+                                const matchedName = matchedProfile.display_name || 
+                                  `${matchedProfile.first_name || ''} ${matchedProfile.last_name || ''}`.trim() || 
+                                  'Unknown';
+                                return (
+                                  <div key={matchedProfile.id} className="text-xs text-muted-foreground">
+                                    <p className="font-medium text-blue-600">{matchedName}</p>
+                                    <p>{(matchedProfile as any).email}</p>
+                                    <p>{matchedProfile.ip_address}</p>
+                                  </div>
+                                );
+                              })}
                           </div>
-                        );
-                      })}
+                        )}
+                      </div>
+                    )}
+
+                    {profile.city && profile.country && (
+                      <div className="text-muted-foreground">
+                        , {profile.city}, {profile.country}
+                      </div>
+                    )}
                   </div>
                 </div>
-              )}
-            </Card>
-          </React.Fragment>
-        );
-      })}
 
-        {filteredProfiles.length === 0 && (
-          <div className="text-center py-12 text-muted-foreground">
-            No registrations found
-          </div>
-        )}
+                {/* Stats */}
+                <div className="flex gap-3 items-center">
+                  <div className="flex items-center gap-1">
+                    <Star className="w-4 h-4" />
+                    <span className="text-sm">0</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Heart className="w-4 h-4" />
+                    <span className="text-sm">0</span>
+                  </div>
+                </div>
+              </div>
+            </Card>
+          );
+        })}
       </div>
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <Pagination className="mt-6">
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious 
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  setCurrentPage(prev => Math.max(prev - 1, 1));
+                }}
+                aria-disabled={currentPage === 1}
+                className={currentPage === 1 ? 'pointer-events-none opacity-50' : ''}
+              />
+            </PaginationItem>
+            
+            {Array.from({ length: Math.min(totalPages, 7) }, (_, i) => {
+              let pageNumber;
+              if (totalPages <= 7) {
+                pageNumber = i + 1;
+              } else if (currentPage <= 4) {
+                pageNumber = i + 1;
+              } else if (currentPage >= totalPages - 3) {
+                pageNumber = totalPages - 6 + i;
+              } else {
+                pageNumber = currentPage - 3 + i;
+              }
+              
+              return (
+                <PaginationItem key={pageNumber}>
+                  <PaginationLink
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setCurrentPage(pageNumber);
+                    }}
+                    isActive={pageNumber === currentPage}
+                  >
+                    {pageNumber}
+                  </PaginationLink>
+                </PaginationItem>
+              );
+            })}
+            
+            <PaginationItem>
+              <PaginationNext 
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  setCurrentPage(prev => Math.min(prev + 1, totalPages));
+                }}
+                aria-disabled={currentPage === totalPages}
+                className={currentPage === totalPages ? 'pointer-events-none opacity-50' : ''}
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
+      )}
+
+      {filteredProfiles.length === 0 && (
+        <div className="text-center py-12 text-muted-foreground">
+          No registrations found
+        </div>
+      )}
     </div>
   );
 }
