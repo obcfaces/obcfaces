@@ -5,11 +5,8 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Trash2 } from "lucide-react";
 
 interface RejectionReason {
   key: string;
@@ -120,8 +117,10 @@ export const RejectionReasonsManagerModal = ({
   };
 
   const handleSave = () => {
+    // Filter out empty reasons
+    const filteredReasons = reasons.filter(r => r.text.trim());
     const updatedReasons: Record<string, string> = {};
-    reasons.forEach(reason => {
+    filteredReasons.forEach(reason => {
       updatedReasons[reason.key] = reason.text;
     });
     onSave(updatedReasons);
@@ -135,85 +134,66 @@ export const RejectionReasonsManagerModal = ({
           <DialogTitle>Manage Rejection Reasons</DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-3 overflow-y-auto max-h-[50vh] pr-2">
+        <div className="space-y-2 overflow-y-auto max-h-[50vh] pr-2">
           {reasons.map((reason, index) => (
-            <div key={reason.key} className="flex items-center gap-2 p-2 border rounded">
-              <div className="w-16">
-                <Label className="text-xs">Order</Label>
-                <Input
-                  type="number"
-                  min="1"
-                  value={reason.sortOrder}
-                  onChange={(e) => handleSortOrderChange(index, e.target.value)}
-                  className="h-8 text-sm"
-                />
-              </div>
-              <div className="flex-1">
-                <Label className="text-xs">Reason Text</Label>
-                <Input
-                  value={reason.text}
-                  onChange={(e) => handleReasonTextChange(index, e.target.value)}
-                  className="h-8 text-sm"
-                />
-              </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => handleDeleteReason(index)}
-                className="mt-5 h-8 w-8 p-0 text-destructive hover:text-destructive hover:bg-destructive/10"
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
+            <div key={reason.key} className="flex items-center gap-2">
+              <Input
+                type="number"
+                min="1"
+                value={reason.sortOrder}
+                onChange={(e) => handleSortOrderChange(index, e.target.value)}
+                className="w-14 h-8 text-sm [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+              />
+              <Input
+                value={reason.text}
+                onChange={(e) => handleReasonTextChange(index, e.target.value)}
+                placeholder="Enter reason text..."
+                className="flex-1 h-8 text-sm"
+              />
             </div>
           ))}
 
           {/* New reason row */}
-          <div className="flex items-center gap-2 p-2 border border-dashed rounded bg-muted/30">
-            <div className="w-16">
-              <Label className="text-xs">Order</Label>
-              <Input
-                type="number"
-                min="1"
-                placeholder={String(reasons.length + 1)}
-                value={newReason.sortOrder}
-                onChange={(e) => setNewReason({ ...newReason, sortOrder: e.target.value })}
-                className="h-8 text-sm"
-              />
-            </div>
-            <div className="flex-1">
-              <Label className="text-xs">New Reason</Label>
-              <Input
-                placeholder="Enter new rejection reason..."
-                value={newReason.text}
-                onChange={(e) => setNewReason({ ...newReason, text: e.target.value })}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    handleAddNewReason();
-                  }
-                }}
-                className="h-8 text-sm"
-              />
-            </div>
+          <div className="flex items-center gap-2 pt-2 border-t">
+            <Input
+              type="number"
+              min="1"
+              placeholder={String(reasons.length + 1)}
+              value={newReason.sortOrder}
+              onChange={(e) => setNewReason({ ...newReason, sortOrder: e.target.value })}
+              className="w-14 h-8 text-sm [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+            />
+            <Input
+              placeholder="Enter new rejection reason..."
+              value={newReason.text}
+              onChange={(e) => setNewReason({ ...newReason, text: e.target.value })}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  handleAddNewReason();
+                }
+              }}
+              className="flex-1 h-8 text-sm"
+            />
             <Button
               variant="outline"
               size="sm"
               onClick={handleAddNewReason}
               disabled={!newReason.text.trim()}
-              className="mt-5 h-8"
+              className="h-8 px-3 text-sm"
             >
               Add
             </Button>
           </div>
         </div>
 
-        <DialogFooter className="flex gap-2">
+        <div className="flex justify-end gap-2 pt-4">
           <Button variant="outline" onClick={onClose}>
             Cancel
           </Button>
           <Button onClick={handleSave}>
             Save Changes
           </Button>
-        </DialogFooter>
+        </div>
       </DialogContent>
     </Dialog>
   );
