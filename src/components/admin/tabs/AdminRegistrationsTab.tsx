@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { Loader2 } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -29,6 +30,8 @@ interface AdminRegistrationsTabProps {
   expandedUserActivity: Set<string>;
   setExpandedUserActivity: (value: Set<string>) => void;
   userActivityData: Record<string, any>;
+  fetchUserActivity?: (userId: string) => void;
+  loadingActivity?: Set<string>;
   isEmailDomainWhitelisted: (email: string) => boolean;
   emailDomainStats: any[];
   loading?: boolean;
@@ -51,6 +54,8 @@ export function AdminRegistrationsTab({
   expandedUserActivity,
   setExpandedUserActivity,
   userActivityData,
+  fetchUserActivity,
+  loadingActivity = new Set(),
   isEmailDomainWhitelisted,
   emailDomainStats,
   loading = false,
@@ -322,8 +327,8 @@ export function AdminRegistrationsTab({
             </thead>
             <tbody>
               {[
-                { label: 'Всего', key: 'all', className: '' },
-                { label: 'Почта ✓', key: 'email_verified', className: '' },
+                { label: 'Total', key: 'all', className: '' },
+                { label: 'Email ✓', key: 'email_verified', className: '' },
                 { label: 'Unverif', key: 'unverified', className: '' },
                 { label: 'Gmail', key: 'gmail', className: '' },
                 { label: 'Facebook', key: 'facebook', className: '' },
@@ -743,19 +748,27 @@ export function AdminRegistrationsTab({
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
-                        const newExpanded = new Set(expandedUserActivity);
-                        if (expandedUserActivity.has(profile.id)) {
+                        const isExpanded = expandedUserActivity.has(profile.id);
+                        if (isExpanded) {
+                          const newExpanded = new Set(expandedUserActivity);
                           newExpanded.delete(profile.id);
+                          setExpandedUserActivity(newExpanded);
                         } else {
-                          newExpanded.add(profile.id);
+                          setExpandedUserActivity(new Set(expandedUserActivity).add(profile.id));
+                          if (!userActivityData[profile.id] && fetchUserActivity) {
+                            fetchUserActivity(profile.id);
+                          }
                         }
-                        setExpandedUserActivity(newExpanded);
                       }}
                     >
                       <Star className="h-4 w-4 text-yellow-500" />
-                      <span className="text-xs font-medium">
-                        {userActivityData[profile.id]?.ratingsCount ?? 0}
-                      </span>
+                      {loadingActivity.has(profile.id) ? (
+                        <Loader2 className="h-3 w-3 animate-spin" />
+                      ) : (
+                        <span className="text-xs font-medium">
+                          {userActivityData[profile.id]?.ratingsCount ?? 0}
+                        </span>
+                      )}
                     </button>
                     
                     {/* Hearts */}
@@ -764,19 +777,27 @@ export function AdminRegistrationsTab({
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
-                        const newExpanded = new Set(expandedUserActivity);
-                        if (expandedUserActivity.has(profile.id)) {
+                        const isExpanded = expandedUserActivity.has(profile.id);
+                        if (isExpanded) {
+                          const newExpanded = new Set(expandedUserActivity);
                           newExpanded.delete(profile.id);
+                          setExpandedUserActivity(newExpanded);
                         } else {
-                          newExpanded.add(profile.id);
+                          setExpandedUserActivity(new Set(expandedUserActivity).add(profile.id));
+                          if (!userActivityData[profile.id] && fetchUserActivity) {
+                            fetchUserActivity(profile.id);
+                          }
                         }
-                        setExpandedUserActivity(newExpanded);
                       }}
                     >
                       <Heart className="h-4 w-4 text-red-500" />
-                      <span className="text-xs font-medium">
-                        {userActivityData[profile.id]?.likesCount ?? 0}
-                      </span>
+                      {loadingActivity.has(profile.id) ? (
+                        <Loader2 className="h-3 w-3 animate-spin" />
+                      ) : (
+                        <span className="text-xs font-medium">
+                          {userActivityData[profile.id]?.likesCount ?? 0}
+                        </span>
+                      )}
                     </button>
                   </div>
                 </div>
