@@ -1539,45 +1539,63 @@ const Admin = () => {
 
   const fetchDailyApplicationStats = async () => {
     try {
-      const { data, error } = await supabase.rpc('get_daily_application_stats');
-      
-      if (error) {
-        console.error('Error fetching daily application stats:', error);
-        return;
-      }
+      // Get the last 7 days
+      const today = new Date();
+      const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+      const stats = [];
 
-      // Get status change and rejection counts for each day
-      const statsWithChanges = await Promise.all((data || []).map(async (stat: any) => {
-        // Count applications that changed status from pending to approved statuses on this day (based on submitted_at, not status change)
+      // Calculate stats for each day of the current week (Mon-Sun)
+      for (let i = 0; i < 7; i++) {
+        const date = new Date(today);
+        date.setDate(today.getDate() - today.getDay() + (i === 0 ? 0 : i)); // Start from Monday
+        const dayStart = new Date(date.setHours(0, 0, 0, 0));
+        const dayEnd = new Date(date.setHours(23, 59, 59, 999));
+        
+        const dayStartISO = dayStart.toISOString();
+        const dayEndISO = dayEnd.toISOString();
+        const dayDate = dayStart.toISOString().split('T')[0];
+
+        // Count ALL new applications submitted on this day (any status, not deleted)
+        const { count: totalCount } = await supabase
+          .from('weekly_contest_participants')
+          .select('*', { count: 'exact', head: true })
+          .is('deleted_at', null)
+          .gte('submitted_at', dayStartISO)
+          .lte('submitted_at', dayEndISO);
+
+        // Count applications submitted on this day that NOW have approved status
         const { count: approvedCount } = await supabase
           .from('weekly_contest_participants')
           .select('*', { count: 'exact', head: true })
-          .eq('is_active', true)
           .is('deleted_at', null)
           .in('admin_status', ['pre next week', 'next week', 'next week on site', 'this week', 'past'])
-          .gte('submitted_at', stat.day_date)
-          .lt('submitted_at', new Date(new Date(stat.day_date).getTime() + 24 * 60 * 60 * 1000).toISOString());
+          .gte('submitted_at', dayStartISO)
+          .lte('submitted_at', dayEndISO);
         
-        // Count rejected applications on this day
+        // Count applications submitted on this day that NOW have rejected status
         const { count: rejectedCount } = await supabase
           .from('weekly_contest_participants')
           .select('*', { count: 'exact', head: true })
-          .eq('is_active', true)
           .is('deleted_at', null)
           .eq('admin_status', 'rejected')
-          .gte('submitted_at', stat.day_date)
-          .lt('submitted_at', new Date(new Date(stat.day_date).getTime() + 24 * 60 * 60 * 1000).toISOString());
-        
-        return {
-          ...stat,
+          .gte('submitted_at', dayStartISO)
+          .lte('submitted_at', dayEndISO);
+
+        stats.push({
+          day_name: daysOfWeek[dayStart.getDay()],
+          day_date: dayDate,
+          total_applications: totalCount || 0,
+          approved_applications: 0, // Not used
           status_changed_count: approvedCount || 0,
-          rejected_count: rejectedCount || 0
-        };
-      }));
+          rejected_count: rejectedCount || 0,
+          day_of_week: dayStart.getDay(),
+          sort_order: i
+        });
+      }
 
       // Ensure proper ordering: Monday to Sunday
       const dayOrder = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-      const sortedData = statsWithChanges.sort((a, b) => {
+      const sortedData = stats.sort((a, b) => {
         return dayOrder.indexOf(a.day_name) - dayOrder.indexOf(b.day_name);
       });
 
