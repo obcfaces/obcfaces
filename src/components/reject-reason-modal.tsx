@@ -57,17 +57,23 @@ const loadRejectionReasons = (): Record<string, string> => {
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) {
-      return JSON.parse(stored);
+      const parsed = JSON.parse(stored);
+      console.log('📖 Loaded rejection reasons from localStorage:', parsed);
+      return parsed;
     }
   } catch (error) {
     console.error('Failed to load rejection reasons:', error);
   }
-  return getDefaultRejectionReasons();
+  const defaults = getDefaultRejectionReasons();
+  console.log('📖 Using default rejection reasons:', defaults);
+  return defaults;
 };
 
 const saveRejectionReasons = (reasons: Record<string, string>) => {
   try {
+    console.log('💾 Saving rejection reasons to localStorage:', reasons);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(reasons));
+    console.log('💾 Successfully saved to localStorage');
   } catch (error) {
     console.error('Failed to save rejection reasons:', error);
   }
@@ -122,11 +128,24 @@ export const RejectReasonModal = ({
   };
 
   const handleSaveReasons = (updatedReasons: Record<string, string>) => {
-    console.log('💾 Saving updated reasons:', updatedReasons);
+    console.log('💾 handleSaveReasons called with:', updatedReasons);
+    
+    // Save to localStorage
     saveRejectionReasons(updatedReasons);
-    REJECTION_REASONS = updatedReasons;
-    setRejectionReasons(updatedReasons);
-    console.log('💾 Reasons saved and state updated');
+    
+    // Force reload from localStorage to ensure consistency
+    const reloaded = loadRejectionReasons();
+    console.log('💾 Reloaded from localStorage:', reloaded);
+    
+    // Update both global variable and local state
+    for (const key in REJECTION_REASONS) {
+      delete REJECTION_REASONS[key];
+    }
+    Object.assign(REJECTION_REASONS, reloaded);
+    setRejectionReasons(reloaded);
+    
+    console.log('💾 Updated REJECTION_REASONS:', REJECTION_REASONS);
+    console.log('💾 Updated rejectionReasons state:', reloaded);
   };
 
   const handleConfirm = async () => {
