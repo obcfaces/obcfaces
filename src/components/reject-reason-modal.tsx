@@ -93,7 +93,15 @@ export const RejectReasonModal = ({
   const [isManageReasonsOpen, setIsManageReasonsOpen] = useState(false);
   const [rejectionReasons, setRejectionReasons] = useState<Record<string, string>>(loadRejectionReasons());
 
-  // Update reasons when localStorage changes
+  // Update reasons when localStorage changes or modal opens
+  useEffect(() => {
+    if (isOpen) {
+      const updated = loadRejectionReasons();
+      setRejectionReasons(updated);
+      REJECTION_REASONS = updated;
+    }
+  }, [isOpen]);
+
   useEffect(() => {
     const handleStorageChange = () => {
       const updated = loadRejectionReasons();
@@ -116,7 +124,9 @@ export const RejectReasonModal = ({
   const handleSaveReasons = (updatedReasons: Record<string, string>) => {
     saveRejectionReasons(updatedReasons);
     REJECTION_REASONS = updatedReasons;
-    setRejectionReasons({ ...updatedReasons });
+    setRejectionReasons(updatedReasons);
+    // Trigger storage event manually for same window
+    window.dispatchEvent(new Event('storage'));
   };
 
   const handleConfirm = async () => {

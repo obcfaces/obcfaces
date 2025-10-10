@@ -153,15 +153,9 @@ const ApplicationCardWithHistory = ({
   onRestore,
   getStatusBackgroundColor,
 }: any) => {
+  const [isHistoryExpanded, setIsHistoryExpanded] = useState(false);
   const { history, loading } = useApplicationHistory(participant.id);
   const historyCount = history.length;
-
-  console.log('ApplicationCard:', {
-    participantId: participant.id,
-    historyCount,
-    loading,
-    historyItems: history
-  });
 
   return (
     <div className="space-y-0">
@@ -171,7 +165,7 @@ const ApplicationCardWithHistory = ({
           {submittedDate && (
             <Badge 
               variant="outline" 
-              className="absolute top-0 left-0 z-20 text-xs rounded-none rounded-br-md font-normal"
+              className="absolute top-0 left-0 z-20 text-xs rounded-none rounded-br-md font-normal bg-muted/90 border-border"
             >
               {submittedDate.toLocaleDateString('en-GB', { 
                 day: 'numeric', 
@@ -184,12 +178,12 @@ const ApplicationCardWithHistory = ({
             </Badge>
           )}
 
-          {/* History badge - right top corner */}
+          {/* History badge - right top area under photo */}
           {historyCount > 0 && (
             <div
-              className="absolute top-1 right-1 z-20 bg-primary text-primary-foreground rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold cursor-pointer hover:bg-primary/90 shadow-md transition-all"
-              onClick={() => toggleHistoryExpand(participant.id)}
-              title={`${historyCount} version${historyCount > 1 ? 's' : ''} - click to ${expandedHistory.has(participant.id) ? 'hide' : 'show'}`}
+              className="absolute top-[200px] right-2 z-20 bg-primary text-primary-foreground rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold cursor-pointer hover:bg-primary/90 shadow-lg transition-all border-2 border-background"
+              onClick={() => setIsHistoryExpanded(!isHistoryExpanded)}
+              title={`${historyCount} version${historyCount > 1 ? 's' : ''} - click to ${isHistoryExpanded ? 'hide' : 'show'}`}
             >
               {historyCount}
             </div>
@@ -498,7 +492,7 @@ const ApplicationCardWithHistory = ({
       )}
 
       {/* History versions - shown when expanded */}
-      {expandedHistory.has(participant.id) && history.length > 0 && (
+      {isHistoryExpanded && history.length > 0 && (
         <div className="mt-2 space-y-2">
           {history.map((historyItem, idx) => (
             <Card key={historyItem.id} className="overflow-hidden bg-muted/30 relative rounded-lg h-[149px]">
