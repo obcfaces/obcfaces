@@ -737,19 +737,19 @@ export function AdminRegistrationsTab({
                   
                   {/* User Activity Icons (bottom right) */}
                   <div className="absolute bottom-2 right-2 flex gap-2">
-                    {/* Ratings */}
-                    <div className="flex items-center gap-1 bg-background/90 px-2 py-1 rounded shadow-sm border">
+                    {/* Stars */}
+                    <div className="flex items-center gap-1 bg-background/90 px-2 py-1 rounded hover:bg-background shadow-sm border transition-colors cursor-pointer">
                       <Star className="h-4 w-4 text-yellow-500" />
                       <span className="text-xs font-medium">
-                        {votingStats?.total_votes_count || 0}
+                        {userActivityData[profile.id]?.ratingsCount ?? 0}
                       </span>
                     </div>
                     
-                    {/* Likes */}
-                    <div className="flex items-center gap-1 bg-background/90 px-2 py-1 rounded shadow-sm border">
+                    {/* Hearts */}
+                    <div className="flex items-center gap-1 bg-background/90 px-2 py-1 rounded hover:bg-background shadow-sm border transition-colors cursor-pointer">
                       <Heart className="h-4 w-4 text-red-500" />
                       <span className="text-xs font-medium">
-                        {userActivityData?.[profile.id]?.likes_given || 0}
+                        {userActivityData[profile.id]?.likesCount ?? 0}
                       </span>
                     </div>
                   </div>
