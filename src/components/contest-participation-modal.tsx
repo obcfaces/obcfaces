@@ -889,18 +889,18 @@ export const ContestParticipationModal = ({
 
       // Update weekly contest participant data if user is already in current week's contest
       if (editMode && existingData) {
-        const userIdToUpdate = existingData.user_id || session.user.id;
+        const participantIdToUpdate = existingData.id;
         const { error: participantUpdateError } = await supabase
           .from('weekly_contest_participants')
           .update({
             application_data: applicationData
           })
-          .eq('user_id', userIdToUpdate);
+          .eq('id', participantIdToUpdate);
 
         if (participantUpdateError) {
           console.warn('Failed to update weekly contest participant:', participantUpdateError);
         } else {
-          console.log('Successfully updated weekly contest participant for user:', userIdToUpdate);
+          console.log('Successfully updated weekly contest participant:', participantIdToUpdate);
         }
       }
 
