@@ -750,7 +750,17 @@ const Admin = () => {
             break;
 
           case 'winnercontent':
+          case 'new-winner':
             await fetchWeeklyParticipants();
+            break;
+
+          case 'new-statistics':
+          case 'stat':
+            await Promise.allSettled([
+              fetchProfiles(),
+              fetchUserRoles(),
+              fetchUserVotingStats()
+            ]);
             break;
 
           case 'next_week_voting':
@@ -3259,30 +3269,33 @@ const Admin = () => {
               </div>
               {/* Mobile layout for new tabs */}
               <div className="md:hidden">
-                <TabsList className="grid grid-cols-8 w-full">
-                  <TabsTrigger value="new-applications" className="text-xs bg-blue-100">
+                <TabsList className="grid grid-cols-10 w-full gap-0.5">
+                  <TabsTrigger value="new-applications" className="text-[10px] px-0.5 bg-blue-100">
                     New
                   </TabsTrigger>
-                  <TabsTrigger value="new-pre-next" className="text-xs bg-blue-100">
+                  <TabsTrigger value="new-pre-next" className="text-[10px] px-0.5 bg-blue-100">
                     Pre
                   </TabsTrigger>
-                  <TabsTrigger value="new-next-week" className="text-xs bg-blue-100">
+                  <TabsTrigger value="new-next-week" className="text-[10px] px-0.5 bg-blue-100">
                     Next
                   </TabsTrigger>
-                  <TabsTrigger value="new-weekly" className="text-xs bg-blue-100">
+                  <TabsTrigger value="new-weekly" className="text-[10px] px-0.5 bg-blue-100">
                     This
                   </TabsTrigger>
-                  <TabsTrigger value="new-past" className="text-xs bg-blue-100">
+                  <TabsTrigger value="new-past" className="text-[10px] px-0.5 bg-blue-100">
                     Past
                   </TabsTrigger>
-                  <TabsTrigger value="new-all" className="text-xs bg-blue-100">
+                  <TabsTrigger value="new-all" className="text-[10px] px-0.5 bg-blue-100">
                     All
                   </TabsTrigger>
-                  <TabsTrigger value="new-registrations" className="text-xs bg-blue-100">
+                  <TabsTrigger value="new-registrations" className="text-[10px] px-0.5 bg-blue-100">
                     Reg
                   </TabsTrigger>
-                  <TabsTrigger value="new-statistics" className="text-xs bg-blue-100">
+                  <TabsTrigger value="new-statistics" className="text-[10px] px-0.5 bg-blue-100">
                     Stat
+                  </TabsTrigger>
+                  <TabsTrigger value="new-winner" className="text-[10px] px-0.5 bg-blue-100">
+                    W
                   </TabsTrigger>
                 </TabsList>
               </div>
@@ -3312,6 +3325,9 @@ const Admin = () => {
                 </TabsTrigger>
                 <TabsTrigger value="new-statistics" className="bg-blue-100">
                   Stat
+                </TabsTrigger>
+                <TabsTrigger value="new-winner" className="bg-blue-100">
+                  W
                 </TabsTrigger>
               </TabsList>
             </div>
@@ -9298,6 +9314,41 @@ const Admin = () => {
 
             <TabsContent value="new-statistics">
               <AdminStatisticsTab />
+            </TabsContent>
+
+            <TabsContent value="new-winner" className="space-y-4">
+              <div className="mb-6">
+                <h2 className="text-xl font-semibold">Winner Content Management</h2>
+                <p className="text-muted-foreground">Add and edit additional content for winner cards</p>
+              </div>
+
+              <div className="space-y-6">
+                {weeklyParticipants
+                  .filter(p => p.final_rank === 1) // Show only winners
+                  .map(participant => (
+                  <div key={participant.id} className="border rounded-lg p-4">
+                    <div className="mb-4">
+                      <h3 className="text-lg font-medium">
+                        {participant.profiles?.first_name} {participant.profiles?.last_name}
+                      </h3>
+                      <p className="text-sm text-muted-foreground">
+                        Winner of week {participant.contest_start_date && new Date(participant.contest_start_date).toLocaleDateString()}
+                      </p>
+                    </div>
+                    <WinnerContentManager 
+                      participantId={participant.id}
+                      userId={participant.user_id}
+                      participantName={`${participant.profiles?.first_name || ''} ${participant.profiles?.last_name || ''}`}
+                    />
+                  </div>
+                ))}
+                
+                {weeklyParticipants.filter(p => p.final_rank === 1).length === 0 && (
+                  <div className="text-center py-8 text-muted-foreground">
+                    No winners to display
+                  </div>
+                )}
+              </div>
             </TabsContent>
 
             </Tabs>
