@@ -11,6 +11,7 @@ import { ContestApplication, ParticipantStatus } from '@/types/admin';
 import { REJECTION_REASONS } from '@/components/reject-reason-modal';
 import { LoadingSpinner } from '@/components/admin/LoadingSpinner';
 import { useApplicationHistory } from '@/hooks/useApplicationHistory';
+import { Country } from 'country-state-city';
 
 interface AdminNewApplicationsTabProps {
   applications: ContestApplication[];
@@ -295,16 +296,46 @@ const ApplicationCardWithHistory = ({
                 
                 {/* Expandable application data */}
                 {expandedId === participant.id && (
-                  <div className="text-xs text-muted-foreground mt-1 max-h-20 overflow-y-auto">
-                    {Object.entries(appData).map(([key, value], index) => {
-                      if (key.includes('url') || key.includes('photo') || !value) return null;
-                      return (
-                        <span key={key}>
-                          {String(value)}
-                          {index < Object.entries(appData).filter(([k, v]) => !k.includes('url') && !k.includes('photo') && v).length - 1 ? ', ' : ''}
+                  <div className="text-xs text-muted-foreground mt-1 max-h-20 overflow-y-auto space-y-1">
+                    <div>
+                      {Object.entries(appData).map(([key, value], index) => {
+                        if (key.includes('url') || key.includes('photo') || key === 'phone' || !value) return null;
+                        return (
+                          <span key={key}>
+                            {String(value)}
+                            {index < Object.entries(appData).filter(([k, v]) => !k.includes('url') && !k.includes('photo') && k !== 'phone' && v).length - 1 ? ', ' : ''}
+                          </span>
+                        );
+                      })}
+                    </div>
+                    
+                    {/* Facebook Link */}
+                    <div className="pt-1">
+                      {appData.facebook_url ? (
+                        <a 
+                          href={appData.facebook_url} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 underline break-all"
+                        >
+                          {appData.facebook_url}
+                        </a>
+                      ) : (
+                        <span className="text-muted-foreground/60">no fb</span>
+                      )}
+                    </div>
+                    
+                    {/* Phone */}
+                    <div>
+                      {appData.phone?.number ? (
+                        <span>
+                          {appData.phone.country_code && `+${Country.getCountryByCode(appData.phone.country_code)?.phonecode || ''} `}
+                          {appData.phone.number}
                         </span>
-                      );
-                    })}
+                      ) : (
+                        <span className="text-muted-foreground/60">no tel</span>
+                      )}
+                    </div>
                   </div>
                 )}
 
@@ -405,16 +436,46 @@ const ApplicationCardWithHistory = ({
                   
                   {/* Expandable application data */}
                   {expandedId === participant.id && (
-                    <div className="text-xs text-muted-foreground mt-1 max-h-24 overflow-y-auto">
-                      {Object.entries(appData).map(([key, value], index) => {
-                        if (key.includes('url') || key.includes('photo') || !value) return null;
-                        return (
-                          <span key={key}>
-                            {String(value)}
-                            {index < Object.entries(appData).filter(([k, v]) => !k.includes('url') && !k.includes('photo') && v).length - 1 ? ', ' : ''}
+                    <div className="text-xs text-muted-foreground mt-1 max-h-24 overflow-y-auto space-y-1">
+                      <div>
+                        {Object.entries(appData).map(([key, value], index) => {
+                          if (key.includes('url') || key.includes('photo') || key === 'phone' || !value) return null;
+                          return (
+                            <span key={key}>
+                              {String(value)}
+                              {index < Object.entries(appData).filter(([k, v]) => !k.includes('url') && !k.includes('photo') && k !== 'phone' && v).length - 1 ? ', ' : ''}
+                            </span>
+                          );
+                        })}
+                      </div>
+                      
+                      {/* Facebook Link */}
+                      <div className="pt-1">
+                        {appData.facebook_url ? (
+                          <a 
+                            href={appData.facebook_url} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 underline break-all"
+                          >
+                            {appData.facebook_url}
+                          </a>
+                        ) : (
+                          <span className="text-muted-foreground/60">no fb</span>
+                        )}
+                      </div>
+                      
+                      {/* Phone */}
+                      <div>
+                        {appData.phone?.number ? (
+                          <span>
+                            {appData.phone.country_code && `+${Country.getCountryByCode(appData.phone.country_code)?.phonecode || ''} `}
+                            {appData.phone.number}
                           </span>
-                        );
-                      })}
+                        ) : (
+                          <span className="text-muted-foreground/60">no tel</span>
+                        )}
+                      </div>
                     </div>
                   )}
                 </div>
