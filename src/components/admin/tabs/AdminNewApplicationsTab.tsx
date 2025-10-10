@@ -6,6 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Edit, Copy, Trash2, ChevronDown, ChevronUp, MoreVertical, History } from 'lucide-react';
 import { ContestApplication, ParticipantStatus } from '@/types/admin';
 import { REJECTION_REASONS } from '@/components/reject-reason-modal';
@@ -159,6 +160,7 @@ const ApplicationCardWithHistory = ({
 }: any) => {
   const [isHistoryExpanded, setIsHistoryExpanded] = useState(false);
   const [showStatusHistoryModal, setShowStatusHistoryModal] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const { history, loading } = useApplicationHistory(participant.id);
   
   // All history records should be shown (they have different IDs from the participant)
@@ -216,7 +218,13 @@ const ApplicationCardWithHistory = ({
                   History
                 </DropdownMenuItem>
                 <DropdownMenuItem
-                  onClick={() => participant.deleted_at ? onRestore(participant) : onDelete(participant)}
+                  onClick={() => {
+                    if (participant.deleted_at) {
+                      onRestore(participant);
+                    } else {
+                      setShowDeleteConfirm(true);
+                    }
+                  }}
                   className="text-destructive focus:text-destructive"
                 >
                   <Trash2 className="h-3.5 w-3.5 mr-2" />
@@ -750,6 +758,30 @@ const ApplicationCardWithHistory = ({
         participantName={`${firstName} ${lastName}`}
         statusHistory={participant.status_history}
       />
+      
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Application?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete the application for {firstName} {lastName}? This action can be undone by restoring the application later.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                onDelete(participant);
+                setShowDeleteConfirm(false);
+              }}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
