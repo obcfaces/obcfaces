@@ -21,7 +21,7 @@ interface AdminPastWeekTabProps {
   onWeekFilterChange: (value: string) => void;
   onViewPhotos: (images: string[], index: number, name: string) => void;
   onEdit?: (participant: WeeklyContestParticipant) => void;
-  onStatusChange?: (participantId: string, newStatus: string, participantName: string) => Promise<any>;
+  onStatusChange?: (participant: WeeklyContestParticipant, newStatus: string) => Promise<any>;
   onViewVoters?: (participant: { id: string; name: string }) => void;
   onViewStatusHistory?: (participantId: string, participantName: string, statusHistory: any) => void;
   onOpenWinnerModal?: (participantId: string, userId: string, name: string) => void;
@@ -149,25 +149,25 @@ export function AdminPastWeekTab({
     });
   }, [participants, getDynamicPastWeekFilters]);
 
-  const handleSaveChanges = async (participantId: string, participantName: string) => {
+  const handleSaveChanges = async (participant: WeeklyContestParticipant) => {
     if (!onStatusChange) return;
     
-    setUpdatingStatuses(prev => new Set(prev).add(participantId));
+    setUpdatingStatuses(prev => new Set(prev).add(participant.id));
     try {
-      const changes = pendingPastChanges[participantId];
+      const changes = pendingPastChanges[participant.id];
       if (changes?.admin_status) {
-        await onStatusChange(participantId, changes.admin_status, participantName);
+        await onStatusChange(participant, changes.admin_status);
       }
       // Clear pending changes
       setPendingPastChanges(prev => {
         const newChanges = { ...prev };
-        delete newChanges[participantId];
+        delete newChanges[participant.id];
         return newChanges;
       });
     } finally {
       setUpdatingStatuses(prev => {
         const newSet = new Set(prev);
-        newSet.delete(participantId);
+        newSet.delete(participant.id);
         return newSet;
       });
     }
@@ -570,7 +570,7 @@ export function AdminPastWeekTab({
                         size="sm"
                         className="w-full h-7 text-xs"
                         disabled={!pendingPastChanges[participant.id] || updatingStatuses.has(participant.id)}
-                        onClick={() => handleSaveChanges(participant.id, participantName)}
+                        onClick={() => handleSaveChanges(participant)}
                       >
                         {updatingStatuses.has(participant.id) ? 'Saving...' : 'Save'}
                       </Button>
@@ -690,7 +690,7 @@ export function AdminPastWeekTab({
                         size="sm"
                         className="w-full h-7 text-xs"
                         disabled={!pendingPastChanges[participant.id] || updatingStatuses.has(participant.id)}
-                        onClick={() => handleSaveChanges(participant.id, participantName)}
+                        onClick={() => handleSaveChanges(participant)}
                       >
                         {updatingStatuses.has(participant.id) ? 'Saving...' : 'Save'}
                       </Button>
