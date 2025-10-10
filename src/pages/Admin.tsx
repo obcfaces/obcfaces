@@ -685,7 +685,8 @@ const Admin = () => {
               fetchUserRoles(),
               fetchUsersWhoVoted(),
               fetchDailyRegistrationStats(),
-              fetchUserVotingStats()
+              fetchUserVotingStats(),
+              fetchUserActivityData()
             ]);
             break;
 
@@ -743,7 +744,8 @@ const Admin = () => {
               fetchUserRoles(),
               fetchUsersWhoVoted(),
               fetchDailyRegistrationStats(),
-              fetchUserVotingStats()
+              fetchUserVotingStats(),
+              fetchUserActivityData()
             ]);
             break;
 
@@ -2078,6 +2080,31 @@ const Admin = () => {
       setEmailDomainVotingStats(data || []);
     } catch (error) {
       console.error('Error fetching email domain voting stats:', error);
+    }
+  };
+
+  // Fetch user activity data (likes given)
+  const fetchUserActivityData = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('likes')
+        .select('user_id');
+      
+      if (error) throw error;
+      
+      // Count likes given by each user
+      const likesMap: Record<string, any> = {};
+      (data || []).forEach(like => {
+        if (!likesMap[like.user_id]) {
+          likesMap[like.user_id] = { likes_given: 0 };
+        }
+        likesMap[like.user_id].likes_given++;
+      });
+      
+      setUserActivityData(likesMap);
+      console.log('✅ User activity data loaded:', Object.keys(likesMap).length, 'users');
+    } catch (error) {
+      console.error('Error fetching user activity data:', error);
     }
   };
 
