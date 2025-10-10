@@ -714,7 +714,7 @@ export function AdminRegistrationsTab({
                     <div className="flex items-center gap-1 bg-background/90 px-2 py-1 rounded shadow-sm border">
                       <Star className="h-4 w-4 text-yellow-500" />
                       <span className="text-xs font-medium">
-                        {votingStats?.given_stars || 0}
+                        {votingStats?.total_votes_count || 0}
                       </span>
                     </div>
                     
@@ -722,7 +722,7 @@ export function AdminRegistrationsTab({
                     <div className="flex items-center gap-1 bg-background/90 px-2 py-1 rounded shadow-sm border">
                       <Heart className="h-4 w-4 text-red-500" />
                       <span className="text-xs font-medium">
-                        {votingStats?.given_hearts || 0}
+                        {userActivityData?.[profile.id]?.likes_given || 0}
                       </span>
                     </div>
                   </div>
@@ -800,11 +800,11 @@ export function AdminRegistrationsTab({
                               <div className="flex items-center gap-3 mt-2">
                                 <div className="flex items-center gap-1">
                                   <Star className="h-3 w-3 text-yellow-500" />
-                                  <span className="text-xs">{fpVotingStats?.given_stars || 0}</span>
+                                  <span className="text-xs">{fpVotingStats?.total_votes_count || 0}</span>
                                 </div>
                                 <div className="flex items-center gap-1">
                                   <Heart className="h-3 w-3 text-red-500" />
-                                  <span className="text-xs">{fpVotingStats?.given_hearts || 0}</span>
+                                  <span className="text-xs">{userActivityData?.[fpProfile.id]?.likes_given || 0}</span>
                                 </div>
                               </div>
                             </div>
